@@ -1,0 +1,80 @@
+package hutoma.api.server.ai;
+
+import java.sql.Date;
+import java.util.ArrayList;
+
+/**
+ * Created by mauriziocibelli on 25/04/16.
+ */
+
+public class api_root {
+
+        public static class _status {
+            public int code = 200;
+            public String info = "";
+            public String id;
+        }
+        public static class _debug {
+            public double score;
+            public long elapsted_time;
+            public String type;
+            public String answer;
+        }
+        public static class _metadata {
+            public String emotion;
+            public String topic;
+        }
+        public static class _result {
+            public double score;
+            public String query = "";
+            public String resolvedQuery = "";
+            public String answer = "";
+            public float elapsed_time;
+            public String source;
+            public String action;
+            public String parameters;
+            public String context;
+            public _metadata metadata;
+            public ArrayList<_debug> debug_info;
+        }
+        public static class _chat {
+            public String id;
+            public  String timestamp;
+            public _result result;
+            public _metadata metadata;
+            public _status status;
+
+        }
+
+       public static class _newai {
+           public _status status;
+           public String aiid;
+           public String client_token;
+       }
+
+    public static class _ai {
+
+        public String aiid;
+        public String name;
+        public String description;
+        public Date created_on;
+        public boolean is_private;
+        public double deep_learning_error;
+        public int deep_learning_status;
+        public int shallow_learning_status;
+        public double shallow_learning_error;
+        public int ai_status;
+        public String client_token;
+        public String ai_training_file;
+
+    }
+
+    public static class _myAIs {
+        public _status status;
+        public String devid;
+        public String dev_token;
+        public ArrayList<_ai> ai_list;
+    }
+
+
+}
