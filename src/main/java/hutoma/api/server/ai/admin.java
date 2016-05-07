@@ -109,7 +109,7 @@ public class admin {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
-            hutoma.api.server.AWS.SQS.push_msg(msg.delete_dev + "|" + devid + "|000");
+            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.delete_dev + "|" + devid + "|000");
         }
         catch (Exception e){
             st.code = 500;

@@ -10,7 +10,6 @@ public class utils {
     public static String getConfigProp(String p) {
         java.util.Properties prop = new java.util.Properties();
         try {
-            System.out.print(System.getProperty("user.home"));
             prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
             return prop.getProperty(p);
 

@@ -18,10 +18,11 @@ public class wnet {
         {
 
             String wnet_server = utils.getConfigProp("wnet_server");
-            wnet_server += "&q="+q.replace(" ","%20");
+            wnet_server += "q="+q.replace(" ","%20");
             wnet_server += "&aiid="+aiid;
             wnet_server += "&uid="+devid;
             wnet_server += "&min_p="+min_p;
+            wnet_server += "&multiprocess=yes&nproc=8&fs=yes";
             if (fastsearch) wnet_server +="&fs=yes";
             URL url = new URL(wnet_server);
             return IOUtils.toString(new InputStreamReader(url.openStream()));

@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import hutoma.api.server.AWS.msg;
 import hutoma.api.server.Role;
 import hutoma.api.server.Secured;
+import hutoma.api.server.utils.utils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -16,6 +17,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import static hutoma.api.server.utils.utils.getConfigProp;
 
 /**
  * Created by mauriziocibelli on 28/04/16.
@@ -47,20 +50,35 @@ public class training {
 
         try {
             String trainingFile="";
+            int n_lines = 0;
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(uploadedInputStream));
                 String line;
-                while ((line = reader.readLine()) != null)
-                    trainingFile += line+"\n";
+                while ((line = reader.readLine()) != null) {
+                    trainingFile += line + "\n";
+                    n_lines++;
+                }
                 reader.close();
             }
             catch (Exception ex) {}
 
-            hutoma.api.server.db.query.update_ai_training_file(aiid,trainingFile);
-            hutoma.api.server.AWS.SQS.push_msg(msg.ready_for_shallow_training + "|" + devid + "|" + aiid);
-            hutoma.api.server.AWS.SQS.push_msg(msg.ready_for_deep_training+"|"+devid+"|"+aiid);
+            hutoma.api.server.db.query.update_ai_training_file(aiid, trainingFile);
+            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_shallow_training + "|" + devid + "|" + aiid);
+            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("deep_queue"),msg.ready_for_deep_training+"|"+devid+"|"+aiid);
+
+            int max_cluster_lines = 5000;
+            double cluster_min_probability = 0.7;
+
+            try {
+                max_cluster_lines = Integer.valueOf(getConfigProp("max_cluster_lines"));
+                cluster_min_probability = Double.valueOf(getConfigProp("cluster_min_probability"));
+            }
+            catch (Exception ex) {}
 
 
+            if (n_lines>max_cluster_lines) {
+                hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.cluster_split + "|" + devid + "|" + aiid +"|"+cluster_min_probability);
+            }
 
         }
         catch (Exception ex) {

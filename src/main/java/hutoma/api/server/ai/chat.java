@@ -70,6 +70,7 @@ public class chat extends api_root {
 
             String wnet_res = dispatcher.getAnswer(devid, aiid, q, min_p, fs);
 
+            res.score = Double.valueOf(wnet_res.split("\\|")[0]);
             if (wnet_res!=null) {
                 try{
                     res.answer = wnet_res.split("\\|")[1];

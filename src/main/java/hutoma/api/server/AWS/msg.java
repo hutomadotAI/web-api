@@ -6,6 +6,7 @@ package hutoma.api.server.AWS;
 public enum msg {
     ready_for_shallow_training,
     ready_for_deep_training,
+    cluster_split,
     delete_dev,
     delete_ai
 }
