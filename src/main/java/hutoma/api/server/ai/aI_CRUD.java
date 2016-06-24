@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * Created by mauriziocibelli on 27/04/16.
  */
-@Path("/api/ai/")
+@Path("/ai/")
 public class aI_CRUD extends  api_root {
 
     //curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAkYzSkvzcRKVaAAAAAP__.kkftTodFfH_kRQANoqT1B96BslSHu1VzM5VC_p6bBcA" http://localhost:8080/api/
@@ -63,7 +63,7 @@ public class aI_CRUD extends  api_root {
             if(!hutoma.api.server.db.query.create_ai(ai.aiid,name,description,devid,is_private,deep_learning_error,deep_learning_status,shallow_learning_status,status,ai.client_token,""))
             {
                 st.code = 500;
-                st.info = "Internal Server Error.";
+                st.info = "Error:Internal Server Error.";
             }
 
             // String[] ECs;
@@ -73,7 +73,7 @@ public class aI_CRUD extends  api_root {
         }
         catch (Exception e){
             st.code = 500;
-            st.info = "Internal Server Error.";
+            st.info = "Error:Internal Server Error.";
         }
         return gson.toJson(ai);
     }
@@ -93,20 +93,23 @@ public class aI_CRUD extends  api_root {
         st.info ="success";
         _ai.status = st;
 
-        ArrayList<_ai> myais = new ArrayList<>();
-        myais =  hutoma.api.server.db.query.get_all_ai(devid);
+       try {
+           ArrayList<_ai> myais = new ArrayList<>();
+           myais = hutoma.api.server.db.query.get_all_ai(devid);
 
-        if (myais.size()<=0)
-        {
-            st.code = 500;
-            st.info = "Internal Server Error.";
-        }
-        else
-        {
-            _ai.ai_list = new ArrayList<_ai>();
-            _ai.ai_list = myais;
+           if (myais.size() <= 0) {
+               st.code = 500;
+               st.info = "Internal Server Error.";
+           } else {
+               _ai.ai_list = new ArrayList<_ai>();
+               _ai.ai_list = myais;
 
-        }
+           }
+       }
+       catch (Exception e){
+           st.code = 500;
+           st.info = "Error:Internal Server Error.";
+       }
 
         return gson.toJson(_ai);
     }
@@ -125,27 +128,19 @@ public class aI_CRUD extends  api_root {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         _status st = new _status();
-        _myAIs _ai = new _myAIs();
+        _myAIs _myai = new _myAIs();
         st.code = 200;
         st.info ="success";
-        _ai.status = st;
+        _myai.status = st;
 
-        ArrayList<_ai> myais = new ArrayList<>();
-        myais.add(hutoma.api.server.db.query.get_ai(aiid));
-
-        if (myais.size()<=0)
-        {
+        try {
+            _myai.ai = hutoma.api.server.db.query.get_ai(aiid);
+        } catch (Exception e){
             st.code = 500;
-            st.info = "Internal Server Error.";
-        }
-        else
-        {
-            _ai.ai_list = new ArrayList<_ai>();
-            _ai.ai_list = myais;
-
+            st.info = "Error:Internal Server Error.";
         }
 
-        return gson.toJson(_ai);
+        return gson.toJson(_myai);
     }
 
     @DELETE
@@ -176,7 +171,7 @@ public class aI_CRUD extends  api_root {
         }
         catch (Exception e){
             st.code = 500;
-            st.info = "Internal Server Error.";
+            st.info = "Error:Internal Server Error.";
         }
         return gson.toJson(ai);
     }

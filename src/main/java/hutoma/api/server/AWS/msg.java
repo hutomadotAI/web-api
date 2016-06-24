@@ -4,9 +4,18 @@ package hutoma.api.server.AWS;
  * Created by mauriziocibelli on 02/05/16.
  */
 public enum msg {
-    ready_for_shallow_training,
-    ready_for_deep_training,
     cluster_split,
     delete_dev,
-    delete_ai
+    delete_ai,
+    ready_for_training,
+    stop_training,
+    start_training,
+    delete_training,
+    internal_error,
+    malformed_training_file,
+    training_queued,
+    training_in_progress,
+    training_completed
+
+
 }

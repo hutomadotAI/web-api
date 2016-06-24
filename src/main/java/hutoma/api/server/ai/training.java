@@ -23,11 +23,11 @@ import static hutoma.api.server.utils.utils.getConfigProp;
 /**
  * Created by mauriziocibelli on 28/04/16.
  */
-@Path("/api/ai/")
+@Path("/ai/")
 public class training {
 
 
-    @PUT
+    @POST
     @Path("/{aiid}/training")
     @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -63,8 +63,7 @@ public class training {
             catch (Exception ex) {}
 
             hutoma.api.server.db.query.update_ai_training_file(aiid, trainingFile);
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_shallow_training + "|" + devid + "|" + aiid);
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("deep_queue"),msg.ready_for_deep_training+"|"+devid+"|"+aiid);
+            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_training+"|"+devid+"|"+aiid);
 
             int max_cluster_lines = 5000;
             double cluster_min_probability = 0.7;
@@ -83,7 +82,7 @@ public class training {
         }
         catch (Exception ex) {
                 st.code = 500;
-                st.info = "Internal Server Error.";
+                st.info = "Error:Internal Server Error.";
             }
 
         finally {
@@ -91,4 +90,29 @@ public class training {
          }
         return gson.toJson(myai);
     }
+
+
+    @DELETE
+    @Path("/{aiid}/training")
+    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public String delete( @Context SecurityContext securityContext,
+                              @DefaultValue("") @HeaderParam("_developer_id") String devid,
+                              @PathParam("aiid") String aiid) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        ArrayList<String> source = new ArrayList<>();
+        ArrayList<String> target = new ArrayList<>();
+        api_root._myAIs myai = new api_root._myAIs();
+        api_root._status st = new api_root._status();
+        st.code = 200;
+        st.info ="success";
+        myai.status =st;
+        api_root._ai _ai = new api_root._ai();
+        hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.delete_training+"|"+devid+"|"+aiid);
+        _ai.ai_status =0;
+        return gson.toJson(myai);
+    }
+
+
 }

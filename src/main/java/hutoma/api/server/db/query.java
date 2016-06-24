@@ -125,6 +125,28 @@ public class query {
     }
 
 
+    public static boolean update_ai_training_status( String aiid, String status) {
+        try {
+
+            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myUrl = getConfigProp("connectionstring");
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl);
+
+            String query = " update ai set ai_status=? where aiid=?";
+            PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setString(1, status);
+            preparedStmt.setString(2, aiid);
+            preparedStmt.execute();
+            conn.close();
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+
 
 
 
@@ -170,9 +192,7 @@ public class query {
                 r.ai_training_file = rs.getString("ai_trainingfile");
                 r.is_private = rs.getBoolean("is_private");
                 r.deep_learning_error = rs.getDouble("deep_learning_error");
-                r.deep_learning_status = rs.getInt("deep_learning_status");
-                r.shallow_learning_error = rs.getDouble("shallow_learning_error");
-                r.deep_learning_status = rs.getInt("shallow_learning_status");
+                r.training_status = rs.getString("deep_learning_status");
                 r.client_token = rs.getString("client_token");
                 res.add(r);
             }
@@ -207,9 +227,7 @@ public class query {
                 r.ai_training_file = rs.getString("ai_trainingfile");
                 r.is_private = rs.getBoolean("is_private");
                 r.deep_learning_error = rs.getDouble("deep_learning_error");
-                r.deep_learning_status = rs.getInt("deep_learning_status");
-                r.shallow_learning_error = rs.getDouble("shallow_learning_error");
-                r.deep_learning_status = rs.getInt("shallow_learning_status");
+                r.training_status = rs.getString("deep_learning_status");
                 r.client_token = rs.getString("client_token");
 
             }
@@ -245,7 +263,6 @@ public class query {
         catch (Exception e) {}
         return stat;
     }
-
 
     public static boolean delete_dev(String dev_id) {
         try {
@@ -294,6 +311,27 @@ public class query {
             return false;
         }
         return true;
+    }
+
+    public static boolean rnnQueueUpdate (String appid,String botid, int status) {
+        boolean res=false;
+        try {
+            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myUrl = getConfigProp("connectionstring");
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl);
+            Statement st = conn.createStatement();
+            String query = "UPDATE rnnQueue SET status ="+status+" WHERE appid='"+appid+"' AND botid='"+botid+"'";
+            System.out.println("query:" + query);
+            st.executeUpdate(query);
+            st.close();
+            conn.close();
+            res =true;
+        }
+        catch (Exception e) {System.err.println("RNN QUEUE UPDATE:"+e.getMessage());}
+        System.out.println("query res:"+res);
+
+        return res;
     }
 
 }

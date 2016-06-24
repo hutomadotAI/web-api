@@ -20,7 +20,7 @@ import java.util.UUID;
  * Created by mauriziocibelli on 27/04/16.
  */
 
-@Path("/api/admin/")
+@Path("/admin/")
 @Secured({Role.ROLE_ADMIN})
 public class admin {
 
@@ -39,7 +39,7 @@ public class admin {
             @DefaultValue("") @QueryParam("name")  String name,
             @DefaultValue("") @QueryParam("attempt") String attempt,
             @DefaultValue("") @QueryParam("dev_token") String dev_token,
-            @DefaultValue("0") @QueryParam("plan_id") int plan_id,
+            @DefaultValue("1") @QueryParam("plan_id") int plan_id,
             @DefaultValue("") @QueryParam("dev_id") String dev_id) {
 
 

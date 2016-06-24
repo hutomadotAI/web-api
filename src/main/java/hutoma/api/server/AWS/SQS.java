@@ -25,7 +25,10 @@ public class SQS {
         try {
             sqs.sendMessage(new SendMessageRequest(queue, message));
 
-        }  catch (Exception e) {return false;}
+        }  catch (Exception e) {
+            System.out.print(e.getMessage());
+           return  false;
+        }
 
         return true;
     }
