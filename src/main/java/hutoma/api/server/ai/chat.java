@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * Created by mauriziocibelli on 24/04/16.
  */
-@Path("/api/ai/")
+@Path("/ai/")
 public class chat extends api_root {
     @Context
     SecurityContext securityContext;

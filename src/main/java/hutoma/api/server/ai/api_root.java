@@ -60,9 +60,7 @@ public class api_root {
         public Date created_on;
         public boolean is_private;
         public double deep_learning_error;
-        public int deep_learning_status;
-        public int shallow_learning_status;
-        public double shallow_learning_error;
+        public String training_status;
         public int ai_status;
         public String client_token;
         public String ai_training_file;
@@ -74,6 +72,7 @@ public class api_root {
         public String devid;
         public String dev_token;
         public ArrayList<_ai> ai_list;
+        public _ai ai;
     }
 
 

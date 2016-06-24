@@ -63,7 +63,7 @@ public class permission_test extends base_test{
             //get single AI
             json= super.curl(super._test_dev_token, "GET", _curl_GET_GET_SINGLEAI.replace("__AIID__", newai));
             _ai = gson.fromJson(json, api_root._myAIs.class);
-            assert(_ai.ai_list.get(0).aiid.equals(newai));
+            assert(_ai.ai.aiid.equals(newai));
 
 
             //now deletes the AI created

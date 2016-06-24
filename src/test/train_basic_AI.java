@@ -1,5 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import hutoma.api.server.AWS.msg;
 import hutoma.api.server.ai.api_root;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class train_basic_AI extends base_test {
 
 
         // upload training file
-        ProcessBuilder pb = new ProcessBuilder("curl", "-X","PUT","-H","Authorization: Bearer "+_test_dev_token,_curl_PUT_UPLOAD_TRAINING.replace("__AIID__", ai.aiid),"-F","file=@"+System.getProperty("user.home") + "/ai/sampletraining.txt");
+        ProcessBuilder pb = new ProcessBuilder("curl", "-X","POST","-H","Authorization: Bearer "+_test_dev_token,_curl_PUT_UPLOAD_TRAINING.replace("__AIID__", ai.aiid),"-F","file=@"+System.getProperty("user.home") + "/ai/sampletraining.txt");
         System.out.print(pb.command().toString());
         Process p = pb.start();
 
@@ -33,8 +34,9 @@ public class train_basic_AI extends base_test {
         String stat ="";
         while (counter < 120) {
             stat = get_ai_status(ai.aiid);
-            if (stat.equals(String.valueOf(errors.shallow_training_completed))) break;
+            if (stat.equals(String.valueOf(msg.training_queued))) break;
             Thread.sleep(1000);
+            System.out.println("waiting...(state was:"+stat+")");
             counter ++;
         }
 
