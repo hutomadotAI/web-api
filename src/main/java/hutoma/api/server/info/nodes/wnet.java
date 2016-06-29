@@ -17,6 +17,7 @@ public class wnet {
         try
         {
 
+            // test
             String wnet_server = utils.getConfigProp("wnet_server");
             wnet_server += "q="+q.replace(" ","%20");
             wnet_server += "&aiid="+aiid;
