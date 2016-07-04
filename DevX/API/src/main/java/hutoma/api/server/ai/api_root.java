@@ -60,6 +60,7 @@ public class api_root {
         public Date created_on;
         public boolean is_private;
         public double deep_learning_error;
+        public String training_debug_info;
         public String training_status;
         public int ai_status;
         public String client_token;

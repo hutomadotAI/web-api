@@ -1,9 +1,6 @@
 package hutoma.api.server.utils;
 
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
+import com.jcraft.jsch.*;
 
 import java.io.*;
 
@@ -63,6 +60,7 @@ public class remotefs {
         } catch (Exception ex) {}
         return result;
     }
+
 
     public static String upload(String host, String lfile,String rfile) {
         String result ="";

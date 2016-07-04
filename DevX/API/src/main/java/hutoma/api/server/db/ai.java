@@ -219,7 +219,6 @@ public class ai {
             String query = "SELECT * FROM ai WHERE aiid='"+aiid+"'";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                r.ai_status = rs.getInt("ai_status");
                 r.aiid = rs.getString("aiid");
                 r.created_on = rs.getDate("created_on");
                 r.description = rs.getString("ai_description");
@@ -229,13 +228,16 @@ public class ai {
                 r.deep_learning_error = rs.getDouble("deep_learning_error");
                 r.training_status = rs.getString("deep_learning_status");
                 r.client_token = rs.getString("client_token");
+                r.training_debug_info = rs.getString("dl_debug");
 
             }
             st.close();
             conn.close();
         }
 
-        catch (Exception e) {}
+        catch (Exception e) {
+            System.out.print(e.getMessage());
+        }
         return r;
     }
 

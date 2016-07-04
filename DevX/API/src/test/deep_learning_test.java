@@ -35,6 +35,8 @@ public class deep_learning_test extends base_test {
 
         //    super.curl(super.role_admin, "POST", _curl_ADMIN_POST_KICKOFF_TRAINING.replace("__DEVID__", super._test_devid).replace("__AIID__", ai.aiid));
 
+
+
             int counter = 0;
             String stat ="";
             while (counter < 120) {
@@ -44,6 +46,9 @@ public class deep_learning_test extends base_test {
                 Thread.sleep(1000);
                 counter ++;
             }
+
+
+
 
 
             json = super.curl(super._test_dev_token, "GET", _curl_GET_CHAT.replace("__AIID__",ai.aiid)+"?q=i%20want%20a%20cake&uid=123&min_p=1");
