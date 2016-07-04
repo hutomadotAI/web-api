@@ -105,6 +105,7 @@ public class aI_CRUD extends  api_root {
                _ai.ai_list = new ArrayList<_ai>();
                _ai.ai_list = myais;
 
+
            }
        }
        catch (Exception e){

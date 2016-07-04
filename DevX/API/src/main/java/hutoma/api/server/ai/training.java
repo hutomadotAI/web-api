@@ -28,6 +28,44 @@ import static hutoma.api.server.utils.utils.getConfigProp;
 public class training {
 
 
+
+    // Parse the training file to check for errors and to build
+    // the conversation history structure
+
+    private String parseTrainingFile(ArrayList<String> training) {
+        String parsedFile="";
+        String currentSentence ="";
+
+
+        String previousSentence = "";
+        int ConversationCounter = 0;
+
+        try {
+            for (String s:training) {
+                currentSentence = s;
+
+                // reset chat history
+                if (s.length()==0) {
+                    ConversationCounter = 0;
+                    previousSentence = "";
+                }
+                ConversationCounter ++;
+
+                // check if the conversation is longer than just answer and question
+                // if yes, and if the current sentence is a question, add the previous sentence
+                if ((ConversationCounter > 2) && (ConversationCounter & 1) != 0)
+                    currentSentence = "CMDHSTART "+ previousSentence +" CMDHEND " + currentSentence;
+                else previousSentence = currentSentence;
+
+                parsedFile = currentSentence+"\n";
+
+            }
+        }
+        catch (Exception ex) {parsedFile="";}
+
+     return  parsedFile;
+    }
+
     @POST
     @Path("/{aiid}/training")
     @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
@@ -40,7 +78,6 @@ public class training {
                               @FormDataParam("file") FormDataContentDisposition fileDetail) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         ArrayList<String> source = new ArrayList<>();
-        ArrayList<String> target = new ArrayList<>();
 
         api_root._myAIs myai = new api_root._myAIs();
         api_root._status st = new api_root._status();
@@ -56,6 +93,7 @@ public class training {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(uploadedInputStream));
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    source.add(line);
                     trainingFile += line + "\n";
                     n_lines++;
                 }
@@ -115,5 +153,32 @@ public class training {
         return gson.toJson(myai);
     }
 
+
+
+    @Path("/{aiid}/training")
+    @GET
+    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getsingle_ai(
+            @Context SecurityContext securityContext,
+            @DefaultValue("") @HeaderParam("_developer_id") String devid,
+            @PathParam("aiid") String aiid) {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        api_root._status st = new api_root._status();
+        api_root._ai _myai = new api_root._ai();
+        st.code = 200;
+        st.info ="success";
+
+        try {
+            _myai = ai.get_ai(aiid);
+
+        } catch (Exception e){
+            st.code = 500;
+            st.info = "Error:Internal Server Error.";
+        }
+
+        return gson.toJson(_myai);
+    }
 
 }

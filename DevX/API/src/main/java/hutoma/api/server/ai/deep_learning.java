@@ -62,6 +62,7 @@ public class deep_learning {
             env.put("LD_LIBRARY_PATH", "/usr/local/cuda/bin:/usr/local/cuda/lib64:$LD_LIBRARY_PATH");
             env.put("PATH", "/usr/local/cuda-6.5/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games");
             pb.directory(new File(utils.getConfigProp("rnnroot") + "preprocess/"));
+            utils.debug("python3.4 /home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py "+"/home/ubuntu/ai/"+dev_id+"/"+aiid+"/"+ " source target");
             File log = new File("/home/ubuntu/ai/"+dev_id+"/"+aiid+"/prepfile_log"+"_"+aiid+".txt");
             pb.redirectErrorStream(true);
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
@@ -81,6 +82,8 @@ public class deep_learning {
            int tCount = getWordCount(utils.getConfigProp("netroot").replace("__USERID__", dev_id).replace("__BOTID__", aiid) + "/" + "target.tok.txt.wordcount");
            script = script.replace("__SOURCE_COUNT__",""+(sCount+1)).replace("__SOURCE_COUNTPLUS__", "" + (sCount + 2));
            script = script.replace("__TARGET_COUNT__",""+(tCount+1)).replace("__TARGET_COUNTPLUS__", "" + (tCount + 2));
+
+           utils.debug("dev id for plan select:"+dev_id);
            script = script.replace("__TIMESTOP__", "" + dev.get_dev_plan_training_time(dev_id));
            ProcessBuilder pb = new ProcessBuilder( "python3.4",
                    utils.getConfigProp("trainingScript"),
@@ -94,6 +97,7 @@ public class deep_learning {
            env.put("LD_LIBRARY_PATH", "/usr/local/cuda-6.5/lib64:/usr/local/cuda-6.5/lib64");
            env.put("PATH", "/usr/local/cuda-6.5/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games");
            pb.directory(new File(utils.getConfigProp("rnnroot")));
+           utils.debug("python3.4 "+utils.getConfigProp("trainingScript")+" "+utils.getConfigProp("netName")+" "+script+" --botid"+aiid);
 
            File log = new File("/home/ubuntu/ai/"+dev_id+"/"+aiid+"log.txt");
            pb.redirectErrorStream(true);

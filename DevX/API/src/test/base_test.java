@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -34,7 +35,7 @@ public class base_test {
     protected String _curl_ADMIN_PUT_CREATE_DEV ="http://54.83.145.18:8080/api/admin?role=__ROLE__&devid=__DEVID__";
     protected String _curl_ADMIN_DELET_DELET_DEV ="http://54.83.145.18:8080/api/admin?devid=__DEVID__";
 
-    protected String _curl_ADMIN_POST_KICKOFF_TRAINING ="http://54.152.159.208:8080/api2/admin/dl/__DEVID__/__AIID__?action=start";
+    protected String _curl_ADMIN_POST_KICKOFF_TRAINING ="http://54.224.70.223:8080/api2/admin/dl/__DEVID__/__AIID__?action=start";
 
 
 
@@ -52,8 +53,58 @@ public class base_test {
     }
 
 
+    private static String parseTrainingFile(ArrayList<String> training) {
+        String parsedFile="";
+        String currentSentence ="";
+
+
+        String previousSentence = "";
+        int ConversationCounter = 0;
+
+        try {
+            for (String s:training) {
+                currentSentence = s;
+
+                // reset chat history
+                if (s.isEmpty()) {
+                    ConversationCounter = 0;
+                    previousSentence = "";
+                }
+                else ConversationCounter ++;
+
+                // check if the conversation is longer than just answer and question
+                // if yes, and if the current sentence is a question, add the previous sentence
+                if ((ConversationCounter > 2) && (ConversationCounter & 1) != 0)
+                    currentSentence = "CMDHSTART "+ previousSentence +" CMDHEND " + currentSentence;
+                else previousSentence = currentSentence;
+
+                parsedFile = parsedFile + currentSentence+"\n";
+
+            }
+        }
+        catch (Exception ex) {parsedFile="";}
+
+        return  parsedFile;
+    }
+
     @BeforeClass
     public static void init() throws IOException {
+
+//
+//        ArrayList<String> tests = new ArrayList<>();
+//        tests.add("Hello");
+//        tests.add("Hi, how are you");
+//        tests.add("I am fine thanks and you?");
+//        tests.add("I am ok thanks");
+//        tests.add("");
+//        tests.add("I am fine thanks and you?");
+//        tests.add("I am OK but i never really asked how are you?");
+//        tests.add("");
+//        tests.add("thanks");
+//        tests.add("you are welcome");
+//
+//        String t = parseTrainingFile(tests);
+//
 
         test.clean_test_data();
 
