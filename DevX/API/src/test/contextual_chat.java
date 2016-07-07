@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+
 import static hutoma.api.server.db.ai.get_ai_status;
 
 /**
@@ -42,11 +43,11 @@ public class contextual_chat extends  base_test {
             }
 
 
-            String question = "hey good morning to you. how is your day going?";
+            String question = "hey good morning to you how was  your day";
             json = super.curl(super._test_dev_token, "GET", _curl_GET_CHAT.replace("__AIID__",ai.aiid)+"?q="+question.replace(" ","%20")+"&min_p=0");
 
 
-            question = "how is your day going?";
+            question = "how was your day";
             json = super.curl(super._test_dev_token, "GET", _curl_GET_CHAT.replace("__AIID__",ai.aiid)+"?q="+question.replace(" ","%20")+"&uid=123&min_p=0");
 
             if (stat.isEmpty()) assert(false);
