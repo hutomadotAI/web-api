@@ -4,6 +4,7 @@ import hutoma.api.server.ai.api_root;
 
 import java.sql.*;
 
+import static hutoma.api.server.utils.utils.debug;
 import static hutoma.api.server.utils.utils.getConfigProp;
 
 /**
@@ -12,7 +13,7 @@ import static hutoma.api.server.utils.utils.getConfigProp;
 public class dev {
 
 
-    public static int get_dev_plan_training_time(String dev_id) {
+    public static int get_dev_plan_training_time(String dev_id) throws SQLException, ClassNotFoundException {
         api_root._ai r = new api_root._ai();
         String pid="";
         int maxt = 0;
@@ -35,13 +36,16 @@ public class dev {
 
             while (rs.next()) {
                 maxt = rs.getInt("maxtraining");
+                debug("DEV PLAN MAX:"+maxt);
             }
 
             st.close();
             conn.close();
         }
 
-        catch (Exception e) {}
+        catch (Exception e) {
+            debug("DEV PLAN SELECTION EXCEPTION:"+e.getMessage());
+        }
         return maxt;
     }
 
