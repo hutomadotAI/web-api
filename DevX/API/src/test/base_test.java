@@ -56,14 +56,11 @@ public class base_test {
     private static String parseTrainingFile(ArrayList<String> training) {
         String parsedFile="";
         String currentSentence ="";
-
-
         String previousSentence = "";
         int ConversationCounter = 0;
-
         try {
             for (String s:training) {
-                currentSentence = s;
+                currentSentence = s.trim();
 
                 // reset contextual_chat history
                 if (s.isEmpty()) {
@@ -75,36 +72,34 @@ public class base_test {
                 // check if the conversation is longer than just answer and question
                 // if yes, and if the current sentence is a question, add the previous sentence
                 if ((ConversationCounter > 2) && (ConversationCounter & 1) != 0)
-                    currentSentence = "CMDHSTART "+ previousSentence +" CMDHEND " + currentSentence;
+                    currentSentence = "["+ previousSentence +"] " + currentSentence;
                 else previousSentence = currentSentence;
-
                 parsedFile = parsedFile + currentSentence+"\n";
 
             }
         }
         catch (Exception ex) {parsedFile="";}
-
         return  parsedFile;
     }
 
     @BeforeClass
     public static void init() throws IOException {
 
-//
-//        ArrayList<String> tests = new ArrayList<>();
-//        tests.add("Hello");
-//        tests.add("Hi, how are you");
-//        tests.add("I am fine thanks and you?");
-//        tests.add("I am ok thanks");
-//        tests.add("");
-//        tests.add("I am fine thanks and you?");
-//        tests.add("I am OK but i never really asked how are you?");
-//        tests.add("");
-//        tests.add("thanks");
-//        tests.add("you are welcome");
-//
-//        String t = parseTrainingFile(tests);
-//
+
+        ArrayList<String> tests = new ArrayList<>();
+        tests.add("Hello");
+        tests.add("Hi, how are you");
+        tests.add("I am fine thanks and you?");
+        tests.add("I am ok thanks");
+        tests.add("");
+        tests.add("I am fine thanks and you?");
+        tests.add("I am OK but i never really asked how are you?");
+        tests.add("");
+        tests.add("thanks");
+        tests.add("you are welcome");
+
+        String t = parseTrainingFile(tests);
+
 
         test.clean_test_data();
 
