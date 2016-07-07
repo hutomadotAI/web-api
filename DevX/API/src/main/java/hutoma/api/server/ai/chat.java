@@ -65,8 +65,8 @@ public class chat extends api_root {
                         @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
                         @DefaultValue("") @QueryParam("q") String q,
                         @DefaultValue("1") @QueryParam("uid") String uid,
+                        @DefaultValue("") @QueryParam("history") String history,
 //                      @DefaultValue("") @QueryParam("session_id") String session_id,
-//                       @DefaultValue("") @QueryParam("contexts") String contexts,
 //                       @DefaultValue("false") @QueryParam("resetContexts") boolean resetContexts,
 //                       @DefaultValue("") @QueryParam("entities") String entities,
 //                       @DefaultValue("") @QueryParam("location") String location,
@@ -102,7 +102,7 @@ public class chat extends api_root {
         long startTime = System.currentTimeMillis();
         try {
 
-            String wnet_res = dispatcher.getAnswer(dev_id, aiid, q, min_p, fs);
+            String wnet_res = dispatcher.getAnswer(dev_id, aiid, "["+history+"]"+q, min_p, fs);
 
             res.score = Double.valueOf(wnet_res.split("\\|")[0]);
             if (wnet_res!=null) {
