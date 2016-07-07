@@ -86,19 +86,19 @@ public class base_test {
     public static void init() throws IOException {
 
 
-        ArrayList<String> tests = new ArrayList<>();
-        tests.add("Hello");
-        tests.add("Hi, how are you");
-        tests.add("I am fine thanks and you?");
-        tests.add("I am ok thanks");
-        tests.add("");
-        tests.add("I am fine thanks and you?");
-        tests.add("I am OK but i never really asked how are you?");
-        tests.add("");
-        tests.add("thanks");
-        tests.add("you are welcome");
-
-        String t = parseTrainingFile(tests);
+//        ArrayList<String> tests = new ArrayList<>();
+//        tests.add("Hello");
+//        tests.add("Hi, how are you");
+//        tests.add("I am fine thanks and you?");
+//        tests.add("I am ok thanks");
+//        tests.add("");
+//        tests.add("I am fine thanks and you?");
+//        tests.add("I am OK but i never really asked how are you?");
+//        tests.add("");
+//        tests.add("thanks");
+//        tests.add("you are welcome");
+//
+//        String t = parseTrainingFile(tests);
 
 
         test.clean_test_data();
