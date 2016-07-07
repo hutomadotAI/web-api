@@ -65,7 +65,7 @@ public class base_test {
             for (String s:training) {
                 currentSentence = s;
 
-                // reset chat history
+                // reset contextual_chat history
                 if (s.isEmpty()) {
                     ConversationCounter = 0;
                     previousSentence = "";
