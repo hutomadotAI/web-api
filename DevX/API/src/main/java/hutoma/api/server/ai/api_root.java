@@ -69,11 +69,31 @@ public class api_root {
     }
 
     public static class _myAIs {
+
         public _status status;
         public String devid;
         public String dev_token;
         public ArrayList<_ai> ai_list;
         public _ai ai;
+    }
+
+    public static class _domain {
+
+        public String dom_id;
+        public String name;
+        public String description;
+        public String icon;
+        public String color;
+        public boolean available;
+    }
+
+    public static class _integration {
+
+        public String id;
+        public String name;
+        public String description;
+        public String icon;
+        public boolean available;
     }
 
 
