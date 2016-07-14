@@ -54,10 +54,11 @@ public class RNN {
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
             String query = "SELECT answer FROM chatlog WHERE id="+qid;
+            utils.debug(query);
             ResultSet rs = st.executeQuery(query);
 
             while (rs.next()) {
-                answer = rs.getString("NNActive");
+                answer = rs.getString("answer");
             }
             st.close();
             conn.close();
@@ -68,9 +69,10 @@ public class RNN {
     }
 
 
-    public static boolean is_RNN_active(String dev_id,String aiid) {
+    public static boolean is_RNN_active(String dev_id,String aiid) throws SQLException, ClassNotFoundException {
         api_root._ai r = new api_root._ai();
         int stat=0;
+        boolean result  =false;
         try {
 
             String myDriver = "org.gjt.mm.mysql.Driver";
@@ -78,18 +80,19 @@ public class RNN {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
-            String query = "SELECT NNActive FROM ai WHERE dev_id='"+dev_id+"' AND ='"+aiid+"'";
+            String query = "SELECT NNActive FROM ai WHERE dev_id='"+dev_id+"' AND aiid='"+aiid+"'";
             ResultSet rs = st.executeQuery(query);
 
             while (rs.next()) {
                 stat = rs.getInt("NNActive");
+                if (stat == 1 )  result = true;
             }
             st.close();
             conn.close();
         }
 
-        catch (Exception e) {}
-        return stat>0;
+        catch (Exception e) {utils.debug("RNNACtive Ex:"+e.getMessage());}
+        return result;
     }
 
 

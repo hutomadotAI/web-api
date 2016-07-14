@@ -46,29 +46,37 @@ public class deep_learning {
     }
     private static void prepTrainingFiles(String dev_id,String aiid) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
-        File f = new File(utils.getConfigProp("botdir") +   dev_id + "/" + aiid + "/binarized_text.target.shuff.h5");
-        if (!f.exists()) {
+
+        try {
+            File f = new File(utils.getConfigProp("botdir") + dev_id + "/" + aiid + "/binarized_text.target.shuff.h5");
+
+            if (!f.exists()) {
+                utils.debug("file training do not exist");
 
 
-            ProcessBuilder pb = new ProcessBuilder("python3.4",
-                    "/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py",
-                    "/home/ubuntu/ai/"+dev_id+"/"+aiid+"/",
-                    "source",
-                    "target");
+                ProcessBuilder pb = new ProcessBuilder("python3.4",
+                        "/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py",
+                        "/home/ubuntu/ai/" + dev_id + "/" + aiid + "/",
+                        "source",
+                        "target");
 
-            Map<String, String> env = pb.environment();
-            env.put("THEANO_FLAGS", "floatX=float32,device=gpu,nvcc.fastmath=True");
-            env.put("PYTHONPATH", "/home/ubuntu/caffe/python:/usr/local/bin:/home/ubuntu/python/hutoma:/home/ubuntu/python/hutoma/neuralnetwork:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn:/home/ubuntu/python/hutoma/neuralnetwork/core:/home/ubuntu/python/hutoma/neuralnetwork/core/dataset:/home/ubuntu/python/hutoma/neuralnetwork/core/layers:/home/ubuntu/python/hutoma/neuralnetwork/core/models:/home/ubuntu/python/hutoma/neuralnetwork/core/trainer:/home/ubuntu/python/hutoma/neuralnetwork/core/utils");
-            env.put("LD_LIBRARY_PATH", "/usr/local/cuda/bin:/usr/local/cuda/lib64:$LD_LIBRARY_PATH");
-            env.put("PATH", "/usr/local/cuda-6.5/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games");
-            pb.directory(new File(utils.getConfigProp("rnnroot") + "preprocess/"));
-            utils.debug("python3.4 /home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py "+"/home/ubuntu/ai/"+dev_id+"/"+aiid+"/"+ " source target");
-            File log = new File("/home/ubuntu/ai/"+dev_id+"/"+aiid+"/prepfile_log"+"_"+aiid+".txt");
-            pb.redirectErrorStream(true);
-            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+                Map<String, String> env = pb.environment();
+                env.put("THEANO_FLAGS", "floatX=float32,device=gpu,nvcc.fastmath=True");
+                env.put("PYTHONPATH", "/home/ubuntu/caffe/python:/usr/local/bin:/home/ubuntu/python/hutoma:/home/ubuntu/python/hutoma/neuralnetwork:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn:/home/ubuntu/python/hutoma/neuralnetwork/core:/home/ubuntu/python/hutoma/neuralnetwork/core/dataset:/home/ubuntu/python/hutoma/neuralnetwork/core/layers:/home/ubuntu/python/hutoma/neuralnetwork/core/models:/home/ubuntu/python/hutoma/neuralnetwork/core/trainer:/home/ubuntu/python/hutoma/neuralnetwork/core/utils");
+                env.put("LD_LIBRARY_PATH", "/usr/local/cuda/bin:/usr/local/cuda/lib64:$LD_LIBRARY_PATH");
+                env.put("PATH", "/usr/local/cuda-6.5/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games");
+                pb.directory(new File(utils.getConfigProp("rnnroot") + "preprocess/"));
+                utils.debug("python3.4 /home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py " + "/home/ubuntu/ai/" + dev_id + "/" + aiid + "/" + " source target");
+                File log = new File("/home/ubuntu/ai/" + dev_id + "/" + aiid + "/prepfile_log" + "_" + aiid + ".txt");
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+                utils.debug("starting thread");
 
-            Process p = pb.start();
-            p.waitFor();
+                Process p = pb.start();
+                p.waitFor();
+            }
+        }
+        catch (Exception e) { utils.debug("prep training exeptionç:"+e.getMessage());
 
         }
 
@@ -130,6 +138,7 @@ public class deep_learning {
 
         switch (action) {
             case "start":
+                utils.debug("start training");
                 startTraining(uid, aiid);
                 break;
 
@@ -165,6 +174,8 @@ public class deep_learning {
             ProcessBuilder pb = new ProcessBuilder(utils.getConfigProp("pythonPath"),
                     utils.getConfigProp("rnnServerPath"),
                     "--normalize",
+                    "--beam-size",
+                    "1",
                     "--beam-search",
                     "--state",
                     utils.getConfigProp("rnnServerParams1").replace("__USERID__", uid).replace("__BOTID__", aiid),
@@ -174,7 +185,7 @@ public class deep_learning {
                     "--keepalive",
                     utils.getConfigProp("keepalive")
             );
-           // utils.debug("wake up:"+pb.command().toString());
+            utils.debug("wake up:"+pb.command().toString());
             Map<String, String> env = pb.environment();
             env.put("THEANO_FLAGS", "floatX=float32,device=gpu,nvcc.fastmath=True");
             env.put("PYTHONPATH", "/home/ubuntu/caffe/python:/usr/local/bin:/home/ubuntu/python/hutoma:/home/ubuntu/python/hutoma/neuralnetwork:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn:/home/ubuntu/python/hutoma/neuralnetwork/core:/home/ubuntu/python/hutoma/neuralnetwork/core/dataset:/home/ubuntu/python/hutoma/neuralnetwork/core/layers:/home/ubuntu/python/hutoma/neuralnetwork/core/models:/home/ubuntu/python/hutoma/neuralnetwork/core/trainer:/home/ubuntu/python/hutoma/neuralnetwork/core/utils");
