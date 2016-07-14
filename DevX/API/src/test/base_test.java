@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -52,45 +51,40 @@ public class base_test {
         return response.toString();
     }
 
-
-    private static String parseTrainingFile(ArrayList<String> training) {
-        String parsedFile="";
-        String currentSentence ="";
-
-
-        String previousSentence = "";
-        int ConversationCounter = 0;
-
-        try {
-            for (String s:training) {
-                currentSentence = s;
-
-                // reset contextual_chat history
-                if (s.isEmpty()) {
-                    ConversationCounter = 0;
-                    previousSentence = "";
-                }
-                else ConversationCounter ++;
-
-                // check if the conversation is longer than just answer and question
-                // if yes, and if the current sentence is a question, add the previous sentence
-                if ((ConversationCounter > 2) && (ConversationCounter & 1) != 0)
-                    currentSentence = "CMDHSTART "+ previousSentence +" CMDHEND " + currentSentence;
-                else previousSentence = currentSentence;
-
-                parsedFile = parsedFile + currentSentence+"\n";
-
-            }
-        }
-        catch (Exception ex) {parsedFile="";}
-
-        return  parsedFile;
-    }
+//
+//    private static String parseTrainingFile(ArrayList<String> training) {
+//        String parsedFile="";
+//        String currentSentence ="";
+//        String previousSentence = "";
+//        int ConversationCounter = 0;
+//        try {
+//            for (String s:training) {
+//                currentSentence = s.trim();
+//
+//                // reset contextual_chat history
+//                if (s.isEmpty()) {
+//                    ConversationCounter = 0;
+//                    previousSentence = "";
+//                }
+//                else ConversationCounter ++;
+//
+//                // check if the conversation is longer than just answer and question
+//                // if yes, and if the current sentence is a question, add the previous sentence
+//                if ((ConversationCounter > 2) && (ConversationCounter & 1) != 0)
+//                    currentSentence = "["+ previousSentence +"] " + currentSentence;
+//                else previousSentence = currentSentence;
+//                parsedFile = parsedFile + currentSentence+"\n";
+//
+//            }
+//        }
+//        catch (Exception ex) {parsedFile="";}
+//        return  parsedFile;
+//    }
 
     @BeforeClass
     public static void init() throws IOException {
 
-//
+
 //        ArrayList<String> tests = new ArrayList<>();
 //        tests.add("Hello");
 //        tests.add("Hi, how are you");
@@ -104,7 +98,7 @@ public class base_test {
 //        tests.add("you are welcome");
 //
 //        String t = parseTrainingFile(tests);
-//
+
 
         test.clean_test_data();
 
