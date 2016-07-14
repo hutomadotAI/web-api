@@ -9,12 +9,12 @@ import java.io.IOException;
 import static hutoma.api.server.db.ai.get_ai_status;
 
 /**
- * Created by mauriziocibelli on 11/05/16.
+ * Created by mauriziocibelli on 22/06/16.
  */
-public class deep_learning_test extends base_test {
+public class contextual_chat extends  base_test {
 
     @Test
-    public void kickoff_dl_training() throws IOException {
+    public void chat() throws IOException {
         try {
 
 
@@ -28,43 +28,35 @@ public class deep_learning_test extends base_test {
 
 
             // upload training file
-            ProcessBuilder pb = new ProcessBuilder("curl", "-X","POST","-H","Authorization: Bearer "+_test_dev_token,_curl_PUT_UPLOAD_TRAINING.replace("__AIID__", ai.aiid),"-F","file=@"+System.getProperty("user.home") + "/ai/sampletraining.txt");
+            ProcessBuilder pb = new ProcessBuilder("curl", "-X","POST","-H","Authorization: Bearer "+_test_dev_token,_curl_PUT_UPLOAD_TRAINING.replace("__AIID__", ai.aiid),"-F","file=@"+System.getProperty("user.home") + "/ai/contextual.txt");
             System.out.print(pb.command().toString());
             Process p = pb.start();
-
-
-        //    super.curl(super.role_admin, "POST", _curl_ADMIN_POST_KICKOFF_TRAINING.replace("__DEVID__", super._test_devid).replace("__AIID__", ai.aiid));
-
-
 
             int counter = 0;
             String stat ="";
             while (counter < 120) {
                 stat = get_ai_status(ai.aiid);
-
                 if (stat.equals(String.valueOf(msg.training_in_progress))) break;
                 Thread.sleep(1000);
                 counter ++;
             }
 
 
+            String question = "hey good morning to you. how is your day going?";
+            json = super.curl(super._test_dev_token, "GET", _curl_GET_CHAT.replace("__AIID__",ai.aiid)+"?q="+question.replace(" ","%20")+"&min_p=0");
 
 
-
-            json = super.curl(super._test_dev_token, "GET", _curl_GET_CHAT.replace("__AIID__",ai.aiid)+"?q=i%20want%20a%20cake&uid=123&min_p=1");
+            question = "how is your day going?";
+            json = super.curl(super._test_dev_token, "GET", _curl_GET_CHAT.replace("__AIID__",ai.aiid)+"?q="+question.replace(" ","%20")+"&uid=123&min_p=0");
 
             if (stat.isEmpty()) assert(false);
-
-
-
 
 
             super.curl(super._test_dev_token, "DELETE", _curl_DELETE_DELETE_AI.replace("__AIID__", ai.aiid));
         }
         catch(Exception ex) {assert (false);}
     }
+    }
 
 
 
-
-}
