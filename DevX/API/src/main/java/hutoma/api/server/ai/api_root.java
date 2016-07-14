@@ -87,6 +87,13 @@ public class api_root {
         public boolean available;
     }
 
+    public static class _domainList {
+
+        public _status status;
+        public ArrayList<_domain> domain_list;
+        public _domain domain;
+    }
+
     public static class _integration {
 
         public String id;

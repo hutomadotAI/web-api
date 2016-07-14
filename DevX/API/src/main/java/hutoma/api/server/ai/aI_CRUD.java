@@ -6,6 +6,7 @@ import hutoma.api.server.AWS.msg;
 import hutoma.api.server.Role;
 import hutoma.api.server.Secured;
 import hutoma.api.server.db.ai;
+import hutoma.api.server.db.domain;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -117,6 +118,42 @@ public class aI_CRUD extends  api_root {
         return gson.toJson(_ai);
     }
 
+
+    @GET
+    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getDomains(
+            @Context SecurityContext securityContext,
+            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        _status st = new _status();
+        _domainList _domain = new _domainList();
+        st.code = 200;
+        st.info ="success";
+        _domain.status = st;
+
+        try {
+            ArrayList<_domain> listdomains = new ArrayList<>();
+            listdomains = domain.get_all_domains();
+
+            if (listdomains.size() <= 0) {
+                st.code = 500;
+                st.info = "Internal Server Error.";
+            } else {
+                _domain.domain_list = new ArrayList<_domain>();
+                _domain.domain_list = listdomains;
+
+
+            }
+        }
+        catch (Exception e){
+            st.code = 500;
+            st.info = "Error:Internal Server Error.";
+        }
+
+        return gson.toJson(_domain);
+    }
 
 
 
