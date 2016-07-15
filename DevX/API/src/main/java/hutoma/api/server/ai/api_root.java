@@ -66,6 +66,7 @@ public class api_root {
         public String client_token;
         public String ai_training_file;
 
+
     }
 
     public static class _myAIs {

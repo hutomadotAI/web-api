@@ -29,41 +29,36 @@ public class training {
 
 
 
-    // Parse the training file to check for errors and to build
-    // the conversation history structure
+    // Parse the training file to check for errors and
+    // builds the conversation history structure
 
     private String parseTrainingFile(ArrayList<String> training) {
         String parsedFile="";
         String currentSentence ="";
-
-
         String previousSentence = "";
         int ConversationCounter = 0;
-
         try {
             for (String s:training) {
-                currentSentence = s;
+                currentSentence = s.trim();
 
-                // reset chat history
-                if (s.length()==0) {
+                // reset contextual_chat history
+                if (s.isEmpty()) {
                     ConversationCounter = 0;
                     previousSentence = "";
                 }
-                ConversationCounter ++;
+                else ConversationCounter ++;
 
                 // check if the conversation is longer than just answer and question
                 // if yes, and if the current sentence is a question, add the previous sentence
                 if ((ConversationCounter > 2) && (ConversationCounter & 1) != 0)
-                    currentSentence = "CMDHSTART "+ previousSentence +" CMDHEND " + currentSentence;
+                    currentSentence = "["+ previousSentence +"] " + currentSentence;
                 else previousSentence = currentSentence;
-
-                parsedFile = currentSentence+"\n";
+                parsedFile = parsedFile + currentSentence+"\n";
 
             }
         }
         catch (Exception ex) {parsedFile="";}
-
-     return  parsedFile;
+        return  parsedFile;
     }
 
 
@@ -96,14 +91,13 @@ public class training {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     source.add(line);
-                    trainingFile += line + "\n";
                     n_lines++;
                 }
                 reader.close();
             }
             catch (Exception ex) {}
 
-            ai.update_ai_training_file(aiid, trainingFile);
+            ai.update_ai_training_file(aiid, parseTrainingFile(source));
             hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_training+"|"+devid+"|"+aiid);
 
             int max_cluster_lines = 5000;
