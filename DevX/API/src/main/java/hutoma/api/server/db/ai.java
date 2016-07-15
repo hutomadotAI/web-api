@@ -148,9 +148,6 @@ public class ai {
 
 
 
-
-
-
     public static boolean delete_ai(String aiid) {
         try {
 

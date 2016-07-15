@@ -6,6 +6,7 @@ import hutoma.api.server.AWS.msg;
 import hutoma.api.server.Role;
 import hutoma.api.server.Secured;
 import hutoma.api.server.db.ai;
+import hutoma.api.server.db.domain;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,8 +26,6 @@ import java.util.UUID;
 public class aI_CRUD extends  api_root {
 
 
-
-    // this is just a test
     //curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAkYzSkvzcRKVaAAAAAP__.kkftTodFfH_kRQANoqT1B96BslSHu1VzM5VC_p6bBcA" http://localhost:8080/api/
     @POST
     @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
@@ -118,9 +117,6 @@ public class aI_CRUD extends  api_root {
 
         return gson.toJson(_ai);
     }
-
-
-
 
     @Path("/{aiid}/")
     @GET
