@@ -2,6 +2,7 @@ package hutoma.api.server.ai;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import hutoma.api.server.AWS.msg;
 import hutoma.api.server.Role;
 import hutoma.api.server.Secured;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 
 import static hutoma.api.server.utils.utils.getConfigProp;
@@ -32,6 +34,19 @@ public class training {
     // Parse the training file to check for errors and
     // builds the conversation history structure
 
+    private String inputSanitizer(String input) {
+        String resultString = input.replaceAll("[^\\x00-\\x7F]", "");
+        resultString = resultString.replaceAll("'","\\'");
+        resultString = resultString.replaceAll("\"","\\\"");
+        resultString = resultString.replaceAll("\"","\\\"");
+        resultString = resultString.replace("(","");
+        resultString = resultString.replace(")","");
+        resultString = resultString.replace("]","");
+        resultString = resultString.replace("[","");
+
+        return  resultString;
+
+    }
     private String parseTrainingFile(ArrayList<String> training) {
         String parsedFile="";
         String currentSentence ="";
@@ -63,6 +78,21 @@ public class training {
 
 
 
+    // reads the input file and returns an array of strings
+    private ArrayList <String> getFile(InputStream uploadedInputStream){
+        ArrayList<String> source = new ArrayList<>();
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(uploadedInputStream));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                source.add(inputSanitizer(line));
+            }
+            reader.close();
+        }
+        catch (Exception ex) {}
+        return source;
+    }
+
     @POST
     @Path("/{aiid}/training")
     @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
@@ -71,6 +101,8 @@ public class training {
     public String uploadFile( @Context SecurityContext securityContext,
                               @DefaultValue("") @HeaderParam("_developer_id") String devid,
                               @PathParam("aiid") String aiid,
+                              @DefaultValue("0") @QueryParam("source_type") int type,
+                              @DefaultValue("")  @QueryParam("url") String url,
                               @FormDataParam("file") InputStream uploadedInputStream,
                               @FormDataParam("file") FormDataContentDisposition fileDetail) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -84,35 +116,43 @@ public class training {
         api_root._ai _ai = new api_root._ai();
 
         try {
-            String trainingFile="";
-            int n_lines = 0;
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(uploadedInputStream));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    source.add(line);
-                    n_lines++;
-                }
-                reader.close();
+
+
+            switch (type) {
+
+                // 0 = training file is text chat
+                case 0:
+                    source = getFile(uploadedInputStream);
+                    ai.update_ai_training_file(aiid, parseTrainingFile(source));
+                    hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_training+"|"+devid+"|"+aiid);
+                    int max_cluster_lines = 10000;
+                    double cluster_min_probability = 0.7;
+                    try {
+                        max_cluster_lines = Integer.valueOf(getConfigProp("max_cluster_lines"));
+                        cluster_min_probability = Double.valueOf(getConfigProp("cluster_min_probability"));
+                    }
+                    catch (Exception ex) {}
+                    if (source.size()>max_cluster_lines) hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.cluster_split + "|" + devid + "|" + aiid +"|"+cluster_min_probability);
+                    break;
+
+                // 1 = trainig file is a document
+                case 1:
+                    source = getFile(uploadedInputStream);
+                    ai.update_ai_training_file(aiid, inputSanitizer(source.toString()));
+                    hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("sqs_DG"),msg.preprocess_training_text+"|"+devid+"|"+aiid);
+                    break;
+
+                // 1 = trainig file is a webpage
+                case 2:
+                    URL _url = new URL(url);
+                    ai.update_ai_training_file(aiid,inputSanitizer(ArticleExtractor.INSTANCE.getText(url)));
+                    hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("sqs_DG"),msg.preprocess_training_text+"|"+devid+"|"+aiid);
+                    break;
+
+
             }
-            catch (Exception ex) {}
-
-            ai.update_ai_training_file(aiid, parseTrainingFile(source));
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_training+"|"+devid+"|"+aiid);
-
-            int max_cluster_lines = 5000;
-            double cluster_min_probability = 0.7;
-
-            try {
-                max_cluster_lines = Integer.valueOf(getConfigProp("max_cluster_lines"));
-                cluster_min_probability = Double.valueOf(getConfigProp("cluster_min_probability"));
-            }
-            catch (Exception ex) {}
 
 
-            if (n_lines>max_cluster_lines) {
-                hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.cluster_split + "|" + devid + "|" + aiid +"|"+cluster_min_probability);
-            }
 
         }
         catch (Exception ex) {

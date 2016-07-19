@@ -24,17 +24,24 @@ public class api_root {
             public String emotion;
             public String topic;
         }
-        public static class _result {
+
+    public static class _parameter {
+        public String name;
+        public String value;
+    }
+
+
+    public static class _result {
             public double score;
             public String query = "";
-            public String resolvedQuery = "";
+           // public String resolvedQuery = "";
             public String answer = "";
             public float elapsed_time;
-            public String source;
+           // public String source;
             public String action;
-            public String parameters;
+            public _parameter[] parameters;
             public String context;
-            public _metadata metadata;
+          //  public _metadata metadata;
             public ArrayList<_debug> debug_info;
         }
         public static class _chat {
