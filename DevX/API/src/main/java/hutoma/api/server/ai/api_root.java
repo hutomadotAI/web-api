@@ -69,7 +69,7 @@ public class api_root {
         public double deep_learning_error;
         public String training_debug_info;
         public String training_status;
-        public int ai_status;
+        public String ai_status;
         public String client_token;
         public String ai_training_file;
 

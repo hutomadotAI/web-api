@@ -185,7 +185,7 @@ public class training {
         myai.status =st;
         api_root._ai _ai = new api_root._ai();
         hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.delete_training+"|"+devid+"|"+aiid);
-        _ai.ai_status =0;
+        _ai.ai_status = String.valueOf(msg.training_queued);
         return gson.toJson(myai);
     }
 
