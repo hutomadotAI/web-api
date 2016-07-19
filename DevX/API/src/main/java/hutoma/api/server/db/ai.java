@@ -1,6 +1,7 @@
 package hutoma.api.server.db;
 
 import hutoma.api.server.ai.api_root;
+import hutoma.api.server.utils.utils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -168,7 +169,7 @@ public class ai {
     }
 
 
-    public static ArrayList<api_root._ai> get_all_ai(String dev_id) {
+    public static ArrayList<api_root._ai> get_all_ai(String dev_id) throws SQLException, ClassNotFoundException {
         ArrayList<api_root._ai> res = new ArrayList<>();
         try {
 
@@ -181,12 +182,12 @@ public class ai {
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
                 api_root._ai r = new api_root._ai();
-                r.ai_status = rs.getInt("ai_status");
+                r.ai_status = rs.getString("ai_status");
                 r.aiid = rs.getString("aiid");
                 r.created_on = rs.getDate("created_on");
                 r.description = rs.getString("ai_description");
                 r.name = rs.getString("ai_name");
-                r.ai_training_file = rs.getString("ai_trainingfile");
+                //r.ai_training_file = rs.getString("ai_trainingfile");
                 r.is_private = rs.getBoolean("is_private");
                 r.deep_learning_error = rs.getDouble("deep_learning_error");
                 r.training_status = rs.getString("deep_learning_status");
@@ -199,7 +200,8 @@ public class ai {
 
         }
 
-        catch (Exception e) {}
+        catch (Exception e) {
+            utils.debug(e.getLocalizedMessage());}
         return res;
     }
 
