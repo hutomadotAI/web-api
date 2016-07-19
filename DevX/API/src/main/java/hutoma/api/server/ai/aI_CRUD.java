@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * Created by mauriziocibelli on 27/04/16.
  */
-@Path("/ai/")
+
 public class aI_CRUD extends  api_root {
 
 

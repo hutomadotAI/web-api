@@ -66,7 +66,6 @@ public class api_root {
         public String client_token;
         public String ai_training_file;
 
-
     }
 
     public static class _myAIs {
@@ -93,6 +92,22 @@ public class api_root {
         public _status status;
         public ArrayList<_domain> domain_list;
         public _domain domain;
+    }
+
+    public static class _userAIDomain {
+
+        public String dev_token;
+        public String aiid;
+        public String dom_id;
+        public boolean active;
+        public Date created_on;
+    }
+
+    public static class _userAIDomainList {
+
+        public _status status;
+        public ArrayList<_userAIDomain> userAIdomain_list;
+        public _userAIDomain userAIdomain;
     }
 
     public static class _integration {

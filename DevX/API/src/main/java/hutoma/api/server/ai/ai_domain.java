@@ -6,10 +6,7 @@ import hutoma.api.server.Role;
 import hutoma.api.server.Secured;
 import hutoma.api.server.db.domain;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
@@ -18,6 +15,7 @@ import java.util.ArrayList;
 /**
  * Created by Hutoma on 15/07/16.
  */
+@Path("/ai/domain")
 public class ai_domain {
 
     @GET
@@ -44,8 +42,6 @@ public class ai_domain {
             } else {
                 _domain.domain_list = new ArrayList<api_root._domain>();
                 _domain.domain_list = listdomains;
-
-
             }
         }
         catch (Exception e){
