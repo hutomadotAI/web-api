@@ -24,17 +24,24 @@ public class api_root {
             public String emotion;
             public String topic;
         }
-        public static class _result {
+
+    public static class _parameter {
+        public String name;
+        public String value;
+    }
+
+
+    public static class _result {
             public double score;
             public String query = "";
-            public String resolvedQuery = "";
+           // public String resolvedQuery = "";
             public String answer = "";
             public float elapsed_time;
-            public String source;
+           // public String source;
             public String action;
-            public String parameters;
+            public _parameter[] parameters;
             public String context;
-            public _metadata metadata;
+          //  public _metadata metadata;
             public ArrayList<_debug> debug_info;
         }
         public static class _chat {
@@ -70,11 +77,38 @@ public class api_root {
     }
 
     public static class _myAIs {
+
         public _status status;
         public String devid;
         public String dev_token;
         public ArrayList<_ai> ai_list;
         public _ai ai;
+    }
+
+    public static class _domain {
+
+        public String dom_id;
+        public String name;
+        public String description;
+        public String icon;
+        public String color;
+        public boolean available;
+    }
+
+    public static class _domainList {
+
+        public _status status;
+        public ArrayList<_domain> domain_list;
+        public _domain domain;
+    }
+
+    public static class _integration {
+
+        public String id;
+        public String name;
+        public String description;
+        public String icon;
+        public boolean available;
     }
 
 

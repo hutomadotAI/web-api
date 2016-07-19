@@ -1,5 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.l3s.boilerpipe.BoilerpipeProcessingException;
+import de.l3s.boilerpipe.extractors.DefaultExtractor;
 import hutoma.api.server.Role;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.db.test;
@@ -83,6 +85,14 @@ public class base_test {
 
     @BeforeClass
     public static void init() throws IOException {
+
+        URL url = new URL("https://en.wikipedia.org/wiki/Alan_Turing");
+        try {
+            String s = DefaultExtractor.INSTANCE.getText(url);
+            System.out.print(s);
+        } catch (BoilerpipeProcessingException e) {
+            e.printStackTrace();
+        }
 
 
 //        ArrayList<String> tests = new ArrayList<>();

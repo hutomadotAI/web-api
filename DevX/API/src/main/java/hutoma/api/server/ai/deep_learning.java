@@ -51,9 +51,6 @@ public class deep_learning {
             File f = new File(utils.getConfigProp("botdir") + dev_id + "/" + aiid + "/binarized_text.target.shuff.h5");
 
             if (!f.exists()) {
-                utils.debug("file training do not exist");
-
-
                 ProcessBuilder pb = new ProcessBuilder("python3.4",
                         "/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py",
                         "/home/ubuntu/ai/" + dev_id + "/" + aiid + "/",
@@ -66,11 +63,9 @@ public class deep_learning {
                 env.put("LD_LIBRARY_PATH", "/usr/local/cuda/bin:/usr/local/cuda/lib64:$LD_LIBRARY_PATH");
                 env.put("PATH", "/usr/local/cuda-6.5/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games");
                 pb.directory(new File(utils.getConfigProp("rnnroot") + "preprocess/"));
-                utils.debug("python3.4 /home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn/preprocess/main.py " + "/home/ubuntu/ai/" + dev_id + "/" + aiid + "/" + " source target");
                 File log = new File("/home/ubuntu/ai/" + dev_id + "/" + aiid + "/prepfile_log" + "_" + aiid + ".txt");
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
-                utils.debug("starting thread");
 
                 Process p = pb.start();
                 p.waitFor();
@@ -91,7 +86,6 @@ public class deep_learning {
            script = script.replace("__SOURCE_COUNT__",""+(sCount+1)).replace("__SOURCE_COUNTPLUS__", "" + (sCount + 2));
            script = script.replace("__TARGET_COUNT__",""+(tCount+1)).replace("__TARGET_COUNTPLUS__", "" + (tCount + 2));
 
-           utils.debug("dev id for plan select:"+dev_id);
            script = script.replace("__TIMESTOP__", "" + dev.get_dev_plan_training_time(dev_id));
            ProcessBuilder pb = new ProcessBuilder( "python3.4",
                    utils.getConfigProp("trainingScript"),
@@ -105,8 +99,6 @@ public class deep_learning {
            env.put("LD_LIBRARY_PATH", "/usr/local/cuda-6.5/lib64:/usr/local/cuda-6.5/lib64");
            env.put("PATH", "/usr/local/cuda-6.5/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games");
            pb.directory(new File(utils.getConfigProp("rnnroot")));
-           utils.debug("python3.4 "+utils.getConfigProp("trainingScript")+" "+utils.getConfigProp("netName")+" "+script+" --botid"+aiid);
-
            File log = new File("/home/ubuntu/ai/"+dev_id+"/"+aiid+"log.txt");
            pb.redirectErrorStream(true);
            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
@@ -138,7 +130,6 @@ public class deep_learning {
 
         switch (action) {
             case "start":
-                utils.debug("start training");
                 startTraining(uid, aiid);
                 break;
 
@@ -185,7 +176,6 @@ public class deep_learning {
                     "--keepalive",
                     utils.getConfigProp("keepalive")
             );
-            utils.debug("wake up:"+pb.command().toString());
             Map<String, String> env = pb.environment();
             env.put("THEANO_FLAGS", "floatX=float32,device=gpu,nvcc.fastmath=True");
             env.put("PYTHONPATH", "/home/ubuntu/caffe/python:/usr/local/bin:/home/ubuntu/python/hutoma:/home/ubuntu/python/hutoma/neuralnetwork:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets:/home/ubuntu/python/hutoma/neuralnetwork/neuralnets/rnn:/home/ubuntu/python/hutoma/neuralnetwork/core:/home/ubuntu/python/hutoma/neuralnetwork/core/dataset:/home/ubuntu/python/hutoma/neuralnetwork/core/layers:/home/ubuntu/python/hutoma/neuralnetwork/core/models:/home/ubuntu/python/hutoma/neuralnetwork/core/trainer:/home/ubuntu/python/hutoma/neuralnetwork/core/utils");
