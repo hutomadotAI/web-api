@@ -6,6 +6,7 @@ import hutoma.api.server.AWS.msg;
 import hutoma.api.server.Role;
 import hutoma.api.server.Secured;
 import hutoma.api.server.db.ai;
+import hutoma.api.server.db.domain;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
