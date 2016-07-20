@@ -18,8 +18,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import static hutoma.api.server.utils.utils.debug;
-
 /**
  * Created by mauriziocibelli on 24/04/16.
  */
@@ -66,6 +64,8 @@ public class chat extends api_root {
                         @DefaultValue("") @QueryParam("q") String q,
                         @DefaultValue("1") @QueryParam("uid") String uid,
                         @DefaultValue("") @QueryParam("history") String history,
+                        @DefaultValue("false") @QueryParam("active_learning") boolean on_the_fly_learning,
+
 //                      @DefaultValue("") @QueryParam("session_id") String session_id,
 //                       @DefaultValue("false") @QueryParam("resetContexts") boolean resetContexts,
 //                       @DefaultValue("") @QueryParam("entities") String entities,
@@ -94,7 +94,7 @@ public class chat extends api_root {
         response.metadata = md;
         response.status  = st;
         res.action ="no action";
-        res.parameters ="no params";
+        //res.parameters ="no params";
         res.context = "";
         res.elapsed_time =0;
         res.query = q;
@@ -124,7 +124,6 @@ public class chat extends api_root {
                 if (res.score<min_p)  {
                     String RNN_answer="";
                     RNN_answer = getRNNAnswer(dev_id,aiid,uid,q);
-                    debug("RNN ANSWER IS:"+RNN_answer);
                     if ((RNN_answer!=null) && (!RNN_answer.isEmpty())) {
                         res.answer =RNN_answer;
                     }

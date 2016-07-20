@@ -7,6 +7,8 @@ public enum msg {
     cluster_split,
     delete_dev,
     delete_ai,
+    preprocess_training_text,
+    preprocess_training_html,
     ready_for_training,
     stop_training,
     start_training,
