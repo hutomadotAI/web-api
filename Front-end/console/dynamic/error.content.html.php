@@ -47,6 +47,9 @@ if (isset($_GET['err'])) {
         case 0 :
             $msg.='JSON chat ERROR';
             break;
+        case 10 :
+            $msg.='aiid SESSION MISSING';
+            break;
         default:
             $msg.='UNDEFINED ERROR';
     }
