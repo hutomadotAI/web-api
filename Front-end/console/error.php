@@ -40,6 +40,8 @@
             <ul class="sidebar-menu">
                 <li class="header">WORKPLACE</li>
                 <?php
+                    session_unset();
+                    session_destroy();
                     echo ('<li><a href="../pages/login.php"><i class="fa fa-plus-circle"></i> <span>go to Login</span></a></li>');
                 ?>
             </ul>

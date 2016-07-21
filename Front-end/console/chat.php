@@ -15,17 +15,15 @@
 
 
 
-
     $dev_token = \hutoma\console::getDevToken();
     $response = \hutoma\console::chatAI($dev_token,$_SESSION['aiid'],'1',$question,'',false,0.5);
-
 
 
     unset($dev_token);
 
     if ($response['status']['code'] !== 200) {
+        echo(json_encode($response,JSON_PRETTY_PRINT));
         unset($response);
-        header('Location: ./error.php?err=0');
         exit;
     }
 
