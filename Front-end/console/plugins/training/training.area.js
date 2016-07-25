@@ -6,77 +6,30 @@ var TRAINING = TRAINING || (function(){
 
             _args[0]=0;
             _args[1]=0;
-            showStart(_args[0],_args[1]);
-            showUpload(_args[0],_args[1]);
+
+            showStart(_args[0],_args[1],_args[2]);
             writeScript()
         },
     };
 }());
 
 
-function showStart(status,file){
-
+function showStart(status,file,filename){
+    var wHTML = "";
     var newNode = document.createElement('div');
     newNode.className = '';
     newNode.id = 'infoTraining';
-    
-    var wHTML = "";
 
-    if ( file == null || file =="undefined" || file == '0' )
-        wHTML += drawTrainingInfo();
+    if ( file == 0)
+        wHTML += trainingAreaUnchecked(status,file);
     else
-        wHTML += drawTrainingStart(status);
+        wHTML += trainingAreaChecked(status,file,filename);
 
     newNode.innerHTML = wHTML;
     document.getElementById('boxTraining').appendChild(newNode);
 }
 
-function drawTrainingInfo(){
-    var wHTML="";
-    wHTML += ('<div class="box-header no-border">');
 
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconTraining" style="margin-top: 8px; margin-right: 8px;"></i>');
-    wHTML += ('You need upload the training file.');
-    wHTML += ('</div>');
-
-    wHTML += ('<a data-toggle="collapse"  href="#collapseInfo">');
-    wHTML += ('<div class="btn btn-success btn-sm pull-right flat" style="margin-right: 5px; width: 120px;">');
-    wHTML += ('<i class="fa fa-download"></i> Get more info');
-    wHTML += ('</div>');
-    wHTML += ('</a>');
-
-    wHTML += ('</div>');
-
-    wHTML += ('<div id="collapseInfo" class="panel-collapse collapse">');
-    wHTML += ('<div class="box-body">');
-    wHTML += ('<div class="overlay center-block">');
-
-    wHTML += drawTrainingMoreInfo();
-
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    return wHTML;
-}
-
-
-function drawTrainingStart(status){
-
-    var wHTML='';
-    wHTML += ('<div class="box-header no-border">');
-
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class="fa fa-check-circle-o text-md text-success" id="iconTraining" style="margin-top:8px; margin-right: 8px;"></i>');
-    wHTML += ('Ready for start Training.');
-    wHTML += ('</div>');
-    wHTML += drawRightButtons(status);
-
-    wHTML += ('</div>');
-
-    return wHTML;
-}
 
 
 function drawTrainingMoreInfo() {
@@ -146,80 +99,122 @@ function drawRightButtons(status){
 }
 
 
-function showUpload(status,file){
-
-    var newNode = document.createElement('div');
-    newNode.className = '';
-    newNode.id = 'infoTraining';
-
-    var wHTML = "";
-
-
-    wHTML += drawUploadInfo(file);
-
-    newNode.innerHTML = wHTML;
-    document.getElementById('boxUpload').appendChild(newNode);
-}
-
-
-function drawUploadInfo(file){
-    var filename =  'example.txt';
-    var wHTML="";
-    wHTML += ('<div class="box-header no-border">');
-
-    if (file==0) {
-
-        wHTML += ('<div class="btn-group pull-left">');
-        wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconUpload" style="margin-top: 8px;margin-right: 8px;"></i>');
-        wHTML += ('Any file uploaded');
-        wHTML += ('</div>');
-
-        wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload" style="margin-right: 5px; width: 120px;">');
-        wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
-        wHTML += ('</div>');
-
-
-    }
-    else {
-        wHTML += ('<div class="btn-group pull-left">');
-        wHTML += ('<i class="fa fa-check-circle-o text-md text-success" id="iconUpload" style="margin-top: 8px; margin-right: 8px;"></i>');
-        wHTML += ('Last uploaded file is <label>'+ filename+'</label>');
-        wHTML += ('</div>');
-
-
-        wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id ="btnUpload" style="margin-right: 5px; width: 120px;">');
-        wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
-        wHTML += ('</div>');
-    }
-
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
-    wHTML += ('</div>');
-    wHTML += ('<div class="box-footer">');
-
-    wHTML += ('<input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
-    wHTML += ('</div>');
-
-    return wHTML;
-}
-
-
 function writeScript(){
     var wHTML="";
     var script = document.createElement('script');
     script.id = 'uploadExperience';
     document.getElementsByTagName('head')[0].appendChild(script);
 
-
     wHTML +='var input = document.getElementById("inputfile");';
     wHTML +='input.onclick = function () { this.value = null; };';
-    wHTML +='input.onchange = function () { alert(this.value); };';
+    wHTML +='input.onchange = function () { changeUIState(); };';
 
     script.text = wHTML;
-
     document.getElementsByTagName('head')[0].appendChild(script);
 }
+
+
+function trainingAreaUnchecked(status,file,filename){
+    var wHTML='';
+    var msg ='You need upload the training file first.';
+
+    wHTML += ('<div class="btn-group pull-left">');
+    wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="btn-group pull-left">');
+    wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
+    wHTML += ('<div id="msgUpload" style="display:inline;">');
+    wHTML += (msg);
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload"  onClick="uploadFile()" style="margin-right: 5px; width: 120px;">');
+    wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += buttonGetMoreInfo();
+    return wHTML;
+}
+
+
+function trainingAreaChecked(status,file,filename){
+    var wHTML='';
+    var msg ='The last training file is ';
+
+    wHTML += ('<div class="btn-group pull-left">');
+    wHTML += ('<i class=" fa fa-check-circle-o text-md text-success" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="btn-group pull-left">');
+    wHTML += ('<i class="fa fa-check-circle-o text-md text-success" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
+    wHTML += ('<div id="msgUpload" style="display:inline;">');
+    wHTML += (msg+'<label>'+filename+'</label>');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload" onClick="uploadFile()"; style="margin-right: 5px; width: 120px;">');
+    wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += buttonGetMoreInfo();
+
+    return wHTML;
+}
+
+
+function changeUIState(){
+
+    $("#btnUpload").attr("disabled", false);
+    $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
+    $('#iconUpload').removeClass('fa fa-exclamation-circle text-md text-danger').addClass('fa fa-check-circle-o text-md text-success');
+    $('#iconFile').removeClass('fa fa-exclamation-circle text-md text-danger').addClass('fa fa-check-circle-o text-md text-success');
+
+    document.getElementById("msgUpload").textContent='Now you can upload your file';
+}
+
+function uploadFile(){
+    var isDisabled =  $('#btnUpload').attr('class') == 'btn btn-success btn-sm pull-right flat';
+    if (isDisabled) {
+        setTimeout(2000);
+        document.getElementById("msgUpload").textContent = 'File uploaded.';
+    }
+}
+
+
+
+function buttonGetMoreInfo(){
+    var wHTML="";
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<a data-toggle="collapse"  href="#collapseInfo">');
+    wHTML += ('<div class="btn btn-primary btn-sm pull-right flat" style="margin-right: 5px; width: 120px;">');
+    wHTML += ('<i class="fa fa-download"></i> Get more info');
+    wHTML += ('</div>');
+    wHTML += ('</a>');
+    wHTML += ('</div>');
+    wHTML += ('<div id="collapseInfo" class="panel-collapse collapse">');
+    wHTML += ('<div class="box-body">');
+    wHTML += ('<div class="overlay center-block">');
+
+    wHTML += drawTrainingMoreInfo();
+
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+    wHTML += ('</div>')
+    return wHTML;
+}
+
 
 
