@@ -39,7 +39,6 @@ public class base_test {
     protected String _curl_ADMIN_POST_KICKOFF_TRAINING ="http://54.224.70.223:8080/api2/admin/dl/__DEVID__/__AIID__?action=start";
 
 
-
     public static String curl(String role, String method, String endpoint) throws IOException {
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -53,6 +52,7 @@ public class base_test {
         return response.toString();
     }
 
+<<<<<<< Updated upstream
 //
 //    private static String parseTrainingFile(ArrayList<String> training) {
 //        String parsedFile="";
@@ -83,6 +83,8 @@ public class base_test {
 //        return  parsedFile;
 //    }
 
+=======
+>>>>>>> Stashed changes
     @BeforeClass
     public static void init() throws IOException {
 
@@ -114,7 +116,7 @@ public class base_test {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         UUID guid = java.util.UUID.randomUUID();
-        String json = curl(role_admin, "POST", "http://54.83.145.18:8080/api/admin?role=" + Role.ROLE_PLAN_1 + "&plan_id=2&devid=HUTOMA_TEST" + guid);
+        String json = curl(role_admin, "POST", "http://54.83.145.18:8080/api/admin?role=" + Role.ROLE_PLAN_1 + "&plan_id=2&devid=API_TEST" + guid);
 
         api_root._myAIs _ai = new api_root._myAIs();
         _ai = gson.fromJson(json,api_root._myAIs.class);
