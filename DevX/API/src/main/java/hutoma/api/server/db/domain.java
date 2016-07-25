@@ -27,7 +27,12 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+<<<<<<< Updated upstream
             String query = " insert into domains (dom_id, name, description, icon, color, available) values (?, ?, ?, ?, ?, ?)";
+=======
+            String query = " insert into domains (dom_id, name, description, icon, color, available)"
+                    + " values (?, ?, ?, ?, ?, ?)";
+>>>>>>> Stashed changes
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, dom_id);
@@ -108,7 +113,11 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+<<<<<<< Updated upstream
             String query = "SELECT * FROM domains WHERE dom_id='"+dom_id+"'";
+=======
+            String query = "SELECT * FROM domain WHERE dom_id='"+dom_id+"'";
+>>>>>>> Stashed changes
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
                 r.dom_id = rs.getString("aiid");
