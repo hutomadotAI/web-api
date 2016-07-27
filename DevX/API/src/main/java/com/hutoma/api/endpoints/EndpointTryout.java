@@ -1,6 +1,8 @@
 package com.hutoma.api.endpoints;
 
 import com.google.inject.Injector;
+import com.hutoma.api.auth.Role;
+import com.hutoma.api.auth.Secured;
 import com.hutoma.api.logic.LogicTest;
 
 import javax.ws.rs.GET;
@@ -23,6 +25,7 @@ public class EndpointTryout extends Endpoint {
     }
 
     @GET
+    @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.TEXT_HTML)
     public String testOut() {
         return guiceInjector.getInstance(LogicTest.class).testOutput("no user");
