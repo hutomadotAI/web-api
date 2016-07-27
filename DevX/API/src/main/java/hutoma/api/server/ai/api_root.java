@@ -94,6 +94,7 @@ public class api_root {
         public boolean available;
     }
 
+<<<<<<< Updated upstream
     public static class _domainList {
 
         public _status status;
@@ -117,6 +118,8 @@ public class api_root {
         public _userAIDomain userAIdomain;
     }
 
+=======
+>>>>>>> Stashed changes
     public static class _integration {
 
         public String id;

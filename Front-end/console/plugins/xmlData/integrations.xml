@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pages>
+  <integration>
+    <name>Cortana</name>
+    <description>Virtual assistant created by Microsoft</description>
+    <icon>cortana.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>Facebook Messenger</name>
+    <description>An easier way to message</description>
+    <icon>messenger.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>Siri</name>
+    <description>Virtual assistant created by Apple</description>
+    <icon>siri.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>Slack</name>
+    <description>A messaging app for teams</description>
+    <icon>slack.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>Telegram</name>
+    <description>A new era of messaging</description>
+    <icon>telegram.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>Twilio</name>
+    <description>Programmable SMS</description>
+    <icon>twilio.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>Webhook</name>
+    <description>A way to plug a web service into your agent</description>
+    <icon>webhook.png</icon>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>WeChat</name>
+    <description>A text and voice messaging communication</description>
+    <icon>wechat.png</icon>
+    <color>bg-red-gradient</color>
+    <active>1</active>
+  </integration>
+  <integration>
+    <name>WhatsApp</name>
+    <description>Cross-platform mobile messaging</description>
+    <icon>whatsapp.png</icon>
+    <active>1</active>
+  </integration>
+</pages>

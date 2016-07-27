@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pages>
+  <domain>
+    <name>Actors</name>
+    <description>Talk with a actor</description>
+    <icon>glyphicon glyphicon-film</icon>
+    <color>bg-maroon-gradient</color>
+    <available>1</available>
+    <active>1</active>
+  </domain>
+  <domain>
+    <name>Apps</name>
+    <description>Open, close, download, remove, search, update, or rate applications</description>
+    <icon>glyphicon glyphicon-phone</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>1</active>
+  </domain>
+  <domain>
+    <name>Authentication</name>
+    <description>Log in/out or sign up for online services</description>
+    <icon>fa fa-user-secret</icon>
+    <color>bg-black-gradient</color>
+    <available>0</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Booking</name>
+    <description>Make reservations at restaurants or hotels</description>
+    <icon>fa fa-hotel</icon>
+    <color>bg-blue-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Calculator</name>
+    <description>Perform basic calculations and conversions</description>
+    <icon>fa fa-calculator</icon>
+    <color>bg-teal-gradient</color>
+    <available>0</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Calendar</name>
+    <description>Work with calendar</description>
+    <icon>fa fa-calendar</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Call</name>
+    <description>Call a number, contact, or venue</description>
+    <icon>fa fa-phone</icon>
+    <color>bg-green-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Device Control</name>
+    <description>Control device’s settings</description>
+    <icon>glyphicon glyphicon-dashboard</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Doctor</name>
+    <description>Talk with a doctor</description>
+    <icon>fa fa-user-md</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Email</name>
+    <description>Compose and read emails</description>
+    <icon>fa fa-envelope-o</icon>
+    <color>bg-teal-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Events</name>
+    <description>Search for events</description>
+    <icon>glyphicon glyphicon-star-empty</icon>
+    <color>bg-purple-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Finance</name>
+    <description>Get stock prices and market reports</description>
+    <icon>glyphicon glyphicon-piggy-bank</icon>
+    <color>bg-green-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Flight Schedules</name>
+    <description>Get flight schedules and statuses</description>
+    <icon>fa fa-plane</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Language Selection</name>
+    <description>Switch between different languages</description>
+    <icon>fa fa-flag-o</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Learning</name>
+    <description>Train the agent to understand new commands and responses</description>
+    <icon>fa fa-graduation-cap</icon>
+    <color>bg-blue-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Manage App</name>
+    <description>Open, close, or update the app</description>
+    <icon>fa fa-gears</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Maps</name>
+    <description>Search in maps</description>
+    <icon>glyphicon glyphicon-globe</icon>
+    <color>bg-green-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Media</name>
+    <description>Control music,video players and radio</description>
+    <icon>fa fa-music</icon>
+    <color>bg-purple-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Messages</name>
+    <description>Compose and read messages</description>
+    <icon>fa fa-send-o</icon>
+    <color>bg-blue-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Navigation</name>
+    <description>Navigate to places</description>
+    <icon>glyphicon glyphicon-road</icon>
+    <color>bg-black-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>News</name>
+    <description>Read news</description>
+    <icon>fa fa-newspaper-o</icon>
+    <color>bg-aqua-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Notes</name>
+    <description>Work with notes</description>
+    <icon>fa fa-edit</icon>
+    <color>bg-teal-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Points of Interest</name>
+    <description>Search for venues</description>
+    <icon>glyphicon glyphicon-map-marker</icon>
+    <color>bg-green-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Reminders and Notifications</name>
+    <description>Work with reminders and notifications</description>
+    <icon>fa fa-bullhorn</icon>
+    <color>bg-blue-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Shopping</name>
+    <description>Search for things to buy</description>
+    <icon>fa fa-shopping-cart</icon>
+    <color>bg-maroon-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Small Talk</name>
+    <description>Make small talk</description>
+    <icon>fa fa-comments-o</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Smart Home</name>
+    <description>Control smart devices</description>
+    <icon>fa fa-home</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Social Networks</name>
+    <description>Work with Twitter and Facebook</description>
+    <icon>fa fa-twitter</icon>
+    <color>bg-aqua-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Sports</name>
+    <description>Get sports scores, stats, schedules, etc.</description>
+    <icon>fa fa-bicycle</icon>
+    <color>bg-teal-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Tasks</name>
+    <description>Work with tasks</description>
+    <icon>fa fa-tasks</icon>
+    <color>bg-blue-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Taxi Search</name>
+    <description>Request a taxi</description>
+    <icon>fa fa-cab</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Time and Dates</name>
+    <description>Work with time and date</description>
+    <icon>glyphicon glyphicon-time</icon>
+    <color>bg-aqua-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Translate</name>
+    <description>Translate text to various languages</description>
+    <icon>fa fa-language</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>TV Listings</name>
+    <description>Get TV listings</description>
+    <icon>fa fa-tv</icon>
+    <color>bg-purple-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>TV Series</name>
+    <description>Get TV series listings</description>
+    <icon>fa fa-ra</icon>
+    <color>bg-red-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Units and Formats</name>
+    <description>Change default formats for units</description>
+    <icon>fa fa-balance-scale</icon>
+    <color>bg-purple-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>User Name and Agent Name</name>
+    <description>Change names of users or agents</description>
+    <icon>glyphicon glyphicon-user</icon>
+    <color>bg-black-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Weather</name>
+    <description>Get weather information</description>
+    <icon>fa fa-sun-o</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Web Browsing</name>
+    <description>Open websites</description>
+    <icon>glyphicon glyphicon-list-alt</icon>
+    <color>bg-yellow-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Web Search</name>
+    <description>Perform web searches</description>
+    <icon>fa fa-search</icon>
+    <color>bg-blue-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+  <domain>
+    <name>Wisdom</name>
+    <description>Ask general knowledge questions</description>
+    <icon>fa fa-university</icon>
+    <color>bg-purple-gradient</color>
+    <available>1</available>
+    <active>0</active>
+  </domain>
+</pages>
