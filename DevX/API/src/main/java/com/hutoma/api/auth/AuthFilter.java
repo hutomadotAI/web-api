@@ -1,7 +1,5 @@
 package com.hutoma.api.auth;
 
-
-import com.google.inject.Injector;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
 import io.jsonwebtoken.Jwts;
@@ -32,15 +30,12 @@ public class AuthFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    @Context
-    private Injector guiceFilter;
-
     private String encoding_key="L0562EMBfnLadKy57nxo9btyi3BEKm9m+DoNvGcfZa+DjHsXwTl+BwCE4NeKEAagfkhYBFvhvJoAgtugSsQOfw==";
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        System.out.println("XXXXXXXXXXXXX: Auth filter guice=" + ((guiceFilter==null)? "null":"nonnull") + " rI:" + resourceInfo.toString());
+        System.out.println("XXXXXXXXXXXXX: Auth filter");
 
         try {
 

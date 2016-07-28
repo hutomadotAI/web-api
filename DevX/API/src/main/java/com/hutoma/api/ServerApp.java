@@ -1,8 +1,5 @@
 package com.hutoma.api;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.hutoma.api.endpoints.EndpointTryout;
 import com.hutoma.api.endpoints.EndpointTryoutTop;
 import com.hutoma.api.auth.AuthFilter;
@@ -13,45 +10,13 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 public class ServerApp extends ResourceConfig {
 
-    Injector guiceInjector;
-
-    public class ServerModule extends AbstractModule {
-
-        @Override
-        protected void configure() {
-        }
-    }
-
     public ServerApp() {
 
-        guiceInjector = Guice.createInjector(new ServerModule());
-        register(new ServerAppBinder(guiceInjector));
+        register(new ServerAppBinder());
         register("org.glassfish.jersey.filter.LoggingFilter;org.glassfish.jersey.media.multipart.MultiPartFeature");
         register(AuthFilter.class);
-        registerInstances(new EndpointTryout(guiceInjector), new EndpointTryoutTop(guiceInjector));
+        registerInstances(new EndpointTryout(), new EndpointTryoutTop());
         //packages(true, "com.hutoma.api");
     }
-    /*
-
-    @Override
-    public Set<Class<?>> getClasses() {
-        Set<Class<?>> classes = new HashSet<>();
-        //classes.add(EndpointTryout.class);
-        classes.add(EndpointTryoutTop.class);
-        return classes;
-    }
-
-    @Override
-    public Set<Object> getSingletons() {
-        Set<Object> singles = new HashSet<>();
-        singles.add(new EndpointTryout(guiceInjector));
-        return singles;
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return super.getProperties();
-    }
-    */
 
 }

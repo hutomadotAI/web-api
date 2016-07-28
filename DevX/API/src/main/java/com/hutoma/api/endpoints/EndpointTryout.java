@@ -1,6 +1,5 @@
 package com.hutoma.api.endpoints;
 
-import com.google.inject.Injector;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
 import com.hutoma.api.logic.LogicTest;
