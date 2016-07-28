@@ -1,8 +1,8 @@
 package hutoma.api.server.ai;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hutoma.api.server.Role;
-import hutoma.api.server.Secured;
+import com.hutoma.api.auth.Role;
+import com.hutoma.api.auth.Secured;
 import hutoma.api.server.db.domain;
 
 import javax.ws.rs.*;

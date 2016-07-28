@@ -2,7 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
 import de.l3s.boilerpipe.extractors.DefaultExtractor;
-import hutoma.api.server.Role;
+import com.hutoma.api.auth.Role;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.db.test;
 import org.junit.AfterClass;
