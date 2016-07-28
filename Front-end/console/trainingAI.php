@@ -64,7 +64,7 @@ function fillSessionVariables($array){
     $_SESSION['ai_language'] = 'COSTANT language';                      // parameter missing
     $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';          // parameter missing
     $_SESSION["ai_confidence"] = '10';                                  // parameter missing
-    $_SESSION['ai_status'] = $array['ai']['ai_status'];                 
+    $_SESSION['ai_status'] = $array['ai']['ai_status'];
     //$_SESSION['ai_training_file'] = $array['ai']['ai_trainingfile'];  // parameter missing
     $_SESSION['current_ai_name'] = $array['ai']['name'];
     $_SESSION['userActivedDomains'] = '';
@@ -118,10 +118,10 @@ function fillSessionVariables($array){
         </li>
         <li><a href="./newAI.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
         <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
+        <li><a href="#"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
+        <li><a href="#"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
         
-        <li><a href="./index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+        <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
         <li class="header">ACTION</li>
         <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
         <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
