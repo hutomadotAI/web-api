@@ -3,27 +3,23 @@ var TRAINING = TRAINING || (function(){
     return {
         init : function(Args) {
             _args = Args;
-            //alert(_args[0]);
-            //alert(_args[1]);
-            //alert(_args[2]);
-
-            showStart(_args[0],_args[1],_args[2]);
+            showStart(_args[0],_args[1]);
             writeScript()
         },
     };
 }());
 
 
-function showStart(status,file,filename){
+function showStart(status,filename){
     var wHTML = "";
     var newNode = document.createElement('div');
     newNode.className = '';
     newNode.id = 'infoTraining';
 
-    if ( file == 0)
-        wHTML += trainingAreaUnchecked(status,file);
+    if ( status == 0)
+        wHTML += trainingAreaUnchecked();
     else
-        wHTML += trainingAreaChecked(status,file,filename);
+        wHTML += trainingAreaChecked(filename);
 
     newNode.innerHTML = wHTML;
     document.getElementById('boxTraining').appendChild(newNode);
@@ -112,7 +108,7 @@ function writeScript(){
 }
 
 
-function trainingAreaUnchecked(status,filename){
+function trainingAreaUnchecked(){
     var wHTML='';
     var msg ='You need upload the training file first.';
 
@@ -142,7 +138,7 @@ function trainingAreaUnchecked(status,filename){
 }
 
 
-function trainingAreaChecked(status,file,filename){
+function trainingAreaChecked(filename){
     var wHTML='';
     var msg ='The last training file is ';
 
