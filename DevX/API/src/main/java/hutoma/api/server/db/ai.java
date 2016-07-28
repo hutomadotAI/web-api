@@ -187,7 +187,7 @@ public class ai {
                 r.created_on = rs.getDate("created_on");
                 r.description = rs.getString("ai_description");
                 r.name = rs.getString("ai_name");
-                //r.ai_training_file = rs.getString("ai_trainingfile");
+                r.ai_training_file = rs.getString("ai_trainingfile");
                 r.is_private = rs.getBoolean("is_private");
                 r.deep_learning_error = rs.getDouble("deep_learning_error");
                 r.training_status = rs.getString("deep_learning_status");
