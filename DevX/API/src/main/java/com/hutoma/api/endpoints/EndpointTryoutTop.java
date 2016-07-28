@@ -11,15 +11,7 @@ import javax.ws.rs.core.MediaType;
  * Created by David MG on 25/07/2016.
  */
 @Path("/")
-public class EndpointTryoutTop extends Endpoint {
-
-    public EndpointTryoutTop() throws Exception {
-        super();
-    }
-
-    public EndpointTryoutTop(Injector guiceInjector) {
-        super(guiceInjector);
-    }
+public class EndpointTryoutTop {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
