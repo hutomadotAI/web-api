@@ -27,6 +27,7 @@
             $_SESSION['ai_training_status'] = 0;
             $_SESSION['ai_status'] = 0;
             $_SESSION['ai_deep_learning_error'] = 0.0;
+            $_SESSION['ai_training_file'] = 0;
 
             $_SESSION['userActivedDomains'] = $_POST['userActivedDomains'];
             $_SESSION['current_ai_name'] = $_SESSION["ai_name"];

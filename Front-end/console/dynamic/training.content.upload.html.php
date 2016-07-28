@@ -10,8 +10,10 @@
 </div>
 
 
-
+<form action="" method="post" enctype="multipart/form-data">
 <script type="text/javascript">
-    TRAINING.init(["<?php echo $_SESSION['ai_status'] ?>","<?php echo $_SESSION['ai_training_file'] ?>","example.txt"]);
+    TRAINING.init(["<?php echo $_SESSION['ai_status'] ?>","<?php echo $_SESSION['ai_training_file'] ?>","<?php echo time().$_SERVER['REMOTE_ADDR'].'.txt'?>"]);
 </script>
+</form>
+
 

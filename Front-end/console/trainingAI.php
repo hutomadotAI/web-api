@@ -42,7 +42,7 @@ function isValuesSessionFilled(){
         isset($_SESSION['ai_description']) &&
         isset($_SESSION['ai_created_on']) &&
         isset($_SESSION['ai_training_status']) &&
-       // isset($_SESSION['ai_status']) &&
+        isset($_SESSION['ai_status']) &&
         isset($_SESSION['ai_deep_learning_error']) &&
         isset($_SESSION['current_ai_name']) &&
         isset($_SESSION['userActivedDomains']);
@@ -60,8 +60,14 @@ function fillSessionVariables($array){
     $_SESSION["ai_description"] = $array['ai']['description'];
     $_SESSION["ai_created_on"] = $array['ai']['created_on'];
     $_SESSION['ai_training_status'] =  $array['ai']['training_status'];
-    $_SESSION['ai_training_file'] = 0;//$array['ai']['ai_training_file'];
-    $_SESSION['ai_status'] = 1;//$array['ai']['ai_status'];
+    echo($array['ai']['ai_trainingfile']);
+    exit;
+    if ( $array['ai']['ai_trainingfile'] != null)
+        $_SESSION['ai_training_file'] = 1;
+    else
+        $_SESSION['ai_training_file'] = 0;
+
+    $_SESSION['ai_status'] = $array['ai']['ai_status'];
     $_SESSION['ai_deep_learning_error'] = $array['ai']['deep_learning_error'];
 
     $_SESSION['current_ai_name'] = $array['ai']['name'];
@@ -89,7 +95,7 @@ function fillSessionVariables($array){
   <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini" id="trainingBody">
 <div class="wrapper">
     <header class="main-header" id="headerID">
       <?php include './dynamic/header.html.php'; ?>
