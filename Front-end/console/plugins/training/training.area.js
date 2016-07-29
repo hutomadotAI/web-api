@@ -26,73 +26,6 @@ function showStart(status,filename){
 }
 
 
-function drawTrainingMoreInfo() {
-    var wHTML = "";
-    wHTML += ('<section class="content bg-gray-light" >');
-
-    wHTML += ('<div class="box-body">');
-    wHTML += ('<dl class="dl-horizontal">');
-    wHTML += ('<dt>Description Actions</dt>');
-    wHTML += ('<dd>Before start training process, y.</dd>');
-    wHTML += ('<dt>Euismod</dt>');
-    wHTML += ('<dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>');
-    wHTML += ('<dd>Donec id elit non mi porta gravida at eget metus.</dd>');
-    wHTML += ('<dt>Malesuada porta</dt>');
-    wHTML += ('<dd>Etiam porta sem malesuada magna mollis euismod.</dd>');
-    wHTML += ('<dt>Felis euismod semper eget lacinia</dt>');
-    wHTML += ('<dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>');
-    wHTML += ('</dl>');
-    wHTML += ('</div>');
-    wHTML += ('</section>');
-    wHTML += ('<p></p>');
-    wHTML +="need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>.";
-
-    return wHTML;
-}
-
-
-function drawRightButtons(status){
-    var wHTML = "";
-    switch (status) {
-        case 0 ://Queued
-            wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> start training');
-            wHTML += ('</div>');
-            break;
-        case 1 ://Training
-            wHTML += ('<div class="btn btn-warning btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> stop training');
-            wHTML += ('</div>');
-            break;
-        case 2 ://Trained
-            wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> start training');
-            wHTML += ('</div>');
-            break;
-        case 3 ://Stopping
-            wHTML += ('<div class="btn btn-warning btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> stop training');
-            wHTML += ('</div>');
-            break;
-        case 4 ://Stopped
-            wHTML += ('<div class="btn btn-primary btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> resume training');
-            wHTML += ('</div>');
-            break;
-        case 5 ://Limited
-            wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id="btnTraining" data-toggle="tooltip" title="you have reach the limit of AIs training"style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> limit reached');
-            wHTML += ('</div>');
-            break;
-        default://Error
-            wHTML += ('<div class="btn btn-danger btn-sm pull-right disabled" id="btnTraining" data-toggle="tooltip" title="Unaspected AI status"style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-warning"></i> training blocked');
-            wHTML += ('</div>');
-    }
-    return wHTML;
-}
-
-
 function writeScript(){
     var wHTML="";
     var script = document.createElement('script');
@@ -218,13 +151,6 @@ function uploadFile(){
 
 function buttonGetMoreInfo(){
     var wHTML="";
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<a data-toggle="collapse"  href="#collapseInfo">');
-    wHTML += ('<div class="btn btn-primary btn-sm pull-right flat" style="margin-right: 5px; width: 120px;">');
-    wHTML += ('<i class="fa fa-download"></i> Get more info');
-    wHTML += ('</div>');
-    wHTML += ('</a>');
-    wHTML += ('</div>');
     wHTML += ('<div id="collapseInfo" class="panel-collapse collapse">');
     wHTML += ('<div class="box-body">');
     wHTML += ('<div class="overlay center-block">');
@@ -236,3 +162,72 @@ function buttonGetMoreInfo(){
     wHTML += ('</div>')
     return wHTML;
 }
+
+
+
+function drawTrainingMoreInfo() {
+    var wHTML = "";
+    wHTML += ('<section class="content bg-gray-light" >');
+
+    wHTML += ('<div class="box-body">');
+    wHTML += ('<dl class="dl-horizontal">');
+    wHTML += ('<dt>Description Actions</dt>');
+    wHTML += ('<dd>Before start training process, y.</dd>');
+    wHTML += ('<dt>Euismod</dt>');
+    wHTML += ('<dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>');
+    wHTML += ('<dd>Donec id elit non mi porta gravida at eget metus.</dd>');
+    wHTML += ('<dt>Malesuada porta</dt>');
+    wHTML += ('<dd>Etiam porta sem malesuada magna mollis euismod.</dd>');
+    wHTML += ('<dt>Felis euismod semper eget lacinia</dt>');
+    wHTML += ('<dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>');
+    wHTML += ('</dl>');
+    wHTML += ('</div>');
+    wHTML += ('</section>');
+    wHTML += ('<p></p>');
+    wHTML +="need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>.";
+
+    return wHTML;
+}
+
+
+function drawRightButtons(status){
+    var wHTML = "";
+    switch (status) {
+        case 0 ://Queued
+            wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-graduation-cap"></i> start training');
+            wHTML += ('</div>');
+            break;
+        case 1 ://Training
+            wHTML += ('<div class="btn btn-warning btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-graduation-cap"></i> stop training');
+            wHTML += ('</div>');
+            break;
+        case 2 ://Trained
+            wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-graduation-cap"></i> start training');
+            wHTML += ('</div>');
+            break;
+        case 3 ://Stopping
+            wHTML += ('<div class="btn btn-warning btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-graduation-cap"></i> stop training');
+            wHTML += ('</div>');
+            break;
+        case 4 ://Stopped
+            wHTML += ('<div class="btn btn-primary btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-graduation-cap"></i> resume training');
+            wHTML += ('</div>');
+            break;
+        case 5 ://Limited
+            wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id="btnTraining" data-toggle="tooltip" title="you have reach the limit of AIs training"style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-graduation-cap"></i> limit reached');
+            wHTML += ('</div>');
+            break;
+        default://Error
+            wHTML += ('<div class="btn btn-danger btn-sm pull-right disabled" id="btnTraining" data-toggle="tooltip" title="Unaspected AI status"style="margin-right: 5px; width: 120px;">');
+            wHTML += ('<i class="fa fa-warning"></i> training blocked');
+            wHTML += ('</div>');
+    }
+    return wHTML;
+}
+
