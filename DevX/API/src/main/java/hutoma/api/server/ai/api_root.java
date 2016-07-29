@@ -103,7 +103,7 @@ public class api_root {
 
     public static class _userAIDomain {
 
-        public String dev_token;
+        public String dev_id;
         public String aiid;
         public String dom_id;
         public boolean active;
