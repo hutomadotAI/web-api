@@ -52,7 +52,7 @@ public class base_test {
         return response.toString();
     }
 
-<<<<<<< Updated upstream
+
 //
 //    private static String parseTrainingFile(ArrayList<String> training) {
 //        String parsedFile="";
@@ -83,8 +83,7 @@ public class base_test {
 //        return  parsedFile;
 //    }
 
-=======
->>>>>>> Stashed changes
+
     @BeforeClass
     public static void init() throws IOException {
 
