@@ -132,7 +132,6 @@ public class domain {
 
     public static boolean delete_domain(String dom_id) {
         try {
-
             String myDriver = "org.gjt.mm.mysql.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
