@@ -1,7 +1,5 @@
 package com.hutoma.api.auth;
 
-import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
 import io.jsonwebtoken.Jwts;
 
 import javax.annotation.Priority;

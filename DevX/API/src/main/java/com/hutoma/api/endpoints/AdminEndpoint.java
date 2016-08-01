@@ -8,17 +8,11 @@ import com.hutoma.api.logic.AdminLogic;
 import hutoma.api.server.AWS.msg;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.utils.utils;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
-import java.util.UUID;
 
 /**
  * Created by David MG on 28/07/2016.
@@ -27,7 +21,7 @@ import java.util.UUID;
 @Secured({Role.ROLE_ADMIN})
 public class AdminEndpoint {
 
-    @Inject AdminLogic adminLogic;
+    @Context AdminLogic adminLogic;
 
     //curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test&role=ROLE_CLIENTONLY
     @POST

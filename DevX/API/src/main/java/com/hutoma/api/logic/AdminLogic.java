@@ -2,20 +2,15 @@ package com.hutoma.api.logic;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hutoma.api.server.AWS.msg;
 import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
-import org.jvnet.hk2.annotations.Contract;
+import org.glassfish.jersey.spi.Contract;
 import org.jvnet.hk2.annotations.Service;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import java.util.UUID;
 
@@ -28,6 +23,10 @@ public class AdminLogic {
 
     public AdminLogic() {
         System.out.println("AdminLogic constructor");
+    }
+
+    public String injectTest() {
+        return "injected";
     }
 
     public String createDev(
