@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 /**
- * Created by Hutoma on 15/07/16.
+ * Created by Hutoma on 15/07/16 .
  */
 
 @Path("/ai/domain")
