@@ -8,6 +8,7 @@
           <element id="module-output" name="Hutoma.API" />
         </element>
         <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: mysql:mysql-connector-java:6.0.3" />
           <element id="library" level="project" name="Maven: com.amazonaws:aws-java-sdk-acm:1.10.74" />
           <element id="library" level="project" name="Maven: com.amazonaws:aws-java-sdk-api-gateway:1.10.74" />
           <element id="library" level="project" name="Maven: com.amazonaws:aws-java-sdk-autoscaling:1.10.74" />
