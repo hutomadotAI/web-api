@@ -20,6 +20,6 @@ public class EndpointTryoutTop {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String testOut() {
-        return "Top Level " + adminLogic.injectTest();
+        return "Top Level X";
     }
 }

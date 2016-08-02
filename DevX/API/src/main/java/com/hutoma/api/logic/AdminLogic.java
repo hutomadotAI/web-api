@@ -1,8 +1,9 @@
 package com.hutoma.api.logic;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.hutoma.api.auth.Role;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.IJsonSerializer;
+import com.hutoma.api.common.IUuidTools;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
@@ -11,6 +12,7 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 import org.glassfish.jersey.spi.Contract;
 import org.jvnet.hk2.annotations.Service;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
 import java.util.UUID;
 
@@ -21,12 +23,13 @@ import java.util.UUID;
 @Service
 public class AdminLogic {
 
-    public AdminLogic() {
-        System.out.println("AdminLogic constructor");
-    }
+    IJsonSerializer jsonSerializer;
+    Config config;
 
-    public String injectTest() {
-        return "injected";
+    @Inject
+    public AdminLogic(Config config, IJsonSerializer jsonSerializer) {
+        this.jsonSerializer = jsonSerializer;
+        this.config = config;
     }
 
     public String createDev(
@@ -43,19 +46,20 @@ public class AdminLogic {
             int planId,
             String dev_id) {
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             api_root._myAIs ai = new api_root._myAIs();
             api_root._status st = new api_root._status();
             st.code = 200;
             st.info ="success";
             ai.status =st;
             ai.dev_token="";
+
             try {
-                String encoding_key = utils.getConfigProp("encoding_key");
-                UUID guid = java.util.UUID.randomUUID();
+                String encoding_key = config.getEncodingKey();
+
 //                String[] ECs;
 //                ECs = utils.getConfigProp("wnet_instances").split(",");
 //                for (String ec:ECs) hutoma.api.server.utils.remotefs.cmd(ec, "mkdir ~/ai/" + devid);
+                
                 String token = Jwts.builder()
                         .claim("ROLE", securityRole)
                         .setSubject(developerID)
@@ -63,12 +67,12 @@ public class AdminLogic {
                         .signWith(SignatureAlgorithm.HS256, encoding_key)
                         .compact();
 
-                String token_client = Jwts.builder()
+                /*String token_client = Jwts.builder()
                         .claim("ROLE", Role.ROLE_CLIENTONLY)
                         .setSubject(developerID)
                         .compressWith(CompressionCodecs.DEFLATE)
                         .signWith(SignatureAlgorithm.HS256, encoding_key)
-                        .compact();
+                        .compact();*/
 
                 ai.dev_token= token;
                 ai.devid = developerID;
@@ -85,8 +89,9 @@ public class AdminLogic {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
-            return gson.toJson(ai);
+            return jsonSerializer.serialize(ai);
     }
+
 /*
    // curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJTY4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test2
     @DELETE
