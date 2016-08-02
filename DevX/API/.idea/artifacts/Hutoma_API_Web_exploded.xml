@@ -8,7 +8,6 @@
           <element id="module-output" name="Hutoma.API" />
         </element>
         <element id="directory" name="lib">
-          <element id="library" level="project" name="Maven: mysql:mysql-connector-java:6.0.3" />
           <element id="library" level="project" name="Maven: com.amazonaws:aws-java-sdk-acm:1.10.74" />
           <element id="library" level="project" name="Maven: com.amazonaws:aws-java-sdk-api-gateway:1.10.74" />
           <element id="library" level="project" name="Maven: com.amazonaws:aws-java-sdk-autoscaling:1.10.74" />
@@ -90,6 +89,7 @@
           <element id="library" level="project" name="Maven: javax.validation:validation-api:1.1.0.Final" />
           <element id="library" level="project" name="Maven: javax.ws.rs:javax.ws.rs-api:2.0.1" />
           <element id="library" level="project" name="Maven: joda-time:joda-time:2.8.1" />
+          <element id="library" level="project" name="Maven: mysql:mysql-connector-java:6.0.3" />
           <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpclient:4.3.6" />
           <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpcore:4.3.3" />
           <element id="library" level="project" name="Maven: org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b34" />
