@@ -1149,56 +1149,7 @@ class console
    * ---------------------
    */
 
-
-  public static function isMyAI($token)
-  {
-    if (self::$loggedIn) {
-      $sql = self::$dbh->prepare("SELECT * FROM `" . self::$config['db']['ai'] . "` WHERE `token` ='" . $token . "' AND `userid` = " . self::$user);
-      $sql->execute();
-      return $sql->rowCount();
-    } else return 0;
-  }
-
-
-
-
-    /*
-  public static function getUserActiveDomains($dev_token)
-  {
-    //if(self::$loggedIn){
-    try {
-      $sql = self::$dbh->prepare("SELECT * FROM `domains`AS d INNER JOIN `userAIDomains` AS u ON u.dom_id = d.dom_id WHERE `dev_token` = " . $dev_token);
-      $sql->execute();
-    } catch (MySQLException $e) {
-      $e->getMessage();
-      $output = 'Query - sql user active AI domains error' . $e;
-      include 'output.html.php';
-      exit();
-    }
-    return $sql->fetchAll();
-    //}
-    //else return 0;  
-  }
-
-
-    /*
-  public static function deactiveUserDomain($id, $aiid, $domid)
-  {
-    //if(self::$loggedIn){
-    try {
-      $sql = self::$dbh->prepare("DELETE FROM `userAIDomains` WHERE `id` =" . $id . " AND `aiid` ='" . $aiid . "' AND `domid` = " . $domid);
-      $sql->execute();
-    } catch (MySQLException $e) {
-      $e->getMessage();
-      $output = 'Query - sql user deactive domains sql error' . $e;
-      include 'output.html.php';
-      exit();
-    }
-    return $sql->fetchAll();
-      
-  }
-*/
-
+  
   // FOR API
   public static function createAI($dev_token,$name,$description,$private, $condifence,$language,$timezone){
       if (self::$loggedIn) {
@@ -1331,32 +1282,6 @@ class console
     }
   }
 
-
-  // FOR API
-  public static function getDomains($dev_token){
-      if (self::$loggedIn) {
-        $path = 'api/ai/domain';
-        $curl = curl_init();
-
-        curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-        $curl_response = curl_exec($curl);
-
-        if ($curl_response === false) {
-          $info = curl_getinfo($curl);
-          curl_close($curl);
-          die('Error: getDomains curl');
-        }
-        $json_response = json_decode($curl_response, true);
-        curl_close($curl);
-        return $json_response;
-    }
-  }
-
-
   // FOR API
   public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
     if (self::$loggedIn) {
@@ -1381,13 +1306,37 @@ class console
       }
       $json_response = json_decode($curl_response, true);
       curl_close($curl);
-      
+
       return $json_response;
-      
+
+    }
+  }
+
+
+  // FOR API
+  public static function getDomains($dev_token){
+      if (self::$loggedIn) {
+        $path = 'api/ai/domain';
+        $curl = curl_init();
+
+        curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+        $curl_response = curl_exec($curl);
+
+        if ($curl_response === false) {
+          $info = curl_getinfo($curl);
+          curl_close($curl);
+          die('Error: getDomains curl');
+        }
+        $json_response = json_decode($curl_response, true);
+        curl_close($curl);
+        return $json_response;
     }
   }
   
-
   // FAKE
   public static function getDevToken(){
         if (self::$loggedIn) {
@@ -1417,12 +1366,12 @@ class console
 
 
     // FOR API STORED PROCEDURE - da cambiare per gli sviluppatori
-    public static function insertUserActiveDomain($dev_token, $aiid, $dom_id, $active){
+    public static function insertUserActiveDomain($dev_id, $aiid, $dom_id, $active){
         if(self::$loggedIn) {
             try {
                 $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
 
-                $sql->bindValue(1, $dev_token, \PDO::PARAM_STR);
+                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
                 $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
                 $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
                 $sql->bindValue(4, $active, \PDO::PARAM_BOOL);
@@ -1438,10 +1387,10 @@ class console
     }
 
 // FAKE
-    public static function getDomains_and_UserActiveDomains($dev_token,$aiid){
+    public static function getDomains_and_UserActiveDomains($dev_id,$aiid){
         if(self::$loggedIn){
             try {
-                $sql = self::$dbh->prepare("SELECT * FROM `domains` AS d LEFT OUTER JOIN ( SELECT * FROM `userAIDomains` WHERE `dev_token` = \"". $dev_token . "\" AND  `aiid`= \"". $aiid . "\" ) AS u ON u.dom_id = d.dom_id");
+                $sql = self::$dbh->prepare("SELECT * FROM `domains` AS d LEFT OUTER JOIN ( SELECT * FROM `userAIDomains` WHERE `dev_id` = \"". $dev_id . "\" AND  `aiid`= \"". $aiid . "\" ) AS u ON u.dom_id = d.dom_id");
                 $sql->execute();
             } catch (MySQLException $e) {
                 $e->getMessage();

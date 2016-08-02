@@ -13,14 +13,16 @@
 
     $dev_token = \hutoma\console::getDevToken();
     $response = hutoma\console::createAI( $dev_token, $_SESSION['ai_name'], $_SESSION['ai_description'], $_SESSION['ai_private'], $_SESSION['ai_confidence'], $_SESSION['ai_language'], $_SESSION['ai_timezone']);
+    unset($dev_token);
 
     if ($response['status']['code'] === 200) {
         if (isset($_POST['userActivedDomains'])) {
 
             $userActivedList = json_decode($_POST['userActivedDomains'], true);
 
+            $details = \hutoma\console::getUser();
             foreach ($userActivedList as $key => $value)
-                \hutoma\console::insertUserActiveDomain($dev_token, $response['aiid'], $key, $userActivedList[$key]);
+                \hutoma\console::insertUserActiveDomain($_SESSION['dev_id'] , $response['aiid'], $key, $userActivedList[$key]);
 
             $_SESSION['aiid'] = $response['aiid'];
             $_SESSION['ai_created_on'] = '';
@@ -34,7 +36,7 @@
             $_SESSION['current_ai_name'] = $_SESSION["ai_name"];
             unset($userActivedList);
         } else{
-            unset($dev_token);
+
             unset($response);
             header('Location: ./error.php?err=4');
             exit();
@@ -60,6 +62,7 @@ function isValuesSessionInputFilled(){
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_description']) ;
+        isset($_SESSION['ai_description']) &&
+        isset($_SESSION['dev_id']);
 }
 ?>

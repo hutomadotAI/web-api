@@ -19,7 +19,6 @@ function generateSession(){
     $dev_token = \hutoma\console::getDevToken();
     $array = \hutoma\console::getSingleAI($dev_token,$_POST['aiid']);
     unset($dev_token);
-
     if ($array['status']['code']===200) {
         fillSessionVariables($array);
     }
@@ -45,7 +44,7 @@ function isValuesSessionFilled(){
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
-        //isset($_SESSION['ai_status']) &&
+        isset($_SESSION['ai_status']) &&
         //isset($_SESSION['ai_training_file']) &&                       // parameter missing
         isset($_SESSION['current_ai_name']) &&
         isset($_SESSION['userActivedDomains']);
@@ -64,7 +63,7 @@ function fillSessionVariables($array){
     $_SESSION['ai_language'] = 'COSTANT language';                      // parameter missing
     $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';          // parameter missing
     $_SESSION["ai_confidence"] = '10';                                  // parameter missing
-    //$_SESSION['ai_status'] = $array['ai']['ai_status'];
+    $_SESSION['ai_status'] = $array['ai']['ai_status'];
     //$_SESSION['ai_training_file'] = $array['ai']['ai_trainingfile'];  // parameter missing
     $_SESSION['current_ai_name'] = $array['ai']['name'];
     $_SESSION['userActivedDomains'] = '';

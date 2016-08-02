@@ -26,6 +26,65 @@ function showStart(status,filename){
 }
 
 
+function trainingAreaUnchecked(){
+    var wHTML='';
+    var msg ='You need upload the training file first.';
+
+    wHTML += htmlSectionInputFileUpload(false);
+    wHTML += htmlSectionButtonUpload(msg,false);
+    wHTML += buttonGetMoreInfo();
+
+    return wHTML;
+}
+
+function trainingAreaChecked(filename){
+    var wHTML='';
+    var msg ='The last training file is '+filename;
+
+    wHTML += htmlSectionInputFileUpload(true);
+    wHTML += htmlSectionButtonUpload(msg,true);
+    wHTML += buttonGetMoreInfo();
+
+    return wHTML;
+}
+
+
+function htmlSectionInputFileUpload(check){
+    var wHTML='';
+    wHTML += ('<div class="btn-group pull-left">');
+    if(check)
+        wHTML += ('<i class=" fa fa-check-circle-o text-md text-success" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
+    else
+        wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
+    wHTML += ('</div>');
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<input type="file" id="inputfile" name="inputname" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
+    wHTML += ('</div>');
+    return wHTML;
+}
+
+
+function htmlSectionButtonUpload(msg,check) {
+    var wHTML='';
+    wHTML += ('<div class="btn-group pull-left">');
+    if(check)
+        wHTML += ('<i class="fa fa-check-circle-o text-md text-success" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
+    else
+        wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
+    wHTML += ('<div id="msgUpload" style="display:inline;">');
+    wHTML += (msg);
+
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+    wHTML += ('<div class="box-header">');
+    wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload"  onClick="uploadFile()" style="margin-right: 5px; width: 120px;">');
+    wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+    return wHTML;
+}
+
+
 function writeScript(){
     var wHTML="";
     var script = document.createElement('script');
@@ -40,66 +99,6 @@ function writeScript(){
     document.getElementsByTagName('head')[0].appendChild(script);
 }
 
-
-function trainingAreaUnchecked(){
-    var wHTML='';
-    var msg ='You need upload the training file first.';
-
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<input type="file" id="inputfile" name="inputname" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
-    wHTML += ('<div id="msgUpload" style="display:inline;">');
-    wHTML += (msg);
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload"  onClick="uploadFile()" style="margin-right: 5px; width: 120px;">');
-    wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    wHTML += buttonGetMoreInfo();
-    return wHTML;
-}
-
-
-function trainingAreaChecked(filename){
-    var wHTML='';
-    var msg ='The last training file is ';
-
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class=" fa fa-check-circle-o text-md text-success" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<input type="file" id="inputfile" name="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="btn-group pull-left">');
-    wHTML += ('<i class="fa fa-check-circle-o text-md text-success" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
-    wHTML += ('<div id="msgUpload" style="display:inline;">');
-    wHTML += (msg+'<label>'+filename+'</label>');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload" onClick="uploadFile()"; style="margin-right: 5px; width: 120px;">');
-    wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    wHTML += buttonGetMoreInfo();
-
-    return wHTML;
-}
 
 
 function changeUIState(){

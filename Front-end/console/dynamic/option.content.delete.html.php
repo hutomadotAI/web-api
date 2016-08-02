@@ -21,7 +21,7 @@
 
 <div id="collapseDelete" class="panel-collapse collapse">
 <div class="box-body">
-      <div class="overlay center-block">
+      <div class="overlay center-block"  style="max-width: 800px;">
       <section class="invoice bg-yellow disabled color-palette">
             <div class="row">
                   <div class="col-xs-12 center-block text-center">

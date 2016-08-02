@@ -4,6 +4,7 @@
     $details = \hutoma\console::getUser();
     $_SESSION['user_name'] = $details['name'];
     $_SESSION['user_plan'] = $details['plan_id'];
+    $_SESSION['dev_id'] = $details['dev_id'];
     $_SESSION['user_joined'] = \hutoma\console::joinedSince($details);
     unset($details);
 
