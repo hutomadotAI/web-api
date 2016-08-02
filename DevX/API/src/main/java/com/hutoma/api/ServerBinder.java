@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.GsonSerializer;
 import com.hutoma.api.common.IJsonSerializer;
+import com.hutoma.api.connectors.Database;
 import com.hutoma.api.logic.AdminLogic;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
@@ -17,5 +18,6 @@ public class ServerBinder extends AbstractBinder {
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(GsonSerializer.class).to(IJsonSerializer.class);
         bind(Config.class).to(Config.class);
+        bind(Database.class).to(Database.class);
     }
 }

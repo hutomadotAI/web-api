@@ -4,6 +4,7 @@ import com.hutoma.api.auth.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.IJsonSerializer;
 import com.hutoma.api.common.IUuidTools;
+import com.hutoma.api.connectors.Database;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
@@ -23,13 +24,15 @@ import java.util.UUID;
 @Service
 public class AdminLogic {
 
-    IJsonSerializer jsonSerializer;
     Config config;
+    IJsonSerializer jsonSerializer;
+    Database database;
 
     @Inject
-    public AdminLogic(Config config, IJsonSerializer jsonSerializer) {
-        this.jsonSerializer = jsonSerializer;
+    public AdminLogic(Config config, IJsonSerializer jsonSerializer, Database database) {
         this.config = config;
+        this.jsonSerializer = jsonSerializer;
+        this.database = database;
     }
 
     public String createDev(
@@ -56,10 +59,6 @@ public class AdminLogic {
             try {
                 String encoding_key = config.getEncodingKey();
 
-//                String[] ECs;
-//                ECs = utils.getConfigProp("wnet_instances").split(",");
-//                for (String ec:ECs) hutoma.api.server.utils.remotefs.cmd(ec, "mkdir ~/ai/" + devid);
-                
                 String token = Jwts.builder()
                         .claim("ROLE", securityRole)
                         .setSubject(developerID)
@@ -67,23 +66,14 @@ public class AdminLogic {
                         .signWith(SignatureAlgorithm.HS256, encoding_key)
                         .compact();
 
-                /*String token_client = Jwts.builder()
-                        .claim("ROLE", Role.ROLE_CLIENTONLY)
-                        .setSubject(developerID)
-                        .compressWith(CompressionCodecs.DEFLATE)
-                        .signWith(SignatureAlgorithm.HS256, encoding_key)
-                        .compact();*/
-
                 ai.dev_token= token;
                 ai.devid = developerID;
 
-                if (!hutoma.api.server.db.ai.create_dev(username, email, password, passwordSalt, name, attempt, ai.dev_token, planId, ai.devid))
-                {
+                if (!database.createDev(username, email, password, passwordSalt, name, attempt, ai.dev_token, planId, ai.devid)) {
                     st.code = 500;
                     st.info = "Internal Server Error.";
                 }
 
-                //localfs.createFolder(System.getProperty("user.home")+"/ai/" + devid);
             }
             catch (Exception e){
                 st.code = 500;
