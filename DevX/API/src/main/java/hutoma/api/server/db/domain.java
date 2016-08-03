@@ -27,6 +27,7 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+
             String query = " insert into domains (dom_id, name, description, icon, color, available) values (?, ?, ?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
@@ -108,7 +109,9 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+
             String query = "SELECT * FROM domains WHERE dom_id='"+dom_id+"'";
+
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
                 r.dom_id = rs.getString("aiid");
