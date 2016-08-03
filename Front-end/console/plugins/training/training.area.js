@@ -3,33 +3,27 @@ var TRAINING = TRAINING || (function(){
     return {
         init : function(Args) {
             _args = Args;
-
-            _args[0]=0;
-            _args[1]=0;
-
-            showStart(_args[0],_args[1],_args[2]);
+            showStart(_args[0],_args[1]);
             writeScript()
         },
     };
 }());
 
 
-function showStart(status,file,filename){
+function showStart(status,filename){
     var wHTML = "";
     var newNode = document.createElement('div');
     newNode.className = '';
     newNode.id = 'infoTraining';
 
-    if ( file == 0)
-        wHTML += trainingAreaUnchecked(status,file);
+    if ( status == 0)
+        wHTML += trainingAreaUnchecked();
     else
-        wHTML += trainingAreaChecked(status,file,filename);
+        wHTML += trainingAreaChecked(filename);
 
     newNode.innerHTML = wHTML;
     document.getElementById('boxTraining').appendChild(newNode);
 }
-
-
 
 
 function drawTrainingMoreInfo() {
@@ -114,7 +108,7 @@ function writeScript(){
 }
 
 
-function trainingAreaUnchecked(status,file,filename){
+function trainingAreaUnchecked(){
     var wHTML='';
     var msg ='You need upload the training file first.';
 
@@ -123,7 +117,7 @@ function trainingAreaUnchecked(status,file,filename){
     wHTML += ('</div>');
 
     wHTML += ('<div class="box-header">');
-    wHTML += ('<input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
+    wHTML += ('<input type="file" id="inputfile" name="inputname" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
     wHTML += ('</div>');
 
     wHTML += ('<div class="btn-group pull-left">');
@@ -144,7 +138,7 @@ function trainingAreaUnchecked(status,file,filename){
 }
 
 
-function trainingAreaChecked(status,file,filename){
+function trainingAreaChecked(filename){
     var wHTML='';
     var msg ='The last training file is ';
 
@@ -153,7 +147,7 @@ function trainingAreaChecked(status,file,filename){
     wHTML += ('</div>');
 
     wHTML += ('<div class="box-header">');
-    wHTML += ('<input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
+    wHTML += ('<input type="file" id="inputfile" name="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
     wHTML += ('</div>');
 
     wHTML += ('<div class="btn-group pull-left">');
@@ -176,7 +170,6 @@ function trainingAreaChecked(status,file,filename){
 
 
 function changeUIState(){
-
     $("#btnUpload").attr("disabled", false);
     $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
     $('#iconUpload').removeClass('fa fa-exclamation-circle text-md text-danger').addClass('fa fa-check-circle-o text-md text-success');
@@ -185,14 +178,42 @@ function changeUIState(){
     document.getElementById("msgUpload").textContent='Now you can upload your file';
 }
 
+
 function uploadFile(){
     var isDisabled =  $('#btnUpload').attr('class') == 'btn btn-success btn-sm pull-right flat';
     if (isDisabled) {
-        setTimeout(2000);
-        document.getElementById("msgUpload").textContent = 'File uploaded.';
+
+        var xmlhttp;
+        var file_data = new FormData();
+        file_data.append("inputfile", document.getElementById('inputfile').files[0]);
+
+        if (window.XMLHttpRequest)
+            xmlhttp = new XMLHttpRequest();
+        else
+            xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+
+        xmlhttp.open('POST','upload.php');
+
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var JSONresponse = xmlhttp.responseText;
+
+                var JSONdata = JSON.parse(JSONresponse);
+                if(JSONdata['status']['code'] === 200)
+                    document.getElementById("msgUpload").textContent = 'File uploaded!!';
+                else
+                    document.getElementById("msgUpload").textContent = 'Something is gone wrong. File NOT uploaded.';
+                $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
+                $('#trainingBody').css("cursor", "default");
+                $('#btnUpload').css("cursor", "pointer");
+            }
+        };
+        $('#trainingBody').css("cursor", "progress");
+        $('#btnUpload').css("cursor", "progress");
+        $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat').addClass('btn btn-success btn-sm pull-right flat disabled');
+        xmlhttp.send(file_data);
     }
 }
-
 
 
 function buttonGetMoreInfo(){
@@ -215,6 +236,3 @@ function buttonGetMoreInfo(){
     wHTML += ('</div>')
     return wHTML;
 }
-
-
-

@@ -125,6 +125,4 @@ public class api_root {
         public String icon;
         public boolean available;
     }
-
-
 }

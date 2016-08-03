@@ -35,35 +35,37 @@ function isValuesSessionFilled(){
     return
         isset($_SESSION['aiid']) &&
         isset($_SESSION['ai_name']) &&
+        isset($_SESSION['ai_description']) &&
+        isset($_SESSION['ai_created_on']) &&
         isset($_SESSION['ai_private']) &&
+        isset($_SESSION['ai_deep_learning_error']) &&
+        isset($_SESSION["ai_training_debug_info"]) &&
+        isset($_SESSION['ai_training_status']) &&
+
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_description']) &&
-        isset($_SESSION['ai_created_on']) &&
-        isset($_SESSION['ai_training_status']) &&
-       // isset($_SESSION['ai_status']) &&
-        isset($_SESSION['ai_deep_learning_error']) &&
+        //isset($_SESSION['ai_status']) &&
+        //isset($_SESSION['ai_training_file']) &&                       // parameter missing
         isset($_SESSION['current_ai_name']) &&
         isset($_SESSION['userActivedDomains']);
 }
 
 function fillSessionVariables($array){
-
     $_SESSION['aiid'] = $array['ai']['aiid'];
-
     $_SESSION['ai_name'] = $array['ai']['name'];
-    $_SESSION['ai_private'] = $array['ai']['is_private'];
-    $_SESSION['ai_language'] = 'COSTANT language';
-    $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';
-    $_SESSION["ai_confidence"] = '10';
     $_SESSION["ai_description"] = $array['ai']['description'];
     $_SESSION["ai_created_on"] = $array['ai']['created_on'];
-    $_SESSION['ai_training_status'] =  $array['ai']['training_status'];
-    $_SESSION['ai_training_file'] = 0;//$array['ai']['ai_training_file'];
-    $_SESSION['ai_status'] = 1;//$array['ai']['ai_status'];
+    $_SESSION['ai_private'] = $array['ai']['is_private'];
     $_SESSION['ai_deep_learning_error'] = $array['ai']['deep_learning_error'];
+    $_SESSION["ai_training_debug_info"] = $array['ai']["training_debug_info"];
+    $_SESSION['ai_training_status'] =  $array['ai']['training_status'];
 
+    $_SESSION['ai_language'] = 'COSTANT language';                      // parameter missing
+    $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';          // parameter missing
+    $_SESSION["ai_confidence"] = '10';                                  // parameter missing
+    //$_SESSION['ai_status'] = $array['ai']['ai_status'];
+    //$_SESSION['ai_training_file'] = $array['ai']['ai_trainingfile'];  // parameter missing
     $_SESSION['current_ai_name'] = $array['ai']['name'];
     $_SESSION['userActivedDomains'] = '';
 }
@@ -89,7 +91,7 @@ function fillSessionVariables($array){
   <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini" id="trainingBody">
 <div class="wrapper">
     <header class="main-header" id="headerID">
       <?php include './dynamic/header.html.php'; ?>
@@ -116,10 +118,10 @@ function fillSessionVariables($array){
         </li>
         <li><a href="./newAI.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
         <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
+        <li><a href="#"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
+        <li><a href="#"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
         
-        <li><a href="./index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+        <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
         <li class="header">ACTION</li>
         <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
         <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>

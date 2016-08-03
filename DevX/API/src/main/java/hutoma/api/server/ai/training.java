@@ -142,7 +142,7 @@ public class training {
                     hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("sqs_DG"),msg.preprocess_training_text+"|"+devid+"|"+aiid);
                     break;
 
-                // 1 = trainig file is a webpage
+                // 2 = trainig file is a webpage
                 case 2:
                     URL _url = new URL(url);
                     ai.update_ai_training_file(aiid,inputSanitizer(ArticleExtractor.INSTANCE.getText(url)));

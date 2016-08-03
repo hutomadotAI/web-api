@@ -1200,112 +1200,111 @@ class console
 */
 
   // FOR API
-    public static function createAI($dev_token,$name,$description,$private, $condifence,$language,$timezone){
-        if (self::$loggedIn) {
-            $path = 'api/ai';
-            $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);
-            $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
-
-            $curl = curl_init();
-
-            curl_setopt($curl, CURLOPT_URL, $service_url);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($curl, CURLOPT_POST, true);
-
-            $curl_response = curl_exec($curl);
-
-            if ($curl_response === false) {
-                $info = curl_getinfo($curl);
-                curl_close($curl);
-                die('Error: createAI curl');
-            }
-            $json_response = json_decode($curl_response, true);
-            curl_close($curl);
-            return $json_response;
-        }
-    }
-
-
-    // FOR API
-    public static function getAIs($dev_token){
-        if (self::$loggedIn) {
-            $path = 'api/ai';
-            $curl = curl_init();
-
-            curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-            $curl_response = curl_exec($curl);
-          
-            if ($curl_response === false) {
-                $info = curl_getinfo($curl);
-                curl_close($curl);
-                die('Error: getAIs curl');
-            }
-            $json_response = json_decode($curl_response, true);
-            curl_close($curl);
-            return $json_response;
-        }
-    }
-
-    // FOR API
-    public static function getSingleAI($dev_token,$aiid){
+  public static function createAI($dev_token,$name,$description,$private, $condifence,$language,$timezone){
       if (self::$loggedIn) {
-        $path = 'api/ai/'.$aiid;
-        $service_url = self::$api_request_url.$path;
+          $path = 'api/ai';
+          $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);
+          $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
-        $curl = curl_init();
+          $curl = curl_init();
 
-        curl_setopt($curl, CURLOPT_URL, $service_url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+          curl_setopt($curl, CURLOPT_URL, $service_url);
+          curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+          curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+          curl_setopt($curl, CURLOPT_POST, true);
 
-        $curl_response = curl_exec($curl);
+          $curl_response = curl_exec($curl);
 
-        if ($curl_response === false) {
-          $info = curl_getinfo($curl);
+          if ($curl_response === false) {
+              $info = curl_getinfo($curl);
+              curl_close($curl);
+              die('Error: createAI curl');
+          }
+          $json_response = json_decode($curl_response, true);
           curl_close($curl);
-          die('Error: getSingleAI curl');
-        }
-        $json_response = json_decode($curl_response, true);
-        curl_close($curl);
-        return $json_response;
+          return $json_response;
       }
-    }
+  }
 
-    // FOR API
-    public static function deleteAI($dev_token,$aiid)
-    {
+
+  // FOR API
+  public static function getAIs($dev_token){
       if (self::$loggedIn) {
-        $path = 'api/ai/'.$aiid;
-        $service_url = self::$api_request_url.$path;
+          $path = 'api/ai';
+          $curl = curl_init();
 
-        $curl = curl_init();
+          curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
+          curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+          curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
-        curl_setopt($curl, CURLOPT_URL, $service_url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+          $curl_response = curl_exec($curl);
 
-        $curl_response = curl_exec($curl);
-
-        if ($curl_response === false) {
-          $info = curl_getinfo($curl);
+          if ($curl_response === false) {
+              $info = curl_getinfo($curl);
+              curl_close($curl);
+              die('Error: getAIs curl');
+          }
+          $json_response = json_decode($curl_response, true);
           curl_close($curl);
-          die('Error: deletAI curl');
-        }
-        $json_response = json_decode($curl_response, true);
-        curl_close($curl);
-        return $json_response;
+          return $json_response;
       }
-    }
+  }
 
+  // FOR API
+  public static function getSingleAI($dev_token,$aiid){
+    if (self::$loggedIn) {
+      $path = 'api/ai/'.$aiid;
+      $service_url = self::$api_request_url.$path;
+      $curl = curl_init();
+
+      curl_setopt($curl, CURLOPT_URL, $service_url);
+      curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+      $curl_response = curl_exec($curl);
+
+      if ($curl_response === false) {
+        $info = curl_getinfo($curl);
+        curl_close($curl);
+        die('Error: getSingleAI curl');
+      }
+      $json_response = json_decode($curl_response, true);
+      curl_close($curl);
+      return $json_response;
+    }
+  }
+
+  // FOR API
+  public static function deleteAI($dev_token,$aiid)
+  {
+    if (self::$loggedIn) {
+      $path = 'api/ai/'.$aiid;
+      $service_url = self::$api_request_url.$path;
+      $curl = curl_init();
+
+      curl_setopt($curl, CURLOPT_URL, $service_url);
+      curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+
+      $curl_response = curl_exec($curl);
+
+      if ($curl_response === false) {
+        $info = curl_getinfo($curl);
+        curl_close($curl);
+        die('Error: deletAI curl');
+      }
+      $json_response = json_decode($curl_response, true);
+      curl_close($curl);
+      return $json_response;
+    }
+  }
+
+  // FOR API
   public static function chatAI($dev_token,$aiid,$uid,$q,$history,$fs,$min_p)
   {
     if (self::$loggedIn) {
@@ -1314,7 +1313,6 @@ class console
       $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
       $curl = curl_init();
-
       curl_setopt($curl, CURLOPT_URL, $service_url);
       curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -1358,6 +1356,37 @@ class console
     }
   }
 
+
+  // FOR API
+  public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
+    if (self::$loggedIn) {
+      $path = 'api/ai/'.$aiid.'/training';
+
+      $filename = $file['tmp_name'];
+      $args['file'] = new \CurlFile($filename, 'text/plain','postfilename.txt');
+      $curl = curl_init();
+
+      curl_setopt($curl, CURLOPT_POST,true);
+      curl_setopt($curl, CURLOPT_POSTFIELDS, $args);
+      curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
+      curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+      $curl_response = curl_exec($curl);
+      if ($curl_response === false) {
+        $info = curl_getinfo($curl);
+        curl_close($curl);
+        die('Error: uploadfile curl');
+      }
+      $json_response = json_decode($curl_response, true);
+      curl_close($curl);
+      
+      return $json_response;
+      
+    }
+  }
+  
 
   // FAKE
   public static function getDevToken(){
