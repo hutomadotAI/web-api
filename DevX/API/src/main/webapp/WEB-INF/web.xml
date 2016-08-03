@@ -9,6 +9,11 @@
            <param-name>javax.ws.rs.Application</param-name>
            <param-value>com.hutoma.api.ServerApp</param-value>
        </init-param>
+       <!--init-param>
+           <param-name>jersey.config.server.provider.classnames</param-name>
+           <param-value>org.glassfish.jersey.filter.LoggingFilter</param-value>
+       </init-param -->
+
        <!-- init-param>
            <param-name>jersey.config.server.provider.packages</param-name>
            <param-value>
