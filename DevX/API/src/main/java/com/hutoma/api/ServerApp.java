@@ -10,7 +10,17 @@ public class ServerApp extends ResourceConfig {
 
     public ServerApp() {
         System.out.println("ServerApp constructor");
+
+        // HK2 DI Binder (service locator)
         register(new ServerBinder());
-        packages(true, "com.hutoma.api.endpoints");
+
+        // authorization filter
+        packages(false, "com.hutoma.api.auth");
+
+        // endpoints
+        packages(false, "com.hutoma.api.endpoints");
+
+        // old namespace. this will enable endpoints that have not yet been migrated to the new.
+        //packages(true, "hutoma.api.server.ai");
     }
 }

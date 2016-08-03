@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 @Secured
 @Provider
 @Priority(Priorities.AUTHENTICATION)
