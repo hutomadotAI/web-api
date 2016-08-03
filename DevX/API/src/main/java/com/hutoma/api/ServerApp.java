@@ -1,6 +1,7 @@
 package com.hutoma.api;
 
 
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -14,6 +15,9 @@ public class ServerApp extends ResourceConfig {
         // HK2 DI Binder (service locator)
         register(new ServerBinder());
 
+        // for upload support
+        register(MultiPartFeature.class);
+
         // authorization filter
         packages(false, "com.hutoma.api.auth");
 
@@ -21,6 +25,6 @@ public class ServerApp extends ResourceConfig {
         packages(false, "com.hutoma.api.endpoints");
 
         // old namespace. this will enable endpoints that have not yet been migrated to the new.
-        //packages(true, "hutoma.api.server.ai");
+        packages(true, "hutoma.api.server.ai");
     }
 }
