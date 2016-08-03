@@ -1,6 +1,7 @@
-package hutoma.api.server;
+package com.hutoma.api.auth;
 
-
+import com.hutoma.api.auth.Role;
+import com.hutoma.api.auth.Secured;
 import io.jsonwebtoken.Jwts;
 
 import javax.annotation.Priority;
@@ -33,6 +34,8 @@ public class AuthFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+
+        System.out.println("XXXXXXXXXXXXX: Auth filter");
 
         try {
 
