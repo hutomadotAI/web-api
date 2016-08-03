@@ -2,9 +2,9 @@ package hutoma.api.server.ai;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hutoma.api.server.AWS.msg;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
+import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.db.RNN;
 import hutoma.api.server.dispatcher;
 import hutoma.api.server.utils.utils;
@@ -35,7 +35,7 @@ public class chat extends api_root {
 
         // if the RNN network is not active, then push a message to get it activated
         if (!RNN.is_RNN_active(dev_id,aiid))
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"), msg.start_RNN + "|" + dev_id + "|" + aiid);
+            MessageQueue.push_msg(utils.getConfigProp("core_queue"), MessageQueue.AwsMessage.start_RNN + "|" + dev_id + "|" + aiid);
 
         long qid = hutoma.api.server.db.RNN.insertQuestion(dev_id,uid,aiid,q);
         if (qid<0) return  answer;

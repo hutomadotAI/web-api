@@ -9,4 +9,10 @@ public class Database {
         return hutoma.api.server.db.ai.create_dev(username, email, password, passwordSalt, name, attempt, dev_token, planId, devid);
     }
 
+    public boolean deleteDev(String devid) {
+        return hutoma.api.server.db.dev.delete_dev(devid);
+    }
+
+
+
 }

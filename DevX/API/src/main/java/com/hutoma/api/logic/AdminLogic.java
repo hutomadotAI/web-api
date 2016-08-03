@@ -1,12 +1,10 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.auth.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.IJsonSerializer;
-import com.hutoma.api.common.IUuidTools;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.ai.api_root;
-import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -15,7 +13,6 @@ import org.jvnet.hk2.annotations.Service;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.UUID;
 
 /**
  * Created by mauriziocibelli on 27/04/16.
@@ -27,12 +24,14 @@ public class AdminLogic {
     Config config;
     IJsonSerializer jsonSerializer;
     Database database;
+    MessageQueue messageQueue;
 
     @Inject
-    public AdminLogic(Config config, IJsonSerializer jsonSerializer, Database database) {
+    public AdminLogic(Config config, IJsonSerializer jsonSerializer, Database database, MessageQueue messageQueue) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
+        this.messageQueue = messageQueue;
     }
 
     public String createDev(
@@ -75,42 +74,34 @@ public class AdminLogic {
                 }
 
             }
-            catch (Exception e){
+            catch (Exception e) {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
             return jsonSerializer.serialize(ai);
     }
 
-/*
-   // curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJTY4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test2
-    @DELETE
-    @Secured({Role.ROLE_ADMIN})
-    @Produces(MediaType.APPLICATION_JSON)
-    public String delete_dev(
-            @Context SecurityContext securityContext,
-            @DefaultValue("") @QueryParam("devid") String devid) {
+    public String deleteDev(
+            SecurityContext securityContext,
+            String devid) {
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         api_root._newai ai = new api_root._newai();
         api_root._status st = new api_root._status();
         st.code = 200;
         st.info ="success";
-        ai.status =st;
-        try {
+        ai.status = st;
 
-            if (!hutoma.api.server.db.dev.delete_dev(devid))
-            {
+        try {
+            if (!database.deleteDev(devid)) {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.delete_dev + "|" + devid + "|000");
+            messageQueue.pushMessageDeleteDev(config, devid);
         }
         catch (Exception e){
             st.code = 500;
             st.info = "Internal Server Error.";
         }
-        return gson.toJson(ai);
+        return jsonSerializer.serialize(ai);
     }
-*/
 }

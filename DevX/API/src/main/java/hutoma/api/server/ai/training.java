@@ -2,8 +2,8 @@ package hutoma.api.server.ai;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hutoma.api.connectors.MessageQueue;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
-import hutoma.api.server.AWS.msg;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
 import hutoma.api.server.db.ai;
@@ -124,7 +124,7 @@ public class training {
                 case 0:
                     source = getFile(uploadedInputStream);
                     ai.update_ai_training_file(aiid, parseTrainingFile(source));
-                    hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.ready_for_training+"|"+devid+"|"+aiid);
+                    MessageQueue.push_msg(utils.getConfigProp("core_queue"), MessageQueue.AwsMessage.ready_for_training+"|"+devid+"|"+aiid);
                     int max_cluster_lines = 10000;
                     double cluster_min_probability = 0.7;
                     try {
@@ -132,21 +132,21 @@ public class training {
                         cluster_min_probability = Double.valueOf(getConfigProp("cluster_min_probability"));
                     }
                     catch (Exception ex) {}
-                    if (source.size()>max_cluster_lines) hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.cluster_split + "|" + devid + "|" + aiid +"|"+cluster_min_probability);
+                    if (source.size()>max_cluster_lines) MessageQueue.push_msg(utils.getConfigProp("core_queue"), MessageQueue.AwsMessage.cluster_split + "|" + devid + "|" + aiid +"|"+cluster_min_probability);
                     break;
 
                 // 1 = trainig file is a document
                 case 1:
                     source = getFile(uploadedInputStream);
                     ai.update_ai_training_file(aiid, inputSanitizer(source.toString()));
-                    hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("sqs_DG"),msg.preprocess_training_text+"|"+devid+"|"+aiid);
+                    MessageQueue.push_msg(utils.getConfigProp("sqs_DG"), MessageQueue.AwsMessage.preprocess_training_text+"|"+devid+"|"+aiid);
                     break;
 
                 // 2 = trainig file is a webpage
                 case 2:
                     URL _url = new URL(url);
                     ai.update_ai_training_file(aiid,inputSanitizer(ArticleExtractor.INSTANCE.getText(url)));
-                    hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("sqs_DG"),msg.preprocess_training_text+"|"+devid+"|"+aiid);
+                    MessageQueue.push_msg(utils.getConfigProp("sqs_DG"), MessageQueue.AwsMessage.preprocess_training_text+"|"+devid+"|"+aiid);
                     break;
 
 
@@ -184,8 +184,8 @@ public class training {
         st.info ="success";
         myai.status =st;
         api_root._ai _ai = new api_root._ai();
-        hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.delete_training+"|"+devid+"|"+aiid);
-        _ai.ai_status = String.valueOf(msg.training_queued);
+        MessageQueue.push_msg(utils.getConfigProp("core_queue"), MessageQueue.AwsMessage.delete_training+"|"+devid+"|"+aiid);
+        _ai.ai_status = String.valueOf(MessageQueue.AwsMessage.training_queued);
         return gson.toJson(myai);
     }
 

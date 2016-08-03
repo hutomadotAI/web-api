@@ -2,9 +2,9 @@ package hutoma.api.server.ai;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hutoma.api.server.AWS.msg;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
+import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.db.ai;
 import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
@@ -166,7 +166,7 @@ public class aI_CRUD extends  api_root {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"),msg.delete_ai + "|" + devid + "|" + aiid);
+            MessageQueue.push_msg(utils.getConfigProp("core_queue"), MessageQueue.AwsMessage.delete_ai + "|" + devid + "|" + aiid);
 
         }
         catch (Exception e){
