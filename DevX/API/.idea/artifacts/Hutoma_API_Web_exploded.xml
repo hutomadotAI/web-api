@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="Hutoma.API:Web exploded">
+  <artifact type="exploded-war" build-on-make="true" name="Hutoma.API:Web exploded">
     <output-path>$PROJECT_DIR$/out/artifacts/Hutoma_API_Web_exploded</output-path>
     <root id="root">
       <element id="javaee-facet-resources" facet="Hutoma.API/web/Web" />
