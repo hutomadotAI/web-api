@@ -9,7 +9,7 @@ import static hutoma.api.server.utils.utils.getConfigProp;
 /**
  * Created by Hutoma on 07/07/16.
  */
-public class userAiDomains {
+public class userAIDomains {
 
     public static boolean insert_domain(
             String id,

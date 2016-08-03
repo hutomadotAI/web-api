@@ -71,7 +71,7 @@ public class ai {
     {
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
