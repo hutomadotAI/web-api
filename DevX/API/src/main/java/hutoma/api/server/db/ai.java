@@ -71,9 +71,8 @@ public class ai {
     {
         try {
 
-            String myDriver = "com.mysql.jdbc.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
-            Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
             String query = " insert into users (username, email, password,password_salt,name,created,attempt,dev_token,plan_id,dev_id)"
