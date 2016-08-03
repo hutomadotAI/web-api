@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * Created by David MG on 25/07/2016.
  */
-@Path("/tryout")
+@Path("/")
 public class EndpointTryoutTop {
 
     @Context
@@ -20,6 +20,6 @@ public class EndpointTryoutTop {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String testOut() {
-        return "Top Level X";
+        return "<h2>Hutoma API</h2>";
     }
 }
