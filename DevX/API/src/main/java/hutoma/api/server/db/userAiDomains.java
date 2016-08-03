@@ -8,45 +8,63 @@ import java.util.ArrayList;
 import static hutoma.api.server.utils.utils.getConfigProp;
 
 /**
- * Created by Andrea on 14/07/16.
+ * Created by Hutoma on 07/07/16.
  */
-public class domain {
+public class userAiDomains {
 
-    public static boolean create_domain(
+    public static boolean create_userAIDomain(
+            String dev_token,
+            String aiid,
             String dom_id,
-            String name,
-            String description,
-            String icon,
-            String color,
-            boolean available
+            boolean active
     ) {
         try {
-
             String myDriver = "org.gjt.mm.mysql.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
-
-            String query = " insert into domains (dom_id, name, description, icon, color, available) values (?, ?, ?, ?, ?, ?)";
+            String query = " INSERT INTO userAIDomains (dev_token, aiid, dom_id, active) VALUES (?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setString (1, dom_id);
-            preparedStmt.setString(2, name);
-            preparedStmt.setString(3, description);
-            preparedStmt.setString(4, icon);
-            preparedStmt.setString(5, color);
-            preparedStmt.setBoolean(6, available);
+            preparedStmt.setString(1, dev_token);
+            preparedStmt.setString(2, aiid);
+            preparedStmt.setString(3, dom_id);
+            preparedStmt.setBoolean(4, active);
             preparedStmt.execute();
             conn.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    public static boolean update_available_domain ( String dom_id, Boolean available) {
+    public static boolean update_userAIDomain(String dev_token, String aiid, String dom_id, Boolean active) {
+        try {
+            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myUrl = getConfigProp("connectionstring");
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl);
+
+            String query = " UPDATE userAIDomains SET active=? WHERE dev_token=? AND aiid=? AND dom_id=?";
+
+            PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setBoolean(1, active);
+            preparedStmt.setString(2, dev_token);
+            preparedStmt.setString(3, aiid);
+            preparedStmt.setString(4, dom_id);
+
+            preparedStmt.execute();
+            conn.close();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public static ArrayList<api_root._userAIDomain> get_all_userAIDomains(String dev_token, String aiid) {
+        ArrayList<api_root._userAIDomain> res = new ArrayList<>();
         try {
 
             String myDriver = "org.gjt.mm.mysql.Driver";
@@ -54,54 +72,31 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
-            String query = " update domains set available=? where dom_id=?";
-            PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setBoolean(1, available);
-            preparedStmt.setString(2, dom_id);
-            preparedStmt.execute();
-            conn.close();
-        }
-        catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
+            String query = "SELECT * FROM userAIDomains WHERE dev_token='" + dev_token + "' AND aiid='" + aiid + "'";
 
-
-    public static ArrayList<api_root._domain> get_all_domains() {
-        ArrayList<api_root._domain> res = new ArrayList<>();
-        try {
-
-            String myDriver = "org.gjt.mm.mysql.Driver";
-            String myUrl = getConfigProp("connectionstring");
-            Class.forName(myDriver);
-            Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
-            String query = "SELECT * FROM domains";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                api_root._domain r = new api_root._domain();
+                api_root._userAIDomain r = new api_root._userAIDomain();
+                r.dev_token = rs.getString("dev_token");
+                r.aiid = rs.getString("aiid");
                 r.dom_id = rs.getString("dom_id");
-                r.name = rs.getString("name");
-                r.description = rs.getString("description");
-                r.icon = rs.getString("icon");
-                r.color = rs.getString("color");
-                r.available = rs.getBoolean("available");
+                r.active = rs.getBoolean("active");
+                r.created_on = rs.getDate("created_on");
                 res.add(r);
             }
             st.close();
             conn.close();
             return res;
 
+        } catch (Exception e) {
         }
-
-        catch (Exception e) {}
         return res;
     }
 
 
-    public static api_root._domain get_domain(String dom_id) {
-        api_root._domain r = new api_root._domain();
+    public static api_root._userAIDomain get_single_userAIDomain(String dev_token, String aiid, String dom_id) {
+        api_root._userAIDomain r = new api_root._userAIDomain();
         try {
 
             String myDriver = "org.gjt.mm.mysql.Driver";
@@ -110,42 +105,42 @@ public class domain {
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
 
-            String query = "SELECT * FROM domains WHERE dom_id='"+dom_id+"'";
+            String query = "SELECT * FROM userAIDomains WHERE dev_token='" + dev_token + "' AND aiid='" + aiid + "' dom_id='" + dom_id + "'";
 
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                r.dom_id = rs.getString("aiid");
-                r.name = rs.getString("name");
-                r.description = rs.getString("description");
-                r.icon = rs.getString("icon");
-                r.color = rs.getString("color");
-                r.available = rs.getBoolean("available");
+                r.dev_token = rs.getString("dev_token");
+                r.aiid = rs.getString("aiid");
+                r.dom_id = rs.getString("dom_id");
+                r.active = rs.getBoolean("active");
+                r.created_on = rs.getDate("created_on");
             }
             st.close();
             conn.close();
+        } catch (Exception e) {
         }
-
-        catch (Exception e) {}
         return r;
     }
 
 
-    public static boolean delete_domain(String dom_id) {
+    public static boolean delete_userAIDomain(String dev_token, String aiid, String dom_id) {
         try {
             String myDriver = "org.gjt.mm.mysql.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
-            String query = " delete from domains where dom_id=?";
+
+            String query = " DELETE FROM userAIDomains WHERE dev_token=? AND aiid=? AND dom_id=?";
+
             PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setString (1, dom_id);
+            preparedStmt.setString(1, dev_token);
+            preparedStmt.setString(2, aiid);
+            preparedStmt.setString(3, dom_id);
             preparedStmt.execute();
             conn.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
-
 }

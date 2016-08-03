@@ -1,4 +1,4 @@
-package hutoma.api.server;
+package com.hutoma.api.auth;
 
 import javax.ws.rs.NameBinding;
 import java.lang.annotation.ElementType;

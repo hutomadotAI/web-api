@@ -5,27 +5,31 @@
          version="3.1">
 
     <servlet>
-        <servlet-name>home</servlet-name>
-        <jsp-file>/index.jsp</jsp-file>
+        <servlet-name>com.hutoma.api.ServerApp</servlet-name>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>default</servlet-name>
-        <url-pattern>*.js</url-pattern>
-        <url-pattern>*.jpg</url-pattern>
-        <url-pattern>*.jpeg</url-pattern>
-        <url-pattern>*.png</url-pattern>
-        <url-pattern>*.pdf</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>home</servlet-name>
+        <servlet-name>com.hutoma.api.ServerApp</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
+    <!--servlet>
+        <servlet-name>API</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>com.hutoma.api.endpoints.TestEndpoint</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet >
+
+    <servlet-mapping>
+        <servlet-name>HutomaAPI</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping -->
 
     <!-- web services -->
-
+<!--
     <display-name>Dendro Recommender Web Service</display-name>
     <servlet>
         <description>JAX-RS Tools Generated - Do not modify</description>
@@ -53,11 +57,9 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-
-
     <servlet-mapping>
         <servlet-name>JAX-RS Servlet</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
+-->
 </web-app>

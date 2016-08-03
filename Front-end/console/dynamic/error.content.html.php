@@ -50,6 +50,9 @@ if (isset($_GET['err'])) {
         case 10 :
             $msg.='aiid SESSION MISSING';
             break;
+        case 11 :
+            $msg.='training FILE ERROR';
+            break;
         default:
             $msg.='UNDEFINED ERROR';
     }

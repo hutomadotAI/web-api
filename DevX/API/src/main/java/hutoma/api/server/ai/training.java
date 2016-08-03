@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import hutoma.api.server.AWS.msg;
-import hutoma.api.server.Role;
-import hutoma.api.server.Secured;
+import com.hutoma.api.auth.Role;
+import com.hutoma.api.auth.Secured;
 import hutoma.api.server.db.ai;
 import hutoma.api.server.utils.utils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -142,7 +142,7 @@ public class training {
                     hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("sqs_DG"),msg.preprocess_training_text+"|"+devid+"|"+aiid);
                     break;
 
-                // 1 = trainig file is a webpage
+                // 2 = trainig file is a webpage
                 case 2:
                     URL _url = new URL(url);
                     ai.update_ai_training_file(aiid,inputSanitizer(ArticleExtractor.INSTANCE.getText(url)));
