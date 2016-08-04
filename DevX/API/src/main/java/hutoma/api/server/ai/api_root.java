@@ -9,27 +9,26 @@ import java.util.ArrayList;
 
 public class api_root {
 
-        public static class _status {
-            public int code = 200;
-            public String info = "";
-            public String id;
-        }
-        public static class _debug {
-            public double score;
-            public long elapsted_time;
-            public String type;
-            public String answer;
-        }
-        public static class _metadata {
-            public String emotion;
-            public String topic;
-        }
+    public static class _status {
+        public int code = 200;
+        public String info = "";
+        public String id;
+    }
+    public static class _debug {
+        public double score;
+        public long elapsted_time;
+        public String type;
+        public String answer;
+    }
+    public static class _metadata {
+        public String emotion;
+        public String topic;
+    }
 
     public static class _parameter {
         public String name;
         public String value;
     }
-
 
     public static class _result {
             public double score;
@@ -43,21 +42,22 @@ public class api_root {
             public String context;
           //  public _metadata metadata;
             public ArrayList<_debug> debug_info;
-        }
-        public static class _chat {
-            public String id;
-            public  String timestamp;
-            public _result result;
-            public _metadata metadata;
-            public _status status;
+    }
 
-        }
+    public static class _chat {
+        public String id;
+        public  String timestamp;
+        public _result result;
+        public _metadata metadata;
+        public _status status;
 
-       public static class _newai {
-           public _status status;
-           public String aiid;
-           public String client_token;
-       }
+    }
+
+   public static class _newai {
+       public _status status;
+       public String aiid;
+       public String client_token;
+   }
 
     public static class _ai {
 
@@ -103,6 +103,7 @@ public class api_root {
 
     public static class _userAIDomain {
 
+        public _status status;
         public String dev_id;
         public String aiid;
         public String dom_id;
