@@ -66,7 +66,7 @@ public class AILogic {
             ai.client_token= token;
             ai.aiid = guid.toString();
 
-            if (database.createAI(ai.aiid, name, description, devid, is_private, deep_learning_error, deep_learning_status, shallow_learning_status, status, ai.client_token, "")) {
+            if (!database.createAI(ai.aiid, name, description, devid, is_private, deep_learning_error, deep_learning_status, shallow_learning_status, status, ai.client_token, "")) {
                 st.code = 500;
                 st.info = "Error:Internal Server Error.";
             }
