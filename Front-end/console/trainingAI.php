@@ -1,6 +1,7 @@
 <?php
     require "../pages/config.php";
 
+
     if ( !\hutoma\console::isSessionActive()) {
         header('Location: ./error.php?err=1');
         exit;
@@ -10,6 +11,7 @@
         generateSession();
     }
 
+
     if ( !isValuesSessionFilled() ){
         header('Location: ./error.php?err=2');
         exit;
@@ -18,12 +20,10 @@
 function generateSession(){
     $dev_token = \hutoma\console::getDevToken();
     $array = \hutoma\console::getSingleAI($dev_token,$_POST['aiid']);
-    unset($dev_token);
     if ($array['status']['code']===200) {
         fillSessionVariables($array);
     }
     else {
-        //header('Location: ./error.php?err=8');
         unset($array);
         exit;
     }

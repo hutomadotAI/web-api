@@ -93,7 +93,7 @@
             <li class="user-header">
               <img src="./dist/img/user1-160x160.jpg" class="img-circle" alt="User Image">
               <p>
-                <?php echo $_SESSION['user_name'],' - planID ',$_SESSION['plan_id'];?>
+                <?php echo $_SESSION['user_name'],' - planID ',$_SESSION['user_plan'];?>
                 <small>
                   <?php echo 'joined since ',$_SESSION["user_joined"] ;?>
                 </small>

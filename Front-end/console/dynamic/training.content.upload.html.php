@@ -2,6 +2,7 @@
 
 <div class="box box-solid box-clean flat no-shadow">
     <div class="box-header with-border">
+        <i class="fa fa-cloud-upload"></i>
         <h3 class="box-title">Training Area</h3>
         <a data-toggle="collapse"  href="#collapseInfo">
             <div class=" pull-right">more info

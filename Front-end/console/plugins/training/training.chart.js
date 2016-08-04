@@ -1,28 +1,22 @@
 
     $(function () {
-      /*
-       * Flot Interactive Chart
-       * -----------------------
-       */
-     
-      var data = [], totalPoints = 100;
-      function getRandomData() {
 
+      var firstValue= 100;
+      var data = [], totalPoints = 100;
+
+
+      function getRandomData() {
         if (data.length > 0)
           data = data.slice(1);
 
         // Do a random walk
         while (data.length < totalPoints) {
-
-          var prev = data.length > 0 ? data[data.length - 1] : 50,
+          var prev = data.length > 0 ? data[data.length - 1] : firstValue,
                   y = prev + Math.random() * 10 - 5;
-
-          if (y < 0) {
+          if (y < 0)
             y = 0;
-          } else if (y > 100) {
+          else if (y > 100)
             y = 100;
-          }
-
           data.push(y);
         }
 
@@ -31,7 +25,6 @@
         for (var i = 0; i < data.length; ++i) {
           res.push([i, data[i]]);
         }
-
         return res;
       }
 
@@ -59,8 +52,9 @@
         }
       });
 
-      var updateInterval = 500; //Fetch data ever x milliseconds
-      var realtime = "off"; //If == to on then fetch data every x seconds. else stop fetching
+      var updateInterval = 1000;
+      var realtime = "off";
+
       function update() {
 
         interactive_plot.setData([getRandomData()]);
@@ -72,17 +66,15 @@
       }
 
       //INITIALIZE REALTIME DATA FETCHING
-      if (realtime === "on") {
+      if (realtime === "on")
         update();
-      }
+
       //REALTIME TOGGLE
       $("#realtime .btn").click(function () {
-        if ($(this).data("toggle") === "on") {
+        if ($(this).data("toggle") === "on")
           realtime = "on";
-        }
-        else {
+        else
           realtime = "off";
-        }
         update();
       });
     });

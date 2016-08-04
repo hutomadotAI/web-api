@@ -1,43 +1,21 @@
-<div class="box box-solid box-clean flat no-shadow">
-
-    <a data-toggle="collapse" data-parent="#accordion" href="#collapseDiagram">
+<div class="box box-solid flat no-shadow" style="border: 1px solid #d2d6de;">
+    
     <div class="box-header with-border">
+        <i class="fa fa-bar-chart-o"></i>
         <h3 class="box-title">Monitor Training</h3>
-        <div class="box-tools pull-right">
-        <button class="btn btn-box-tool" ><i class="fa fa-minus"></i></button>
+        <div class="box-tools pull-right" style="margin-top: 5px;margin-right: 7px;">
+        Real time
+        <div class="btn-group" id="realtime" data-toggle="btn-toggle" style="margin-left: 5px;">
+        <button type="button" class="btn btn-default btn-xs flat active" data-toggle="on" style="border: 1px solid #d2d6de;">On</button>
+        <button type="button" class="btn btn-default btn-xs flat" data-toggle="off" style="border: 1px solid #d2d6de;">Off</button>
+        </div>
         </div>
     </div>
-    </a>
-
-    <div id="collapseDiagram" class="panel-collapse collapse">
-    <div class="box-header with-border">
-
-
-            <div class="btn-group pull-left" id="realtime" data-toggle="btn-toggle" >
-                <button type="button" class="btn btn-default btn-md" data-toggle="tooltip" title="stop training"><i class="fa fa-stop"></i></button>
-                <button type="button" class="btn btn-default btn-md" data-toggle="tooltip" title="pause training"><i class="fa fa-pause"></i></button>
-                <button type="button" class="btn btn-default btn-md" data-toggle="tooltip" title="start training"><i class="fa fa-play"></i></button>
-            </div>
-
-            <div class="btn-group pull-right" id="realtime" data-toggle="btn-toggle">
-                <div class="center-block text-center">Real Time
-                    <button type="button" class="btn btn-default btn-md" data-toggle="on">On</button>
-                    <button type="button" class="btn btn-default btn-md active" data-toggle="off">Off</button>
-                </div>
-            </div>
-
-
-    </div>
-
-
-
+    
     <div class="box-body">
-          <div id="interactive" style="height: 300px;"></div>
-    </div>
+        <div id="interactive" style="height: 334px;"></div>
     </div>
 </div>
-
-
 
 
 

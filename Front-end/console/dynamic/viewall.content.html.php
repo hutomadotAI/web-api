@@ -51,7 +51,7 @@
                 }
                 echo('<td>' . $bot['description'] . '</td>');
                 echo('<td>' . $bot['created_on'] . '</td>');
-                echo('<td><button type="button" name="btnSelect" value="'.$bot['aiid'].'"  onClick="sendAIID(this.value)" class="btn btn-primary pull-right" id="btn_select" style="margin-right: 5px; width: 115px;"><i class="fa fa-user"></i> details AI</button></td>');
+                echo('<td><button type="button" name="btnSelect" value="'.$bot['aiid'].'"  onClick="sendAIID(this.value)" class="btn btn-primary flat pull-right" id="btn_select" style="margin-right: 5px; width: 115px;"><i class="fa fa-user"></i> details AI</button></td>');
             }
 
             unset($array);
@@ -59,7 +59,7 @@
             echo('</form>');
             echo('<tr>');
             echo('<td></td><td></td><td></td><td></td><td></td>');
-            echo('<td><a href="./newAI.php"><div class="btn btn-success pull-right" style="margin-right: 5px; width: 115px;"><i class="fa fa-user-plus"></i> add new AI</div></a></td>');
+            echo('<td><a href="./newAI.php"><div class="btn btn-success flat pull-right" style="margin-right: 5px; width: 115px;"><i class="fa fa-user-plus"></i> add new AI</div></a></td>');
             echo('</tr>');
             echo('</table>');
 

@@ -78,16 +78,16 @@
         <div class="col-md-6">
         <div class="input-group">
               <span class="input-group-addon">Client key</i></span>
-              <?php echo('<input type="text" class="form-control" placeholder="API REQUEST CLIENT KEY" disabled>'); ?>
-              <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+              <input type="text" class="form-control" placeholder="<?php echo($_SESSION['dev_id']);?>" disabled>
+              <span class="input-group-addon" data-toggle="tooltip" title="copy to clipboard" onclick="copyToClipboard('result')"><i class="fa fa-clipboard"></i></span>
         </div>
         </div>
     
         <div class="col-md-6">
         <div class="input-group">
               <span class="input-group-addon">Developer key</i></span>
-              <?php echo('<input type="text" class="form-control" placeholder="API REQUEST DEV KEY" disabled>'); ?>
-              <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+              <input type="text" class="form-control" placeholder=" <?php echo(\hutoma\console::getDevToken());?>" disabled>
+              <span class="input-group-addon" data-toggle="tooltip" title="copy to clipboard" onclick="copyToClipboard('result')" ><i class="fa fa-clipboard"></i></span>
         </div>
         </div>
     </div>

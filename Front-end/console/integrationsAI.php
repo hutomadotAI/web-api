@@ -37,7 +37,7 @@ require "../pages/config.php";
         <li class="header">WORKPLACE</li>
         <li class="active">
             <a href="#">
-              <i class="fa fa-user"></i><span>API REQUEST AI NAME</span><i class="fa fa-ellipsis-v pull-right"></i>
+              <i class="fa fa-user"></i><span><?php echo($_SESSION['current_ai_name']); ?></span><i class="fa fa-ellipsis-v pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
