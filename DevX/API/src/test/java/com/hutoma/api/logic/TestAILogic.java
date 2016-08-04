@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.amazonaws.services.route53domains.model.CountryCode;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
@@ -80,6 +81,35 @@ public class TestAILogic {
         aiLogic.createAI(fakeContext, DEVID, "name", "description", true, 0.0d, 0, 0, 0);
         api_root._newai apiRoot = ((api_root._newai)fakeSerializer.getUnserialized());
         Assert.assertNull(apiRoot.client_token);
+    }
+
+    @Test
+    public void testGetSingle_Valid() {
+        api_root._ai ai = new api_root._ai();
+        when(fakeDatabase.getAI(AIID)).thenReturn(ai);
+        aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertEquals(200, apiRoot.status.code);
+    }
+
+    @Test
+    public void testGetSingle_Valid_Return() {
+        api_root._ai ai = new api_root._ai();
+        ai.aiid = AIID;
+        when(fakeDatabase.getAI(AIID)).thenReturn(ai);
+        aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertNotNull(apiRoot.ai);
+        Assert.assertEquals(AIID, apiRoot.ai.aiid);
+    }
+
+    @Test
+    public void testGetSingle_DBFail_Error() {
+        api_root._ai ai = new api_root._ai();
+        when(fakeDatabase.getAI(anyString())).thenReturn(ai);
+        aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertEquals(404, apiRoot.status.code);
     }
 
 }
