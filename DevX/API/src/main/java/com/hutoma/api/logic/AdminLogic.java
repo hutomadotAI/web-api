@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.IJsonSerializer;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.ai.api_root;
@@ -22,12 +22,12 @@ import javax.ws.rs.core.SecurityContext;
 public class AdminLogic {
 
     Config config;
-    IJsonSerializer jsonSerializer;
+    JsonSerializer jsonSerializer;
     Database database;
     MessageQueue messageQueue;
 
     @Inject
-    public AdminLogic(Config config, IJsonSerializer jsonSerializer, Database database, MessageQueue messageQueue) {
+    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;

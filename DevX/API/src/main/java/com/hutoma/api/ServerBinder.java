@@ -21,10 +21,10 @@ public class ServerBinder extends AbstractBinder {
         bind(AILogic.class).to(AILogic.class);
 
         // other
-        bind(GsonSerializer.class).to(IJsonSerializer.class);
+        bind(JsonSerializer.class).to(JsonSerializer.class);
         bind(Config.class).to(Config.class);
         bind(Database.class).to(Database.class);
         bind(MessageQueue.class).to(MessageQueue.class);
-        bind(UuidTools.class).to(IUuidTools.class);
+        bind(Tools.class).to(Tools.class);
     }
 }

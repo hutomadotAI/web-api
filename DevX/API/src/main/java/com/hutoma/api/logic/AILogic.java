@@ -1,25 +1,17 @@
 package com.hutoma.api.logic;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.IJsonSerializer;
-import com.hutoma.api.common.IUuidTools;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.ai.api_root;
-import hutoma.api.server.db.ai;
-import hutoma.api.server.utils.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -30,18 +22,18 @@ import java.util.UUID;
 public class AILogic {
 
     Config config;
-    IJsonSerializer jsonSerializer;
+    JsonSerializer jsonSerializer;
     Database database;
     MessageQueue messageQueue;
-    IUuidTools uuidTools;
+    Tools tools;
 
     @Inject
-    public AILogic(Config config, IJsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, IUuidTools uuidTools) {
+    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, Tools tools) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.messageQueue = messageQueue;
-        this.uuidTools = uuidTools;
+        this.tools = tools;
     }
 
     public String createAI(
@@ -63,7 +55,7 @@ public class AILogic {
         ai.client_token="";
         try {
             String encoding_key = config.getEncodingKey();
-            UUID guid = uuidTools.createNewRandomUUID();
+            UUID guid = tools.createNewRandomUUID();
             String token = Jwts.builder()
                     .claim("ROLE", Role.ROLE_CLIENTONLY)
                     .claim("AIID", guid)

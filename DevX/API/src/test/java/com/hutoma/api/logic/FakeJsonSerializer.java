@@ -1,11 +1,11 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.IJsonSerializer;
+import com.hutoma.api.common.JsonSerializer;
 
 /**
  * Created by David MG on 02/08/2016.
  */
-public class FakeJsonSerializer implements IJsonSerializer {
+public class FakeJsonSerializer extends JsonSerializer {
 
     Object unserialized;
 
