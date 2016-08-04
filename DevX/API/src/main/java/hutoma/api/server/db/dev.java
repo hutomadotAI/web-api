@@ -53,7 +53,7 @@ public class dev {
     public static boolean delete_dev(String dev_id) {
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);

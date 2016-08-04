@@ -28,7 +28,7 @@ public class ai {
                               ) {
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
@@ -73,6 +73,7 @@ public class ai {
 
             String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
+            Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
             String query = " insert into users (username, email, password,password_salt,name,created,attempt,dev_token,plan_id,dev_id)"
@@ -151,7 +152,7 @@ public class ai {
     public static boolean delete_ai(String aiid) {
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
@@ -168,11 +169,11 @@ public class ai {
     }
 
 
-    public static ArrayList<api_root._ai> get_all_ai(String dev_id) throws SQLException, ClassNotFoundException {
+    public static ArrayList<api_root._ai> get_all_ai(String dev_id) {
         ArrayList<api_root._ai> res = new ArrayList<>();
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
@@ -200,7 +201,9 @@ public class ai {
         }
 
         catch (Exception e) {
-            utils.debug(e.getLocalizedMessage());}
+            System.out.println(e.toString());
+            // TODO: add logging here
+        }
         return res;
     }
 
@@ -209,7 +212,7 @@ public class ai {
         api_root._ai r = new api_root._ai();
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);

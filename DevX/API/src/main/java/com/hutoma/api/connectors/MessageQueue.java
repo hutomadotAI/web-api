@@ -36,6 +36,10 @@ public class MessageQueue {
         return pushMessage(config, AwsMessage.delete_dev + "|" + devid + "|000");
     }
 
+    public boolean pushMessageDeleteAI(Config config, String devid, String aiid) {
+        return pushMessage(config, AwsMessage.delete_ai + "|" + devid + "|" + aiid);
+    }
+
     protected boolean pushMessage(Config config, String message) {
         AWSCredentials credentials = null;
         try {
