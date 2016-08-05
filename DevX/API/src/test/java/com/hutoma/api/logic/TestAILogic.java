@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import javax.ws.rs.core.SecurityContext;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.mockito.Matchers.*;
@@ -86,6 +87,7 @@ public class TestAILogic {
     @Test
     public void testGetSingle_Valid() {
         api_root._ai ai = new api_root._ai();
+        ai.aiid = AIID;
         when(fakeDatabase.getAI(AIID)).thenReturn(ai);
         aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
@@ -112,5 +114,50 @@ public class TestAILogic {
         Assert.assertEquals(404, apiRoot.status.code);
     }
 
+    private ArrayList<api_root._ai> getAIList() {
+        api_root._ai ai = new api_root._ai();
+        ai.aiid = AIID;
+        ArrayList<api_root._ai> returnList = new ArrayList<>();
+        returnList.add(ai);
+        return returnList;
+    }
+
+    @Test
+    public void testGetAll_Valid() {
+        ArrayList<api_root._ai> returnList = getAIList();
+        when(fakeDatabase.getAllAIs(VALIDDEVID)).thenReturn(returnList);
+        aiLogic.getAIs(fakeContext, VALIDDEVID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertEquals(200, apiRoot.status.code);
+    }
+
+    @Test
+    public void testGetAll_Valid_Return() {
+        ArrayList<api_root._ai> returnList = getAIList();
+        when(fakeDatabase.getAllAIs(VALIDDEVID)).thenReturn(returnList);
+        aiLogic.getAIs(fakeContext, VALIDDEVID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertNotNull(apiRoot.ai_list);
+        Assert.assertFalse(apiRoot.ai_list.isEmpty());
+        Assert.assertEquals(AIID, apiRoot.ai_list.get(0).aiid);
+    }
+
+    @Test
+    public void testGetAll_NoneFound() {
+        ArrayList<api_root._ai> returnList = getAIList();
+        when(fakeDatabase.getAllAIs(VALIDDEVID)).thenReturn(new ArrayList<>());
+        aiLogic.getAIs(fakeContext, VALIDDEVID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertEquals(200, apiRoot.status.code);
+    }
+
+    @Test
+    public void testGetAll_DBFail() {
+        ArrayList<api_root._ai> returnList = getAIList();
+        when(fakeDatabase.getAllAIs(anyString())).thenReturn(new ArrayList<>());
+        aiLogic.getAIs(fakeContext, VALIDDEVID);
+        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
+        Assert.assertEquals(500, apiRoot.status.code);
+    }
 }
 
