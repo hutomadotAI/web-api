@@ -43,13 +43,11 @@ public class AIDomainLogic {
         st.info ="success";
         _domain.status = st;
         try {
-            ArrayList<api_root._domain> listdomains = new ArrayList<>();
-            listdomains = database.getAllDomains();
+            ArrayList<api_root._domain> listdomains = database.getAllDomains();
             if (listdomains.size() <= 0) {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             } else {
-                _domain.domain_list = new ArrayList<api_root._domain>();
                 _domain.domain_list = listdomains;
             }
         }
