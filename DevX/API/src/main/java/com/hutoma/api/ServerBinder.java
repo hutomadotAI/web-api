@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.logic.AIDomainLogic;
 import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.AdminLogic;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -20,6 +21,7 @@ public class ServerBinder extends AbstractBinder {
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(AILogic.class).to(AILogic.class);
+        bind(AIDomainLogic.class).to(AIDomainLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

@@ -2,13 +2,17 @@ package com.hutoma.api.connectors;
 
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.db.ai;
+import hutoma.api.server.db.domain;
 
 import java.util.ArrayList;
 
 /**
  * Created by David MG on 02/08/2016.
+ * This is a single class entry point for all database calls
+ * for future refactoring of database connectivity
  */
 public class Database {
+
 
     public boolean createDev(String username, String email, String password, String passwordSalt, String name, String attempt, String dev_token, int planId, String devid) {
         return hutoma.api.server.db.ai.create_dev(username, email, password, passwordSalt, name, attempt, dev_token, planId, devid);
@@ -36,5 +40,9 @@ public class Database {
 
     public boolean deleteAi(String aiid) {
         return hutoma.api.server.db.ai.delete_ai(aiid);
+    }
+
+    public ArrayList<api_root._domain> getAllDomains() {
+        return hutoma.api.server.db.domain.get_all_domains();
     }
 }
