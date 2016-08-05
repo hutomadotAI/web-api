@@ -2,12 +2,14 @@ package com.hutoma.api.common;
 
 import com.amazonaws.regions.Regions;
 
+import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
  * Created by David MG on 02/08/2016.
  */
+@Singleton
 public class Config {
 
     public String getEncodingKey() {

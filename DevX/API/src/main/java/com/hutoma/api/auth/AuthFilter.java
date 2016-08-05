@@ -1,8 +1,10 @@
 package com.hutoma.api.auth;
 
+import com.hutoma.api.common.Logger;
 import io.jsonwebtoken.Jwts;
 
 import javax.annotation.Priority;
+import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -27,12 +29,17 @@ public class AuthFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
+    @Inject
+    private Logger logger;
+
+    private final String LOGFROM = "authfilter";
+
     private String encoding_key="L0562EMBfnLadKy57nxo9btyi3BEKm9m+DoNvGcfZa+DjHsXwTl+BwCE4NeKEAagfkhYBFvhvJoAgtugSsQOfw==";
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        System.out.println("XXXXXXXXXXXXX: Auth filter");
+        logger.logDebug(LOGFROM, "endpoint secured");
 
         try {
 
@@ -53,8 +60,6 @@ public class AuthFilter implements ContainerRequestFilter {
             }
             catch (Exception e) {}
 
-
-
             // Extract the token from the HTTP Authorization header
             String token = authorizationHeader.substring("Bearer".length()).trim();
 
@@ -71,6 +76,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 catch (Exception ex) {}
 
                 _devrole = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("ROLE").toString();
+                logger.logDebug(LOGFROM, "devrole " + _devrole);
             } catch (Exception e) {
                 requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
             }
@@ -82,10 +88,15 @@ public class AuthFilter implements ContainerRequestFilter {
 
             try {
                 boolean is_valid;
-                if (methodRoles.isEmpty()) is_valid = checkPermissions(_devrole, classRoles);
-                else is_valid = checkPermissions(_devrole, methodRoles);
+                if (methodRoles.isEmpty()) {
+                    is_valid = checkPermissions(_devrole, classRoles);
+                } else {
+                    is_valid = checkPermissions(_devrole, methodRoles);
+                }
 
-                if (!is_valid) requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                if (!is_valid) {
+                    requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                }
             } catch (Exception e) {
                 requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
             }

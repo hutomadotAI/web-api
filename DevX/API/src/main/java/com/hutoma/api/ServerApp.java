@@ -10,7 +10,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class ServerApp extends ResourceConfig {
 
     public ServerApp() {
-        System.out.println("ServerApp constructor");
 
         // HK2 DI Binder (service locator)
         register(new ServerBinder());
