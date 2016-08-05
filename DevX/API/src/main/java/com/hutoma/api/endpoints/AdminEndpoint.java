@@ -1,13 +1,8 @@
 package com.hutoma.api.endpoints;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
 import com.hutoma.api.logic.AdminLogic;
-import hutoma.api.server.AWS.msg;
-import hutoma.api.server.ai.api_root;
-import hutoma.api.server.utils.utils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -61,27 +56,7 @@ public class AdminEndpoint {
     public String delete_dev(
             @Context SecurityContext securityContext,
             @DefaultValue("") @QueryParam("devid") String devid) {
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        api_root._newai ai = new api_root._newai();
-        api_root._status st = new api_root._status();
-        st.code = 200;
-        st.info ="success";
-        ai.status =st;
-        try {
-
-            if (!hutoma.api.server.db.dev.delete_dev(devid))
-            {
-                st.code = 500;
-                st.info = "Internal Server Error.";
-            }
-            hutoma.api.server.AWS.SQS.push_msg(utils.getConfigProp("core_queue"), msg.delete_dev + "|" + devid + "|000");
-        }
-        catch (Exception e){
-            st.code = 500;
-            st.info = "Internal Server Error.";
-        }
-        return gson.toJson(ai);
+        return adminLogic.deleteDev(securityContext, devid);
     }
 
 }

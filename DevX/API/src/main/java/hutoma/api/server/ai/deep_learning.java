@@ -2,9 +2,9 @@ package hutoma.api.server.ai;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hutoma.api.server.AWS.msg;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
+import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.db.RNN;
 import hutoma.api.server.db.ai;
 import hutoma.api.server.db.dev;
@@ -103,7 +103,7 @@ public class deep_learning {
            pb.redirectErrorStream(true);
            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
            Process p = pb.start();
-           ai.update_ai_training_status(aiid, String.valueOf(msg.training_in_progress));
+           ai.update_ai_training_status(aiid, String.valueOf(MessageQueue.AwsMessage.training_in_progress));
 
        }
        catch (Exception e) {

@@ -1,5 +1,7 @@
 package com.hutoma.api.common;
 
+import com.amazonaws.regions.Regions;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -10,6 +12,14 @@ public class Config {
 
     public String getEncodingKey() {
         return getConfigProp("encoding_key");
+    }
+
+    public String getCoreQueue() {
+        return getConfigProp("core_queue");
+    }
+
+    public Regions getMessageQueueRegion() {
+        return Regions.US_EAST_1;
     }
 
     public String getConfigProp(String p) {

@@ -2,20 +2,18 @@ package com.hutoma.api.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hutoma.api.common.IJsonSerializer;
 
 /**
  * Created by David MG on 02/08/2016.
  */
-public class GsonSerializer implements IJsonSerializer {
+public class JsonSerializer {
 
     Gson gson;
 
-    public GsonSerializer() {
+    public JsonSerializer() {
         gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
-    @Override
     public String serialize(Object o) {
         return gson.toJson(o);
     }
