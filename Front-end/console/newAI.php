@@ -40,41 +40,17 @@
 
     <aside class="main-sidebar ">
     <section class="sidebar">
-        <!-- ================ USER PANEL ================== -->
-        <?php include './dynamic/userpanel.html.php'; ?>
-        <!-- ================ USER ACTION ================= -->
+    <!-- ================ USER PANEL ================== -->
+    <?php include './dynamic/userpanel.html.php'; ?>
+    <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <?php
-
-          if (isset($_SESSION['current_ai_name'])) {
-                echo('
-                      <li>
-                      <a href="#">
-                        <i class="fa fa-user"></i><span>'.$_SESSION["current_ai_name"].'</span><i class="fa fa-ellipsis-v pull-right"></i>
-                      </a>
-                      <ul class="treeview-menu">
-                          <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-                          <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-                          <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-                          <li><a href="./optionAI.php"><i class="fa fa-gear"></i>AI options</a></li>
-                      </ul>
-                      </li>
-                      <li class="active"><a href="#"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-                      <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-                      <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-                      <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-                  ');
-              }
-              else
-                echo ('<li class="active"><a href="#"><i class="fa fa-plus-circle"></i> <span>Create new AI</span></a></li>');
-            ?>
-
-        <li><a href="./documentation.php"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li class="header">WORKPLACE</li>
+            <li class="active"><a href="./home.php"><i class="fa fa-home"></i><span>home</span></a></li>
+            <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+            <li class="header">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -95,17 +71,19 @@
     <aside class="control-sidebar control-sidebar-dark">
     <?php include './dynamic/sidebar.controll.html.php'; ?>
     </aside>
-  </div>
+</div>
 
-    <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
-    <script src="./bootstrap/js/bootstrap.min.js"></script>
-    <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-    <script src="./plugins/fastclick/fastclick.min.js"></script>
-    <script src="./dist/js/app.min.js"></script>
-    <script src="./plugins/select2/select2.full.min.js"></script>
-    <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-    <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-    <script src="./plugins/createAI/createAI.js"></script>
-    <script src="./plugins/shared/shared.js"></script>
+<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
+<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="./dist/js/app.min.js"></script>
+<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="./plugins/shared/shared.js"></script>
+
+<script src="./plugins/select2/select2.full.min.js"></script>
+<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
+<script src="./plugins/createAI/createAI.js"></script>
+
 </body>
 </html>

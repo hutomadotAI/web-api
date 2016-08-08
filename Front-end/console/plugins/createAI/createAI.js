@@ -38,14 +38,18 @@ $(function () {
     $('.slider').slider();
     $("#confidence").ionRangeSlider({
         type: "single",
-        from: "good",
+        min: 1,
+        max: 4,
+        from:2,
+        from_value:"sometimes",
+        step: 1,
         grid: true,
         keyboard: true,
         onStart: function (data) {console.log("onStart"); },
         onChange: function (data) {console.log("onChange"); },
         onFinish: function (data) { console.log("onFinish"); },
         onUpdate: function (data) {console.log("onUpdate"); },
-        values: ["very bad", "bad", "little bad","mediocre", "normale", "good","very good", "excellent", "genius", "oracle"]
+        values: ["never", "sometimes", "often","always"]
     });
 });
 

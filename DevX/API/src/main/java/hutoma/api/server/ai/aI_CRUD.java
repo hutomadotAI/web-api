@@ -44,6 +44,7 @@ public class aI_CRUD extends  api_root {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         _newai ai = new _newai();
+
         _status st = new _status();
         st.code = 200;
         st.info ="success";

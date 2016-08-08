@@ -34,28 +34,26 @@ require "../pages/config.php";
 
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <li class="active">
-            <a href="#">
-              <i class="fa fa-user"></i><span><?php echo($_SESSION['current_ai_name']); ?></span><i class="fa fa-ellipsis-v pull-right"></i>
-            </a>
-            <ul class="treeview-menu">
-                <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-                <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-                <li class="active"><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-                <li><a href="./optionAI.php"><i class="fa fa fa-gear"></i>AI options</a></li>
-            </ul>
-        </li>
-        <li><a href="./newAi.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-       
-        <li><a href="./index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li class="header">WORKPLACE</li>
+            <li><a href="./home.php"><i class="fa fa-home"></i><span>home</span></a></li>
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
+                    <li><a href="./intents.php"><i class="fa fa-commenting-o"></i> <span>intents</span></a></li>
+                    <li><a href="./entities.html"><i class="fa fa-sitemap"></i> <span>entities</span></a></li>
+                    <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
+                    <li class="active"><a href="#"><i class="glyphicon glyphicon-list-alt"></i>integrations</a></li>
+                    <li><a href="./settingsAI.php"><i class="fa fa-gear"></i>settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+            <li class="header">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>

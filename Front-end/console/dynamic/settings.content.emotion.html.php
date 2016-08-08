@@ -8,7 +8,7 @@
       <span class="lead">Emotions</span>
       </div>
       <div class="col-xs-4">
-      <span class="text-muted pull-right"></span>
+      <span class="text-muted"> NOT AVAILABLE FOR BETA VERSION</span>
       </div>
       <div class="col-xs-4">
       <a data-toggle="collapse" data-parent="#accordion" href="#collapseEmotion">

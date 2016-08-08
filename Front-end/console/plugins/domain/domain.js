@@ -34,7 +34,9 @@ function showDomains(str,size){
                         wHTML += ('<div class="col-xs-7">');
                         wHTML += ('<h4 class="text-center" style="text-align: left;">&nbsp;'+domains[x].name+'</h4>');
                         wHTML += ('<h5 class="text-center text-muted" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
+                        wHTML += ('<a data-toggle="modal"  data-target="#detailsDomain" data-id="'+domains[x].dom_id+'" style="cursor: pointer;">');
                         wHTML += ('<h5 class="text-center text-light-blue" style="text-align: left;">&nbsp;info and settings</h5>');
+                        wHTML += ('</a>');
                         wHTML += ('</div>');
                         wHTML += ('<div class="col-xs-3">');
 
@@ -68,7 +70,7 @@ function showDomains(str,size){
                       else
                           wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed borderActive" id="'+boxid+'">');
 
-                      wHTML += ('<div class="info-circle-icon '+domains[x].color+'" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div>');
+                      wHTML += ('<a><div class="info-circle-icon '+domains[x].color+'" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div></a>');
                       wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
                       wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
                       wHTML += ('<div class="box-footer-flatdown"><h5 class="text-center text-light-blue">info and settings</h5>');
@@ -104,6 +106,9 @@ function switchClick(node,key){
 }
 
 function domainsToJsonForPOST() {
+    RecursiveUnbind($('#wrapper'));
+
+    /*
     $("#btnSave").attr("disabled", true);
     $("#btnSave").attr("onClick","");
     $('#btnSave').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
@@ -114,9 +119,21 @@ function domainsToJsonForPOST() {
 
     $("#btnSwitch").attr("disabled", true);
     $("#btnSwitch").attr("onClick","");
-
+    */
     var JsonStringActiveDomains = JSON.stringify(userActived);
     $("#userActivedDomains").attr("value", JsonStringActiveDomains);
 }
 
+/*
+$(document).ready(function() {
+    $('a[data-toggle=modal], button[data-toggle=modal]').click(function () {
+
+        var data_id = '';
+        if (typeof $(this).data('id') !== 'undefined') {
+            data_id = $(this).data('id');
+        }
+        $('#domainTitle').val(data_id);
+    })
+});
+*/
 

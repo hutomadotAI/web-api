@@ -36,7 +36,6 @@ function isValuesSessionFilled(){
         isset($_SESSION['ai_name']) &&
         isset($_SESSION['ai_description']) &&
         isset($_SESSION['ai_created_on']) &&
-        isset($_SESSION['ai_private']) &&
         isset($_SESSION['ai_deep_learning_error']) &&
         isset($_SESSION["ai_training_debug_info"]) &&
         isset($_SESSION['ai_training_status']) &&
@@ -44,6 +43,7 @@ function isValuesSessionFilled(){
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
+        isset($_SESSION['ai_personality']) &&
         isset($_SESSION['ai_status']) &&
         //isset($_SESSION['ai_training_file']) &&                       // parameter missing
         isset($_SESSION['current_ai_name']) &&
@@ -103,28 +103,27 @@ function fillSessionVariables($array){
 
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <li class="active">
-        <a href="#">
-            <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
-        </a>
-        <ul class="treeview-menu">
-            <li class="active"><a href="#"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-            <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-            <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-            <li><a href="./optionAI.php"><i class="fa fa-gear"></i>AI options</a></li>
-        </ul>
-        </li>
-        <li><a href="./newAI.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="#"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="#"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-        
-        <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li class="header">WORKPLACE</li>
+            <li><a href="./home.php"><i class="fa fa-home"></i><span>home</span></a></li>
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+
+                    <li class="active"><a href="#"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
+                    <li><a href="./intents.php"><i class="fa fa-commenting-o"></i> <span>intents</span></a></li>
+                    <li><a href="./entities.html"><i class="fa fa-sitemap"></i> <span>entities</span></a></li>
+                    <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
+                    <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integrations</a></li>
+                    <li><a href="./settingsAI.php"><i class="fa fa-gear"></i>settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+            <li class="header">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -136,17 +135,18 @@ function fillSessionVariables($array){
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>  
                 <?php include './dynamic/training.content.diagram.html.php'; ?>
+                <?php include './dynamic/training.content.domains.html.php'; ?>
             </div>
             <div class="col-md-5">
                 <?php include './dynamic/training.content.chat.html.php'; ?>
                 <?php include './dynamic/training.content.json.html.php'; ?>
-                <?php include './dynamic/training.content.intent.html.php'; ?>
-                <?php include './dynamic/training.content.actions.html.php'; ?>
-                <?php include './dynamic/training.content.domains.html.php'; ?>        
             </div>
         </div>
+        <?php include './dynamic/training.content.keys.html.php'; ?>
     </section>
     </div>
+
+
 
     <!-- =================== FOOTER =================== -->
     <footer class="main-footer">

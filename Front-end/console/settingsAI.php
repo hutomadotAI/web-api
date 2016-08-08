@@ -16,11 +16,11 @@ function isValuesSessionFilled(){
     return
         isset($_SESSION['aiid']) &&
         isset($_SESSION['ai_name']) &&
-        isset($_SESSION['ai_private']) &&
+        isset($_SESSION['ai_description']) &&
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_description']) ;
+        isset($_SESSION['ai_personality']);
 }
 ?>
 
@@ -62,28 +62,26 @@ function isValuesSessionFilled(){
         <?php include './dynamic/userpanel.html.php'; ?>
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <li class="active">
-        <a href="#">
-          <i class="fa fa-user"></i><span><?php echo $_SESSION['ai_name'];?></span><i class="fa fa-ellipsis-v pull-right"></i>
-        </a>
-        <ul class="treeview-menu">
-            <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-            <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-            <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-            <li class="active"><a href="#"><i class="fa fa-gear"></i>AI options</a></li>
-        </ul>
-        </li>
-        <li><a href="./newAi.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-
-        <li><a href="./index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li class="header">WORKPLACE</li>
+            <li><a href="./home.php"><i class="fa fa-home"></i><span>home</span></a></li>
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
+                    <li><a href="./intents.php"><i class="fa fa-commenting-o"></i> <span>intents</span></a></li>
+                    <li><a href="./entities.html"><i class="fa fa-sitemap"></i> <span>entities</span></a></li>
+                    <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
+                    <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integrations</a></li>
+                    <li class="active"><a href="#"><i class="fa fa-gear"></i>settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+            <li class="header">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>    
         </ul>
     </section>
     </aside>
@@ -105,15 +103,15 @@ function isValuesSessionFilled(){
         <div class="tab-content">
               <!-- GENERAL TAB -->
               <div class="tab-pane active" id="tab_general">
-                  <?php include './dynamic/option.content.input.html.php'; ?>
+                  <?php include './dynamic/settings.content.input.html.php'; ?>
               </div>
               <!-- EMOTION TAB -->
               <div class="tab-pane" id="tab_emotion">
-                  <?php include './dynamic/option.content.emotion.html.php'; ?>
+                  <?php include './dynamic/settings.content.emotion.html.php'; ?>
               </div>
               <!-- DELETE TAB -->
               <div class="tab-pane" id="tab_delete">
-                  <?php include './dynamic/option.content.delete.html.php'; ?>
+                  <?php include './dynamic/settings.content.delete.html.php'; ?>
               </div>
         </div>
     </div>
@@ -140,25 +138,30 @@ function isValuesSessionFilled(){
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/deleteAI/deleteAI.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+<script src="./plugins/general/copyToClipboard.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script> $(function () { $(".select2").select2(); }); </script>
 
 <script>
-        $(function () {
-            $('.slider').slider();
-            $("#confidence").ionRangeSlider({
-              type: "single",
-              from: "good",
-              grid: true,
-              keyboard: true,
-              onStart: function (data) {console.log("onStart"); },
-              onChange: function (data) {console.log("onChange"); },
-              onFinish: function (data) { console.log("onFinish"); },
-              onUpdate: function (data) {console.log("onUpdate"); },
-              values: ["bad", "two", "three","four", "five", "normal","good", "very good", "excellent", "oracle"]
-            });   
+    $(function () {
+        $('.slider').slider();
+        $("#confidence").ionRangeSlider({
+            type: "single",
+            min: 1,
+            max: 10,
+            from:5,
+            from_value:"normal",
+            step: 1,
+            grid: true,
+            keyboard: true,
+            onStart: function (data) {console.log("onStart"); },
+            onChange: function (data) {console.log("onChange"); },
+            onFinish: function (data) { console.log("onFinish"); },
+            onUpdate: function (data) {console.log("onUpdate"); },
+            values: ["very bad", "bad", "little bad","mediocre", "normal", "good","very good", "excellent", "genius", "oracle"]
         });
+    });
 </script>
 </body>
 </html>

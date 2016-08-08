@@ -58,7 +58,7 @@
             <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
             <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
             <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-            <li><a href="./optionAI.php"><i class="fa fa  fa-gear"></i>AI options</a></li>
+            <li><a href="settingsAI.php"><i class="fa fa  fa-gear"></i>AI options</a></li>
         </ul>
         </li>
         <li><a href="./newAi.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>

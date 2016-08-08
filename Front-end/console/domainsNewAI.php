@@ -13,7 +13,6 @@
 
     fillSessionVariablesByPOST();
 
-
     $dev_token = \hutoma\console::getDevToken();
     $response = \hutoma\console::getDomains($dev_token);
     unset($dev_token);
@@ -27,26 +26,22 @@
 function isPostInputSet(){
     return  (
         isset($_POST['ai_name']) &&
-        isset($_POST['ai_type']) &&
+        isset($_POST['ai_description']) &&
         isset($_POST['ai_language']) &&
         isset($_POST['ai_timezone']) &&
         isset($_POST['ai_confidence']) &&
-        isset($_POST['ai_description'])
+        isset($_POST['ai_personality'])
+        //isset($_POST['ai_avatar'])
     );
 }
 
 function fillSessionVariablesByPOST(){
-
     $_SESSION['ai_name'] = $_POST['ai_name'];
-    if ( $_POST['ai_type'] ==='public')
-        $_SESSION['ai_private'] = 0;
-    else
-        $_SESSION['ai_private'] = 1;
+    $_SESSION['ai_description'] = $_POST['ai_description'];
     $_SESSION['ai_language'] = $_POST['ai_language'];
     $_SESSION['ai_timezone'] = $_POST['ai_timezone'];
     $_SESSION['ai_confidence'] = $_POST['ai_confidence'];
-    $_SESSION['ai_description'] = $_POST['ai_description'];
-
+    $_SESSION['ai_personality'] = $_POST['ai_personality'];
 }
 
 
@@ -74,8 +69,7 @@ function fillSessionVariablesByPOST(){
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',0)">
-<div class="wrapper">
-
+<div class="wrapper" id="wrapper">
     <header class="main-header">
     <?php include './dynamic/header.html.php'; ?>
     </header>
@@ -87,35 +81,13 @@ function fillSessionVariablesByPOST(){
         <?php include './dynamic/userpanel.html.php'; ?>
         <!-- ================ USER ACTION ================== -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <?php
-            if (isset($_SESSION['current_ai_name'])) {
-                echo('
-                        <li>
-                        <a href="#">
-                          <i class="fa fa-user"></i><span>'.$_SESSION['current_ai_name'].'</span><i class="fa fa-ellipsis-v pull-right"></i>
-                        </a>
-                        <ul class="treeview-menu">
-                            <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-                            <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-                            <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-                            <li><a href="./optionAI.php"><i class="fa fa-gear"></i>AI options</a></li>
-                        </ul>
-                        </li>
-                        <li class="active"><a href="#"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-                        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-                        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-                        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-                  ');
-              }
-              else
-                echo ('<li class="active"><a href="./newAI.php"><i class="fa fa-plus-circle"></i> <span>Create new AI</span></a></li>');
-        ?>
-        <li><a href="./documentation.php"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li class="header">WORKPLACE</li>
+            <li class="active"><a href="./home.php"><i class="fa fa-home"></i><span>home</span></a></li>
+            <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+            <li class="header">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -125,22 +97,7 @@ function fillSessionVariablesByPOST(){
     <!-- =============================================== -->
     <div class="content-wrapper">
     <section class="content">
-        
-        <form method="POST" id="domainsNweAIform" action="./saveAI.php" onsubmit="domainsToJsonForPOST()">
-            <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
-            <button type="submit" class="btn btn-success flat" id="btnSave" value="" onClick="">save</button>
-            <p></p>
-            
-            <div class="input-group-btn">
-            <input class="form-control input-lg " value="" placeholder="Search" tabindex="0" onkeyup="searchDomain(this.value)">
-            <input type="hidden" id="userActivedDomains"name="userActivedDomains" value="">
-            </div>
-            <p></p>
-            
-            <h2></h2>
-            <p id="domsearch"></p>
-    </form>
-    <p></p>
+            <?php include './dynamic/domainsNewAI.content.html.php'; ?>
     </section>
     </div>
 
@@ -151,21 +108,18 @@ function fillSessionVariablesByPOST(){
     <aside class="control-sidebar control-sidebar-dark">
     <?php include './dynamic/sidebar.controll.html.php'; ?>
     </aside>
-</div><!-- ./wrapper -->
+</div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-<script src="./plugins/daterangepicker/daterangepicker.js"></script>
-<script src="./plugins/domain/domain.js"></script>
 <script src="./plugins/shared/shared.js"></script>
+<script src="./plugins/domain/domain.js"></script>
+
 <script>
   var domains = <?php  echo json_encode($response['domain_list']);  unset($response); ?>;
-
-  // create a actived domains associative object - key is dom_id
   var userActived ={};
   for (var x in domains){
       var key = domains[x].dom_id;
@@ -176,6 +130,7 @@ function fillSessionVariablesByPOST(){
   newNode.className = 'row';
   newNode.id = 'domains_list';
 </script>
+
 <script>
   function searchDomain(str) {
     showDomains(str,0);

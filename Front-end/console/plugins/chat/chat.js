@@ -61,9 +61,9 @@ function createRightMsg(ai_name,msg,error){
     wHTML +=('</div>');
     wHTML +=('<img class="direct-chat-img" src="./dist/img/user3-128x128.jpg" alt="AI image">');
     if( error)
-        wHTML +=('<div class="direct-chat-text bg-red">');
+        wHTML +=('<div class="direct-chat-text bg-warning">');
     else
-        wHTML +=('<div class="direct-chat-text">');
+        wHTML +=('<div class="direct-chat-text bg-primary">');
     wHTML += msg;
     wHTML +=('</div>');
     newLeftMsg.innerHTML = wHTML;

@@ -3,7 +3,7 @@
 <div class="box box-solid box-clean flat no-shadow">
     <div class="box-header with-border">
         <i class="fa fa-cloud-upload"></i>
-        <h3 class="box-title">Training Area</h3>
+        <h3 class="box-title">AI Training</h3>
         <a data-toggle="collapse"  href="#collapseInfo">
             <div class=" pull-right">more info
             <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -11,10 +11,8 @@
         </a>
     </div>
     <div class="box-body" id="boxTraining"></div>
-    <div class="box-body" id="boxUpload"></div>
 
 </div>
-
 
 <form action="" method="post" enctype="multipart/form-data">
 <script type="text/javascript">
