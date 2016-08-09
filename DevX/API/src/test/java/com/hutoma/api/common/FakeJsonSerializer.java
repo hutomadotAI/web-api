@@ -1,4 +1,4 @@
-package com.hutoma.api.logic;
+package com.hutoma.api.common;
 
 import com.hutoma.api.common.JsonSerializer;
 

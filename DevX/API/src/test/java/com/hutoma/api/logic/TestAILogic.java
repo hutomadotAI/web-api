@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
-import com.amazonaws.services.route53domains.model.CountryCode;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;

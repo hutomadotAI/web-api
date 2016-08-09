@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.ai.api_root;
@@ -9,8 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.SecurityContext;
-
-import java.security.Principal;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -99,7 +98,7 @@ public class TestAdminLogic {
     @Test
     public void testDelete_Success() {
         when(fakeDatabase.deleteDev(anyString())).thenReturn(true);
-        when(fakeMessageQueue.pushMessageDeleteDev(any(), anyString())).thenReturn(true);
+        when(fakeMessageQueue.pushMessageDeleteDev(anyString())).thenReturn(true);
         Assert.assertEquals(200, deleteDev(VALIDDEVID).status.code);
     }
 

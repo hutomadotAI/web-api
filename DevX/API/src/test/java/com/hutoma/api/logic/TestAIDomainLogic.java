@@ -1,9 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
 import hutoma.api.server.ai.api_root;
 import org.junit.Assert;
 import org.junit.Before;

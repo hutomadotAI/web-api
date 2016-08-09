@@ -142,7 +142,7 @@ public class AILogic {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
-            messageQueue.pushMessageDeleteAI(config, devid, aiid);
+            messageQueue.pushMessageDeleteAI(devid, aiid);
         }
         catch (Exception e){
             st.code = 500;

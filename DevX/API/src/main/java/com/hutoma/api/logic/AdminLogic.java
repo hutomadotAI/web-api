@@ -96,7 +96,7 @@ public class AdminLogic {
                 st.code = 500;
                 st.info = "Internal Server Error.";
             }
-            messageQueue.pushMessageDeleteDev(config, devid);
+            messageQueue.pushMessageDeleteDev(devid);
         }
         catch (Exception e){
             st.code = 500;

@@ -24,6 +24,14 @@ public class Config {
         return Regions.US_EAST_1;
     }
 
+    public String getWNetServer() {
+        return getConfigProp("wnet_server");
+    }
+
+    public long getNeuralNetworkTimeout() {
+        return Long.valueOf(getConfigProp("RNNTimeout"));
+    }
+
     public String getConfigProp(String p) {
         java.util.Properties prop = new java.util.Properties();
         try {

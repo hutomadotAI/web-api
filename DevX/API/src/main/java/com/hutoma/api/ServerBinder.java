@@ -3,9 +3,12 @@ package com.hutoma.api;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.connectors.NeuralNet;
+import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.logic.AIDomainLogic;
 import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.AdminLogic;
+import com.hutoma.api.logic.ChatLogic;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import javax.inject.Singleton;
@@ -22,6 +25,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(AILogic.class).to(AILogic.class);
         bind(AIDomainLogic.class).to(AIDomainLogic.class);
+        bind(ChatLogic.class).to(ChatLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -30,5 +34,7 @@ public class ServerBinder extends AbstractBinder {
         bind(MessageQueue.class).to(MessageQueue.class);
         bind(Tools.class).to(Tools.class);
         bind(Logger.class).to(Logger.class).in(Singleton.class);
+        bind(NeuralNet.class).to(NeuralNet.class);
+        bind(SemanticAnalysis.class).to(SemanticAnalysis.class);
     }
 }

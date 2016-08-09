@@ -1,9 +1,11 @@
 package com.hutoma.api.connectors;
 
+import com.hutoma.api.common.Logger;
 import hutoma.api.server.ai.api_root;
 import hutoma.api.server.db.ai;
 import hutoma.api.server.db.domain;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +15,14 @@ import java.util.ArrayList;
  */
 public class Database {
 
+    private final String LOGFROM = "database";
+
+    Logger logger;
+
+    @Inject
+    public Database(Logger logger) {
+        this.logger = logger;
+    }
 
     public boolean createDev(String username, String email, String password, String passwordSalt, String name, String attempt, String dev_token, int planId, String devid) {
         return hutoma.api.server.db.ai.create_dev(username, email, password, passwordSalt, name, attempt, dev_token, planId, devid);
@@ -45,4 +55,32 @@ public class Database {
     public ArrayList<api_root._domain> getAllDomains() {
         return hutoma.api.server.db.domain.get_all_domains();
     }
+
+    public boolean isNeuralNetworkServerActive(String dev_id, String aiid) throws Exception {
+        try {
+            return hutoma.api.server.db.RNN.is_RNN_active(dev_id, aiid);
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "db call failed: " + e.toString());
+            throw e;
+        }
+    }
+
+    public long insertNeuralNetworkQuestion(String dev_id, String uid, String aiid, String q) {
+        try {
+            return hutoma.api.server.db.RNN.insertQuestion(dev_id, uid, aiid, q);
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "db call failed: " + e.toString());
+            return -1;
+        }
+    }
+
+    public String getAnswer(long qid) {
+        try {
+            return hutoma.api.server.db.RNN.getAnswer(qid);
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "db call failed: " + e.toString());
+        }
+        return null;
+    }
+
 }

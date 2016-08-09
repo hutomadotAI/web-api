@@ -8,6 +8,9 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.Logger;
+
+import javax.inject.Inject;
 
 
 public class MessageQueue {
@@ -32,19 +35,37 @@ public class MessageQueue {
         start_RNN
     }
 
-    public boolean pushMessageDeleteDev(Config config, String devid) {
-        return pushMessage(config, AwsMessage.delete_dev + "|" + devid + "|000");
+    private final String LOGFROM = "messagequeue";
+
+    Config config;
+    Logger logger;
+
+    @Inject
+    public MessageQueue(Config config, Logger logger) {
+        this.config = config;
+        this.logger = logger;
     }
 
-    public boolean pushMessageDeleteAI(Config config, String devid, String aiid) {
-        return pushMessage(config, AwsMessage.delete_ai + "|" + devid + "|" + aiid);
+    public boolean pushMessageDeleteDev(String devid) {
+        return pushMessage(AwsMessage.delete_dev + "|" + devid + "|000");
     }
 
-    protected boolean pushMessage(Config config, String message) {
+    public boolean pushMessageDeleteAI(String devid, String aiid) {
+        return pushMessage(AwsMessage.delete_ai + "|" + devid + "|" + aiid);
+    }
+
+    public boolean pushMessageStartRNN(String devid, String aiid) {
+        return pushMessage(AwsMessage.start_RNN + "|" + devid + "|" + aiid);
+    }
+
+    protected boolean pushMessage(String message) {
         AWSCredentials credentials = null;
         try {
             credentials = new ProfileCredentialsProvider().getCredentials();
-        } catch (Exception e) {return false;}
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "getCredentials error " + e.toString());
+            return false;
+        }
 
         AmazonSQS sqs = new AmazonSQSClient(credentials);
         Region targetRegion = Region.getRegion(config.getMessageQueueRegion());
@@ -52,9 +73,9 @@ public class MessageQueue {
 
         try {
             sqs.sendMessage(new SendMessageRequest(config.getCoreQueue(), message));
-        }  catch (Exception e) {
-            System.out.print(e.getMessage());
-           return  false;
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "sendMessage error " + e.toString());
+            return false;
         }
 
         return true;
