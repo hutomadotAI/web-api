@@ -109,9 +109,9 @@ function domainsToJsonForPOST() {
     RecursiveUnbind($('#wrapper'));
 
     /*
-    $("#btnSave").attr("disabled", true);
-    $("#btnSave").attr("onClick","");
-    $('#btnSave').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
+    $("#btnNext").attr("disabled", true);
+    $("#btnNext").attr("onClick","");
+    $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
 
     $("#btnBack").attr("disabled", true);
     $("#btnBack").attr("onClick","");

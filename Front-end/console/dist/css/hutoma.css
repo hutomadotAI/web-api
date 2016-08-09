@@ -2131,6 +2131,17 @@ a:focus {
   padding: 5px 10px;
   margin-left: 90px;
 }
+
+.info-box-title {
+  display: block;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.info-box-description {
+  display: block;
+  font-size: 12px;
+}
 .info-box-number {
   display: block;
   font-weight: bold;
@@ -4363,6 +4374,10 @@ table.text-center th {
   color: #000;
   background-color: #b5bbc8 !important;
 }
+.bg-gray-ultralight {
+  background-color: #f9f9f9 !important;
+}
+
 .bg-black-active {
   background-color: #000000 !important;
 }
@@ -4535,6 +4550,10 @@ table.text-center th {
 }
 .text-sm {
   font-size: 12px;
+}
+
+.text-md {
+  font-size: 20px;
 }
 .jqstooltip {
   padding: 5px!important;

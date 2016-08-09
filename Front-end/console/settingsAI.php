@@ -122,9 +122,10 @@ function isValuesSessionFilled(){
     <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
+    <!--
     <aside class="control-sidebar control-sidebar-dark">
-    <?php include './dynamic/sidebar.controll.html.php'; ?>
     </aside>
+    -->
 
 </div>
 

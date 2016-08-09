@@ -1,5 +1,6 @@
 <div class="box box-solid box-success flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
+        <i class="fa fa-user-plus"></i>
     <h3 class="box-title">Create Your New AI</h3>
     </div>
     <form method="POST" id="createAIform" action="./domainsNewAI.php">

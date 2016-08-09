@@ -105,9 +105,10 @@ function fillSessionVariablesByPOST(){
     <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
+    <!--
     <aside class="control-sidebar control-sidebar-dark">
-    <?php include './dynamic/sidebar.controll.html.php'; ?>
     </aside>
+    -->
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

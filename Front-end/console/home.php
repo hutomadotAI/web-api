@@ -67,6 +67,11 @@
     </section>
     </div>
 
+    <!--
+    <aside class="control-sidebar control-sidebar-dark">
+    </aside>
+    -->
+    
     <footer class="main-footer">
     <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
