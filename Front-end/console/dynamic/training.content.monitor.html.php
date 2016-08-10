@@ -30,9 +30,9 @@ function decodeAIState($state)
 }
 ?>
 
-<div class="box box-solid box-clean flat no-shadow">
-    <div class="box-header with-border">
-        <i class="fa fa-bar-chart-o"></i>
+<div class="box box-solid box-clean  flat no-shadow" >
+    <div class="box-header no-border">
+        <i class="fa fa-bar-chart-o text-success"></i>
         <h3 class="box-title">Training Monitor</h3>
         <a data-toggle="collapse"  href="#collapseMonitoring">
             <div class=" pull-right">more info
@@ -40,25 +40,24 @@ function decodeAIState($state)
             </div>
         </a>
     </div>
-    <div class="box-body">
-    <div class="box-body no-padding">
-        <table class="table table-condensed">
+    <div class="box-body table-responsive no-padding">
+        <table class="table ">
             <tr>
-                <th style="width: 30%;" >State</th>
-                <th  style="width: 50%;">Progress</th>
+                <th class="text-center" style="width: 20%;" >State</th>
+                <th class="text-center" style="width: 60%;">Progress</th>
                 <th style="width: 10%;">Label</th>
             </tr>
             <tr>
                 <td><?php echo ($_SESSION['ai_status']); ?></td>
                 <td>
-                    <div class="progress progress-xs progress-striped active" style="margin-top:8px;">
+                    <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
                         <div class="progress-bar progress-bar-success" style="width: 90%;"></div>
                     </div>
                 </td>
                 <td><span class="badge bg-green">90%</span></td>
             </tr>
         </table>
-    </div>
+
     </div>
 
     <div id="collapseMonitoring" class="panel-collapse collapse">

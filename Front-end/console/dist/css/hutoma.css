@@ -176,7 +176,7 @@ body.hold-transition .main-header .logo {
   margin-right: auto;
   margin-left: auto;
   padding-left: 15px;
-  padding-righ7: 15px;
+  padding-right: 15px;
 }
 
 .content-small{
@@ -2553,10 +2553,11 @@ a:focus {
 }
 /* NAV TABS */
 .nav-tabs-custom {
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   background: #fff;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   border-radius: 0px;
+   border: 1px solid #d2d6de;
 }
 .nav-tabs-custom > .nav-tabs {
   margin: 0;
@@ -4328,6 +4329,11 @@ table.text-center th {
 .modal-info .modal-body {
   background-color: #00c0ef !important;
 }
+
+.alert-base{
+  background-color: #f9f9f9 !important;
+}
+
 .bg-blue {
   background-color: #0073b7 !important;
 }
@@ -4551,9 +4557,11 @@ table.text-center th {
 .text-sm {
   font-size: 12px;
 }
-
 .text-md {
-  font-size: 20px;
+  font-size: 18px;
+}
+.text-bg {
+  font-size: 22px;
 }
 .jqstooltip {
   padding: 5px!important;

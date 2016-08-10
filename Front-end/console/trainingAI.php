@@ -18,6 +18,7 @@
     }
 
 function generateSession(){
+
     $dev_token = \hutoma\console::getDevToken();
     $array = \hutoma\console::getSingleAI($dev_token,$_POST['aiid']);
     if ($array['status']['code']===200) {
@@ -39,12 +40,12 @@ function isValuesSessionFilled(){
         isset($_SESSION['ai_deep_learning_error']) &&
         isset($_SESSION["ai_training_debug_info"]) &&
         isset($_SESSION['ai_training_status']) &&
-
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
         isset($_SESSION['ai_personality']) &&
         isset($_SESSION['ai_status']) &&
+
         //isset($_SESSION['ai_training_file']) &&                       // parameter missing
         isset($_SESSION['current_ai_name']) &&
         isset($_SESSION['userActivedDomains']);
@@ -62,11 +63,13 @@ function fillSessionVariables($array){
 
     $_SESSION['ai_language'] = 'COSTANT language';                      // parameter missing
     $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';          // parameter missing
-    $_SESSION["ai_confidence"] = '10';                                  // parameter missing
+    $_SESSION["ai_confidence"] = '10';
+    $_SESSION['ai_personality'] = 'default';                             // parameter missing
     $_SESSION['ai_status'] = $array['ai']['ai_status'];
+
     //$_SESSION['ai_training_file'] = $array['ai']['ai_trainingfile'];  // parameter missing
     $_SESSION['current_ai_name'] = $array['ai']['name'];
-    $_SESSION['userActivedDomains'] = '';
+    $_SESSION['userActivedDomains'] = \hutoma\console::getDomains_and_UserActiveDomains($_SESSION['dev_id'], $_SESSION['aiid']);
 }
 ?>
 
@@ -134,15 +137,16 @@ function fillSessionVariables($array){
         <div class="row">
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>  
-                <?php include './dynamic/training.content.diagram.html.php'; ?>
+                <?php include './dynamic/training.content.monitor.html.php'; ?>
                 <?php include './dynamic/training.content.domains.html.php'; ?>
+                <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
             <div class="col-md-5">
                 <?php include './dynamic/training.content.chat.html.php'; ?>
                 <?php include './dynamic/training.content.json.html.php'; ?>
             </div>
         </div>
-        <?php include './dynamic/training.content.keys.html.php'; ?>
+
     </section>
     </div>
 
@@ -175,9 +179,8 @@ function fillSessionVariables($array){
 <script src="./plugins/flot/jquery.flot.categories.min.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./dist/js/demo.js"></script>
 <script src="./plugins/chat/chat.js"></script>
-<script src="./plugins/training/training.chart.js"></script>
+<script src="./plugins/general/copyToClipboard.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 </body>

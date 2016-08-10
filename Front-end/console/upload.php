@@ -12,17 +12,22 @@ if ( !isset($_SESSION['aiid']) ){
     exit;
 }
 
-if ( !isset($_FILES['inputfile'])) {
+if (!isset($_POST['tab'])) {
+    echo('no select: '.$_POST['tab']);
+    exit;
+}
+
+if ( !isset($_FILES['inputfile'.$_POST['tab']])) {
     echo 'Upload file failed';
     exit;
 }
 
-if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK ){
-    echo 'Upload file something is wrong';
+if ($_FILES['inputfile'.$_POST['tab']]['error'] != UPLOAD_ERR_OK ){
+    echo 'During Upload processing something is gone wrong';
     exit;
 }
 
-if (!is_uploaded_file($_FILES['inputfile']['tmp_name'])) {
+if (!is_uploaded_file($_FILES['inputfile'.$_POST['tab']]['tmp_name'])) {
     echo 'empty file';
     exit;
 }
@@ -39,7 +44,7 @@ if (!is_uploaded_file($_FILES['inputfile']['tmp_name']) || !copy($_FILES['inputf
 $dev_token = \hutoma\console::getDevToken();
 $source_type = 0;
 $url = "";
-$response = hutoma\console::uploadFile($dev_token,$_SESSION['aiid'],$_FILES['inputfile'],$source_type,$url);
+$response = hutoma\console::uploadFile($dev_token,$_SESSION['aiid'],$_FILES['inputfile'.$_POST['tab']],$source_type,$url);
 unset($dev_token);
 unset($source_type);
 unset($url);

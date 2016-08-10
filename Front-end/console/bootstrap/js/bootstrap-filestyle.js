@@ -223,7 +223,7 @@
 			}
 
 			btn = '<span class="group-span-filestyle ' + (_self.options.input ? 'input-group-btn' : '') + '">' + 
-			  '<label for="' + id + '"  style="margin-right: 5px; width: 120px;" class="btn ' + _self.options.buttonName + ' ' + 
+			  '<label for="' + id + '"  style="width: 120px;" class="btn ' + _self.options.buttonName + ' ' + 
 			(_self.options.size == 'nr' ? '' : 'btn-' + _self.options.size) + '" ' + 
 			(_self.options.disabled ? 'disabled="true"' : '') + '>' + 
 			_self.htmlIcon() + '<span class="buttonText">' + _self.options.buttonText + '</span>' + 

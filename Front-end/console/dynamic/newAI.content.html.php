@@ -49,7 +49,7 @@
 
             <!-- Learn new Answer -->
             <div class="col-md-6">
-                <a data-toggle="collapse"  href="#collapsePersonality">
+                <a data-toggle="collapse"  href="#collapseLearn">
                     <div class=" pull-right">more info
                         <i class="fa fa-question-circle text-md text-yellow"></i>
                     </div>
@@ -73,28 +73,61 @@
             </div>
         </div>
 
-        <div id="collapsePersonality" class="panel-collapse collapse">
-            <div class="box-body">
-                <div class="overlay center-block">
-                    <section class="content bg-gray-light" >
-                        <div class="box-body">
-                            <dl class="dl-horizontal">
-                                <dt>Description Actions</dt>
-                                <dd>Tell the AI learning ...</dd>
-                                <dt>Euismod</dt>
-                                <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                <dt>Malesuada porta</dt>
-                                <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                <dt>Felis euismod semper eget lacinia</dt>
-                                <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                            </dl>
+        <div class="row">
+
+            <div class="col-md-6">
+                <div id="collapseLearn" class="panel-collapse collapse">
+                    <div class="box-body">
+                        <div class="overlay center-block">
+                            <section class="content bg-gray-light" >
+                                <div class="box-body">
+                                    <dl class="dl-horizontal">
+                                        <dt>Description Actions</dt>
+                                        <dd>Tell the AI learning ...</dd>
+                                        <dt>Euismod</dt>
+                                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+                                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
+                                        <dt>Malesuada porta</dt>
+                                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
+                                        <dt>Felis euismod semper eget lacinia</dt>
+                                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                                    </dl>
+                                </div>
+                            </section>
+                            <p></p>
+                            need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
                         </div>
-                    </section>
-                    <p></p>
-                    need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                    </div>
                 </div>
             </div>
+
+
+            <div class="col-md-6">
+                <div id="collapsePersonality" class="panel-collapse collapse">
+                    <div class="box-body">
+                        <div class="overlay center-block">
+                            <section class="content bg-gray-light" >
+                                <div class="box-body">
+                                    <dl class="dl-horizontal">
+                                        <dt>Description Actions</dt>
+                                        <dd>Tell the AI learning ...</dd>
+                                        <dt>Euismod</dt>
+                                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+                                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
+                                        <dt>Malesuada porta</dt>
+                                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
+                                        <dt>Felis euismod semper eget lacinia</dt>
+                                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                                    </dl>
+                                </div>
+                            </section>
+                            <p></p>
+                            need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
 

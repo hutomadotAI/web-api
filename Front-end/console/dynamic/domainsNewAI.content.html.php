@@ -1,4 +1,4 @@
-<form method="POST" id="domainsNweAIform" action="./market.php" onsubmit="domainsToJsonForPOST()">
+<form method="POST" id="domainsNewAIform" action="./market.php" onsubmit="domainsToJsonForPOST()">
     <div class="row row-centered">
         <div class="col-xs-4 col-centered">
             <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>

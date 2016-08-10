@@ -1,123 +1,193 @@
 var TRAINING = TRAINING || (function(){
-    var _args = {}; // private
-    return {
-        init : function(Args) {
-            _args = Args;
-            showStart(_args[0],_args[1]);
-            writeScript()
-        },
-    };
-}());
+        var _args = {}; // private
+        return {
+            init : function(Args) {
+                _args = Args;
+                showStart(_args[0],_args[1],_args[2]);
+            }
+        };
+    }());
 
 
-function showStart(status,filename){
+function showStart(status,filename,nameAI){
+    var wHTMLFile = "";
+    var newNodeFile = document.createElement('div');
+    newNodeFile.className = '';
+    newNodeFile.id = 'infoTrainingFile';
+
+    var wHTMLBook= "";
+    var newNodeBook = document.createElement('div');
+    newNodeBook.className = '';
+    newNodeBook.id = 'infoTrainingBook';
+
+    var wHTMLWeb= "";
+    var newNodeWeb = document.createElement('div');
+    newNodeWeb.className = '';
+    newNodeWeb.id = 'infoTrainingWeb';
+
+
+    wHTMLFile += trainingAreaFile(nameAI,0);
+    newNodeFile.innerHTML = wHTMLFile;
+    document.getElementById('boxTrainingFile').appendChild(newNodeFile);
+    writeScript(0);
+
+    wHTMLBook += trainingAreaFile(nameAI,1);
+    newNodeBook.innerHTML = wHTMLBook;
+    document.getElementById('boxTrainingBook').appendChild(newNodeBook);
+    writeScript(1);
+
+    wHTMLWeb += trainingAreaFile(nameAI,2);
+    newNodeWeb.innerHTML = wHTMLWeb;
+    document.getElementById('boxTrainingWeb').appendChild(newNodeWeb);
+    writeScript(2);
+}
+
+
+function trainingAreaFile(nameAI,TAB){
+    var wHTML='';
+    var msg;
+    var placeholder;
+    var chooseButtonLabel;
+    var uploadButtonLabel;
+
+    switch(TAB){
+        case(0): // upload file
+            msg ='Before start training you need upload your text file';
+            placeholder = 'No file';
+            chooseButtonLabel = ' choose file ';
+            uploadButtonLabel = 'Upload file';
+            break;
+        case(1): // upload book
+            msg ='Before start training you need upload your complex structure';
+            placeholder = 'No complex structure ';
+            chooseButtonLabel = ' choose structure ';
+            uploadButtonLabel = 'Upload sctucture';
+            break;
+        case(2): // upload web
+            msg ='Before start training you need add an URL';
+            placeholder = 'insert URL here';
+            chooseButtonLabel = ' add URL ';
+            uploadButtonLabel = 'Upload URL';
+            break;
+        default: msg ='Oops.. Something is wrong!!';
+    }
+
+
+    var wHTMLdata='';
+    wHTMLdata += ('data-iconName="glyphicon glyphicon-inbox" ');
+    wHTMLdata += ('data-buttonName="btn-success btn-sm flat" ');
+    wHTMLdata += ('data-placeholder="'+placeholder+'" ');
+    wHTMLdata += ('data-buttonText=" '+chooseButtonLabel+' " ');
+
+    wHTML += ('<p></p>');
+    if ( TAB !='2') {
+        wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload' + TAB + '" onClick="uploadFile(' + TAB + ')" style="width: 120px;">');
+        wHTML += ('<i class="fa fa-cloud-upload"></i> ' + uploadButtonLabel);
+        wHTML += ('</div>');
+
+        wHTML += ('<p></p>');
+        wHTML += ('<input type="file" id="inputfile' + TAB + '" name="inputname' + TAB + '" class="filestyle" ' + wHTMLdata + '>');
+        wHTML += ('<p></p>');
+    }
+    if ( TAB =='2') {
+        wHTML += ('<div class="input-group">');
+        wHTML += ('<input type="text" class="form-control" style="height:30px;" id="inputURL" name="inputURL" placeholder="'+placeholder+'" onkeyup="activeNext(this.value,'+TAB+')">');
+        wHTML += ('<span class="input-group-btn">');
+        wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload'+TAB+'" onClick="uploadURL('+ TAB +')" style="width: 120px;">');
+        wHTML += ('<i class="fa fa-cloud-upload"></i> '+uploadButtonLabel);
+        wHTML += ('</div>');
+        wHTML += ('</span>');
+        wHTML += ('</div>');
+    }
+    wHTML += ('<p></p>');
+    wHTML += ('<div class="alert alert-base alert-dismissable flat">');
+    wHTML += ('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>');
+    wHTML += ('<i class="icon fa fa-check"></i>');
+    wHTML += ('<span id="msgUpload'+TAB+'">'+msg+'</span>');
+    wHTML += ('</div>');
+    wHTML += ('<form method="post">');
+    wHTML += ('<input type="hidden" id="tab" name="tab" value="'+TAB+'">');
+    wHTML += ('</form>');
+
+    return wHTML;
+}
+
+
+function helpInfoSection(){
     var wHTML = "";
-    var newNode = document.createElement('div');
-    newNode.className = '';
-    newNode.id = 'infoTraining';
-
-    if ( status == 0)
-        wHTML += trainingAreaUnchecked();
-    else
-        wHTML += trainingAreaChecked(filename);
-
-    newNode.innerHTML = wHTML;
-    document.getElementById('boxTraining').appendChild(newNode);
-}
-
-
-function trainingAreaUnchecked(){
-    var wHTML='';
-    var msg ='You need upload the training file first.';
-
-    wHTML += htmlSectionInputFileUpload(false);
-    wHTML += htmlSectionButtonUpload(msg,false);
-    wHTML += buttonGetMoreInfo();
-
-    return wHTML;
-}
-
-function trainingAreaChecked(filename){
-    var wHTML='';
-    var msg ='The last training file is '+filename;
-
-    wHTML += htmlSectionInputFileUpload(true);
-    wHTML += htmlSectionButtonUpload(msg,true);
-    wHTML += buttonGetMoreInfo();
-
-    return wHTML;
-}
-
-
-function htmlSectionInputFileUpload(check){
-    var wHTML='';
-    wHTML += ('<div class="btn-group pull-left">');
-    if(check)
-        wHTML += ('<i class=" fa fa-check-circle-o text-md text-success" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
-    else
-        wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconFile" style="margin-top: 18px;margin-right: 8px; margin-left: 10px;"></i>');
+    wHTML += ('<div class="btn-group pull-right">');
+    wHTML += ('<a data-toggle="collapse"  href="#collapseInfo">');
+    wHTML += ('<div class=" pull-right">more info');
+    wHTML += ('<i class="fa fa-question-circle text-md text-yellow"></i>');
     wHTML += ('</div>');
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<input type="file" id="inputfile" name="inputname" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText=" choose file ">');
+    wHTML += ('</a>');
     wHTML += ('</div>');
     return wHTML;
 }
 
 
-function htmlSectionButtonUpload(msg,check) {
-    var wHTML='';
-    wHTML += ('<div class="btn-group pull-left">');
-    if(check)
-        wHTML += ('<i class="fa fa-check-circle-o text-md text-success" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
-    else
-        wHTML += ('<i class="fa fa-exclamation-circle text-md text-danger" id="iconUpload" style="margin-top: 18px; margin-right: 8px;margin-left: 10px;"></i>');
-    wHTML += ('<div id="msgUpload" style="display:inline;">');
-    wHTML += (msg);
-
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    wHTML += ('<div class="box-header">');
-    wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id ="btnUpload"  onClick="uploadFile()" style="margin-right: 5px; width: 120px;">');
-    wHTML += ('<i class="fa fa-cloud-upload"></i> Upload file');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    return wHTML;
-}
-
-
-function writeScript(){
+function writeScript(TAB){
     var wHTML="";
     var script = document.createElement('script');
     script.id = 'uploadExperience';
     document.getElementsByTagName('head')[0].appendChild(script);
 
-    wHTML +='var input = document.getElementById("inputfile");';
+    wHTML +='var input = document.getElementById("inputfile'+TAB+'");';
     wHTML +='input.onclick = function () { this.value = null; };';
-    wHTML +='input.onchange = function () { changeUIState(); };';
+    wHTML +='input.onchange = function () { changeUIState('+TAB+'); };';
 
     script.text = wHTML;
     document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 
-
-function changeUIState(){
-    $("#btnUpload").attr("disabled", false);
-    $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
-    $('#iconUpload').removeClass('fa fa-exclamation-circle text-md text-danger').addClass('fa fa-check-circle-o text-md text-success');
-    $('#iconFile').removeClass('fa fa-exclamation-circle text-md text-danger').addClass('fa fa-check-circle-o text-md text-success');
-
-    document.getElementById("msgUpload").textContent='Now you can upload your file';
+function changeUIState(TAB){
+    var msg;
+    switch(TAB){
+        case(0): // upload file
+            msg ='Now you can upload your file';
+            break;
+        case(1): // upload book
+            msg ='Now you can upload your file your complex structure';
+            break;
+        case(2): // upload web
+            msg ='Now you can upload your URL';
+            break;
+        default: msg ='Oops.. Something is wrong!!';
+    }
+    $('#btnUpload'+TAB).attr('disabled', false);
+    $('#btnUpload'+TAB).removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
+    try {
+        document.getElementById('msgUpload'+TAB).textContent = msg;
+    }catch (e) {
+    }
 }
 
 
-function uploadFile(){
-    var isDisabled =  $('#btnUpload').attr('class') == 'btn btn-success btn-sm pull-right flat';
+function uploadFile(TAB){
+    var isDisabled =  $('#btnUpload'+TAB).attr('class') == 'btn btn-success btn-sm pull-right flat';
+    var msgUploaded ='';
+    var msg;
+
+    switch(TAB){
+        case(0): // upload file
+            msgUploaded ='File uploaded!!';
+            break;
+        case(1): // upload book
+            msgUploaded ='Complex structure uploaded!!';
+            break;
+        case(2): // upload web
+            msgUploaded ='URL uploaded!!';
+            break;
+        default: msg ='Oops.. Something is wrong!!';
+    }
+    var msgError = 'Something is gone wrong.';
     if (isDisabled) {
 
         var xmlhttp;
         var file_data = new FormData();
-        file_data.append("inputfile", document.getElementById('inputfile').files[0]);
+        file_data.append("inputfile"+TAB, document.getElementById('inputfile'+TAB).files[0]);
+        file_data.append("tab",TAB);
 
         if (window.XMLHttpRequest)
             xmlhttp = new XMLHttpRequest();
@@ -129,21 +199,81 @@ function uploadFile(){
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 var JSONresponse = xmlhttp.responseText;
-
-                var JSONdata = JSON.parse(JSONresponse);
-                if(JSONdata['status']['code'] === 200)
-                    document.getElementById("msgUpload").textContent = 'File uploaded!!';
-                else
-                    document.getElementById("msgUpload").textContent = 'Something is gone wrong. File NOT uploaded.';
-                $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
+                try {
+                    var JSONdata = JSON.parse(JSONresponse);
+                    if (JSONdata['status']['code'] === 200)
+                        document.getElementById("msgUpload"+TAB).textContent = msgUploaded;
+                    else
+                        document.getElementById("msgUpload"+TAB).textContent = msgError;
+                }catch (e){
+                    alert(JSONresponse);
+                }
+                $('#btnUpload'+TAB).removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
                 $('#trainingBody').css("cursor", "default");
-                $('#btnUpload').css("cursor", "pointer");
+                $('#btnUpload'+TAB).css("cursor", "pointer");
             }
         };
         $('#trainingBody').css("cursor", "progress");
-        $('#btnUpload').css("cursor", "progress");
-        $('#btnUpload').removeClass('btn btn-success btn-sm pull-right flat').addClass('btn btn-success btn-sm pull-right flat disabled');
-        xmlhttp.send(file_data);
+        $('#btnUpload'+TAB).css("cursor", "progress");
+        $('#btnUpload'+TAB).removeClass('btn btn-success btn-sm pull-right flat').addClass('btn btn-success btn-sm pull-right flat disabled');
+        xmlhttp.send(file_data,TAB);
+    }
+}
+
+function learnRegExp(url){
+    return /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(url);
+}
+
+function uploadURL(TAB){
+    var isDisabled =  $('#btnUpload'+TAB).attr('class') == 'btn btn-success btn-sm pull-right flat';
+    var msgUploaded ='URL uploaded!!';
+
+    var msgError = 'Something is gone wrong.';
+    if (isDisabled) {
+
+        var xmlhttp;
+        var file_data = new FormData();
+        file_data.append("tab",TAB);
+
+        if (window.XMLHttpRequest)
+            xmlhttp = new XMLHttpRequest();
+        else
+            xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+
+        xmlhttp.open('POST','upload.php');
+
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var JSONresponse = xmlhttp.responseText;
+                try {
+                    var JSONdata = JSON.parse(JSONresponse);
+                    if (JSONdata['status']['code'] === 200)
+                        document.getElementById("msgUpload"+TAB).textContent = msgUploaded;
+                    else
+                        document.getElementById("msgUpload"+TAB).textContent = msgError;
+                }catch (e){
+                    alert(JSONresponse);
+                }
+                $('#btnUpload'+TAB).removeClass('btn btn-success btn-sm pull-right flat disabled').addClass('btn btn-success btn-sm pull-right flat');
+                $('#trainingBody').css("cursor", "default");
+                $('#btnUpload'+TAB).css("cursor", "pointer");
+            }
+        };
+        $('#trainingBody').css("cursor", "progress");
+        $('#btnUpload'+TAB).css("cursor", "progress");
+        $('#btnUpload'+TAB).removeClass('btn btn-success btn-sm pull-right flat').addClass('btn btn-success btn-sm pull-right flat disabled');
+        xmlhttp.send(file_data,TAB);
+    }
+}
+
+
+function activeNext(str,TAB) {
+    var url = $("#inputURL").val();
+    if ( learnRegExp(url) ){
+        $("#btnUpload"+TAB).removeClass("btn btn-success btn-sm pull-right flat disabled").addClass("btn btn-success btn-sm pull-right flat");
+    }
+    else{
+        $("#btnUpload"+TAB).removeClass("btn btn-success btn-sm pull-right flat").addClass("btn btn-success btn-sm pull-right flat disabled");
     }
 }
 
@@ -161,7 +291,6 @@ function buttonGetMoreInfo(){
     wHTML += ('</div>')
     return wHTML;
 }
-
 
 
 function drawTrainingMoreInfo() {
@@ -187,46 +316,3 @@ function drawTrainingMoreInfo() {
 
     return wHTML;
 }
-
-
-function drawRightButtons(status){
-    var wHTML = "";
-    switch (status) {
-        case 0 ://Queued
-            wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> start training');
-            wHTML += ('</div>');
-            break;
-        case 1 ://Training
-            wHTML += ('<div class="btn btn-warning btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> stop training');
-            wHTML += ('</div>');
-            break;
-        case 2 ://Trained
-            wHTML += ('<div class="btn btn-success btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> start training');
-            wHTML += ('</div>');
-            break;
-        case 3 ://Stopping
-            wHTML += ('<div class="btn btn-warning btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> stop training');
-            wHTML += ('</div>');
-            break;
-        case 4 ://Stopped
-            wHTML += ('<div class="btn btn-primary btn-sm pull-right flat" id="btnTraining" style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> resume training');
-            wHTML += ('</div>');
-            break;
-        case 5 ://Limited
-            wHTML += ('<div class="btn btn-success btn-sm pull-right flat disabled" id="btnTraining" data-toggle="tooltip" title="you have reach the limit of AIs training"style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-graduation-cap"></i> limit reached');
-            wHTML += ('</div>');
-            break;
-        default://Error
-            wHTML += ('<div class="btn btn-danger btn-sm pull-right disabled" id="btnTraining" data-toggle="tooltip" title="Unaspected AI status"style="margin-right: 5px; width: 120px;">');
-            wHTML += ('<i class="fa fa-warning"></i> training blocked');
-            wHTML += ('</div>');
-    }
-    return wHTML;
-}
-
