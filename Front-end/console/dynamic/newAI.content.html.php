@@ -18,6 +18,12 @@
               <input type="text" class="form-control" name="ai_name" id="ai_name" placeholder="Enter your AI name" onkeyup="activeNext(this.value)">
               </div>
               </div>
+
+
+                <p id="ai_name_alert"></p>
+
+
+
             </div>
 
             <!-- INPUT Language -->
@@ -136,8 +142,8 @@
     </form>
 
     <div class="box-footer">
-        <a href="newAI.php" class="btn btn-primary flat" id="btnCancel">cancel</a>
-        <button type="submit" id="btnNext"  class="btn btn-success flat disabled" onClick="" alt="next step">next</button>
+            <a href="newAI.php" class="btn btn-primary flat" id="btnCancel">cancel</a>
+            <button type="submit" id="btnNext"  class="btn btn-success flat disabled" onClick="showInfoMessage()" alt="next step">next</button>
     </div>
 </div>
 

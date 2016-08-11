@@ -32,6 +32,22 @@ function submitForm() {
     document.getElementById("createAIform").submit();
 }
 
+function showInfoMessage(){
+
+   /* var wHTML='';
+    wHTML += ('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>');
+    wHTML += ('<i class="icon fa fa-check"></i>');
+    wHTML += ('<span> Before go on you fill the fi</span>');
+    
+    var newNode = document.createElement('div');
+    newNode.className = 'alert alert-base alert-dismissable flat';
+    newNode.id = 'inputNameMsgAlert';
+    newNode.innerHTML = wHTML;
+    document.getElementById('ai_name_alert').appendChild(newNode);
+    */
+    
+}
+
 $(function () {
     $(".select2").select2();
 });

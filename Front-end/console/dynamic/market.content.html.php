@@ -8,6 +8,7 @@
             </div>
         </a>
     </div>
+
     <form method="POST" id="domainsNweAIform" action="./trainingAI.php" onsubmit="RecursiveUnbind($('#wrapper'));">
 
         <div class="input-group-btn">
@@ -41,8 +42,6 @@
                                     </dl>
                                 </div>
                             </section>
-                            <p></p>
-                            need help? email us <a href='#'>hello@hutoma.com</a>
                         </div>
                     </div>
                 </div>
@@ -109,21 +108,10 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
-
-
-
             </div>
-
-
-
-
         </div>
 
-        <div id="collapseStart" class="panel-collapse collapse">
+        <div id="collapsePayments" class="panel-collapse collapse">
             <div class="box-body">
                 <div class="overlay center-block">
                     <section class="content bg-gray-light" >
@@ -144,77 +132,11 @@
                 </div>
             </div>
         </div>
-
-
-
-        <div class="box-footer">
-                <button type="submit" class="btn btn-success flat" id="btnSave" value="" onClick="">save</button>
-        </div>
     </form>
-</div>
 
-
-<!-- Modal INFO Type of plans-->
-<div class="modal fade" id="infoPlans" role="dialog">
-    <div class="modal-dialog flat">
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Type of plans</h4>
-            </div>
-            <div class="modal-body">
-                <div class="box-body">
-                    <dl class="dl-horizontal">
-                        <dt>Description Actions</dt>
-                        <dd>Tell the AI learning ...</dd>
-                        <dt>Euismod</dt>
-                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                        <dt>Malesuada porta</dt>
-                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                        <dt>Felis euismod semper eget lacinia</dt>
-                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                    </dl>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary flat" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-
+    <div class="box-footer">
+            <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
+            <button type="submit" class="btn btn-success flat" id="btnSave" value="" onClick="">save</button>
     </div>
-</div>
 
-
-<!-- Modal INFO Type of contract-->
-<div class="modal fade" id="infoContract" role="dialog">
-    <div class="modal-dialog flat">
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Type of COntract</h4>
-            </div>
-            <div class="modal-body">
-                <div class="box-body">
-                    <dl class="dl-horizontal">
-                        <dt>Description Actions</dt>
-                        <dd>Tell the AI learning ...</dd>
-                        <dt>Euismod</dt>
-                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                        <dt>Malesuada porta</dt>
-                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                        <dt>Felis euismod semper eget lacinia</dt>
-                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                    </dl>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary flat" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-
-    </div>
 </div>
