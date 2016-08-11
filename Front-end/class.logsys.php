@@ -31,8 +31,8 @@ class console
       "db" => array(
           "host" => '54.83.145.18',
           "port" => '3306',
-          "username" => 'root',
-          "password" => 'P7gj3fLKtPhjU7aw',
+          "username" => 'hutoma_caller',
+          "password" => '>YR"khuN*.gF)V4#',
           "name" => 'hutoma',
           "table" => 'users',
           "token_table" => "resetTokens"
@@ -715,14 +715,12 @@ class console
   public static function userExists($identification)
   {
     self::construct();
-    if (self::$config['features']['email_login'] === true) {
-      $query = "SELECT `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login";
-    } else {
-      $query = "SELECT `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login";
-    }
+
+    $query = "CALL getUserId(:userName, :checkEmail)";
     $sql = self::$dbh->prepare($query);
     $sql->execute(array(
-        ":login" => $identification
+        ":userName" => $identification,
+        ":checkEmail" => (self::$config['features']['email_login'] === true)
     ));
     return $sql->rowCount() == 0 ? false : true;
   }
