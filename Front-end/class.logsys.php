@@ -731,9 +731,14 @@ class console
       $columns = $what != "*" ? "`$what`" : "*";
     }
 
-    $sql = self::$dbh->prepare("SELECT {$columns} FROM `" . self::$config['db']['table'] . "` WHERE `id` = ? ORDER BY `id` LIMIT 1");
+    $query = "CALL getUserById(:id, :columns)";
+    $sql = self::$dbh->prepare($query);
 
-    $sql->execute(array($user));
+    /* Bind the values */
+    $sql->bindValue(":id", $user);
+    $sql->bindValue(":columns", $columns);
+    $sql->execute();
+
     $data = $sql->fetch(\PDO::FETCH_ASSOC);
 
     if (!is_array($what)) {
