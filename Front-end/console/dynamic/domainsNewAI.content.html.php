@@ -25,7 +25,6 @@
     <input type="hidden" id="userActivedDomains"name="userActivedDomains" value="">
     </div>
     <p></p>
-
     <h2></h2>
     <p id="domsearch"></p>
 </form>

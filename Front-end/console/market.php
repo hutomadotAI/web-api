@@ -1,7 +1,6 @@
 <?php
 require '../pages/config.php';
 
-
 if ( !\hutoma\console::isSessionActive()) {
     header('Location: ./error.php?err=1');
     exit();
@@ -25,16 +24,7 @@ function isValuesSessionInputFilled(){
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
         isset($_SESSION['ai_personality']) &&
-        isset($_SESSION['dev_id']) &&
-        isset($_SESSION['aiid']) &&
-        isset($_SESSION['ai_created_on']) &&
-        isset($_SESSION['ai_training_status']) &&
-        isset($_SESSION['ai_deep_learning_error']) &&
-        isset($_SESSION['ai_training_debug_info']) &&
-        isset($_SESSION['ai_status']) &&
-        //isset($_SESSION['ai_training_file']) &&
-        isset($_SESSION['userActivedDomains']) &&
-        isset($_SESSION['current_ai_name']);
+        isset($_SESSION['dev_id']);
 }
 
 ?>
@@ -50,7 +40,7 @@ function isValuesSessionInputFilled(){
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/ionicons.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.min.css">
+    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
     <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
     <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -63,7 +53,7 @@ function isValuesSessionInputFilled(){
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini">
+<body class="hold-transition skin-blue-light fixed sidebar-mini">
 <div class="wrapper">
 
     <header class="main-header">
@@ -76,11 +66,14 @@ function isValuesSessionInputFilled(){
             <?php include './dynamic/userpanel.html.php'; ?>
             <!-- ================ USER ACTION ================= -->
             <ul class="sidebar-menu">
-                <li class="header">WORKPLACE</li>
-                <li class="active"><a href="./home.php"><i class="fa fa-home"></i><span>home</span></a></li>
-                <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-                <li class="header">ACTION</li>
-                <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+                <li class="header" style="text-align: center;">WORKPLACE</li>
+                <li class="active"><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
+                <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
+            </ul>
+
+            <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
+                <li class="header" style="text-align: center;">ACTION</li>
+                <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
                 <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
                 <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
             </ul>

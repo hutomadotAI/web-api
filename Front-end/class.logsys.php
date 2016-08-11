@@ -1333,7 +1333,9 @@ class console
         }
         $json_response = json_decode($curl_response, true);
         curl_close($curl);
+
         return $json_response;
+
     }
   }
   

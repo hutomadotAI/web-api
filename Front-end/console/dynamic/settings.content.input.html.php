@@ -1,5 +1,5 @@
 <form role="form">
-    <div class="box-body">
+    <div class="box-body  f6f6f6">
         <div class="row">
 
             <!-- INPUT Name -->
@@ -97,25 +97,28 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-addon">Developer key</i></span>
-                    <input type="text" class="form-control" id="devkey" placeholder=" <?php echo(\hutoma\console::getDevToken());?>" disabled>
-                    <span class="input-group-addon" data-toggle="tooltip"  id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')" ><i class="fa fa-clipboard"></i></span>
+                    <input type="text" class="form-control" id="devkey" value=" <?php echo(\hutoma\console::getDevToken());?>" disabled>
+                    <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')" ><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-addon">Client key</i></span>
-                    <input type="text" class="form-control" id="clikey" placeholder="<?php echo($_SESSION['dev_id']);?>" disabled>
-                    <span class="input-group-addon" data-toggle="tooltip"  id="clikeytooltip" title="copy to clipboard" onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
+                    <input type="text" class="form-control" id="clikey" value="<?php echo($_SESSION['dev_id']);?>" disabled>
+                    <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#clikey" id="clikeytooltip" title="copy to clipboard" onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
         </div>
 
-
-
     </div>
 </form>
+<script src="./plugins/clipboard/clipboard.min.js"></script>
+<script>
+   
+</script>
 <div class="box-footer">
       <a href="optionAI.php" class="btn btn-primary flat">cancel</a>
       <button  name="btnSave" value="btnSave" id="btnSave" value="_next" class="btn btn-success flat disabled" onClick="" alt="save">save</button>
-</div> 
+</div>
+

@@ -7,7 +7,7 @@ function showDomains(str,size){
 
                   // slim box design
                   if ( domains[x].available == '0' ){
-                        wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed" id="'+boxid+'"><p></p>');
+                        wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                         wHTML += ('<div class="col-xs-2">');
                         wHTML += ('<div class="info-circle-icon-small text-ultragray"><i class="'+domains[x].icon+'"></i></div>');
                         wHTML += ('</div>');
@@ -25,9 +25,9 @@ function showDomains(str,size){
                         var key = domains[x].dom_id;
                      
                         if ( userActived[key] === false )
-                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed" id="'+boxid+'"><p></p>');
+                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                         else
-                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed borderActive" id="'+boxid+'"><p></p>');
+                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow borderActive" id="'+boxid+'"><p></p>');
                         wHTML += ('<div class="col-xs-2">');
                         wHTML += ('<div class="info-circle-icon-small '+domains[x].color+'"><i class="'+domains[x].icon+'"></i></div>');
                         wHTML += ('</div>');
@@ -108,7 +108,6 @@ function switchClick(node,key){
 function domainsToJsonForPOST() {
     RecursiveUnbind($('#wrapper'));
 
-    /*
     $("#btnNext").attr("disabled", true);
     $("#btnNext").attr("onClick","");
     $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
@@ -119,21 +118,7 @@ function domainsToJsonForPOST() {
 
     $("#btnSwitch").attr("disabled", true);
     $("#btnSwitch").attr("onClick","");
-    */
+
     var JsonStringActiveDomains = JSON.stringify(userActived);
     $("#userActivedDomains").attr("value", JsonStringActiveDomains);
 }
-
-/*
-$(document).ready(function() {
-    $('a[data-toggle=modal], button[data-toggle=modal]').click(function () {
-
-        var data_id = '';
-        if (typeof $(this).data('id') !== 'undefined') {
-            data_id = $(this).data('id');
-        }
-        $('#domainTitle').val(data_id);
-    })
-});
-*/
-

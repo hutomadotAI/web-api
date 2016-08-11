@@ -1,6 +1,6 @@
-<div class="box box-solid box-primary flat no-shadow">
+<div class="box box-solid box-clean flat no-shadow">
     <div class='box-header with-border'>
-        <i class="fa fa-group"></i>
+        <i class="fa fa-group text-light-blue"></i>
     <h3 class='box-title'>View all your AIs</h3>
     </div>
 
@@ -12,46 +12,46 @@
         if ($array['status']['code']===200) {
 
             echo('<div class="box-body table-responsive">');
-            echo('<table class="table table-hover">');
-            echo('<tr>');
-            echo('<th>ID</th>');
-            echo('<th>AI</th>');
-            echo('<th>Status</th>');
-            echo('<th>Description</th>');
-            echo('<th>Date</th>');
+            echo('<table class="table table">');
+            echo('<tr disabled>');
+            echo('<th class="text-center" style="border:0;">ID</th>');
+            echo('<th class="text-center" style="border:0;">AI</th>');
+            echo('<th style="border:0;">Status</th>');
+            echo('<th class="text-center" style="border:0;">Description</th>');
+            echo('<th style="border:0;">Date</th>');
             echo('</tr>');
             echo('<form method="POST" id="viewAllAIsform" action="./trainingAI.php">');
 
             foreach ($array['ai_list'] as $bot) {
                 echo('<tr>');
-                echo('<td>' . $bot['aiid'] . '</td>');
-                echo('<td>' . $bot['name'] . '</td>');
+                echo('<td style="padding-top: 15px;">' . $bot['aiid'] . '</td>');
+                echo('<td style="padding-top: 15px;">' . $bot['name'] . '</td>');
 
                 switch ( $bot['ai_status']) {
                     case 0 :
-                        echo('<td><span class="label label-primary">Queued</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-primary">Queued</span></td>');
                         break;
                     case 1 :
-                        echo('<td><span class="label label-warning">Training</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-warning">Training</span></td>');
                         break;
                     case 2 :
-                        echo('<td><span class="label label-success">Trained</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-success">Trained</span></td>');
                         break;
                     case 3 :
-                        echo('<td><span class="label label-warning">Stopping</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-warning">Stopping</span></td>');
                         break;
                     case 4 :
-                        echo('<td><span class="label label-primary">Stopped</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-primary">Stopped</span></td>');
                         break;
                     case 5 :
-                        echo('<td><span class="label label-danger">Limited</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-danger">Limited</span></td>');
                         break;
                     default:
-                        echo('<td><span class="label label-danger">Error</span></td>');
+                        echo('<td style="padding-top: 15px;"><span class="label label-danger">Error</span></td>');
                 }
-                echo('<td>' . $bot['description'] . '</td>');
-                echo('<td>' . $bot['created_on'] . '</td>');
-                echo('<td><button type="button" name="btnSelect" value="'.$bot['aiid'].'"  onClick="sendAIID(this.value)" class="btn btn-primary flat pull-right" id="btn_select" style="margin-right: 5px; width: 115px;"><i class="fa fa-user"></i> details AI</button></td>');
+                echo('<td style="padding-top: 15px;">' . $bot['description'] . '</td>');
+                echo('<td style="padding-top: 15px;">' . $bot['created_on'] . '</td>');
+                echo('<td style="padding-top: 8px;"><button type="button" name="btnSelect" value="'.$bot['aiid'].'"  onClick="sendAIID(this.value)" class="btn btn-primary flat pull-right" id="btn_select" style="margin-right: 5px; width: 115px;"><i class="fa fa-user"></i> details AI</button></td>');
             }
 
             unset($array);
