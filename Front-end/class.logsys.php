@@ -368,15 +368,12 @@ class console
        * We Add LIMIT to 1 in SQL query because to
        * get an array with key as the column name.
        */
-      if (self::$config['features']['email_login'] === true) {
-        $query = "SELECT `id`, `password`, `password_salt`, `attempt` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login ORDER BY `id` LIMIT 1";
-      } else {
-        $query = "SELECT `id`, `password`, `password_salt`, `attempt` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login ORDER BY `id` LIMIT 1";
-      }
-
+      $query = "CALL getUser(:userName, :checkEmail)";
       $sql = self::$dbh->prepare($query);
-      $sql->bindValue(":login", $username);
-      $sql->execute();
+      $sql->execute(array(
+          ":userName" => $username,
+          ":checkEmail" => (self::$config['features']['email_login'] === true)
+      ));
 
       if ($sql->rowCount() == 0) {
         // No such user like that
@@ -496,7 +493,7 @@ class console
    * A function to register a user with passing the username, password
    * and optionally any other additional fields.
    */
-  public static function register($id, $password, $other = array())
+  public static function register($id, $password, $username, $fullname, $created)
   {
     self::construct();
     if (self::userExists($id) || (isset($other['email']) && self::userExists($other['email']))) {
@@ -505,26 +502,17 @@ class console
       $randomSalt = self::rand_string(20);
       $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
 
-      if (count($other) == 0) {
-        /* If there is no other fields mentioned, make the default query */
-        $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['table'] . "` (`email`, `password`, `password_salt`) VALUES(:email, :password, :passwordSalt)");
-      } else {
-        /* if there are other fields to add value to, make the query and bind values according to it */
-        $keys = array_keys($other);
-        $columns = implode(",", $keys);
-        $colVals = implode(",:", $keys);
-        $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['table'] . "` (`email`, `password`, `password_salt`, $columns) VALUES(:email, :password, :passwordSalt, :$colVals)");
-        foreach ($other as $key => $value) {
-          $value = htmlspecialchars($value);
-          $sql->bindValue(":$key", $value);
-        }
-      }
-      /* Bind the default values */
+      $query = "CALL addUser(:email, :password, :passwordSalt, :userName, :fullName, :creationDate)";
+      $sql = self::$dbh->prepare($query);
+
+      /* Bind the values */
       $sql->bindValue(":email", $id);
       $sql->bindValue(":password", $saltedPass);
       $sql->bindValue(":passwordSalt", $randomSalt);
+      $sql->bindValue(":userName", $username);
+      $sql->bindValue(":fullName", $fullname);
+      $sql->bindValue(":creationDate", $created);
       $sql->execute();
-
 
       return true;
     }
