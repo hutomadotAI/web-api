@@ -85,7 +85,7 @@
             <li class="header">ACTION</li>
             <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
             <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>

@@ -1,5 +1,5 @@
 <form role="form">
-    <div class="box-body  f6f6f6">
+    <div class="box-body">
         <div class="row">
 
             <!-- INPUT Name -->
@@ -114,9 +114,7 @@
     </div>
 </form>
 <script src="./plugins/clipboard/clipboard.min.js"></script>
-<script>
-   
-</script>
+
 <div class="box-footer">
       <a href="optionAI.php" class="btn btn-primary flat">cancel</a>
       <button  name="btnSave" value="btnSave" id="btnSave" value="_next" class="btn btn-success flat disabled" onClick="" alt="save">save</button>

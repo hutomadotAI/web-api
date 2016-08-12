@@ -28,7 +28,6 @@ function submitForm() {
     $("#btnCancel").attr("disabled",true);
     $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
     $('#btnCancel').removeClass('btn btn-primary flat').addClass('btn btn-primary flat disabled');
-    
     document.getElementById("createAIform").submit();
 }
 

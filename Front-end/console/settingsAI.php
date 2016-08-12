@@ -34,7 +34,7 @@ function isValuesSessionFilled(){
   <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
   <link rel="stylesheet" href="./dist/css/ionicons.min.css">
-  <link rel="stylesheet" href="./dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
   <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
   <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -50,7 +50,7 @@ function isValuesSessionFilled(){
 
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini">
+<body class="hold-transition skin-blue-light fixed sidebar-mini">
 <div class="wrapper">
     <header class="main-header">
     <?php include './dynamic/header.html.php'; ?>
@@ -82,7 +82,7 @@ function isValuesSessionFilled(){
             <li class="header">ACTION</li>
             <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
             <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>    
+            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>

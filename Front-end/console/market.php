@@ -1,20 +1,19 @@
 <?php
-require '../pages/config.php';
-
-if ( !\hutoma\console::isSessionActive()) {
-    header('Location: ./error.php?err=1');
-    exit();
+    require '../pages/config.php';
+    
+    if ( !\hutoma\console::isSessionActive()) {
+        header('Location: ./error.php?err=1');
+        exit();
+    }
+    
+    if (isset($_POST['userActivedDomains'])) {
+        $_SESSION['userActivedDomains'] = $_POST['userActivedDomains'];
+    }
+    
+    if ( !isValuesSessionInputFilled() ) {
+        header("Location: ./error.php?err=2");
+        exit();
 }
-
-if (isset($_POST['userActivedDomains'])) {
-    $_SESSION['userActivedDomains'] = $_POST['userActivedDomains'];
-}
-
-if ( !isValuesSessionInputFilled() ) {
-    header("Location: ./error.php?err=2");
-    exit();
-}
-
 
 function isValuesSessionInputFilled(){
     return
@@ -26,7 +25,6 @@ function isValuesSessionInputFilled(){
         isset($_SESSION['ai_personality']) &&
         isset($_SESSION['dev_id']);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -75,7 +73,7 @@ function isValuesSessionInputFilled(){
                 <li class="header" style="text-align: center;">ACTION</li>
                 <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
                 <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-                <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+                <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
             </ul>
         </section>
     </aside>

@@ -11,6 +11,11 @@
         exit();
     }
 
+    if ( !isMarketplaceDataPassed() ) {
+        header("Location: ./error.php?err=12");
+        exit();
+    }
+
     $dev_token = \hutoma\console::getDevToken();
     $response = hutoma\console::createAI( $dev_token, $_SESSION['ai_name'], $_SESSION['ai_description'], $_SESSION['ai_language'], $_SESSION['ai_timezone'], $_SESSION['ai_confidence'], $_SESSION['ai_personality']);
     unset($dev_token);
@@ -27,7 +32,7 @@
             $_SESSION['ai_created_on'] = '';
             $_SESSION['ai_training_status'] = 0;
             $_SESSION['ai_deep_learning_error'] = 0.0;
-            $_SESSION["ai_training_debug_info"] = '';
+            $_SESSION["ai_training_debug_info"] = ' ';
             $_SESSION['ai_training_status'] = 0;
             $_SESSION['ai_status'] = 0;
             //$_SESSION['ai_training_file'] = '';       // parameter missing
@@ -60,4 +65,11 @@ function isValuesSessionInputFilled(){
         isset($_SESSION['userActivedDomains']);
 }
 
+
+function isMarketplaceDataPassed(){
+    return
+        isset($_POST['ai_contract']) &&
+        isset($_POST['ai_payment_type']) &&
+        isset($_POST['ai_price']);
+}
 ?>

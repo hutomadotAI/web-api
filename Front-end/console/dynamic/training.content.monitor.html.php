@@ -34,6 +34,13 @@ function decodeAIState($state)
     <div class="box-header no-border">
         <i class="fa fa-bar-chart-o text-success"></i>
         <h3 class="box-title">Training Monitor</h3>
+
+        <a>
+        <div class="pull-right" style="padding-left:5px;" onClick="updateStateAI();" data-toggle="tooltip" title="Refresh data"  onMouseOver="this.style.cursor='pointer'">
+                <i id="btnRefresh" class="fa fa-refresh text-md text-yellow"></i>
+        </div>
+        </a>
+
         <a data-toggle="collapse"  href="#collapseMonitoring">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>

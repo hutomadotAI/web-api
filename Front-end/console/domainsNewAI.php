@@ -37,14 +37,15 @@ function isPostInputSet(){
 
 function fillSessionVariablesByPOST(){
     $_SESSION['ai_name'] = $_POST['ai_name'];
-    $_SESSION['ai_description'] = $_POST['ai_description'];
+    if ( $_POST['ai_description'] !='')
+        $_SESSION['ai_description'] = $_POST['ai_description'];
+    else
+        $_SESSION['ai_description'] = 'no description';
     $_SESSION['ai_language'] = $_POST['ai_language'];
     $_SESSION['ai_timezone'] = $_POST['ai_timezone'];
     $_SESSION['ai_confidence'] = $_POST['ai_confidence'];
     $_SESSION['ai_personality'] = $_POST['ai_personality'];
 }
-
-
 
 ?>
 

@@ -40,6 +40,9 @@ if (isset($_GET['err'])) {
         case 11 :
             $msg ='training FILE ERROR';
             break;
+        case 12 :
+            $msg ='Payment Marketplace Data missing FILE ERROR';
+            break;
         default:
             $msg ='UNDEFINED ERROR';
     }

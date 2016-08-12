@@ -132,9 +132,16 @@ function writeScript(TAB){
     script.id = 'uploadExperience';
     document.getElementsByTagName('head')[0].appendChild(script);
 
-    wHTML +='var input = document.getElementById("inputfile'+TAB+'");';
-    wHTML +='input.onclick = function () { this.value = null; };';
-    wHTML +='input.onchange = function () { changeUIState('+TAB+'); };';
+    if ( TAB != 2) {
+        wHTML += 'var input = document.getElementById("inputfile' + TAB + '");';
+        wHTML += 'input.onclick = function () { this.value = null; };';
+        wHTML += 'input.onchange = function () { changeUIState(' + TAB + '); };';
+    }
+    else{
+        wHTML += 'var input = document.getElementById("inputURL");';
+        wHTML += 'input.onclick = function () { this.value = null; };';
+        wHTML += 'input.onchange = function () { changeUIState(' + TAB + '); };';
+    }
 
     script.text = wHTML;
     document.getElementsByTagName('head')[0].appendChild(script);
@@ -277,6 +284,11 @@ function activeNext(str,TAB) {
     }
 }
 
+function updateStateAI(){
+    //$('#btnRefresh').toggleClass('fa-spin');
+    $('#btnRefresh').addClass("fa-spin");
+
+}
 
 function buttonGetMoreInfo(){
     var wHTML="";

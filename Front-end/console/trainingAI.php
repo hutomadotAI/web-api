@@ -11,8 +11,7 @@
     }
 
     if ( !isValuesSessionFilled() ){
-        echo ( "errore");
-        //header('Location: ./error.php?err=2');
+        header('Location: ./error.php?err=2');
         exit;
     }
 
@@ -63,11 +62,11 @@ function isValuesSessionFilled(){
         isset($_SESSION['ai_language']) &&
         isset($_SESSION['ai_timezone']) &&
         isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_personality']);
-    isset($_SESSION['current_ai_name']);
-    isset($_SESSION['ai_status']) ;
+        isset($_SESSION['ai_personality'])&&
+        isset($_SESSION['ai_status']) &&
+        isset($_SESSION['current_ai_name']) &&
+        isset($_SESSION['userActivedDomains']) ;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -124,7 +123,7 @@ function isValuesSessionFilled(){
             <li class="header" style="text-align: center;">ACTION</li>
             <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
             <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -144,7 +143,6 @@ function isValuesSessionFilled(){
                 <?php include './dynamic/training.content.json.html.php'; ?>
             </div>
         </div>
-
     </section>
     </div>
 

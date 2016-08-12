@@ -8,8 +8,8 @@
             </div>
         </a>
     </div>
-
-    <form method="POST" id="domainsNweAIform" action="./trainingAI.php" onsubmit="RecursiveUnbind($('#wrapper'));">
+    rainingAI
+    <form method="POST" id="domainsNweAIform" action="./saveAI.php" onsubmit="RecursiveUnbind($('#wrapper'));">
 
         <div class="input-group-btn">
             <input type="hidden" id="userActivedDomains"name="userActivedDomains" value="<?php echo $_SESSION['userActivedDomains'] ?>">
@@ -86,7 +86,7 @@
                             <div class="input-group-addon">
                                 <i class="fa fa-euro"></i>
                             </div>
-                            <input type="text" class="form-control" name="ai_name" id="ai_name" placeholder="Enter your AI name" onkeyup="activeNext(this.value)" class="form-control" data-inputmask='"mask": "0-9.0-9"' data-mask>
+                            <input type="text" class="form-control" name="ai_price" id="ai_price" placeholder="Enter price" onkeyup="activeNext(this.value)">
                         </div>
                     </div>
                     <div class="box-body">
@@ -132,11 +132,11 @@
                 </div>
             </div>
         </div>
-    </form>
+
 
     <div class="box-footer">
             <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
             <button type="submit" class="btn btn-success flat" id="btnSave" value="" onClick="">save</button>
     </div>
-
+    </form>
 </div>
