@@ -11,3 +11,10 @@ function RecursiveUnbind($jElement) {
         RecursiveUnbind($(this));
     });
 }
+function getPercentualValue(error){
+    error = 100 - error;
+    error = error.toFixed(2);
+    if ( error % 1 === 0 )
+        error = Math.round(error);
+    return error
+}

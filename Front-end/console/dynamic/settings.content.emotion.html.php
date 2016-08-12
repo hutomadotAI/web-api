@@ -1,8 +1,8 @@
 <div class="panel box flat no-border ">
 <div class="box-header flat no-border">
 <div class="row">
-      <div class="col-xs-1">
-      <i class="fa fa-heartbeat"></i>
+      <div class="col-md-1" style="padding-top:6px;">
+      <i class="fa fa-heartbeat "></i>
       </div>
       <div class="col-xs-3">
       <span class="lead">Emotions</span>
@@ -19,7 +19,7 @@
 </div>
 
 
-<div id="collapseEmotion" class="panel-collapse collapse">
+<div id="collapseEmotionNOT" class="panel-collapse collapse">
 <div class="box-body">
 <section class="invoice">
 

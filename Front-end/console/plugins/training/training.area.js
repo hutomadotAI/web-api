@@ -284,9 +284,34 @@ function activeNext(str,TAB) {
     }
 }
 
+
 function updateStateAI(){
-    //$('#btnRefresh').toggleClass('fa-spin');
     $('#btnRefresh').addClass("fa-spin");
+    
+    $.ajax({ url: './refreshAIstate.php',
+        data: {action: 'update'},
+        type: 'post',
+        success: function(output) {
+            try {
+                var JSONresponse = output;
+                var JSONdata = JSON.parse(JSONresponse);
+                if (JSONdata['status']['code'] === 200) {
+                    $('#status-container').text(JSONdata['ai']['ai_status']);
+                    var deep_learning_error = getPercentualValue( JSONdata['ai']['deep_learning_error'] );
+
+                    $('#status-bagde').text(deep_learning_error+'%');
+                    $('#status-progress-bar').css('width', deep_learning_error +'%');
+                    $('#status-container').text(JSONdata['ai']['ai_status']);
+                }
+                else
+                    $('#status-container').text("Update unavailable");
+                $('#btnRefresh').removeClass("fa-spin");
+            }catch(e){
+                $('#status-container').text("Update Failed");
+                $('#btnRefresh').removeClass("fa-spin");
+            }
+        }
+    });
 
 }
 

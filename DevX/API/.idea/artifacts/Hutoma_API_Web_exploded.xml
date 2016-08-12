@@ -1,7 +1,8 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="Hutoma.API:war exploded">
-    <output-path>$PROJECT_DIR$/out/artifacts/Hutoma_API_war_exploded</output-path>
+  <artifact type="exploded-war" build-on-make="true" name="Hutoma.API:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/Hutoma_API_Web_exploded</output-path>
     <root id="root">
+      <element id="javaee-facet-resources" facet="Hutoma.API/web/Web" />
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="Hutoma.API" />
@@ -114,8 +115,6 @@
           <element id="library" level="project" name="aws-java-sdk-1.10.741" />
         </element>
       </element>
-      <element id="library" level="project" name="hamcrest-all-1.3" />
-      <element id="javaee-facet-resources" facet="Hutoma.API/web/Web" />
     </root>
   </artifact>
 </component>

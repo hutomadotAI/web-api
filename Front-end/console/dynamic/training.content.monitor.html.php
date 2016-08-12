@@ -28,17 +28,25 @@ function decodeAIState($state)
             return('<span class="label label-danger">Error</span>');
     }
 }
+
+
+$error = 100 -  $_SESSION['ai_deep_learning_error'];
+$error = round($error,2);
+if ( $error % 1 === 0 )
+    $error = round($error,0);
+
 ?>
 
-<div class="box box-solid box-clean  flat no-shadow" >
-    <div class="box-header no-border">
+
+
+<div class="box box-solid box-clean flat no-shadow" >
+    <div class="box-header with-border no-shadow">
         <i class="fa fa-bar-chart-o text-success"></i>
         <h3 class="box-title">Training Monitor</h3>
-
         <a>
-        <div class="pull-right" style="padding-left:5px;" onClick="updateStateAI();" data-toggle="tooltip" title="Refresh data"  onMouseOver="this.style.cursor='pointer'">
-                <i id="btnRefresh" class="fa fa-refresh text-md text-yellow"></i>
-        </div>
+            <div class="pull-right" style="padding-left:5px;" onClick="updateStateAI();" onMouseOver="this.style.cursor='pointer'">
+                    <i id="btnRefresh" class="fa fa-refresh text-md text-yellow"></i>
+            </div>
         </a>
 
         <a data-toggle="collapse"  href="#collapseMonitoring">
@@ -54,14 +62,15 @@ function decodeAIState($state)
                 <th class="text-center" style="width: 60%;">Progress</th>
                 <th style="width: 10%;">Label</th>
             </tr>
+
             <tr>
-                <td><?php echo ($_SESSION['ai_status']); ?></td>
+                <td id="status-container"><?php echo ($_SESSION['ai_status']); ?></td>
                 <td>
                     <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
-                        <div class="progress-bar progress-bar-success" style="width: 90%;"></div>
+                        <div id="status-progress-bar" class="progress-bar progress-bar-success" style="width: <?php echo $error; ?>%;"></div>
                     </div>
                 </td>
-                <td><span class="badge bg-green">90%</span></td>
+                <td><span id="status-bagde" class="badge bg-green">  <?php echo $error; ?>%</span></td>
             </tr>
         </table>
 

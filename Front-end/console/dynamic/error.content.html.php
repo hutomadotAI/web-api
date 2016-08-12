@@ -43,6 +43,9 @@ if (isset($_GET['err'])) {
         case 12 :
             $msg ='Payment Marketplace Data missing FILE ERROR';
             break;
+        case 13 :
+            $msg ='Update AI status Failed!';
+            break;
         default:
             $msg ='UNDEFINED ERROR';
     }

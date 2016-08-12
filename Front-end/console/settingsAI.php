@@ -62,25 +62,28 @@ function isValuesSessionFilled(){
         <?php include './dynamic/userpanel.html.php'; ?>
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-            
             <li class="header">WORKPLACE</li>
             <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
             <li class="active">
                 <a href="#">
-                    <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-                    <li><a href="./intents.php"><i class="fa fa-commenting-o text-green" ></i> <span>intents</span></a></li>
-                    <li><a href="./entities.html"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
-                    <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i>domains</a></li>
+
+                    <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
+                    <li><a href="./intents.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
+                    <li><a href="./entities.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                    <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
                     <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
                     <li class="active"><a href="#"><i class="fa fa-gear text-black"></i>settings</a></li>
                 </ul>
             </li>
-            <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-            <li class="header">ACTION</li>
-            <li><a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
+        </ul>
+
+        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
+            <li class="header" style="text-align: center;">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
             <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
             <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
