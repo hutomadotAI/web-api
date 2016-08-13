@@ -1,6 +1,3 @@
-<script src="./plugins/training/training.area.js"></script>
-
-
 <div class="nav-tabs-custom no-shadow flat">
     <ul class="nav nav-tabs pull-right">
         <li><a href="#trainingweb" data-toggle="tab">from WEB</a></li>
@@ -29,6 +26,7 @@
 </div>
 
 
+<script src="./plugins/training/training.area.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
 <script type="text/javascript">
     TRAINING.init(["<?php echo $_SESSION['ai_status'] ?>","<?php echo time().$_SERVER['REMOTE_ADDR'].'.txt'?>","<?php echo $_SESSION['current_ai_name']?>"]);

@@ -9,6 +9,7 @@ var TRAINING = TRAINING || (function(){
     }());
 
 
+
 function showStart(status,filename,nameAI){
     var wHTMLFile = "";
     var newNodeFile = document.createElement('div');

@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow">
+<div class="box box-solid box-clean flat no-shadow" >
 	<a data-toggle="collapse" data-parent="#accordion" href="#collapseAction">
 		<div class="box-header with-border">
 			<h3 class="box-title">Actions</h3>

@@ -1,9 +1,8 @@
 <div class="form-group">
 <label>Language</label>
 <select class="form-control select2" name="ai_language" id="ai_language"style="width: 100%;">
-  <option selected="selected">English</option>
   <option disabled="disabled">Deutsch</option>
-  <option>English</option>
+  <option selected="selected">English</option>
   <option disabled="disabled">Español</option>
   <option disabled="disabled">Français</option>
   <option disabled="disabled">Italiano</option>

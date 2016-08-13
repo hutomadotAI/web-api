@@ -31,7 +31,7 @@ function isPostInputSet(){
         isset($_POST['ai_timezone']) &&
         isset($_POST['ai_confidence']) &&
         isset($_POST['ai_personality'])
-        //isset($_POST['ai_avatar'])
+        //isset($_POST['ai_sex'])
     );
 }
 

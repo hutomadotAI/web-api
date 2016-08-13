@@ -75,7 +75,16 @@
             <!-- INPUT Personality -->
             <div class="col-md-6">
                 <?php include './dynamic/input.personality.html.php'; ?>
-                <?php include './dynamic/input.avatar.html.php'; ?>
+
+
+                <div class="form-group">
+                    <label>Sex</label>
+                    <select class="form-control select2" name="ai_sex" id="ai_sex"style="width: 100%;">
+                        <option selected="selected">Male</option>
+                        <option>Female</option>
+                    </select>
+                </div>
+                
             </div>
         </div>
 

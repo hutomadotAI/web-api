@@ -4453,6 +4453,9 @@ table.text-center th {
 .text-red {
   color: #dd4b39 !important;
 }
+.text-coral {
+  color: #FFC4C1 !important;
+}
 .text-yellow {
   color: #f39c12 !important;
 }
@@ -4868,4 +4871,53 @@ table.text-center th {
   }
 }
 
+/* enable absolute positioning */
+.inner-addon {
+  position: relative;
+}
 
+/* style glyph */
+.inner-addon .fa {
+  position: absolute;
+  padding: 10px;
+  pointer-events: none;
+}
+
+/* align glyph */
+.left-addon .fa  { left:  0px;}
+.right-addon .fa { right: 0px;}
+
+/* add padding  */
+.left-addon input  { padding-left:  30px; }
+.right-addon input { padding-right: 30px; }
+
+.flashing{
+  -webkit-animation: glowing 1500ms infinite;
+  -moz-animation: glowing 1500ms infinite;
+  -o-animation: glowing 1500ms infinite;
+  animation: glowing 1500ms infinite;
+}
+
+@-webkit-keyframes glowing {
+  0% { color: #dd4b39;  }
+  50% { color: #FFFFFF;  }
+  100% { color: #dd4b39;  }
+}
+
+@-moz-keyframes glowing {
+  0% { color: #dd4b39;  }
+  50% { color: #FFFFFF;  }
+  100% { color: #dd4b39;  }
+}
+
+@-o-keyframes glowing {
+  0% { color: #dd4b39; }
+  50% { color: #FFFFFF; }
+  100% { color: #dd4b39; }
+}
+
+@keyframes glowing {
+  0% { color: #dd4b39; }
+  50% { color: #FFFFFF; }
+  100% { color: #dd4b39; }
+}

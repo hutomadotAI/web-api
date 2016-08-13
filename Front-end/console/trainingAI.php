@@ -179,6 +179,7 @@ function isValuesSessionFilled(){
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/chat/chat.js"></script>
+<script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 

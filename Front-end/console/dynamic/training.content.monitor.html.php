@@ -40,7 +40,7 @@ if ( $error % 1 === 0 )
 
 
 <div class="box box-solid box-clean flat no-shadow" >
-    <div class="box-header with-border no-shadow">
+    <div class="box-header with-border">
         <i class="fa fa-bar-chart-o text-success"></i>
         <h3 class="box-title">Training Monitor</h3>
         <a>
@@ -55,12 +55,13 @@ if ( $error % 1 === 0 )
             </div>
         </a>
     </div>
-    <div class="box-body table-responsive no-padding">
+    <div class="box-body table-responsive">
+
         <table class="table ">
             <tr>
-                <th class="text-center" style="width: 20%;" >State</th>
-                <th class="text-center" style="width: 60%;">Progress</th>
-                <th style="width: 10%;">Label</th>
+                <th class="text-center no-border" style="width: 20%;" >State</th>
+                <th class="text-center no-border" style="width: 60%;">Progress</th>
+                <th class="no-border" style="width: 10%;">Label</th>
             </tr>
 
             <tr>

@@ -2,8 +2,12 @@ function createNodeChat(human_name, ai_name) {
     var msg = $('#message').val();
     if ( msg.length != 0 ){
 
-        document.getElementById('btnSend').disabled = true;
-        document.getElementById('btnSend').setAttribute('onClick','');
+        //document.getElementById('btnSend').disabled = true;
+        //document.getElementById('btnSend').setAttribute('onClick','');
+        var isChrome = !!window.chrome;
+        if (isChrome) {
+            document.getElementById('microphone').setAttribute('class','fa fa-microphone text-coral');
+        }
         document.getElementById('message').disabled = true;
         document.getElementById('message').value = '';
 
@@ -43,9 +47,9 @@ function createLeftMsg(human_name,msg){
 }
 
 
-function createRightMsg(ai_name,msg,error){
-    var height = parseInt( $('#chat').scrollTop());
-    var interval = window.setInterval( animate, 10 );
+function createRightMsg(ai_name,msg,error) {
+    var height = parseInt($('#chat').scrollTop());
+    var interval = window.setInterval(animate, 10);
 
     var newLeftMsg = document.createElement('div');
     newLeftMsg.className = 'direct-chat-msg right';
@@ -53,32 +57,40 @@ function createRightMsg(ai_name,msg,error){
 
     var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = "";
-    wHTML +=('<div class="direct-chat-info clearfix">');
-    wHTML +=('<span class="direct-chat-name pull-right">');
-    wHTML +=(ai_name);
-    wHTML +=('</span>');
-    wHTML +=('<span class="direct-chat-timestamp pull-left">'+date+'</span>');
-    wHTML +=('</div>');
-    wHTML +=('<img class="direct-chat-img" src="./dist/img/user3-128x128.jpg" alt="AI image">');
-    if( error)
-        wHTML +=('<div class="direct-chat-text bg-warning">');
+    wHTML += ('<div class="direct-chat-info clearfix">');
+    wHTML += ('<span class="direct-chat-name pull-right">');
+    wHTML += (ai_name);
+    wHTML += ('</span>');
+    wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
+    wHTML += ('</div>');
+    wHTML += ('<img class="direct-chat-img" src="./dist/img/user3-128x128.jpg" alt="AI image">');
+    if (error)
+        wHTML += ('<div class="direct-chat-text bg-warning">');
     else
-        wHTML +=('<div class="direct-chat-text bg-primary">');
+        wHTML += ('<div class="direct-chat-text bg-primary">');
     wHTML += msg;
-    wHTML +=('</div>');
+    wHTML += ('</div>');
     newLeftMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newLeftMsg);
 
     function animate() {
-        if (parseInt( $("#chat")[0].scrollHeight) < parseInt(height) )
-            clearInterval( interval );
+        if (parseInt($("#chat")[0].scrollHeight) < parseInt(height))
+            clearInterval(interval);
         height = parseInt(height) + 5;
-        $('#chat').scrollTop( height );
+        $('#chat').scrollTop(height);
     }
-    document.getElementById('btnSend').disabled = false;
-    document.getElementById('btnSend').setAttribute('onClick','');
+
+    //document.getElementById('btnSend').disabled = false;
+    //document.getElementById('btnSend').setAttribute('onClick','startDictation()');
+
     document.getElementById('message').disabled = false;
     document.getElementById('message').value = '';
+
+    var isChrome = !!window.chrome;
+    if (isChrome) {
+        document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-red');
+        speak(msg);
+    }
 }
 
 function requestAnswerAI(ai_name, question) {
@@ -156,3 +168,4 @@ String.prototype.toHtmlEntities = function() {
         return '&#' + s.charCodeAt(0) + ';';
     });
 };
+

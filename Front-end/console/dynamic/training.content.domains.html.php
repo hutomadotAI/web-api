@@ -4,9 +4,9 @@ $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains($dev_token,$_SE
 unset($dev_token);
 ?>
 
-<div class='box box-solid box-clean flat no-shadow'>
+<div class="box box-solid box-clean flat no-shadow" >
       <a data-toggle="collapse" data-parent="#accordion" href="#collapseDomain">
-      <div class='box-header with-border'>
+          <div class="box-header with-border">
           <i class="fa fa fa-th text-warning"></i>
           <h3 class="box-title">Actived Domains</h3>
           <div class="box-tools pull-right">

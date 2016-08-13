@@ -8,7 +8,7 @@
             </div>
         </a>
     </div>
-    rainingAI
+ 
     <form method="POST" id="domainsNweAIform" action="./saveAI.php" onsubmit="RecursiveUnbind($('#wrapper'));">
 
         <div class="input-group-btn">
