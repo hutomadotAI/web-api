@@ -58,6 +58,26 @@ public class MessageQueue {
         return pushMessage(AwsMessage.start_RNN + "|" + devid + "|" + aiid);
     }
 
+    public void pushMessageReadyForTraining(String devid, String aiid) throws Exception {
+        if (!pushMessage(AwsMessage.ready_for_training + "|" + devid + "|" + aiid)) {
+            throw new Exception("push message failed");
+        }
+    }
+
+    public void pushMessagePreprocessTrainingText(String devid, String aiid) throws Exception {
+        if (!pushMessage(AwsMessage.preprocess_training_text + "|" + devid + "|" + aiid)) {
+            throw new Exception("push message failed");
+        }
+    }
+
+    public boolean pushMessageClusterSplit(String devid, String aiid, double clusterMinProbability) {
+        return pushMessage(AwsMessage.cluster_split + "|" + devid + "|" + aiid + "|" + clusterMinProbability);
+    }
+
+    public boolean pushMessageDeleteTraining(String devid, String aiid) {
+        return pushMessage(AwsMessage.delete_training + "|" + devid + "|" + aiid);
+    }
+
     protected boolean pushMessage(String message) {
         AWSCredentials credentials = null;
         try {

@@ -104,32 +104,25 @@ public class ai {
     }
 
 
-    public static boolean update_ai_training_file( String aiid, String training_file) {
-        try {
+    public static void update_ai_training_file( String aiid, String training_file) throws Exception {
+        String myDriver = "com.mysql.cj.jdbc.Driver";
+        String myUrl = getConfigProp("connectionstring");
+        Class.forName(myDriver);
+        Connection conn = DriverManager.getConnection(myUrl);
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
-            String myUrl = getConfigProp("connectionstring");
-            Class.forName(myDriver);
-            Connection conn = DriverManager.getConnection(myUrl);
-
-            String query = " update ai set ai_trainingfile=? where aiid=?";
-            PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setString(1, training_file);
-            preparedStmt.setString(2, aiid);
-            preparedStmt.execute();
-            conn.close();
-        }
-        catch (Exception e) {
-            return false;
-        }
-        return true;
+        String query = " update ai set ai_trainingfile=? where aiid=?";
+        PreparedStatement preparedStmt = conn.prepareStatement(query);
+        preparedStmt.setString(1, training_file);
+        preparedStmt.setString(2, aiid);
+        preparedStmt.execute();
+        conn.close();
     }
 
 
     public static boolean update_ai_training_status( String aiid, String status) {
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
@@ -248,7 +241,7 @@ public class ai {
         String stat="";
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);

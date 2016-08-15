@@ -17,6 +17,12 @@ public class Database {
 
     private final String LOGFROM = "database";
 
+    public class DatabaseException extends Exception {
+        public DatabaseException(Throwable cause) {
+            super(cause);
+        }
+    }
+
     Logger logger;
 
     @Inject
@@ -81,6 +87,14 @@ public class Database {
             logger.logError(LOGFROM, "db call failed: " + e.toString());
         }
         return null;
+    }
+
+    public void updateAiTrainingFile(String aiid, String trainingData) throws DatabaseException {
+        try {
+            ai.update_ai_training_file(aiid, trainingData);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
     }
 
 }
