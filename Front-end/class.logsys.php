@@ -271,6 +271,8 @@ class console
         self::$session = isset($_SESSION['logSyscuruser']) ? $_SESSION['logSyscuruser'] : false;
         self::$remember_cookie = isset($_COOKIE['logSysrememberMe']) ? $_COOKIE['logSysrememberMe'] : false;
 
+        //DEBUG  self::$dbh->setAttribute( \PDO::ATTR_ERRMODE , \PDO::ERRMODE_EXCEPTION );
+
         $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$session . self::$config['keys']['cookie']);
         if (self::$cookie == $encUserID) {
           self::$loggedIn = true;
@@ -376,6 +378,9 @@ class console
       ));
 
       if ($sql->rowCount() == 0) {
+        // finally fetch the additional sql row for stored proc calls
+        $sql->nextRowset();
+
         // No such user like that
         return false;
       } else {
@@ -383,6 +388,10 @@ class console
          * Get the user details
          */
         $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+
+        // finally fetch the additional sql row for stored proc calls
+        $sql->nextRowset();
+
         $us_id = $rows['id'];
         $us_pass = $rows['password'];
         $us_salt = $rows['password_salt'];
@@ -394,15 +403,14 @@ class console
           if (time() < $blockedTime) {
             $blocked = true;
             return array(
-                "status" => "blocked",
-                "minutes" => round(abs($blockedTime - time()) / 60, 0),
-                "seconds" => round(abs($blockedTime - time()) / 60 * 60, 2)
+              "status" => "blocked",
+              "minutes" => round(abs($blockedTime - time()) / 60, 0),
+              "seconds" => round(abs($blockedTime - time()) / 60 * 60, 2)
             );
           } else {
             // remove the block, because the time limit is over
-            self::updateUser(array(
-                "attempt" => "" // No tries at all
-            ), $us_id);
+            self::updateUserLoginAttempts("" // No tries at all
+              , $us_id);
           }
         }
         /**
@@ -430,9 +438,8 @@ class console
                * If Brute Force Protection is Enabled,
                * Reset the attempt status
                */
-              self::updateUser(array(
-                  "attempt" => "0"
-              ), $us_id);
+              self::updateUserLoginAttempts("0",
+                $us_id);
             }
 
             // Redirect
@@ -459,28 +466,25 @@ class console
 
             if ($status == "") {
               // User was not logged in before
-              self::updateUser(array(
-                  "attempt" => "1" // Tried 1 time
-              ), $us_id);
+              self::updateUserLoginAttempts("1", // Tried 1 time
+                $us_id);
             } else if ($status == $max_tries) {
               /**
                * Account Blocked. User will be only able to
                * re-login at the time in UNIX timestamp
                */
               $eligible_for_next_login_time = strtotime("+" . self::$config['brute_force']['time_limit'] . " seconds", time());
-              self::updateUser(array(
-                  "attempt" => "b-" . $eligible_for_next_login_time
-              ), $us_id);
+              self::updateUserLoginAttempts("b-" . $eligible_for_next_login_time,
+                $us_id);
               return array(
-                  "status" => "blocked",
-                  "minutes" => round(abs($eligible_for_next_login_time - time()) / 60, 0),
-                  "seconds" => round(abs($eligible_for_next_login_time - time()) / 60 * 60, 2)
+                "status" => "blocked",
+                "minutes" => round(abs($eligible_for_next_login_time - time()) / 60, 0),
+                "seconds" => round(abs($eligible_for_next_login_time - time()) / 60 * 60, 2)
               );
             } else if ($status < $max_tries) {
               // If the attempts are less than Max and not Max
-              self::updateUser(array(
-                  "attempt" => $status + 1 // Increase the no of tries by +1.
-              ), $us_id);
+              self::updateUserLoginAttempts($status + 1, // Increase the no of tries by +1.
+                $us_id);
             }
           }
           return false;
@@ -513,6 +517,9 @@ class console
       $sql->bindValue(":fullName", $fullname);
       $sql->bindValue(":creationDate", $created);
       $sql->execute();
+
+      // finally fetch the additional sql row for stored proc calls
+      $sql->nextRowset();
 
       return true;
     }
@@ -710,7 +717,12 @@ class console
         ":userName" => $identification,
         ":checkEmail" => (self::$config['features']['email_login'] === true)
     ));
-    return $sql->rowCount() == 0 ? false : true;
+    $rowCount = $sql->rowCount();
+
+    // finally fetch the additional sql row for stored proc calls
+    $sql->nextRowset();
+
+    return $rowCount == 0 ? false : true;
   }
 
   /**
@@ -744,8 +756,32 @@ class console
     if (!is_array($what)) {
       $data = $what == "*" ? $data : $data[$what];
     }
+
+    // finally fetch the additional sql row for stored proc calls
+    $sql->nextRowset();
+
     return $data;
   }
+
+    /**
+     * Updates the login attempts of the user
+     */
+    public static function updateUserLoginAttempts($attempts, $user = null)
+    {
+      self::construct();
+      if ($user == null) {
+          $user = self::$user;
+      }
+
+      $sql = self::$dbh->prepare("CALL updateUserLoginAttempts(:id, :attempts)");
+      $sql->bindValue(":id", $user);
+      $sql->bindValue(":attempts", $attempts);
+
+      $sql->execute();
+
+      // finally fetch the additional sql row for stored proc calls
+      $sql->nextRowset();
+    }
 
   /**
    * Updates the info of user in DB
@@ -1410,21 +1446,27 @@ class console
     // FOR API STORED PROCEDURE - da cambiare per gli sviluppatori
     public static function insertUserActiveDomain($dev_token, $aiid, $dom_id, $active){
         if(self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
+          try {
+              $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
 
-                $sql->bindValue(1, $dev_token, \PDO::PARAM_STR);
-                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
-                $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
-                $sql->bindValue(4, $active, \PDO::PARAM_BOOL);
+              $sql->bindValue(1, $dev_token, \PDO::PARAM_STR);
+              $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
+              $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
+              $sql->bindValue(4, $active, \PDO::PARAM_BOOL);
 
-                $sql->execute();
-            } catch (MySQLException $e) {
-                $e->getMessage();
-                $output = 'Query - sql user active update ACTIVE domains error' . $e;
-                exit();
-            }
-          return $sql->fetchAll();
+              $sql->execute();
+          } catch (MySQLException $e) {
+              $e->getMessage();
+              $output = 'Query - sql user active update ACTIVE domains error' . $e;
+              exit();
+          }
+
+          $data = $sql->fetchAll();
+
+          // finally fetch the additional sql row for stored proc calls
+          $sql->nextRowset();
+
+          return $data;
         }
     }
 
