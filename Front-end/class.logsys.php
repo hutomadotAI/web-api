@@ -784,35 +784,6 @@ class console
     }
 
   /**
-   * Updates the info of user in DB
-   */
-  public static function updateUser($toUpdate = array(), $user = null)
-  {
-    self::construct();
-    if (is_array($toUpdate) && !isset($toUpdate['id'])) {
-      if ($user == null) {
-        $user = self::$user;
-      }
-      $columns = "";
-      foreach ($toUpdate as $k => $v) {
-        $columns .= "`$k` = :$k, ";
-      }
-      $columns = substr($columns, 0, -2); // Remove last ","
-
-      $sql = self::$dbh->prepare("UPDATE `" . self::$config['db']['table'] . "` SET {$columns} WHERE `id`=:id");
-      $sql->bindValue(":id", $user);
-      foreach ($toUpdate as $key => $value) {
-        $value = htmlspecialchars($value);
-        $sql->bindValue(":$key", $value);
-      }
-      $sql->execute();
-
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Returns a string which shows the time since the user has joined
    */
   public static function joinedSince($user = null)

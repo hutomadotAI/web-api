@@ -152,10 +152,11 @@ body {
           if($createAccount === "exists"){
              $msg= $userexists;
           }elseif($createAccount === true){
-           header("Location: home.php"); /* Redirect browser */
-          exit();
-        }
-        else  $msg= $createAccount;
+            // redirect to the login page
+            \hutoma\console::logout();
+            exit();
+          }
+          else  $msg= $createAccount;
 
       }
     }
