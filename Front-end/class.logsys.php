@@ -1398,17 +1398,26 @@ class console
     }
 
 // FAKE
-    public static function getDomains_and_UserActiveDomains($dev_token,$aiid){
+    public static function getDomains_and_UserActiveDomains($dev_id,$aiid){
         if(self::$loggedIn){
             try {
-                $sql = self::$dbh->prepare("SELECT * FROM `domains` AS d LEFT OUTER JOIN ( SELECT * FROM `userAIDomains` WHERE `dev_token` = \"". $dev_token . "\" AND  `aiid`= \"". $aiid . "\" ) AS u ON u.dom_id = d.dom_id");
-                $sql->execute();
+
+              $sql = self::$dbh->prepare("CALL getDomainsAndUserActiveDomains(:devid, :aiid)");
+              $sql->execute(array(
+                ":devid" => $dev_id,
+                ":aiid" => $aiid));
+
+              $data = $sql->fetchAll();
+
+              // finally fetch the additional sql row for stored proc calls
+              $sql->nextRowset();
+
             } catch (MySQLException $e) {
                 $e->getMessage();
                 $output = 'Query - sql user active AI domains error' . $e;
                 exit();
             }
-            return $sql->fetchAll();
+            return $data;
         }
     }
 
