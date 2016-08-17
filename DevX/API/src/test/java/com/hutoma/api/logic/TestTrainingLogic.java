@@ -4,6 +4,7 @@ import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.containers.ApiResult;
 import hutoma.api.server.ai.api_root;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Assert;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class TestTrainingLogic {
 
     Config fakeConfig;
-    FakeJsonSerializer fakeSerializer;
+    JsonSerializer fakeSerializer;
     MessageQueue fakeMessageQueue;
     DatabaseProxy fakeDatabase;
     Tools fakeTools;
@@ -60,7 +61,7 @@ public class TestTrainingLogic {
     @Before
     public void setup() {
 
-        this.fakeSerializer = new FakeJsonSerializer();
+        this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         this.fakeDatabase = mock(DatabaseProxy.class);
@@ -92,52 +93,46 @@ public class TestTrainingLogic {
     @Test
     public void testTrain_TextSimple() {
         InputStream stream = createUpload(SOMETEXT);
-        logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(200, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_DocSimple() {
         InputStream stream = createUpload(SOMETEXT);
-        logic.uploadFile(fakeContext, DEVID, AIID, 1, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(200, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 1, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_UrlSimple() throws HTMLExtractor.HtmlExtractionException {
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
-        logic.uploadFile(fakeContext, DEVID, AIID, 2, UURL, null, null);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(200, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 2, UURL, null, null);
+        Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Text_UploadTooLarge() {
         InputStream stream = createUpload(TEXTMULTILINE);
         when(fakeConfig.getMaxUploadSize()).thenReturn((long)TEXTMULTILINE.length()-1);
-        logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(413, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(413, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Doc_UploadTooLarge() {
         InputStream stream = createUpload(TEXTMULTILINE);
         when(fakeConfig.getMaxUploadSize()).thenReturn((long)TEXTMULTILINE.length()-1);
-        logic.uploadFile(fakeContext, DEVID, AIID, 1, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(413, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 1, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(413, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Url_ExtractTooLarge() throws HTMLExtractor.HtmlExtractionException {
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(TEXTMULTILINE);
         when(fakeConfig.getMaxUploadSize()).thenReturn((long)TEXTMULTILINE.length()-1);
-        logic.uploadFile(fakeContext, DEVID, AIID, 2, UURL, null, null);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(413, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 2, UURL, null, null);
+        Assert.assertEquals(413, result.getStatus().getCode());
     }
 
     @Test
@@ -162,9 +157,8 @@ public class TestTrainingLogic {
         doThrow(fakeDatabase.createDBEx()).when(fakeDatabase).updateAiTrainingFile(anyString(), anyString());
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
-        logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(500, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
@@ -186,20 +180,18 @@ public class TestTrainingLogic {
     }
 
     void makeMessageQueueFail(int trainingType) throws Exception {
-        doThrow(new Exception("test")).when(fakeMessageQueue).pushMessageReadyForTraining(anyString(), anyString());
-        doThrow(new Exception("test")).when(fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), anyString());
+        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessageReadyForTraining(anyString(), anyString());
+        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), anyString());
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
-        logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(500, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_BadTrainingType() {
         InputStream stream = createUpload(SOMETEXT);
-        logic.uploadFile(fakeContext, DEVID, AIID, -1, UURL, stream, fakeContentDisposition);
-        api_root._myAIs apiRoot = ((api_root._myAIs)fakeSerializer.getUnserialized());
-        Assert.assertEquals(400, apiRoot.status.code);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, -1, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(400, result.getStatus().getCode());
     }
 }
