@@ -313,6 +313,7 @@ class console
             self::logout();
             $called_from = "login";
           } else if (self::$config['two_step_login']['first_check_only'] === false || (self::$config['two_step_login']['first_check_only'] === true && !isset($_SESSION['device_check']))) {
+            //TODO: 2-step-login is off at the moment - to wil have to be moved to a stored procedure to work
             $sql = self::$dbh->prepare("SELECT '1' FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
             $sql->execute(array(self::$user, $_COOKIE['logSysdevice']));
 
@@ -570,6 +571,7 @@ class console
        * The user gave the password reset token. Check if the token is valid.
        */
       $reset_pass_token = urldecode($_GET['resetPassToken']);
+      //TODO: move this to a stored procedure - at the moment this code is not being used.
       $sql = self::$dbh->prepare("SELECT `uid` FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
       $sql->execute(array($reset_pass_token));
 
@@ -601,6 +603,7 @@ class console
       }
     } elseif (isset($_POST['logSysForgotPassChange']) && isset($_POST['logSysForgotPassNewPassword']) && isset($_POST['logSysForgotPassRetypedPassword'])) {
       $reset_pass_token = urldecode($_POST['token']);
+      //TODO: move this to a stored procedure - at the moment this code is not being used.
       $sql = self::$dbh->prepare("SELECT `uid` FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
       $sql->execute(array($reset_pass_token));
 
@@ -630,6 +633,7 @@ class console
             /**
              * The token shall not be used again, so remove it.
              */
+            //TODO: move this to a stored procedure - at the moment this code is not being used.
             $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
             $sql->execute(array($reset_pass_token));
 
@@ -648,6 +652,7 @@ class console
         exit();
 
       } else {
+        //TODO: move this to a stored procedure - at the moment this code is not being used.
         $sql = self::$dbh->prepare("SELECT `email`, `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login");
         $sql->bindValue(":login", $identification);
         $sql->execute();
@@ -663,6 +668,7 @@ class console
            * Make token and insert into the table
            */
           $token = self::rand_string(40);
+          //TODO: move this to a stored procedure - at the moment this code is not being used.
           $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['token_table'] . "` (`token`, `uid`, `requested`) VALUES (?, ?, NOW())");
           $sql->execute(array($token, $uid));
           $encodedToken = urlencode($token);
@@ -694,6 +700,7 @@ class console
     if (self::$loggedIn) {
       $randomSalt = self::rand_string(20);
       $saltedPass = hash('sha256', $newpass . self::$config['keys']['salt'] . $randomSalt);
+      //TODO: move this to a stored procedure - at the moment this code is not being used.
       $sql = self::$dbh->prepare("UPDATE `" . self::$config['db']['table'] . "` SET `password` = ?, `password_salt` = ? WHERE `id` = ?");
       $sql->execute(array($saltedPass, $randomSalt, self::$user));
       return true;
@@ -851,6 +858,7 @@ class console
       $uid = $_POST['logSys_two_step_login-uid'];
       $token = $_POST['logSys_two_step_login-token'];
 
+      //TODO: this statement needs to move to stored procedure
       $sql = self::$dbh->prepare("SELECT COUNT(1) FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ? AND `uid` = ?");
       $sql->execute(array($token, $uid));
 
@@ -871,6 +879,7 @@ class console
          */
         if (isset($_POST['logSys_two_step_login-dontask'])) {
           $device_token = self::rand_string(10);
+          //TODO: this statement needs to move to stored procedure
           $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['two_step_login']['devices_table'] . "` (`uid`, `token`, `last_access`) VALUES (?, ?, NOW())");
           $sql->execute(array($uid, $device_token));
           setcookie("logSysdevice", $device_token, strtotime(self::$config['two_step_login']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -879,6 +888,7 @@ class console
         /**
          * Revoke token from reusing
          */
+        //TODO: this statement needs to move to stored procedure
         $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ? AND `uid` = ?");
         $sql->execute(array($token, $uid));
         self::login(self::getUser("username", $uid), "", isset($_POST['logSys_two_step_login-remember_me']));
@@ -903,6 +913,7 @@ class console
          * Check if device is verfied so that 2 Step Verification can be skipped
          */
         if (isset($_COOKIE['logSysdevice'])) {
+          //TODO: move this to a stored procedure - at the moment this code is not being used.
           $sql = self::$dbh->prepare("SELECT 1 FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
           $sql->execute(array($uid, $_COOKIE['logSysdevice']));
           if ($sql->fetchColumn() == "1") {
@@ -910,6 +921,7 @@ class console
             /**
              * Update last accessed time
              */
+            //TODO: this statement needs to move to stored procedure
             $sql = self::$dbh->prepare("UPDATE `" . self::$config['two_step_login']['devices_table'] . "` SET `last_access` = NOW() WHERE `uid` = ? AND `token` = ?");
             $sql->execute(array($uid, $_COOKIE['logSysdevice']));
 
@@ -936,6 +948,7 @@ class console
           /**
            * Save the token in DB
            */
+          //TODO: this statement needs to move to stored procedure
           $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['token_table'] . "` (`token`, `uid`, `requested`) VALUES (?, ?, NOW())");
           $sql->execute(array($token, $uid));
 
@@ -983,6 +996,7 @@ class console
   public static function getDevices()
   {
     if (self::$loggedIn) {
+      //TODO: this statement needs to move to stored procedure
       $sql = self::$dbh->prepare("SELECT * FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ?");
       $sql->execute(array(self::$user));
       return $sql->fetchAll(\PDO::FETCH_ASSOC);
@@ -998,6 +1012,7 @@ class console
   public static function revokeDevice($device_token)
   {
     if (self::$loggedIn) {
+      //TODO: this statement needs to move to stored procedure
       $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
       $sql->execute(array(self::$user, $device_token));
       if (isset($_SESSION['device_check'])) {
