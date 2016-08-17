@@ -4,6 +4,8 @@ import com.google.gson.*;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 
 /**
@@ -27,5 +29,13 @@ public class JsonSerializer {
 
     public String serialize(Object o) {
         return gson.toJson(o);
+    }
+
+    public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
+        Object o = gson.fromJson(new InputStreamReader(stream), resultClass);
+        if (null==o) {
+            throw new JsonParseException("cannot deserialize valid object from json");
+        }
+        return o;
     }
 }

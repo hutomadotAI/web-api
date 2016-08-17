@@ -10,10 +10,13 @@ public class ChatResult {
     double score;
     String query = "";
     String answer = "";
-    long elapsed_time;
+    double elapsed_time;
     String action;
     List<Parameter> parameters;
     String context;
+
+    String topic_in = "";
+    String topic_out = "";
 
     public String getAnswer() {
         return answer;
@@ -31,10 +34,6 @@ public class ChatResult {
         this.answer = answer;
     }
 
-    public void setElapsed_time(long elapsed_time) {
-        this.elapsed_time = elapsed_time;
-    }
-
     public void setAction(String action) {
         this.action = action;
     }
@@ -45,5 +44,9 @@ public class ChatResult {
 
     public double getScore() {
         return score;
+    }
+
+    public void setElapsedTime(double elapsed_time) {
+        this.elapsed_time = elapsed_time;
     }
 }

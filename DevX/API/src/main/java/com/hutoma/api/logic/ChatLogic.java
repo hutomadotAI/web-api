@@ -4,15 +4,12 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
-import hutoma.api.server.ai.api_root;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
@@ -52,7 +49,7 @@ public class ChatLogic {
 
         res.setAction("no action");
         res.setContext("");
-        res.setElapsed_time(0);
+        res.setElapsedTime(0.0d);
         res.setQuery(q);
 
         long startTime = timestampNow;
@@ -60,44 +57,45 @@ public class ChatLogic {
         logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid);
         boolean noResponse = true;
         try {
-            String wnet_res = semanticAnalysis.getAnswer(dev_id, aiid, "[" +history+ "]" + q, min_p, fs);
-            if (null!=wnet_res) {
-                String[] answers = wnet_res.split("\\|");
-                if (answers.length>1) {
-                    noResponse = false;
-                    res.setScore(Math.round(Double.valueOf(answers[0]) * 10.0d) / 10.0d);
+            ChatResult result = semanticAnalysis.getAnswer(dev_id, aiid, "[" +history+ "]" + q, min_p, fs);
 
-                    // take the second line in the answer, or an empty string if there isn't one
-                    res.setAnswer((answers.length>1)? answers[1]:"");
+            if (null!=result.getAnswer() && !result.getAnswer().isEmpty()) {
+                noResponse = false;
+                res.setScore(Math.round(Double.valueOf(result.getScore()) * 10.0d) / 10.0d);
 
-                    long endWNetTime = tools.getTimestamp();
-                    res.setElapsed_time(endWNetTime - startTime);
+                // take the second line in the answer, or an empty string if there isn't one
+                res.setAnswer(result.getAnswer());
 
-                    apiChat.setTimestamp(endWNetTime);
-                    //apiChat.metadata = md;
+                long endWNetTime = tools.getTimestamp();
+                res.setElapsedTime((endWNetTime - startTime)/1000.0d);
 
-                    logger.logDebug(LOGFROM, "AI response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(res.getScore()));
+                apiChat.setTimestamp(endWNetTime);
+                //apiChat.metadata = md;
 
-                    // if Semantic Analysis is not confident enough, try with the Neural Network
-                    if (res.getScore()<min_p)  {
-                        logger.logDebug(LOGFROM, "starting RNN request");
-                        String RNN_answer = neuralNet.getAnswer(dev_id, aiid, uid,q);
-                        long endRNNTime = tools.getTimestamp();
+                logger.logDebug(LOGFROM, "AI response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(res.getScore()));
 
-                        boolean validRNN = false;
-                        if ((RNN_answer!=null) && (!RNN_answer.isEmpty())) {
-                            res.setAnswer(RNN_answer);
-                            validRNN = true;
-                        }
-                        logger.logDebug(LOGFROM, "RNN " + ((validRNN)? "valid":"*empty*") + " response in " +
-                                Long.toString(endRNNTime - endWNetTime) + "ms. Total query time " +
-                                Long.toString(endRNNTime - startTime) + "ms.");
+                // if Semantic Analysis is not confident enough, try with the Neural Network
+                if (res.getScore()<min_p)  {
+                    logger.logDebug(LOGFROM, "starting RNN request");
+                    String RNN_answer = neuralNet.getAnswer(dev_id, aiid, uid,q);
+                    long endRNNTime = tools.getTimestamp();
+
+                    boolean validRNN = false;
+                    if ((RNN_answer!=null) && (!RNN_answer.isEmpty())) {
+                        res.setAnswer(RNN_answer);
+                        res.setElapsedTime((endRNNTime - startTime)/1000.0d);
+                        validRNN = true;
                     }
+                    logger.logDebug(LOGFROM, "RNN " + ((validRNN)? "valid":"*empty*") + " response in " +
+                            Long.toString(endRNNTime - endWNetTime) + "ms. Total query time " +
+                            Long.toString(endRNNTime - startTime) + "ms.");
                 }
             }
         }
         catch (Exception ex){
-            logger.logError(LOGFROM, "AI chat request exception" + ex.toString());
+            logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
+            // log the error but don't return a 500
+            // because the error may have occurred on the second request and the first may have completed correctly
         }
         if (noResponse) {
             logger.logWarning(LOGFROM, "no response from chat server");

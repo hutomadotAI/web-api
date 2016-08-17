@@ -1,13 +1,15 @@
 package com.hutoma.api.connectors;
 
+import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
+import com.hutoma.api.containers.sub.ChatResult;
 import io.mikael.urlbuilder.UrlBuilder;
-import org.apache.commons.io.IOUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -17,16 +19,24 @@ public class SemanticAnalysis {
 
     Config config;
     Logger logger;
+    JsonSerializer serializer;
 
     private final String LOGFROM = "wnetconnector";
 
-    @Inject
-    public SemanticAnalysis(Config config, Logger logger) {
-        this.config = config;
-        this.logger = logger;
+    public static class SemanticAnalysisException extends Exception {
+        public SemanticAnalysisException(Throwable cause) {
+            super(cause);
+        }
     }
 
-    public String getAnswer(String devid, String aiid, String q, float min_p, boolean fastSearch) {
+    @Inject
+    public SemanticAnalysis(Config config, Logger logger, JsonSerializer serializer) {
+        this.config = config;
+        this.logger = logger;
+        this.serializer = serializer;
+    }
+
+    public ChatResult getAnswer(String devid, String aiid, String q, float min_p, boolean fastSearch) throws SemanticAnalysisException {
         try {
             UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                     .addParameter("q", q)
@@ -39,30 +49,16 @@ public class SemanticAnalysis {
                 url = url.addParameter("fs", "yes");
             }
             URL finalUrl = new URL(url.toString());
-            return IOUtils.toString(new InputStreamReader(finalUrl.openStream()));
+            InputStream stream = finalUrl.openStream();
+            ChatResult result = (ChatResult) serializer.deserialize(stream, ChatResult.class);
+            return result;
+        } catch (JsonParseException jp) {
+            logger.logError(LOGFROM, "failed to deserialize json result from SemanticAnalysis server: ");
+            throw new SemanticAnalysisException(jp);
         } catch (IOException e) {
             logger.logError(LOGFROM, "failed to contact SemanticAnalysis server: " + e.toString());
+            throw new SemanticAnalysisException(e);
         }
-        return "";
     }
-
-    /*
-    public String getAnswerOld(String devid, String aiid, String q, float min_p, boolean fastSearch) {
-        try
-        {
-            String wnet_server = config.getWNetServer();
-            wnet_server += "q="+q.replace(" ","%20");
-            wnet_server += "&aiid="+aiid;
-            wnet_server += "&uid="+devid;
-            wnet_server += "&min_p="+min_p;
-            wnet_server += "&multiprocess=yes&nproc=8&fs=yes";
-            if (fastSearch) wnet_server +="&fs=yes";
-            URL url = new URL(wnet_server);
-            return IOUtils.toString(new InputStreamReader(url.openStream()));
-        }
-        catch (IOException e) {}
-        return "";
-    }
-    */
 
 }
