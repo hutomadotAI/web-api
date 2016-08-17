@@ -5,6 +5,8 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
+import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.ApiResult;
 import hutoma.api.server.ai.api_root;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,71 +62,70 @@ public class TestChatLogic {
         chatLogic = new ChatLogic(fakeConfig, fakeSerializer, fakeSemanticAnalysis, fakeNeuralNet, fakeTools, fakeLogger);
     }
 
-    private api_root._chat getValidChat(float min_p) {
+    private ApiResult getValidChat(float min_p) {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyFloat(), anyBoolean())).thenReturn(semanticResult);
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(neuralResult);
         return getChat(min_p);
     }
 
-    private api_root._chat getChat(float min_p) {
-        chatLogic.chat(fakeContext, AIID, DEVID, "question", UID, "history", false, false, min_p);
-        return ((api_root._chat) fakeSerializer.getUnserialized());
+    private ApiResult getChat(float min_p) {
+        return chatLogic.chat(fakeContext, AIID, DEVID, "question", UID, "history", false, false, min_p);
     }
 
     @Test
     public void testChat_Valid_Semantic() {
-        api_root._chat apiRoot = getValidChat(0.2f);
-        Assert.assertEquals(200, apiRoot.status.code);
-        Assert.assertEquals(SEMANTICRESULT, apiRoot.result.answer);
+        ApiResult result = getValidChat(0.2f);
+        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat)result).getResult().getAnswer());
     }
 
     @Test
     public void testChat_Valid_Neural() {
-        api_root._chat apiRoot = getValidChat(0.5f);
-        Assert.assertEquals(200, apiRoot.status.code);
-        Assert.assertEquals(NEURALRESULT, apiRoot.result.answer);
+        ApiResult result = getValidChat(0.5f);
+        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(NEURALRESULT, ((ApiChat)result).getResult().getAnswer());
     }
 
     @Test
     public void testChat_EmptySemantic() {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyFloat(), anyBoolean())).thenReturn("");
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(neuralResult);
-        api_root._chat apiRoot = getChat(0.2f);
-        Assert.assertEquals(500, apiRoot.status.code);
+        ApiResult result = getChat(0.2f);
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testChat_NullSemantic() {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyFloat(), anyBoolean())).thenReturn(null);
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(neuralResult);
-        api_root._chat apiRoot = getChat(0.2f);
-        Assert.assertEquals(500, apiRoot.status.code);
+        ApiResult result = getChat(0.2f);
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testChat_EmptyNeural() {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyFloat(), anyBoolean())).thenReturn(semanticResult);
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn("");
-        api_root._chat apiRoot = getChat(0.5f);
-        Assert.assertEquals(200, apiRoot.status.code);
-        Assert.assertEquals(SEMANTICRESULT, apiRoot.result.answer);
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat)result).getResult().getAnswer());
     }
 
     @Test
     public void testChat_NullNeural() {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyFloat(), anyBoolean())).thenReturn(semanticResult);
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(null);
-        api_root._chat apiRoot = getChat(0.5f);
-        Assert.assertEquals(200, apiRoot.status.code);
-        Assert.assertEquals(SEMANTICRESULT, apiRoot.result.answer);
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat)result).getResult().getAnswer());
     }
 
     @Test
     public void testChat_EmptyBoth() {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyFloat(), anyBoolean())).thenReturn("");
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn("");
-        api_root._chat apiRoot = getChat(0.5f);
-        Assert.assertEquals(500, apiRoot.status.code);
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
 }

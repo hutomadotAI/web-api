@@ -1,9 +1,9 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Logger;
-import hutoma.api.server.ai.api_root;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.ApiAi;
 import hutoma.api.server.db.ai;
-import hutoma.api.server.db.domain;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -46,11 +46,11 @@ public class Database {
                 shallow_learning_status, status, client_token, trainingFile);
     }
 
-    public ArrayList<api_root._ai> getAllAIs(String devid) {
+    public ArrayList<ApiAi> getAllAIs(String devid) {
         return hutoma.api.server.db.ai.get_all_ai(devid);
     }
 
-    public api_root._ai getAI(String aiid) {
+    public ApiAi getAI(String aiid) {
         return hutoma.api.server.db.ai.get_ai(aiid);
     }
 
@@ -58,8 +58,8 @@ public class Database {
         return hutoma.api.server.db.ai.delete_ai(aiid);
     }
 
-    public ArrayList<api_root._domain> getAllDomains() {
-        return hutoma.api.server.db.domain.get_all_domains();
+    public ArrayList<AiDomain> getAiDomainList() {
+        return hutoma.api.server.db.domain.getAiDomainList();
     }
 
     public boolean isNeuralNetworkServerActive(String dev_id, String aiid) throws Exception {

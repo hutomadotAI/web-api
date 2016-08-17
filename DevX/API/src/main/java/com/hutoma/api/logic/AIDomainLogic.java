@@ -1,22 +1,16 @@
 package com.hutoma.api.logic;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
-import hutoma.api.server.ai.api_root;
-import hutoma.api.server.db.domain;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.ApiAiDomains;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiResult;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Hutoma on 15/07/16.
@@ -26,35 +20,35 @@ public class AIDomainLogic {
     Config config;
     JsonSerializer jsonSerializer;
     Database database;
+    Logger logger;
+
+    private final String LOGFROM = "aidomainlogic";
 
     @Inject
-    public AIDomainLogic(Config config, JsonSerializer jsonSerializer, Database database) {
+    public AIDomainLogic(Config config, JsonSerializer jsonSerializer, Database database, Logger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
+        this.logger = logger;
     }
 
-    public String getDomains(
+    public ApiResult getDomains(
             SecurityContext securityContext,
             String devid) {
-        api_root._status st = new api_root._status();
-        api_root._domainList _domain = new api_root._domainList();
-        st.code = 200;
-        st.info ="success";
-        _domain.status = st;
+
         try {
-            ArrayList<api_root._domain> listdomains = database.getAllDomains();
-            if (listdomains.size() <= 0) {
-                st.code = 500;
-                st.info = "Internal Server Error.";
-            } else {
-                _domain.domain_list = listdomains;
+            logger.logDebug(LOGFROM, "request to get all domains for " + devid);
+            //TODO: distinguish between db fail and not found
+            List<AiDomain> domainList = database.getAiDomainList();
+            if (domainList.size()==0) {
+                logger.logDebug(LOGFROM, "no domains found");
+                return ApiError.getNotFound();
             }
+            return new ApiAiDomains(domainList).setSuccessStatus();
         }
         catch (Exception e){
-            st.code = 500;
-            st.info = "Error:Internal Server Error.";
+            logger.logError(LOGFROM, "could not get all domains; " + e.toString());
+            return ApiError.getInternalServerError();
         }
-        return jsonSerializer.serialize(_domain);
     }
 }

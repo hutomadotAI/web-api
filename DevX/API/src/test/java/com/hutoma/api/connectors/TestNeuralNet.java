@@ -13,6 +13,7 @@ import org.junit.Test;
 import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -63,7 +64,6 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_Success() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenReturn(false);
-        when(fakeMessageQueue.pushMessageStartRNN(anyString(), anyString())).thenReturn(true);
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
         String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
@@ -73,7 +73,6 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_DBFail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenThrow(new Exception());
-        when(fakeMessageQueue.pushMessageStartRNN(anyString(), anyString())).thenReturn(true);
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
         String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
@@ -84,7 +83,7 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_MessageFail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenReturn(false);
-        when(fakeMessageQueue.pushMessageStartRNN(anyString(), anyString())).thenReturn(false);
+        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessageStartRNN(anyString(), anyString());
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
         String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");

@@ -8,6 +8,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.*;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiResult;
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import com.hutoma.api.auth.Role;
@@ -63,16 +65,9 @@ public class TrainingLogic {
         this.logger = logger;
     }
 
-    public String uploadFile(SecurityContext securityContext, String devid, String aiid, int type, String url, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+    public ApiResult uploadFile(SecurityContext securityContext, String devid, String aiid, int type, String url, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 
         ArrayList<String> source;
-
-        api_root._myAIs myai = new api_root._myAIs();
-        api_root._status st = new api_root._status();
-        st.code = 200;
-        st.info ="success";
-        myai.status =st;
-        api_root._ai _ai = new api_root._ai();
 
         long maxUploadFileSize = config.getMaxUploadSize();
 
@@ -90,7 +85,7 @@ public class TrainingLogic {
                     if (source.size() > config.getMaxClusterLines()) {
                         messageQueue.pushMessageClusterSplit(devid, aiid, config.getClusterMinProbability());
                     }
-                    break;
+                    return new ApiResult().setSuccessStatus("upload accepted");
 
                 // 1 = training file is a document
                 case 1:
@@ -99,53 +94,44 @@ public class TrainingLogic {
                     source = getFile(maxUploadFileSize, uploadedInputStream);
                     database.updateAiTrainingFile(aiid, String.join("\n", source));
                     messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
-                    break;
+                    return new ApiResult().setSuccessStatus("upload document accepted");
 
                 // 2 = training file is a webpage
                 case 2:
                     logger.logDebug(LOGFROM, "training from uploaded URL");
                     database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize));
                     messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
-                    break;
+                    return new ApiResult().setSuccessStatus("url training accepted");
 
                 default:
-                    logger.logInfo(LOGFROM, "bad request type");
-                    st.code = 400;
-                    st.info = "Bad request type";
-                    break;
+                    return ApiError.getBadRequest("incorrect training type");
             }
         }
         catch (IOException ioe) {
             logger.logInfo(LOGFROM, "html extraction error " + ioe.toString());
-            st.code = 400;
-            st.info = "Bad request";
+            return ApiError.getBadRequest();
         }
         catch (HTMLExtractor.HtmlExtractionException ht) {
             logger.logInfo(LOGFROM, "html extraction error " + ht.getCause().toString());
-            st.code = 400;
-            st.info = "HTML extraction error";
+            return ApiError.getBadRequest("html extraction error");
         }
         catch (UploadTooLargeException tooLarge) {
             logger.logInfo(LOGFROM, "upload attempt was larger than maximum allowed");
-            st.code = 413;
-            st.info = "Payload Too Large";
+            return ApiError.getPayloadTooLarge();
         }
         catch (Database.DatabaseException dde) {
             logger.logError(LOGFROM, "database error " + dde.getCause().toString());
-            st.code = 500;
-            st.info = "Internal server error";
+            return ApiError.getInternalServerError();
         }
         catch (Exception ex) {
             logger.logError(LOGFROM, "exception " + ex.toString());
-            st.code = 500;
-            st.info = "Internal server error";
+            return ApiError.getInternalServerError();
         }
         finally {
             try {
                 uploadedInputStream.close();
             } catch (Throwable ignore) {}
-         }
-        return jsonSerializer.serialize(myai);
+        }
     }
 
     void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize) throws UploadTooLargeException {
@@ -156,17 +142,15 @@ public class TrainingLogic {
         }
     }
 
-    public String delete(SecurityContext securityContext, String devid, String aiid) {
-        api_root._myAIs myai = new api_root._myAIs();
-        api_root._status st = new api_root._status();
-        st.code = 200;
-        st.info ="success";
-        myai.status = st;
-
-        //api_root._ai _ai = new api_root._ai();
-        messageQueue.pushMessageDeleteTraining(devid, aiid);
-        //_ai.ai_status = String.valueOf(MessageQueue.AwsMessage.training_queued);
-        return jsonSerializer.serialize(myai);
+    public ApiResult delete(SecurityContext securityContext, String devid, String aiid) {
+        logger.logDebug(LOGFROM, "request to delete training for " + aiid);
+        try {
+            messageQueue.pushMessageDeleteTraining(devid, aiid);
+        } catch (MessageQueue.MessageQueueException e) {
+            logger.logError(LOGFROM, "message queue exception " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+        return new ApiResult().setSuccessStatus("successfully queued for deletion");
     }
 
     /**

@@ -2,14 +2,15 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
-import hutoma.api.server.ai.api_root;
+import com.hutoma.api.containers.ApiAdmin;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiResult;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
-import org.glassfish.jersey.spi.Contract;
-import org.jvnet.hk2.annotations.Service;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
@@ -17,24 +18,26 @@ import javax.ws.rs.core.SecurityContext;
 /**
  * Created by mauriziocibelli on 27/04/16.
  */
-@Contract
-@Service
 public class AdminLogic {
 
     Config config;
     JsonSerializer jsonSerializer;
     Database database;
     MessageQueue messageQueue;
+    Logger logger;
+
+    private final String LOGFROM = "adminlogic";
 
     @Inject
-    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue) {
+    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, Logger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.messageQueue = messageQueue;
+        this.logger = logger;
     }
 
-    public String createDev(
+    public ApiResult createDev(
             SecurityContext securityContext,
             String securityRole,
             String developerID,
@@ -48,60 +51,48 @@ public class AdminLogic {
             int planId,
             String dev_id) {
 
-            api_root._myAIs ai = new api_root._myAIs();
-            api_root._status st = new api_root._status();
-            st.code = 200;
-            st.info ="success";
-            ai.status =st;
-            ai.dev_token="";
+        try {
+            String encoding_key = config.getEncodingKey();
+            logger.logInfo(LOGFROM, "request to create dev " + developerID);
 
-            try {
-                String encoding_key = config.getEncodingKey();
+            String devToken = Jwts.builder()
+                    .claim("ROLE", securityRole)
+                    .setSubject(developerID)
+                    .compressWith(CompressionCodecs.DEFLATE)
+                    .signWith(SignatureAlgorithm.HS256, encoding_key)
+                    .compact();
 
-                String token = Jwts.builder()
-                        .claim("ROLE", securityRole)
-                        .setSubject(developerID)
-                        .compressWith(CompressionCodecs.DEFLATE)
-                        .signWith(SignatureAlgorithm.HS256, encoding_key)
-                        .compact();
-
-                ai.dev_token= token;
-                ai.devid = developerID;
-
-                if (!database.createDev(username, email, password, passwordSalt, name, attempt, ai.dev_token, planId, ai.devid)) {
-                    st.code = 500;
-                    st.info = "Internal Server Error.";
-                }
-
+            if (!database.createDev(username, email, password, passwordSalt, name, attempt, devToken, planId, developerID)) {
+                logger.logError(LOGFROM, "db failed to create dev");
+                return ApiError.getInternalServerError();
             }
-            catch (Exception e) {
-                st.code = 500;
-                st.info = "Internal Server Error.";
-            }
-            return jsonSerializer.serialize(ai);
+
+            return new ApiAdmin(devToken, developerID).setSuccessStatus("created successfully");
+        }
+        catch (Exception e) {
+            logger.logError(LOGFROM, "failed to create dev: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
     }
 
-    public String deleteDev(
+    public ApiResult deleteDev(
             SecurityContext securityContext,
             String devid) {
 
-        api_root._newai ai = new api_root._newai();
-        api_root._status st = new api_root._status();
-        st.code = 200;
-        st.info ="success";
-        ai.status = st;
-
         try {
+            logger.logInfo(LOGFROM, "request to delete dev " + devid);
+
+            //TODO: distinguish between error condition and "failed to delete", perhaps because the dev was not found?
             if (!database.deleteDev(devid)) {
-                st.code = 500;
-                st.info = "Internal Server Error.";
+                logger.logInfo(LOGFROM, "db failed to delete dev");
+                return ApiError.getBadRequest("not found or unable to delete");
             }
             messageQueue.pushMessageDeleteDev(devid);
         }
         catch (Exception e){
-            st.code = 500;
-            st.info = "Internal Server Error.";
+            logger.logError(LOGFROM, "failed to create dev: " + e.toString());
+            return ApiError.getInternalServerError();
         }
-        return jsonSerializer.serialize(ai);
+        return new ApiResult().setSuccessStatus("deleted successfully");
     }
 }

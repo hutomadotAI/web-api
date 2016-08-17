@@ -35,7 +35,11 @@ public class NeuralNet {
         // if the RNN network is not active, then push a message to get it activated
         try {
             if (!database.isNeuralNetworkServerActive(dev_id, aiid)) {
-                if (!messageQueue.pushMessageStartRNN(dev_id, aiid)) {
+
+                //TODO: fix this
+                try {
+                    messageQueue.pushMessageStartRNN(dev_id, aiid);
+                } catch (MessageQueue.MessageQueueException mqe) {
                     throw new Exception("failed to send message to message queue");
                 }
             }

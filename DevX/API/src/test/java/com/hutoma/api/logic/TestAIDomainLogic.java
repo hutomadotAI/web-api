@@ -2,8 +2,11 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
+import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
-import hutoma.api.server.ai.api_root;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.ApiAiDomains;
+import com.hutoma.api.containers.ApiResult;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +27,10 @@ public class TestAIDomainLogic {
     SecurityContext fakeContext;
     Database fakeDatabase;
     Config fakeConfig;
+    Logger fakeLogger;
 
-    ArrayList<api_root._domain> listOfSingleResult;
+    ArrayList<AiDomain> listOfSingleResult;
+    ArrayList<AiDomain> listOfEmpty;
     AIDomainLogic aiDomainLogic;
 
     private String DEVID = "devid";
@@ -37,46 +42,44 @@ public class TestAIDomainLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
+        this.fakeLogger = mock(Logger.class);
 
-        api_root._domain result = new api_root._domain();
-        result.dom_id = DOMID;
+        AiDomain domain = new AiDomain(DOMID, "name", "desc", "icon", "colour", true);
         listOfSingleResult = new ArrayList<>();
-        listOfSingleResult.add(result);
+        listOfSingleResult.add(domain);
+        listOfEmpty = new ArrayList<>();
 
-        aiDomainLogic = new AIDomainLogic(fakeConfig, fakeSerializer, fakeDatabase);
+        aiDomainLogic = new AIDomainLogic(fakeConfig, fakeSerializer, fakeDatabase, fakeLogger);
     }
 
     @Test
     public void testGetAll_Valid() {
-        when(fakeDatabase.getAllDomains()).thenReturn(listOfSingleResult);
-        aiDomainLogic.getDomains(fakeContext, DEVID);
-        api_root._domainList domain = ((api_root._domainList) fakeSerializer.getUnserialized());
-        Assert.assertEquals(200, domain.status.code);
+        when(fakeDatabase.getAiDomainList()).thenReturn(listOfSingleResult);
+        ApiResult result = aiDomainLogic.getDomains(fakeContext, DEVID);
+        Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetAll_Valid_Result() {
-        when(fakeDatabase.getAllDomains()).thenReturn(listOfSingleResult);
+        when(fakeDatabase.getAiDomainList()).thenReturn(listOfSingleResult);
         aiDomainLogic.getDomains(fakeContext, DEVID);
-        api_root._domainList domain = ((api_root._domainList) fakeSerializer.getUnserialized());
-        Assert.assertNotNull(domain.domain_list);
-        Assert.assertFalse(domain.domain_list.isEmpty());
-        Assert.assertEquals(DOMID, domain.domain_list.get(0).dom_id);
+        ApiAiDomains result = (ApiAiDomains)aiDomainLogic.getDomains(fakeContext, DEVID);
+        Assert.assertNotNull(result.getDomainList());
+        Assert.assertFalse(result.getDomainList().isEmpty());
+        Assert.assertEquals(DOMID, result.getDomainList().get(0).getDomID());
     }
 
     @Test
     public void testGetAll_DBFail() {
-        when(fakeDatabase.getAllDomains()).thenReturn(new ArrayList<api_root._domain>());
-        aiDomainLogic.getDomains(fakeContext, DEVID);
-        api_root._domainList domain = ((api_root._domainList) fakeSerializer.getUnserialized());
-        Assert.assertEquals(500, domain.status.code);
+        when(fakeDatabase.getAiDomainList()).thenReturn(listOfEmpty);
+        ApiResult result = aiDomainLogic.getDomains(fakeContext, DEVID);
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetAll_NotFound() {
-        when(fakeDatabase.getAllDomains()).thenReturn(new ArrayList<api_root._domain>());
-        aiDomainLogic.getDomains(fakeContext, DEVID);
-        api_root._domainList domain = ((api_root._domainList) fakeSerializer.getUnserialized());
-        Assert.assertEquals(404, domain.status.code);
+        when(fakeDatabase.getAiDomainList()).thenReturn(listOfEmpty);
+        ApiResult result = aiDomainLogic.getDomains(fakeContext, DEVID);
+        Assert.assertEquals(400, result.getStatus().getCode());
     }
 }
