@@ -147,20 +147,16 @@ body {
           elseif($password != $retyped_password) $msg= $passwordmismatch;
             elseif($terms != 'True') $msg= $termsmsg;
         else{
-          $createAccount = \hutoma\console::register($email, $password,
-            array(
-              "username" => $email,
-              "name" => $name,
-              "created" => date("Y-m-d H:i:s") // Just for testing
-            )
-          );
+          $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
+
           if($createAccount === "exists"){
              $msg= $userexists;
           }elseif($createAccount === true){
-           header("Location: home.php"); /* Redirect browser */
-          exit();
-        }
-        else  $msg= $createAccount;
+            // redirect to the login page
+            \hutoma\console::logout();
+            exit();
+          }
+          else  $msg= $createAccount;
 
       }
     }
