@@ -1,9 +1,11 @@
 package com.hutoma.api.connectors;
 
-import hutoma.api.server.ai.api_root;
+import com.hutoma.api.common.Logger;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.ApiAi;
 import hutoma.api.server.db.ai;
-import hutoma.api.server.db.domain;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +15,20 @@ import java.util.ArrayList;
  */
 public class Database {
 
+    private final String LOGFROM = "database";
+
+    public class DatabaseException extends Exception {
+        public DatabaseException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    Logger logger;
+
+    @Inject
+    public Database(Logger logger) {
+        this.logger = logger;
+    }
 
     public boolean createDev(String username, String email, String password, String passwordSalt, String name, String attempt, String dev_token, int planId, String devid) {
         return hutoma.api.server.db.ai.create_dev(username, email, password, passwordSalt, name, attempt, dev_token, planId, devid);
@@ -30,11 +46,11 @@ public class Database {
                 shallow_learning_status, status, client_token, trainingFile);
     }
 
-    public ArrayList<api_root._ai> getAllAIs(String devid) {
+    public ArrayList<ApiAi> getAllAIs(String devid) {
         return hutoma.api.server.db.ai.get_all_ai(devid);
     }
 
-    public api_root._ai getAI(String aiid) {
+    public ApiAi getAI(String aiid) {
         return hutoma.api.server.db.ai.get_ai(aiid);
     }
 
@@ -42,7 +58,43 @@ public class Database {
         return hutoma.api.server.db.ai.delete_ai(aiid);
     }
 
-    public ArrayList<api_root._domain> getAllDomains() {
-        return hutoma.api.server.db.domain.get_all_domains();
+    public ArrayList<AiDomain> getAiDomainList() {
+        return hutoma.api.server.db.domain.getAiDomainList();
     }
+
+    public boolean isNeuralNetworkServerActive(String dev_id, String aiid) throws Exception {
+        try {
+            return hutoma.api.server.db.RNN.is_RNN_active(dev_id, aiid);
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "db call failed: " + e.toString());
+            throw e;
+        }
+    }
+
+    public long insertNeuralNetworkQuestion(String dev_id, String uid, String aiid, String q) {
+        try {
+            return hutoma.api.server.db.RNN.insertQuestion(dev_id, uid, aiid, q);
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "db call failed: " + e.toString());
+            return -1;
+        }
+    }
+
+    public String getAnswer(long qid) {
+        try {
+            return hutoma.api.server.db.RNN.getAnswer(qid);
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "db call failed: " + e.toString());
+        }
+        return null;
+    }
+
+    public void updateAiTrainingFile(String aiid, String trainingData) throws DatabaseException {
+        try {
+            ai.update_ai_training_file(aiid, trainingData);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
+
 }

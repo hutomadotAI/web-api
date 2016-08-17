@@ -1,7 +1,8 @@
 package hutoma.api.server.db;
 
+import com.hutoma.api.containers.ApiAi;
 import hutoma.api.server.ai.api_root;
-import hutoma.api.server.utils.utils;
+import org.joda.time.DateTime;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -104,32 +105,24 @@ public class ai {
     }
 
 
-    public static boolean update_ai_training_file( String aiid, String training_file) {
-        try {
+    public static void update_ai_training_file( String aiid, String training_file) throws Exception {
+        String myDriver = "com.mysql.cj.jdbc.Driver";
+        String myUrl = getConfigProp("connectionstring");
+        Class.forName(myDriver);
+        Connection conn = DriverManager.getConnection(myUrl);
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
-            String myUrl = getConfigProp("connectionstring");
-            Class.forName(myDriver);
-            Connection conn = DriverManager.getConnection(myUrl);
-
-            String query = " update ai set ai_trainingfile=? where aiid=?";
-            PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setString(1, training_file);
-            preparedStmt.setString(2, aiid);
-            preparedStmt.execute();
-            conn.close();
-        }
-        catch (Exception e) {
-            return false;
-        }
-        return true;
+        String query = " update ai set ai_trainingfile=? where aiid=?";
+        PreparedStatement preparedStmt = conn.prepareStatement(query);
+        preparedStmt.setString(1, training_file);
+        preparedStmt.setString(2, aiid);
+        preparedStmt.execute();
+        conn.close();
     }
 
 
     public static boolean update_ai_training_status( String aiid, String status) {
         try {
-
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
@@ -169,49 +162,37 @@ public class ai {
     }
 
 
-    public static ArrayList<api_root._ai> get_all_ai(String dev_id) {
-        ArrayList<api_root._ai> res = new ArrayList<>();
+    public static ArrayList<ApiAi> get_all_ai(String dev_id) {
+        ArrayList<ApiAi> res = new ArrayList<>();
         try {
 
             String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
+
             Statement st = conn.createStatement();
             String query = "SELECT * FROM ai WHERE dev_id='"+dev_id+"'";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                api_root._ai r = new api_root._ai();
-                r.ai_status = rs.getString("ai_status");
-                r.aiid = rs.getString("aiid");
-                r.created_on = rs.getDate("created_on");
-                r.description = rs.getString("ai_description");
-                r.name = rs.getString("ai_name");
-                //r.ai_training_file = rs.getString("ai_trainingfile");
-                r.is_private = rs.getBoolean("is_private");
-                r.deep_learning_error = rs.getDouble("deep_learning_error");
-                r.training_status = rs.getString("deep_learning_status");
-                r.client_token = rs.getString("client_token");
-                res.add(r);
+                ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
+                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                res.add(ai);
             }
             st.close();
             conn.close();
-            return res;
-
         }
-
         catch (Exception e) {
-            System.out.println(e.toString());
-            // TODO: add logging here
+            return null;
         }
         return res;
     }
 
+    public static ApiAi get_ai(String aiid) {
 
-    public static api_root._ai get_ai(String aiid) {
-        api_root._ai r = new api_root._ai();
+        ApiAi ai = null;
         try {
-
             String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
@@ -219,27 +200,18 @@ public class ai {
             Statement st = conn.createStatement();
             String query = "SELECT * FROM ai WHERE aiid='"+aiid+"'";
             ResultSet rs = st.executeQuery(query);
-            while (rs.next()) {
-                r.aiid = rs.getString("aiid");
-                r.created_on = rs.getDate("created_on");
-                r.description = rs.getString("ai_description");
-                r.name = rs.getString("ai_name");
-                //r.ai_training_file = rs.getString("ai_trainingfile");
-                r.is_private = rs.getBoolean("is_private");
-                r.deep_learning_error = rs.getDouble("deep_learning_error");
-                r.training_status = rs.getString("deep_learning_status");
-                r.client_token = rs.getString("client_token");
-                r.training_debug_info = rs.getString("dl_debug");
-
+            if (rs.next()) {
+                ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
+                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
             }
             st.close();
             conn.close();
         }
-
         catch (Exception e) {
             System.out.print(e.getMessage());
         }
-        return r;
+        return ai;
     }
 
 
@@ -248,7 +220,7 @@ public class ai {
         String stat="";
         try {
 
-            String myDriver = "org.gjt.mm.mysql.Driver";
+            String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);

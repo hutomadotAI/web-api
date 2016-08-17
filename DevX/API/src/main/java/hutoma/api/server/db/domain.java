@@ -1,5 +1,6 @@
 package hutoma.api.server.db;
 
+import com.hutoma.api.containers.sub.AiDomain;
 import hutoma.api.server.ai.api_root;
 
 import java.sql.*;
@@ -68,10 +69,9 @@ public class domain {
     }
 
 
-    public static ArrayList<api_root._domain> get_all_domains() {
-        ArrayList<api_root._domain> res = new ArrayList<>();
+    public static ArrayList<AiDomain> getAiDomainList() {
+        ArrayList<AiDomain> res = new ArrayList<>();
         try {
-
             String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
@@ -80,19 +80,18 @@ public class domain {
             String query = "SELECT * FROM domains";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                api_root._domain r = new api_root._domain();
-                r.dom_id = rs.getString("dom_id");
-                r.name = rs.getString("name");
-                r.description = rs.getString("description");
-                r.icon = rs.getString("icon");
-                r.color = rs.getString("color");
-                r.available = rs.getBoolean("available");
+                AiDomain r = new AiDomain(
+                        rs.getString("dom_id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("icon"),
+                        rs.getString("color"),
+                        rs.getBoolean("available"));
                 res.add(r);
             }
             st.close();
             conn.close();
             return res;
-
         }
 
         catch (Exception e) {}

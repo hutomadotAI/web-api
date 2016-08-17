@@ -8,9 +8,19 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.Logger;
+
+import javax.inject.Inject;
 
 
 public class MessageQueue {
+
+    public static class MessageQueueException extends Exception {
+
+        public MessageQueueException(Throwable cause) {
+            super(cause);
+        }
+    }
 
     public enum AwsMessage {
         cluster_split,
@@ -32,19 +42,53 @@ public class MessageQueue {
         start_RNN
     }
 
-    public boolean pushMessageDeleteDev(Config config, String devid) {
-        return pushMessage(config, AwsMessage.delete_dev + "|" + devid + "|000");
+    private final String LOGFROM = "messagequeue";
+
+    Config config;
+    Logger logger;
+
+    @Inject
+    public MessageQueue(Config config, Logger logger) {
+        this.config = config;
+        this.logger = logger;
     }
 
-    public boolean pushMessageDeleteAI(Config config, String devid, String aiid) {
-        return pushMessage(config, AwsMessage.delete_ai + "|" + devid + "|" + aiid);
+    public void pushMessageDeleteDev(String devid) throws MessageQueueException {
+        pushMessage(AwsMessage.delete_dev + "|" + devid + "|000");
     }
 
-    protected boolean pushMessage(Config config, String message) {
+    public void pushMessageDeleteAI(String devid, String aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.delete_ai + "|" + devid + "|" + aiid);
+    }
+
+    public void pushMessageStartRNN(String devid, String aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.start_RNN + "|" + devid + "|" + aiid);
+    }
+
+    public void pushMessageReadyForTraining(String devid, String aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.ready_for_training + "|" + devid + "|" + aiid);
+    }
+
+    public void pushMessagePreprocessTrainingText(String devid, String aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.preprocess_training_text + "|" + devid + "|" + aiid);
+    }
+
+    public void pushMessageClusterSplit(String devid, String aiid, double clusterMinProbability) throws MessageQueueException {
+        pushMessage(AwsMessage.cluster_split + "|" + devid + "|" + aiid + "|" + clusterMinProbability);
+    }
+
+    public void pushMessageDeleteTraining(String devid, String aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.delete_training + "|" + devid + "|" + aiid);
+    }
+
+    protected void pushMessage(String message) throws MessageQueueException {
         AWSCredentials credentials = null;
         try {
             credentials = new ProfileCredentialsProvider().getCredentials();
-        } catch (Exception e) {return false;}
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "getCredentials error " + e.toString());
+            throw new MessageQueueException(e);
+        }
 
         AmazonSQS sqs = new AmazonSQSClient(credentials);
         Region targetRegion = Region.getRegion(config.getMessageQueueRegion());
@@ -52,12 +96,10 @@ public class MessageQueue {
 
         try {
             sqs.sendMessage(new SendMessageRequest(config.getCoreQueue(), message));
-        }  catch (Exception e) {
-            System.out.print(e.getMessage());
-           return  false;
+        } catch (Exception e) {
+            logger.logError(LOGFROM, "sendMessage error " + e.toString());
+            throw new MessageQueueException(e);
         }
-
-        return true;
     }
 
     @Deprecated

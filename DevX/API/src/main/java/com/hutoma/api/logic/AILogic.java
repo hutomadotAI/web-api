@@ -3,10 +3,14 @@ package com.hutoma.api.logic;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
-import hutoma.api.server.ai.api_root;
+import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiResult;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -25,18 +29,22 @@ public class AILogic {
     JsonSerializer jsonSerializer;
     Database database;
     MessageQueue messageQueue;
+    Logger logger;
     Tools tools;
 
+    private final String LOGFROM = "ailogic";
+
     @Inject
-    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, Tools tools) {
+    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, Tools tools, Logger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.messageQueue = messageQueue;
         this.tools = tools;
+        this.logger = logger;
     }
 
-    public String createAI(
+    public ApiResult createAI(
             SecurityContext securityContext,
             String devid,
             String name,
@@ -47,15 +55,13 @@ public class AILogic {
             int shallow_learning_status,
             int status)
     {
-        api_root._newai ai = new api_root._newai();
-        api_root._status st = new api_root._status();
-        st.code = 200;
-        st.info ="success";
-        ai.status =st;
-        ai.client_token="";
         try {
+            logger.logDebug(LOGFROM, "request to create new ai from " + devid);
             String encoding_key = config.getEncodingKey();
+
             UUID guid = tools.createNewRandomUUID();
+            String aiid = guid.toString();
+
             String token = Jwts.builder()
                     .claim("ROLE", Role.ROLE_CLIENTONLY)
                     .claim("AIID", guid)
@@ -63,92 +69,83 @@ public class AILogic {
                     .compressWith(CompressionCodecs.DEFLATE)
                     .signWith(SignatureAlgorithm.HS256, encoding_key)
                     .compact();
-            ai.client_token= token;
-            ai.aiid = guid.toString();
 
-            if (!database.createAI(ai.aiid, name, description, devid, is_private, deep_learning_error, deep_learning_status, shallow_learning_status, status, ai.client_token, "")) {
-                st.code = 500;
-                st.info = "Error:Internal Server Error.";
+            if (!database.createAI(aiid, name, description, devid, is_private,
+                    deep_learning_error, deep_learning_status,
+                    shallow_learning_status, status, token, "")) {
+                logger.logInfo(LOGFROM, "db fail creating new ai");
+                return ApiError.getInternalServerError();
             }
+            return new ApiAi(aiid, token).setSuccessStatus("successfully created");
         }
         catch (Exception e){
-            st.code = 500;
-            st.info = "Error:Internal Server Error.";
+            logger.logError(LOGFROM, "error creating new ai: " + e.toString());
+            return ApiError.getInternalServerError();
         }
-        return jsonSerializer.serialize(ai);
     }
 
-    public String getAIs(
+    public ApiResult getAIs(
             SecurityContext securityContext,
             String devid) {
 
-        api_root._status st = new api_root._status();
-        api_root._myAIs _ai = new api_root._myAIs();
-        st.code = 200;
-        st.info ="success";
-        _ai.status = st;
-
        try {
-           ArrayList<api_root._ai> myais = database.getAllAIs(devid);
-
-           if (myais.size() <= 0) {
-               st.code = 500;
-               st.info = "Internal Server Error.";
-           } else {
-               _ai.ai_list = myais;
+           logger.logDebug(LOGFROM, "request to list all ais");
+           ArrayList<ApiAi> aiList = database.getAllAIs(devid);
+           if (null==aiList) {
+               throw new Exception("database exception");
            }
+           if (aiList.isEmpty()) {
+               logger.logDebug(LOGFROM, "ai list is empty");
+               return ApiError.getNotFound();
+           }
+           return new ApiAiList(aiList).setSuccessStatus();
        }
        catch (Exception e){
-           st.code = 500;
-           st.info = "Error:Internal Server Error.";
+           logger.logError(LOGFROM, "error getting all ais: " + e.toString());
+           return ApiError.getInternalServerError();
        }
-       return jsonSerializer.serialize(_ai);
     }
 
-    public String getSingleAI(
+    public ApiResult getSingleAI(
             SecurityContext securityContext,
             String devid,
             String aiid) {
 
-        api_root._status st = new api_root._status();
-        api_root._myAIs _myai = new api_root._myAIs();
-        st.code = 200;
-        st.info ="success";
-        _myai.status = st;
-
         try {
-            _myai.ai = database.getAI(aiid);
-        } catch (Exception e){
-            st.code = 500;
-            st.info = "Error:Internal Server Error.";
-        }
+            logger.logDebug(LOGFROM, "request to list all ais");
+            ApiAi ai = database.getAI(aiid);
+            if (null==ai) {
+                logger.logDebug(LOGFROM, "ai not found");
+                return ApiError.getNotFound();
+            } else {
+                return ai.setSuccessStatus();
+            }
 
-        return jsonSerializer.serialize(_myai);
+        } catch (Exception e){
+            logger.logError(LOGFROM, "error getting single ai: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
     }
 
-    public String deleteAI(
+    public ApiResult deleteAI(
             SecurityContext securityContext,
             String aiid,
             String devid) {
 
-        api_root._newai ai = new api_root._newai();
-        api_root._status st = new api_root._status();
-        st.code = 200;
-        st.info ="success";
-        ai.status =st;
         try {
+            logger.logDebug(LOGFROM, "request to delete aiid " + aiid);
             if(!database.deleteAi(aiid))
             {
-                st.code = 500;
-                st.info = "Internal Server Error.";
+                //TODO: distinguish between db fail and ai not found
+                return ApiError.getNotFound();
             }
-            messageQueue.pushMessageDeleteAI(config, devid, aiid);
+            messageQueue.pushMessageDeleteAI(devid, aiid);
+            return new ApiResult().setSuccessStatus("deleted successfully");
         }
-        catch (Exception e){
-            st.code = 500;
-            st.info = "Error:Internal Server Error.";
+        catch (Exception e) {
+            logger.logError(LOGFROM, "error deleting ai: " + e.toString());
+            return ApiError.getInternalServerError();
         }
-        return jsonSerializer.serialize(ai);
     }
 
 }
