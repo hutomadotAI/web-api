@@ -271,7 +271,7 @@ class console
         self::$session = isset($_SESSION['logSyscuruser']) ? $_SESSION['logSyscuruser'] : false;
         self::$remember_cookie = isset($_COOKIE['logSysrememberMe']) ? $_COOKIE['logSysrememberMe'] : false;
 
-        //DEBUG  self::$dbh->setAttribute( \PDO::ATTR_ERRMODE , \PDO::ERRMODE_EXCEPTION );
+        // DEBUG self::$dbh->setAttribute( \PDO::ATTR_ERRMODE , \PDO::ERRMODE_EXCEPTION );
 
         $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$session . self::$config['keys']['cookie']);
         if (self::$cookie == $encUserID) {
@@ -1148,55 +1148,6 @@ class console
    */
 
 
-  public static function isMyAI($token)
-  {
-    if (self::$loggedIn) {
-      $sql = self::$dbh->prepare("SELECT * FROM `" . self::$config['db']['ai'] . "` WHERE `token` ='" . $token . "' AND `userid` = " . self::$user);
-      $sql->execute();
-      return $sql->rowCount();
-    } else return 0;
-  }
-
-
-
-
-    /*
-  public static function getUserActiveDomains($dev_token)
-  {
-    //if(self::$loggedIn){
-    try {
-      $sql = self::$dbh->prepare("SELECT * FROM `domains`AS d INNER JOIN `userAIDomains` AS u ON u.dom_id = d.dom_id WHERE `dev_token` = " . $dev_token);
-      $sql->execute();
-    } catch (MySQLException $e) {
-      $e->getMessage();
-      $output = 'Query - sql user active AI domains error' . $e;
-      include 'output.html.php';
-      exit();
-    }
-    return $sql->fetchAll();
-    //}
-    //else return 0;  
-  }
-
-
-    /*
-  public static function deactiveUserDomain($id, $aiid, $domid)
-  {
-    //if(self::$loggedIn){
-    try {
-      $sql = self::$dbh->prepare("DELETE FROM `userAIDomains` WHERE `id` =" . $id . " AND `aiid` ='" . $aiid . "' AND `domid` = " . $domid);
-      $sql->execute();
-    } catch (MySQLException $e) {
-      $e->getMessage();
-      $output = 'Query - sql user deactive domains sql error' . $e;
-      include 'output.html.php';
-      exit();
-    }
-    return $sql->fetchAll();
-      
-  }
-*/
-
   // FOR API
   public static function createAI($dev_token,$name,$description,$private, $condifence,$language,$timezone){
       if (self::$loggedIn) {
@@ -1401,15 +1352,20 @@ class console
     public static function getIntegrations(){
         if(self::$loggedIn){
             try {
-                $sql = self::$dbh->prepare("SELECT * FROM `integrations`");
-                $sql->execute();
+              $sql = self::$dbh->prepare("CALL getIntegrations()");
+              $sql->execute();
+              $data = $sql->fetchAll();
+
+              // finally fetch the additional sql row for stored proc calls
+              $sql->nextRowset();
+
             } catch (MySQLException $e) {
                 $e->getMessage();
                 $output = 'Query - sql all integration error' . $e;
                 include 'output.html.php';
                 exit();
             }
-            return $sql->fetchAll();
+            return $data;
         }
     }
 
