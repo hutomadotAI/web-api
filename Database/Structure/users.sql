@@ -19,6 +19,15 @@ GRANT USAGE ON *.* TO 'admin'@'localhost' IDENTIFIED BY PASSWORD '*6BACDD7311879
 GRANT ALL PRIVILEGES ON `hutoma`.* TO 'admin'@'localhost' WITH GRANT OPTION;
 
 
+# Privileges for `aiWriter`@`localhost`
+
+GRANT USAGE ON *.* TO 'aiWriter'@'localhost' IDENTIFIED BY PASSWORD '*EF8F1009CF338D6FE006551C74F80A24A5E59EB9';
+
+GRANT EXECUTE ON `hutoma`.* TO 'aiWriter'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai` TO 'aiWriter'@'localhost';
+
+
 # Privileges for `debian-sys-maint`@`localhost`
 
 GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY PASSWORD '*E0C3E92BFDAD93DD265D2D527A71F7DE26B211C3' WITH GRANT OPTION;
@@ -30,9 +39,9 @@ GRANT USAGE ON *.* TO 'domainsReader'@'localhost' IDENTIFIED BY PASSWORD '*D62B7
 
 GRANT EXECUTE ON `hutoma`.* TO 'domainsReader'@'localhost';
 
-GRANT SELECT ON `hutoma`.`domains` TO 'domainsReader'@'localhost';
-
 GRANT SELECT ON `hutoma`.`userAIDomains` TO 'domainsReader'@'localhost';
+
+GRANT SELECT ON `hutoma`.`domains` TO 'domainsReader'@'localhost';
 
 
 # Privileges for `domainsWriter`@`localhost`

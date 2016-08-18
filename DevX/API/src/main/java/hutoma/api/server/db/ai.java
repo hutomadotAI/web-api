@@ -34,8 +34,7 @@ public class ai {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
-            String query = " insert into ai (aiid, ai_name, ai_description,dev_id, is_private,deep_learning_error,deep_learning_status,shallow_learning_status,ai_status,client_token,ai_trainingfile)"
-                                 + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String query = "CALL addAI(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, aiid);
