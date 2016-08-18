@@ -33,11 +33,10 @@ public class AIDomainLogic {
     }
 
     public ApiResult getDomains(
-            SecurityContext securityContext,
-            String devid) {
+            SecurityContext securityContext) {
 
         try {
-            logger.logDebug(LOGFROM, "request to get all domains for " + devid);
+            logger.logDebug(LOGFROM, "request to get all domains ");
             //TODO: distinguish between db fail and not found
             List<AiDomain> domainList = database.getAiDomainList();
             if (domainList.size()==0) {

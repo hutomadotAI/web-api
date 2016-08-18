@@ -14,47 +14,27 @@ import java.util.Date;
  */
 public class utils {
 
-    public static String debug(String txt) throws ClassNotFoundException, SQLException {
-
-        try {
-            String debug = getConfigProp("debug");
-
-            if (debug.equals("true")) {
-
-                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                Date date = new Date();
-                txt = (dateFormat.format(date))+" "+txt.replace("'","\\'");
-                String myDriver = "org.gjt.mm.mysql.Driver";
-                String myUrl = getConfigProp("connectionstring");
-                Class.forName(myDriver);
-                Connection conn = DriverManager.getConnection(myUrl);
-                Statement st = conn.createStatement();
-                String query = "INSERT INTO debug (text) VALUES ('" + txt + "')";
-                st.executeUpdate(query);
-                st.close();
-                conn.close();
-            }
-        }
-        catch (Exception e) {
-            String myDriver = "org.gjt.mm.mysql.Driver";
-            String myUrl = getConfigProp("connectionstring");
-            Class.forName(myDriver);
-            Connection conn = DriverManager.getConnection(myUrl);
-            Statement st = conn.createStatement();
-            String query = "INSERT INTO debug (text) VALUES ('" + e.getMessage() + "')";
-            st.executeUpdate(query);
-            st.close();
-            conn.close();
-            return "exception:" + e.getMessage();
-        }
-        return "saved";
-
-    }
     public static String getConfigProp(String p) {
         java.util.Properties prop = new java.util.Properties();
         try {
             prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
-            return prop.getProperty(p);
+
+
+
+            String value = prop.getProperty(p);
+            switch(p) {
+                case "connectionstring": {
+                    //replace username and password for DB login here
+                    int startUserName = value.indexOf("user=");
+                    int startPassword = value.indexOf("password=");
+                    int endPassword = value.indexOf('&', startPassword);
+                    String newConnectionString = value.substring(0,startUserName) +  "user=hutoma_caller&password=>YR\"khuN*.gF)V4#" + value.substring(endPassword);
+                    value = newConnectionString;
+                    break;
+                }
+            }
+
+            return value;
 
         } catch (IOException ex) {
             ex.printStackTrace();

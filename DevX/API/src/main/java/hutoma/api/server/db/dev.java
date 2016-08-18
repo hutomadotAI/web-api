@@ -4,7 +4,6 @@ import hutoma.api.server.ai.api_root;
 
 import java.sql.*;
 
-import static hutoma.api.server.utils.utils.debug;
 import static hutoma.api.server.utils.utils.getConfigProp;
 
 /**

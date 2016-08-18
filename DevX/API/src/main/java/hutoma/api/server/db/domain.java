@@ -28,7 +28,7 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
-
+            //TODO: this needs to be converted to stored procedure when needed
             String query = " insert into domains (dom_id, name, description, icon, color, available) values (?, ?, ?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
@@ -55,7 +55,9 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: this needs to be converted to stored procedure when needed
             String query = " update domains set available=? where dom_id=?";
+
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setBoolean(1, available);
             preparedStmt.setString(2, dom_id);
@@ -77,7 +79,7 @@ public class domain {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
-            String query = "SELECT * FROM domains";
+            String query = "CALL getDomains()";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
                 AiDomain r = new AiDomain(
@@ -109,6 +111,7 @@ public class domain {
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
 
+            //TODO: this needs to be converted to stored procedure when needed
             String query = "SELECT * FROM domains WHERE dom_id='"+dom_id+"'";
 
             ResultSet rs = st.executeQuery(query);
@@ -135,7 +138,9 @@ public class domain {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
+            //TODO: this needs to be converted to stored procedure when needed
             String query = " delete from domains where dom_id=?";
+
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, dom_id);
             preparedStmt.execute();

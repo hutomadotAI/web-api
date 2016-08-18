@@ -70,8 +70,9 @@ public class ai {
             String dev_id
             )
     {
-        try {
+        Boolean result = true;
 
+        try {
             String myDriver = "com.mysql.cj.jdbc.Driver";
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
@@ -96,12 +97,14 @@ public class ai {
             preparedStmt.setInt(9, plan_id);
             preparedStmt.setString(10, dev_id);
             preparedStmt.execute();
+
             conn.close();
         }
         catch (Exception e) {
-            return false;
+            result = false;
         }
-        return true;
+
+        return result;
     }
 
 
