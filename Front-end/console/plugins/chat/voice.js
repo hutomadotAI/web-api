@@ -1,12 +1,24 @@
 var msg = new SpeechSynthesisUtterance();
 var recognizer;
 
-msg.addEventListener('start', function () {recognizer.stop();})
-msg.addEventListener('end', function () {recognizer.start();})
+msg.addEventListener('start', function () {});
+msg.addEventListener('end', function () {  enableSpeech(true); enableChat(true);});
 msg.lang = 'en-US';
 msg.volume = 1;
 msg.rate = 1;
 msg.pitch = 1
+
+
+function afterAiSpeech(){
+
+    enableSpeech(true);
+    enableChat(true);
+    if ( continuousSpeech == 1) {
+        // startDictation('andrea','andrea');
+    }
+    else{
+    }
+}
 
 function speak(text) {
     msg.text = text;
@@ -32,7 +44,7 @@ function startDictation(human_name, ai_name) {
 
         recognition.onresult = function(e) {
             document.getElementById('message').value = e.results[0][0].transcript;
-            createNodeChat(human_name, ai_name);
+            createNodeChat(human_name, ai_name,true);
             recognition.stop();
         };
 

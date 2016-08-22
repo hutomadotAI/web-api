@@ -1,20 +1,60 @@
 function createNodeChat(human_name, ai_name) {
-    var msg = $('#message').val();
-    if ( msg.length != 0 ){
+   if ( chat == 1) {
+       chat = (chat+1)%(2);
+       var msg = $('#message').val();
+       if (msg.length != 0) {
+          
+           var isChrome = !!window.chrome;
+           if (isChrome) {
+               document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-coral');
+               $(".submitBtn").attr("microphone", true);
 
-        //document.getElementById('btnSend').disabled = true;
-        //document.getElementById('btnSend').setAttribute('onClick','');
-        var isChrome = !!window.chrome;
-        if (isChrome) {
-            document.getElementById('microphone').setAttribute('class','fa fa-microphone text-coral');
-        }
+           }
+           enableChat(false);
+           enableSpeech(false);
+           createLeftMsg(human_name, msg);
+           requestAnswerAI(ai_name, msg);
+
+           //var isChrome = !!window.chrome;
+           //if (isChrome && speechResponse == 1) {
+           //        speak(msg);
+           //}
+
+       }
+
+   }
+}
+
+function enableChat(flag){
+    if(flag) {
+        document.getElementById('message').disabled = false;
+        document.getElementById('message').value = '';
+        document.getElementById("message").focus();
+        chat = (chat+1)%(2);
+    }
+    else{
         document.getElementById('message').disabled = true;
         document.getElementById('message').value = '';
-
-        createLeftMsg(human_name,msg);
-        requestAnswerAI(ai_name,msg);
     }
 }
+
+
+function enableSpeech(flag){
+    if(flag) {
+
+       // document.getElementById('microphone').onclick = startDictation(+ human_name +' \', \' '+ ai_name +' \'";
+        document.getElementById('microphone').disabled = false;
+        document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-red');
+    }
+    else{
+        document.getElementById("microphone").
+        document.getElementById('microphone').disabled = true;
+        document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-coral');
+    }
+}
+
+
+
 
 function createLeftMsg(human_name,msg){
     var height = parseInt( $('#chat').scrollTop());
@@ -79,19 +119,12 @@ function createRightMsg(ai_name,msg,error) {
         height = parseInt(height) + 5;
         $('#chat').scrollTop(height);
     }
-
-    //document.getElementById('btnSend').disabled = false;
-    //document.getElementById('btnSend').setAttribute('onClick','startDictation()');
-
-    document.getElementById('message').disabled = false;
-    document.getElementById('message').value = '';
-
-    var isChrome = !!window.chrome;
-    if (isChrome) {
-        document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-red');
+    if ( speechResponse == 1)
         speak(msg);
-    }
+    else
+        enableChat(true);
 }
+
 
 function requestAnswerAI(ai_name, question) {
     var xmlhttp;
