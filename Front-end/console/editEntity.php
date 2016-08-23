@@ -21,7 +21,7 @@ $integrations = \hutoma\console::getIntegrations();
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showEntities('')">
+<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="searchEntries()">
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -67,7 +67,7 @@ $integrations = \hutoma\console::getIntegrations();
         <section class="content">
             <div class="row">
                 <div class="col-md-8">
-                    <?php include './dynamic/entities.content.html.php'; ?>
+                    <?php include './dynamic/editEntity.content.html.php'; ?>
                 </div>
                 <div class="col-md-4">
                     <?php include './dynamic/training.content.chat.html.php'; ?>
@@ -98,21 +98,21 @@ $integrations = \hutoma\console::getIntegrations();
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
-<script src="./plugins/entities/entities.js"></script>
+<script src="./plugins/entities/entry.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
     // FAKE API JSON REQUEST INTEGRATION RESPONSE
 
-    var entities = <?php echo json_encode($integrations)?>;
+    var entries = <?php echo json_encode($integrations)?>;
     var newNode = document.createElement('div');
     newNode.className = 'row';
-    newNode.id = 'entities_list';
+    newNode.id = 'entries_list';
 </script>
 <script>
-    function searchEntities(str) {
-        showEntities(str);
+    function searchEntries() {
+        showEntries();
     }
 </script>
 </body>

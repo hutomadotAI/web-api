@@ -97,7 +97,7 @@ function isValuesSessionFilled(){
     <section class="content">
 
     <!-- Custom Tabs -->
-    <div class="nav-tabs-custom">
+    <div class="nav-tabs-custom flat no-shadow">
         <ul class="nav nav-tabs">
         <li class="active"><a href="#tab_general" data-toggle="tab">General</a></li>
         <li><a href="#tab_emotion" data-toggle="tab">Emotions</a></li>
