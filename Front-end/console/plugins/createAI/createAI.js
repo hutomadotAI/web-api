@@ -8,16 +8,16 @@ if ( name.length > 0 ){
 
 function activeNext(str) {
   var name = $("#ai_name").val();
-  if ( name.length > 0 ){
+if ( name.length > 0 ){
     $("#btnNext").removeClass("btn btn-success flat disabled").addClass("btn btn-success flat");
     $("#btnNext").attr("value","_next");
     $("#btnNext").attr("onClick","submitForm()");
-  }
-  else{
+}
+else{
     $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
     $("#btnNext").attr("value","");
     $("#btnNext").attr("onClick","");
-  }
+}
 }
 
 function submitForm() {

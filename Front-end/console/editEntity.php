@@ -67,13 +67,6 @@ $integrations = \hutoma\console::getIntegrations();
         <section class="content">
             <div class="row">
                 <div class="col-md-8">
-                    <?php include './dynamic/entities.content.start.html.php'; ?>
-                </div>
-                <div class="col-md-3">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8">
                     <?php include './dynamic/entities.content.html.php'; ?>
                 </div>
                 <div class="col-md-4">

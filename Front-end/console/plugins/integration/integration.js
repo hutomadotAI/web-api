@@ -5,7 +5,7 @@ function showIntegrations(str){
     for (var x in integrations) {
       if ( (str!=" ") && ( (str.length==0) || (integrations[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  { 
        
-            wHTML += ('<div class="box-body bg-white " style=" border: 1px solid #d2d6de;">');
+            wHTML += ('<div class="box-body bg-white" style=" border: 1px solid #d2d6de;">');
             wHTML += ('<div class="row">');
             wHTML += ('<div class="col-xs-1">');
             wHTML += ('<img src="./dist/img/social/icons/'+integrations[x].icon+'" width="30" height="30" alt="'+integrations[x].name+'">');
@@ -40,6 +40,9 @@ function showIntegrations(str){
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('<p></p>');
+
+      
+        
     }
   }
   wHTML += ('</div>');
