@@ -1,3 +1,4 @@
+<script src="./plugins/view/view.js"></script>
 <div class="box box-solid box-clean flat no-shadow">
     <div class='box-header with-border'>
         <i class="fa fa-group text-light-blue"></i>
@@ -52,6 +53,7 @@
                 echo('<td style="padding-top: 15px;">' . $bot['description'] . '</td>');
                 echo('<td style="padding-top: 15px;">' . $bot['created_on'] . '</td>');
                 echo('<td style="padding-top: 8px;"><button type="button" name="btnSelect" value="'.$bot['aiid'].'"  onClick="sendAIID(this.value)" class="btn btn-primary flat pull-right" id="btn_select" style="margin-right: 5px; width: 115px;"><i class="fa fa-user"></i> details AI</button></td>');
+                echo('<td style="padding-top: 8px;"><button type="button" name="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI.call(this)" class="btn btn-info flat pull-right" id="btn-publish" style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');
             }
 
             unset($array);
@@ -75,14 +77,4 @@
 </div>
 </div>
 
-<script>
-function sendAIID(aiid){
-    var input = document.createElement("input");
-    input.setAttribute("type", "hidden");
-    input.setAttribute("name", "aiid");
-    input.setAttribute("value", aiid);
-    
-    document.getElementById("viewAllAIsform").appendChild(input);
-    document.getElementById("viewAllAIsform").submit();
-}
-</script>
+
