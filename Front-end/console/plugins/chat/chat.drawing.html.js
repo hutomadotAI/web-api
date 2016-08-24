@@ -22,7 +22,7 @@ function drawChatFooter(human_name,ai_name) {
     newNode.className = 'input-group';
     newNode.id = 'id-input-group';
 
-    wHTML += ('<input type="text" id="message" placeholder="Type Message ..." class="form-control" onkeydown="if(event.keyCode == 13 && this.value ) { createNodeChat(\' '+ human_name +' \', \' '+ ai_name +' \'); }">');
+    wHTML += ('<input type="text" id="message" placeholder="Type Message ..." class="form-control" tabindex="-1" onkeydown="if(event.keyCode == 13 && this.value ) { createNodeChat(\' '+ human_name +' \', \' '+ ai_name +' \'); }">');
     if (isChrome) {
         wHTML += ('<div class="input-group-addon" id="btnSpeech"   onClick="startDictation(\' '+ human_name +' \', \' '+ ai_name +' \')" onMouseOver="this.style.cursor=\'pointer\'">');
         wHTML += ('<i id="microphone" style="font-size: 18px;" class="fa fa-microphone text-red"></i>');

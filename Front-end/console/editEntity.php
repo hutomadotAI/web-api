@@ -35,29 +35,30 @@ $integrations = \hutoma\console::getIntegrations();
             <!-- ================ USER ACTION ================= -->
             <ul class="sidebar-menu">
                 <li class="header">WORKPLACE</li>
-                <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
+                <li><a href="./home.php" tabindex="-1"><i class="fa fa-home text-light-blue" tabindex="-1"></i><span>home</span></a></li>
                 <li class="active">
-                    <a href="#">
-                        <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                    <a href="#" tabindex="-1">
+                        <i class="fa fa-user text-olive" tabindex="-1" ></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
 
-                        <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
-                        <li><a href="./intents.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
-                        <li class="active"><a href="./entities.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
-                        <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
-                        <li><a href="#"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
-                        <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
+                        <li><a href="./trainingAI.php" tabindex="-1"><i class="fa fa-graduation-cap text-purple" tabindex="-1"></i> <span>training</span></a></li>
+                        <li><a href="./intents.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i>
+                                <span>intents</span></a></li>
+                        <li class="active"><a href="./entities.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
+                        <li><a href="./domainsAI.php" tabindex="-1"><i class="fa fa-th text-red" tabindex="-1"></i> <span>domains</span></a></li>
+                        <li><a href="#" tabindex="-1" ><i class="glyphicon glyphicon-list-alt text-default" tabindex="-1"></i>integrations</a></li>
+                        <li><a href="./settingsAI.php" tabindex="-1"><i class="fa fa-gear text-black" tabindex="-1"></i>settings</a></li>
                     </ul>
                 </li>
-                <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
+                <li><a href="#" tabindex="-1"><i class="fa fa-book text-purple" tabindex="-1"></i> <span>Documentation</span></a></li>
             </ul>
 
             <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
                 <li class="header" style="text-align: center;">ACTION</li>
-                <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
-                <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-                <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+                <li><a href="#" tabindex="-1" ><i class="fa fa-shopping-cart text-green" style="position: relative;" tabindex="-1" ></i> <span>Marketplace</span></a></li>
+                <li><a href="#" tabindex="-1" ><i class="fa fa-user text-blue" tabindex="-1" ></i> <span>Account</span></a></li>
+                <li><a href="./logout.php" tabindex="-1" ><i class="fa fa-power-off text-red" tabindex="-1" ></i> <span>LOGOUT</span></a></li>
             </ul>
         </section>
     </aside>
@@ -100,12 +101,15 @@ $integrations = \hutoma\console::getIntegrations();
 <script src="./dist/js/demo.js"></script>
 <script src="./plugins/entities/entry.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
+<script src="./plugins/chat/chat.js"></script>
+<script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
     // FAKE API JSON REQUEST INTEGRATION RESPONSE
 
     var entries = <?php echo json_encode($integrations)?>;
+
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'entries_list';

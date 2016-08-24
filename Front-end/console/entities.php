@@ -107,6 +107,8 @@ $integrations = \hutoma\console::getIntegrations();
 <script src="./dist/js/demo.js"></script>
 <script src="./plugins/entities/entities.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
+<script src="./plugins/chat/chat.js"></script>
+<script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script>

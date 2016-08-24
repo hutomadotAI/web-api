@@ -3,8 +3,8 @@
 
         <!-- User Account: style can be found in dropdown.less -->
         <li class="dropdown user user-menu">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-            <img src="./dist/img/user1-160x160.jpg" class="user-image" alt="User Image">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1" >
+            <img src="./dist/img/user1-160x160.jpg" class="user-image" alt="User Image" tabindex="-1" >
             <span class="hidden-xs">
             <?php echo $_SESSION['user_name'];?>
             </span>
@@ -33,7 +33,7 @@
         </li>
         <!-- Control Sidebar Toggle Button -->
         <li>
-          <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+          <a href="#" data-toggle="control-sidebar" tabindex="-1" ><i class="fa fa-gears" tabindex="-1" ></i></a>
         </li>
       </ul>
     </div>

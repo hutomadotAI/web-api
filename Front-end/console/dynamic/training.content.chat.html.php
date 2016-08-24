@@ -5,11 +5,11 @@
 
 
         <div class="box-tools pull-right" id="dropdown-chat-options">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" >
                 <i class="fa fa-gears"></i>
             </a>
          
-            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            <button class="btn btn-box-tool" data-widget="collapse" tabindex="-1" ><i class="fa fa-minus"></i></button>
         </div>
 
     </div>

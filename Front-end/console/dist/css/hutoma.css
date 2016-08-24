@@ -2428,6 +2428,40 @@ a:focus {
   font-weight: 400;
 }
 
+.cell-square {
+  border-radius: 0px;
+  position: relative;
+  padding: 5px 20px 5px 10px;
+  margin: 3px 3px 3px 3px;
+  min-width: 30px;
+  max-width: 90px;
+  height: 40px;
+  text-align: center;
+  color: #666;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  font-size: 14px;
+}
+
+.cell-square:hover {
+  background: #f4f4f4;
+  color: #444;
+  border-color: #aaa;
+}
+
+.cell-square > .fa {
+  position: absolute;
+  padding-top: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  background-color : transparent;
+}
+
+.cell-square:active,
+.cell-square:focus {
+  font-color: red;
+}
+
 
 /*
  * Component: Callout

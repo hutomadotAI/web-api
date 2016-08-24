@@ -47,7 +47,6 @@ function enableSpeech(flag){
         document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-red');
     }
     else{
-        document.getElementById("microphone").
         document.getElementById('microphone').disabled = true;
         document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-coral');
     }

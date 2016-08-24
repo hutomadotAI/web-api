@@ -18,7 +18,7 @@ function showEntities(str){
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
             wHTML += ('<a data-toggle="dropdown">');
-            wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Save"></i>');
+            wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
             wHTML += ('</a>');
             wHTML += ('<ul class="dropdown-menu flat">');
             wHTML += ('<li><a onClick="downloadEntity (\''+entities[x].name+'\','+x+',0)">JSON format</a></li>');

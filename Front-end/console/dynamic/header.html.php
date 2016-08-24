@@ -1,4 +1,4 @@
-<a href="./home.php" class="logo">
+<a href="./home.php" class="logo" tabindex="-1">
     <span class="logo-mini"><b>hu</b></span><span class="logo-lg">
        <b class="title">hu<font color="green">:</font><font color="CornflowerBlue">toma</font></b>
     </span></a>
