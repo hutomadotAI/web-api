@@ -77,8 +77,7 @@ public class ai {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
-            String query = " insert into users (username, email, password,password_salt,name,created,attempt,dev_token,plan_id,dev_id)"
-                         + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String query = "CALL addUserComplete(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, username);
@@ -113,10 +112,10 @@ public class ai {
         Class.forName(myDriver);
         Connection conn = DriverManager.getConnection(myUrl);
 
-        String query = " update ai set ai_trainingfile=? where aiid=?";
+        String query = "CALL updateTrainingData(?,?)";
         PreparedStatement preparedStmt = conn.prepareStatement(query);
-        preparedStmt.setString(1, training_file);
-        preparedStmt.setString(2, aiid);
+        preparedStmt.setString(1, aiid);
+        preparedStmt.setString(2, training_file);
         preparedStmt.execute();
         conn.close();
     }
