@@ -129,8 +129,8 @@ public class AILogic {
 
     public ApiResult deleteAI(
             SecurityContext securityContext,
-            String aiid,
-            String devid) {
+            String devid,
+            String aiid) {
 
         try {
             logger.logDebug(LOGFROM, "request to delete aiid " + aiid);

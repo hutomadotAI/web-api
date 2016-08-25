@@ -128,6 +128,7 @@ public class ai {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: update to stored procedure when needed
             String query = " update ai set ai_status=? where aiid=?";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString(1, status);
@@ -150,7 +151,7 @@ public class ai {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
-            String query = " delete from ai where aiid=?";
+            String query = "CALL deleteAI(?)";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, aiid);
             preparedStmt.execute();
@@ -172,16 +173,19 @@ public class ai {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
-            Statement st = conn.createStatement();
-            String query = "SELECT * FROM ai WHERE dev_id='"+dev_id+"'";
-            ResultSet rs = st.executeQuery(query);
+            String query = "CALL getAIs(?)";
+
+            PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setString (1, dev_id);
+            ResultSet rs = preparedStmt.executeQuery();
+
             while (rs.next()) {
                 ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
                         new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
                         null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                 res.add(ai);
             }
-            st.close();
+            preparedStmt.close();
             conn.close();
         }
         catch (Exception e) {
@@ -198,15 +202,19 @@ public class ai {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
-            Statement st = conn.createStatement();
-            String query = "SELECT * FROM ai WHERE aiid='"+aiid+"'";
-            ResultSet rs = st.executeQuery(query);
+
+            String query = "CALL getAI(?)";
+
+            PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setString (1, aiid);
+            ResultSet rs = preparedStmt.executeQuery();
+
             if (rs.next()) {
                 ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
                         new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
                         null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
             }
-            st.close();
+            preparedStmt.close();
             conn.close();
         }
         catch (Exception e) {
@@ -226,6 +234,8 @@ public class ai {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+
+            //TODO: move to stored procedure when needed
             String query = "SELECT ai_status FROM ai WHERE aiid='"+aiid+"'";
             ResultSet rs = st.executeQuery(query);
 
