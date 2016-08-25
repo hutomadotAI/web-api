@@ -118,6 +118,15 @@ GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY PASSWORD '*6BACD
 GRANT PROXY ON ''@'' TO 'root'@'localhost' WITH GRANT OPTION;
 
 
+# Privileges for `userDeleter`@`localhost`
+
+GRANT USAGE ON *.* TO 'userDeleter'@'localhost' IDENTIFIED BY PASSWORD '*DBD50A22424E1DD5EEECDE250B16BF27E5D77D45';
+
+GRANT EXECUTE ON `hutoma`.* TO 'userDeleter'@'localhost';
+
+GRANT SELECT, DELETE ON `hutoma`.`users` TO 'userDeleter'@'localhost';
+
+
 # Privileges for `userTableReader`@`localhost`
 
 GRANT USAGE ON *.* TO 'userTableReader'@'localhost' IDENTIFIED BY PASSWORD '*772F1183F2BBB885AE09AAEDCEA59F5FA4137D0D';
