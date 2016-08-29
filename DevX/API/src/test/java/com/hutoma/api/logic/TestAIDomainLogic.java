@@ -55,15 +55,15 @@ public class TestAIDomainLogic {
     @Test
     public void testGetAll_Valid() {
         when(fakeDatabase.getAiDomainList()).thenReturn(listOfSingleResult);
-        ApiResult result = aiDomainLogic.getDomains(fakeContext, DEVID);
+        ApiResult result = aiDomainLogic.getDomains(fakeContext);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetAll_Valid_Result() {
         when(fakeDatabase.getAiDomainList()).thenReturn(listOfSingleResult);
-        aiDomainLogic.getDomains(fakeContext, DEVID);
-        ApiAiDomains result = (ApiAiDomains)aiDomainLogic.getDomains(fakeContext, DEVID);
+        aiDomainLogic.getDomains(fakeContext);
+        ApiAiDomains result = (ApiAiDomains)aiDomainLogic.getDomains(fakeContext);
         Assert.assertNotNull(result.getDomainList());
         Assert.assertFalse(result.getDomainList().isEmpty());
         Assert.assertEquals(DOMID, result.getDomainList().get(0).getDomID());
@@ -72,14 +72,14 @@ public class TestAIDomainLogic {
     @Test
     public void testGetAll_DBFail() {
         when(fakeDatabase.getAiDomainList()).thenReturn(listOfEmpty);
-        ApiResult result = aiDomainLogic.getDomains(fakeContext, DEVID);
+        ApiResult result = aiDomainLogic.getDomains(fakeContext);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetAll_NotFound() {
         when(fakeDatabase.getAiDomainList()).thenReturn(listOfEmpty);
-        ApiResult result = aiDomainLogic.getDomains(fakeContext, DEVID);
+        ApiResult result = aiDomainLogic.getDomains(fakeContext);
         Assert.assertEquals(400, result.getStatus().getCode());
     }
 }

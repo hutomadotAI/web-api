@@ -4,7 +4,6 @@ import hutoma.api.server.ai.api_root;
 
 import java.sql.*;
 
-import static hutoma.api.server.utils.utils.debug;
 import static hutoma.api.server.utils.utils.getConfigProp;
 
 /**
@@ -19,12 +18,12 @@ public class dev {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
-            String query = " delete from users where dev_id=?";
+            String query = "CALL deleteUser(?)";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, dev_id);
             preparedStmt.execute();
 
-            query = " delete from ai where dev_id=?";
+            query = "CALL deleteAllAIs(?)";
             preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, dev_id);
             preparedStmt.execute();

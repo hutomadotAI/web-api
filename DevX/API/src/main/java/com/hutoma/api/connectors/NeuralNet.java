@@ -64,14 +64,9 @@ public class NeuralNet {
         do {
             tools.threadSleep(POLLEVERY);
             answer = database.getAnswer(qid);
-            if (null==answer) {
-                // an error has occurred, so exit now
-                return null;
-            } else {
-                if (!answer.isEmpty()) {
-                    // we have an answer!
-                    break;
-                }
+            if (null!=answer && !answer.isEmpty()) {
+                // we have an answer!
+                break;
             }
         } while ((tools.getTimestamp() + (POLLEVERY)) < endTime);
         return answer;

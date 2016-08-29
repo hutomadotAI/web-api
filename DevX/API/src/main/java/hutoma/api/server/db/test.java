@@ -19,6 +19,8 @@ public class test {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
+
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " delete from users where dev_id like '%HUTOMA_TEST%'";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.execute();
