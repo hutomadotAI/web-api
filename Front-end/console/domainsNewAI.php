@@ -6,12 +6,10 @@
         exit;
     }
 
-    if (! isPostInputSet() ) {
+    if (! isPostInputAvailable() ) {
         header("Location: ./error.php?err=2");
         exit;
     }
-
-    fillSessionVariablesByPOST();
 
     $dev_token = \hutoma\console::getDevToken();
     $response = \hutoma\console::getDomains($dev_token);
@@ -23,28 +21,16 @@
         exit;
     }
 
-function isPostInputSet(){
+function isPostInputAvailable(){
     return  (
         isset($_POST['ai_name']) &&
         isset($_POST['ai_description']) &&
         isset($_POST['ai_language']) &&
         isset($_POST['ai_timezone']) &&
         isset($_POST['ai_confidence']) &&
-        isset($_POST['ai_personality'])
-        //isset($_POST['ai_sex'])
+        isset($_POST['ai_personality']) &&
+        isset($_POST['ai_sex'])
     );
-}
-
-function fillSessionVariablesByPOST(){
-    $_SESSION['ai_name'] = $_POST['ai_name'];
-    if ( $_POST['ai_description'] !='')
-        $_SESSION['ai_description'] = $_POST['ai_description'];
-    else
-        $_SESSION['ai_description'] = 'no description';
-    $_SESSION['ai_language'] = $_POST['ai_language'];
-    $_SESSION['ai_timezone'] = $_POST['ai_timezone'];
-    $_SESSION['ai_confidence'] = $_POST['ai_confidence'];
-    $_SESSION['ai_personality'] = $_POST['ai_personality'];
 }
 
 ?>
@@ -108,11 +94,7 @@ function fillSessionVariablesByPOST(){
     <footer class="main-footer">
     <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
-
-    <!--
-    <aside class="control-sidebar control-sidebar-dark">
-    </aside>
-    -->
+    
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

@@ -6,7 +6,12 @@
     $_SESSION['dev_id'] = $details['dev_id'];
     $_SESSION['user_joined'] = \hutoma\console::joinedSince($details);
     unset($details);
+
+    $dev_token = \hutoma\console::getDevToken();
+    $response_getAIs = \hutoma\console::getAIs($dev_token);  // used to show the list of AIs
+    unset($dev_token);
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -60,27 +65,22 @@
     <section class="content">
     <?php
         include './dynamic/home.content.start.html.php';
-        include './dynamic/viewall.content.html.php';
+        include './dynamic/home.viewall.html.php';
     ?>
     </section>
     </div>
-
-    <!--
-    <aside class="control-sidebar control-sidebar-dark">
-    </aside>
-    -->
     
     <footer class="main-footer">
     <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
 </div>
-
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
+<script src="./plugins/home/home.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 </body>

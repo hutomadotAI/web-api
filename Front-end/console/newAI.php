@@ -1,11 +1,9 @@
 <?php
     require '../pages/config.php';
-
     if ( !\hutoma\console::isSessionActive()) {
         header('Location: ./error.php?err=1');
         exit;
     }
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -82,12 +80,13 @@
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/shared/shared.js"></script>
 
 <script src="./plugins/select2/select2.full.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/createAI/createAI.js"></script>
+<script src="./plugins/shared/shared.js"></script>
+
 
 </body>
 </html>

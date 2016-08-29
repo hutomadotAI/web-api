@@ -3,7 +3,8 @@
         <i class="fa fa-user-plus text-blue"></i>
     <h3 class="box-title">Create Your New AI</h3>
     </div>
-    <form method="POST" id="createAIform" action="./domainsNewAI.php">
+    
+    <form method="POST" name="createAIform" action="./domainsNewAI.php">
     <div class="box-body">
         <div class="row">
 
@@ -15,14 +16,15 @@
                   <div class="input-group-addon">
                   <i class="glyphicon glyphicon-user"></i>
                   </div>
-              <input type="text" class="form-control" name="ai_name" id="ai_name" placeholder="Enter your AI name" onkeyup="activeNext(this.value)">
+              <input type="text" class="form-control" id="ai_name" name="ai_name" placeholder="Enter your AI name">
               </div>
               </div>
 
-
-                <p id="ai_name_alert"></p>
-
-
+                <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNameAI" style="display:none;">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <i class="icon fa fa-check" id="iconAlertNameAI"></i>
+                    <span id="msgAlertNameAI"></span>
+                </div>
 
             </div>
 
@@ -65,7 +67,7 @@
                 <div class="box-body">
                 <div class="row margin">
                     <div class="col-sm-12">
-                        <input id="confidence" type="hidden" name="ai_confidence" id_confidence="ai_confidence" value="0;10">
+                        <input type="hidden" name="ai_confidence" id_confidence="ai_confidence" value="0;10">
                     </div>
                 </div>
                 </div>
@@ -75,18 +77,18 @@
             <!-- INPUT Personality -->
             <div class="col-md-6">
                 <?php include './dynamic/input.personality.html.php'; ?>
-
-
                 <div class="form-group">
                     <label>Sex</label>
                     <select class="form-control select2" name="ai_sex" id="ai_sex"style="width: 100%;">
-                        <option selected="selected">Male</option>
-                        <option>Female</option>
+                        <option selected="selected" id="_male">Male</option>
+                        <option id="_female">Female</option>
                     </select>
                 </div>
                 
             </div>
         </div>
+
+    </form>
 
         <div class="row">
 
@@ -148,12 +150,11 @@
 
        
     </div>
-    </form>
+
 
     <div class="box-footer">
-            <a href="newAI.php" class="btn btn-primary flat" id="btnCancel">cancel</a>
-            <button type="submit" id="btnNext"  class="btn btn-success flat disabled" onClick="showInfoMessage()" alt="next step">next</button>
+            <button type="submit" id="btnCancel" class="btn btn-primary flat" alt="cancel">cancel</button>
+            <button type="submit" id="btnNext" class="btn btn-success flat" alt="next step">next</button>
     </div>
 </div>
 
-<script src="./plugins/shared/shared.js"></script>

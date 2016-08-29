@@ -44,9 +44,9 @@ $integrations = \hutoma\console::getIntegrations();
 
                         <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
                         <li><a href="./intents.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
-                        <li class="active"><a href="./entities.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                        <li class="active"><a href="#"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
                         <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
-                        <li><a href="#"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
+                        <li><a href="./integrations.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
                         <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
                     </ul>
                 </li>
@@ -64,24 +64,18 @@ $integrations = \hutoma\console::getIntegrations();
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-        <section class="content">
+    <section class="content">
             <div class="row">
-                <div class="col-md-8">
-                    <?php include './dynamic/entities.content.start.html.php'; ?>
+                <div class="col-md-7">
+                        <?php include './dynamic/entity.content.create.html.php'; ?>
+                        <?php include './dynamic/entity.content.html.php'; ?>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-5">
+                        <?php include './dynamic/training.content.chat.html.php'; ?>
+                        <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8">
-                    <?php include './dynamic/entities.content.html.php'; ?>
                 </div>
-                <div class="col-md-4">
-                    <?php include './dynamic/training.content.chat.html.php'; ?>
-                    <?php include './dynamic/training.content.json.html.php'; ?>
-                </div>
-            </div>
-        </section>
+    </section>
     </div>
 
     <!--
@@ -105,15 +99,13 @@ $integrations = \hutoma\console::getIntegrations();
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
-<script src="./plugins/entities/entities.js"></script>
-<script src="./plugins/saveFile/FileSaver.js"></script>
+<script src="./plugins/entity/entity.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
     // FAKE API JSON REQUEST INTEGRATION RESPONSE
-
     var entities = <?php echo json_encode($integrations)?>;
     var newNode = document.createElement('div');
     newNode.className = 'row';

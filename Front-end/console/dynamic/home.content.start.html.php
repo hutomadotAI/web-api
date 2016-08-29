@@ -9,14 +9,12 @@
         </a>
     </div>
 
-    <div class='box-tools pull-right'>
-        <button class='btn btn-box-tool' data-toggle='tooltip'></i></button>
-    </div>
-
     <div class='box-body'>
         Howdy! Thanks for signing up with our tech preview. You are now just seconds away from creating your own conversational AI powered by deep learning. If you need help feel free to email us at devs@hutoma.com
         <br/><br/>
-        <a class='btn btn-block btn-success btn-lg center-block flat' href='./newAI.php' style='width: 200px'>Create AI</a>
+        <form method="POST" name="startForm" action="./newAI.php">
+            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI" style="width: 120px;" alt="create AI">Create AI</button>
+        </form>
         <br/><br/>
 
         <div id="collapseStart" class="panel-collapse collapse">

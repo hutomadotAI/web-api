@@ -1,3 +1,6 @@
+<script src="./plugins/clipboard/clipboard.min.js"></script>
+<script src="./plugins/deleteAI/deleteAI.js"></script>
+
 <form role="form">
     <div class="box-body">
         <div class="row">
@@ -113,10 +116,42 @@
 
     </div>
 </form>
-<script src="./plugins/clipboard/clipboard.min.js"></script>
+
+
 
 <div class="box-footer">
-      <a href="optionAI.php" class="btn btn-primary flat">cancel</a>
-      <button  name="btnSave" value="btnSave" id="btnSave" value="_next" class="btn btn-success flat disabled" onClick="" alt="save">save</button>
+    <a href="settingsAI.php" class="btn btn-primary flat">cancel</a>
+    <button  name="btnSave"  value="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat disabled"  onClick="" alt="save">save</button>
+
+   <a data-toggle="modal" data-target="#deleteAI" style="cursor: pointer;">
+       <button  name="btnDelete" id="btnDelete" value="<?php echo($_SESSION['ai_name']); ?>" class="btn btn-danger flat pull-right" onClick="" alt="delete">delete AI</button>
+   </a>
 </div>
 
+
+
+<!-- Modal DELETE AI-->
+<div class="modal fade" id="deleteAI" role="dialog">
+    <div class="modal-dialog flat">
+        <!-- Modal content-->
+        <div class="modal-content bordered">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">   <i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> DELETE AI</h4>
+            </div>
+            <div class="modal-body">
+                <div class="box-body" id="delete-ai-label">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" id="deleteForm" action="./deleteAI.php">
+                <button type="submit" class="btn btn-primary flat" id="modalDelete" data-dismiss="modal">Delete</button>
+
+                <button type="button" class="btn btn-primary flat" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

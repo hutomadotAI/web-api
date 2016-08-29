@@ -1,4 +1,3 @@
-<script src="./plugins/view/view.js"></script>
 <div class="box box-solid box-clean flat no-shadow">
     <div class='box-header with-border'>
         <i class="fa fa-group text-light-blue"></i>
@@ -6,11 +5,7 @@
     </div>
 
     <?php
-
-        $dev_token = \hutoma\console::getDevToken();
-        $array = \hutoma\console::getAIs($dev_token);
-        unset($dev_token);
-        if ($array['status']['code']===200) {
+        if ($response_getAIs['status']['code']===200) {
 
             echo('<div class="box-body table-responsive">');
             echo('<table class="table table">');
@@ -21,9 +16,9 @@
             echo('<th class="text-center" style="border:0;">Description</th>');
             echo('<th style="border:0;">Date</th>');
             echo('</tr>');
-            echo('<form method="POST" id="viewAllAIsform" action="./trainingAI.php">');
+            echo('<form method="POST" name="viewAllForm" action="./trainingAI.php">');
 
-            foreach ($array['ai_list'] as $bot) {
+            foreach ($response_getAIs['ai_list'] as $bot) {
                 echo('<tr>');
                 echo('<td style="padding-top: 15px;">' . $bot['aiid'] . '</td>');
                 echo('<td style="padding-top: 15px;">' . $bot['name'] . '</td>');
@@ -52,17 +47,11 @@
                 }
                 echo('<td style="padding-top: 15px;">' . $bot['description'] . '</td>');
                 echo('<td style="padding-top: 15px;">' . $bot['created_on'] . '</td>');
-                echo('<td style="padding-top: 8px;"><button type="button" name="btnSelect" value="'.$bot['aiid'].'"  onClick="sendAIID(this.value)" class="btn btn-primary flat pull-right" id="btn_select" style="margin-right: 5px; width: 115px;"><i class="fa fa-user"></i> details AI</button></td>');
-                echo('<td style="padding-top: 8px;"><button type="button" name="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI.call(this)" class="btn btn-info flat pull-right" id="btn-publish" style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');
+                echo('<td style="padding-top: 8px;"><button id="btnSelect" name="ai" value="'.$bot['aiid'].'"  onClick="sendAIID()" class="btn btn-primary flat pull-right" style="margin-right: 5px; width: 115px;"><i class="fa fa-user" ></i> Details AI</button></td>');
+                echo('<td style="padding-top: 8px;"><button id="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI.call()" class="btn btn-info flat pull-right"    style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');
             }
-
-            unset($array);
-
             echo('</form>');
             echo('<tr>');
-            echo('<td></td><td></td><td></td><td></td><td></td>');
-            echo('<td><a href="./newAI.php"><div class="btn btn-success flat pull-right" style="margin-right: 5px; width: 115px;"><i class="fa fa-user-plus"></i> add new AI</div></a></td>');
-            echo('</tr>');
             echo('</table>');
 
         }else{
@@ -73,6 +62,7 @@
             echo('</div>');
             echo('</div>');
         }
+    unset($response_getAIs);
     ?>
 </div>
 </div>

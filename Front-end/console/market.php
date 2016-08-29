@@ -5,26 +5,25 @@
         header('Location: ./error.php?err=1');
         exit();
     }
-    
-    if (isset($_POST['userActivedDomains'])) {
-        $_SESSION['userActivedDomains'] = $_POST['userActivedDomains'];
-    }
-    
-    if ( !isValuesSessionInputFilled() ) {
+
+    if ( !isPostInputAvailable() ) {
         header("Location: ./error.php?err=2");
         exit();
-}
+    }
 
-function isValuesSessionInputFilled(){
-    return
-        isset($_SESSION['ai_name']) &&
-        isset($_SESSION['ai_description']) &&
-        isset($_SESSION['ai_language']) &&
-        isset($_SESSION['ai_timezone']) &&
-        isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_personality']) &&
-        isset($_SESSION['dev_id']);
-}
+    function isPostInputAvailable(){
+        return  (
+            isset($_POST['ai_name']) &&
+            isset($_POST['ai_description']) &&
+            isset($_POST['ai_language']) &&
+            isset($_POST['ai_timezone']) &&
+            isset($_POST['ai_confidence']) &&
+            isset($_POST['ai_personality']) &&
+            isset($_POST['ai_sex']) &&
+            isset($_POST['userActivedDomains'])
+        );
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -106,7 +105,7 @@ function isValuesSessionInputFilled(){
 
 <script src="./plugins/select2/select2.full.min.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-<script src="./plugins/createAI/createAI.js"></script>
+<script src="./plugins/market/market.js"></script>
 
 </body>
 </html>

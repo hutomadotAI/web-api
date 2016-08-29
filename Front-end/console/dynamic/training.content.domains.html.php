@@ -7,7 +7,7 @@ unset($dev_token);
 <div class="box box-solid box-clean flat no-shadow" >
       <a data-toggle="collapse" data-parent="#accordion" href="#collapseDomain">
           <div class="box-header with-border">
-          <i class="fa fa fa-th text-warning"></i>
+          <i class="fa fa fa-th text-red"></i>
           <h3 class="box-title">Actived Domains</h3>
           <div class="box-tools pull-right">
             <button class="btn btn-box-tool" ><i class="fa fa-minus"></i></button>

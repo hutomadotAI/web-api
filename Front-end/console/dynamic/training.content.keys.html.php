@@ -6,7 +6,7 @@
 
     <a data-toggle="collapse" data-parent="#accordion" href="#collapseKEYS">
         <div class="box-header with-border">
-            <i class="fa fa-user-secret"></i>
+            <i class="fa fa-user-secret text-warning"></i>
             <h3 class="box-title">API keys</h3>
             <div class="box-tools pull-right">
                 <button class="btn btn-box-tool" ><i class="fa fa-minus"></i></button>

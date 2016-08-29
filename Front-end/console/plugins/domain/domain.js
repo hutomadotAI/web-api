@@ -1,10 +1,35 @@
+document.getElementById("btnNext").addEventListener("click", wizardNext);
+document.getElementById("btnBack").addEventListener("click", backPage);
+
+function wizardNext() {
+    $(this).prop("disabled",true);
+    $("#btnCancel").prop("disabled",true);
+    $("#domsearch").prop("disabled",true);
+
+    if(document.domainsNewAIform.onsubmit) {
+        return;
+    }
+
+    RecursiveUnbind($('#wrapper'));
+    var JsonStringActiveDomains = JSON.stringify(userActived);
+    $("#userActivedDomains").attr("value", JsonStringActiveDomains);
+    document.domainsNewAIform.submit();
+}
+
+function backPage(){
+    $(this).prop("disabled",true);
+    history.go(-1);
+    return false;
+}
+
+
+
 function showDomains(str,size){
   var wHTML = "";
   for (var x in domains) {
     var boxid = 'box' + domains[x].dom_id;
     if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
           if(size==0){
-
                   // slim box design
                   if ( domains[x].available == '0' ){
                         wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
@@ -100,25 +125,6 @@ function switchClick(node,key){
     else {
         $(node).attr('box-checked', 0);
         userActived[key] = false;
-
         $("#"+boxid).removeClass("borderActive");
     }
-}
-
-function domainsToJsonForPOST() {
-    RecursiveUnbind($('#wrapper'));
-
-    $("#btnNext").attr("disabled", true);
-    $("#btnNext").attr("onClick","");
-    $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
-
-    $("#btnBack").attr("disabled", true);
-    $("#btnBack").attr("onClick","");
-    $('#btnBack').removeClass('btn btn-primary flat').addClass('btn btn-primary flat disabled');
-
-    $("#btnSwitch").attr("disabled", true);
-    $("#btnSwitch").attr("onClick","");
-
-    var JsonStringActiveDomains = JSON.stringify(userActived);
-    $("#userActivedDomains").attr("value", JsonStringActiveDomains);
 }

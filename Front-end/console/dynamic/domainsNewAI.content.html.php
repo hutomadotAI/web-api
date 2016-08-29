@@ -1,8 +1,8 @@
-<form method="POST" id="domainsNewAIform" action="./market.php" onsubmit="domainsToJsonForPOST()">
+<form method="POST" name="domainsNewAIform" action="./market.php">
     <div class="row row-centered">
         <div class="col-xs-4 col-centered">
-            <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
-            <button type="submit" class="btn btn-success flat" id="btnNext" value="" onClick="">next</button>
+            <a href="#" class="btn btn-primary flat" id="btnBack">back</a>
+            <button type="submit" class="btn btn-success flat" id="btnNext">next</button>
         </div>
 
         <div class="col-xs-5 col-centered">
@@ -22,11 +22,18 @@
     <p></p>
     <div class="input-group-btn">
     <input class="form-control input-lg " value="" placeholder="Search" tabindex="0" onkeyup="searchDomain(this.value)">
-    <input type="hidden" id="userActivedDomains"name="userActivedDomains" value="">
     </div>
     <p></p>
     <h2></h2>
     <p id="domsearch"></p>
+    <input type="hidden" name="ai_name"         value="<?php echo $_POST['ai_name'] ?>">
+    <input type="hidden" name="ai_description"  value="<?php echo $_POST['ai_description'] ?>">
+    <input type="hidden" name="ai_language"     value="<?php echo $_POST['ai_language'] ?>">
+    <input type="hidden" name="ai_timezone"     value="<?php echo $_POST['ai_timezone'] ?>">
+    <input type="hidden" name="ai_confidence"   value="<?php echo $_POST['ai_confidence'] ?>">
+    <input type="hidden" name="ai_personality"  value="<?php echo $_POST['ai_personality'] ?>">
+    <input type="hidden" name="ai_sex"          value="<?php echo $_POST['ai_sex'] ?>">
+    <input type="hidden" name="userActivedDomains" value="">
 </form>
 
 <p></p>

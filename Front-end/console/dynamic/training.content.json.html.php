@@ -1,6 +1,7 @@
 <div class="box box-solid box-clean flat no-shadow" >
       <a data-toggle="collapse" data-parent="#accordion" href="#collapseJSON" tabindex="-1" >
       <div class="box-header with-border">
+          <i class="fa fa-file-code-o text-danger"></i>
           <h3 class="box-title">JSON message</h3>
           <div class="box-tools pull-right">
             <button class="btn btn-box-tool" tabindex="-1" ><i class="fa fa-minus" tabindex="-1" ></i></button>

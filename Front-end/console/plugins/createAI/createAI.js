@@ -1,52 +1,96 @@
-var name = $("#ai_name").val();
+document.getElementById("btnNext").addEventListener("click", wizardNext);
+document.getElementById("btnCancel").addEventListener("click", clearInputFields);
+document.getElementById("ai_name").addEventListener("keyup", activeBtnNext);
 
-if ( name.length > 0 ){
-    $("#btnNext").removeClass("btn btn-success flat disabled").addClass("btn btn-success flat");
-    $("#btnNext").attr("value","_next");
-    $("#btnNext").attr("onClick","submitForm()");
-}
+var ai_name = $("#ai_name").val();
+if ( ai_name.length > 0 )
+    $("#btnNext").prop("disabled",false);
+else
+    $("#btnNext").prop("disabled",true);
 
-function activeNext(str) {
-  var name = $("#ai_name").val();
-if ( name.length > 0 ){
-    $("#btnNext").removeClass("btn btn-success flat disabled").addClass("btn btn-success flat");
-    $("#btnNext").attr("value","_next");
-    $("#btnNext").attr("onClick","submitForm()");
-}
-else{
-    $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
-    $("#btnNext").attr("value","");
-    $("#btnNext").attr("onClick","");
-}
-}
+function wizardNext() {
+    $(this).prop("disabled",true);
+    $("#btnCancel").prop("disabled",true);
 
-function submitForm() {
+    if(isContainInvalidCharacters($("#ai_name").val())) {
+        msgAlert(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 character');
+        inputsActiveDeactive(false);
+        return;
+    }
 
+    if(document.createAIform.onsubmit)
+        return;
     RecursiveUnbind($('#wrapper'));
-
-    $("#btnNext").attr("disabled",true);
-    $("#btnCancel").attr("disabled",true);
-    $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
-    $('#btnCancel').removeClass('btn btn-primary flat').addClass('btn btn-primary flat disabled');
-    document.getElementById("createAIform").submit();
+    document.createAIform.submit();
 }
 
-function showInfoMessage(){
-
-   /* var wHTML='';
-    wHTML += ('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>');
-    wHTML += ('<i class="icon fa fa-check"></i>');
-    wHTML += ('<span> Before go on you fill the fi</span>');
-    
-    var newNode = document.createElement('div');
-    newNode.className = 'alert alert-base alert-dismissable flat';
-    newNode.id = 'inputNameMsgAlert';
-    newNode.innerHTML = wHTML;
-    document.getElementById('ai_name_alert').appendChild(newNode);
-    */
-    
+function activeBtnNext() {
+    var ai_name = $("#ai_name").val();
+    if ( ai_name.length > 0 ) {
+        $("#btnNext").prop("disabled", false);
+        if(document.getElementById('containerMsgAlertNameAI').getAttribute("style")!=null && document.getElementById('containerMsgAlertNameAI').getAttribute("style")!="") {
+            document.getElementById('containerMsgAlertNameAI').style.display = 'none';
+        }
+        document.getElementById('ai_name').style.borderColor = "#d2d6de";
+    }
+    else
+        $("#btnNext").prop("disabled",true);
 }
 
+function inputsActiveDeactive(flag){
+    $("#btnNext").prop("disabled",flag);
+    $("#btnCancel").prop("disabled",flag);
+    $("#ai_name").prop("disabled",flag);
+    $("#ai_description").prop("disabled",flag);
+    $("#ai_confidence").prop("disabled",flag);
+    $("#ai_timezone").prop("disabled",flag);
+    $("#ai_sex").prop("disabled",flag);
+    $("#ai_language").prop("disabled",flag);
+    $("#ai_personality").prop("disabled",flag);
+}
+
+function isContainInvalidCharacters(txt) {
+    var letters = /^[0-9a-zA-Z]+$/;
+    if (letters.test(txt))
+        return false;
+    else
+        return true;
+}
+
+function clearInputFields() {
+    document.getElementById('containerMsgAlertNameAI').style.display = 'none';
+    $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
+    $("#icongAlertNameAI").attr('class', 'icon fa fa-check');
+    document.getElementById('ai_name').style.borderColor = "#d2d6de";
+    document.getElementById('ai_name').value = '';
+
+    document.getElementById("ai_sex")[0].selected = true;
+    document.getElementById("ai_sex")[1].selected = false;
+    document.getElementById("ai_sex")[0].value = ("Male");
+}
+
+function msgAlert(alarm,msg){
+    document.getElementById('containerMsgAlertNameAI').style.display = 'block';
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
+            document.getElementById('ai_name').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
+            document.getElementById('ai_name').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-warning');
+            document.getElementById('ai_name').style.borderColor = "red";
+            break
+    }
+    document.getElementById('msgAlertNameAI').innerText = msg;
+}
+    
 $(function () {
     $(".select2").select2();
 });

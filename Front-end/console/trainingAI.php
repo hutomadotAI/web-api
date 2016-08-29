@@ -3,16 +3,25 @@
 
     if ( !\hutoma\console::isSessionActive()) {
         header('Location: ./error.php?err=1');
-        exit;
+        exit();
     }
 
-    if (isset($_POST['aiid']) ){
-        generateSession();
+    if (isset($_POST['ai']) ){
+        $dev_token = \hutoma\console::getDevToken();
+        $singleAI = \hutoma\console::getSingleAI($dev_token,$_POST['ai']);
+        if ($singleAI['status']['code']===200) {
+            fillSessionVariables($array);
+        }
+        else {
+            unset($array);
+            exit;
+        }
+        unset($array);
     }
 
-    if ( !isValuesSessionFilled() ){
-        header('Location: ./error.php?err=2');
-        exit;
+    if ( !isPostInputAvailable() ) {
+        header("Location: ./error.php?err=2");
+        exit();
     }
 
 function generateSession(){
@@ -113,7 +122,7 @@ function isValuesSessionFilled(){
 
                     <li class="active"><a href="#"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
                     <li><a href="./intents.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
-                    <li><a href="./entities.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                    <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
                     <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
                     <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
                     <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
@@ -149,18 +158,10 @@ function isValuesSessionFilled(){
     </section>
     </div>
 
-
-
-    <!-- =================== FOOTER =================== -->
     <footer class="main-footer">
        <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
-    <!-- ================== SIDE BAR ================== -->
-    <!--
-    <aside class="control-sidebar control-sidebar-dark">
-    </aside>
-    -->
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

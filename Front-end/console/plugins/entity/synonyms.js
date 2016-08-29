@@ -13,7 +13,7 @@ function showEntries(){
 
 
             wHTML += ('<div class="col-xs-12">');
-            wHTML += ('<div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
+            wHTML += ('<div class="box-body bg-white flat" style="border: 1px solid #d2d6de; margin-bottom: 1px;" id="box-entry'+x+'" ondblclick="openSynonyms('+x+')" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row">');
 
 
@@ -58,9 +58,6 @@ function deleteEntity (elem) {
     showEntities('');
 }
 
-function saveEntity (elem) {
-    //entities[elem];
-}
 
 function OnMouseIn (elem) {
     var btn = elem.children[0].children[2];
@@ -70,11 +67,6 @@ function OnMouseIn (elem) {
 function OnMouseOut (elem) {
     var btn = elem.children[0].children[2];
     btn.style.display = 'none';
-}
-
-function activeSave(label,value) {
-    if ( label.length > 0 )
-        saveEntity(value)
 }
 
 function addEntity() {
@@ -88,18 +80,28 @@ function addEntity() {
 }
 
 function openSynonyms(elem){
-    $(elem).toggleClass("text-aqua");
+    $(elem).toggleClass('text-aqua');
     var x = $(elem).attr('value');
     var node = document.getElementById('list-entry'+x);
 
-    if (node.style.display == 'none')
+    if (node.style.display == 'none') {
         node.style.display = '';
-    else
+        var parent = document.getElementById('box-entry'+x);
+        parent.style.border = '1px solid #00c0ef';
+
+    }
+    else {
+        if ( node.childElementCount != 1)
+            trasformBoxEntriesToText(node);
         node.style.display = 'none';
+        var parent = document.getElementById('box-entry'+x);
+        parent.style.border = '1px solid #d2d6de';
+
+    }
 }
 
 function checkKeyCode(element,key,n_id){
-   if(key == 9 || key == 13 || key == 59) {
+   if(key == 9 || key == 13 || key == 58) {
        if ($(element).val() != "") {
            var synonym = $(element).val();
            var parent = document.getElementById('list-entry'+n_id);
@@ -147,4 +149,32 @@ function drawEntriesList(synonyms,x) {
         wHTML += ('<div class="box-body bg-white flat border" id="list-entry' + x + '" style="display:none;" >');
     }
     return wHTML;
+}
+
+function trasformBoxEntriesToText(parent){
+    var simpleText='';
+    var children = parent.childNodes;
+    alert(children.length);
+    for (var i = 0; i < children.length; i++){
+        children[i].style.display = 'none';
+        if ( (i-1)< children.length )
+            simpleText +=  children[i].innerText +' , ';
+        else
+            simpleText +=  children[i].innerText;
+    }
+    alert(simpleText);
+}
+
+
+function showBoxEntries(parent){
+    var children = parent.childNodes;
+
+    for (var i = 0; i < children.length; i++){
+        children[i].style.display = 'block';
+        if ( (i-1)< children.length )
+            simpleText +=  children[i].innerText +' , ';
+        else
+            simpleText +=  children[i].innerText;
+    }
+    alert(simpleText);
 }

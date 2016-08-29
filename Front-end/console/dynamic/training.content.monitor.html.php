@@ -30,7 +30,7 @@ function decodeAIState($state)
 }
 
 
-$error = 100 -  $_SESSION['ai_deep_learning_error'];
+$error = 80 -  $_SESSION['ai_deep_learning_error'];
 $error = round($error,2);
 if ( $error % 1 === 0 )
     $error = round($error,0);
@@ -63,16 +63,18 @@ if ( $error % 1 === 0 )
                 <th class="text-center no-border" style="width: 60%;">Progress</th>
                 <th class="no-border" style="width: 10%;">Label</th>
             </tr>
-
+            <!--
             <tr>
-                <td id="status-container"><?php echo ($_SESSION['ai_status']); ?></td>
+                <td id="status-container"><?php //echo ($_SESSION['ai_status']); ?></td>
                 <td>
                     <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
-                        <div id="status-progress-bar" class="progress-bar progress-bar-success" style="width: <?php echo $error; ?>%;"></div>
+
+                       <div id="status-progress-bar" class="progress-bar progress-bar-success" style="width: <?php //echo $error; ?>%;"></div>
                     </div>
                 </td>
-                <td><span id="status-bagde" class="badge bg-green">  <?php echo $error; ?>%</span></td>
+                <td><span id="status-bagde" class="badge bg-green">  <?php //echo $error; ?>%</span></td>
             </tr>
+    -->
         </table>
 
     </div>

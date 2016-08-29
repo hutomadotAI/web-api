@@ -9,12 +9,7 @@
         </a>
     </div>
  
-    <form method="POST" id="domainsNweAIform" action="./saveAI.php" onsubmit="RecursiveUnbind($('#wrapper'));">
-
-        <div class="input-group-btn">
-            <input type="hidden" id="userActivedDomains"name="userActivedDomains" value="<?php echo $_SESSION['userActivedDomains'] ?>">
-        </div>
-
+    <form method="POST" name="marketNewAIform" action="./dynamic/saveAI.php">
         <div class="box-body">
             <div class="row">
 
@@ -86,9 +81,10 @@
                             <div class="input-group-addon">
                                 <i class="fa fa-euro"></i>
                             </div>
-                            <input type="text" class="form-control" name="ai_price" id="ai_price" placeholder="Enter price" onkeyup="activeNext(this.value)">
+                            <input type="text" class="form-control" name="ai_price" id="ai_price" placeholder="Enter price">
                         </div>
                     </div>
+
                     <div class="box-body">
                         <div class="overlay center-block">
                             <section class="content bg-gray-light" >
@@ -136,7 +132,23 @@
 
     <div class="box-footer">
             <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
-            <button type="submit" class="btn btn-success flat" id="btnSave" value="" onClick="">save</button>
+            <button type="submit" class="btn btn-success flat" id="btnSave">save</button>
+        <p></p>
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertPriceAI" style="display:none;">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <i class="icon fa fa-check" id="iconAlertPriceAI"></i>
+            <span id="msgAlertPriceAI"></span>
+        </div>
     </div>
+
+        <input type="hidden" name="ai_name"         value="<?php echo $_POST['ai_name'] ?>">
+        <input type="hidden" name="ai_description"  value="<?php echo $_POST['ai_description'] ?>">
+        <input type="hidden" name="ai_language"     value="<?php echo $_POST['ai_language'] ?>">
+        <input type="hidden" name="ai_timezone"     value="<?php echo $_POST['ai_timezone'] ?>">
+        <input type="hidden" name="ai_confidence"   value="<?php echo $_POST['ai_confidence'] ?>">
+        <input type="hidden" name="ai_personality"  value="<?php echo $_POST['ai_personality'] ?>">
+        <input type="hidden" name="ai_sex"          value="<?php echo $_POST['ai_sex'] ?>">
+        <input type="hidden" name="userActivedDomains" value="">
+
     </form>
 </div>
