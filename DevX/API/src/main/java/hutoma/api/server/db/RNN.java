@@ -20,8 +20,7 @@ public class RNN {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
-            String query = " insert into chatlog (dev_id,message_from, message_to, question)"
-                    + " values (?,?,?,?)";
+            String query = "CALL insertQuestion(?,?,?,?)";
             PreparedStatement preparedStmt = conn.prepareStatement(query,Statement.RETURN_GENERATED_KEYS);
             preparedStmt.setString (1, dev_id);
             preparedStmt.setString (2, uid);
@@ -29,11 +28,11 @@ public class RNN {
             preparedStmt.setString(4, q);
             java.util.Date utilDate = new java.util.Date();
             java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-            preparedStmt.execute();
-            ResultSet generatedKeys = preparedStmt.getGeneratedKeys();
+            ResultSet generatedKeys = preparedStmt.executeQuery();
             if (generatedKeys.next()) {
                 rowid = generatedKeys.getLong(1);
             }
+            preparedStmt.close();
             conn.close();
         }
         catch (Exception e) {
@@ -50,16 +49,19 @@ public class RNN {
         String myUrl = getConfigProp("connectionstring");
         Class.forName(myDriver);
         Connection conn = DriverManager.getConnection(myUrl);
-        Statement st = conn.createStatement();
-        String query = "SELECT answer FROM chatlog WHERE id="+qid;
-        ResultSet rs = st.executeQuery(query);
+
+        String query = "CALL getAnswer(?)";
+        PreparedStatement preparedStmt = conn.prepareStatement(query);
+        preparedStmt.setLong (1, qid);
+
+        ResultSet rs = preparedStmt.executeQuery();
 
         // TODO: fix and figure out why we get more than one result here and each one overwrites the last one
         while (rs.next()) {
             answer = rs.getString("answer");
         }
 
-        st.close();
+        preparedStmt.close();
         conn.close();
         return answer;
     }
@@ -74,14 +76,19 @@ public class RNN {
         Class.forName(myDriver);
         Connection conn = DriverManager.getConnection(myUrl);
         Statement st = conn.createStatement();
-        String query = "SELECT NNActive FROM ai WHERE dev_id='"+dev_id+"' AND aiid='"+aiid+"'";
-        ResultSet rs = st.executeQuery(query);
+        String query = "CALL getAiActive(?,?)";
+
+        PreparedStatement preparedStmt = conn.prepareStatement(query);
+        preparedStmt.setString (1, aiid);
+        preparedStmt.setString (2, dev_id);
+
+        ResultSet rs = preparedStmt.executeQuery();
 
         while (rs.next()) {
             stat = rs.getInt("NNActive");
             if (stat == 1 )  result = true;
         }
-        st.close();
+        preparedStmt.close();
         conn.close();
 
         return result;
@@ -98,6 +105,8 @@ public class RNN {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+
+            //TODO: move to stored procedure when it is being used somewhere
             String query = "SELECT model_files_available FROM ai WHERE dev_id='"+dev_id+"' AND aiid='"+aiid+"'";
             ResultSet rs = st.executeQuery(query);
 
@@ -123,6 +132,8 @@ public class RNN {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+
+            //TODO: move to stored procedure when it is being used somewhere
             String query = "UPDATE rnnQueue SET status ="+status+" WHERE appid='"+appid+"' AND botid='"+botid+"'";
             System.out.println("ai:" + query);
             st.executeUpdate(query);

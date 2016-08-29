@@ -24,6 +24,7 @@ public class userAiDomains {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " INSERT INTO userAIDomains (dev_token, aiid, dom_id, active) VALUES (?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
@@ -46,6 +47,7 @@ public class userAiDomains {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " UPDATE userAIDomains SET active=? WHERE dev_token=? AND aiid=? AND dom_id=?";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);
@@ -72,6 +74,7 @@ public class userAiDomains {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = "SELECT * FROM userAIDomains WHERE dev_token='" + dev_token + "' AND aiid='" + aiid + "'";
 
             Statement st = conn.createStatement();
@@ -105,6 +108,7 @@ public class userAiDomains {
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = "SELECT * FROM userAIDomains WHERE dev_token='" + dev_token + "' AND aiid='" + aiid + "' dom_id='" + dom_id + "'";
 
             ResultSet rs = st.executeQuery(query);
@@ -130,6 +134,7 @@ public class userAiDomains {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " DELETE FROM userAIDomains WHERE dev_token=? AND aiid=? AND dom_id=?";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query);

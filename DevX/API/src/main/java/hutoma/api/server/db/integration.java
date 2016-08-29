@@ -26,6 +26,7 @@ public class integration {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " insert into integrations (id, name, description, icon, available)"
                     + " values (?, ?, ?, ?, ?)";
 
@@ -52,6 +53,7 @@ public class integration {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
 
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " update integrations set available=? where id=?";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setBoolean(1, available);
@@ -75,6 +77,8 @@ public class integration {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+
+            //TODO: move to stored procedure when it is being used somewhere
             String query = "SELECT * FROM integrations";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
@@ -106,6 +110,8 @@ public class integration {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
             Statement st = conn.createStatement();
+
+            //TODO: move to stored procedure when it is being used somewhere
             String query = "SELECT * FROM integrations WHERE id='"+id+"'";
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
@@ -131,6 +137,8 @@ public class integration {
             String myUrl = getConfigProp("connectionstring");
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl);
+
+            //TODO: move to stored procedure when it is being used somewhere
             String query = " delete from domains where dom_id=?";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setString (1, dom_id);
