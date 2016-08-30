@@ -95,7 +95,7 @@ public class TestAILogic {
     public void testCreate_DB_NotFound() {
         when(fakeDatabase.createAI(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(false);
         ApiResult result = aiLogic.createAI(fakeContext, DEVID, "name", "description", true, 0.0d, 0, 0, 0);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test

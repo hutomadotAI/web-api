@@ -32,16 +32,21 @@ public class ChatEndpoint {
     @Path("{aiid}/chat")
     @Secured({Role.ROLE_CLIENTONLY,Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response chat(@Context SecurityContext securityContext,
-                         @PathParam("aiid") String aiid,
-                         @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
-                         @DefaultValue("") @QueryParam("q") String q,
-                         @DefaultValue("1") @QueryParam("uid") String uid,
-                         @DefaultValue("") @QueryParam("history") String history,
-                         @DefaultValue("false") @QueryParam("active_learning") boolean on_the_fly_learning,
-                         @DefaultValue("false") @QueryParam("fs") boolean fs,
-                         @DefaultValue("0.5") @QueryParam("min_p") float min_p) {
-        ApiResult result = chatLogic.chat(securityContext, aiid, dev_id, q, uid, history, on_the_fly_learning, fs, min_p);
+    public Response chat(
+            @Context SecurityContext securityContext,
+            @PathParam("aiid") String aiid,
+            @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
+            @DefaultValue("") @QueryParam("q") String q,
+            @DefaultValue("1") @QueryParam("uid") String uid,
+            @DefaultValue("") @QueryParam("history") String history,
+            @DefaultValue("false") @QueryParam("active_learning") boolean on_the_fly_learning,
+            @DefaultValue("120") @QueryParam("expires") int expires,
+            @DefaultValue("5") @QueryParam("nprompts") int nprompts,
+            @DefaultValue("") @QueryParam("topic") String topic,
+            @DefaultValue("") @QueryParam("rnn") String rnn,
+            @DefaultValue("false") @QueryParam("fs") boolean fs,
+            @DefaultValue("0.5") @QueryParam("min_p") float min_p) {
+        ApiResult result = chatLogic.chat(securityContext, aiid, dev_id, q, uid, history, on_the_fly_learning, expires, nprompts, topic, rnn, fs, min_p);
         return result.getResponse(serializer).build();
     }
 

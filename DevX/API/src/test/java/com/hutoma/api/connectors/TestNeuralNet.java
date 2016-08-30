@@ -116,8 +116,12 @@ public class TestNeuralNet {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenReturn(true);
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn("");
-        String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
-        Assert.assertEquals("", result);
+        try {
+            String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
+            Assert.fail("should have timed out");
+        } catch (NeuralNet.NeuralNetNotRespondingException nnnre) {
+            // this is supposed to throw
+        }
         Assert.assertTrue(fakeTools.getTimestamp() >= NeuralNet.POLLEVERY);
     }
 

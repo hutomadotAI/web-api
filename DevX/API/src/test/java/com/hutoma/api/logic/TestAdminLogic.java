@@ -106,7 +106,7 @@ public class TestAdminLogic {
     @Test
     public void testDelete_NullDevid() {
         when(fakeDatabase.deleteDev(anyString())).thenReturn(false);
-        Assert.assertEquals(500, deleteDev(null).getStatus().getCode());
+        Assert.assertEquals(400, deleteDev(null).getStatus().getCode());
     }
 
     @Test

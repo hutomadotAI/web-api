@@ -13,11 +13,11 @@ import java.io.IOException;
 public class Config {
 
     public String getEncodingKey() {
-        return getConfigProp("encoding_key", "");
+        return getConfigFromProperties("encoding_key", "");
     }
 
     public String getCoreQueue() {
-        return getConfigProp("core_queue", "");
+        return getConfigFromProperties("core_queue", "");
     }
 
     public Regions getMessageQueueRegion() {
@@ -25,30 +25,43 @@ public class Config {
     }
 
     public String getWNetServer() {
-        return getConfigProp("wnet_server", "");
+        return getConfigFromProperties("wnet_server", "");
     }
 
     public long getNeuralNetworkTimeout() {
-        return Long.valueOf(getConfigProp("RNNTimeout", "60"));
+        return Long.valueOf(getConfigFromProperties("RNNTimeout", "60"));
     }
 
     public long getMaxUploadSize() {
-        return Long.valueOf(getConfigProp("MaxUploadSize", "65536"));
+        return Long.valueOf(getConfigFromProperties("MaxUploadSize", "65536"));
     }
 
     public int getMaxClusterLines() {
-        return Integer.valueOf(getConfigProp("max_cluster_lines", "10000"));
+        return Integer.valueOf(getConfigFromProperties("max_cluster_lines", "10000"));
     }
 
     public double getClusterMinProbability() {
-        return Double.valueOf(getConfigProp("cluster_min_probability", "0.7"));
+        return Double.valueOf(getConfigFromProperties("cluster_min_probability", "0.7"));
     }
 
-    public String getConfigProp(String p, String defaultValue) {
+    private String getConfigFromProperties(String p, String defaultValue) {
         java.util.Properties prop = new java.util.Properties();
         try {
             prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
             return prop.getProperty(p, defaultValue);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    @Deprecated
+    public static String getConfigProp(String p) {
+        java.util.Properties prop = new java.util.Properties();
+        try {
+            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
+            return prop.getProperty(p);
 
         } catch (IOException ex) {
             ex.printStackTrace();

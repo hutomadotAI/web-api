@@ -1,40 +1,25 @@
 package com.hutoma.api.logic;
 
-import com.amazonaws.services.devicefarm.model.Upload;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.*;
+import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
-import de.l3s.boilerpipe.BoilerpipeProcessingException;
-import de.l3s.boilerpipe.extractors.ArticleExtractor;
-import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
-import hutoma.api.server.ai.api_root;
-import hutoma.api.server.db.ai;
-import hutoma.api.server.utils.utils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static hutoma.api.server.utils.utils.getConfigProp;
 
 /**
  * Created by mauriziocibelli on 28/04/16.

@@ -49,4 +49,12 @@ public class ChatResult {
     public void setElapsedTime(double elapsed_time) {
         this.elapsed_time = elapsed_time;
     }
+
+    public void setTopic_out(String topic_out) {
+        this.topic_out = topic_out;
+    }
+
+    public String getTopic_out() {
+        return topic_out;
+    }
 }

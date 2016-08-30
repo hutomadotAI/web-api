@@ -13,6 +13,7 @@ import com.hutoma.api.containers.sub.ChatResult;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
+import java.util.UUID;
 
 /**
  * Created by mauriziocibelli on 24/04/16.
@@ -38,52 +39,50 @@ public class ChatLogic {
         this.logger = logger;
     }
 
-    public ApiResult chat(SecurityContext securityContext, String aiid, String dev_id, String q,
-                          String uid, String history, boolean on_the_fly_learning, boolean fs, float min_p) {
+    public ApiResult chat(SecurityContext context, String aiid, String dev_id, String q, String uid, String history,
+                          boolean on_the_fly_learning, int expires, int nprompts, String topic,
+                          String rnn, boolean fs, float min_p) {
 
         long timestampNow = tools.getTimestamp();
+        UUID chatID = tools.createNewRandomUUID();
 
         ApiChat apiChat = new ApiChat(tools.createNewRandomUUID(), timestampNow);
-        ChatResult res = new ChatResult();
-        apiChat.setResult(res);
-
-        res.setAction("no action");
-        res.setContext("");
-        res.setElapsedTime(0.0d);
-        res.setQuery(q);
+        ChatResult chatResult = new ChatResult();
+        apiChat.setResult(chatResult);
+        apiChat.setID(chatID);
 
         long startTime = timestampNow;
 
         logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid);
         boolean noResponse = true;
         try {
-            ChatResult result = semanticAnalysis.getAnswer(dev_id, aiid, "[" +history+ "]" + q, min_p, fs);
+            ChatResult semanticAnalysisResult = semanticAnalysis.getAnswer(dev_id, aiid, uid, topic, "[" +history+ "]" + q, min_p, fs, expires, nprompts);
 
-            if (null!=result.getAnswer() && !result.getAnswer().isEmpty()) {
+            if (null!=semanticAnalysisResult.getAnswer() && !semanticAnalysisResult.getAnswer().isEmpty()) {
                 noResponse = false;
-                res.setScore(Math.round(Double.valueOf(result.getScore()) * 10.0d) / 10.0d);
 
-                // take the second line in the answer, or an empty string if there isn't one
-                res.setAnswer(result.getAnswer());
+                chatResult.setScore(Math.round(Double.valueOf(semanticAnalysisResult.getScore()) * 10.0d) / 10.0d);
+                chatResult.setTopic_out(semanticAnalysisResult.getTopic_out());
+                chatResult.setAnswer(semanticAnalysisResult.getAnswer());
 
                 long endWNetTime = tools.getTimestamp();
-                res.setElapsedTime((endWNetTime - startTime)/1000.0d);
+                chatResult.setElapsedTime((endWNetTime - startTime)/1000.0d);
 
                 apiChat.setTimestamp(endWNetTime);
                 //apiChat.metadata = md;
 
-                logger.logDebug(LOGFROM, "AI response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(res.getScore()));
+                logger.logDebug(LOGFROM, "AI response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
 
                 // if Semantic Analysis is not confident enough, try with the Neural Network
-                if (res.getScore()<min_p)  {
+                if (chatResult.getScore()<min_p)  {
                     logger.logDebug(LOGFROM, "starting RNN request");
                     String RNN_answer = neuralNet.getAnswer(dev_id, aiid, uid,q);
                     long endRNNTime = tools.getTimestamp();
 
                     boolean validRNN = false;
                     if ((RNN_answer!=null) && (!RNN_answer.isEmpty())) {
-                        res.setAnswer(RNN_answer);
-                        res.setElapsedTime((endRNNTime - startTime)/1000.0d);
+                        chatResult.setAnswer(RNN_answer);
+                        chatResult.setElapsedTime((endRNNTime - startTime)/1000.0d);
                         validRNN = true;
                     }
                     logger.logDebug(LOGFROM, "RNN " + ((validRNN)? "valid":"*empty*") + " response in " +
@@ -91,6 +90,10 @@ public class ChatLogic {
                             Long.toString(endRNNTime - startTime) + "ms.");
                 }
             }
+        }
+        catch (NeuralNet.NeuralNetNotRespondingException nr) {
+            logger.logError(LOGFROM, "neural net did not respond in time");
+            return ApiError.getNoResponse("unable to respond in time. try again");
         }
         catch (Exception ex){
             logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
@@ -104,6 +107,8 @@ public class ChatLogic {
 
         return apiChat.setSuccessStatus();
     }
+
+
 }
 
 

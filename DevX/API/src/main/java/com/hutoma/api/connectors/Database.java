@@ -3,10 +3,13 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiMemoryToken;
 import hutoma.api.server.db.ai;
+import hutoma.api.server.db.memory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -17,7 +20,7 @@ public class Database {
 
     private final String LOGFROM = "database";
 
-    public class DatabaseException extends Exception {
+    public static class DatabaseException extends Exception {
         public DatabaseException(Throwable cause) {
             super(cause);
         }
@@ -92,6 +95,56 @@ public class Database {
     public void updateAiTrainingFile(String aiid, String trainingData) throws DatabaseException {
         try {
             ai.update_ai_training_file(aiid, trainingData);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public List<ApiMemoryToken> getAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
+        try {
+            return memory.get_all_user_variables(dev_id, aiid, uid);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public ApiMemoryToken getUserVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
+        try {
+            return memory.get_user_variable(dev_id, aiid, uid, variable);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public boolean setUserVariable(String dev_id, String aiid, String uid, int expires_seconds, int n_prompt,
+                                        String variable_type, String variable_name, String variable_value) throws DatabaseException {
+        try {
+            return memory.set_variable(dev_id, aiid, uid, expires_seconds, n_prompt, variable_type, variable_name, variable_value);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+
+    }
+
+    public boolean removeVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
+        try {
+            return memory.remove_variable(dev_id, aiid, uid, variable);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public boolean removeAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
+        try {
+            return memory.remove_all_user_variables(dev_id, aiid, uid);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public boolean removeAllAiVariables(String dev_id, String aiid) throws DatabaseException {
+        try {
+            return memory.remove_all_ai_variables(dev_id, aiid);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }

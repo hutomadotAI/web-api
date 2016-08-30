@@ -29,7 +29,7 @@ public class TestTrainingLogic {
     Config fakeConfig;
     JsonSerializer fakeSerializer;
     MessageQueue fakeMessageQueue;
-    DatabaseProxy fakeDatabase;
+    Database fakeDatabase;
     Tools fakeTools;
     Logger fakeLogger;
     SecurityContext fakeContext;
@@ -44,28 +44,13 @@ public class TestTrainingLogic {
     private String SOMETEXT = "some text";
     private String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
 
-    /**
-     * Roundabout way to get around DatabaseException being an inner class
-     */
-    public class DatabaseProxy extends Database {
-
-        public DatabaseProxy(Logger logger) {
-            super(logger);
-        }
-
-        public DatabaseException createDBEx() {
-            return new Database.DatabaseException(new Exception("test"));
-        }
-    }
-
     @Before
     public void setup() {
 
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
-        this.fakeDatabase = mock(DatabaseProxy.class);
-        when(fakeDatabase.createDBEx()).thenCallRealMethod();
+        this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = mock(Tools.class);
@@ -154,7 +139,7 @@ public class TestTrainingLogic {
     }
 
     void makeDBFail(int trainingType) throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
-        doThrow(fakeDatabase.createDBEx()).when(fakeDatabase).updateAiTrainingFile(anyString(), anyString());
+        doThrow(new Database.DatabaseException(new Exception("test"))).when(fakeDatabase).updateAiTrainingFile(anyString(), anyString());
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);

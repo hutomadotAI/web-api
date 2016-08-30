@@ -5,7 +5,7 @@ import hutoma.api.server.ai.api_root;
 import java.sql.*;
 import java.util.ArrayList;
 
-import static hutoma.api.server.utils.utils.getConfigProp;
+import static com.hutoma.api.common.Config.getConfigProp;
 
 /**
  * Created by Hutoma on 14/07/16.

@@ -112,7 +112,7 @@ public class AILogic {
             String aiid) {
 
         try {
-            logger.logDebug(LOGFROM, "request to list all ais");
+            logger.logDebug(LOGFROM, "request to list single ai");
             ApiAi ai = database.getAI(aiid);
             if (null==ai) {
                 logger.logDebug(LOGFROM, "ai not found");

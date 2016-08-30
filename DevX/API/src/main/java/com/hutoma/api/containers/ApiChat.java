@@ -37,4 +37,8 @@ public class ApiChat extends ApiResult {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    public void setID(UUID id) {
+        this.id = id;
+    }
 }

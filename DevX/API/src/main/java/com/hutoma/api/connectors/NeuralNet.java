@@ -20,6 +20,9 @@ public class NeuralNet {
     private final String LOGFROM = "neuralnetconnector";
     static long POLLEVERY = 1000;                                  // hard-coded to one second
 
+    public static class NeuralNetNotRespondingException extends Exception {
+    }
+
     @Inject
     public NeuralNet(Database database, MessageQueue messageQueue, Logger logger, Config config, Tools tools) {
         this.database = database;
@@ -30,7 +33,7 @@ public class NeuralNet {
     }
 
     // Neural Network Query
-    public String getAnswer(String dev_id, String aiid, String uid, String q) {
+    public String getAnswer(String dev_id, String aiid, String uid, String q) throws NeuralNetNotRespondingException {
 
         // if the RNN network is not active, then push a message to get it activated
         try {
@@ -64,11 +67,18 @@ public class NeuralNet {
         do {
             tools.threadSleep(POLLEVERY);
             answer = database.getAnswer(qid);
-            if (null!=answer && !answer.isEmpty()) {
-                // we have an answer!
-                break;
+            if (null==answer) {
+                // an error has occurred, so exit now
+                return null;
+            } else {
+                if (!answer.isEmpty()) {
+                    // we have an answer!
+                    return answer;
+                }
             }
         } while ((tools.getTimestamp() + (POLLEVERY)) < endTime);
-        return answer;
+
+        // otherwise no response appeared in a reasonable amount of time
+        throw new NeuralNetNotRespondingException();
     }
 }

@@ -80,6 +80,6 @@ public class TestAIDomainLogic {
     public void testGetAll_NotFound() {
         when(fakeDatabase.getAiDomainList()).thenReturn(listOfEmpty);
         ApiResult result = aiDomainLogic.getDomains(fakeContext);
-        Assert.assertEquals(400, result.getStatus().getCode());
+        Assert.assertEquals(404, result.getStatus().getCode());
     }
 }

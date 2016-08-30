@@ -1,12 +1,8 @@
 package hutoma.api.server.db;
 
-import com.hutoma.api.common.Logger;
 import hutoma.api.server.ai.api_root;
-import hutoma.api.server.utils.utils;
-
 import java.sql.*;
-
-import static hutoma.api.server.utils.utils.getConfigProp;
+import static com.hutoma.api.common.Config.getConfigProp;
 
 /**
  * Created by mauriziocibelli on 22/06/16.

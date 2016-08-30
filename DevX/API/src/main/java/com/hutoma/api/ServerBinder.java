@@ -21,6 +21,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AIDomainLogic.class).to(AIDomainLogic.class);
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(TrainingLogic.class).to(TrainingLogic.class);
+        bind(MemoryLogic.class).to(MemoryLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

@@ -36,7 +36,7 @@ public class SemanticAnalysis {
         this.serializer = serializer;
     }
 
-    public ChatResult getAnswer(String devid, String aiid, String q, float min_p, boolean fastSearch) throws SemanticAnalysisException {
+    public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p, boolean fastSearch, int expires, int nprompts) throws SemanticAnalysisException {
         try {
             UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                     .addParameter("q", q)

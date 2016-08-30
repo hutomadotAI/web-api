@@ -49,4 +49,8 @@ public class ApiError extends ApiResult {
         return ApiError.getNotFound("not found");
     }
 
+    public static ApiError getNoResponse(String message) {
+        return ApiError.getError(HttpURLConnection.HTTP_ACCEPTED, message);
+    }
+
 }
