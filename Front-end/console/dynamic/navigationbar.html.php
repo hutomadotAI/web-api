@@ -6,7 +6,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1" >
             <img src="./dist/img/user1-160x160.jpg" class="user-image" alt="User Image" tabindex="-1" >
             <span class="hidden-xs">
-            <?php echo $_SESSION['user_name'];?>
+            <?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['username'];?>
             </span>
           </a>
           <ul class="dropdown-menu">
@@ -14,9 +14,9 @@
             <li class="user-header">
               <img src="./dist/img/user1-160x160.jpg" class="img-circle" alt="User Image">
               <p>
-                <?php echo $_SESSION['user_name'],' - planID ',$_SESSION['user_plan'];?>
+                <?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['username'],' - planID ',$_SESSION[$_SESSION['navigation_id']]['user_plan'];?>
                 <small>
-                  <?php echo 'joined since ',$_SESSION["user_joined"] ;?>
+                  <?php echo 'joined since ',$_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"] ;?>
                 </small>
               </p>
             </li>

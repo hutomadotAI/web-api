@@ -1,15 +1,10 @@
 <?php
     require '../pages/config.php';
-    $details = \hutoma\console::getUser();
-    $_SESSION['user_name'] = $details['name'];
-    $_SESSION['user_plan'] = $details['plan_id'];
-    $_SESSION['dev_id'] = $details['dev_id'];
-    $_SESSION['user_joined'] = \hutoma\console::joinedSince($details);
-    unset($details);
 
-    $dev_token = \hutoma\console::getDevToken();
-    $response_getAIs = \hutoma\console::getAIs($dev_token);  // used to show the list of AIs
-    unset($dev_token);
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details'] = \hutoma\console::getUser();
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[ $_SESSION['navigation_id'] ]['user_details']);
+
+    $response_getAIs = \hutoma\console::getAIs(\hutoma\console::getDevToken());
 ?>
 
 <!DOCTYPE html>

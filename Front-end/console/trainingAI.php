@@ -6,76 +6,32 @@
         exit();
     }
 
-    if (isset($_POST['ai']) ){
-        $dev_token = \hutoma\console::getDevToken();
-        $singleAI = \hutoma\console::getSingleAI($dev_token,$_POST['ai']);
-        if ($singleAI['status']['code']===200) {
-            fillSessionVariables($array);
-        }
-        else {
-            unset($array);
+    if (isset($_POST['ai']) )
+        CallGetSingleAI($_POST['ai']);
+
+
+    function CallGetSingleAI($aiid){
+        $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(),$aiid);
+        if ($singleAI['status']['code'] === 200) {
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'] = $singleAI['ai']['aiid'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $singleAI['ai']['name'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'] = $singleAI['ai']['description'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on'] = $singleAI['ai']['created_on'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['is_private'] = $singleAI['ai']['is_private'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'] = $singleAI['ai']['deep_learning_error'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info'] = $singleAI['ai']['training_debug_info'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status'] = $singleAI['ai']['training_status'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai']['ai_status'];
+            //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
+            unset($singleAI);
+        }else{
+            unset($response);
+            unset($singleAI);
+            header("Location: ../error.php?err=15");
             exit;
         }
-        unset($array);
     }
 
-    if ( !isPostInputAvailable() ) {
-        header("Location: ./error.php?err=2");
-        exit();
-    }
-
-function generateSession(){
-
-    $dev_token = \hutoma\console::getDevToken();
-    $array = \hutoma\console::getSingleAI($dev_token,$_POST['aiid']);
-    if ($array['status']['code']===200) {
-        fillSessionVariables($array);
-    }
-    else {
-        unset($array);
-        exit;
-    }
-    unset($array);
-}
-
-function fillSessionVariables($array){
-    $_SESSION['aiid'] = $array['ai']['aiid'];
-    $_SESSION['ai_name'] = $array['ai']['name'];
-    $_SESSION["ai_description"] = $array['ai']['description'];
-    $_SESSION["ai_created_on"] = $array['ai']['created_on'];
-    $_SESSION['ai_private'] = $array['ai']['is_private'];
-    $_SESSION['ai_deep_learning_error'] = $array['ai']['deep_learning_error'];
-    $_SESSION["ai_training_debug_info"] = $array['ai']["training_debug_info"];
-    $_SESSION['ai_training_status'] =  $array['ai']['training_status'];
-
-    $_SESSION['ai_language'] = 'COSTANT language';                      // parameter missing
-    $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';          // parameter missing
-    $_SESSION["ai_confidence"] = '10';
-    $_SESSION['ai_personality'] = 'default';                             // parameter missing
-    $_SESSION['ai_status'] = $array['ai']['ai_status'];
-
-    //$_SESSION['ai_training_file'] = $array['ai']['ai_trainingfile'];  // parameter missing
-    $_SESSION['current_ai_name'] = $array['ai']['name'];
-    $_SESSION['userActivedDomains'] = \hutoma\console::getDomains_and_UserActiveDomains($_SESSION['dev_id'], $_SESSION['aiid']);
-}
-
-function isValuesSessionFilled(){
-    return
-        isset($_SESSION['aiid']) &&
-        isset($_SESSION['ai_name']) &&
-        isset($_SESSION['ai_description']) &&
-        isset($_SESSION['ai_created_on']) &&
-        isset($_SESSION['ai_deep_learning_error']) &&
-        isset($_SESSION["ai_training_debug_info"]) &&
-        isset($_SESSION['ai_training_status']) &&
-        isset($_SESSION['ai_language']) &&
-        isset($_SESSION['ai_timezone']) &&
-        isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_personality'])&&
-        isset($_SESSION['ai_status']) &&
-        isset($_SESSION['current_ai_name']) &&
-        isset($_SESSION['userActivedDomains']) ;
-}
 ?>
 
 <!DOCTYPE html>
@@ -116,7 +72,7 @@ function isValuesSessionFilled(){
             <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
             <li class="active">
                 <a href="#">
-                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
 

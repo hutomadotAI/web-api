@@ -133,6 +133,7 @@
     <div class="box-footer">
             <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
             <button type="submit" class="btn btn-success flat" id="btnSave">save</button>
+            <button type="submit" class="btn btn-warning flat pull-right" id="btnSkip">skip</button>
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertPriceAI" style="display:none;">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -140,15 +141,5 @@
             <span id="msgAlertPriceAI"></span>
         </div>
     </div>
-
-        <input type="hidden" name="ai_name"         value="<?php echo $_POST['ai_name'] ?>">
-        <input type="hidden" name="ai_description"  value="<?php echo $_POST['ai_description'] ?>">
-        <input type="hidden" name="ai_language"     value="<?php echo $_POST['ai_language'] ?>">
-        <input type="hidden" name="ai_timezone"     value="<?php echo $_POST['ai_timezone'] ?>">
-        <input type="hidden" name="ai_confidence"   value="<?php echo $_POST['ai_confidence'] ?>">
-        <input type="hidden" name="ai_personality"  value="<?php echo $_POST['ai_personality'] ?>">
-        <input type="hidden" name="ai_sex"          value="<?php echo $_POST['ai_sex'] ?>">
-        <input type="hidden" name="userActivedDomains" value="">
-
     </form>
 </div>

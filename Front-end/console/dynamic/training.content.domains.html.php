@@ -1,9 +1,3 @@
-<?php
-$dev_token = \hutoma\console::getDevToken();
-$usr_domains = \hutoma\console::getDomains_and_UserActiveDomains($dev_token,$_SESSION['aiid']);
-unset($dev_token);
-?>
-
 <div class="box box-solid box-clean flat no-shadow" >
       <a data-toggle="collapse" data-parent="#accordion" href="#collapseDomain">
           <div class="box-header with-border">
@@ -19,7 +13,9 @@ unset($dev_token);
       <div class="box-body">
 
           <?php
+          /*
                 $list ="<div class='row'>";
+                $usr_domains = $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains'] ;
                 for($i=0; $i<sizeof($usr_domains); $i++) {
                     $list = $list."<div class='col-md-3 col-sm-4 col-xs-4'>";
                     if ( $usr_domains[$i]['active'] ) {
@@ -33,6 +29,7 @@ unset($dev_token);
           $list  = $list ."</div>";
           echo $list;
           unset($usr_domains);
+          */
           ?>
           
       </div>

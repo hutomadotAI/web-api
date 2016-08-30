@@ -30,7 +30,7 @@ function decodeAIState($state)
 }
 
 
-$error = 80 -  $_SESSION['ai_deep_learning_error'];
+$error = 80 -  $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'];
 $error = round($error,2);
 if ( $error % 1 === 0 )
     $error = round($error,0);

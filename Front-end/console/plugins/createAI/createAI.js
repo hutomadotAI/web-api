@@ -97,7 +97,7 @@ $(function () {
 
 $(function () {
     $('.slider').slider();
-    $("#confidence").ionRangeSlider({
+    $("#ai_confidence").ionRangeSlider({
         type: "single",
         min: 1,
         max: 4,

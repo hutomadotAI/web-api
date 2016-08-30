@@ -29,7 +29,10 @@
 <script src="./plugins/training/training.area.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
 <script type="text/javascript">
-    TRAINING.init(["<?php echo $_SESSION['ai_status'] ?>","<?php echo time().$_SERVER['REMOTE_ADDR'].'.txt'?>","<?php echo $_SESSION['current_ai_name']?>"]);
+    TRAINING.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status']?>",
+                    "<?php echo time().$_SERVER['REMOTE_ADDR'].'.txt'?>",
+                    "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']?>"]
+    );
 </script>
 </form>
 

@@ -241,7 +241,7 @@ class console
   public static $db = true;
   public static $user = false;
   private static $init_called = false;
-  private static $api_request_url = 'http://54.83.145.18:8080/';
+  private static $api_request_url = 'http://54.83.145.18:8080/'; //http://localhost:8081/
   private static $cookie, $session, $remember_cookie, $dbh;
 
   public static function construct($called_from = "")
@@ -422,6 +422,8 @@ class console
             $_SESSION['logSyscuruser'] = $us_id;
 
             setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
+
+            $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
 
             if ($remember_me === true && self::$config['features']['remember_me'] === true) {
               setcookie("logSysrememberMe", $us_id, strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -1151,7 +1153,7 @@ class console
 
   
   // FOR API
-  public static function createAI($dev_token,$name,$description,$private, $condifence,$language,$timezone){
+  public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$sex,$contract,$payment_type,$price){
       if (self::$loggedIn) {
           $path = 'api/ai';
           $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);

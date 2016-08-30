@@ -3,23 +3,18 @@
     
     if ( !\hutoma\console::isSessionActive()) {
         header('Location: ./error.php?err=1');
-        exit();
+        exit;
     }
 
     if ( !isPostInputAvailable() ) {
         header("Location: ./error.php?err=2");
-        exit();
+        exit;
     }
+
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains'] = $_POST['userActivedDomains'];
 
     function isPostInputAvailable(){
         return  (
-            isset($_POST['ai_name']) &&
-            isset($_POST['ai_description']) &&
-            isset($_POST['ai_language']) &&
-            isset($_POST['ai_timezone']) &&
-            isset($_POST['ai_confidence']) &&
-            isset($_POST['ai_personality']) &&
-            isset($_POST['ai_sex']) &&
             isset($_POST['userActivedDomains'])
         );
     }

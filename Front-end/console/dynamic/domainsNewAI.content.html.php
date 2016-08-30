@@ -26,19 +26,10 @@
     <p></p>
     <h2></h2>
     <p id="domsearch"></p>
-    <input type="hidden" name="ai_name"         value="<?php echo $_POST['ai_name'] ?>">
-    <input type="hidden" name="ai_description"  value="<?php echo $_POST['ai_description'] ?>">
-    <input type="hidden" name="ai_language"     value="<?php echo $_POST['ai_language'] ?>">
-    <input type="hidden" name="ai_timezone"     value="<?php echo $_POST['ai_timezone'] ?>">
-    <input type="hidden" name="ai_confidence"   value="<?php echo $_POST['ai_confidence'] ?>">
-    <input type="hidden" name="ai_personality"  value="<?php echo $_POST['ai_personality'] ?>">
-    <input type="hidden" name="ai_sex"          value="<?php echo $_POST['ai_sex'] ?>">
     <input type="hidden" name="userActivedDomains" value="">
 </form>
 
 <p></p>
-
-
 
 
 

@@ -11,9 +11,15 @@
         exit;
     }
 
-    $dev_token = \hutoma\console::getDevToken();
-    $response = \hutoma\console::getDomains($dev_token);
-    unset($dev_token);
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $_POST['ai_name'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $_POST['ai_description'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = $_POST['ai_language'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone'] = $_POST['ai_timezone'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality'] = $_POST['ai_personality'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['sex'] = $_POST['ai_sex'];
+
+    $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
 
     if ($response['status']['code'] !== 200) {
         unset($response);
@@ -21,18 +27,17 @@
         exit;
     }
 
-function isPostInputAvailable(){
-    return  (
-        isset($_POST['ai_name']) &&
-        isset($_POST['ai_description']) &&
-        isset($_POST['ai_language']) &&
-        isset($_POST['ai_timezone']) &&
-        isset($_POST['ai_confidence']) &&
-        isset($_POST['ai_personality']) &&
-        isset($_POST['ai_sex'])
-    );
-}
-
+    function isPostInputAvailable(){
+        return  (
+            isset($_POST['ai_name']) &&
+            isset($_POST['ai_description']) &&
+            isset($_POST['ai_language']) &&
+            isset($_POST['ai_timezone']) &&
+            isset($_POST['ai_confidence']) &&
+            isset($_POST['ai_personality']) &&
+            isset($_POST['ai_sex'])
+        );
+    }
 ?>
 
 <!DOCTYPE html>

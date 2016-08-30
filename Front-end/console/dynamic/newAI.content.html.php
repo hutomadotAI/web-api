@@ -67,7 +67,7 @@
                 <div class="box-body">
                 <div class="row margin">
                     <div class="col-sm-12">
-                        <input type="hidden" name="ai_confidence" id_confidence="ai_confidence" value="0;10">
+                        <input type="hidden" name="ai_confidence" id="ai_confidence" value="0;10">
                     </div>
                 </div>
                 </div>

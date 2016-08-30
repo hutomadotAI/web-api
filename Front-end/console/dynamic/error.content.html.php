@@ -8,7 +8,7 @@ if (isset($_GET['err'])) {
             $msg ='SESSION EXIPED';
             break;
         case 2 :
-            $msg ='SESSION AI VARIABILES INCOMPLETE';
+            $msg ='POST AI VARIABILES INCOMPLETE';
             break;
         case 3 :
             $msg ='DOMAINS GET INFO ERROR';
@@ -45,6 +45,9 @@ if (isset($_GET['err'])) {
             break;
         case 13 :
             $msg ='Update AI status Failed!';
+            break;
+        case 15 :
+            $msg ='RESPONSE JSON GET SINGLE AI INFO ERROR';
             break;
         default:
             $msg ='UNDEFINED ERROR';
