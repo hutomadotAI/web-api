@@ -1,6 +1,10 @@
 <?php
-require "../pages/config.php";
-    $integrations = \hutoma\console::getIntegrations();
+    require "../pages/config.php";
+
+    if ( !\hutoma\console::isSessionActive()) {
+        header('Location: ./error.php?err=1');
+        exit();
+    }
 ?>
 <!DOCTYPE html>
 <html>
@@ -38,7 +42,7 @@ require "../pages/config.php";
             <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
             <li class="active">
                 <a href="#">
-                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                    <i class="fa fa-user text-olive"></i><span><?php echo  $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
 
@@ -103,9 +107,7 @@ require "../pages/config.php";
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
-  // FAKE API JSON REQUEST INTEGRATION RESPONSE
-
-  var integrations = <?php echo json_encode($integrations)?>;
+  var integrations = <?php echo json_encode(\hutoma\console::getIntegrations())?>;
   var newNode = document.createElement('div');
   newNode.className = 'row';
   newNode.id = 'integrations_list';

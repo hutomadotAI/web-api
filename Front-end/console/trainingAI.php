@@ -9,7 +9,6 @@
     if (isset($_POST['ai']) )
         CallGetSingleAI($_POST['ai']);
 
-
     function CallGetSingleAI($aiid){
         $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(),$aiid);
         if ($singleAI['status']['code'] === 200) {
@@ -107,7 +106,7 @@
                 <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
             <div class="col-md-5">
-                <?php include './dynamic/training.content.chat.html.php'; ?>
+                <?php include './dynamic/chat.html.php'; ?>
                 <?php include './dynamic/training.content.json.html.php'; ?>
             </div>
         </div>

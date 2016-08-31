@@ -6,22 +6,10 @@
         exit;
     }
 
-    if ( !isValuesSessionFilled() ){
+    if (!isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])){
         header('Location: ./error.php?err=2');
         exit;
     }
-
-
-function isValuesSessionFilled(){
-    return
-        isset($_SESSION['aiid']) &&
-        isset($_SESSION['ai_name']) &&
-        isset($_SESSION['ai_description']) &&
-        isset($_SESSION['ai_language']) &&
-        isset($_SESSION['ai_timezone']) &&
-        isset($_SESSION['ai_confidence']) &&
-        isset($_SESSION['ai_personality']);
-}
 ?>
 
 <!DOCTYPE html>
@@ -66,7 +54,7 @@ function isValuesSessionFilled(){
             <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
             <li class="active">
                 <a href="#">
-                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
 
@@ -101,7 +89,6 @@ function isValuesSessionFilled(){
         <ul class="nav nav-tabs">
         <li class="active"><a href="#tab_general" data-toggle="tab">General</a></li>
         <li><a href="#tab_emotion" data-toggle="tab">Emotions</a></li>
-        <li><a href="#tab_delete" data-toggle="tab">Delete</a></li>
         </ul>
                 
         <div class="tab-content">
@@ -137,9 +124,9 @@ function isValuesSessionFilled(){
 <script src="./plugins/select2/select2.full.min.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/deleteAI/deleteAI.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
+<script src="./plugins/deleteAI/deleteAI.js" type="text/javascript"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script> $(function () { $(".select2").select2(); }); </script>

@@ -13,7 +13,7 @@
                         <div class="input-group-addon">
                             <i class="glyphicon glyphicon-user"></i>
                         </div>
-                        <?php echo('<input type="text" class="form-control" name="ai_name" id="ai_name" placeholder="'.$_SESSION['ai_name'].'"disabled>');?>
+                        <?php echo('<input type="text" class="form-control" name="ai_name" id="ai_name" placeholder="'.$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'].'"disabled>');?>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                         <div class="input-group-addon">
                             <i class="glyphicon glyphicon-pencil"></i>
                         </div>
-                        <?php echo('<input type="text" class="form-control" name="ai_description" id="ai_description" placeholder="'.$_SESSION['ai_description'].'">'); ?>
+                        <?php echo('<input type="text" class="form-control" name="ai_description" id="ai_description" placeholder="'.$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'].'">'); ?>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-addon">Developer key</i></span>
-                    <input type="text" class="form-control" id="devkey" value=" <?php echo(\hutoma\console::getDevToken());?>" disabled>
+                    <input type="text" class="form-control" id="devkey" value=" <?php echo \hutoma\console::getDevToken();?>" disabled>
                     <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')" ><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
@@ -108,7 +108,7 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-addon">Client key</i></span>
-                    <input type="text" class="form-control" id="clikey" value="<?php echo($_SESSION['dev_id']);?>" disabled>
+                    <input type="text" class="form-control" id="clikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_id'];?>" disabled>
                     <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#clikey" id="clikeytooltip" title="copy to clipboard" onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
@@ -124,7 +124,7 @@
     <button  name="btnSave"  value="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat disabled"  onClick="" alt="save">save</button>
 
    <a data-toggle="modal" data-target="#deleteAI" style="cursor: pointer;">
-       <button  name="btnDelete" id="btnDelete" value="<?php echo($_SESSION['ai_name']); ?>" class="btn btn-danger flat pull-right" onClick="" alt="delete">delete AI</button>
+       <button  name="btnDelete" id="btnDelete" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" onClick="" alt="delete">delete AI</button>
    </a>
 </div>
 

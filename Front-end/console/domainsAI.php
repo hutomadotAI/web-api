@@ -6,30 +6,19 @@
         exit();
     }
 
-    if (!isset($_SESSION['current_ai_name'])){
-        header('Location: ./error.php?err=6');
-        exit();
-    }
-
-    if (!isset($_SESSION['aiid'])){
+    if (!isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])){
         header('Location: ./error.php?err=10');
         exit();
     }
 
-    // da sotituire con la nuova api
-    $dev_token = \hutoma\console::getDevToken();
-    $response = \hutoma\console::getDomains($dev_token);
+    $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
 
     if ($response['status']['code'] !== 200) {
         unset($response);
         header('Location: ./error.php?err=3');
         exit;
     }
-
-    $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains($dev_token,$_SESSION['aiid']);
-    unset($dev_token);
-
-
+    $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
 ?>
 
 <!DOCTYPE html>
