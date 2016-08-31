@@ -67,13 +67,13 @@ public class TestChatLogic {
 
     private ApiResult getValidChat(float min_p) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyFloat(), anyBoolean(), anyInt(), anyInt())).thenReturn(getSemanticResult());
+                anyString(), anyFloat())).thenReturn(getSemanticResult());
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(NEURALRESULT);
         return getChat(min_p);
     }
 
     private ApiResult getChat(float min_p) {
-        return chatLogic.chat(fakeContext, AIID, DEVID, "question", UID, "history", false, 0, 0, "topic", "rnn", false, min_p);
+        return chatLogic.chat(fakeContext, AIID, DEVID, "question", UID, "history", "topic", min_p);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class TestChatLogic {
         ChatResult res = getSemanticResult();
         res.setAnswer("");
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyFloat(), anyBoolean(), anyInt(), anyInt())).thenReturn(res);
+                anyString(), anyFloat())).thenReturn(res);
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(NEURALRESULT);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(500, result.getStatus().getCode());
@@ -104,7 +104,7 @@ public class TestChatLogic {
     @Test
     public void testChat_NullSemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyFloat(), anyBoolean(), anyInt(), anyInt())).thenThrow(
+                anyString(), anyFloat())).thenThrow(
                 new SemanticAnalysis.SemanticAnalysisException(new Exception("test")));
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(NEURALRESULT);
         ApiResult result = getChat(0.2f);
@@ -114,7 +114,7 @@ public class TestChatLogic {
     @Test
     public void testChat_EmptyNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyFloat(), anyBoolean(), anyInt(), anyInt())).thenReturn(getSemanticResult());
+                anyString(), anyFloat())).thenReturn(getSemanticResult());
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn("");
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(200, result.getStatus().getCode());
@@ -124,7 +124,7 @@ public class TestChatLogic {
     @Test
     public void testChat_NullNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyFloat(), anyBoolean(), anyInt(), anyInt())).thenReturn(getSemanticResult());
+                anyString(), anyFloat())).thenReturn(getSemanticResult());
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(null);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(200, result.getStatus().getCode());
@@ -136,7 +136,7 @@ public class TestChatLogic {
         ChatResult res = getSemanticResult();
         res.setAnswer("");
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
-                anyString(), anyFloat(), anyBoolean(), anyInt(), anyInt())).thenReturn(res);
+                anyString(), anyFloat())).thenReturn(res);
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn("");
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(500, result.getStatus().getCode());

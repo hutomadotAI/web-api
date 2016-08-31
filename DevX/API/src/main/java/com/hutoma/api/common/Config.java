@@ -61,7 +61,21 @@ public class Config {
         java.util.Properties prop = new java.util.Properties();
         try {
             prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
-            return prop.getProperty(p);
+
+            String value = prop.getProperty(p);
+            switch (p) {
+                case "connectionstring": {
+                    //replace username and password for DB login here
+                    int startUserName = value.indexOf("user=");
+                    int startPassword = value.indexOf("password=");
+                    int endPassword = value.indexOf('&', startPassword);
+                    String newConnectionString = value.substring(0, startUserName) + "user=hutoma_caller&password=>YR\"khuN*.gF)V4#" + value.substring(endPassword);
+                    value = newConnectionString;
+                    break;
+                }
+            }
+
+            return value;
 
         } catch (IOException ex) {
             ex.printStackTrace();

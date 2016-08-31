@@ -1273,7 +1273,7 @@ class console
   {
     if (self::$loggedIn) {
       $path = 'api/ai/'.$aiid.'/chat';
-      $api_response_parameters = array('q'=> $q,'uid' => $uid,'history' =>$history);
+      $api_response_parameters = array('q'=> $q,'uid' => $uid,'chat_history' =>$history);
       $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
       $curl = curl_init();

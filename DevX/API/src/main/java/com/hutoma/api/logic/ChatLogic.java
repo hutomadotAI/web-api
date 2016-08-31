@@ -40,8 +40,7 @@ public class ChatLogic {
     }
 
     public ApiResult chat(SecurityContext context, String aiid, String dev_id, String q, String uid, String history,
-                          boolean on_the_fly_learning, int expires, int nprompts, String topic,
-                          String rnn, boolean fs, float min_p) {
+                             String topic, float min_p) {
 
         long timestampNow = tools.getTimestamp();
         UUID chatID = tools.createNewRandomUUID();
@@ -56,7 +55,7 @@ public class ChatLogic {
         logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid);
         boolean noResponse = true;
         try {
-            ChatResult semanticAnalysisResult = semanticAnalysis.getAnswer(dev_id, aiid, uid, topic, "[" +history+ "]" + q, min_p, fs, expires, nprompts);
+            ChatResult semanticAnalysisResult = semanticAnalysis.getAnswer(dev_id, aiid, uid, topic, "[" +history+ "]" + q, min_p);
 
             if (null!=semanticAnalysisResult.getAnswer() && !semanticAnalysisResult.getAnswer().isEmpty()) {
                 noResponse = false;

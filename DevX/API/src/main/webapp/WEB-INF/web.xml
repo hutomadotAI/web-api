@@ -9,26 +9,10 @@
            <param-name>javax.ws.rs.Application</param-name>
            <param-value>com.hutoma.api.ServerApp</param-value>
        </init-param>
-       <!--init-param>
-           <param-name>jersey.config.server.provider.classnames</param-name>
-           <param-value>org.glassfish.jersey.filter.LoggingFilter</param-value>
-       </init-param -->
-
-       <!-- init-param>
-           <param-name>jersey.config.server.provider.packages</param-name>
-           <param-value>
-               com.hutoma.api.endpoints
-           </param-value>
-       </init-param>
-       <init-param>
-           <param-name>jersey.config.server.provider.scanning.recursive</param-name>
-           <param-value>false</param-value>
-       </init-param -->
-
        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>HutomaAPI</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/v1/*</url-pattern>
     </servlet-mapping>
 </web-app>
