@@ -36,7 +36,7 @@ public class SemanticAnalysis {
         this.serializer = serializer;
     }
 
-    public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p, boolean fastSearch, int expires, int nprompts) throws SemanticAnalysisException {
+    public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p) throws SemanticAnalysisException {
         try {
             UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                     .addParameter("q", q)
@@ -45,9 +45,6 @@ public class SemanticAnalysis {
                     .addParameter("min_p", Float.toString(min_p))
                     .addParameter("multiprocess", "yes")
                     .addParameter("nproc", "8");
-            if (fastSearch) {
-                url = url.addParameter("fs", "yes");
-            }
             URL finalUrl = new URL(url.toString());
             InputStream stream = finalUrl.openStream();
             ChatResult result = (ChatResult) serializer.deserialize(stream, ChatResult.class);

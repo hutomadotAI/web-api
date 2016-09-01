@@ -38,15 +38,10 @@ public class ChatEndpoint {
             @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
             @DefaultValue("") @QueryParam("q") String q,
             @DefaultValue("1") @QueryParam("uid") String uid,
-            @DefaultValue("") @QueryParam("history") String history,
-            @DefaultValue("false") @QueryParam("active_learning") boolean on_the_fly_learning,
-            @DefaultValue("120") @QueryParam("expires") int expires,
-            @DefaultValue("5") @QueryParam("nprompts") int nprompts,
-            @DefaultValue("") @QueryParam("topic") String topic,
-            @DefaultValue("") @QueryParam("rnn") String rnn,
-            @DefaultValue("false") @QueryParam("fs") boolean fs,
-            @DefaultValue("0.5") @QueryParam("min_p") float min_p) {
-        ApiResult result = chatLogic.chat(securityContext, aiid, dev_id, q, uid, history, on_the_fly_learning, expires, nprompts, topic, rnn, fs, min_p);
+            @DefaultValue("") @QueryParam("chat_history") String history,
+            @DefaultValue("") @QueryParam("current_topic") String topic,
+            @DefaultValue("0.5") @QueryParam("confidence_threshold") float min_p) {
+        ApiResult result = chatLogic.chat(securityContext, aiid, dev_id, q, uid, history, topic, min_p);
         return result.getResponse(serializer).build();
     }
 
