@@ -39,6 +39,10 @@ public class ChatLogic {
         this.logger = logger;
     }
 
+    private double toOneDecimalPlace(double input) {
+        return Math.round(input * 10.0d) / 10.0d;
+    }
+
     public ApiResult chat(SecurityContext context, String aiid, String dev_id, String q, String uid, String history,
                              String topic, float min_p) {
 
@@ -60,7 +64,8 @@ public class ChatLogic {
             if (null!=semanticAnalysisResult.getAnswer() && !semanticAnalysisResult.getAnswer().isEmpty()) {
                 noResponse = false;
 
-                chatResult.setScore(Math.round(Double.valueOf(semanticAnalysisResult.getScore()) * 10.0d) / 10.0d);
+                double semanticScore = Double.valueOf(semanticAnalysisResult.getScore());
+                chatResult.setScore(toOneDecimalPlace(semanticScore));
                 chatResult.setTopic_out(semanticAnalysisResult.getTopic_out());
                 chatResult.setAnswer(semanticAnalysisResult.getAnswer());
 
@@ -73,18 +78,26 @@ public class ChatLogic {
                 logger.logDebug(LOGFROM, "AI response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
 
                 // if Semantic Analysis is not confident enough, try with the Neural Network
-                if (chatResult.getScore()<min_p)  {
+                if (semanticScore < min_p)  {
                     logger.logDebug(LOGFROM, "starting RNN request");
                     String RNN_answer = neuralNet.getAnswer(dev_id, aiid, uid,q);
                     long endRNNTime = tools.getTimestamp();
 
                     boolean validRNN = false;
                     if ((RNN_answer!=null) && (!RNN_answer.isEmpty())) {
-                        chatResult.setAnswer(RNN_answer);
-                        chatResult.setElapsedTime((endRNNTime - startTime)/1000.0d);
-                        validRNN = true;
+
+                        // rnn returns result in the form
+                        // 0.157760821867|tell me then .
+                        int splitIndex = RNN_answer.indexOf('|');
+                        if (splitIndex>0) {
+                            double neuralNetConfidence = Double.valueOf(RNN_answer.substring(0, splitIndex));
+                            chatResult.setAnswer(RNN_answer.substring(splitIndex+1));
+                            chatResult.setScore(toOneDecimalPlace(neuralNetConfidence));
+                            chatResult.setElapsedTime((endRNNTime - startTime)/1000.0d);
+                            validRNN = true;
+                        }
                     }
-                    logger.logDebug(LOGFROM, "RNN " + ((validRNN)? "valid":"*empty*") + " response in " +
+                    logger.logDebug(LOGFROM, "RNN " + ((validRNN)? "valid":"invalid/empty") + " response in " +
                             Long.toString(endRNNTime - endWNetTime) + "ms. Total query time " +
                             Long.toString(endRNNTime - startTime) + "ms.");
                 }
