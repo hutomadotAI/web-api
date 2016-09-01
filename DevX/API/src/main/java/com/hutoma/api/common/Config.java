@@ -40,6 +40,10 @@ public class Config {
         return Integer.valueOf(getConfigFromProperties("max_cluster_lines", "10000"));
     }
 
+    public String getDatabaseConnectionString() {
+        return enforceNewDBCredentials(getConfigFromProperties("connectionstring", ""));
+    }
+
     public double getClusterMinProbability() {
         return Double.valueOf(getConfigFromProperties("cluster_min_probability", "0.7"));
     }
@@ -47,7 +51,7 @@ public class Config {
     private String getConfigFromProperties(String p, String defaultValue) {
         java.util.Properties prop = new java.util.Properties();
         try {
-            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
+            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/v1.config.properties"));
             return prop.getProperty(p, defaultValue);
 
         } catch (IOException ex) {
@@ -60,17 +64,12 @@ public class Config {
     public static String getConfigProp(String p) {
         java.util.Properties prop = new java.util.Properties();
         try {
-            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/config.properties"));
+            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/v1.config.properties"));
 
             String value = prop.getProperty(p);
             switch (p) {
                 case "connectionstring": {
-                    //replace username and password for DB login here
-                    int startUserName = value.indexOf("user=");
-                    int startPassword = value.indexOf("password=");
-                    int endPassword = value.indexOf('&', startPassword);
-                    String newConnectionString = value.substring(0, startUserName) + "user=hutoma_caller&password=>YR\"khuN*.gF)V4#" + value.substring(endPassword);
-                    value = newConnectionString;
+                    value = enforceNewDBCredentials(value);
                     break;
                 }
             }
@@ -81,5 +80,12 @@ public class Config {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private static String enforceNewDBCredentials(String value) {
+        int startUserName = value.indexOf("user=");
+        int startPassword = value.indexOf("password=");
+        int endPassword = value.indexOf('&', startPassword);
+        return value.substring(0, startUserName) + "user=hutoma_caller&password=>YR\"khuN*.gF)V4#" + value.substring(endPassword);
     }
 }

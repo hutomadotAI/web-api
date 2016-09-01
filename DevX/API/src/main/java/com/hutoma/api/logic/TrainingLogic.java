@@ -63,9 +63,14 @@ public class TrainingLogic {
                 // 0 = training file is text chat
                 case 0:
                     logger.logDebug(LOGFROM, "training from uploaded training file");
+                    if (null==fileDetail) {
+                        return ApiError.getBadRequest("upload could not be processed");
+                    }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
-                    database.updateAiTrainingFile(aiid, parseTrainingFile(source));
+                    if (!database.updateAiTrainingFile(aiid, parseTrainingFile(source))) {
+                        return ApiError.getNotFound("ai not found");
+                    }
                     messageQueue.pushMessageReadyForTraining(devid, aiid);
                     if (source.size() > config.getMaxClusterLines()) {
                         messageQueue.pushMessageClusterSplit(devid, aiid, config.getClusterMinProbability());
@@ -75,16 +80,23 @@ public class TrainingLogic {
                 // 1 = training file is a document
                 case 1:
                     logger.logDebug(LOGFROM, "training from uploaded document");
+                    if (null==fileDetail) {
+                        return ApiError.getBadRequest("upload could not be processed");
+                    }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
-                    database.updateAiTrainingFile(aiid, String.join("\n", source));
+                    if (!database.updateAiTrainingFile(aiid, String.join("\n", source))) {
+                        return ApiError.getNotFound("ai not found");
+                    }
                     messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
                     return new ApiResult().setSuccessStatus("upload document accepted");
 
                 // 2 = training file is a webpage
                 case 2:
                     logger.logDebug(LOGFROM, "training from uploaded URL");
-                    database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize));
+                    if (!database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
+                        return ApiError.getNotFound("ai not found");
+                    }
                     messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
                     return new ApiResult().setSuccessStatus("url training accepted");
 

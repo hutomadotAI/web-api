@@ -1,22 +1,19 @@
 package com.hutoma.api.endpoints;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.hutoma.api.auth.Role;
 import com.hutoma.api.auth.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AIDomainLogic;
-import hutoma.api.server.ai.api_root;
-import hutoma.api.server.db.domain;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.util.ArrayList;
 
 /**
  * Created by David MG on 05/08/2016.

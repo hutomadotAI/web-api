@@ -5,7 +5,6 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiResult;
-import hutoma.api.server.ai.api_root;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,12 +44,13 @@ public class TestTrainingLogic {
     private String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
 
     @Before
-    public void setup() {
+    public void setup() throws Database.DatabaseException {
 
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         this.fakeDatabase = mock(Database.class);
+        when(fakeDatabase.updateAiTrainingFile(anyString(), anyString())).thenReturn(true);
         this.fakeContext = mock(SecurityContext.class);
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = mock(Tools.class);
@@ -144,6 +144,32 @@ public class TestTrainingLogic {
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
         Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_TextDBNotFound() throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
+        int trainingType = 0;
+        makeDBUpdateZeroRows(trainingType);
+    }
+
+    @Test
+    public void testTrain_DocDBNotFound() throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
+        int trainingType = 1;
+        makeDBUpdateZeroRows(trainingType);
+    }
+
+    @Test
+    public void testTrain_UrlDBNotFound() throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
+        int trainingType = 2;
+        makeDBUpdateZeroRows(trainingType);
+    }
+
+    void makeDBUpdateZeroRows(int trainingType) throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
+        when(fakeDatabase.updateAiTrainingFile(anyString(), anyString())).thenReturn(false);
+        InputStream stream = createUpload(SOMETEXT);
+        when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
+        Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test

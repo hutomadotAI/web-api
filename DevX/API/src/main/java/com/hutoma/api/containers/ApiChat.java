@@ -1,9 +1,7 @@
 package com.hutoma.api.containers;
 
-import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.Metadata;
-import hutoma.api.server.ai.api_root;
 
 import java.util.UUID;
 

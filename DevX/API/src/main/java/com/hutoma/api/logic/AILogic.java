@@ -91,9 +91,6 @@ public class AILogic {
        try {
            logger.logDebug(LOGFROM, "request to list all ais");
            ArrayList<ApiAi> aiList = database.getAllAIs(devid);
-           if (null==aiList) {
-               throw new Exception("database exception");
-           }
            if (aiList.isEmpty()) {
                logger.logDebug(LOGFROM, "ai list is empty");
                return ApiError.getNotFound();
@@ -136,7 +133,6 @@ public class AILogic {
             logger.logDebug(LOGFROM, "request to delete aiid " + aiid);
             if(!database.deleteAi(aiid))
             {
-                //TODO: distinguish between db fail and ai not found
                 return ApiError.getNotFound();
             }
             messageQueue.pushMessageDeleteAI(devid, aiid);

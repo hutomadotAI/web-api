@@ -94,6 +94,10 @@ public class ChatLogic {
             logger.logError(LOGFROM, "neural net did not respond in time");
             return ApiError.getNoResponse("unable to respond in time. try again");
         }
+        catch (NeuralNet.NeuralNetException nne) {
+            logger.logError(LOGFROM, "neural net exception: " + nne.toString());
+            return ApiError.getInternalServerError();
+        }
         catch (Exception ex){
             logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
             // log the error but don't return a 500

@@ -7,7 +7,6 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiResult;
-import hutoma.api.server.ai.api_root;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,46 +47,53 @@ public class TestAdminLogic {
     }
 
     @Test
-    public void testCreate_Valid() {
+    public void testCreate_Valid() throws Database.DatabaseException {
         validKeyDBSuccess();
         Assert.assertEquals(200, createDev().getStatus().getCode());
     }
 
     @Test
-    public void testCreate_Valid_Devid() {
+    public void testCreate_Valid_Devid() throws Database.DatabaseException {
         validKeyDBSuccess();
         Assert.assertEquals(DEVID, ((ApiAdmin)createDev()).getDevid());
     }
 
     @Test
-    public void testCreate_Valid_Token() {
+    public void testCreate_Valid_Token() throws Database.DatabaseException {
         validKeyDBSuccess();
         Assert.assertNotNull(((ApiAdmin)createDev()).getDev_token());
     }
 
-    private void validKeyDBSuccess() {
+    private void validKeyDBSuccess() throws Database.DatabaseException {
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         when(fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
     }
 
     @Test
-    public void testCreate_KeyNull() {
+    public void testCreate_KeyNull() throws Database.DatabaseException {
         when(fakeConfig.getEncodingKey()).thenReturn(null);
         when(fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
         Assert.assertEquals(500, createDev().getStatus().getCode());
     }
 
     @Test
-    public void testCreate_InvalidKey() {
+    public void testCreate_InvalidKey() throws Database.DatabaseException {
         when(fakeConfig.getEncodingKey()).thenReturn("[]");
         when(fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
         Assert.assertEquals(500, createDev().getStatus().getCode());
     }
 
     @Test
-    public void testCreate_ValidKeyDBFail() {
+    public void testCreate_ValidKeyUpdateFail() throws Database.DatabaseException {
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         when(fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(false);
+        Assert.assertEquals(500, createDev().getStatus().getCode());
+    }
+
+    @Test
+    public void testCreate_ValidKeyDBFail() throws Database.DatabaseException {
+        when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
+        when(fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
         Assert.assertEquals(500, createDev().getStatus().getCode());
     }
 
@@ -98,19 +104,19 @@ public class TestAdminLogic {
     }
 
     @Test
-    public void testDelete_Success() {
+    public void testDelete_Success() throws Database.DatabaseException {
         when(fakeDatabase.deleteDev(anyString())).thenReturn(true);
         Assert.assertEquals(200, deleteDev(VALIDDEVID).getStatus().getCode());
     }
 
     @Test
-    public void testDelete_NullDevid() {
-        when(fakeDatabase.deleteDev(anyString())).thenReturn(false);
+    public void testDelete_NullDevid() throws Database.DatabaseException {
+        when(fakeDatabase.deleteDev(anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
         Assert.assertEquals(400, deleteDev(null).getStatus().getCode());
     }
 
     @Test
-    public void testDelete_NonExistentDevid() {
+    public void testDelete_NonExistentDevid() throws Database.DatabaseException {
         when(fakeDatabase.deleteDev(anyString())).thenReturn(false);
         Assert.assertEquals(400, deleteDev("other").getStatus().getCode());
     }

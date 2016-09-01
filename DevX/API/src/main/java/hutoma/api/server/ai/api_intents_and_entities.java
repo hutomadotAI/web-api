@@ -30,10 +30,4 @@ public class api_intents_and_entities {
         public int n_prompts;
     }
 
-    public static class REST_RESPONSE_ai_memory {
-        public ArrayList<memory_token> memory;
-        public api_root._status status;
-    }
-
-
 }

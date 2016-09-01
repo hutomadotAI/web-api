@@ -8,7 +8,6 @@ import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
-import hutoma.api.server.ai.api_root;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +64,7 @@ public class TestChatLogic {
         return res;
     }
 
-    private ApiResult getValidChat(float min_p) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    private ApiResult getValidChat(float min_p) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
                 anyString(), anyFloat())).thenReturn(getSemanticResult());
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(NEURALRESULT);
@@ -77,21 +76,21 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_Valid_Semantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_Valid_Semantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         ApiResult result = getValidChat(0.2f);
         Assert.assertEquals(200, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat)result).getResult().getAnswer());
     }
 
     @Test
-    public void testChat_Valid_Neural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_Valid_Neural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         ApiResult result = getValidChat(0.5f);
         Assert.assertEquals(200, result.getStatus().getCode());
         Assert.assertEquals(NEURALRESULT, ((ApiChat)result).getResult().getAnswer());
     }
 
     @Test
-    public void testChat_EmptySemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_EmptySemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         ChatResult res = getSemanticResult();
         res.setAnswer("");
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
@@ -102,7 +101,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_NullSemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_NullSemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
                 anyString(), anyFloat())).thenThrow(
                 new SemanticAnalysis.SemanticAnalysisException(new Exception("test")));
@@ -112,7 +111,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_EmptyNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_EmptyNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
                 anyString(), anyFloat())).thenReturn(getSemanticResult());
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn("");
@@ -122,7 +121,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_NullNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_NullNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),
                 anyString(), anyFloat())).thenReturn(getSemanticResult());
         when(fakeNeuralNet.getAnswer(anyString(), anyString(), anyString(), anyString())).thenReturn(null);
@@ -132,7 +131,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_EmptyBoth() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetNotRespondingException {
+    public void testChat_EmptyBoth() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         ChatResult res = getSemanticResult();
         res.setAnswer("");
         when(fakeSemanticAnalysis.getAnswer(anyString(), anyString(), anyString(), anyString(),

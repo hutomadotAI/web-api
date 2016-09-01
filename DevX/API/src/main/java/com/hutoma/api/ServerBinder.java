@@ -21,12 +21,12 @@ public class ServerBinder extends AbstractBinder {
         bind(AIDomainLogic.class).to(AIDomainLogic.class);
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(TrainingLogic.class).to(TrainingLogic.class);
-        bind(MemoryLogic.class).to(MemoryLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(Database.class).to(Database.class);
+        bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(MessageQueue.class).to(MessageQueue.class);
         bind(Tools.class).to(Tools.class);
         bind(Logger.class).to(Logger.class).in(Singleton.class);

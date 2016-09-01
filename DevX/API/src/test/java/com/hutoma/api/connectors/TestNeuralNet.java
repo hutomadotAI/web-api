@@ -1,21 +1,15 @@
 package com.hutoma.api.connectors;
 
-import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
-import com.hutoma.api.connectors.NeuralNet;
-import com.hutoma.api.connectors.SemanticAnalysis;
-import hutoma.api.server.ai.api_root;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeTimerTools;
+import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.Tools;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by David MG on 09/08/2016.
@@ -62,7 +56,7 @@ public class TestNeuralNet {
     }
 
     @Test
-    public void testNeuralNet_NeedToStartServer_Success() throws Exception {
+    public void testNeuralNet_NeedToStartServer_Success() throws Database.DatabaseException, NeuralNet.NeuralNetException {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenReturn(false);
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
@@ -71,12 +65,15 @@ public class TestNeuralNet {
     }
 
     @Test
-    public void testNeuralNet_NeedToStartServer_DBFail() throws Exception {
-        when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenThrow(new Exception());
+    public void testNeuralNet_NeedToStartServer_DBFail() throws Database.DatabaseException, NeuralNet.NeuralNetException {
+        when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
-        String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
-        Assert.assertEquals(null, result);
+        try {
+            String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
+            Assert.fail("exception expected");
+        } catch (Exception e) {
+        }
         Assert.assertEquals(0, fakeTools.getTimestamp());
     }
 
@@ -86,8 +83,11 @@ public class TestNeuralNet {
         doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessageStartRNN(anyString(), anyString());
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
-        String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
-        Assert.assertEquals(null, result);
+        try {
+            String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
+            Assert.fail("exception expected");
+        } catch (Exception e) {
+        }
         Assert.assertEquals(0, fakeTools.getTimestamp());
     }
 
@@ -105,9 +105,13 @@ public class TestNeuralNet {
     public void testNeuralNet_CheckResult_DBFail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), anyString())).thenReturn(true);
         when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), anyString(), anyString())).thenReturn(QID);
-        when(fakeDatabase.getAnswer(QID)).thenReturn(null);
-        String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
-        Assert.assertEquals(null, result);
+        when(fakeDatabase.getAnswer(QID)).thenThrow(new Database.DatabaseException(new Exception("test")));
+        try {
+            String result = neuralNet.getAnswer(DEVID, AIID, UID, "question");
+            Assert.fail("exception expected");
+        } catch (NeuralNet.NeuralNetException nne) {
+            // this is supposed to throw
+        }
         Assert.assertTrue(fakeTools.getTimestamp() <= NeuralNet.POLLEVERY);
     }
 

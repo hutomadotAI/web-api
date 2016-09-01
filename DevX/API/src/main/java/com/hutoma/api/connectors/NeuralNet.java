@@ -20,7 +20,16 @@ public class NeuralNet {
     private final String LOGFROM = "neuralnetconnector";
     static long POLLEVERY = 1000;                                  // hard-coded to one second
 
-    public static class NeuralNetNotRespondingException extends Exception {
+    public static class NeuralNetException extends Exception {
+        public NeuralNetException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    public static class NeuralNetNotRespondingException extends NeuralNetException {
+        public NeuralNetNotRespondingException() {
+            super(new Exception("not responding"));
+        }
     }
 
     @Inject
@@ -33,27 +42,26 @@ public class NeuralNet {
     }
 
     // Neural Network Query
-    public String getAnswer(String dev_id, String aiid, String uid, String q) throws NeuralNetNotRespondingException {
+    public String getAnswer(String dev_id, String aiid, String uid, String q) throws NeuralNetException {
 
         // if the RNN network is not active, then push a message to get it activated
         try {
             if (!database.isNeuralNetworkServerActive(dev_id, aiid)) {
-
-                //TODO: fix this
-                try {
-                    messageQueue.pushMessageStartRNN(dev_id, aiid);
-                } catch (MessageQueue.MessageQueueException mqe) {
-                    throw new Exception("failed to send message to message queue");
-                }
+                messageQueue.pushMessageStartRNN(dev_id, aiid);
             }
         } catch (Exception e) {
             logger.logError(LOGFROM, "failed to check/start server " + e.toString());
-            return null;
+            throw new NeuralNetException(e);
         }
 
         String answer = "";
 
-        long qid = database.insertNeuralNetworkQuestion(dev_id, uid, aiid, q);
+        long qid = 0;
+        try {
+            qid = database.insertNeuralNetworkQuestion(dev_id, uid, aiid, q);
+        } catch (Database.DatabaseException e) {
+            throw new NeuralNetException(e);
+        }
 
         // if less than zero then an error has occurred
         if (qid<0) {
@@ -64,19 +72,18 @@ public class NeuralNet {
         long timeout = config.getNeuralNetworkTimeout();
         long startTime = tools.getTimestamp();
         long endTime = startTime + (timeout * 1000);
-        do {
-            tools.threadSleep(POLLEVERY);
-            answer = database.getAnswer(qid);
-            if (null==answer) {
-                // an error has occurred, so exit now
-                return null;
-            } else {
-                if (!answer.isEmpty()) {
+        try {
+            do {
+                tools.threadSleep(POLLEVERY);
+                answer = database.getAnswer(qid);
+                if ((null!=answer) && (!answer.isEmpty())) {
                     // we have an answer!
                     return answer;
                 }
-            }
-        } while ((tools.getTimestamp() + (POLLEVERY)) < endTime);
+            } while ((tools.getTimestamp() + (POLLEVERY)) < endTime);
+        } catch (Database.DatabaseException dbe) {
+            throw new NeuralNetException(dbe);
+        }
 
         // otherwise no response appeared in a reasonable amount of time
         throw new NeuralNetNotRespondingException();
