@@ -36,14 +36,21 @@ public class TestToolsTextSanitizer {
         Assert.assertEquals("a b cX Y Z", tools.textSanitizer("a   b cX\tY\t\t\tZ"));
     }
 
+    /***
+     * Test now ensures that only round parentheses are retained
+     */
     @Test
     public void testTextRemoveInvalidParentheses() {
-        Assert.assertEquals("abcXYZ", tools.textSanitizer("(abc)[X]<YZ>"));
+        Assert.assertEquals("(abc)XYZ", tools.textSanitizer("(abc)[X]<YZ>"));
     }
 
+    /***
+     * Removed the requirement to escape quotes.
+     * This test now checks that quotes remain intact
+     */
     @Test
-    public void testTextEscapeQuotes() {
-        Assert.assertEquals("\\'abcXYZ\\\"", tools.textSanitizer("\'abcXYZ\""));
+    public void testTextNotEscapedQuotes() {
+        Assert.assertEquals("\'abcXYZ\"", tools.textSanitizer("\'abcXYZ\""));
     }
 
     @Test

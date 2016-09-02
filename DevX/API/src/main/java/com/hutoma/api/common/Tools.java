@@ -24,7 +24,7 @@ public class Tools {
 
     /**
      * Returns the same string with anything over char 127 or below char 32 removed
-     * Also, ()[]<> removed and quotes replaces by backslash-quotes
+     * Also, []<> are removed altogther
      * Whitespaces are deduped and the string is trimmed of leading and trailing whitespaces.
      * @param input   abc[]<>()  abc
      * @return abc abc
@@ -51,15 +51,7 @@ public class Tools {
                 // ignore out of range characters
                 if ((c>=32) && (c<128)) {
                     switch(c) {
-                        // characters to escape
-                        case '\'':
-                        case '\"':
-                            sb.append('\\').append(c);
-                            lastCharWasSpace = false;
-                            break;
                         // characters to omit
-                        case '(':
-                        case ')':
                         case '[':
                         case ']':
                         case '<':
