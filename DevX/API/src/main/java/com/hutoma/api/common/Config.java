@@ -44,6 +44,14 @@ public class Config {
         return enforceNewDBCredentials(getConfigFromProperties("connectionstring", ""));
     }
 
+    public int getDatabaseConnectionPoolMinimumSize() {
+        return Integer.valueOf(getConfigFromProperties("DBConnectionPoolMinSize", "8"));
+    }
+
+    public int getDatabaseConnectionPoolMaximumSize() {
+        return Integer.valueOf(getConfigFromProperties("DBConnectionPoolMaxSize", "64"));
+    }
+
     public double getClusterMinProbability() {
         return Double.valueOf(getConfigFromProperties("cluster_min_probability", "0.7"));
     }

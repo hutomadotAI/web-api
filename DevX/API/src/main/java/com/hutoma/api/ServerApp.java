@@ -17,6 +17,9 @@ public class ServerApp extends ResourceConfig {
         // for upload support
         register(MultiPartFeature.class);
 
+        // initialisation
+        register(ServerInit.class);
+
         // authorization filter
         packages(false, "com.hutoma.api.auth");
 
@@ -25,5 +28,7 @@ public class ServerApp extends ResourceConfig {
 
         // old namespace. this will enable endpoints that have not yet been migrated to the new.
         packages(true, "hutoma.api.server.ai");
+
     }
+
 }

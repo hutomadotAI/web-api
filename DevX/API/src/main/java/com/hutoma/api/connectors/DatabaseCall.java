@@ -18,23 +18,18 @@ public class DatabaseCall implements AutoCloseable {
     int paramCount;
     int paramSetIndex;
     String callName;
+    DatabaseConnectionPool pool;
 
     @Inject
-    public DatabaseCall(Config config) {
+    public DatabaseCall(Config config, DatabaseConnectionPool pool) {
         this.config = config;
+        this.pool = pool;
         this.statement = null;
         this.connection = null;
     }
 
     private Connection getConnection() throws Database.DatabaseException {
-        try {
-            String myDriver = "com.mysql.cj.jdbc.Driver";
-            String myUrl = config.getDatabaseConnectionString();
-            Class.forName(myDriver);
-            return DriverManager.getConnection(myUrl);
-        } catch (Exception e) {
-            throw new Database.DatabaseException(e);
-        }
+        return pool.borrowConnection();
     }
 
     private void checkPosition() throws Database.DatabaseException {

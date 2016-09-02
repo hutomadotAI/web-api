@@ -15,6 +15,11 @@ public class ServerBinder extends AbstractBinder {
     @Override
     protected void configure() {
 
+        // infrastructure
+        bind(Config.class).to(Config.class).in(Singleton.class);
+        bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
+        bind(Logger.class).to(Logger.class).in(Singleton.class);
+
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(AILogic.class).to(AILogic.class);
@@ -24,12 +29,10 @@ public class ServerBinder extends AbstractBinder {
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
-        bind(Config.class).to(Config.class).in(Singleton.class);
         bind(Database.class).to(Database.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(MessageQueue.class).to(MessageQueue.class);
         bind(Tools.class).to(Tools.class);
-        bind(Logger.class).to(Logger.class).in(Singleton.class);
         bind(NeuralNet.class).to(NeuralNet.class);
         bind(SemanticAnalysis.class).to(SemanticAnalysis.class);
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
