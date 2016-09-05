@@ -31,7 +31,7 @@ function loadVoices() {
 
 function startDictation(human_name, ai_name) {
     document.getElementById('microphone').setAttribute('class','fa fa-microphone text-light-gray flashing');
-    
+
     if (window.hasOwnProperty('webkitSpeechRecognition')) {
 
         var recognition = new webkitSpeechRecognition();

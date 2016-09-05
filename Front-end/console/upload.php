@@ -61,7 +61,6 @@ require "../pages/config.php";
                 exit;
             }
             $response = hutoma\console::uploadURL(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['url']);
-
             break;
     }
 
