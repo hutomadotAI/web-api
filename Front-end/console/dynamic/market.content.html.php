@@ -136,7 +136,7 @@
             <button type="submit" class="btn btn-warning flat pull-right" id="btnSkip">skip</button>
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertPriceAI" style="display:none;">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertPriceAI"></i>
             <span id="msgAlertPriceAI"></span>
         </div>

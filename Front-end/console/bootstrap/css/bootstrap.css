@@ -620,7 +620,7 @@ th {
   content: "\e111";
 }
 .glyphicon-magnet:before {
-  content: "\e112";
+  content: "\e112";\
 }
 .glyphicon-chevron-up:before {
   content: "\e113";

@@ -137,6 +137,7 @@
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
+<script src="./plugins/training/training.area.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 </body>

@@ -7,6 +7,7 @@ function RecursiveUnbind($jElement) {
     $jElement.unbind();
     $jElement.removeAttr('onclick');
     $jElement.removeAttr('href');
+    $jElement.removeAttr('type');
     $jElement.children().each(function () {
         RecursiveUnbind($(this));
     });

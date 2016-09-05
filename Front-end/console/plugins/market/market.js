@@ -1,14 +1,16 @@
 document.getElementById("btnSave").addEventListener("click", wizardNext);
+document.getElementById("btnSkip").addEventListener("click", wizardNext);
 document.getElementById("btnBack").addEventListener("click", backPage);
 document.getElementById("ai_price").addEventListener("keyup", checkValue);
 
 
 function wizardNext() {
-    $(this).prop("disabled",true);
+    $("#btnSave").prop("disabled",true);
+    $("#btnSkip").prop("disabled",true);
     $("#btnCancel").prop("disabled",true);
 
     if(isContainInvalidCharacters($("#ai_price").val())) {
-        msgAlert(2, 'The price need contain only price format');
+        msgAlert(2, 'The price needs contains only a price format. Please insert the correct value');
         return;
     }
 
@@ -25,7 +27,9 @@ function backPage(){
 }
 
 function checkValue() {
-    $("#btnSave").prop("disabled", false);
+    $("#btnSave").prop("disabled",false);
+    $("#btnSkip").prop("disabled",false);
+    $("#btnCancel").prop("disabled",false);
     if(document.getElementById('containerMsgAlertPriceAI').getAttribute("style")!=null && document.getElementById('containerMsgAlertPriceAI').getAttribute("style")!="") {
         document.getElementById('containerMsgAlertPriceAI').style.display = 'none';
     }

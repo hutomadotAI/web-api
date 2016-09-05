@@ -28,9 +28,7 @@ function activeBtnNext() {
     var ai_name = $("#ai_name").val();
     if ( ai_name.length > 0 ) {
         $("#btnNext").prop("disabled", false);
-        if(document.getElementById('containerMsgAlertNameAI').getAttribute("style")!=null && document.getElementById('containerMsgAlertNameAI').getAttribute("style")!="") {
-            document.getElementById('containerMsgAlertNameAI').style.display = 'none';
-        }
+        document.getElementById('containerMsgAlertNameAI').style.display = 'none';
         document.getElementById('ai_name').style.borderColor = "#d2d6de";
     }
     else
@@ -38,7 +36,7 @@ function activeBtnNext() {
 }
 
 function inputsActiveDeactive(flag){
-    $("#btnNext").prop("disabled",flag);
+    $("#btnNext").prop("disabled",!flag);
     $("#btnCancel").prop("disabled",flag);
     $("#ai_name").prop("disabled",flag);
     $("#ai_description").prop("disabled",flag);
@@ -58,9 +56,11 @@ function isContainInvalidCharacters(txt) {
 }
 
 function clearInputFields() {
+    $("#btnNext").prop("disabled",true);
     document.getElementById('containerMsgAlertNameAI').style.display = 'none';
     $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
     $("#icongAlertNameAI").attr('class', 'icon fa fa-check');
+
     document.getElementById('ai_name').style.borderColor = "#d2d6de";
     document.getElementById('ai_name').value = '';
 

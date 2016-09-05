@@ -8,7 +8,7 @@
         if ($response_getAIs['status']['code']===200) {
 
             echo('<div class="box-body table-responsive">');
-            echo('<table class="table table">');
+            echo('<table class="table table" id="listTable">');
             echo('<tr disabled>');
             echo('<th class="text-center" style="border:0;">ID</th>');
             echo('<th class="text-center" style="border:0;">AI</th>');
@@ -16,7 +16,6 @@
             echo('<th class="text-center" style="border:0;">Description</th>');
             echo('<th style="border:0;">Date</th>');
             echo('</tr>');
-            echo('<form method="POST" name="viewAllForm" action="./trainingAI.php">');
 
             foreach ($response_getAIs['ai_list'] as $bot) {
                 echo('<tr>');
@@ -47,12 +46,16 @@
                 }
                 echo('<td style="padding-top: 15px;">' . $bot['description'] . '</td>');
                 echo('<td style="padding-top: 15px;">' . $bot['created_on'] . '</td>');
-                echo('<td style="padding-top: 8px;"><button id="btnSelect" name="ai" value="'.$bot['aiid'].'"  onClick="sendAIID()" class="btn btn-primary flat pull-right" style="margin-right: 5px; width: 115px;"><i class="fa fa-user" ></i> Details AI</button></td>');
-                echo('<td style="padding-top: 8px;"><button id="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI.call()" class="btn btn-info flat pull-right"    style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');
+                echo('<td style="padding-top: 8px;"><button type="button" id="btnSelectAI"  value="'.$bot['aiid'].'"  onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 5px; width: 115px;"><i class="fa fa-user" ></i> Details AI</button></td>');
+                echo('<td style="padding-top: 8px;"><button type="button" id="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI(this)" class="btn btn-info flat pull-right"    style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');
+                echo('<tr>');
             }
-            echo('</form>');
-            echo('<tr>');
+
+
             echo('</table>');
+            echo('<form method="POST" name="viewAllForm" action="./trainingAI.php">');
+            echo('<input type="hidden" id="ai" name="ai" value="">');
+            echo('</form>');
 
         }else{
 
@@ -62,6 +65,8 @@
             echo('</div>');
             echo('</div>');
         }
+
+
     unset($response_getAIs);
     ?>
 </div>

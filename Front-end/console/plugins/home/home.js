@@ -8,21 +8,23 @@ function wizardNext() {
     document.startForm.submit();
 }
 
-function sendAIID(){
-    $(this).prop("disabled",true);
+function sendAIID(elem){
+    var value = elem.value;
+    $(elem).prop("disabled",true);
     if(document.viewAllForm.onsubmit)
         return;
-    RecursiveUnbind($('#wrapper'));
+    RecursiveUnbind($('#listTable'));
+    document.getElementById("ai").value = value;
     document.viewAllForm.submit();
 }
 
-function publishAI(){
-    if ( this.className == 'btn btn-info flat pull-right'){
-        this.className = 'btn btn-warning flat pull-right';
-        this.innerHTML = '<i class="fa fa-globe"></i> Unpublish AI';
+function publishAI(elem){
+    if ( elem.className == 'btn btn-info flat pull-right'){
+        elem.className = 'btn btn-warning flat pull-right';
+        elem.innerHTML = '<i class="fa fa-globe"></i> Unpublish AI';
     }
     else{
-        this.className = 'btn btn-info flat pull-right';
-        this.innerHTML = '<i class="fa fa-globe"></i> Publish AI';
+        elem.className = 'btn btn-info flat pull-right';
+        elem.innerHTML = '<i class="fa fa-globe"></i> Publish AI';
     }
 }

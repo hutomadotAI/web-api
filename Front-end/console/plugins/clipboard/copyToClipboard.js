@@ -20,8 +20,7 @@ function copyToClipboard(elementId) {
         }
 
         if (!copysuccess) {
-
-
+            
             $('#' + elementId).attr('disabled',false);
 
             var clipboard = new Clipboard('.input-group-addon');

@@ -2,9 +2,11 @@
     require '../pages/config.php';
 
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details'] = \hutoma\console::getUser();
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[ $_SESSION['navigation_id'] ]['user_details']);
+ $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[ $_SESSION['navigation_id'] ]['user_details']);
 
     $response_getAIs = \hutoma\console::getAIs(\hutoma\console::getDevToken());
+
+
 ?>
 
 <!DOCTYPE html>

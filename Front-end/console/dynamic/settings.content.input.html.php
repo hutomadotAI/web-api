@@ -120,12 +120,9 @@
 
 
 <div class="box-footer">
-    <a href="settingsAI.php" class="btn btn-primary flat">cancel</a>
-    <button  name="btnSave"  value="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat disabled"  onClick="" alt="save">save</button>
-
-   <a data-toggle="modal" data-target="#deleteAI" style="cursor: pointer;">
-       <button  name="btnDelete" id="btnDelete" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" onClick="" alt="delete">delete AI</button>
-   </a>
+    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" alt="cancel">cancel</button>
+    <button  name="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat" alt="save" disabled>save</button>
+    <button  name="btnDelete" id="btnDelete"  data-toggle="modal" data-target="#deleteAI" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" alt="delete">delete AI</button>
 </div>
 
 
@@ -136,7 +133,7 @@
         <!-- Modal content-->
         <div class="modal-content bordered">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">   <i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> DELETE AI</h4>
             </div>
             <div class="modal-body">
@@ -147,8 +144,7 @@
             <div class="modal-footer">
                 <form method="POST" id="deleteForm" action="./deleteAI.php">
                 <button type="submit" class="btn btn-primary flat" id="modalDelete" data-dismiss="modal">Delete</button>
-
-                <button type="button" class="btn btn-primary flat" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel</button>
                 </form>
             </div>
         </div>

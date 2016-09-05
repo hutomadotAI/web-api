@@ -29,8 +29,8 @@ class console
      * Database Configuration
      */
       "db" => array(
-          "host" => '54.83.145.18',
-          "port" => '3306',
+          "host" => 'https://api.hutoma.com/v1',
+          "port" => '433',
           "username" => 'root',
           "password" => 'P7gj3fLKtPhjU7aw',
           "name" => 'hutoma',
@@ -241,7 +241,7 @@ class console
   public static $db = true;
   public static $user = false;
   private static $init_called = false;
-  private static $api_request_url = 'http://54.83.145.18:8080/'; //http://localhost:8081/
+  private static $api_request_url = 'https://api.hutoma.com/v1/';  //http://52.83.145.18:8080/'; //http://localhost:8081/
   private static $cookie, $session, $remember_cookie, $dbh;
 
   public static function construct($called_from = "")
@@ -1155,7 +1155,7 @@ class console
   // FOR API
   public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$sex,$contract,$payment_type,$price){
       if (self::$loggedIn) {
-          $path = 'api/ai';
+          $path = 'ai';
           $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);
           $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
@@ -1172,7 +1172,7 @@ class console
           if ($curl_response === false) {
               $info = curl_getinfo($curl);
               curl_close($curl);
-              die('Error: createAI curl');
+              die('Error: createAI curl: '.$curl);
           }
           $json_response = json_decode($curl_response, true);
           curl_close($curl);
@@ -1184,7 +1184,7 @@ class console
   // FOR API
   public static function getAIs($dev_token){
       if (self::$loggedIn) {
-          $path = 'api/ai';
+          $path = 'ai';
           $curl = curl_init();
 
           curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
@@ -1208,7 +1208,7 @@ class console
   // FOR API
   public static function getSingleAI($dev_token,$aiid){
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid;
+      $path = 'ai/'.$aiid;
       $service_url = self::$api_request_url.$path;
       $curl = curl_init();
 
@@ -1234,7 +1234,7 @@ class console
   public static function deleteAI($dev_token,$aiid)
   {
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid;
+      $path = 'ai/'.$aiid;
       $service_url = self::$api_request_url.$path;
       $curl = curl_init();
 
@@ -1261,7 +1261,7 @@ class console
   public static function chatAI($dev_token,$aiid,$uid,$q,$history,$fs,$min_p)
   {
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid.'/chat';
+      $path = 'ai/'.$aiid.'/chat';
       $api_response_parameters = array('q'=> $q,'uid' => $uid,'history' =>$history);
       $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
@@ -1287,7 +1287,7 @@ class console
   // FOR API
   public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid.'/training';
+      $path = 'ai/'.$aiid.'/training';
 
       $filename = $file['tmp_name'];
       $args['file'] = new \CurlFile($filename, 'text/plain','postfilename.txt');
@@ -1318,7 +1318,7 @@ class console
   // FOR API
   public static function getDomains($dev_token){
       if (self::$loggedIn) {
-        $path = 'api/ai/domain';
+        $path = 'ai/domain';
         $curl = curl_init();
 
         curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
