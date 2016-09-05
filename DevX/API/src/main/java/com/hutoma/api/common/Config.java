@@ -2,15 +2,42 @@ package com.hutoma.api.common;
 
 import com.amazonaws.regions.Regions;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 /**
  * Created by David MG on 02/08/2016.
  */
 @Singleton
 public class Config {
+
+    Logger logger;
+    Properties properties;
+
+    private final String LOGFROM = "config";
+
+    @Inject
+    public Config(Logger logger) {
+        this.logger = logger;
+        loadPropertiesFile();
+    }
+
+    public void loadPropertiesFile() {
+        Path configPath = Paths.get(System.getProperty("user.home"), "/ai/v1.config.properties");
+        try {
+            Properties loadProperties = new Properties();
+            loadProperties.load(new FileInputStream(configPath.toFile()));
+            properties = loadProperties;
+            logger.logInfo(LOGFROM, "loaded " + properties.size() + " properties file from " + configPath.toString());
+        } catch (IOException e) {
+            logger.logError(LOGFROM, "failed to load valid properties file: " + e.toString());
+        }
+    }
 
     public String getEncodingKey() {
         return getConfigFromProperties("encoding_key", "");
@@ -57,15 +84,11 @@ public class Config {
     }
 
     private String getConfigFromProperties(String p, String defaultValue) {
-        java.util.Properties prop = new java.util.Properties();
-        try {
-            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/v1.config.properties"));
-            return prop.getProperty(p, defaultValue);
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        if (null==properties) {
+            logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
+            return defaultValue;
         }
-        return null;
+        return properties.getProperty(p, defaultValue);
     }
 
     @Deprecated

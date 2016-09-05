@@ -18,6 +18,8 @@ public class ServerInit implements ApplicationEventListener {
 
     private final String LOGFROM = "serverinit";
 
+    Config config;
+
     @Inject
     ServiceLocator serviceLocator;
 
@@ -27,8 +29,12 @@ public class ServerInit implements ApplicationEventListener {
             case INITIALIZATION_FINISHED:
                 initialise(applicationEvent);
                 break;
-            case INITIALIZATION_START:
             case RELOAD_FINISHED:
+                if (null!=config) {
+                    config.loadPropertiesFile();
+                }
+                break;
+            case INITIALIZATION_START:
             case DESTROY_FINISHED:
             default:
                 break;
@@ -36,10 +42,9 @@ public class ServerInit implements ApplicationEventListener {
     }
 
     private void initialise(ApplicationEvent applicationEvent) {
-        Config config = serviceLocator.createAndInitialize(Config.class);
-        DatabaseConnectionPool connectionPool = serviceLocator.createAndInitialize(DatabaseConnectionPool.class);
-        Logger logger = serviceLocator.createAndInitialize(Logger.class);
-
+        Logger logger = serviceLocator.getService(Logger.class);
+        config = serviceLocator.getService(Config.class);
+        DatabaseConnectionPool connectionPool = serviceLocator.getService(DatabaseConnectionPool.class);
         try {
             connectionPool.borrowConnection().close();
             logger.logInfo(LOGFROM, "initialisation finished");
