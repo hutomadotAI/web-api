@@ -54,6 +54,15 @@ require "../pages/config.php";
             $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputstructure'],0,'');
 
             break;
+
+        case 'url':
+            if (!isset($_POST['url'])) {
+                echo 'Send URL failed';
+                exit;
+            }
+            $response = hutoma\console::uploadURL(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['url']);
+
+            break;
     }
 
 

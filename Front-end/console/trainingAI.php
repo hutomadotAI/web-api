@@ -1,4 +1,5 @@
 <?php
+
     require "../pages/config.php";
 
     if ( !\hutoma\console::isSessionActive()) {

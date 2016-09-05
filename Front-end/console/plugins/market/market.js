@@ -1,5 +1,5 @@
 document.getElementById("btnSave").addEventListener("click", wizardNext);
-document.getElementById("btnSkip").addEventListener("click", wizardNext);
+document.getElementById("btnSkip").addEventListener("click", wizardSkip);
 document.getElementById("btnBack").addEventListener("click", backPage);
 document.getElementById("ai_price").addEventListener("keyup", checkValue);
 
@@ -13,6 +13,17 @@ function wizardNext() {
         msgAlert(2, 'The price needs contains only a price format. Please insert the correct value');
         return;
     }
+
+    if(document.marketNewAIform.onsubmit)
+        return;
+    RecursiveUnbind($('#wrapper'));
+    document.marketNewAIform.submit();
+}
+
+function wizardSkip() {
+    $("#btnSave").prop("disabled",true);
+    $("#btnSkip").prop("disabled",true);
+    $("#btnCancel").prop("disabled",true);
 
     if(document.marketNewAIform.onsubmit)
         return;

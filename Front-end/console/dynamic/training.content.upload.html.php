@@ -17,7 +17,7 @@
             <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText="choose file">
             <p></p>
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadFile">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
                 <span id="msgAlertUploadFile">Before start training you need upload your text file</span>
             </div>
@@ -31,7 +31,7 @@
             <input type="file" id="inputstructure" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No complex file" data-buttonText="choose file">
             <p></p>
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadStructure">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadStructure"></i>
                 <span id="msgAlertUploadStructure">Before start training you need upload your complex text file</span>
             </div>
@@ -40,21 +40,20 @@
         <div class="tab-pane" id="trainingweb">
             <p></p>
             <div class="row">
-
-
+                
             <div class="col-md-9">
             <input type="text" id="inputurl" class="form-control input-sm " placeholder="add here web address...">
             </div>
 
             <div class="col-md-3">
-                <button id="btnUploadUrl" class="btn btn-success btn-sm flat pull-right " style="width: 120px;" disabled>
+                <button id="btnUploadUrl" name="url" class="btn btn-success btn-sm flat pull-right " style="width: 120px;" disabled>
                     <i class="fa fa-globe"></i> Add URL
                 </button>
             </div>
             </div>
             <p></p>
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadUrl">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
                 <span id="msgAlertUploadUrl">Before start training you need add a url</span>
             </div>

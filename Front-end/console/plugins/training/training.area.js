@@ -1,26 +1,33 @@
-document.getElementById("inputfile").addEventListener("change", enableUploadFile);
-document.getElementById("inputstructure").addEventListener("change", enableUploadStructure);
-document.getElementById("inputurl").addEventListener("change", enableUploadUrl);
+document.getElementById('inputfile').addEventListener('change', enableUploadFile);
+document.getElementById('inputstructure').addEventListener('change', enableUploadStructure);
+document.getElementById('inputurl').addEventListener('keyup', enableUploadUrl);
 
-document.getElementById("btnUploadFile").addEventListener("click", uploadFile);
-document.getElementById("btnUploadStructure").addEventListener("click", uploadStructure);
-//document.getElementById("btnUploadUrl").addEventListener("click", uploadUrl);
+document.getElementById('btnUploadFile').addEventListener('click', uploadFile);
+document.getElementById('btnUploadStructure').addEventListener('click', uploadStructure);
+document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
+
 
 
 function enableUploadFile() {
-    $("#btnUploadFile").prop("disabled", false);
+    if ( $(this).val() == null || $(this).val == "")
+        $('#btnUploadFile').prop('disabled', true);
+    else
+        $('#btnUploadFile').prop('disabled', false);
     msgAlert(0,'Now you can upload your file');
 }
 
 function enableUploadStructure() {
-    $("#btnUploadStructure").prop("disabled", false);
+    if ( $(this).val() == null || $(this).val == "")
+        $("#btnUploadStructure").prop("disabled", true);
+    else
+        $("#btnUploadStructure").prop("disabled", false);
     msgAlertStructure(0,'Now you can upload your complex file');
 }
 
 function enableUploadUrl() {
-    var url = $("#inputurl").val();
+    var url = $('#inputurl').val();
     if ( learnRegExp(url) )
-        $("#btnUploadUrl").prop("disabled", false);
+        $('#btnUploadUrl').prop('disabled', false);
     else
         $("#btnUploadUrl").prop("disabled", true);
 }
@@ -29,8 +36,16 @@ function learnRegExp(url){
     return /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(url);
 }
 
+
+
 function uploadFile(){
-    $("#btnUploadFile").prop("disabled", true);
+    if ( $('#inputfile').val() == null ||  $('#inputfile').val() == "") {
+        $("#btnUploadFile").prop("disabled", true);
+        msgAlert(1,'You need choose file first');
+        return;
+    }
+    else
+        $("#btnUploadFile").prop("disabled", true);
 
     var xmlhttp;
     var file_data = new FormData();
@@ -65,7 +80,13 @@ function uploadFile(){
 
 
 function uploadStructure(){
-    $("#btnUploadStructure").prop("disabled", true);
+    if ( $('#inputstructure').val() == null ||  $('#inputstructure').val() == "") {
+        $("#btnUploadStructure").prop("disabled", true);
+        msgAlertStructure(1,'You need choose complex file first');
+        return;
+    }
+    else
+        $("#btnUploadStructure").prop("disabled", true);
 
     var xmlhttp;
     var file_data = new FormData();
@@ -82,7 +103,6 @@ function uploadStructure(){
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var JSONresponse = xmlhttp.responseText;
-            alert(JSONresponse);
             try {
                 var JSONdata = JSON.parse(JSONresponse);
                 if (JSONdata['status']['code'] === 200)
@@ -100,6 +120,44 @@ function uploadStructure(){
 }
 
 
+function uploadUrl(){
+    if ( $('#inputurl').val() == null ||  $('#inputurl').val() == "") {
+        $("#btnUploadUrl").prop("disabled", true);
+        msgAlertStructure(1,'You need choose complex file first');
+        return;
+    }
+    else
+        $("#btnUploadUrl").prop("disabled", true);
+
+    var xmlhttp;
+    var file_data = new FormData();
+    file_data.append("tab","url");
+
+    if (window.XMLHttpRequest)
+        xmlhttp = new XMLHttpRequest();
+    else
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+
+    xmlhttp.open('POST','upload.php');
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var JSONresponse = xmlhttp.responseText;
+            try {
+                var JSONdata = JSON.parse(JSONresponse);
+                if (JSONdata['status']['code'] === 200)
+                    msgAlertUrl(3,'URL Uploaded!!!');
+                else
+                    msgAlertUrl(2,'Something is gone wrong. URL not uploaded');
+            }catch (e){
+                msgAlertUrl(2,'Something is gone wrong. JSON error on URL transfer');
+            }
+            $("#btnUploadUrl").prop("disabled", false);
+        }
+    };
+    msgAlertUrl(1,'Uploading URL...');
+    xmlhttp.send(file_data);
+}
 
 
 function msgAlert(alarm,msg){
@@ -148,3 +206,26 @@ function msgAlertStructure(alarm,msg){
     document.getElementById('msgAlertUploadStructure').innerText = msg;
 }
 
+
+function msgAlertUrl(alarm,msg){
+    document.getElementById('containerMsgAlertUploadUrl').style.display = 'block';
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertUploadUrl").attr('class', 'icon fa fa-check');
+            break;
+        case 1:
+            $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertUploadUrl").attr('class', 'icon fa fa-check');
+            break;
+        case 2:
+            $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertUploadUrl").attr('class', 'icon fa fa-warning');
+            break
+        case 3:
+            $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-success');
+            $("#iconAlertUploadUrl").attr('class', 'icon fa fa-check');
+            break
+    }
+    document.getElementById('msgAlertUploadUrl').innerText = msg;
+}
