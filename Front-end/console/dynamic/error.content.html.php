@@ -49,6 +49,9 @@ if (isset($_GET['err'])) {
         case 15 :
             $msg ='RESPONSE JSON GET SINGLE AI INFO ERROR';
             break;
+        case 16 :
+            $msg ='NEW INTENT NAME TRASMISSION FAILED';
+            break;
         default:
             $msg ='UNDEFINED ERROR';
     }

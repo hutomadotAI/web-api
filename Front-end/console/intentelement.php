@@ -1,13 +1,17 @@
 <?php
-require "../pages/config.php";
-$integrations = \hutoma\console::getIntegrations();
+
+    require "../pages/config.php";
+    if (!isset($_POST['intent']) ) {
+        header('Location: ./error.php?err=16');
+        exit();
+    }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | entities </title>
+    <title>hu:toma | Create new Intent </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
@@ -43,9 +47,8 @@ $integrations = \hutoma\console::getIntegrations();
                     <ul class="treeview-menu">
 
                         <li><a href="./trainingAI.php" tabindex="-1"><i class="fa fa-graduation-cap text-purple" tabindex="-1"></i> <span>training</span></a></li>
-                        <li><a href="./intents.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i>
-                                <span>intents</span></a></li>
-                        <li class="active"><a href="./entity.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
+                        <li class="active"><a href="./intent.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i><span>intents</span></a></li>
+                        <li><a href="./entity.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
                         <li><a href="./domainsAI.php" tabindex="-1"><i class="fa fa-th text-red" tabindex="-1"></i> <span>domains</span></a></li>
                         <li><a href="./integrations.php" tabindex="-1" ><i class="glyphicon glyphicon-list-alt text-default" tabindex="-1"></i>integrations</a></li>
                         <li><a href="./settingsAI.php" tabindex="-1"><i class="fa fa-gear text-black" tabindex="-1"></i>settings</a></li>
@@ -66,22 +69,15 @@ $integrations = \hutoma\console::getIntegrations();
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-                <div class="row">
-                    <div class="col-md-8">
-                        <?php include './dynamic/editEntity.content.start.html.php'; ?>
-                    </div>
-                    <div class="col-md-3">
-                    </div>
+            <div class="row">
+                <div class="col-md-7">
+                    <?php include './dynamic/intent.element.content.create.html.php'; ?>
                 </div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <?php include './dynamic/editEntity.content.html.php'; ?>
-                    </div>
-                    <div class="col-md-4">
-                        <?php include './dynamic/training.content.chat.html.php'; ?>
-                        <?php include './dynamic/training.content.json.html.php'; ?>
-                    </div>
+                <div class="col-md-5">
+                    <?php include './dynamic/chat.html.php'; ?>
+                    <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
+            </div>
         </section>
     </div>
 
@@ -106,25 +102,11 @@ $integrations = \hutoma\console::getIntegrations();
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
-<script src="./plugins/entity/entry.js"></script>
+<script src="./plugins/intent/intent.element.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
-<script>
-    // FAKE API JSON REQUEST Entities RESPONSE
-
-    var entries = <?php echo json_encode($integrations)?>;
-
-    var newNode = document.createElement('div');
-    newNode.className = 'row';
-    newNode.id = 'entries_list';
-</script>
-<script>
-    function searchEntries() {
-        showEntries();
-    }
-</script>
 </body>
 </html>

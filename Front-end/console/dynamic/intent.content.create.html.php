@@ -1,9 +1,9 @@
 <div class="box box-solid box-clean flat no-shadow" >
    
     <div class="box-header with-border">
-        <i class="fa fa-sitemap text-yellow"></i>
-        <h3 class="box-title">Entities</h3>
-        <a data-toggle="collapse"  href="#collapseEntitiesInfo">
+        <i class="fa fa-commenting-o text-green"></i>
+        <h3 class="box-title">Intents</h3>
+        <a data-toggle="collapse"  href="#collapseIntentsInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
             </div>
@@ -11,35 +11,34 @@
     </div>
 
 
-    <div class="box-body" id="boxEntities">
-        <div class="bootstrap-filestyle input-group" id="GrpEntityButton">
-            <input type="text" class="form-control" id="inputEntityName" placeholder="Enter entity name" style="width: 96%;">
+    <div class="box-body" id="boxIntents">
+        <div class="bootstrap-filestyle input-group" id="GrpIntentButton">
+            <form method="POST" name="intentCreateForm" action="./intentelement.php" onsubmit="RecursiveUnbind($('#wrapper'));">
+            <input type="text" class="form-control" id="inputIntentName" name="intent" placeholder="Enter intent name" style="width: 96%;">
+            </form>
             <div class="input-group-btn" tabindex="0">
-                <form method="POST" name="entityCreateForm" onsubmit="RecursiveUnbind($('#wrapper'));">
-
-                    fa-plus
-                    <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" alt="create entity" disabled><i class="fa fa-plus-circle" ></i> Add Entity</button>
-                </form>
+                    <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" alt="create intent" disabled>Create Intent</button>
             </div>
+
         </div>
         <p></p>
         
-        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertEntity">
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntent">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
-            <i class="icon fa fa-check" id="icongAlertEntity"></i>
-            <span id="msgAlertEntity"></span>
+            <i class="icon fa fa-check" id="icongAlertIntent"></i>
+            <span id="msgAlertIntent"></span>
         </div>
     </div>
 
 
 
-    <div id="collapseEntitiesInfo" class="panel-collapse collapse">
+    <div id="collapseIntentsInfo" class="panel-collapse collapse">
         <div class="box-body">
             <div class="overlay center-block">
                 <section class="content bg-gray-light" >
                     <div class="box-body">
                         <dl class="dl-horizontal">
-                            <dt>Description Entities Manipulation</dt>
+                            <dt>Description Intents Manipulation</dt>
                             <dd>Before start training process, y.</dd>
                             <dt>Euismod</dt>
                             <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>

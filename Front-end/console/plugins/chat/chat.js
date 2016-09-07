@@ -6,7 +6,7 @@ var muteMicrophone = '0';
 var chat = 1;  // start enable chatting buttons
 
 
-if (!isChrome)
+if (isChrome)
     document.getElementById("btnSpeech").addEventListener("click", start);
 else{
     document.getElementById("btnSpeech").setAttribute('data-toggle','tooltip');

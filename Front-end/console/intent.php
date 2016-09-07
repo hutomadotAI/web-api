@@ -1,7 +1,7 @@
 <?php
 require "../pages/config.php";
 
-    // fake request - here we need the enities from user on specified AI
+    // fake request - here we need the intents from user on specified AI
     $integrations = \hutoma\console::getIntegrations();
 ?>
 <!DOCTYPE html>
@@ -9,7 +9,7 @@ require "../pages/config.php";
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | entities </title>
+    <title>hu:toma | intents </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
@@ -23,7 +23,7 @@ require "../pages/config.php";
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showEntities('')">
+<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showIntents('')">
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -45,8 +45,8 @@ require "../pages/config.php";
                     <ul class="treeview-menu">
 
                         <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
-                        <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
-                        <li class="active"><a href="#"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                        <li class="active"><a href="#"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
+                        <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
                         <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
                         <li><a href="./integrations.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
                         <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
@@ -69,14 +69,14 @@ require "../pages/config.php";
     <section class="content">
             <div class="row">
                 <div class="col-md-7">
-                        <?php include './dynamic/entity.content.create.html.php'; ?>
-                        <?php include './dynamic/entity.content.html.php'; ?>
+                        <?php include './dynamic/intent.content.create.html.php'; ?>
+                        <?php include './dynamic/intent.content.html.php'; ?>
                 </div>
                 <div class="col-md-5">
                         <?php include './dynamic/chat.html.php'; ?>
                         <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
-                </div>
+            </div>
     </section>
     </div>
 
@@ -101,21 +101,21 @@ require "../pages/config.php";
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
-<script src="./plugins/entity/entity.js"></script>
+<script src="./plugins/intent/intent.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
     // FAKE API JSON REQUEST INTEGRATION RESPONSE
-    var entities = <?php echo json_encode($integrations)?>;
+    var intents = <?php echo json_encode($integrations)?>;
     var newNode = document.createElement('div');
     newNode.className = 'row';
-    newNode.id = 'entities_list';
+    newNode.id = 'intents_list';
 </script>
 <script>
-    function searchEntities(str) {
-        showEntities(str);
+    function searchIntents(str) {
+        showIntents(str);
     }
 </script>
 </body>

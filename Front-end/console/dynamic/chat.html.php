@@ -6,7 +6,7 @@
 
         <div class="box-tools pull-right" id="dropdown-chat-options">
             <ul class="dropdown-menu flat" id = "list-options-voice">
-                <li class="footer"><a href="#">  <i class="fa fa fa-bullhorn"></i>Deactive Voice</a></li>
+                <li class="footer"><a href="#">  <i class="fa fa-bullhorn"></i>Deactive Voice</a></li>
                 <li class="footer"><a href="#">  <i class="fa fa-microphone-slash"></i>Mute Microphone</a></li>
                 <li class="footer"><a href="#">  <i class="fa fa-adjust"></i>Color Voice</a></li>
                 <li class="footer" id="continuous-option" value ="0" onClick="continuousOption(this.value)" onMouseOver="this.style.cursor='pointer'">

@@ -1,23 +1,6 @@
 document.getElementById("inputEntityName").addEventListener("keyup", activeButtonCreate);
 document.getElementById("btnCreateEntity").addEventListener("click", createEntity);
 
-document.entityCreateForm.submit(function() {
-    $(this).submit(function() {
-        return false;
-    });
-    return true;
-});
-
-$('#deleteEntity').on('show.bs.modal', function(e) {
-    var $modal = $(this), esseyId = e.relatedTarget.id;
-    var elem = document.getElementById('delete-entity-label');
-    var elemBtn = document.getElementById('modalDelete');
-    var value = $('#entity-label'+esseyId).text();
-    elem.innerHTML = 'Are you sure you would like to delete <label>' +  value +'</label> entity ? ';
-    elemBtn.setAttribute("value", esseyId);
-});
-
-
 
 function activeButtonCreate() {
     var limitTextInputSize = 50;
@@ -63,7 +46,8 @@ function CallBackendSaveEntity(){
         msgAlert(2,'An error is occured during submit data!');
         return;
     }
-    document.entityCreateForm.submit();
+    //document.entityCreateForm.submit();
+    alert("add entity to list");
 }
 
 function isContainInvalidCharacters(txt) {
@@ -113,7 +97,7 @@ function showEntities(str){
 
             wHTML += ('<form method="POST" id="createEntityform" action="./editEntity.php" >');
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onClick="editEntity(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@'+entities[x].name+'</div>')
+            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onMouseOver="this.style.cursor=\'pointer\'">@'+entities[x].name+'</div>')
             wHTML += ('</div>');
             wHTML += ('</form>');
 
@@ -148,16 +132,15 @@ function deleteEntity (elem) {
     delete entities[elem];
     showEntities('');
 }
+
 function OnMouseIn (elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = '';
 }
+
 function OnMouseOut (elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = 'none';
-}
-function editEntity(entity){
-    document.getElementById("createEntityform").submit();
 }
 
 function downloadEntity (name,value,flag) {
@@ -171,3 +154,12 @@ function downloadEntity (name,value,flag) {
         saveAs(blob, name+".csv");
     }
 }
+
+$('#deleteEntity').on('show.bs.modal', function(e) {
+    var $modal = $(this), esseyId = e.relatedTarget.id;
+    var elem = document.getElementById('delete-entity-label');
+    var elemBtn = document.getElementById('modalDelete');
+    var value = $('#entity-label'+esseyId).text();
+    elem.innerHTML = 'Are you sure you would like to delete <label>' +  value +'</label> entity ? ';
+    elemBtn.setAttribute("value", esseyId);
+});
