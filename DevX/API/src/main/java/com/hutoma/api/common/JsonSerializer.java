@@ -38,4 +38,12 @@ public class JsonSerializer {
         }
         return o;
     }
+
+    public Object deserialize(String content, Class resultClass) throws JsonParseException {
+        Object o = gson.fromJson(content, resultClass);
+        if (null==o) {
+            throw new JsonParseException("cannot deserialize valid object from json");
+        }
+        return o;
+    }
 }

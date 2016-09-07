@@ -20,6 +20,9 @@ public class NeuralNet {
     private final String LOGFROM = "neuralnetconnector";
     static long POLLEVERY = 1000;                                  // hard-coded to one second
 
+    long startTime;
+    long qid = 0;
+
     public static class NeuralNetException extends Exception {
         public NeuralNetException(Throwable cause) {
             super(cause);
@@ -42,7 +45,9 @@ public class NeuralNet {
     }
 
     // Neural Network Query
-    public String getAnswer(String dev_id, String aiid, String uid, String q) throws NeuralNetException {
+    public void startAnswerRequest(String dev_id, String aiid, String uid, String q) throws NeuralNetException {
+
+        startTime = tools.getTimestamp();
 
         // if the RNN network is not active, then push a message to get it activated
         try {
@@ -54,9 +59,6 @@ public class NeuralNet {
             throw new NeuralNetException(e);
         }
 
-        String answer = "";
-
-        long qid = 0;
         try {
             qid = database.insertNeuralNetworkQuestion(dev_id, uid, aiid, q);
         } catch (Database.DatabaseException e) {
@@ -64,23 +66,34 @@ public class NeuralNet {
         }
 
         // if less than zero then an error has occurred
-        if (qid<0) {
-            return null;
+        if (qid < 0) {
+            throw new NeuralNetException(new Exception("negative qid"));
         }
+    }
 
-        // TODO: Polling loop: find a better way
+    public String getAnswerResult() throws NeuralNetException {
+
+        String answer = "";
+
+        // timeout in seconds
         long timeout = config.getNeuralNetworkTimeout();
-        long startTime = tools.getTimestamp();
+        // calculate the exact time that we give up
         long endTime = startTime + (timeout * 1000);
+
+        long timeNow;
+        long timeRemaining;
         try {
             do {
-                tools.threadSleep(POLLEVERY);
+                // do we have an answer?
                 answer = database.getAnswer(qid);
                 if ((null!=answer) && (!answer.isEmpty())) {
-                    // we have an answer!
+                    // yes, end and return
                     return answer;
                 }
-            } while ((tools.getTimestamp() + (POLLEVERY)) < endTime);
+                timeNow = tools.getTimestamp();
+                timeRemaining = Math.max(0, endTime - timeNow);
+                tools.threadSleep(Math.min(POLLEVERY, timeRemaining));
+            } while (timeRemaining > 0);
         } catch (Database.DatabaseException dbe) {
             throw new NeuralNetException(dbe);
         }

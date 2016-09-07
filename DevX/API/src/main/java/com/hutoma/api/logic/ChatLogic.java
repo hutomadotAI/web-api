@@ -59,12 +59,20 @@ public class ChatLogic {
         logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid);
         boolean noResponse = true;
         try {
-            ChatResult semanticAnalysisResult = semanticAnalysis.getAnswer(dev_id, aiid, uid, topic, "[" +history+ "]" + q, min_p);
+            // async start both requests
+            semanticAnalysis.startAnswerRequest(dev_id, aiid, uid, topic, "[" +history+ "]" + q, min_p);
+            neuralNet.startAnswerRequest(dev_id, aiid, uid, q);
 
-            if (null!=semanticAnalysisResult.getAnswer() && !semanticAnalysisResult.getAnswer().isEmpty()) {
-                noResponse = false;
+            // wait for semantic result to complete
+            ChatResult semanticAnalysisResult = semanticAnalysis.getAnswerResult();
 
-                double semanticScore = Double.valueOf(semanticAnalysisResult.getScore());
+            // process result from semantic analysis
+            if (null!=semanticAnalysisResult.getAnswer()) {
+                if (!semanticAnalysisResult.getAnswer().isEmpty()) {
+                    noResponse = false;
+                }
+
+                double semanticScore = semanticAnalysisResult.getScore();
                 chatResult.setScore(toOneDecimalPlace(semanticScore));
                 chatResult.setTopic_out(semanticAnalysisResult.getTopic_out());
                 chatResult.setAnswer(semanticAnalysisResult.getAnswer());
@@ -73,14 +81,17 @@ public class ChatLogic {
                 chatResult.setElapsedTime((endWNetTime - startTime)/1000.0d);
 
                 apiChat.setTimestamp(endWNetTime);
-                //apiChat.metadata = md;
 
-                logger.logDebug(LOGFROM, "AI response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                logger.logDebug(LOGFROM, "WNET response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
 
-                // if Semantic Analysis is not confident enough, try with the Neural Network
+                // if semantic analysis is not confident enough, wait for and process result from neural network
                 if (semanticScore < min_p)  {
-                    logger.logDebug(LOGFROM, "starting RNN request");
-                    String RNN_answer = neuralNet.getAnswer(dev_id, aiid, uid,q);
+
+                    // wait for neural network to complete
+                    String RNN_answer = neuralNet.getAnswerResult();
+                    if (!RNN_answer.isEmpty()) {
+                        noResponse = false;
+                    }
                     long endRNNTime = tools.getTimestamp();
 
                     boolean validRNN = false;
@@ -97,9 +108,11 @@ public class ChatLogic {
                             validRNN = true;
                         }
                     }
-                    logger.logDebug(LOGFROM, "RNN " + ((validRNN)? "valid":"invalid/empty") + " response in " +
-                            Long.toString(endRNNTime - endWNetTime) + "ms. Total query time " +
-                            Long.toString(endRNNTime - startTime) + "ms.");
+                    if (validRNN) {
+                        logger.logDebug(LOGFROM, "RNN response in " + Long.toString(endRNNTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                    } else {
+                        logger.logDebug(LOGFROM, "RNN invalid/empty response in " + Long.toString(endRNNTime - startTime) + "ms.");
+                    }
                 }
             }
         }

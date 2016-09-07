@@ -57,4 +57,8 @@ public class ChatResult {
     public String getTopic_out() {
         return topic_out;
     }
+
+    public double getElapsedTime() {
+        return elapsed_time;
+    }
 }
