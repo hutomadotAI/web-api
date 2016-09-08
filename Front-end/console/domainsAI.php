@@ -59,7 +59,7 @@
             <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
             <li class="active">
                 <a href="#">
-                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
 
@@ -113,7 +113,7 @@
 <script src="./plugins/shared/shared.js"></script>
 <script>
   // API JSON REQUEST DOMAIN RESPONSE
-  var domains = <?php echo json_encode($response['domain_list']); unset($response);?>;
+  var domains = <?php echo json_encode($response['_domainList']); unset($response);?>;
   var usr_domains =<?php echo json_encode($usr_domains); unset($usr_domains);?>;
 
   var userActived ={};

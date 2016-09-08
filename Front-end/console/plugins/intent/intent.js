@@ -1,6 +1,9 @@
 document.getElementById("inputIntentName").addEventListener("keyup", activeButtonCreate);
 document.getElementById("btnCreateIntent").addEventListener("click", PostingIntentName);
 
+if (limitText($("#inputIntentName"))== 0)
+    $("#btnCreateIntent").prop("disabled", false);
+
 
 function activeButtonCreate() {
     var limitTextInputSize = 50;
@@ -32,15 +35,6 @@ function limitText(limitField, limitNum) {
 }
 
 
-function createIntent() {
-    $(this).prop("disabled",true);
-    if(isContainInvalidCharacters($("#inputIntentName").val()))
-        msgAlertIntent(2,'Intent name need contain only the following: A-Z, a-z, 0-9 character');
-    else {
-        PostingIntentName();
-    }
-}
-
 function PostingIntentName(){
     $(this).prop("disabled",true);
     
@@ -66,17 +60,17 @@ function msgAlertIntent(alarm,msg){
     switch (alarm){
         case 0:
             $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-base');
-            $("#icongAlertIntent").attr('class', 'icon fa fa-check');
+            $("#iconAlertIntent").attr('class', 'icon fa fa-check');
             document.getElementById('inputIntentName').style.borderColor = "#d2d6de";
             break;
         case 1:
             $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-warning');
-            $("#icongAlertIntent").attr('class', 'icon fa fa-check');
+            $("#iconAlertIntent").attr('class', 'icon fa fa-check');
             document.getElementById('inputIntentName').style.borderColor = "orange";
             break;
         case 2:
             $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-danger');
-            $("#icongAlertIntent").attr('class', 'icon fa fa-warning');
+            $("#iconAlertIntent").attr('class', 'icon fa fa-warning');
             document.getElementById('inputIntentName').style.borderColor = "red";
             break
     }

@@ -25,7 +25,7 @@
         
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntent">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
-            <i class="icon fa fa-check" id="icongAlertIntent"></i>
+            <i class="icon fa fa-check" id="iconAlertIntent"></i>
             <span id="msgAlertIntent"></span>
         </div>
     </div>

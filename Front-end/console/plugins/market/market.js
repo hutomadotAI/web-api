@@ -6,7 +6,6 @@ document.getElementById("ai_price").addEventListener("keyup", checkValue);
 
 function wizardNext() {
     $("#btnSave").prop("disabled",true);
-    $("#btnSkip").prop("disabled",true);
     $("#btnCancel").prop("disabled",true);
 
     if(isContainInvalidCharacters($("#ai_price").val())) {
@@ -22,7 +21,6 @@ function wizardNext() {
 
 function wizardSkip() {
     $("#btnSave").prop("disabled",true);
-    $("#btnSkip").prop("disabled",true);
     $("#btnCancel").prop("disabled",true);
 
     if(document.marketNewAIform.onsubmit)

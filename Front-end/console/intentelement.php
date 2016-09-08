@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="searchEntries()">
+<body class="hold-transition skin-blue-light fixed sidebar-mini">
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -42,7 +42,7 @@
                 <li><a href="./home.php" tabindex="-1"><i class="fa fa-home text-light-blue" tabindex="-1"></i><span>home</span></a></li>
                 <li class="active">
                     <a href="#" tabindex="-1">
-                        <i class="fa fa-user text-olive" tabindex="-1" ></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                        <i class="fa fa-user text-olive" tabindex="-1" ></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                     </a>
                     <ul class="treeview-menu">
 
@@ -71,7 +71,8 @@
         <section class="content">
             <div class="row">
                 <div class="col-md-7">
-                    <?php include './dynamic/intent.element.content.create.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.expression.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.action.html.php'; ?>
                 </div>
                 <div class="col-md-5">
                     <?php include './dynamic/chat.html.php'; ?>

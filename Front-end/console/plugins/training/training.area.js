@@ -64,6 +64,8 @@ function uploadFile(){
             var JSONresponse = xmlhttp.responseText;
             try {
                 var JSONdata = JSON.parse(JSONresponse);
+
+
                 if (JSONdata['status']['code'] === 200)
                     msgAlert(3,'File Uploaded!!!');
                 else

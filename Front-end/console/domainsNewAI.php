@@ -21,6 +21,7 @@
 
     $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
 
+
     if ($response['status']['code'] !== 200) {
         unset($response);
         header('Location: ./error.php?err=3');
@@ -111,7 +112,7 @@
 <script src="./plugins/domain/domain.js"></script>
 
 <script>
-  var domains = <?php  echo json_encode($response['domain_list']);  unset($response); ?>;
+  var domains = <?php  echo json_encode($response['_domainList']);  unset($response); ?>;
   var userActived ={};
   for (var x in domains){
       var key = domains[x].dom_id;
