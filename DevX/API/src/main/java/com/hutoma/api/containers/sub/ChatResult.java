@@ -1,5 +1,6 @@
 package com.hutoma.api.containers.sub;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,12 +8,14 @@ import java.util.List;
  */
 public class ChatResult {
 
+
     double score;
     String query = "";
     String answer = "";
     double elapsed_time;
     String action;
     List<Parameter> parameters;
+    public ArrayList<Intent> intent;
     String context;
 
     String topic_in = "";

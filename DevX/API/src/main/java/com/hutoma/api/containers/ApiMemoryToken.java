@@ -24,6 +24,21 @@ public class ApiMemoryToken extends ApiResult {
     }
 
     public String getVariableName() {
+
         return variable_name;
+    }
+
+    public DateTime getLast_accessed() {
+
+        return last_accessed;
+    }
+
+    public int getExpires_seconds() {
+        return expires_seconds;
+    }
+
+    public String getVariable_name() {
+
+        return  this.variable_name;
     }
 }

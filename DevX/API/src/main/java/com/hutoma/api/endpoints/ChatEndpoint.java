@@ -40,7 +40,7 @@ public class ChatEndpoint {
             @DefaultValue("1") @QueryParam("uid") String uid,
             @DefaultValue("") @QueryParam("chat_history") String history,
             @DefaultValue("") @QueryParam("current_topic") String topic,
-            @DefaultValue("0.5") @QueryParam("confidence_threshold") float min_p) {
+            @DefaultValue("0.0") @QueryParam("confidence_threshold") float min_p) {
         ApiResult result = chatLogic.chat(securityContext, aiid, dev_id, q, uid, history, topic, min_p);
         return result.getResponse(serializer).build();
     }

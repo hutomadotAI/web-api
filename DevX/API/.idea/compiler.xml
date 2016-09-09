@@ -27,7 +27,6 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="Hutoma.API" target="1.8" />
-      <module name="Recommender" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

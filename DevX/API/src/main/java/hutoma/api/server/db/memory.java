@@ -58,12 +58,11 @@ public class memory {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                api_intents_and_entities.memory_token r = new api_intents_and_entities.memory_token();
-                r.variable_name = rs.getString("variable_name");
-                r.last_accessed = rs.getTimestamp("last_accessed");
-                r.expires_seconds= rs.getInt("expires_seconds");
-                long secs = diff(timestamp, r.last_accessed );
-                if (secs>r.expires_seconds) remove_variable(dev_id,aiid,uid,r.variable_name);
+
+                ApiMemoryToken memory_token  = new ApiMemoryToken(rs.getString("variable_name"),"","",new DateTime(rs.getTimestamp("last_accessed")),rs.getInt("expires_seconds"),0);
+
+                long secs = diff(timestamp, new Timestamp(memory_token.getLast_accessed().getMillis()));
+                if (secs>memory_token.getExpires_seconds()) remove_variable(dev_id,aiid,uid,memory_token.getVariable_name());
 
             }
             st.close();
@@ -177,9 +176,9 @@ public class memory {
         Connection conn = DriverManager.getConnection(myUrl);
         Statement st = conn.createStatement();
         String query = "INSERT INTO ai_memory (aiid,uid,variable_name,variable_value,last_accessed,expires_seconds,n_prompts,variable_type,dev_id) " +
-                       "VALUES (?,?,?,?,?,?,?,?,?) " +
-                       "ON DUPLICATE KEY " +
-                       "UPDATE variable_value=VALUES(variable_value), last_accessed=VALUES(last_accessed),n_prompts=VALUES(n_prompts)";
+                "VALUES (?,?,?,?,?,?,?,?,?) " +
+                "ON DUPLICATE KEY " +
+                "UPDATE variable_value=VALUES(variable_value), last_accessed=VALUES(last_accessed),n_prompts=VALUES(n_prompts)";
 
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setString(1, aiid);

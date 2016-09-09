@@ -39,6 +39,8 @@ public class Config {
         }
     }
 
+    public  String getWnetNumberOfCPUS() {return getConfigFromProperties("num_CPUs", "8");}
+
     public String getEncodingKey() {
         return getConfigFromProperties("encoding_key", "");
     }

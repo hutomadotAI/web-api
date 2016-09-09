@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import javax.ws.rs.core.SecurityContext;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

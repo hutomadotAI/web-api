@@ -73,4 +73,9 @@ public class TestToolsTextSanitizer {
         Assert.assertEquals("", tools.textSanitizer(" "));
     }
 
+    @Test
+    public void testTextWhitAmpersand() {
+        Assert.assertEquals("hello", tools.textSanitizer("&hello"));
+    }
+
 }

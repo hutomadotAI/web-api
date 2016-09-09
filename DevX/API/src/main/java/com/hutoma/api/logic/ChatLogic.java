@@ -44,7 +44,7 @@ public class ChatLogic {
     }
 
     public ApiResult chat(SecurityContext context, String aiid, String dev_id, String q, String uid, String history,
-                             String topic, float min_p) {
+                          String topic, float min_p) {
 
         long timestampNow = tools.getTimestamp();
         UUID chatID = tools.createNewRandomUUID();
@@ -60,7 +60,7 @@ public class ChatLogic {
         boolean noResponse = true;
         try {
             // async start both requests
-            semanticAnalysis.startAnswerRequest(dev_id, aiid, uid, topic, "[" +history+ "]" + q, min_p);
+            semanticAnalysis.startAnswerRequest(dev_id, aiid, uid, topic,history,q, min_p);
             neuralNet.startAnswerRequest(dev_id, aiid, uid, q);
 
             // wait for semantic result to complete

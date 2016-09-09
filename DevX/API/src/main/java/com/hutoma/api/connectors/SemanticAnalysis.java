@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -45,14 +44,18 @@ public class SemanticAnalysis {
         this.tools = tools;
     }
 
-    public void startAnswerRequest(String devid, String aiid, String uid, String topic, String q, float min_p) throws SemanticAnalysisException {
+    public void startAnswerRequest(String devid, String aiid, String uid, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
         UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                 .addParameter("q", q)
                 .addParameter("aiid", aiid)
-                .addParameter("uid", devid)
+                .addParameter("dev_id", devid)
+                .addParameter("uid", uid)
                 .addParameter("min_p", Float.toString(min_p))
                 .addParameter("multiprocess", "yes")
-                .addParameter("nproc", "8");
+                .addParameter("nproc", "8")
+                .addParameter("topic", topic)
+                .addParameter("nproc", config.getWnetNumberOfCPUS())
+                .addParameter("history", history);
         responseFuture = ClientBuilder.newClient().target(url.toString()).request().async().get();
     }
 
@@ -68,15 +71,19 @@ public class SemanticAnalysis {
     }
 
     @Deprecated
-    public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p) throws SemanticAnalysisException {
+    public ChatResult getAnswer(String devid, String aiid, String uid, String history, String topic, String q, float min_p) throws SemanticAnalysisException {
         try {
             UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                     .addParameter("q", q)
                     .addParameter("aiid", aiid)
-                    .addParameter("uid", devid)
+                    .addParameter("dev_id", devid)
+                    .addParameter("uid", uid)
                     .addParameter("min_p", Float.toString(min_p))
                     .addParameter("multiprocess", "yes")
-                    .addParameter("nproc", "8");
+                    .addParameter("nproc", "8")
+                    .addParameter("topic", topic)
+                    .addParameter("nproc", config.getWnetNumberOfCPUS())
+                    .addParameter("history", history);
             URL finalUrl = new URL(url.toString());
             InputStream stream = finalUrl.openStream();
             ChatResult result = (ChatResult) serializer.deserialize(stream, ChatResult.class);

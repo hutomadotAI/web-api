@@ -1,9 +1,9 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Logger;
-import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiMemoryToken;
+import com.hutoma.api.containers.sub.AiDomain;
 import hutoma.api.server.db.memory;
 import org.joda.time.DateTime;
 
@@ -233,5 +233,6 @@ public class Database {
             throw new DatabaseException(e);
         }
     }
+
 
 }

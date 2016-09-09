@@ -56,6 +56,7 @@ public class Tools {
                         case ']':
                         case '<':
                         case '>':
+                        case '&':
                             break;
                         // characters to retain unchanged
                         default:
@@ -71,4 +72,5 @@ public class Tools {
         }
         return sb.toString();
     }
+
 }
