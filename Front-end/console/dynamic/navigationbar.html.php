@@ -31,10 +31,11 @@
             </li>
           </ul>
         </li>
-        <!-- Control Sidebar Toggle Button -->
+        <!-- Control Sidebar Toggle Button
         <li>
           <a href="#" data-toggle="control-sidebar" tabindex="-1" ><i class="fa fa-gears" tabindex="-1" ></i></a>
         </li>
+        -->
       </ul>
     </div>
 </nav>

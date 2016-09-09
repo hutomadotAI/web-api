@@ -1,7 +1,17 @@
+checkListExpressionSize();
+
+function checkListExpressionSize(){
+    if (document.getElementById('userexpression-list').childElementCount > 0)
+        $("#btnSaveIntent").prop("disabled",false);
+    else
+        $("#btnSaveIntent").prop("disabled",true);
+}
+
 function deleteUserExpression (element) {
     // delete node from page - dipendence parentNode
     var parent =  ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent)
+    checkListExpressionSize();
 }
 
 function OnMouseIn (elem) {
@@ -26,6 +36,39 @@ function checkKeyCode(element,key){
     }
 }
 
+
+function findEntityList(element){
+    var prefix = $(element).val();
+    loadEntitySublist(element,prefix);
+}
+
+function loadEntitySublist(element,str){
+    var newNode = document.createElement('div');
+    newNode.className = 'row';
+    newNode.id = 'entity_list';
+
+    var wHTML = '';
+
+    //wHTML += ('<div class="box-tools pull-right">');
+   // wHTML += ('<ul class="dropdown-menu flat">');
+    for (var x in entityList) {
+        if ( (str!=" ") && ( (str.length==0) || (entityList[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
+            if(entityList.length!=0){
+                wHTML += ('<li class="footer" onMouseOver="this.style.cursor=\'pointer\'">'+entityList[x].name+'</li>');
+            }
+        }
+    }
+   // wHTML += ('</ul>');
+    //wHTML += ('</div>');
+
+    var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
+    newNode.innerHTML = wHTML;
+
+    document.getElementById('btnList').click();
+    element.focus();
+    parent.appendChild(newNode);
+}
+
 function createNewUsersayRow(elem,value,parent){
 
     var wHTML ='';
@@ -35,7 +78,7 @@ function createNewUsersayRow(elem,value,parent){
 
     wHTML +=('<div class="col-xs-9" id="obj-userexpression">');
     wHTML +=('<div class="inner-addon left-addon">');
-    wHTML +=('<i class="fa fa-quote-right text-gray"></i>');
+    wHTML +=('<i class="fa fa-commenting-o text-gray"></i>');
 
     wHTML +=('<input type="text" class="form-control no-border" id="user-expression" name="user-expression" style="padding-left: 35px; " placeholder="'+value+'">');
     wHTML +=('</div>');
@@ -56,6 +99,8 @@ function createNewUsersayRow(elem,value,parent){
     newNode.setAttribute('class', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
+
+    checkListExpressionSize();
 }
 
 
@@ -105,3 +150,29 @@ function msgAlertUserExpression(alarm,msg){
     }
     document.getElementById('msgAlertUserExpression').innerText = msg;
 }
+
+function doOn(obj)
+{
+    if(obj.id=="mydef")
+    {
+        document.getElementById("def1").style.display="none";
+        document.getElementById("def").style.display="block";
+    }
+    if(obj.id=="search")
+    {
+        document.getElementById("def").style.display="none";
+
+        document.getElementById("def1").innerHTML='<li><a id="Java" onclick="mydef(this);" >java</a></li><li><a id="oracle" onclick="mydef(this);" >Oracle</a></li>';
+
+        document.getElementById("def1").style.display="block";
+    }
+
+}
+
+function mydef(obj)
+{
+    document.getElementById("search").value=obj.innerHTML;
+    document.getElementById("def1").style.display="none";
+    document.getElementById("def").style.display="none";
+}
+

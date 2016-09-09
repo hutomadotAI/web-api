@@ -4,8 +4,8 @@
         <h3 class="box-title"><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?> - Chat</h3>
 
 
-        <div class="box-tools pull-right" id="dropdown-chat-options">
-            <ul class="dropdown-menu flat" id = "list-options-voice">
+        <div class="box-tools pull-right" >
+            <ul class="dropdown-menu flat">
                 <li class="footer"><a href="#">  <i class="fa fa-bullhorn"></i>Deactive Voice</a></li>
                 <li class="footer"><a href="#">  <i class="fa fa-microphone-slash"></i>Mute Microphone</a></li>
                 <li class="footer"><a href="#">  <i class="fa fa-adjust"></i>Color Voice</a></li>
@@ -54,7 +54,7 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        drawHTML.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['username']; ?>","<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>"]);
+        drawHTML.init(["<?php //echo $_SESSION[$_SESSION['navigation_id']]['user_details']['username']; ?>","<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>"]);
     </script>
 </form>
 -->

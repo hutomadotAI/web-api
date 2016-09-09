@@ -1,46 +1,28 @@
  <div class="box box-solid box-clean flat no-shadow" >
    
-    <div class="box-header with-border">
-        <i class="fa fa-commenting-o text-green"></i>
-        <h3 class="box-title">Intent</h3>
+    <div class="box-header with-border ">
+        <!--<i class="fa fa-comment-o text-green"></i>-->
+        <h3 class="box-title">User Expression</h3>
         <a data-toggle="collapse"  href="#collapseExpressionInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
             </div>
         </a>
     </div>
+     
 
+     
 
-     <div class="box-header bg-gray-light">
-
-         <div class="bootstrap-filestyle input-group" id="GrpIntentButton">
-             <form method="POST" name="intentCreateForm" onsubmit="RecursiveUnbind($('#wrapper'));">
-                 <input type="text" class="form-control" id="inputIntentName" name="intent" placeholder="Enter intent name" value="<?php echo $_POST['intent']?>" style="width: 96%;" disabled>
-             </form>
-             <div class="input-group-btn" tabindex="0">
-                 <button id="btnSaveIntent"  class="btn btn-success flat" style="width: 120px;" alt="save intent" disabled>Save Intent</button>
-             </div>
-         </div>
-     </div>
-
-
-
-
-     <div class="box-body" id="boxIntent">
-
+     <div class="box-body no-margin" id="boxIntent"  style="padding-top: 0px;">
             <div class="row">
-                <h4 class="box-title">
                 <div class="col-md-12">
-                    </i><span class="lead"> User expression</span>
-                    <p></p>
                     <h5 class="box-title">
                     <div class="inner-addon left-addon">
-                        <i class="fa fa-quote-right text-light-blue"></i>
+                        <i class="fa fa-comment-o text-light-blue"></i>
                         <input type="text" class="form-control" id="user-expression" name="user-expression" placeholder="User expression" onkeydown="checkKeyCode(this,event.keyCode)"  style="padding-left: 35px;">
                     </div>
                     </h5>
                 </div>
-                </h4>
             </div>
 
             <div class="row" id="userexpression-list"></div>

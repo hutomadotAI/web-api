@@ -5,6 +5,19 @@
         header('Location: ./error.php?err=16');
         exit();
     }
+
+    // fake request - we need to loading entity for a specific USER,AI, INTENT 
+    $entityList = \hutoma\console::getIntegrations();
+
+
+/*
+    if ($entityList['status']['code'] !== 200) {
+        unset($entityList);
+        header('Location: ./error.php?err=3');
+        exit;
+    }
+    */
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -22,7 +35,13 @@
     <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="./plugins/iCheck/skins/square/red.css">
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+
+
+    <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
@@ -70,11 +89,12 @@
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
-                <div class="col-md-7">
+                <div class="col-md-8">
+                    <?php include './dynamic/intent.element.content.head.html.php'; ?>
                     <?php include './dynamic/intent.element.content.expression.html.php'; ?>
                     <?php include './dynamic/intent.element.content.action.html.php'; ?>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <?php include './dynamic/chat.html.php'; ?>
                     <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
@@ -103,11 +123,53 @@
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
+<script src="./plugins/iCheck/icheck.js"></script>
 <script src="./plugins/intent/intent.element.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
+
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="./plugins/jQuery/jquery.omniselect.js"></script>
+
+
+<script>
+    $(document).ready(function(){
+        $('required').iCheck({
+            checkboxClass: 'icheckbox_square',
+            //increaseArea: '20%' // optional
+        });
+    });
+    
+    var entityList = <?php echo json_encode($entityList); unset($entityList);?>;
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var $input = $('#states');
+
+        $input.omniselect({
+            source: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"],
+            resultsClass: 'typeahead dropdown-menu',
+            activeClass: 'active',
+            renderItem: function(label, id, index) {
+                return '<li><a href="#">' + label + '</a></li>';
+            }
+        });
+
+        $input.on('omniselect:select', function(event, value) {
+            console.log('Selected: ' + value);
+        });
+    });
+</script>
+<script type="text/javascript">
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+
 
 </body>
 </html>
