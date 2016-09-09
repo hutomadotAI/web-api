@@ -31,8 +31,8 @@ class console
       "db" => array(
           "host" => 'https://api.hutoma.com/v1',
           "port" => '433',
-          "username" => 'root',
-          "password" => 'P7gj3fLKtPhjU7aw',
+          "username" => 'hutoma_caller',
+          "password" => '>YR"khuN*.gF)V4#',
           "name" => 'hutoma',
           "table" => 'users',
           "token_table" => "resetTokens"
@@ -271,6 +271,8 @@ class console
         self::$session = isset($_SESSION['logSyscuruser']) ? $_SESSION['logSyscuruser'] : false;
         self::$remember_cookie = isset($_COOKIE['logSysrememberMe']) ? $_COOKIE['logSysrememberMe'] : false;
 
+        // DEBUG self::$dbh->setAttribute( \PDO::ATTR_ERRMODE , \PDO::ERRMODE_EXCEPTION );
+
         $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$session . self::$config['keys']['cookie']);
         if (self::$cookie == $encUserID) {
           self::$loggedIn = true;
@@ -311,6 +313,7 @@ class console
             self::logout();
             $called_from = "login";
           } else if (self::$config['two_step_login']['first_check_only'] === false || (self::$config['two_step_login']['first_check_only'] === true && !isset($_SESSION['device_check']))) {
+            //TODO: 2-step-login is off at the moment - to wil have to be moved to a stored procedure to work
             $sql = self::$dbh->prepare("SELECT '1' FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
             $sql->execute(array(self::$user, $_COOKIE['logSysdevice']));
 
@@ -368,17 +371,17 @@ class console
        * We Add LIMIT to 1 in SQL query because to
        * get an array with key as the column name.
        */
-      if (self::$config['features']['email_login'] === true) {
-        $query = "SELECT `id`, `password`, `password_salt`, `attempt` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login ORDER BY `id` LIMIT 1";
-      } else {
-        $query = "SELECT `id`, `password`, `password_salt`, `attempt` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login ORDER BY `id` LIMIT 1";
-      }
-
+      $query = "CALL getUser(:userName, :checkEmail)";
       $sql = self::$dbh->prepare($query);
-      $sql->bindValue(":login", $username);
-      $sql->execute();
+      $sql->execute(array(
+          ":userName" => $username,
+          ":checkEmail" => (self::$config['features']['email_login'] === true)
+      ));
 
       if ($sql->rowCount() == 0) {
+        // finally fetch the additional sql row for stored proc calls
+        $sql->nextRowset();
+
         // No such user like that
         return false;
       } else {
@@ -386,6 +389,10 @@ class console
          * Get the user details
          */
         $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+
+        // finally fetch the additional sql row for stored proc calls
+        $sql->nextRowset();
+
         $us_id = $rows['id'];
         $us_pass = $rows['password'];
         $us_salt = $rows['password_salt'];
@@ -397,15 +404,14 @@ class console
           if (time() < $blockedTime) {
             $blocked = true;
             return array(
-                "status" => "blocked",
-                "minutes" => round(abs($blockedTime - time()) / 60, 0),
-                "seconds" => round(abs($blockedTime - time()) / 60 * 60, 2)
+              "status" => "blocked",
+              "minutes" => round(abs($blockedTime - time()) / 60, 0),
+              "seconds" => round(abs($blockedTime - time()) / 60 * 60, 2)
             );
           } else {
             // remove the block, because the time limit is over
-            self::updateUser(array(
-                "attempt" => "" // No tries at all
-            ), $us_id);
+            self::updateUserLoginAttempts("" // No tries at all
+              , $us_id);
           }
         }
         /**
@@ -435,9 +441,8 @@ class console
                * If Brute Force Protection is Enabled,
                * Reset the attempt status
                */
-              self::updateUser(array(
-                  "attempt" => "0"
-              ), $us_id);
+              self::updateUserLoginAttempts("0",
+                $us_id);
             }
 
             // Redirect
@@ -464,28 +469,25 @@ class console
 
             if ($status == "") {
               // User was not logged in before
-              self::updateUser(array(
-                  "attempt" => "1" // Tried 1 time
-              ), $us_id);
+              self::updateUserLoginAttempts("1", // Tried 1 time
+                $us_id);
             } else if ($status == $max_tries) {
               /**
                * Account Blocked. User will be only able to
                * re-login at the time in UNIX timestamp
                */
               $eligible_for_next_login_time = strtotime("+" . self::$config['brute_force']['time_limit'] . " seconds", time());
-              self::updateUser(array(
-                  "attempt" => "b-" . $eligible_for_next_login_time
-              ), $us_id);
+              self::updateUserLoginAttempts("b-" . $eligible_for_next_login_time,
+                $us_id);
               return array(
-                  "status" => "blocked",
-                  "minutes" => round(abs($eligible_for_next_login_time - time()) / 60, 0),
-                  "seconds" => round(abs($eligible_for_next_login_time - time()) / 60 * 60, 2)
+                "status" => "blocked",
+                "minutes" => round(abs($eligible_for_next_login_time - time()) / 60, 0),
+                "seconds" => round(abs($eligible_for_next_login_time - time()) / 60 * 60, 2)
               );
             } else if ($status < $max_tries) {
               // If the attempts are less than Max and not Max
-              self::updateUser(array(
-                  "attempt" => $status + 1 // Increase the no of tries by +1.
-              ), $us_id);
+              self::updateUserLoginAttempts($status + 1, // Increase the no of tries by +1.
+                $us_id);
             }
           }
           return false;
@@ -498,7 +500,7 @@ class console
    * A function to register a user with passing the username, password
    * and optionally any other additional fields.
    */
-  public static function register($id, $password, $other = array())
+  public static function register($id, $password, $username, $fullname, $created)
   {
     self::construct();
     if (self::userExists($id) || (isset($other['email']) && self::userExists($other['email']))) {
@@ -507,26 +509,20 @@ class console
       $randomSalt = self::rand_string(20);
       $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
 
-      if (count($other) == 0) {
-        /* If there is no other fields mentioned, make the default query */
-        $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['table'] . "` (`email`, `password`, `password_salt`) VALUES(:email, :password, :passwordSalt)");
-      } else {
-        /* if there are other fields to add value to, make the query and bind values according to it */
-        $keys = array_keys($other);
-        $columns = implode(",", $keys);
-        $colVals = implode(",:", $keys);
-        $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['table'] . "` (`email`, `password`, `password_salt`, $columns) VALUES(:email, :password, :passwordSalt, :$colVals)");
-        foreach ($other as $key => $value) {
-          $value = htmlspecialchars($value);
-          $sql->bindValue(":$key", $value);
-        }
-      }
-      /* Bind the default values */
+      $query = "CALL addUser(:email, :password, :passwordSalt, :userName, :fullName, :creationDate)";
+      $sql = self::$dbh->prepare($query);
+
+      /* Bind the values */
       $sql->bindValue(":email", $id);
       $sql->bindValue(":password", $saltedPass);
       $sql->bindValue(":passwordSalt", $randomSalt);
+      $sql->bindValue(":userName", $username);
+      $sql->bindValue(":fullName", $fullname);
+      $sql->bindValue(":creationDate", $created);
       $sql->execute();
 
+      // finally fetch the additional sql row for stored proc calls
+      $sql->nextRowset();
 
       return true;
     }
@@ -577,6 +573,7 @@ class console
        * The user gave the password reset token. Check if the token is valid.
        */
       $reset_pass_token = urldecode($_GET['resetPassToken']);
+      //TODO: move this to a stored procedure - at the moment this code is not being used.
       $sql = self::$dbh->prepare("SELECT `uid` FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
       $sql->execute(array($reset_pass_token));
 
@@ -608,6 +605,7 @@ class console
       }
     } elseif (isset($_POST['logSysForgotPassChange']) && isset($_POST['logSysForgotPassNewPassword']) && isset($_POST['logSysForgotPassRetypedPassword'])) {
       $reset_pass_token = urldecode($_POST['token']);
+      //TODO: move this to a stored procedure - at the moment this code is not being used.
       $sql = self::$dbh->prepare("SELECT `uid` FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
       $sql->execute(array($reset_pass_token));
 
@@ -637,6 +635,7 @@ class console
             /**
              * The token shall not be used again, so remove it.
              */
+            //TODO: move this to a stored procedure - at the moment this code is not being used.
             $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
             $sql->execute(array($reset_pass_token));
 
@@ -655,6 +654,7 @@ class console
         exit();
 
       } else {
+        //TODO: move this to a stored procedure - at the moment this code is not being used.
         $sql = self::$dbh->prepare("SELECT `email`, `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login");
         $sql->bindValue(":login", $identification);
         $sql->execute();
@@ -670,6 +670,7 @@ class console
            * Make token and insert into the table
            */
           $token = self::rand_string(40);
+          //TODO: move this to a stored procedure - at the moment this code is not being used.
           $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['token_table'] . "` (`token`, `uid`, `requested`) VALUES (?, ?, NOW())");
           $sql->execute(array($token, $uid));
           $encodedToken = urlencode($token);
@@ -701,6 +702,7 @@ class console
     if (self::$loggedIn) {
       $randomSalt = self::rand_string(20);
       $saltedPass = hash('sha256', $newpass . self::$config['keys']['salt'] . $randomSalt);
+      //TODO: move this to a stored procedure - at the moment this code is not being used.
       $sql = self::$dbh->prepare("UPDATE `" . self::$config['db']['table'] . "` SET `password` = ?, `password_salt` = ? WHERE `id` = ?");
       $sql->execute(array($saltedPass, $randomSalt, self::$user));
       return true;
@@ -717,16 +719,19 @@ class console
   public static function userExists($identification)
   {
     self::construct();
-    if (self::$config['features']['email_login'] === true) {
-      $query = "SELECT `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login";
-    } else {
-      $query = "SELECT `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login";
-    }
+
+    $query = "CALL getUserId(:userName, :checkEmail)";
     $sql = self::$dbh->prepare($query);
     $sql->execute(array(
-        ":login" => $identification
+        ":userName" => $identification,
+        ":checkEmail" => (self::$config['features']['email_login'] === true)
     ));
-    return $sql->rowCount() == 0 ? false : true;
+    $rowCount = $sql->rowCount();
+
+    // finally fetch the additional sql row for stored proc calls
+    $sql->nextRowset();
+
+    return $rowCount == 0 ? false : true;
   }
 
   /**
@@ -747,45 +752,45 @@ class console
       $columns = $what != "*" ? "`$what`" : "*";
     }
 
-    $sql = self::$dbh->prepare("SELECT {$columns} FROM `" . self::$config['db']['table'] . "` WHERE `id` = ? ORDER BY `id` LIMIT 1");
+    $query = "CALL getUserById(:id, :columns)";
+    $sql = self::$dbh->prepare($query);
 
-    $sql->execute(array($user));
+    /* Bind the values */
+    $sql->bindValue(":id", $user);
+    $sql->bindValue(":columns", $columns);
+    $sql->execute();
+
     $data = $sql->fetch(\PDO::FETCH_ASSOC);
 
     if (!is_array($what)) {
       $data = $what == "*" ? $data : $data[$what];
     }
+
+    // finally fetch the additional sql row for stored proc calls
+    $sql->nextRowset();
+
     return $data;
   }
 
-  /**
-   * Updates the info of user in DB
-   */
-  public static function updateUser($toUpdate = array(), $user = null)
-  {
-    self::construct();
-    if (is_array($toUpdate) && !isset($toUpdate['id'])) {
+    /**
+     * Updates the login attempts of the user
+     */
+    public static function updateUserLoginAttempts($attempts, $user = null)
+    {
+      self::construct();
       if ($user == null) {
-        $user = self::$user;
+          $user = self::$user;
       }
-      $columns = "";
-      foreach ($toUpdate as $k => $v) {
-        $columns .= "`$k` = :$k, ";
-      }
-      $columns = substr($columns, 0, -2); // Remove last ","
 
-      $sql = self::$dbh->prepare("UPDATE `" . self::$config['db']['table'] . "` SET {$columns} WHERE `id`=:id");
+      $sql = self::$dbh->prepare("CALL updateUserLoginAttempts(:id, :attempts)");
       $sql->bindValue(":id", $user);
-      foreach ($toUpdate as $key => $value) {
-        $value = htmlspecialchars($value);
-        $sql->bindValue(":$key", $value);
-      }
+      $sql->bindValue(":attempts", $attempts);
+
       $sql->execute();
 
-    } else {
-      return false;
+      // finally fetch the additional sql row for stored proc calls
+      $sql->nextRowset();
     }
-  }
 
   /**
    * Returns a string which shows the time since the user has joined
@@ -855,6 +860,7 @@ class console
       $uid = $_POST['logSys_two_step_login-uid'];
       $token = $_POST['logSys_two_step_login-token'];
 
+      //TODO: this statement needs to move to stored procedure
       $sql = self::$dbh->prepare("SELECT COUNT(1) FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ? AND `uid` = ?");
       $sql->execute(array($token, $uid));
 
@@ -875,6 +881,7 @@ class console
          */
         if (isset($_POST['logSys_two_step_login-dontask'])) {
           $device_token = self::rand_string(10);
+          //TODO: this statement needs to move to stored procedure
           $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['two_step_login']['devices_table'] . "` (`uid`, `token`, `last_access`) VALUES (?, ?, NOW())");
           $sql->execute(array($uid, $device_token));
           setcookie("logSysdevice", $device_token, strtotime(self::$config['two_step_login']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -883,6 +890,7 @@ class console
         /**
          * Revoke token from reusing
          */
+        //TODO: this statement needs to move to stored procedure
         $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ? AND `uid` = ?");
         $sql->execute(array($token, $uid));
         self::login(self::getUser("username", $uid), "", isset($_POST['logSys_two_step_login-remember_me']));
@@ -907,6 +915,7 @@ class console
          * Check if device is verfied so that 2 Step Verification can be skipped
          */
         if (isset($_COOKIE['logSysdevice'])) {
+          //TODO: move this to a stored procedure - at the moment this code is not being used.
           $sql = self::$dbh->prepare("SELECT 1 FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
           $sql->execute(array($uid, $_COOKIE['logSysdevice']));
           if ($sql->fetchColumn() == "1") {
@@ -914,6 +923,7 @@ class console
             /**
              * Update last accessed time
              */
+            //TODO: this statement needs to move to stored procedure
             $sql = self::$dbh->prepare("UPDATE `" . self::$config['two_step_login']['devices_table'] . "` SET `last_access` = NOW() WHERE `uid` = ? AND `token` = ?");
             $sql->execute(array($uid, $_COOKIE['logSysdevice']));
 
@@ -940,6 +950,7 @@ class console
           /**
            * Save the token in DB
            */
+          //TODO: this statement needs to move to stored procedure
           $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['token_table'] . "` (`token`, `uid`, `requested`) VALUES (?, ?, NOW())");
           $sql->execute(array($token, $uid));
 
@@ -987,6 +998,7 @@ class console
   public static function getDevices()
   {
     if (self::$loggedIn) {
+      //TODO: this statement needs to move to stored procedure
       $sql = self::$dbh->prepare("SELECT * FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ?");
       $sql->execute(array(self::$user));
       return $sql->fetchAll(\PDO::FETCH_ASSOC);
@@ -1002,6 +1014,7 @@ class console
   public static function revokeDevice($device_token)
   {
     if (self::$loggedIn) {
+      //TODO: this statement needs to move to stored procedure
       $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
       $sql->execute(array(self::$user, $device_token));
       if (isset($_SESSION['device_check'])) {
@@ -1262,7 +1275,7 @@ class console
   {
     if (self::$loggedIn) {
       $path = 'ai/'.$aiid.'/chat';
-      $api_response_parameters = array('q'=> $q,'uid' => $uid,'history' =>$history);
+      $api_response_parameters = array('q'=> $q,'uid' => $uid,'chat_history' =>$history);
       $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
       $curl = curl_init();
@@ -1356,15 +1369,20 @@ class console
     public static function getIntegrations(){
         if(self::$loggedIn){
             try {
-                $sql = self::$dbh->prepare("SELECT * FROM `integrations`");
-                $sql->execute();
+              $sql = self::$dbh->prepare("CALL getIntegrations()");
+              $sql->execute();
+              $data = $sql->fetchAll();
+
+              // finally fetch the additional sql row for stored proc calls
+              $sql->nextRowset();
+
             } catch (MySQLException $e) {
                 $e->getMessage();
                 $output = 'Query - sql all integration error' . $e;
                 include 'output.html.php';
                 exit();
             }
-            return $sql->fetchAll();
+            return $data;
         }
     }
 
@@ -1372,21 +1390,27 @@ class console
     // FOR API STORED PROCEDURE - da cambiare per gli sviluppatori
     public static function insertUserActiveDomain($dev_id, $aiid, $dom_id, $active){
         if(self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
+          try {
+              $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
 
                 $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
-                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
-                $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
-                $sql->bindValue(4, $active, \PDO::PARAM_BOOL);
+              $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
+              $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
+              $sql->bindValue(4, $active, \PDO::PARAM_BOOL);
 
-                $sql->execute();
-            } catch (MySQLException $e) {
-                $e->getMessage();
-                $output = 'Query - sql user active update ACTIVE domains error' . $e;
-                exit();
-            }
-          return $sql->fetchAll();
+              $sql->execute();
+          } catch (MySQLException $e) {
+              $e->getMessage();
+              $output = 'Query - sql user active update ACTIVE domains error' . $e;
+              exit();
+          }
+
+          $data = $sql->fetchAll();
+
+          // finally fetch the additional sql row for stored proc calls
+          $sql->nextRowset();
+
+          return $data;
         }
     }
 
@@ -1394,14 +1418,23 @@ class console
     public static function getDomains_and_UserActiveDomains($dev_id,$aiid){
         if(self::$loggedIn){
             try {
-                $sql = self::$dbh->prepare("SELECT * FROM `domains` AS d LEFT OUTER JOIN ( SELECT * FROM `userAIDomains` WHERE `dev_id` = \"". $dev_id . "\" AND  `aiid`= \"". $aiid . "\" ) AS u ON u.dom_id = d.dom_id");
-                $sql->execute();
+
+              $sql = self::$dbh->prepare("CALL getDomainsAndUserActiveDomains(:devid, :aiid)");
+              $sql->execute(array(
+                ":devid" => $dev_id,
+                ":aiid" => $aiid));
+
+              $data = $sql->fetchAll();
+
+              // finally fetch the additional sql row for stored proc calls
+              $sql->nextRowset();
+
             } catch (MySQLException $e) {
                 $e->getMessage();
                 $output = 'Query - sql user active AI domains error' . $e;
                 exit();
             }
-            return $sql->fetchAll();
+            return $data;
         }
     }
 

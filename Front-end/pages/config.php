@@ -9,8 +9,8 @@ require __DIR__ . "/../class.logsys.php";
   "db" => array(
     "host" => "52.44.215.190",
     "port" => 3306,
-    "username" => "root",
-    "password" => 'P7gj3fLKtPhjU7aw',
+    "username" => "hutoma_caller",
+    "password" => '>YR"khuN*.gF)V4#',
     "name" => "hutoma",
     "ai" => "ai",
     "table" => "users"
