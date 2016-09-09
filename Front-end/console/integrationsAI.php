@@ -1,6 +1,10 @@
 <?php
-require "../pages/config.php";
-    $integrations = \hutoma\console::getIntegrations();
+    require "../pages/config.php";
+
+    if ( !\hutoma\console::isSessionActive()) {
+        header('Location: ./error.php?err=1');
+        exit();
+    }
 ?>
 <!DOCTYPE html>
 <html>
@@ -13,7 +17,7 @@ require "../pages/config.php";
   <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
   <link rel="stylesheet" href="./dist/css/ionicons.min.css">
   <link rel="stylesheet" href="./dist/css/hutoma.css">
-  <link rel="stylesheet" href="./dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
   <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
   <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -21,7 +25,7 @@ require "../pages/config.php";
   <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntegrations('')">
+<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showIntegrations('')">
 <div class="wrapper">
     <header class="main-header">
       <?php include './dynamic/header.html.php'; ?>
@@ -34,28 +38,30 @@ require "../pages/config.php";
 
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <li class="active">
-            <a href="#">
-              <i class="fa fa-user"></i><span>API REQUEST AI NAME</span><i class="fa fa-ellipsis-v pull-right"></i>
-            </a>
-            <ul class="treeview-menu">
-                <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-                <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-                <li class="active"><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-                <li><a href="./optionAI.php"><i class="fa fa fa-gear"></i>AI options</a></li>
-            </ul>
-        </li>
-        <li><a href="./newAi.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-       
-        <li><a href="./index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+            <li class="header">WORKPLACE</li>
+            <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-user text-olive"></i><span><?php echo  $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+
+                    <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
+                    <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
+                    <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                    <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
+                    <li class="active"><a href="#"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
+                    <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
+        </ul>
+
+        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
+            <li class="header" style="text-align: center;">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -76,13 +82,14 @@ require "../pages/config.php";
     </section>
     </div>
 
+    <!--
+    <aside class="control-sidebar control-sidebar-dark">
+    </aside>
+    -->
+
     <footer class="main-footer">
        <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
-
-    <aside class="control-sidebar control-sidebar-dark">
-      <?php include './dynamic/sidebar.controll.html.php'; ?>
-    </aside>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -100,9 +107,7 @@ require "../pages/config.php";
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
-  // FAKE API JSON REQUEST INTEGRATION RESPONSE
-
-  var integrations = <?php echo json_encode($integrations)?>;
+  var integrations = <?php echo json_encode(\hutoma\console::getIntegrations())?>;
   var newNode = document.createElement('div');
   newNode.className = 'row';
   newNode.id = 'integrations_list';

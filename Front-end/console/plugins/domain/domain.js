@@ -1,13 +1,39 @@
+document.getElementById("btnNext").addEventListener("click", wizardNext);
+document.getElementById("btnBack").addEventListener("click", backPage);
+
+
+function wizardNext() {
+    $(this).prop("disabled",true);
+    $("#btnCancel").prop("disabled",true);
+    $("#domsearch").prop("disabled",true);
+
+    if(document.domainsNewAIform.onsubmit) {
+        return;
+    }
+
+    RecursiveUnbind($('#wrapper'));
+    var JsonStringActiveDomains = JSON.stringify(userActived);
+    $("#userActivedDomains").attr("value", JsonStringActiveDomains);
+    document.domainsNewAIform.submit();
+}
+
+function backPage(){
+    $(this).prop("disabled",true);
+    history.go(-1);
+    return false;
+}
+
+
+
 function showDomains(str,size){
   var wHTML = "";
   for (var x in domains) {
     var boxid = 'box' + domains[x].dom_id;
     if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
           if(size==0){
-
                   // slim box design
                   if ( domains[x].available == '0' ){
-                        wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed" id="'+boxid+'"><p></p>');
+                        wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                         wHTML += ('<div class="col-xs-2">');
                         wHTML += ('<div class="info-circle-icon-small text-ultragray"><i class="'+domains[x].icon+'"></i></div>');
                         wHTML += ('</div>');
@@ -25,16 +51,18 @@ function showDomains(str,size){
                         var key = domains[x].dom_id;
                      
                         if ( userActived[key] === false )
-                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed" id="'+boxid+'"><p></p>');
+                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                         else
-                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed borderActive" id="'+boxid+'"><p></p>');
+                            wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow borderActive" id="'+boxid+'"><p></p>');
                         wHTML += ('<div class="col-xs-2">');
                         wHTML += ('<div class="info-circle-icon-small '+domains[x].color+'"><i class="'+domains[x].icon+'"></i></div>');
                         wHTML += ('</div>');
                         wHTML += ('<div class="col-xs-7">');
                         wHTML += ('<h4 class="text-center" style="text-align: left;">&nbsp;'+domains[x].name+'</h4>');
                         wHTML += ('<h5 class="text-center text-muted" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
+                        wHTML += ('<a data-toggle="modal"  data-target="#detailsDomain" data-id="'+domains[x].dom_id+'" style="cursor: pointer;">');
                         wHTML += ('<h5 class="text-center text-light-blue" style="text-align: left;">&nbsp;info and settings</h5>');
+                        wHTML += ('</a>');
                         wHTML += ('</div>');
                         wHTML += ('<div class="col-xs-3">');
 
@@ -68,7 +96,7 @@ function showDomains(str,size){
                       else
                           wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed borderActive" id="'+boxid+'">');
 
-                      wHTML += ('<div class="info-circle-icon '+domains[x].color+'" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div>');
+                      wHTML += ('<a><div class="info-circle-icon '+domains[x].color+'" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div></a>');
                       wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
                       wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
                       wHTML += ('<div class="box-footer-flatdown"><h5 class="text-center text-light-blue">info and settings</h5>');
@@ -98,25 +126,6 @@ function switchClick(node,key){
     else {
         $(node).attr('box-checked', 0);
         userActived[key] = false;
-
         $("#"+boxid).removeClass("borderActive");
     }
 }
-
-function domainsToJsonForPOST() {
-    $("#btnSave").attr("disabled", true);
-    $("#btnSave").attr("onClick","");
-    $('#btnSave').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
-
-    $("#btnBack").attr("disabled", true);
-    $("#btnBack").attr("onClick","");
-    $('#btnBack').removeClass('btn btn-primary flat').addClass('btn btn-primary flat disabled');
-
-    $("#btnSwitch").attr("disabled", true);
-    $("#btnSwitch").attr("onClick","");
-
-    var JsonStringActiveDomains = JSON.stringify(userActived);
-    $("#userActivedDomains").attr("value", JsonStringActiveDomains);
-}
-
-

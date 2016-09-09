@@ -1,74 +1,37 @@
 <?php
+
     require "../pages/config.php";
 
     if ( !\hutoma\console::isSessionActive()) {
         header('Location: ./error.php?err=1');
-        exit;
+        exit();
     }
 
-    if (isset($_POST['aiid']) ){
-        generateSession();
+
+    if (isset($_POST['ai']) )
+        CallGetSingleAI($_POST['ai']);
+
+    function CallGetSingleAI($aiid){
+        $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(),$aiid);
+        if ($singleAI['status']['code'] === 200) {
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'] = $singleAI['aiid'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $singleAI['name'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'] = $singleAI['description'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on'] = $singleAI['created_on'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['is_private'] = $singleAI['is_private'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
+            //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info'] = $singleAI['ai']['training_debug_info'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status'] = $singleAI['training_status'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai_status'];
+            //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
+        }else{
+            unset($response);
+            unset($singleAI);
+            header("Location: ../error.php?err=15");
+            exit;
+        }
     }
 
-    if ( !isValuesSessionFilled() ){
-        header('Location: ./error.php?err=2');
-        exit;
-    }
-
-function generateSession(){
-    $dev_token = \hutoma\console::getDevToken();
-    $array = \hutoma\console::getSingleAI($dev_token,$_POST['aiid']);
-    unset($dev_token);
-
-    if ($array['status']['code']===200) {
-        fillSessionVariables($array);
-    }
-    else {
-        //header('Location: ./error.php?err=8');
-        unset($array);
-        exit;
-    }
-    unset($array);
-}
-
-function isValuesSessionFilled(){
-    return
-        isset($_SESSION['aiid']) &&
-        isset($_SESSION['ai_name']) &&
-        isset($_SESSION['ai_description']) &&
-        isset($_SESSION['ai_created_on']) &&
-        isset($_SESSION['ai_private']) &&
-        isset($_SESSION['ai_deep_learning_error']) &&
-        isset($_SESSION["ai_training_debug_info"]) &&
-        isset($_SESSION['ai_training_status']) &&
-
-        isset($_SESSION['ai_language']) &&
-        isset($_SESSION['ai_timezone']) &&
-        isset($_SESSION['ai_confidence']) &&
-        //isset($_SESSION['ai_status']) &&
-        //isset($_SESSION['ai_training_file']) &&                       // parameter missing
-        isset($_SESSION['current_ai_name']) &&
-        isset($_SESSION['userActivedDomains']);
-}
-
-function fillSessionVariables($array){
-    $_SESSION['aiid'] = $array['ai']['aiid'];
-    $_SESSION['ai_name'] = $array['ai']['name'];
-    $_SESSION["ai_description"] = $array['ai']['description'];
-    $_SESSION["ai_created_on"] = $array['ai']['created_on'];
-    $_SESSION['ai_private'] = $array['ai']['is_private'];
-    $_SESSION['ai_deep_learning_error'] = $array['ai']['deep_learning_error'];
-    $_SESSION["ai_training_debug_info"] = $array['ai']["training_debug_info"];
-    $_SESSION['ai_training_status'] =  $array['ai']['training_status'];
-
-    $_SESSION['ai_language'] = 'COSTANT language';                      // parameter missing
-    $_SESSION['ai_timezone'] = 'COSTANT GMT +00:00 UTC (UTC)';          // parameter missing
-    $_SESSION["ai_confidence"] = '10';                                  // parameter missing
-    //$_SESSION['ai_status'] = $array['ai']['ai_status'];
-    //$_SESSION['ai_training_file'] = $array['ai']['ai_trainingfile'];  // parameter missing
-    $_SESSION['current_ai_name'] = $array['ai']['name'];
-    $_SESSION['userActivedDomains'] = '';
-}
 ?>
 
 <!DOCTYPE html>
@@ -83,15 +46,16 @@ function fillSessionVariables($array){
   <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
   <link rel="stylesheet" href="./dist/css/ionicons.min.css">
   <link rel="stylesheet" href="./dist/css/hutoma.css">
-  <link rel="stylesheet" href="./dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
   <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
   <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="./plugins/select2/select2.min.css">
   <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" id="trainingBody">
+<body class="hold-transition skin-blue-light fixed sidebar-mini" id="trainingBody">
 <div class="wrapper">
     <header class="main-header" id="headerID">
       <?php include './dynamic/header.html.php'; ?>
@@ -104,28 +68,30 @@ function fillSessionVariables($array){
 
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-        <li class="active">
-        <a href="#">
-            <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
-        </a>
-        <ul class="treeview-menu">
-            <li class="active"><a href="#"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-            <li><a href="./domainsAI.php"><i class="fa fa-th"></i>domains</a></li>
-            <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-            <li><a href="./optionAI.php"><i class="fa fa-gear"></i>AI options</a></li>
+            <li class="header">WORKPLACE</li>
+            <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+
+                    <li class="active"><a href="#"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
+                    <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
+                    <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                    <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
+                    <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
+                    <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
         </ul>
-        </li>
-        <li><a href="./newAI.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="#"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="#"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-        
-        <li><a href="#"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+
+        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
+            <li class="header" style="text-align: center;">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -135,29 +101,23 @@ function fillSessionVariables($array){
     <section class="content">
         <div class="row">
             <div class="col-md-7">
-                <?php include './dynamic/training.content.upload.html.php'; ?>  
-                <?php include './dynamic/training.content.diagram.html.php'; ?>
+                <?php include './dynamic/training.content.upload.html.php'; ?>
+                <?php include './dynamic/training.content.monitor.html.php'; ?>
+                <?php include './dynamic/training.content.domains.html.php'; ?>
+                <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
             <div class="col-md-5">
-                <?php include './dynamic/training.content.chat.html.php'; ?>
+                <?php include './dynamic/chat.html.php'; ?>
                 <?php include './dynamic/training.content.json.html.php'; ?>
-                <?php include './dynamic/training.content.intent.html.php'; ?>
-                <?php include './dynamic/training.content.actions.html.php'; ?>
-                <?php include './dynamic/training.content.domains.html.php'; ?>        
             </div>
         </div>
     </section>
     </div>
 
-    <!-- =================== FOOTER =================== -->
     <footer class="main-footer">
        <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
-    <!-- ================== SIDE BAR ================== -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <?php include './dynamic/sidebar.controll.html.php'; ?>
-    </aside>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -175,9 +135,10 @@ function fillSessionVariables($array){
 <script src="./plugins/flot/jquery.flot.categories.min.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./dist/js/demo.js"></script>
 <script src="./plugins/chat/chat.js"></script>
-<script src="./plugins/training/training.chart.js"></script>
+<script src="./plugins/chat/voice.js"></script>
+<script src="./plugins/clipboard/copyToClipboard.js"></script>
+<script src="./plugins/training/training.area.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 </body>

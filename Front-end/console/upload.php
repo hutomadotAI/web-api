@@ -1,31 +1,73 @@
 <?php
 require "../pages/config.php";
 
+    if ( !\hutoma\console::isSessionActive()) {
+        header('Location: ./error.php?err=1');
+        exit;
+    }
 
-if ( !\hutoma\console::isSessionActive()) {
-    header('Location: ./error.php?err=1');
-    exit;
-}
+    if ( !isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) ){
+        header('Location: ./error.php?err=2');
+        exit;
+    }
 
-if ( !isset($_SESSION['aiid']) ){
-    header('Location: ./error.php?err=2');
-    exit;
-}
+    if (!isset($_POST['tab'])) {
+        echo('no select: '.$_POST['tab']);
+        exit;
+    }
+    switch ($_POST['tab']){
+         case 'file':
+            if (!isset($_FILES['inputfile'])) {
+                echo 'Upload file failed';
+                exit;
+            }
+            if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK) {
+                echo 'Something is gone wrong';
+                exit;
+            }
+            if (!is_uploaded_file($_FILES['inputfile']['tmp_name'])) {
+                echo 'empty file';
+                exit;
+            }
 
-if ( !isset($_FILES['inputfile'])) {
-    echo 'Upload file failed';
-    exit;
-}
+             //$source_type = 0;
+             //$url = "";
+             $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputfile'],0,'');
+             break;
 
-if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK ){
-    echo 'Upload file something is wrong';
-    exit;
-}
+        case 'structure':
+            if (!isset($_FILES['inputstructure'])) {
+                echo 'Upload complex file failed';
+                exit;
+            }
+            if ($_FILES['inputstructure']['error'] != UPLOAD_ERR_OK) {
+                echo 'Something is gone wrong';
+                exit;
+            }
+            if (!is_uploaded_file($_FILES['inputstructure']['tmp_name'])) {
+                echo 'empty file';
+                exit;
+            }
 
-if (!is_uploaded_file($_FILES['inputfile']['tmp_name'])) {
-    echo 'empty file';
-    exit;
-}
+            //$source_type = 0;
+            //$url = "";
+            $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputstructure'],0,'');
+
+            break;
+
+        case 'url':
+            if (!isset($_POST['url'])) {
+                echo 'Send URL failed';
+                exit;
+            }
+            $response = hutoma\console::uploadURL(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['url']);
+            break;
+    }
+
+
+
+
+
 
 /**********  EVENTUALLY copy file to server-side
 $filename = '/path/' . time() . $_SERVER['REMOTE_ADDR'] . 'txt';
@@ -35,21 +77,6 @@ if (!is_uploaded_file($_FILES['inputfile']['tmp_name']) || !copy($_FILES['inputf
     exit;
 }
 */
-
-$dev_token = \hutoma\console::getDevToken();
-$source_type = 0;
-$url = "";
-$response = hutoma\console::uploadFile($dev_token,$_SESSION['aiid'],$_FILES['inputfile'],$source_type,$url);
-unset($dev_token);
-unset($source_type);
-unset($url);
-
-if ($response['status']['code'] !== 200) {
-    echo(json_encode($response,JSON_PRETTY_PRINT));
-    unset($response);
-    unset($filename);
-    exit;
-}
 
 echo json_encode($response,JSON_PRETTY_PRINT);
 unset($response);

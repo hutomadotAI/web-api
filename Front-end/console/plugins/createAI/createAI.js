@@ -1,71 +1,115 @@
-var name = $("#ai_name").val();
+document.getElementById("btnNext").addEventListener("click", wizardNext);
+document.getElementById("btnCancel").addEventListener("click", clearInputFields);
+document.getElementById("ai_name").addEventListener("keyup", activeBtnNext);
 
-if ( name.length > 0 ){
-    $("#btnNext").removeClass("btn btn-success flat disabled").addClass("btn btn-success flat");
-    $("#btnNext").attr("value","_next");
-    $("#btnNext").attr("onClick","submitForm()");
+var ai_name = $("#ai_name").val();
+if ( ai_name.length > 0 )
+    $("#btnNext").prop("disabled",false);
+else
+    $("#btnNext").prop("disabled",true);
+
+function wizardNext() {
+    $(this).prop("disabled",true);
+    $("#btnCancel").prop("disabled",true);
+
+    if(isContainInvalidCharacters($("#ai_name").val())) {
+        msgAlert(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 character');
+        inputsActiveDeactive(false);
+        return;
+    }
+
+    if(document.createAIform.onsubmit)
+        return;
+    RecursiveUnbind($('#wrapper'));
+    document.createAIform.submit();
 }
 
-function activeNext(str) {
-  var name = $("#ai_name").val();
-  if ( name.length > 0 ){
-    $("#btnNext").removeClass("btn btn-success flat disabled").addClass("btn btn-success flat");
-    $("#btnNext").attr("value","_next");
-    $("#btnNext").attr("onClick","submitForm()");
-  }
-  else{
-    $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
-    $("#btnNext").attr("value","");
-    $("#btnNext").attr("onClick","");
-  }
+function activeBtnNext() {
+    var ai_name = $("#ai_name").val();
+    if ( ai_name.length > 0 ) {
+        $("#btnNext").prop("disabled", false);
+        document.getElementById('containerMsgAlertNameAI').style.display = 'none';
+        document.getElementById('ai_name').style.borderColor = "#d2d6de";
+    }
+    else
+        $("#btnNext").prop("disabled",true);
 }
 
-function submitForm() {
-    $("#btnNext").attr("disabled",true);
-    $("#btnCancel").attr("disabled",true);
-    $('#btnNext').removeClass('btn btn-success flat').addClass('btn btn-success flat disabled');
-    $('#btnCancel').removeClass('btn btn-primary flat').addClass('btn btn-primary flat disabled');
-
-    document.getElementById("createAIform").submit();
+function inputsActiveDeactive(flag){
+    $("#btnNext").prop("disabled",!flag);
+    $("#btnCancel").prop("disabled",flag);
+    $("#ai_name").prop("disabled",flag);
+    $("#ai_description").prop("disabled",flag);
+    $("#ai_confidence").prop("disabled",flag);
+    $("#ai_timezone").prop("disabled",flag);
+    $("#ai_sex").prop("disabled",flag);
+    $("#ai_language").prop("disabled",flag);
+    $("#ai_personality").prop("disabled",flag);
 }
 
+function isContainInvalidCharacters(txt) {
+    var letters = /^[0-9a-zA-Z]+$/;
+    if (letters.test(txt))
+        return false;
+    else
+        return true;
+}
 
+function clearInputFields() {
+    $("#btnNext").prop("disabled",true);
+    document.getElementById('containerMsgAlertNameAI').style.display = 'none';
+    $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
+    $("#icongAlertNameAI").attr('class', 'icon fa fa-check');
+
+    document.getElementById('ai_name').style.borderColor = "#d2d6de";
+    document.getElementById('ai_name').value = '';
+
+    document.getElementById("ai_sex")[0].selected = true;
+    document.getElementById("ai_sex")[1].selected = false;
+    document.getElementById("ai_sex")[0].value = ("Male");
+}
+
+function msgAlert(alarm,msg){
+    document.getElementById('containerMsgAlertNameAI').style.display = 'block';
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
+            document.getElementById('ai_name').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
+            document.getElementById('ai_name').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-warning');
+            document.getElementById('ai_name').style.borderColor = "red";
+            break
+    }
+    document.getElementById('msgAlertNameAI').innerText = msg;
+}
+    
 $(function () {
     $(".select2").select2();
 });
 
 $(function () {
     $('.slider').slider();
-    $("#confidence").ionRangeSlider({
+    $("#ai_confidence").ionRangeSlider({
         type: "single",
-        from: "good",
+        min: 1,
+        max: 4,
+        from:2,
+        from_value:"sometimes",
+        step: 1,
         grid: true,
         keyboard: true,
         onStart: function (data) {console.log("onStart"); },
         onChange: function (data) {console.log("onChange"); },
         onFinish: function (data) { console.log("onFinish"); },
         onUpdate: function (data) {console.log("onUpdate"); },
-        values: ["very bad", "bad", "little bad","mediocre", "normale", "good","very good", "excellent", "genius", "oracle"]
+        values: ["never", "sometimes", "often","always"]
     });
 });
-
-var newNode = document.createElement('div');
-newNode.className = 'row';
-newNode.id = '_alert';
-
-function createAlert(value){
-    var wHTML = "";
-    wHTML += ('<div class="box box-solid box-clean flat no-shadow" id="alert_message" style=" display: none;">');
-    wHTML += ('<div class="box-body">');
-    wHTML += ('<div class="col-xs-1">');
-    wHTML += ('<h4><i class="fa fa-exclamation-circle text-md"></i></h4>');
-    wHTML += ('</div>');
-    wHTML += ('<div class="col-xs-8">');
-    if( value == 1)
-        wHTML += ('You need to update your profile');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    newNode.innerHTML = wHTML;
-    document.getElementById('newAicontent').appendChild(newNode);
-}

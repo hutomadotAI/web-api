@@ -29,8 +29,8 @@ class console
      * Database Configuration
      */
       "db" => array(
-          "host" => '54.83.145.18',
-          "port" => '3306',
+          "host" => 'https://api.hutoma.com/v1',
+          "port" => '433',
           "username" => 'hutoma_caller',
           "password" => '>YR"khuN*.gF)V4#',
           "name" => 'hutoma',
@@ -241,7 +241,7 @@ class console
   public static $db = true;
   public static $user = false;
   private static $init_called = false;
-  private static $api_request_url = 'http://54.83.145.18:8080/';
+  private static $api_request_url = 'https://api.hutoma.com/v1/';  //http://52.83.145.18:8080/'; //http://localhost:8081/
   private static $cookie, $session, $remember_cookie, $dbh;
 
   public static function construct($called_from = "")
@@ -428,6 +428,8 @@ class console
             $_SESSION['logSyscuruser'] = $us_id;
 
             setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
+
+            $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
 
             if ($remember_me === true && self::$config['features']['remember_me'] === true) {
               setcookie("logSysrememberMe", $us_id, strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -1162,11 +1164,11 @@ class console
    * ---------------------
    */
 
-
+  
   // FOR API
-  public static function createAI($dev_token,$name,$description,$private, $condifence,$language,$timezone){
+  public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$sex,$contract,$payment_type,$price){
       if (self::$loggedIn) {
-          $path = 'api/ai';
+          $path = 'ai';
           $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);
           $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
@@ -1183,7 +1185,7 @@ class console
           if ($curl_response === false) {
               $info = curl_getinfo($curl);
               curl_close($curl);
-              die('Error: createAI curl');
+              die('Error: createAI curl: '.$curl);
           }
           $json_response = json_decode($curl_response, true);
           curl_close($curl);
@@ -1195,7 +1197,7 @@ class console
   // FOR API
   public static function getAIs($dev_token){
       if (self::$loggedIn) {
-          $path = 'api/ai';
+          $path = 'ai';
           $curl = curl_init();
 
           curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
@@ -1219,7 +1221,7 @@ class console
   // FOR API
   public static function getSingleAI($dev_token,$aiid){
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid;
+      $path = 'ai/'.$aiid;
       $service_url = self::$api_request_url.$path;
       $curl = curl_init();
 
@@ -1245,7 +1247,7 @@ class console
   public static function deleteAI($dev_token,$aiid)
   {
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid;
+      $path = 'ai/'.$aiid;
       $service_url = self::$api_request_url.$path;
       $curl = curl_init();
 
@@ -1272,7 +1274,7 @@ class console
   public static function chatAI($dev_token,$aiid,$uid,$q,$history,$fs,$min_p)
   {
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid.'/chat';
+      $path = 'ai/'.$aiid.'/chat';
       $api_response_parameters = array('q'=> $q,'uid' => $uid,'chat_history' =>$history);
       $service_url = self::$api_request_url.$path.'?'.http_build_query($api_response_parameters);
 
@@ -1295,36 +1297,10 @@ class console
     }
   }
 
-
-  // FOR API
-  public static function getDomains($dev_token){
-      if (self::$loggedIn) {
-        $path = 'api/ai/domain';
-        $curl = curl_init();
-
-        curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-        $curl_response = curl_exec($curl);
-
-        if ($curl_response === false) {
-          $info = curl_getinfo($curl);
-          curl_close($curl);
-          die('Error: getDomains curl');
-        }
-        $json_response = json_decode($curl_response, true);
-        curl_close($curl);
-        return $json_response;
-    }
-  }
-
-
   // FOR API
   public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
     if (self::$loggedIn) {
-      $path = 'api/ai/'.$aiid.'/training';
+      $path = 'ai/'.$aiid.'/training';
 
       $filename = $file['tmp_name'];
       $args['file'] = new \CurlFile($filename, 'text/plain','postfilename.txt');
@@ -1345,13 +1321,39 @@ class console
       }
       $json_response = json_decode($curl_response, true);
       curl_close($curl);
-      
+
       return $json_response;
-      
+
+    }
+  }
+
+
+  // FOR API
+  public static function getDomains($dev_token){
+      if (self::$loggedIn) {
+        $path = 'ai/domain';
+        $curl = curl_init();
+
+        curl_setopt($curl, CURLOPT_URL, self::$api_request_url.$path);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '. $dev_token));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+        $curl_response = curl_exec($curl);
+
+        if ($curl_response === false) {
+          $info = curl_getinfo($curl);
+          curl_close($curl);
+          die('Error: getDomains curl');
+        }
+        $json_response = json_decode($curl_response, true);
+        curl_close($curl);
+
+        return $json_response;
+
     }
   }
   
-
   // FAKE
   public static function getDevToken(){
         if (self::$loggedIn) {
@@ -1386,12 +1388,12 @@ class console
 
 
     // FOR API STORED PROCEDURE - da cambiare per gli sviluppatori
-    public static function insertUserActiveDomain($dev_token, $aiid, $dom_id, $active){
+    public static function insertUserActiveDomain($dev_id, $aiid, $dom_id, $active){
         if(self::$loggedIn) {
           try {
               $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
 
-              $sql->bindValue(1, $dev_token, \PDO::PARAM_STR);
+                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
               $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
               $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
               $sql->bindValue(4, $active, \PDO::PARAM_BOOL);

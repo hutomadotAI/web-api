@@ -6,30 +6,19 @@
         exit();
     }
 
-    if (!isset($_SESSION['current_ai_name'])){
-        header('Location: ./error.php?err=6');
-        exit();
-    }
-
-    if (!isset($_SESSION['aiid'])){
+    if (!isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])){
         header('Location: ./error.php?err=10');
         exit();
     }
 
-    // da sotituire con la nuova api
-    $dev_token = \hutoma\console::getDevToken();
-    $response = \hutoma\console::getDomains($dev_token);
+    $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
 
     if ($response['status']['code'] !== 200) {
         unset($response);
         header('Location: ./error.php?err=3');
         exit;
     }
-
-    $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains($dev_token,$_SESSION['aiid']);
-    unset($dev_token);
-
-
+    $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
 ?>
 
 <!DOCTYPE html>
@@ -43,7 +32,7 @@
   <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
   <link rel="stylesheet" href="./dist/css/ionicons.min.css">
   <link rel="stylesheet" href="./dist/css/hutoma.css">
-  <link rel="stylesheet" href="./dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
   <link rel="stylesheet" href="./plugins/switch/switch.css">
   <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
   <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
@@ -52,7 +41,7 @@
   <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)" id="body"> 
+<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showDomains('',1)" id="body">
 <div class="wrapper">
 
     <header class="main-header">
@@ -64,30 +53,32 @@
         <!-- ================ USER PANEL ================== -->
         <?php include './dynamic/userpanel.html.php'; ?>
         <!-- ================ USER ACTION ================== -->
+
         <ul class="sidebar-menu">
-        <li class="header">WORKPLACE</li>
-      
-        <li class="active">
-        <a href="#">
-          <i class="fa fa-user"></i><span><?php echo $_SESSION['current_ai_name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
-        </a>
-        <ul class="treeview-menu">
-            <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>
-            <li class="active"><a href="#"><i class="fa fa-th"></i>domains</a></li>
-            <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt"></i>integration</a></li>
-            <li><a href="./optionAI.php"><i class="fa fa-gear"></i>AI options</a></li>
+            <li class="header">WORKPLACE</li>
+            <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
+                </a>
+                <ul class="treeview-menu">
+
+                    <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
+                    <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
+                    <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
+                    <li class="active"><a href="#"><i class="fa fa-th text-red"></i>domains</a></li>
+                    <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
+                    <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
         </ul>
-        </li>
-        <li><a href="./newAi.php"><i class="fa fa-user-plus"></i>Create new AI</a></li>
-        <li><a href="./viewAllAI.php"><i class="fa fa fa-list"></i>View all AI</a></li>
-        <li><a href="./index.html"><i class="fa fa-commenting-o"></i> <span>intent</span></a></li>
-        <li><a href="./index.html"><i class="fa fa-sitemap"></i> <span>entity</span></a></li>
-       
-        <li><a href="./documentation.php"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-        <li class="header">ACTION</li>
-        <li><a href="#"><i class="fa fa-arrow-circle-o-up text-green"></i> <span>Update</span></a></li>
-        <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-        <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+
+        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
+            <li class="header" style="text-align: center;">ACTION</li>
+            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
+            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
+            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
         </ul>
     </section>
     </aside>
@@ -97,22 +88,7 @@
     <!-- =============================================== -->
     <div class="content-wrapper">
     <section class="content">
-
-        <form method="POST" id="domainsNweAIform" action="./saveAI.php" onsubmit="domainsToJsonForPOST()">
-            <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
-            <button type="submit" class="btn btn-success flat" id="btnSave" value="" onClick="">save</button>
-            <p></p>
-
-            <div class="input-group-btn">
-            <input class="form-control input-lg " value="" placeholder="Search" tabindex="0" onkeyup="searchDomain(this.value)">
-            <input type="hidden" id="userActivedDomains" name="userActivedDomains" value="">
-            </div>
-            <p></p>
-          
-            <h2></h2>
-            <p id="domsearch"></p>
-    </form>
-    <p></p>
+        <?php include './dynamic/domainsAI.content.html.php'; ?>
     </section>
     </div>
 
@@ -120,9 +96,10 @@
     <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
+    <!--
     <aside class="control-sidebar control-sidebar-dark">
-    <?php include './dynamic/sidebar.controll.html.php'; ?>
     </aside>
+    -->
 </div><!-- ./wrapper -->
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -136,7 +113,7 @@
 <script src="./plugins/shared/shared.js"></script>
 <script>
   // API JSON REQUEST DOMAIN RESPONSE
-  var domains = <?php echo json_encode($response['domain_list']); unset($response);?>;
+  var domains = <?php echo json_encode($response['_domainList']); unset($response);?>;
   var usr_domains =<?php echo json_encode($usr_domains); unset($usr_domains);?>;
 
   var userActived ={};

@@ -7,7 +7,7 @@ ini_set("display_errors", "on");
 require __DIR__ . "/../class.logsys.php";
 \hutoma\console::config(array(
   "db" => array(
-    "host" => "54.83.145.18",
+    "host" => "52.44.215.190",
     "port" => 3306,
     "username" => "hutoma_caller",
     "password" => '>YR"khuN*.gF)V4#',

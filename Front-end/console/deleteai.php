@@ -6,29 +6,33 @@
     exit;
   }
 
-  if (isset($_SESSION["aiid"])) {
+  if (isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])) {
 
-    $aiid = $_SESSION["aiid"];
-    $dev_token = \hutoma\console::getDevToken();
-    $response = \hutoma\console::deleteAI($dev_token, $aiid);
-    unset($aiid);
-    unset($dev_token);
+    $response = \hutoma\console::deleteAI(\hutoma\console::getDevToken(), $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
 
     if ($response['status']['code'] === 200) {
 
-      unset($_SESSION['aiid']);
-      unset($_SESSION['ai_name']);
-      unset($_SESSION['ai_type']);
-      unset($_SESSION['ai_language']);
-      unset($_SESSION['ai_timezone']);
-      unset($_SESSION['ai_confidence']);
-      unset($_SESSION['ai_description']);
-      unset($_SESSION['ai_created_on']);
-      unset($_SESSION['ai_training_status']);
-      unset($_SESSION['ai_status']);
-      unset($_SESSION['ai_deep_learning_error']);
-      unset($_SESSION['userActivedDomains']);
-      unset($_SESSION['current_ai_name']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['sex']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains']);
+
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['is_private']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] );
+      //unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']);
+
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['contract']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['payment_type']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['price']);
 
     }
     else{

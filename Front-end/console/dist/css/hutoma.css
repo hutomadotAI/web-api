@@ -176,7 +176,7 @@ body.hold-transition .main-header .logo {
   margin-right: auto;
   margin-left: auto;
   padding-left: 15px;
-  padding-righ7: 15px;
+  padding-right: 15px;
 }
 
 .content-small{
@@ -1571,6 +1571,9 @@ a:focus {
   width: 100%;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
+.box.box-hutoma {
+  border-top-color: #f6f6f6;
+}
 .box.box-primary {
   border-top-color: #3c8dbc;
 }
@@ -1648,13 +1651,14 @@ a:focus {
 }
 
 .box.box-solid.box-default-small-fixed.borderActive {
-     border: 1px solid #3c8dbc;
+  border: 1px solid #3c8dbc;
 }
 
 .box.box-solid.box-clean > .box-header {
   color: #444444;
   background: #d2d6de;
   background-color: #ffffff;
+  border-bottom: 1px solid #d2d6de;
 }
 .box.box-solid.box-default > .box-header {
   color: #444444;
@@ -1880,6 +1884,7 @@ a:focus {
   border-top: 1px solid #f4f4f4;
   padding: 10px;
   background-color: #ffffff;
+
 }
 .box-footer-flatdown {
   border-top-left-radius: 0;
@@ -1891,6 +1896,7 @@ a:focus {
   width: 100%;
   bottom: 15px;
   background-color: #ffffff;
+  
 }
 .chart-legend {
   margin: 10px 0;
@@ -2131,6 +2137,17 @@ a:focus {
   padding: 5px 10px;
   margin-left: 90px;
 }
+
+.info-box-title {
+  display: block;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.info-box-description {
+  display: block;
+  font-size: 12px;
+}
 .info-box-number {
   display: block;
   font-weight: bold;
@@ -2335,6 +2352,7 @@ a:focus {
 .btn-info.hover {
   background-color: #00acd6;
 }
+
 .btn-danger {
   background-color: #dd4b39;
   border-color: #d73925;
@@ -2408,6 +2426,40 @@ a:focus {
   right: -10px;
   font-size: 10px;
   font-weight: 400;
+}
+
+.cell-square {
+  border-radius: 0px;
+  position: relative;
+  padding: 5px 20px 5px 10px;
+  margin: 3px 3px 3px 3px;
+  min-width: 30px;
+  max-width: 90px;
+  height: 40px;
+  text-align: center;
+  color: #666;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  font-size: 14px;
+}
+
+.cell-square:hover {
+  background: #f4f4f4;
+  color: #444;
+  border-color: #aaa;
+}
+
+.cell-square > .fa {
+  position: absolute;
+  padding-top: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  background-color : transparent;
+}
+
+.cell-square:active,
+.cell-square:focus {
+  font-color: red;
 }
 
 
@@ -2542,10 +2594,11 @@ a:focus {
 }
 /* NAV TABS */
 .nav-tabs-custom {
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   background: #fff;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   border-radius: 0px;
+   border: 1px solid #d2d6de;
 }
 .nav-tabs-custom > .nav-tabs {
   margin: 0;
@@ -4317,6 +4370,11 @@ table.text-center th {
 .modal-info .modal-body {
   background-color: #00c0ef !important;
 }
+
+.alert-base{
+  background-color: #f9f9f9 !important;
+}
+
 .bg-blue {
   background-color: #0073b7 !important;
 }
@@ -4363,6 +4421,10 @@ table.text-center th {
   color: #000;
   background-color: #b5bbc8 !important;
 }
+.bg-gray-ultralight {
+  background-color: #f9f9f9 !important;
+}
+
 .bg-black-active {
   background-color: #000000 !important;
 }
@@ -4426,11 +4488,14 @@ table.text-center th {
 .text-red {
   color: #dd4b39 !important;
 }
+.text-coral {
+  color: #FFC4C1 !important;
+}
 .text-yellow {
   color: #f39c12 !important;
 }
 .text-light-yellow {
-  color: #FFFF66 !important;
+  color: #e5e500 !important;
 }
 .text-aqua {
   color: #00c0ef !important;
@@ -4535,6 +4600,12 @@ table.text-center th {
 }
 .text-sm {
   font-size: 12px;
+}
+.text-md {
+  font-size: 18px;
+}
+.text-bg {
+  font-size: 22px;
 }
 .jqstooltip {
   padding: 5px!important;
@@ -4833,4 +4904,55 @@ table.text-center th {
   .table-responsive > .table tr td {
     white-space: normal!important;
   }
+}
+
+/* enable absolute positioning */
+.inner-addon {
+  position: relative;
+}
+
+/* style glyph */
+.inner-addon .fa {
+  position: absolute;
+  padding: 10px;
+  pointer-events: none;
+}
+
+/* align glyph */
+.left-addon .fa  { left:  0px;}
+.right-addon .fa { right: 0px;}
+
+/* add padding  */
+.left-addon input  { padding-left:  30px; }
+.right-addon input { padding-right: 30px; }
+
+.flashing{
+  -webkit-animation: glowing 1500ms infinite;
+  -moz-animation: glowing 1500ms infinite;
+  -o-animation: glowing 1500ms infinite;
+  animation: glowing 1500ms infinite;
+}
+
+@-webkit-keyframes glowing {
+  0% { color: #dd4b39;  }
+  50% { color: #FFFFFF;  }
+  100% { color: #dd4b39;  }
+}
+
+@-moz-keyframes glowing {
+  0% { color: #dd4b39;  }
+  50% { color: #FFFFFF;  }
+  100% { color: #dd4b39;  }
+}
+
+@-o-keyframes glowing {
+  0% { color: #dd4b39; }
+  50% { color: #FFFFFF; }
+  100% { color: #dd4b39; }
+}
+
+@keyframes glowing {
+  0% { color: #dd4b39; }
+  50% { color: #FFFFFF; }
+  100% { color: #dd4b39; }
 }

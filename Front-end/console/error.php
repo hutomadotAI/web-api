@@ -12,20 +12,15 @@
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/ionicons.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.min.css">
+    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
     <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
     <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-
-    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-slider/slider.css">
-    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
-    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini">
+<body class="hold-transition skin-blue-light fixed sidebar-mini">
 <div class="wrapper">
 
     <header class="main-header">
@@ -38,12 +33,16 @@
             <?php include './dynamic/userpanel.html.php'; ?>
             <!-- ================ USER ACTION ================= -->
             <ul class="sidebar-menu">
-                <li class="header">WORKPLACE</li>
-                <?php
-                    session_unset();
-                    session_destroy();
-                    echo ('<li><a href="../pages/login.php"><i class="fa fa-plus-circle"></i> <span>go to Login</span></a></li>');
-                ?>
+                <li class="header" style="text-align: center;">WORKPLACE</li>
+                <li><a href="#"><i class="fa fa-home text-light-blue"></i><span class="text-muted">home</span></a></li>
+                <li><a href="#"><i class="fa fa-book text-purple"></i> <span class="text-muted">Documentation</span></a></li>
+            </ul>
+
+            <ul class="sidebar-menu disabled" style="position: absolute; bottom:0; width: 230px; min-height: 135px;">
+                <li class="header" style="text-align: center;">ACTION</li>
+                <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span class="text-muted">Marketplace</span></a></li>
+                <li><a href="#"><i class="fa fa-user text-blue"></i> <span class="text-muted">Account</span></a></li>
+                <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
             </ul>
         </section>
     </aside>
