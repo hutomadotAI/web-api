@@ -16,7 +16,7 @@ public class TestTrainingLogicParser {
 
     @Before
     public void setup() {
-        logic = new TrainingLogic(null, null, null, null, null, null, null);
+        logic = new TrainingLogic(null, null, null, null, null, null, null, null);
     }
 
     private String parse(String[] input) {

@@ -1,15 +1,13 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.validation.Validate;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
@@ -43,7 +41,7 @@ public class ChatLogic {
         return Math.round(input * 10.0d) / 10.0d;
     }
 
-    public ApiResult chat(SecurityContext context, String aiid, String dev_id, String q, String uid, String history,
+    public ApiResult chat(SecurityContext context, UUID aiid, String dev_id, String q, String uid, String history,
                           String topic, float min_p) {
 
         long timestampNow = tools.getTimestamp();
@@ -56,11 +54,12 @@ public class ChatLogic {
 
         long startTime = timestampNow;
 
-        logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid);
         boolean noResponse = true;
         try {
+            logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
+
             // async start both requests
-            semanticAnalysis.startAnswerRequest(dev_id, aiid, uid, topic,history,q, min_p);
+            semanticAnalysis.startAnswerRequest(dev_id, aiid, uid, topic, history, q, min_p);
             neuralNet.startAnswerRequest(dev_id, aiid, uid, q);
 
             // wait for semantic result to complete
@@ -136,7 +135,6 @@ public class ChatLogic {
 
         return apiChat.setSuccessStatus();
     }
-
 
 }
 

@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -59,7 +60,7 @@ public class Database {
         }
     }
 
-    public boolean createAI(String aiid, String name, String description, String devid,
+    public boolean createAI(UUID aiid, String name, String description, String devid,
                             boolean is_private, double deep_learning_error, int deep_learning_status,
                             int shallow_learning_status, int status, String client_token, String trainingFile) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
@@ -90,7 +91,7 @@ public class Database {
         }
     }
 
-    public ApiAi getAI(String aiid) throws DatabaseException {
+    public ApiAi getAI(UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("getAI", 1).add(aiid);
             ResultSet rs = call.executeQuery();
@@ -107,7 +108,7 @@ public class Database {
         }
     }
 
-    public boolean deleteAi(String aiid) throws DatabaseException {
+    public boolean deleteAi(UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("deleteAI", 1).add(aiid);
             return call.executeUpdate()>0;
@@ -131,7 +132,7 @@ public class Database {
         }
     }
 
-    public boolean isNeuralNetworkServerActive(String dev_id, String aiid) throws DatabaseException {
+    public boolean isNeuralNetworkServerActive(String dev_id, UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("getAiActive", 2).add(aiid).add(dev_id);
             ResultSet rs = call.executeQuery();
@@ -146,7 +147,7 @@ public class Database {
         }
     }
 
-    public long insertNeuralNetworkQuestion(String dev_id, String uid, String aiid, String q) throws DatabaseException {
+    public long insertNeuralNetworkQuestion(String dev_id, String uid, UUID aiid, String q) throws DatabaseException {
 
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("insertQuestion", 4).add(dev_id).add(uid).add(aiid).add(q);
@@ -177,9 +178,9 @@ public class Database {
         }
     }
 
-    public boolean updateAiTrainingFile(String aiid, String trainingData) throws DatabaseException {
+    public boolean updateAiTrainingFile(UUID aiUUID, String trainingData) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
-            call.initialise("updateTrainingData", 2).add(aiid).add(trainingData);
+            call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
             return call.executeUpdate()>0;
         }
     }

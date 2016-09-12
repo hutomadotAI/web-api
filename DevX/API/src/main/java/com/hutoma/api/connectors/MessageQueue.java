@@ -11,6 +11,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 
 import javax.inject.Inject;
+import java.util.UUID;
 
 
 public class MessageQueue {
@@ -57,28 +58,28 @@ public class MessageQueue {
         pushMessage(AwsMessage.delete_dev + "|" + devid + "|000");
     }
 
-    public void pushMessageDeleteAI(String devid, String aiid) throws MessageQueueException {
-        pushMessage(AwsMessage.delete_ai + "|" + devid + "|" + aiid);
+    public void pushMessageDeleteAI(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.delete_ai + "|" + devid + "|" + aiid.toString());
     }
 
-    public void pushMessageStartRNN(String devid, String aiid) throws MessageQueueException {
-        pushMessage(AwsMessage.start_RNN + "|" + devid + "|" + aiid);
+    public void pushMessageStartRNN(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.start_RNN + "|" + devid + "|" + aiid.toString());
     }
 
-    public void pushMessageReadyForTraining(String devid, String aiid) throws MessageQueueException {
-        pushMessage(AwsMessage.ready_for_training + "|" + devid + "|" + aiid);
+    public void pushMessageReadyForTraining(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.ready_for_training + "|" + devid + "|" + aiid.toString());
     }
 
-    public void pushMessagePreprocessTrainingText(String devid, String aiid) throws MessageQueueException {
-        pushMessage(AwsMessage.preprocess_training_text + "|" + devid + "|" + aiid);
+    public void pushMessagePreprocessTrainingText(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.preprocess_training_text + "|" + devid + "|" + aiid.toString());
     }
 
-    public void pushMessageClusterSplit(String devid, String aiid, double clusterMinProbability) throws MessageQueueException {
-        pushMessage(AwsMessage.cluster_split + "|" + devid + "|" + aiid + "|" + clusterMinProbability);
+    public void pushMessageClusterSplit(String devid, UUID aiid, double clusterMinProbability) throws MessageQueueException {
+        pushMessage(AwsMessage.cluster_split + "|" + devid + "|" + aiid.toString() + "|" + clusterMinProbability);
     }
 
-    public void pushMessageDeleteTraining(String devid, String aiid) throws MessageQueueException {
-        pushMessage(AwsMessage.delete_training + "|" + devid + "|" + aiid);
+    public void pushMessageDeleteTraining(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(AwsMessage.delete_training + "|" + devid + "|" + aiid.toString());
     }
 
     protected void pushMessage(String message) throws MessageQueueException {

@@ -1,14 +1,12 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.validation.Validate;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import javax.inject.Inject;
@@ -19,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -33,6 +32,7 @@ public class TrainingLogic {
     Database database;
     Tools tools;
     Logger logger;
+    Validate validate;
 
     private final String LOGFROM = "traininglogic";
 
@@ -40,7 +40,8 @@ public class TrainingLogic {
     }
 
     @Inject
-    public TrainingLogic(Config config, JsonSerializer jsonSerializer, MessageQueue messageQueue, HTMLExtractor htmlExtractor, Database database, Tools tools, Logger logger) {
+    public TrainingLogic(Config config, JsonSerializer jsonSerializer, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
+                         Database database, Tools tools, Logger logger, Validate validate) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.messageQueue = messageQueue;
@@ -48,16 +49,16 @@ public class TrainingLogic {
         this.database = database;
         this.tools = tools;
         this.logger = logger;
+        this.validate = validate;
     }
 
-    public ApiResult uploadFile(SecurityContext securityContext, String devid, String aiid, int type, String url, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+    public ApiResult uploadFile(SecurityContext securityContext, String devid, UUID aiid, int type, String url, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 
         ArrayList<String> source;
 
         long maxUploadFileSize = config.getMaxUploadSize();
 
         try {
-
             switch (type) {
 
                 // 0 = training file is text chat
@@ -139,9 +140,9 @@ public class TrainingLogic {
         }
     }
 
-    public ApiResult delete(SecurityContext securityContext, String devid, String aiid) {
-        logger.logDebug(LOGFROM, "request to delete training for " + aiid);
+    public ApiResult delete(SecurityContext securityContext, String devid, UUID aiid) {
         try {
+            logger.logDebug(LOGFROM, "request to delete training for " + aiid);
             messageQueue.pushMessageDeleteTraining(devid, aiid);
         } catch (MessageQueue.MessageQueueException e) {
             logger.logError(LOGFROM, "message queue exception " + e.toString());
@@ -170,7 +171,7 @@ public class TrainingLogic {
         // recombine the lines after they've been sanitised
         StringBuilder sb = new StringBuilder();
         for(String line: text) {
-            sb.append(tools.textSanitizer(line)).append('\n');
+            sb.append(validate.textSanitizer(line)).append('\n');
         }
         return sb.toString();
     }
@@ -246,7 +247,7 @@ public class TrainingLogic {
                 lineSize = line.length() + 2;
                 // if the line doesn't push us over the upload limit
                 if ((fileSize + lineSize) < maxUploadSize) {
-                    source.add(tools.textSanitizer(line));
+                    source.add(validate.textSanitizer(line));
                     fileSize += lineSize;
                 } else {
                     throw new UploadTooLargeException();

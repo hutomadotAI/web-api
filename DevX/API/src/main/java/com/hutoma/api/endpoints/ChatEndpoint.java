@@ -5,9 +5,13 @@ import com.hutoma.api.auth.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.validation.APIParameter;
+import com.hutoma.api.validation.ValidateParameters;
+import com.hutoma.api.validation.ParameterFilter;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,18 +34,22 @@ public class ChatEndpoint {
 
     @GET
     @Path("{aiid}/chat")
+    @ValidateParameters({APIParameter.AIID, APIParameter.ChatQuestion, APIParameter.ChatHistory, APIParameter.ChatTopic, APIParameter.Min_P})
     @Secured({Role.ROLE_CLIENTONLY,Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response chat(
             @Context SecurityContext securityContext,
-            @PathParam("aiid") String aiid,
+            @Context ContainerRequestContext requestContext,
             @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
-            @DefaultValue("") @QueryParam("q") String q,
-            @DefaultValue("1") @QueryParam("uid") String uid,
-            @DefaultValue("") @QueryParam("chat_history") String history,
-            @DefaultValue("") @QueryParam("current_topic") String topic,
-            @DefaultValue("0.0") @QueryParam("confidence_threshold") float min_p) {
-        ApiResult result = chatLogic.chat(securityContext, aiid, dev_id, q, uid, history, topic, min_p);
+            @DefaultValue("1") @QueryParam("uid") String uid) {
+        ApiResult result = chatLogic.chat(securityContext,
+                ParameterFilter.getAiid(requestContext),
+                dev_id,
+                ParameterFilter.getChatQuestion(requestContext),
+                uid,
+                ParameterFilter.getChatHistory(requestContext),
+                ParameterFilter.getTopic(requestContext),
+                ParameterFilter.getMinP(requestContext));
         return result.getResponse(serializer).build();
     }
 

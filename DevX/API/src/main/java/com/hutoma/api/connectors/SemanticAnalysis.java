@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 /**
@@ -44,10 +45,10 @@ public class SemanticAnalysis {
         this.tools = tools;
     }
 
-    public void startAnswerRequest(String devid, String aiid, String uid, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
+    public void startAnswerRequest(String devid, UUID aiid, String uid, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
         UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                 .addParameter("q", q)
-                .addParameter("aiid", aiid)
+                .addParameter("aiid", aiid.toString())
                 .addParameter("dev_id", devid)
                 .addParameter("uid", uid)
                 .addParameter("min_p", Float.toString(min_p))

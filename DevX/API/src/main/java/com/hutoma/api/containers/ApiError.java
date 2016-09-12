@@ -1,5 +1,6 @@
 package com.hutoma.api.containers;
 
+import com.hutoma.api.validation.Validate;
 import com.hutoma.api.containers.sub.Status;
 
 import java.net.HttpURLConnection;
@@ -39,6 +40,10 @@ public class ApiError extends ApiResult {
 
     public static ApiError getBadRequest() {
         return ApiError.getBadRequest("Bad request");
+    }
+
+    public static ApiError getBadRequest(Validate.ParameterValidationException pve) {
+        return ApiError.getBadRequest(pve.getMessage());
     }
 
     public static ApiError getNotFound(String message) {

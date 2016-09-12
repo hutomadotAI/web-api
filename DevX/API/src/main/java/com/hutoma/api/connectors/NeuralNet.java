@@ -5,6 +5,7 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 
 import javax.inject.Inject;
+import java.util.UUID;
 
 /**
  * Created by David MG on 08/08/2016.
@@ -45,7 +46,7 @@ public class NeuralNet {
     }
 
     // Neural Network Query
-    public void startAnswerRequest(String dev_id, String aiid, String uid, String q) throws NeuralNetException {
+    public void startAnswerRequest(String dev_id, UUID aiid, String uid, String q) throws NeuralNetException {
 
         startTime = tools.getTimestamp();
 

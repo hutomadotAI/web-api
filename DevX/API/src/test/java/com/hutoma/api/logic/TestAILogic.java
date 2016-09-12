@@ -1,14 +1,13 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.validation.TestParameterValidation;
+import com.hutoma.api.validation.Validate;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,7 +38,7 @@ public class TestAILogic {
     Logger fakeLogger;
 
     private String DEVID = "devid";
-    private String AIID = "aiid";
+    private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private String VALIDDEVID = "DevidExists";
 
@@ -53,12 +52,13 @@ public class TestAILogic {
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(Logger.class);
+
         when(fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        aiLogic = new AILogic(fakeConfig, fakeSerializer, fakeDatabase, fakeMessageQueue, fakeTools, fakeLogger);
+        aiLogic = new AILogic(fakeConfig, fakeSerializer, fakeDatabase, fakeMessageQueue, fakeLogger, fakeTools);
     }
 
     private ApiAi getAI() {
-        return new ApiAi(AIID, "token", "name", "desc", DateTime.now(), false, 0.0d, null, "status", "status", null);
+        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.0d, null, "status", "status", null);
     }
 
     private ArrayList<ApiAi> getAIList() {
@@ -69,14 +69,14 @@ public class TestAILogic {
 
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
-        when(fakeDatabase.createAI(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(true);
+        when(fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(true);
         ApiResult result = aiLogic.createAI(fakeContext, DEVID, "name", "description", true, 0.0d, 0, 0, 0);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_Valid_Token() throws Database.DatabaseException {
-        when(fakeDatabase.createAI(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(true);
+        when(fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(true);
         ApiResult result = aiLogic.createAI(fakeContext, DEVID, "name", "description", true, 0.0d, 0, 0, 0);
         Assert.assertTrue(result instanceof ApiAi);
         Assert.assertNotNull(((ApiAi)result).getClient_token());
@@ -85,7 +85,7 @@ public class TestAILogic {
 
     @Test
     public void testCreate_DBFail_Error() throws Database.DatabaseException {
-        when(fakeDatabase.createAI(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString()))
+        when(fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString()))
                 .thenThrow(new Database.DatabaseException(new Exception("test")));
         ApiResult result = aiLogic.createAI(fakeContext, DEVID, "name", "description", true, 0.0d, 0, 0, 0);
         Assert.assertEquals(500, result.getStatus().getCode());
@@ -93,35 +93,35 @@ public class TestAILogic {
 
     @Test
     public void testCreate_DB_NotFound() throws Database.DatabaseException {
-        when(fakeDatabase.createAI(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(false);
+        when(fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(false);
         ApiResult result = aiLogic.createAI(fakeContext, DEVID, "name", "description", true, 0.0d, 0, 0, 0);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_Valid() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(AIID)).thenReturn(getAI());
+        when(fakeDatabase.getAI(any())).thenReturn(getAI());
         ApiResult result = aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_Valid_Return() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(AIID)).thenReturn(getAI());
+        when(fakeDatabase.getAI(any())).thenReturn(getAI());
         ApiAi result = (ApiAi)aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
-        Assert.assertEquals(AIID, result.getAiid());
+        Assert.assertEquals(AIID.toString(), result.getAiid());
     }
 
     @Test
     public void testGetSingle_DBFail_Error() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(anyString())).thenThrow(new Database.DatabaseException(new Exception("")));
+        when(fakeDatabase.getAI(any())).thenThrow(new Database.DatabaseException(new Exception("")));
         ApiResult result = aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_DB_NotFound() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(anyString())).thenReturn(null);
+        when(fakeDatabase.getAI(any())).thenReturn(null);
         ApiResult result = aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
@@ -143,7 +143,7 @@ public class TestAILogic {
         ApiAiList list = (ApiAiList)result;
         Assert.assertNotNull(list.getAiList());
         Assert.assertFalse(list.getAiList().isEmpty());
-        Assert.assertEquals(AIID, list.getAiList().get(0).getAiid());
+        Assert.assertEquals(AIID.toString(), list.getAiList().get(0).getAiid());
     }
 
     @Test
@@ -165,21 +165,21 @@ public class TestAILogic {
 
     @Test
     public void testDelete_Valid() throws Database.DatabaseException {
-        when(fakeDatabase.deleteAi(anyString())).thenReturn(true);
+        when(fakeDatabase.deleteAi(any())).thenReturn(true);
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testDelete_DBFail_NotFound() throws Database.DatabaseException {
-        when(fakeDatabase.deleteAi(anyString())).thenReturn(false);
+        when(fakeDatabase.deleteAi(any())).thenReturn(false);
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test
     public void testDelete_DBFail_Error() throws Database.DatabaseException {
-        when(fakeDatabase.deleteAi(anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        when(fakeDatabase.deleteAi(any())).thenThrow(new Database.DatabaseException(new Exception("test")));
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }

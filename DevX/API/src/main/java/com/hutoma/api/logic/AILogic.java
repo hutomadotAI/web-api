@@ -1,16 +1,14 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.auth.Role;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -35,13 +33,14 @@ public class AILogic {
     private final String LOGFROM = "ailogic";
 
     @Inject
-    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, Tools tools, Logger logger) {
+    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,
+                   Logger logger, Tools tools) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.messageQueue = messageQueue;
-        this.tools = tools;
         this.logger = logger;
+        this.tools = tools;
     }
 
     public ApiResult createAI(
@@ -57,26 +56,25 @@ public class AILogic {
     {
         try {
             logger.logDebug(LOGFROM, "request to create new ai from " + devid);
-            String encoding_key = config.getEncodingKey();
 
-            UUID guid = tools.createNewRandomUUID();
-            String aiid = guid.toString();
+            String encoding_key = config.getEncodingKey();
+            UUID aiUUID = tools.createNewRandomUUID();
 
             String token = Jwts.builder()
                     .claim("ROLE", Role.ROLE_CLIENTONLY)
-                    .claim("AIID", guid)
+                    .claim("AIID", aiUUID)
                     .setSubject(devid)
                     .compressWith(CompressionCodecs.DEFLATE)
                     .signWith(SignatureAlgorithm.HS256, encoding_key)
                     .compact();
 
-            if (!database.createAI(aiid, name, description, devid, is_private,
+            if (!database.createAI(aiUUID, name, description, devid, is_private,
                     deep_learning_error, deep_learning_status,
                     shallow_learning_status, status, token, "")) {
                 logger.logInfo(LOGFROM, "db fail creating new ai");
                 return ApiError.getInternalServerError();
             }
-            return new ApiAi(aiid, token).setSuccessStatus("successfully created");
+            return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
         }
         catch (Exception e){
             logger.logError(LOGFROM, "error creating new ai: " + e.toString());
@@ -106,19 +104,19 @@ public class AILogic {
     public ApiResult getSingleAI(
             SecurityContext securityContext,
             String devid,
-            String aiid) {
+            UUID aiid) {
 
         try {
-            logger.logDebug(LOGFROM, "request to list single ai");
+            logger.logDebug(LOGFROM, devid + " request to list " + aiid);
             ApiAi ai = database.getAI(aiid);
-            if (null==ai) {
+            if (null == ai) {
                 logger.logDebug(LOGFROM, "ai not found");
                 return ApiError.getNotFound();
             } else {
                 return ai.setSuccessStatus();
             }
-
-        } catch (Exception e){
+        }
+        catch (Exception e){
             logger.logError(LOGFROM, "error getting single ai: " + e.toString());
             return ApiError.getInternalServerError();
         }
@@ -127,10 +125,10 @@ public class AILogic {
     public ApiResult deleteAI(
             SecurityContext securityContext,
             String devid,
-            String aiid) {
+            UUID aiid) {
 
         try {
-            logger.logDebug(LOGFROM, "request to delete aiid " + aiid);
+            logger.logDebug(LOGFROM, devid + " request to delete " + aiid);
             if(!database.deleteAi(aiid))
             {
                 return ApiError.getNotFound();

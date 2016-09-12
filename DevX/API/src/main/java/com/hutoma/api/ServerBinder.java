@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.*;
 import com.hutoma.api.logic.*;
+import com.hutoma.api.validation.Validate;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import javax.inject.Singleton;
@@ -36,5 +37,6 @@ public class ServerBinder extends AbstractBinder {
         bind(NeuralNet.class).to(NeuralNet.class);
         bind(SemanticAnalysis.class).to(SemanticAnalysis.class);
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
+        bind(Validate.class).to(Validate.class);
     }
 }

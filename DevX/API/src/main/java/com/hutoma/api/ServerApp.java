@@ -23,11 +23,12 @@ public class ServerApp extends ResourceConfig {
         // authorization filter
         packages(false, "com.hutoma.api.auth");
 
+        // validation and param extraction
+        packages(false, "com.hutoma.api.validation");
+
         // endpoints
         packages(false, "com.hutoma.api.endpoints");
 
-        // old namespace. this will enable endpoints that have not yet been migrated to the new.
-        packages(true, "hutoma.api.server.ai");
 
     }
 
