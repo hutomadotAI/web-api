@@ -1,6 +1,7 @@
 var isChrome = !!window.chrome;
 var continuousSpeech = '0';
-var speechResponse = '1'; // voice ativated for default
+var speechResponse = '1'; // voice activated true for default
+var jsonResponse = '1'; // voice activated true for default
 var colorVoice = '0';
 var muteMicrophone = '0';
 var chat = 1;  // start enable chatting buttons
@@ -167,6 +168,13 @@ function continuousOption(value){
     $('#continuous-text').toggleClass("text-red");
 }
 
+function jsonOption(value){
+    jsonResponse = (value+1)%(2);
+    $('#json-icon').toggleClass("text-red");
+    $('#json-text').toggleClass("text-red");
+    $('#jsonBox').toggle();
+}
+
 
 function copyToClipboard(elementId) {
   var node = document.getElementById('msgJSON');
@@ -218,50 +226,3 @@ String.prototype.toHtmlEntities = function() {
 };
 
 
-function drawChatFooter(human_name,ai_name) {
-    var isChrome = !!window.chrome;
-    var wHTML = '';
-    var newNode = document.createElement('div');
-    newNode.className = 'input-group';
-    newNode.id = 'id-input-group';
-
-    wHTML += ('<input type="text" id="message" placeholder="Type Message ..." class="form-control" tabindex="-1" onkeydown="if(event.keyCode == 13 && this.value ) { createNodeChat(\' '+ human_name +' \', \' '+ ai_name +' \'); }">');
-    if (isChrome) {
-        wHTML += ('<div class="input-group-addon" id="btnSpeech"   onClick="startDictation(\' '+ human_name +' \', \' '+ ai_name +' \')" onMouseOver="this.style.cursor=\'pointer\'">');
-        wHTML += ('<i id="microphone" style="font-size: 18px;" class="fa fa-microphone text-red"></i>');
-        wHTML += ('</div>');
-    }else {
-        wHTML += ('<div class="input-group-addon" id="btnSpeech" data-toggle="tooltip" title="Available on Chrome">');
-        wHTML += ('<i id="microphone" style="font-size: 18px;" class="fa fa-microphone-slash text-coral"></i>');
-        wHTML += ('</div>');
-    }
-    newNode.innerHTML = wHTML;
-    document.getElementById('chat-footer').appendChild(newNode);
-
-}
-
-
-function drawMenuOptionVoice() {
-    var isChrome = !!window.chrome;
-    var wHTML = '';
-    var newNode = document.createElement('ul');
-    newNode.className = 'dropdown-menu flat';
-    newNode.id = 'list-options-voice';
-
-
-    if (isChrome) {
-        wHTML += ('<li class="footer"><a href="#">  <i class="fa fa fa-bullhorn"></i>Deactive Voice</a></li>');
-        wHTML += ('<li class="footer"><a href="#">  <i class="fa fa-microphone-slash"></i>Mute Microphone</a></li>');
-        wHTML += ('<li class="footer"><a href="#">  <i class="fa fa-adjust"></i>Color Voice</a></li>');
-        wHTML += ('<li class="footer" id="conversation-value" value ="0" onClick="activeVoice(this.value)" onMouseOver="this.style.cursor=\'pointer\'"><a id="conversation-type" ><i id="conversation-icon" class="fa fa-retweet"></i><spam id="conversation-task">Continuous Speech</spam></a></li>');
-    }
-    else {
-        wHTML += ('<li class="footer"><a href="#" disabled><i lass="fa fa-bullhorn"></i>Deactive Voice</a></li>');
-        wHTML += ('<li class="footer"><a href="#">  <i class="fa fa-adjust"></i>Color Voice</a></li>');
-        wHTML += ('<li class="footer"><a href="#">  <i class="fa fa-retweet"></i>Pepetual Conversation</a></li>');
-
-    }
-    newNode.innerHTML = wHTML;
-    document.getElementById('dropdown-chat-options').appendChild(newNode);
-
-}
