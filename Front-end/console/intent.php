@@ -107,11 +107,14 @@ require "../pages/config.php";
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
-    // FAKE API JSON REQUEST INTEGRATION RESPONSE
+    // FAKE API JSON REQUEST INTENTS RESPONSE
     var intents = <?php echo json_encode($integrations)?>;
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'intents_list';
+
+
+
 </script>
 <script>
     function searchIntents(str) {

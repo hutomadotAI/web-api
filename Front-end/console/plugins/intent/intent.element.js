@@ -1,4 +1,88 @@
+$(document).ready(function() {
+    // loading stored expressions
+    for (var x in expressionListFromServer) {
+        var value = expressionListFromServer[x].name;
+        var parent = document.getElementById('userexpression-list');
+        document.getElementById('user-expression').value = '';
+        createNewUsersayRow(value,parent);
+    }
+
+    // loading stored parameter
+    for (var x in parameterListFromServer) {
+        var name = parameterListFromServer[x].name;
+        var entity = '@'+parameterListFromServer[x].name;
+        var value = parameterListFromServer[x].id;
+        var parent = document.getElementById('parameter-list');
+
+        createNewParameterRow(name,entity,value,parent);
+    }
+
+    // one parameter is empty for new input entry
+    var node = document.getElementById('parameter-list');
+    createNewParameterRow('','','',node);
+
+
+
+    var $input = $('#action-entity');
+    var array = [];
+
+    // loading stored entities
+    for (var x in entityListFromServer) {
+        array.push('@'+entityListFromServer[x].name);
+    }
+
+    $input.omniselect({
+        source: array,
+        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
+        activeClass: 'active',
+        renderItem: function(label, id, index) {
+            return '<li><a href="#">' + label + '</a></li>';
+        }
+    });
+
+    $input.on('omniselect:select', function(event, value) {
+        console.log('Selected: ' + value);
+    });
+
+
+});
+
+
+
+(function() {
+    var ga = document.createElement('script');
+    ga.type = 'text/javascript';
+    ga.async = true;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(ga, s);
+})();
+
 checkListExpressionSize();
+
+document.getElementById("addParameter").addEventListener("click", addNewParameter);
+
+$('#btnCreateIntent').bind('click', saveIntentElements );
+
+//document.getElementById("btnCreateIntent").addEventListener("click", saveIntentElements);
+
+
+function actionReaction(element,key){
+    if(key == 13) {
+        if (checkLimitAction()){
+            var node = document.getElementById('parameter-list');
+            // set focus after key 13 on Action
+            var inputNode = node.children[0].children[1].children[0].children[0];
+            inputNode.focus();
+        }
+    }
+}
+
+
+function addNewParameter(){
+    var node = document.getElementById('parameter-list');
+    createNewParameterRow('','','',node);
+    
+}
 
 function checkListExpressionSize(){
     if (document.getElementById('userexpression-list').childElementCount > 0)
@@ -24,52 +108,22 @@ function OnMouseOut (elem) {
     btn.style.display = 'none';
 }
 
-
 function checkKeyCode(element,key){
     if(key == 13) {
         if (checkLimitUsersay()){
             var value = $(element).val();
             var parent = document.getElementById('userexpression-list');
             document.getElementById('user-expression').value = '';
-            createNewUsersayRow(element,value,parent);
+            createNewUsersayRow(value,parent);
         }
     }
 }
 
-
-function findEntityList(element){
-    var prefix = $(element).val();
-    loadEntitySublist(element,prefix);
+function saveIntentElements () {
+    alert("save data");
 }
 
-function loadEntitySublist(element,str){
-    var newNode = document.createElement('div');
-    newNode.className = 'row';
-    newNode.id = 'entity_list';
-
-    var wHTML = '';
-
-    //wHTML += ('<div class="box-tools pull-right">');
-   // wHTML += ('<ul class="dropdown-menu flat">');
-    for (var x in entityList) {
-        if ( (str!=" ") && ( (str.length==0) || (entityList[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
-            if(entityList.length!=0){
-                wHTML += ('<li class="footer" onMouseOver="this.style.cursor=\'pointer\'">'+entityList[x].name+'</li>');
-            }
-        }
-    }
-   // wHTML += ('</ul>');
-    //wHTML += ('</div>');
-
-    var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
-    newNode.innerHTML = wHTML;
-
-    document.getElementById('btnList').click();
-    element.focus();
-    parent.appendChild(newNode);
-}
-
-function createNewUsersayRow(elem,value,parent){
+function createNewUsersayRow(value,parent){
 
     var wHTML ='';
 
@@ -97,16 +151,101 @@ function createNewUsersayRow(elem,value,parent){
 
     var newNode = document.createElement('div');
     newNode.setAttribute('class', 'col-xs-12');
+    newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
 
     checkListExpressionSize();
 }
 
+function createNewParameterRow(name,entity,value,parent){
+    
+
+    if (typeof(name)==='undefined' || (name)=='') name = 'parameter name';
+    if (typeof(entity)==='undefined' || (entity)=='') entity = 'entity name';
+    if (typeof(value)==='undefined' || (value)=='') value = 'enter value';
+  
+    var wHTML ='';
+
+    wHTML += ('<div class="col-xs-2">');
+    wHTML += ('<div class="text-center" >');
+    wHTML += ('<input type="checkbox" id="required">');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="col-xs-4">');
+    wHTML += ('<div class="text-center" >');
+    wHTML += ('<input type="text" class="form-control no-border" id="action-parameter" name="action-parameter"  placeholder="'+name+'" style="padding-left: 35px;">');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="col-xs-3">');
+    wHTML += ('<div class="text-center" >');
+    wHTML += ('<input type="text" class="span3 form-control no-border" name="action-entity"  id="action-entity" style="margin: 0" placeholder="'+entity+'" autocomplete="off" >');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += ('<div class="col-xs-3">');
+    wHTML += ('<div class="text-center" >');
+    wHTML += ('<input type="text" class="form-control no-border" id="action-value" name="action-value" placeholder="'+value+'" style="padding-left: 35px;">');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    var newNode = document.createElement('div');
+    newNode.setAttribute('class', 'box-body bg-white flat no-padding');
+
+    newNode.style.border = '1px solid #d2d6de';
+    newNode.style.marginTop ='-1px';
+    newNode.innerHTML = wHTML;
+    parent.insertBefore(newNode, parent.firstChild);
+
+    // be carefull - this is the treepath for input entity list
+    var inputNode = newNode.children[2].children[0].children[0];
+
+    var $input = $(inputNode);
+    var array = [];
+
+    // loading stored entities
+    for (var x in entityListFromServer) {
+        array.push('@'+entityListFromServer[x].name);
+    }
+
+    $input.omniselect({
+        source: array,
+        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
+        activeClass: 'active',
+        renderItem: function(label, id, index) {
+            return '<li><a href="#">' + label + '</a></li>';
+        }
+    });
+
+    $input.on('omniselect:select', function(event, value) {
+        console.log('Selected: ' + value);
+    });
+
+
+}
+
 
 function checkLimitUsersay() {
     var limitTextInputSize = 50;
     switch (limitText($("#user-expression"), limitTextInputSize)){
+        case -1:
+            $("#btnSaveIntent").prop("disabled",true);
+            return false;
+        case 0:
+            $("#btnSaveIntent").prop("disabled", true);
+            return true;
+        case 1:
+            msgAlertIntent(1, 'Limit \'user says\' reached!');
+            $("#btnSaveIntent").prop("disabled", false);
+            return true;
+    }
+}
+
+function checkLimitAction() {
+    var limitTextInputSize = 20;
+    switch (limitText($("#action-reaction"), limitTextInputSize)){
         case -1:
             $("#btnSaveIntent").prop("disabled",true);
             return false;
@@ -150,29 +289,3 @@ function msgAlertUserExpression(alarm,msg){
     }
     document.getElementById('msgAlertUserExpression').innerText = msg;
 }
-
-function doOn(obj)
-{
-    if(obj.id=="mydef")
-    {
-        document.getElementById("def1").style.display="none";
-        document.getElementById("def").style.display="block";
-    }
-    if(obj.id=="search")
-    {
-        document.getElementById("def").style.display="none";
-
-        document.getElementById("def1").innerHTML='<li><a id="Java" onclick="mydef(this);" >java</a></li><li><a id="oracle" onclick="mydef(this);" >Oracle</a></li>';
-
-        document.getElementById("def1").style.display="block";
-    }
-
-}
-
-function mydef(obj)
-{
-    document.getElementById("search").value=obj.innerHTML;
-    document.getElementById("def1").style.display="none";
-    document.getElementById("def").style.display="none";
-}
-

@@ -15,6 +15,7 @@ function wizardNext() {
 
     if(document.marketNewAIform.onsubmit)
         return;
+    
     RecursiveUnbind($('#wrapper'));
     document.marketNewAIform.submit();
 }

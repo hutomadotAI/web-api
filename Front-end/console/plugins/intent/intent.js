@@ -93,11 +93,11 @@ function showIntents(str){
             wHTML += ('<div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row">');
 
-            wHTML += ('<form method="POST" id="createIntentform" action="./editIntent.php" >');
+
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
             wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">'+intents[x].name+'</div>')
             wHTML += ('</div>');
-            wHTML += ('</form>');
+
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
@@ -142,7 +142,17 @@ function OnMouseOut (elem) {
 }
 
 function editIntent(intent){
-    document.getElementById("createIntentsform").submit();
+    var form = document.createElement("form");
+    var element = document.createElement("input");
+
+    form.method = "POST";
+    form.action = "./intentelement.php";
+
+    element.value=intent;
+    element.name="intent";
+    form.appendChild(element);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 function downloadIntent (name,value,flag) {

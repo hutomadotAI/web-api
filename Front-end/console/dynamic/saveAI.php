@@ -2,7 +2,7 @@
     require '../../pages/config.php';
 
     if ( !\hutoma\console::isSessionActive()) {
-        header('Location: ./error.php?err=1');
+        \hutoma\console::redirect('./error.php?err=1');
         exit;
     }
 
@@ -28,25 +28,22 @@
                                         );
 
 
-    if ($response['status']['code'] === 200)
-        CallGetSingleAI($response['aiid']);
+    if ($response['status']['code'] === 200) {
+        if (updateData($response['aiid'])){
+            unset($_response);
+            \hutoma\console::redirect('../trainingAI.php');
+        }
+        else {
+            unset($_response);
+            \hutoma\console::redirect('./error.php?err=15');
+            exit;
+        }
+    }
     else{
         unset($_response);
-        header("Location: ../error.php?err=5");
+        \hutoma\console::redirect('./error.php?err=5');
         exit;
     }
-    unset($_response);
-
-        /*
-        MANCA IL DEV ID
-        ù
-        $userActivedList = json_decode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains'] , true);
-        foreach ($userActivedList as $key => $value)
-           \hutoma\console::insertUserActiveDomain($singleAI['dev_id'] , $response['aiid'], $key, $userActivedList[$key]);
-        unset($userActivedList);
-
-        */
-    header('Location: ../trainingAI.php');
 
 
     function isPostInputAvailable(){
@@ -57,26 +54,46 @@
         );
     }
 
-    function CallGetSingleAI($aiid){
+    function updateData($aiid){
         $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(),$aiid);
-        
+    
         if ($singleAI['status']['code'] === 200) {
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'] = $singleAI['aiid'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $singleAI['name'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'] = $singleAI['description'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on'] = $singleAI['created_on'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['is_private'] = $singleAI['is_private'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['descritpion'] = $singleAI['description'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['created_on'] = $singleAI['created_on'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['is_private'] = $singleAI['is_private'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info'] = $singleAI['ai']['training_debug_info'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status'] = $singleAI['training_status'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai_status'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['training_status'] = $singleAI['training_status'];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
-        }else{
-            unset($response);
-            unset($singleAI);
-            header("Location: ../error.php?err=15");
-            exit;
+
+            if ( updateUserActivedDomains($singleAI['dev_id'], $singleAI['aiid']) ){
+                unset($singleAI);
+                return true;
+            }else{
+                unset($singleAI);
+                return false;
+            }
         }
+        unset($singleAI);
+        return false;
+    }
+
+    function updateUserActivedDomains($dev_id,$aiid){
+        $userActivedList = json_decode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains'] , true);
+        try {
+            foreach ($userActivedList as $key => $value)
+              \hutoma\console::insertUserActiveDomain($dev_id, $aiid, $key, $userActivedList[$key]);
+            
+        }
+        catch (Exception $e) {
+            unset($userActivedList);
+            return false;
+        }
+        unset($userActivedList);
+        return true;
     }
 
 ?>
