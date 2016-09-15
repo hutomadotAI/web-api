@@ -84,7 +84,7 @@ public class ChatLogic {
                 logger.logDebug(LOGFROM, "WNET response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
 
                 // if semantic analysis is not confident enough, wait for and process result from neural network
-                if (semanticScore < min_p)  {
+                if ((semanticScore < min_p) || (0.0d == semanticScore))  {
 
                     // wait for neural network to complete
                     String RNN_answer = neuralNet.getAnswerResult();
@@ -129,7 +129,7 @@ public class ChatLogic {
             // because the error may have occurred on the second request and the first may have completed correctly
         }
         if (noResponse) {
-            logger.logWarning(LOGFROM, "no response from chat server");
+            logger.logError(LOGFROM, "chat server returned an empty response");
             return ApiError.getInternalServerError();
         }
 
