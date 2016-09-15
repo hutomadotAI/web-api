@@ -87,6 +87,21 @@ public class Config {
         return Double.valueOf(getConfigFromProperties("cluster_min_probability", "0.7"));
     }
 
+    public double getRateLimit_Chat_BurstRequests() {
+        return Double.valueOf(getConfigFromProperties("ratelimit_chat_burst", "3.0"));
+    }
+
+    public double getRateLimit_Chat_Frequency() {
+        return Double.valueOf(getConfigFromProperties("ratelimit_chat_frequency", "2.0"));
+    }
+
+    public double getRateLimit_QuickRead_BurstRequests() {
+        return Double.valueOf(getConfigFromProperties("ratelimit_quickread_burst", "5.0"));
+    }
+
+    public double getRateLimit_QuickRead_Frequency() {
+        return Double.valueOf(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
+    }
     private String getConfigFromProperties(String p, String defaultValue) {
         if (null==properties) {
             logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");

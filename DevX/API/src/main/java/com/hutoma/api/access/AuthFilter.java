@@ -1,4 +1,4 @@
-package com.hutoma.api.auth;
+package com.hutoma.api.access;
 
 import com.hutoma.api.common.Logger;
 import io.jsonwebtoken.Jwts;

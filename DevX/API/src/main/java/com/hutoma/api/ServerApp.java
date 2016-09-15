@@ -21,7 +21,7 @@ public class ServerApp extends ResourceConfig {
         register(ServerInit.class);
 
         // authorization filter
-        packages(false, "com.hutoma.api.auth");
+        packages(false, "com.hutoma.api.access");
 
         // validation and param extraction
         packages(false, "com.hutoma.api.validation");

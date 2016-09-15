@@ -4,6 +4,7 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.sub.RateLimitStatus;
 import hutoma.api.server.db.memory;
 import org.joda.time.DateTime;
 
@@ -182,6 +183,21 @@ public class Database {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
             return call.executeUpdate()>0;
+        }
+    }
+
+    public RateLimitStatus checkRateLimit(String dev_id, String rateKey, double burst, double frequency) throws DatabaseException {
+        try (DatabaseCall call = callProvider.get()) {
+            call.initialise("rate_limit_check", 4).add(dev_id).add(rateKey).add(burst).add(frequency);
+            ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return new RateLimitStatus(rs.getBoolean("rate_limit"), rs.getFloat("tokens"));
+                }
+                throw new DatabaseException(new Exception("stored proc should have returned a row but it returned none"));
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
         }
     }
 

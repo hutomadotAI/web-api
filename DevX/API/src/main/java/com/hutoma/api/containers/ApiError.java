@@ -58,4 +58,8 @@ public class ApiError extends ApiResult {
         return ApiError.getError(HttpURLConnection.HTTP_ACCEPTED, message);
     }
 
+    public static ApiError getRateLimited() {
+        return ApiError.getError(429, "too many requests");
+    }
+
 }

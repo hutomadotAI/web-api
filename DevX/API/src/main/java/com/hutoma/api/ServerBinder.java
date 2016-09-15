@@ -1,5 +1,6 @@
 package com.hutoma.api;
 
+import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.*;
 import com.hutoma.api.logic.*;
@@ -38,5 +39,6 @@ public class ServerBinder extends AbstractBinder {
         bind(SemanticAnalysis.class).to(SemanticAnalysis.class);
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);
+        bind(RateLimitCheck.class).to(RateLimitCheck.class);
     }
 }

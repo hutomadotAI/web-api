@@ -35,7 +35,7 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
 
     // query parameter names
     private final String AIID = "aiid";
-    private final String DEVID = "devid";
+    private final String DEVID = "_developer_id";
     private final String CHATQUESTION = "q";
     private final String CHATHISTORY = "chat_history";
     private final String AIDESC = "description";
@@ -56,12 +56,12 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
             MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
             MultivaluedMap<String, String> queryParameters = requestContext.getUriInfo().getQueryParameters();
 
+            // developer ID is always validated
+            requestContext.setProperty(APIParameter.DevID.toString(),
+                    this.validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
+
             // extract each parameter as necessary,
             // validate and put the result into a property in the requestcontext
-            if (checkList.contains(APIParameter.DevID)) {
-                requestContext.setProperty(APIParameter.DevID.toString(),
-                        this.validateAlphaNumPlusDashes(DEVID, getFirst(pathParameters.get(DEVID))));
-            }
             if (checkList.contains(APIParameter.AIID)) {
                 requestContext.setProperty(APIParameter.AIID.toString(),
                         this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
@@ -99,6 +99,10 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
     }
 
     // static accessors to retrieve validated parameters from the request context
+    public static String getDevid(ContainerRequestContext requestContext) {
+        return (String)requestContext.getProperty(APIParameter.DevID.toString());
+    }
+
     public static UUID getAiid(ContainerRequestContext requestContext) {
         return (UUID)requestContext.getProperty(APIParameter.AIID.toString());
     }

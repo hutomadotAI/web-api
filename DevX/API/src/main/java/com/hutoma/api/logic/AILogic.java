@@ -1,6 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.auth.Role;
+import com.hutoma.api.access.Role;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
@@ -8,7 +8,6 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;

@@ -1,7 +1,9 @@
 package com.hutoma.api.endpoints;
 
-import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
+import com.hutoma.api.access.RateKey;
+import com.hutoma.api.access.RateLimit;
+import com.hutoma.api.access.Role;
+import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AIDomainLogic;
@@ -19,6 +21,7 @@ import javax.ws.rs.core.SecurityContext;
  * Created by David MG on 05/08/2016.
  */
 @Path("/ai/domain")
+@RateLimit(RateKey.QuickRead)
 public class AIDomainEndpoint {
 
     AIDomainLogic aiDomainLogic;

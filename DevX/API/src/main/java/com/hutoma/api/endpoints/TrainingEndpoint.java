@@ -1,7 +1,9 @@
 package com.hutoma.api.endpoints;
 
-import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
+import com.hutoma.api.access.RateKey;
+import com.hutoma.api.access.RateLimit;
+import com.hutoma.api.access.Role;
+import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.TrainingLogic;
@@ -24,6 +26,7 @@ import java.io.InputStream;
  * Created by David MG on 09/08/2016.
  */
 @Path("/ai/")
+@RateLimit(RateKey.QuickRead)
 public class TrainingEndpoint {
 
     TrainingLogic trainingLogic;

@@ -1,7 +1,7 @@
 package com.hutoma.api.endpoints;
 
-import com.hutoma.api.auth.Role;
-import com.hutoma.api.auth.Secured;
+import com.hutoma.api.access.Role;
+import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AdminLogic;
