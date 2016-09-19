@@ -6,6 +6,7 @@ package com.hutoma.api.validation;
 public enum APIParameter {
     AIID,
     DevID,
+    UserID,
     AIName,
     AIDescription,
     ChatQuestion,

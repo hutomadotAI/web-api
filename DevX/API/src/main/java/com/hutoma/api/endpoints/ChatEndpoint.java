@@ -37,19 +37,17 @@ public class ChatEndpoint {
 
     @GET
     @Path("{aiid}/chat")
-    @ValidateParameters({APIParameter.AIID, APIParameter.ChatQuestion, APIParameter.ChatHistory, APIParameter.ChatTopic, APIParameter.Min_P})
+    @ValidateParameters({APIParameter.AIID, APIParameter.UserID, APIParameter.ChatQuestion, APIParameter.ChatHistory, APIParameter.ChatTopic, APIParameter.Min_P})
     @Secured({Role.ROLE_CLIENTONLY,Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response chat(
             @Context SecurityContext securityContext,
-            @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
-            @DefaultValue("1") @QueryParam("uid") String uid) {
+            @Context ContainerRequestContext requestContext) {
         ApiResult result = chatLogic.chat(securityContext,
                 ParameterFilter.getAiid(requestContext),
-                dev_id,
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
-                uid,
+                ParameterFilter.getUserID(requestContext),
                 ParameterFilter.getChatHistory(requestContext),
                 ParameterFilter.getTopic(requestContext),
                 ParameterFilter.getMinP(requestContext));
