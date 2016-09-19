@@ -1,5 +1,6 @@
 package com.hutoma.api.access;
 
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import io.jsonwebtoken.Jwts;
 
@@ -29,12 +30,16 @@ public class AuthFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    @Inject
     private Logger logger;
+    private Config config;
+
+    @Inject
+    public AuthFilter(Logger logger, Config config) {
+        this.logger = logger;
+        this.config = config;
+    }
 
     private final String LOGFROM = "authfilter";
-
-    private String encoding_key="L0562EMBfnLadKy57nxo9btyi3BEKm9m+DoNvGcfZa+DjHsXwTl+BwCE4NeKEAagfkhYBFvhvJoAgtugSsQOfw==";
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -42,6 +47,8 @@ public class AuthFilter implements ContainerRequestFilter {
         logger.logDebug(LOGFROM, "endpoint secured");
 
         try {
+
+            String encoding_key = config.getEncodingKey();
 
             String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             String _devrole = "";
