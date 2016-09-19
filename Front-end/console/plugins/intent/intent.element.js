@@ -60,6 +60,7 @@ $(document).ready(function() {
 checkListExpressionSize();
 
 document.getElementById("addParameter").addEventListener("click", addNewParameter);
+document.getElementById("btnAddExpression").addEventListener("click", addExpression);
 
 $('#btnCreateIntent').bind('click', saveIntentElements );
 
@@ -133,13 +134,30 @@ function OnMouseDeepOut (elem) {
 
 
 function checkKeyCode(element,key){
-    if(key == 13) {
-        if (checkLimitUsersay()){
-            var value = $(element).val();
-            var parent = document.getElementById('userexpression-list');
-            document.getElementById('user-expression').value = '';
-            createNewUsersayRow(value,parent);
+    var value = $(element).val();
+
+    if( value.length > 0) {
+        document.getElementById('btnAddExpression').disabled = false;
+        if (key == 13) {
+            if (checkLimitExpression()) {
+                document.getElementById('btnAddExpression').disabled = true;
+                var parent = document.getElementById('userexpression-list');
+                document.getElementById('user-expression').value = '';
+                createNewUsersayRow(value, parent);
+            }
         }
+    }
+    else {
+        document.getElementById('btnAddExpression').disabled = true;
+    }
+}
+
+function addExpression(){
+    if (checkLimitExpression()){
+        var value = $(element).val();
+        var parent = document.getElementById('userexpression-list');
+        document.getElementById('user-expression').value = '';
+        createNewUsersayRow(value,parent);
     }
 }
 
@@ -263,7 +281,7 @@ function createNewParameterRow(name,entity,value,parent){
 }
 
 
-function checkLimitUsersay() {
+function checkLimitExpression() {
     var limitTextInputSize = 50;
     switch (limitText($("#user-expression"), limitTextInputSize)){
         case -1:

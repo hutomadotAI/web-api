@@ -16,10 +16,11 @@
                 <div class="col-md-12">
                     <h5 class="box-title">
                         <div class="input-group no-margin">
-                            <input type="text" class="form-control" id="user-expression" name="user-expression" placeholder="Add user expression" onkeydown="checkKeyCode(this,event.keyCode)"  style="padding-left: 35px;">
-                    <span class="input-group-btn">
-                      <button class="btn btn-info btn-flat" type="button">Go!</button>
-                    </span>
+                            <input type="text" class="form-control" id="user-expression" name="user-expression" placeholder="Add user expression" onkeyup="checkKeyCode(this,event.keyCode)"  style="width: 96%;">
+                            <span class="input-group-btn">
+                            <button class="btn btn-success flat pull-right" id="btnAddExpression"  style="width: 120px;" alt="Add expression" disabled>Add Expression</button>
+                            </span>
+                        </div>
                     </h5>
                 </div>
             </div>
