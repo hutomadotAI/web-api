@@ -1,9 +1,9 @@
 <div class="box box-solid box-clean flat no-shadow direct-chat direct-chat-success">
 
     <div class="box-header with-border">
-        <i class="fa fa-comment-o"></i>
-        <h3 class="box-title"><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?> - Chat</h3>
-        <div class="box-tools pull-right" >
+        <i class="glyphicon glyphicon-user"></i>
+        <h3 class="box-title"><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></h3>
+        <div class="box-tools pull-right">
             <ul class="dropdown-menu flat">
                 <li class="footer"><a href="#">  <i class="fa fa-bullhorn"></i> Deactive Voice</a></li>
                 <li class="footer"><a href="#">  <i class="fa fa-microphone-slash"></i> Mute Microphone</a></li>

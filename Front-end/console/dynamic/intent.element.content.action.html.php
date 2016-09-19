@@ -24,51 +24,7 @@
              </div>
          </div>
 
-         <div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;">
-             <div class="row">
-                 <div class="col-xs-2">
-                     <div class="text-center" >
-                         Required
-                         <i class="fa fa-question-circle text-md text-yellow" data-toggle="tooltip" title="This parameter needs to" ></i>
-                     </div>
-                 </div>
-                 <div class="col-xs-4">
-                     <div class="text-center" >
-                         Parameter
-                         <i class="fa fa-question-circle text-md text-yellow" data-toggle="tooltip" title="This parametere needs to" ></i>
-                     </div>
-                 </div>
-                 <div class="col-xs-3">
-                     <div class="text-center" >
-                         Entity
-                         <i class="fa fa-question-circle text-md text-yellow" data-toggle="tooltip" title="This parametere needs to" ></i>
-                     </div>
-                 </div>
-                 <div class="col-xs-3">
-                     <div class="text-center" >
-                         Value
-                         <i class="fa fa-question-circle text-md text-yellow" data-toggle="tooltip" title="This parametere needs to" ></i>
-                     </div>
-                 </div>
-            </div>
-         </div>
-
-
-         <div class="box-body bg-white flat no-padding" id="parameter-list"></div>
-
-         <p></p>
-         <button type="button" class="btn btn-primary flat pull-left" id="addParameter" value="">Add parameter</button>
-         
-
-     </div>
-
-
-
-
-
-
-
-     <div id="collapseActionInfo" class="panel-collapse collapse">
+         <div id="collapseActionInfo" class="panel-collapse collapse">
              <div class="box-body">
                  <div class="overlay center-block">
                      <section class="content bg-gray-light" >
@@ -90,8 +46,44 @@
                      need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
                  </div>
              </div>
-     </div>
+         </div>
 
+         <div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;paddind-bottom:3px;">
+             <div class="row">
+                 <div class="col-xs-3 border-right">
+                     <div class="text-center" >
+                         <i class="fa fa fa-sitemap text-md text-md text-yellow" data-toggle="tooltip" title="This parametere needs to" ></i>
+                         Entity
+                     </div>
+                 </div>
+                 <div class="col-xs-4 border-right">
+                     <div class="text-center" >
+                         <i class="fa fa-sliders text-md text-red" data-toggle="tooltip" title="This parametere needs to" ></i>
+                         Parameter
+                     </div>
+                 </div>
+                 <div class="col-xs-3 border-right">
+                     <div class="text-center" >
+                         <i class="fa  fa-tag text-md text-blue" data-toggle="tooltip" title="This parametere needs to" ></i>
+                         Value
+                     </div>
+                 </div>
+                 <div class="col-xs-2">
+                     <div class="text-center" >
+                         Apply
+                     </div>
+                 </div>
+            </div>
+         </div>
+
+
+         <div class="box-body bg-white flat no-padding" id="parameter-list"></div>
+
+         <p></p>
+         <button type="button" class="btn btn-primary flat pull-left" id="addParameter" value="">Add parameter</button>
+         
+
+     </div>
 
 </div>
 

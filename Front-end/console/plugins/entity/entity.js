@@ -1,6 +1,8 @@
 document.getElementById("inputEntityName").addEventListener("keyup", activeButtonCreate);
-document.getElementById("btnCreateEntity").addEventListener("click", createEntity);
+document.getElementById("btnCreateEntity").addEventListener("click", PostingEnntityName);
 
+if (limitText($("#inputEntityName"))== 0)
+    $("#btnCreateEntity").prop("disabled", false);
 
 function activeButtonCreate() {
     var limitTextInputSize = 50;
@@ -32,22 +34,17 @@ function limitText(limitField, limitNum) {
 }
 
 
-function createEntity() {
+function PostingEnntityName() {
     $(this).prop("disabled",true);
-    if(isContainInvalidCharacters($("#inputEntityName").val()))
-        msgAlert(2,'Entity name need contain only the following: A-Z, a-z, 0-9 character');
-    else {
-        CallBackendSaveEntity();
-    }
-}
 
-function CallBackendSaveEntity(){
-    if(!document.entityCreateForm.onsubmit){
-        msgAlert(2,'An error is occured during submit data!');
-        return;
+    if(isContainInvalidCharacters($("#inputEntityName").val())) {
+        msgAlert(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
     }
-    //document.entityCreateForm.submit();
-    alert("add entity to list");
+    else {
+        if(!document.entityCreateForm.onsubmit)
+            return;
+        document.entityCreateForm.submit();
+    }
 }
 
 function isContainInvalidCharacters(txt) {
@@ -95,16 +92,20 @@ function showEntities(str){
             wHTML += ('<div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row">');
 
-            wHTML += ('<form method="POST" id="createEntityform" action="./editEntity.php" >');
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onMouseOver="this.style.cursor=\'pointer\'">@'+entities[x].name+'</div>')
+            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onClick="editEntity(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@'+entities[x].name+'</div>')
             wHTML += ('</div>');
-            wHTML += ('</form>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
+
+            var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].name.replace(/\s/g, '') + x);
+            wHTML +=('<a data-toggle="collapse" href="#'+unique_id+'">');
+            wHTML +=('<i class="fa fa-comments-o" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
+            wHTML +=('</a>');
+
             wHTML += ('<a data-toggle="dropdown">');
-            wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
+            wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
             wHTML += ('</a>');
             wHTML += ('<ul class="dropdown-menu flat">');
             wHTML += ('<li><a onClick="downloadEntity (\''+entities[x].name+'\','+x+',0)">JSON format</a></li>');
@@ -117,11 +118,23 @@ function showEntities(str){
 
             wHTML += ('</div>');
             wHTML += ('</div>');
+            // push PROMPT inside box internal
+            wHTML += ('<div id="'+unique_id+'" class="panel-collapse collapse" >');
+            wHTML += ('<div class="row" style="padding: 10px 0px 0px 0px;">');
+            wHTML += ('<div class="col-xs-12">');
+            wHTML += ('<div class="inner-addon left-addon">');
+            wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
+            wHTML += ('<textarea class="form-control bg-gray-ultralight" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px;" placeholder="value from server" readonly></textarea>');
+            wHTML += ('</div>');
+            wHTML += ('</div>');
+            wHTML += ('</div>');
+            wHTML += ('</div>');
 
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('</div>');
         }
+
     }
 
     newNode.innerHTML = wHTML;
@@ -141,6 +154,20 @@ function OnMouseIn (elem) {
 function OnMouseOut (elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = 'none';
+}
+
+function editEntity(entity){
+    var form = document.createElement('form');
+    var element = document.createElement('input');
+
+    form.method = 'POST';
+    form.action = './entityelement.php';
+
+    element.value=entity;
+    element.name='entity';
+    form.appendChild(element);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 function downloadEntity (name,value,flag) {

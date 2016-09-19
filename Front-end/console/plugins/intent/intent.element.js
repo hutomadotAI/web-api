@@ -98,6 +98,15 @@ function deleteUserExpression (element) {
     checkListExpressionSize();
 }
 
+// delete node from page - dipendence parentNode
+function deleteActionParameter (element) {
+    // delete node from page - dipendence parentNode
+    var parent =  (((element.parentNode).parentNode).parentNode).parentNode;
+    parent.parentNode.removeChild(parent)
+    checkListExpressionSize();
+}
+
+
 function OnMouseIn (elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = '';
@@ -107,6 +116,21 @@ function OnMouseOut (elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = 'none';
 }
+
+function OnMouseDeepIn (elem) {
+    if ( elem != document.getElementById('parameter-list').children[0]) {
+        var btn = elem.children[3].children[0].children[1].children[0];
+        btn.style.display = '';
+    }
+}
+
+function OnMouseDeepOut (elem) {
+    if ( elem != document.getElementById('parameter-list').children[0]) {
+        var btn = elem.children[3].children[0].children[1].children[0];
+        btn.style.display = 'none';
+    }
+}
+
 
 function checkKeyCode(element,key){
     if(key == 13) {
@@ -140,7 +164,7 @@ function createNewUsersayRow(value,parent){
 
     wHTML += ('<div class="col-xs-3" id="btnUserExpression" style="display:none;" >');
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
-    wHTML += ('<a data-toggle="modal" data-target="#deleteUserExpression" id="x" style="cursor: pointer;" onClick="deleteUserExpression(this)">');
+    wHTML += ('<a data-toggle="modal" data-target="#deleteUserExpression" style="cursor: pointer;" onClick="deleteUserExpression(this)">');
     wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
     wHTML += ('</a>');
     wHTML +=('</div>');
@@ -167,9 +191,10 @@ function createNewParameterRow(name,entity,value,parent){
   
     var wHTML ='';
 
-    wHTML += ('<div class="col-xs-2">');
+
+    wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="checkbox" id="required">');
+    wHTML += ('<input type="text" class="span3 form-control no-border" name="action-entity"  id="action-entity" style="margin: 0" placeholder="'+entity+'" autocomplete="off" >');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -181,18 +206,29 @@ function createNewParameterRow(name,entity,value,parent){
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="span3 form-control no-border" name="action-entity"  id="action-entity" style="margin: 0" placeholder="'+entity+'" autocomplete="off" >');
+    wHTML += ('<input type="text" class="form-control no-border" id="action-value" name="action-value" placeholder="'+value+'" style="padding-left: 35px;">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
-    wHTML += ('<div class="col-xs-3">');
+    wHTML += ('<div class="col-xs-2" style="padding-top:7px;">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control no-border" id="action-value" name="action-value" placeholder="'+value+'" style="padding-left: 35px;">');
+
+    wHTML += ('<div class="col-xs-7 text-gray no-padding">');
+    wHTML += ('<input class="pull-right" type="checkbox" id="required"> ');
+    wHTML += ('</div>');
+    wHTML += ('<div class="col-xs-5 text-gray no-padding">');
+    wHTML += ('<a class="pull-right"  data-toggle="modal" data-target="#deleteActionParameter" style="display:none;" onClick="deleteActionParameter(this)">');
+    wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
+    wHTML += ('</a>');
+    wHTML += ('</div>');
+
     wHTML += ('</div>');
     wHTML += ('</div>');
 
     var newNode = document.createElement('div');
     newNode.setAttribute('class', 'box-body bg-white flat no-padding');
+    newNode.setAttribute('onmouseover','OnMouseDeepIn (this)');
+    newNode.setAttribute('onmouseout','OnMouseDeepOut (this)');
 
     newNode.style.border = '1px solid #d2d6de';
     newNode.style.marginTop ='-1px';
@@ -200,7 +236,7 @@ function createNewParameterRow(name,entity,value,parent){
     parent.insertBefore(newNode, parent.firstChild);
 
     // be carefull - this is the treepath for input entity list
-    var inputNode = newNode.children[2].children[0].children[0];
+    var inputNode = newNode.children[0].children[0].children[0];
 
     var $input = $(inputNode);
     var array = [];
@@ -231,14 +267,14 @@ function checkLimitUsersay() {
     var limitTextInputSize = 50;
     switch (limitText($("#user-expression"), limitTextInputSize)){
         case -1:
-            $("#btnSaveIntent").prop("disabled",true);
+
             return false;
         case 0:
-            $("#btnSaveIntent").prop("disabled", true);
+
             return true;
         case 1:
             msgAlertIntent(1, 'Limit \'user says\' reached!');
-            $("#btnSaveIntent").prop("disabled", false);
+
             return true;
     }
 }
@@ -247,14 +283,14 @@ function checkLimitAction() {
     var limitTextInputSize = 20;
     switch (limitText($("#action-reaction"), limitTextInputSize)){
         case -1:
-            $("#btnSaveIntent").prop("disabled",true);
+
             return false;
         case 0:
-            $("#btnSaveIntent").prop("disabled", true);
+
             return true;
         case 1:
-            msgAlertIntent(1, 'Limit \'user says\' reached!');
-            $("#btnSaveIntent").prop("disabled", false);
+            msgAlertIntent(1, 'Limit \'Action \' reached!');
+
             return true;
     }
 }

@@ -70,7 +70,7 @@ require "../pages/config.php";
             <div class="row">
                 <div class="col-md-7">
                         <?php include './dynamic/intent.content.create.html.php'; ?>
-                        <?php include './dynamic/intent.content.html.php'; ?>
+                        <?php include './dynamic/intent.content.list.html.php'; ?>
                 </div>
                 <div class="col-md-5">
                         <?php include './dynamic/chat.html.php'; ?>

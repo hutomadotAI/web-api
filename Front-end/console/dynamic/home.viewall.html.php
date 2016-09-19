@@ -17,7 +17,7 @@
             echo('<th style="border:0;">Date</th>');
             echo('</tr>');
 
-            foreach ($response_getAIs['ai_list'] as $bot) {
+            foreach (array_reverse($response_getAIs['ai_list']) as $bot) {
                 echo('<tr>');
                 echo('<td style="padding-top: 15px;">' . $bot['aiid'] . '</td>');
                 echo('<td style="padding-top: 15px;">' . $bot['name'] . '</td>');
