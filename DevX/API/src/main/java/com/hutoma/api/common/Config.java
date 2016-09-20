@@ -55,6 +55,10 @@ public class Config {
         return getConfigFromProperties("core_queue", "");
     }
 
+    public String getQuestionGeneratorQueue() {
+        return getConfigFromProperties("sqs_QG", "");
+    }
+
     public Regions getMessageQueueRegion() {
         return Regions.US_EAST_1;
     }
