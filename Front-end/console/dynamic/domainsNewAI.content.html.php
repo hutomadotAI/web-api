@@ -10,19 +10,18 @@
     </div>
 
     <div class="box-body" id="boxNewDomains">
+        <p></p>
         <input class="form-control " value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
         <p></p>
         <div class="form-group pull-right">
-
-            <span>Show Free Neural Networks Only</span>
+            <span style="padding-right:5px;">Show Free Neural Networks Only</span>
             <label>
                 <input type="checkbox" class="minimal" checked>
             </label>
         </div>
     </div>
 
-
-
+    
 
     <div id="collapseInfoNewDomains" class="panel-collapse collapse">
         <div class="box-body">
