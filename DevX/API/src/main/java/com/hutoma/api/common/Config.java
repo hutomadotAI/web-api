@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Properties;
 
 /**
@@ -18,16 +19,19 @@ public class Config {
 
     Logger logger;
     Properties properties;
+    HashSet<String> propertyLoaded;
 
     private final String LOGFROM = "config";
 
     @Inject
     public Config(Logger logger) {
         this.logger = logger;
+        this.propertyLoaded = new HashSet<>();
         loadPropertiesFile();
     }
 
     public void loadPropertiesFile() {
+        this.propertyLoaded.clear();
         Path configPath = Paths.get(System.getProperty("user.home"), "/ai/v1.config.properties");
         try {
             Properties loadProperties = new Properties();
@@ -40,7 +44,7 @@ public class Config {
     }
 
     public  String getWnetNumberOfCPUS() {
-        return getConfigFromProperties("num_CPUs", "8");
+        return getConfigFromProperties("wnet_num_CPUs", "8");
     }
 
     public String getEncodingKey() {
@@ -60,11 +64,11 @@ public class Config {
     }
 
     public long getNeuralNetworkTimeout() {
-        return Long.valueOf(getConfigFromProperties("RNNTimeout", "60"));
+        return Long.valueOf(getConfigFromProperties("rnn_timeout", "60"));
     }
 
     public long getMaxUploadSize() {
-        return Long.valueOf(getConfigFromProperties("MaxUploadSize", "65536"));
+        return Long.valueOf(getConfigFromProperties("max_upload_size", "65536"));
     }
 
     public int getMaxClusterLines() {
@@ -72,15 +76,21 @@ public class Config {
     }
 
     public String getDatabaseConnectionString() {
-        return enforceNewDBCredentials(getConfigFromProperties("connectionstring", ""));
+        // if we are using admin or root, log an error and return an empty connection string
+        try {
+            return enforceNewDBCredentials(getConfigFromProperties("connection_string", ""));
+        } catch (Exception e) {
+            logger.logError(LOGFROM, e.getMessage());
+        }
+        return "";
     }
 
     public int getDatabaseConnectionPoolMinimumSize() {
-        return Integer.valueOf(getConfigFromProperties("DBConnectionPoolMinSize", "8"));
+        return Integer.valueOf(getConfigFromProperties("dbconnectionpool_min_size", "8"));
     }
 
     public int getDatabaseConnectionPoolMaximumSize() {
-        return Integer.valueOf(getConfigFromProperties("DBConnectionPoolMaxSize", "64"));
+        return Integer.valueOf(getConfigFromProperties("dbconnectionpool_max_size", "64"));
     }
 
     public double getClusterMinProbability() {
@@ -102,12 +112,35 @@ public class Config {
     public double getRateLimit_QuickRead_Frequency() {
         return Double.valueOf(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
     }
+
     private String getConfigFromProperties(String p, String defaultValue) {
         if (null==properties) {
             logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
             return defaultValue;
         }
+        // keep a list of used properties
+        // if this is the first time we are accessing a property and we are using defaults then log a warning
+        if (propertyLoaded.add(p) && (!properties.containsKey(p))) {
+            logger.logWarning(LOGFROM, "no property set for " + p + ". using hard-coded default " + defaultValue);
+        }
         return properties.getProperty(p, defaultValue);
+    }
+
+    /***
+     * Throw an exception if we are using a username that starts with 'admin' or 'root'
+     * @param value connection string
+     * @return same connection string
+     * @throws Exception if username is admin... or root...
+     */
+    private static String enforceNewDBCredentials(String value) throws Exception {
+        int startUserName = value.indexOf("user=");
+        if (startUserName>=0) {
+            String prefixUsername = value.substring(startUserName + ("user=".length())).toLowerCase();
+            if ((prefixUsername.startsWith("admin")) || (prefixUsername.startsWith("root"))) {
+                throw new Exception("db connection string uses root/admin access. please update your config properties file.");
+            }
+        }
+        return value;
     }
 
     @Deprecated
@@ -118,24 +151,18 @@ public class Config {
 
             String value = prop.getProperty(p);
             switch (p) {
-                case "connectionstring": {
+                case "connection_string": {
                     value = enforceNewDBCredentials(value);
                     break;
                 }
             }
-
             return value;
 
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
-    }
-
-    private static String enforceNewDBCredentials(String value) {
-        int startUserName = value.indexOf("user=");
-        int startPassword = value.indexOf("password=");
-        int endPassword = value.indexOf('&', startPassword);
-        return value.substring(0, startUserName) + "user=hutoma_caller&password=>YR\"khuN*.gF)V4#" + value.substring(endPassword);
     }
 }
