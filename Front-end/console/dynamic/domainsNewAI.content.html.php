@@ -1,7 +1,7 @@
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
         <i class="fa fa-th text-red"></i>
-        <h3 class="box-title">Select one or more pre-training neural networks</h3>
+        <h3 class="box-title">Pre-training Neural Networks</h3>
         <a data-toggle="collapse"  href="#collapseInfoNewDomains">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -13,15 +13,14 @@
         <p></p>
         <input class="form-control " value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
         <p></p>
-        <div class="form-group pull-right">
-            <span style="padding-right:5px;">Show Free Neural Networks Only</span>
-            <label>
-                <input type="checkbox" class="minimal" checked>
-            </label>
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
+            <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+            <i class="icon fa fa-check" id="icongAlertNewDomains"></i>
+            <span id="msgAlertNewDomains">You can search and select one or more pre-training neural networks</span>
         </div>
     </div>
 
-    
+
 
     <div id="collapseInfoNewDomains" class="panel-collapse collapse">
         <div class="box-body">
@@ -51,6 +50,12 @@
         <a href="#" class="btn btn-primary flat" id="btnCancel" onClick="history.go(-1); return false;">cancel</a>
         <!--<a href="#" class="btn btn-primary flat" id="btnBack">back</a>-->
         <button type="submit" id="btnNext" class="btn btn-success flat" alt="next step">next</button>
+        <div class="form-group pull-right no-margin" style="padding-top: 5px;">
+            <span style="padding-right:5px;">Show Free Neural Networks Only</span>
+            <label>
+                <input type="checkbox" class="minimal" checked>
+            </label>
+        </div>
     </div>
 </div>
 

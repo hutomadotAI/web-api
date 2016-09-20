@@ -129,3 +129,21 @@ function switchClick(node,key){
         $("#"+boxid).removeClass("borderActive");
     }
 }
+
+function msgAlertNewDomains(alarm,msg){
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertNewDomains").attr('class','alert alert-dismissable flat alert-base');
+            $("#icongAlertNewDomains").attr('class', 'icon fa fa-check');
+            break;
+        case 1:
+            $("#containerMsgAlertNewDomains").attr('class','alert alert-dismissable flat alert-warning');
+            $("#icongAlertNewDomains").attr('class', 'icon fa fa-check');
+            break;
+        case 2:
+            $("#containerMsgAlertNewDomains").attr('class','alert alert-dismissable flat alert-danger');
+            $("#icongAlertNewDomains").attr('class', 'icon fa fa-warning');
+            break
+    }
+    document.getElementById('msgAlertNewDomains').innerText = msg;
+}
