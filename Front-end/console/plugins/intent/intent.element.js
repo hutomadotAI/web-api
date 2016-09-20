@@ -135,6 +135,7 @@ function OnMouseDeepOut (elem) {
 
 function checkKeyCode(element,key){
     var value = $(element).val();
+    document.getElementById('user-expression').style.borderColor = "#d2d6de";
 
     if( value.length > 0) {
         document.getElementById('btnAddExpression').disabled = false;
@@ -154,6 +155,7 @@ function checkKeyCode(element,key){
 
 function addExpression(){
     if (checkLimitExpression()){
+        var element = document.getElementById('user-expression');
         var value = $(element).val();
         var parent = document.getElementById('userexpression-list');
         document.getElementById('user-expression').value = '';
@@ -288,10 +290,10 @@ function checkLimitExpression() {
 
             return false;
         case 0:
-
+            msgAlertUserExpression(0, 'You can add user expressions and save it!');
             return true;
         case 1:
-            msgAlertIntent(1, 'Limit \'user says\' reached!');
+            msgAlertUserExpression(1, 'Limit \'user says\' reached!');
 
             return true;
     }
@@ -328,18 +330,20 @@ function msgAlertUserExpression(alarm,msg){
         case 0:
             $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-base');
             $("#iconAlertUserExpression").attr('class', 'icon fa fa-check');
-            document.getElementById('inputUserExpression').style.borderColor = "#d2d6de";
+            document.getElementById('user-expression').style.borderColor = "#d2d6de";
             break;
         case 1:
             $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-warning');
             $("#iconAlertUserExpression").attr('class', 'icon fa fa-check');
-            document.getElementById('inputUserExpression').style.borderColor = "orange";
+            document.getElementById('user-expression').style.borderColor = "orange";
             break;
         case 2:
             $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertUserExpression").attr('class', 'icon fa fa-warning');
-            document.getElementById('inputUserExpression').style.borderColor = "red";
+            document.getElementById('user-expression').style.borderColor = "red";
             break
     }
     document.getElementById('msgAlertUserExpression').innerText = msg;
 }
+
+

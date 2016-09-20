@@ -25,6 +25,12 @@
                 </div>
             </div>
 
+         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUserExpression">
+             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+             <i class="icon fa fa-check" id="iconAlertUserExpression"></i>
+             <span id="msgAlertUserExpression">You can add user expressions and save it</span>
+         </div>
+
              <div id="collapseExpressionInfo" class="panel-collapse collapse">
                  <div class="box-body">
                      <div class="overlay center-block">
