@@ -11,8 +11,7 @@
                 <li class="footer" id="json-option" value ="0" onClick="jsonOption(this.value)" onMouseOver="this.style.cursor='pointer'">
                     <a id="json-type" ><i id="json-icon" class="fa fa-file-code-o text-red"></i><spam id="json-text" class="text-red"> Show Json Message</spam></a>
                 </li>
-                <li class="footer" id="continuous-option" value ="0" onClick="continuousOption(this.value)" onMouseOver="this.style.cursor='pointer'">
-                    <a id="continuous-type" ><i id="continuous-icon" class="fa fa-retweet"></i><spam id="continuous-text"> Continuous Speech</spam></a>
+                <li class="footer" id="continuous-option" value ="0"  class="fa fa-retweet"></i><spam id="continuous-text"> Continuous Speech  <h7>beta</h7></spam></a>
                 </li>
             </ul>
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" >

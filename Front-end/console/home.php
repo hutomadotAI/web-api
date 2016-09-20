@@ -39,13 +39,13 @@
         <?php include './dynamic/userpanel.html.php'; ?>
         <!-- ================ USER ACTION ================= -->
         <ul class="sidebar-menu">
-           <li class="header" style="text-align: center;">WORKPLACE</li>
+           <li class="header" style="text-align: center;">CONSOLE</li>
            <li class="active"><a href="#"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
         </ul>
 
         <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-            <li class="header" style="text-align: center;">ACTION</li>
+            <li class="header" style="text-align: center;">MY ACCOUNT</li>
            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>

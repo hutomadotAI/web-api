@@ -1,5 +1,5 @@
 document.getElementById("btnNext").addEventListener("click", wizardNext);
-document.getElementById("btnBack").addEventListener("click", backPage);
+//document.getElementById("btnBack").addEventListener("click", backPage);
 
 
 function wizardNext() {
