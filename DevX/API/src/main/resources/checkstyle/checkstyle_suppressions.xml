@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+    <suppress checks=".*" files="test"/>
+
+    <!-- JavaDoc related -->
+    <suppress checks="Javadoc" files=".*\.java$"/>
+    <suppress checks="NonEmptyAtclauseDescriptionCheck" files=".*\.java$"/>
+
+    <!-- Imports -->
+    <suppress checks="AvoidStarImport" files=".*\.java$"/>
+    <suppress checks="ImportOrder" files=".*\.java$"/>
+
+    <!-- Java naming conventions -->
+    <suppress checks="MemberName" files=".*\.java$"/>
+    <suppress checks="ParameterName" files=".*\.java$"/>
+    <suppress checks="LocalVariableName" files=".*\.java$"/>
+    <suppress checks="TypeName" files="[api_intents_and_entities|intent|memory]\.java$"/>
+
+    <!-- This is because of us using sometimes C# style curly bracket positioning :) -->
+    <suppress checks="RightCurly" files=".*\.java$"/>
+    <suppress checks="LeftCurly" files=".*\.java$"/>
+    <suppress checks="NeedBraces" files=".*\.java$"/>
+
+    <!-- TODO: Most likely the highest Pri to fix -->
+    <!-- This is a particularly nasty one as it potentially silences all errors -->
+    <suppress checks="EmptyCatchBlockCheck" files=".*\.java$"/>
+    <!-- This can cause unwanted effects if new options are added or the option is not covered -->
+    <suppress checks="MissingSwitchDefaultCheck" files=".*\.java$"/>
+
+    <!-- Misc -->
+    <!-- <suppress checks="MagicNumber" files=".*\.java$"/> -->
+    <suppress checks="AbbreviationAsWordInName" files=".*\.java$"/>
+    <suppress checks="EmptyLineSeparator" files=".*\.java$"/>
+    <suppress checks="WhitespaceAround" files=".*\.java$"/>
+    <suppress checks="MethodParamPad" files=".*\.java$"/>
+    <suppress checks="VariableDeclarationUsageDistance" files=".*\.java$"/>
+    <!-- Line length overriding our definition :) -->
+    <suppress checks="LineLength" files=".*\.java$"/>
+    <suppress checks="OperatorWrapCheck" files=".*\.java$"/>
+    <suppress checks="OverloadMethodsDeclarationOrderCheck" files=".*\.java$"/>
+</suppressions>
