@@ -73,6 +73,10 @@ if (isset($_GET['err'])) {
             $msg ='NEW ENTITY NAME TRASMISSION FAILED';
             $details =' We could not find the data you were looking for';
             break;
+        case 18 :
+            $msg ='AI TRAINING GET INFO ERROR';
+            $details =' We could not find the data you were looking for';
+            break;
         default:
             $msg ='UNDEFINED ERROR';
             $details =' We could not find the data you were looking for';

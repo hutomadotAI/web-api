@@ -1,6 +1,6 @@
 <label>Avatar</label>
 <div class="box box-solid box-clean flat no-shadow">
-    <a data-toggle="collapse"  href="#collapseAvatar">
+    <a data-toggle="collapse"  href="#collapseAvatar" tabindex="-1">
     <div class="box-header" style="height: 35px;">
         <i class="fa fa-square"></i>
             <div class=" pull-right">

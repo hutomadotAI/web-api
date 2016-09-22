@@ -12,7 +12,14 @@
     <div class="box-body" id="boxNewDomains">
         <p></p>
         <input class="form-control " value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
-        <p></p>
+        <div class="form-group pull-right no-margin" style="padding-top: 5px;">
+            <span style="padding-right:5px;">Show Free Neural Networks Only</span>
+            <label>
+                <input type="checkbox" class="minimal" checked>
+            </label>
+        </div>
+        <br></br>
+
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertNewDomains"></i>
@@ -50,12 +57,6 @@
         <a href="#" class="btn btn-primary flat" id="btnCancel" onClick="history.go(-1); return false;">cancel</a>
         <!--<a href="#" class="btn btn-primary flat" id="btnBack">back</a>-->
         <button type="submit" id="btnNext" class="btn btn-success flat" alt="next step">next</button>
-        <div class="form-group pull-right no-margin" style="padding-top: 5px;">
-            <span style="padding-right:5px;">Show Free Neural Networks Only</span>
-            <label>
-                <input type="checkbox" class="minimal" checked>
-            </label>
-        </div>
     </div>
 </div>
 

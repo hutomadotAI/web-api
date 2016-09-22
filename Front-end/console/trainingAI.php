@@ -103,7 +103,7 @@
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>
                 <?php include './dynamic/training.content.monitor.html.php'; ?>
-                <?php include './dynamic/training.content.domains.html.php'; ?>
+                <?php //include './dynamic/training.content.domains.html.php'; ?>
                 <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
             <div class="col-md-5">
@@ -138,6 +138,7 @@
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
+<script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/training/training.area.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 

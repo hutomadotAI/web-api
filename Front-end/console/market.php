@@ -1,6 +1,7 @@
 <?php
+
     require '../pages/config.php';
-    
+
     if ( !\hutoma\console::isSessionActive()) {
         header('Location: ./error.php?err=1');
         exit;
@@ -15,12 +16,11 @@
 
     function isPostInputAvailable(){
         return  (
-            isset($_POST['userActivedDomains'])
+        isset($_POST['userActivedDomains'])
         );
     }
 
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,15 +33,13 @@
     <link rel="stylesheet" href="./dist/css/ionicons.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-    <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
     <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-
-    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
     <link rel="stylesheet" href="./plugins/bootstrap-slider/slider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
@@ -85,9 +83,6 @@
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
-    <aside class="control-sidebar control-sidebar-dark">
-        <?php include './dynamic/sidebar.controll.html.php'; ?>
-    </aside>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -95,12 +90,11 @@
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
+<script src="./plugins/select2/select2.full.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/shared/shared.js"></script>
-
-<script src="./plugins/select2/select2.full.min.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-<script src="./plugins/market/market.js"></script>
+<script src="./plugins/createAI/createAI.js"></script>
 
 </body>
 </html>

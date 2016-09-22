@@ -2,7 +2,7 @@
     <div class='box-header with-border'>
         <i class="fa fa-user-plus text-light-blue" ></i>
         <h3 class='box-title'>Welcome to hu:toma - Tech Preview</h3>
-        <a data-toggle="collapse"  href="#collapseStart">
+        <a data-toggle="collapse"  href="#collapseStart" tabindex="-1">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
             </div>
@@ -41,7 +41,7 @@
     </div>
 
     <div class="box-footer">
-        <span>need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a></span>
+        <span>need help? check our <a href='#' tabindex="-1">video tutorial </a> or email us <a href='#' tabindex="-1">hello@hutoma.com</a></span>
 
     </div>
 

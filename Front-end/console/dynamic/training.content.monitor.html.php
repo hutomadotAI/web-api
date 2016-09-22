@@ -1,40 +1,41 @@
 <?php
-function decodeAIState($state)
-{
-    switch ($state) {
 
-        case -1 :
-            return('<span class="label label-muted">Empty</span>');
-            break;
-        case 0 :
-            return('<span class="label label-primary">Queued</span>');
-            break;
-        case 1 :
-            return('<span class="label label-warning">Training</span>');
-            break;
-        case 2 :
-            return('<span class="label label-success">Trained</span>');
-            break;
-        case 3 :
-            return('<span class="label label-warning">Stopping</span>');
-            break;
-        case 4 :
-            return('<span class="label label-primary">Stopped</span>');
-            break;
-        case 5 :
-            return('<span class="label label-danger">Limited</span>');
-            break;
-        default:
-            return('<span class="label label-danger">Error</span>');
+    $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(), $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+
+    if ($singleAI['status']['code'] !== 200) {
+        unset($singleAI);
+        header('Location: ./error.php?err=18');
+        exit;
     }
-}
 
+    function decodeAIState($state){
+        switch ($state) {
 
-$error = 80 -  $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'];
-$error = round($error,2);
-if ( $error % 1 === 0 )
-    $error = round($error,0);
-
+            case -1 :
+                return('<span class="label label-muted">Empty</span>');
+                break;
+            case '0' :
+                return('<span class="label label-primary">Queued</span>');
+                break;
+            case 'training_in_progress' :
+                return('<span class="label label-warning">Training</span>');
+                break;
+            case 2 :
+                return('<span class="label label-success">Trained</span>');
+                break;
+            case 3 :
+                return('<span class="label label-warning">Stopping</span>');
+                break;
+            case 4 :
+                return('<span class="label label-primary">Stopped</span>');
+                break;
+            case 5 :
+                return('<span class="label label-danger">Limited</span>');
+                break;
+            default:
+                return('<span class="label label-danger">Error</span>');
+        }
+    }
 ?>
 
 
@@ -42,7 +43,7 @@ if ( $error % 1 === 0 )
 <div class="box box-solid box-clean flat no-shadow" >
     <div class="box-header with-border">
         <i class="fa fa-bar-chart-o text-success"></i>
-        <h3 class="box-title">Training Monitor</h3>
+        <h3 class="box-title">Training Status</h3>
         <a>
             <div class="pull-right" style="padding-left:5px;" onClick="updateStateAI();" onMouseOver="this.style.cursor='pointer'">
                     <i id="btnRefresh" class="fa fa-refresh text-md text-yellow"></i>
@@ -55,27 +56,44 @@ if ( $error % 1 === 0 )
             </div>
         </a>
     </div>
+
     <div class="box-body table-responsive">
 
-        <table class="table ">
+        <table class="table">
             <tr>
-                <th class="text-center no-border" style="width: 20%;" >State</th>
+                <th class="text-center no-border" style="width: 20%;" >Training Phase</th>
                 <th class="text-center no-border" style="width: 60%;">Progress</th>
-                <th class="no-border" style="width: 10%;">Label</th>
+                <th class="text-center no-border" style="width: 10%;">Completed</th>
+            </tr>
+            <tr>
+                <td class="text-center" id="status-upload-file">phase 1</td>
+                <td>
+                    <div class="progress progress-xs progress-striped active" id="progress-upload-file-action"style="margin-top:9px;">
+                       <div class="progress-bar progress-bar-primary" id="progress-upload-file" style="width:0%;"></div>
+                    </div>
+                </td>
+                <td class="text-center"><span id="status-bagde-upload" class="badge btn-primary">0%</span></td>
             </tr>
 
-            <tr>
-                <td id="status-container"><?php echo  $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status']; ?></td>
+            <tr id="trainingbar"hidden>
+                <td class="text-center" id="status-training-file">phase 2</td>
                 <td>
                     <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
 
-                       <div id="status-progress-bar" class="progress-bar progress-bar-success" style="width: <?php echo $error; ?>%;"></div>
+                        <div class="progress-bar progress-bar-success"  id="progress-training-file" style="width:0%;"></div>
                     </div>
                 </td>
-                <td><span id="status-bagde" class="badge bg-green">  <?php echo $error; ?>%</span></td>
+                <td class="text-center"><span id="status-bagde-training" class="badge btn-success">0%</span></td>
             </tr>
-
         </table>
+
+        <tr>
+            <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="display: none">
+                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+                <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
+                <span id="msgAlertProgressBar"></span>
+            </div>
+        </tr>
 
     </div>
 
@@ -105,3 +123,7 @@ if ( $error % 1 === 0 )
     </div>
 
 </div>
+<script>
+    var status = '<?php echo $singleAI['ai_status']; ?>';
+    var error = <?php echo $singleAI['deep_learning_error']; ?>;
+</script>

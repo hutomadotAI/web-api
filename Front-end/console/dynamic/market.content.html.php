@@ -8,22 +8,23 @@
             </div>
         </a>
     </div>
- 
+
     <form method="POST" name="marketNewAIform" action="./dynamic/saveAI.php">
         <div class="box-body">
             <div class="row">
-
+                
+                <!-- Publisher Options -->
                 <div class="col-md-4">
                     <div class="form-group">
-                        <div class="form-group">
-                            <label>Publisher Options</label>
-                            <select class="form-control select2" name="ai_payment_type" id="ai_payment_type"style="width: 100%;">
-                                <option>This AI is Private</option>
-                                <option selected="selected">This AI is Public</option>
+                        <label>Publisher Options</label>
+                        <select class="form-control select2" name="ai_payment_type" id="ai_payment_type"style="width: 100%;">
+                            <option>This AI is Private</option>
+                            <option selected="selected">This AI is Public</option>
 
-                            </select>
-                        </div>
+                        </select>
                     </div>
+
+
                     <div class="box-body">
                         <div class="overlay center-block">
                             <section class="content bg-gray-light" >
@@ -44,6 +45,8 @@
                     </div>
                 </div>
 
+
+                <!-- License Type -->
                 <div class="col-md-4">
                     <div class="form-group">
                         <label>License Type</label>
@@ -72,6 +75,8 @@
                     </div>
                 </div>
 
+
+                <!-- Price -->
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="ainame">Price</label>

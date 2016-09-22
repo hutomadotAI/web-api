@@ -17,12 +17,12 @@ else{
 }
 
 function start(){
-    startDictation('human', 'cpu');
+    startDictation('human', 'AI');
 }
 
 function keyboardChat(e){
     if(e.keyCode == 13 && document.getElementById("message").value )
-     createNodeChat('human','cpu');
+     createNodeChat('human','AI');
 }
 
 function createNodeChat(human_name, ai_name) {

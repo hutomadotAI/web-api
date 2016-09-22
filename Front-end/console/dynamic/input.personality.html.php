@@ -1,5 +1,5 @@
 <div class="form-group">
-    <a data-toggle="collapse"  href="#collapsePersonality">
+    <a data-toggle="collapse"  href="#collapsePersonality" tabindex="-1">
         <div class=" pull-right">more info
             <i class="fa fa-question-circle text-md text-yellow"></i>
         </div>

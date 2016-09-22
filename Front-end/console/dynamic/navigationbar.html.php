@@ -1,3 +1,21 @@
+<?php
+
+  $username = 'unknown';
+  $plan = 'not defined';
+  $joined ='not available';
+
+  try {
+    if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['username']))
+      $username = $_SESSION[$_SESSION['navigation_id']]['user_details']['username'];
+    if (isset($_SESSION[$_SESSION['navigation_id']]['user_plan']))
+      $plan = $_SESSION[$_SESSION['navigation_id']]['user_plan'];
+    if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"]))
+      $joined = $_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"];
+  }catch(Exception $e){
+
+  }
+?>
+
 <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
 
@@ -6,7 +24,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1" >
             <img src="./dist/img/user1-160x160.jpg" class="user-image" alt="User Image" tabindex="-1" >
             <span class="hidden-xs">
-            <?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['username'];?>
+            <?php echo $username ?>
             </span>
           </a>
           <ul class="dropdown-menu">
@@ -14,19 +32,19 @@
             <li class="user-header">
               <img src="./dist/img/user1-160x160.jpg" class="img-circle" alt="User Image">
               <p>
-                <?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['username'],' - planID ',$_SESSION[$_SESSION['navigation_id']]['user_plan'];?>
+                  <?php  echo ( $username.' - planID '. $plan);?>
                 <small>
-                  <?php echo 'joined since ',$_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"] ;?>
+                  <?php echo 'joined since ',$joined ;?>
                 </small>
               </p>
             </li>
             <!-- Menu Footer-->
             <li class="user-footer">
               <div class="pull-left">
-                <a href="#" class="btn btn-default btn-flat">Profile</a>
+                <a href="#" class="btn btn-default btn-flat" tabindex="-1">Profile</a>
               </div>
               <div class="pull-right">
-                <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                <a href="#" class="btn btn-default btn-flat" tabindex="-1">Sign out</a>
               </div>
             </li>
           </ul>
@@ -38,6 +56,7 @@
         -->
       </ul>
 </div>
+<?php unset($username); unset($plan); unset($joined); ?>
 
 
 
