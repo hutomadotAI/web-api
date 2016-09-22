@@ -34,7 +34,7 @@ public class Validate {
      * @throws ParameterValidationException if the parameter is empty, null or invalid
      */
     private String validatePattern(Pattern pattern, String paramName, String param) throws ParameterValidationException {
-        if (null==param) {
+        if (null == param) {
             throw new ParameterValidationException("missing " + paramName);
         }
         String result = param.trim();
@@ -85,7 +85,7 @@ public class Validate {
             return fallback;
         }
         // trim and convert commas to full-stops
-        param = param.trim().replace(',','.');
+        param = param.trim().replace(',', '.');
         // check that it generally matches
         if (!floatPattern.matcher(param).matches()) {
             throw new ParameterValidationException("invalid " + paramName);
@@ -93,11 +93,11 @@ public class Validate {
         // parse
         float result = Float.parseFloat(param);
         // just in case it's still weirdly invalid
-        if (result==Float.NaN) {
+        if (Float.isNaN(result)) {
             throw new ParameterValidationException("invalid " + paramName);
         }
         // if it's out of range
-        if ((result<min) || (result>max)) {
+        if ((result < min) || (result > max)) {
             throw new ParameterValidationException(paramName + " out of range");
         }
         return result;
@@ -118,7 +118,7 @@ public class Validate {
     }
 
     String validateRequiredSanitized(String paramName, String param) throws ParameterValidationException {
-        if (null==param) {
+        if (null == param) {
             throw new ParameterValidationException("missing " + paramName);
         }
         String result = textSanitizer(param);
@@ -144,20 +144,21 @@ public class Validate {
      * Returns the same string with anything over char 127 or below char 32 removed
      * Also, []<>& are removed altogther
      * Whitespaces are deduped and the string is trimmed of leading and trailing whitespaces.
-     * @param input   abc[]<>&  abc
+     *
+     * @param input abc[]<>&  abc
      * @return abc abc
      */
     public String textSanitizer(String input) {
         // null check, fast bail
-        if (null==input) {
+        if (null == input) {
             return "";
         }
 
         StringBuilder sb = new StringBuilder();
-        int n=input.length();
+        int n = input.length();
         boolean lastCharWasSpace = true;
         char c;
-        for (int i=0; i<n; i++) {
+        for (int i = 0; i < n; i++) {
             c = input.charAt(i);
             // all whitespaces
             if (Character.isWhitespace(c)) {
@@ -167,8 +168,8 @@ public class Validate {
                 }
             } else {
                 // ignore out of range characters
-                if ((c>=32) && (c<127)) {
-                    switch(c) {
+                if ((c >= 32) && (c < 127)) {
+                    switch (c) {
                         // characters to omit
                         case '[':
                         case ']':
@@ -185,8 +186,8 @@ public class Validate {
             }
         }
         // removed trailing space if present
-        if ((lastCharWasSpace) && (sb.length()>0)) {
-            sb.setLength((sb.length()-1));
+        if ((lastCharWasSpace) && (sb.length() > 0)) {
+            sb.setLength((sb.length() - 1));
         }
         return sb.toString();
     }
