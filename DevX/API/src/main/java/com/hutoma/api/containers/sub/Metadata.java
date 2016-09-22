@@ -5,7 +5,7 @@ package com.hutoma.api.containers.sub;
  */
 public class Metadata {
 
-    public String emotion;
-    public String topic;
+    private String emotion;
+    private String topic;
 
 }

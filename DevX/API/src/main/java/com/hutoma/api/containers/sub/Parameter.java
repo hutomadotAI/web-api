@@ -5,7 +5,7 @@ package com.hutoma.api.containers.sub;
  */
 public class Parameter {
 
-    public String name;
-    public String value;
+    private String name;
+    private String value;
 
 }
