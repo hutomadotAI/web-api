@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -33,9 +34,10 @@ public class Config {
     public void loadPropertiesFile() {
         this.propertyLoaded.clear();
         Path configPath = Paths.get(System.getProperty("user.home"), "/ai/v1.config.properties");
-        try {
+
+        try (InputStream fileInputStream = new FileInputStream(configPath.toFile())) {
             Properties loadProperties = new Properties();
-            loadProperties.load(new FileInputStream(configPath.toFile()));
+            loadProperties.load(fileInputStream);
             properties = loadProperties;
             logger.logInfo(LOGFROM, "loaded " + properties.size() + " properties file from " + configPath.toString());
         } catch (IOException e) {
@@ -43,7 +45,7 @@ public class Config {
         }
     }
 
-    public  String getWnetNumberOfCPUS() {
+    public String getWnetNumberOfCPUS() {
         return getConfigFromProperties("wnet_num_CPUs", "8");
     }
 
@@ -118,7 +120,7 @@ public class Config {
     }
 
     private String getConfigFromProperties(String p, String defaultValue) {
-        if (null==properties) {
+        if (null == properties) {
             logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
             return defaultValue;
         }
@@ -138,7 +140,7 @@ public class Config {
      */
     private static String enforceNewDBCredentials(String value) throws Exception {
         int startUserName = value.indexOf("user=");
-        if (startUserName>=0) {
+        if (startUserName >= 0) {
             String prefixUsername = value.substring(startUserName + ("user=".length())).toLowerCase();
             if ((prefixUsername.startsWith("admin")) || (prefixUsername.startsWith("root"))) {
                 throw new Exception("db connection string uses root/admin access. please update your config properties file.");
