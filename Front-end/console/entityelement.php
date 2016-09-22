@@ -1,14 +1,13 @@
 <?php
 
     require "../pages/config.php";
-    if (!isset($_POST['intent']) ) {
-        header('Location: ./error.php?err=16');
+    if (!isset($_POST['entity']) ) {
+        header('Location: ./error.php?err=17');
         exit();
     }
-    // fake request - we need to loading entity for a specific USER,AI, INTENT 
-    $entityList = \hutoma\console::getIntegrations();
-    $expressionList = \hutoma\console::getIntegrations();
-    $parameterList = \hutoma\console::getIntegrations();
+    // fake request - we need to loading entity keys for a specific USER,AI
+    $entityKeys = \hutoma\console::getIntegrations();
+
 
 
 /*
@@ -25,7 +24,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Edit Intent </title>
+    <title>hu:toma | Edit Entity </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
@@ -66,8 +65,8 @@
                     <ul class="treeview-menu">
 
                         <li><a href="./trainingAI.php" tabindex="-1"><i class="fa fa-graduation-cap text-purple" tabindex="-1"></i> <span>training</span></a></li>
-                        <li class="active"><a href="./intent.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i><span>intents</span></a></li>
-                        <li><a href="./entity.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
+                        <li><a href="./intent.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i><span>intents</span></a></li>
+                        <li class="active"><a href="./entity.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
                         <li><a href="./domainsAI.php" tabindex="-1"><i class="fa fa-th text-red" tabindex="-1"></i> <span>domains</span></a></li>
                         <li><a href="./integrations.php" tabindex="-1" ><i class="glyphicon glyphicon-list-alt text-default" tabindex="-1"></i>integrations</a></li>
                         <li><a href="./settingsAI.php" tabindex="-1"><i class="fa fa-gear text-black" tabindex="-1"></i>settings</a></li>
@@ -90,9 +89,9 @@
         <section class="content">
             <div class="row">
                 <div class="col-md-8">
-                    <?php include './dynamic/intent.element.content.head.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.expression.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.action.html.php'; ?>
+                    <?php include './dynamic/entity.element.content.head.html.php'; ?>
+                    <?php include './dynamic/entity.element.content.keys.html.php'; ?>
+                    <?php include './dynamic/entity.element.content.prompt.html.php'; ?>
                 </div>
                 <div class="col-md-4">
                     <?php include './dynamic/chat.html.php'; ?>
@@ -124,16 +123,14 @@
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
 <script src="./plugins/iCheck/icheck.js"></script>
-<script src="./plugins/intent/intent.element.js"></script>
+<script src="./plugins/entity/entity.element.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/jQuery/jquery.omniselect.js"></script>
 <script>
-    var entityListFromServer = <?php echo json_encode($entityList); unset($entityList);?>;
-    var expressionListFromServer = <?php echo json_encode($expressionList); unset($expressionList);?>;
-    var parameterListFromServer = <?php echo json_encode($parameterList); unset($parameterList);?>;
+    var entityKeysListFromServer = <?php echo json_encode($entityKeys); unset($entityKeys);?>;
 </script>
 </body>
 </html>

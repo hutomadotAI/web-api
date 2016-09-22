@@ -8,7 +8,7 @@
       source: [],
       resultsClass: 'omniselect-results',
       activeClass: 'omniselect-active',
-      numResults: 10,
+      numResults: 999,
       allowAdd: false
     };
 
@@ -98,7 +98,8 @@
         id, item, $item;
 
       if (!query || query.length < 1) {
-        return visible ? hide() : plugin;
+        query="@";
+        // return visible ? hide() : plugin;
       }
 
       $results.empty();

@@ -70,7 +70,7 @@ require "../pages/config.php";
             <div class="row">
                 <div class="col-md-7">
                         <?php include './dynamic/entity.content.create.html.php'; ?>
-                        <?php include './dynamic/entity.content.html.php'; ?>
+                        <?php include './dynamic/entity.content.list.html.php'; ?>
                 </div>
                 <div class="col-md-5">
                         <?php include './dynamic/chat.html.php'; ?>

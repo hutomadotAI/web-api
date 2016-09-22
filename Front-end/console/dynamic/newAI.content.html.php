@@ -42,7 +42,7 @@
                   <div class="input-group-addon">
                   <i class="glyphicon glyphicon-pencil"></i>
                   </div>
-                  <input type="text" class="form-control" name="ai_description" id="ai_description" placeholder="insert description">
+                  <input type="text" class="form-control" name="ai_description" id="ai_description" placeholder="Enter your AI description">
               </div>
               </div>
             </div>
@@ -62,7 +62,7 @@
                         <i class="fa fa-question-circle text-md text-yellow"></i>
                     </div>
                 </a>
-                <label>Learn new answers</label>
+                <label>Create new Answers</label>
                 <div class="box box-solid box-clean-fixed flat no-shadow">
                 <div class="box-body">
                 <div class="row margin">
@@ -98,17 +98,8 @@
                         <div class="overlay center-block">
                             <section class="content bg-gray-light" >
                                 <div class="box-body">
-                                    <dl class="dl-horizontal">
-                                        <dt>Description Actions</dt>
-                                        <dd>Tell the AI learning ...</dd>
-                                        <dt>Euismod</dt>
-                                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                        <dt>Malesuada porta</dt>
-                                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                        <dt>Felis euismod semper eget lacinia</dt>
-                                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                                    </dl>
+                                        <dt>What does this mean?</dt>
+                                        <dd>By enabling this functionality you will let the AI decide when to follow pre-pacakged answers vs creating new ones based on the trainig data you provide.</dd>
                                 </div>
                             </section>
                             <p></p>
@@ -125,17 +116,7 @@
                         <div class="overlay center-block">
                             <section class="content bg-gray-light" >
                                 <div class="box-body">
-                                    <dl class="dl-horizontal">
-                                        <dt>Description Actions</dt>
-                                        <dd>Tell the AI learning ...</dd>
-                                        <dt>Euismod</dt>
-                                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                        <dt>Malesuada porta</dt>
-                                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                        <dt>Felis euismod semper eget lacinia</dt>
-                                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                                    </dl>
+                                    <dt>NOT YET IMPLEMENTED</dt>
                                 </div>
                             </section>
                             <p></p>
@@ -153,7 +134,7 @@
 
 
     <div class="box-footer">
-            <button type="submit" id="btnCancel" class="btn btn-primary flat" alt="cancel">cancel</button>
+            <a href="#" class="btn btn-primary flat" id="btnCancel" onClick="history.go(-1); return false;">cancel</a>
             <button type="submit" id="btnNext" class="btn btn-success flat" alt="next step">next</button>
     </div>
 </div>

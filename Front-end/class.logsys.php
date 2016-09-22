@@ -217,6 +217,7 @@ class console
     if ($direct == true) {
       self::construct();
     }
+
   }
 
   /**
@@ -246,11 +247,10 @@ class console
 
   public static function construct($called_from = "")
   {
-
+    
     if (self::$constructed === false) {
       self::config(null, false);
       self::$constructed = true;
-
       if (self::$config['features']['start_session'] === true) {
         session_start();
       }
@@ -261,7 +261,6 @@ class console
         /**
          * Add the login page to the array of pages that doesn't need logging in
          */
-
         array_push(self::$config['pages']['no_login'], self::$config['pages']['login_page']);
 
         self::$dbh = new \PDO("mysql:dbname=" . self::$config['db']['name'] . ";host=" . self::$config['db']['host'] . ";port=" . self::$config['db']['port'] . ";charset=utf8", self::$config['db']['username'], self::$config['db']['password']);

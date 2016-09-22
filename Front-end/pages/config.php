@@ -3,7 +3,6 @@
  * For Development Purposes
  */
 ini_set("display_errors", "on");
-
 require __DIR__ . "/../class.logsys.php";
 \hutoma\console::config(array(
   "db" => array(
@@ -28,3 +27,5 @@ require __DIR__ . "/../class.logsys.php";
     "home_page" => "/console/home.php"
   )
 ));
+
+

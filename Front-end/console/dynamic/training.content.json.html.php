@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow" >
+<div class="box box-solid box-clean flat no-shadow"  id="jsonBox">
       <a data-toggle="collapse" data-parent="#accordion" href="#collapseJSON" tabindex="-1" >
       <div class="box-header with-border">
           <i class="fa fa-file-code-o text-danger"></i>

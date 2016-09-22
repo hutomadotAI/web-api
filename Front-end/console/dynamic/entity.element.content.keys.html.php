@@ -1,9 +1,9 @@
- <div class="box box-solid box-clean flat no-shadow" >
+ <div class="box box-solid box-clean flat no-shadow">
    
     <div class="box-header with-border ">
         <!--<i class="fa fa-comment-o text-green"></i>-->
-        <h3 class="box-title"><?php echo $_POST['intent']?><span class="text-sm text-gray" style="padding: 0px 3px 0px 3px;"> > </span> User Expression</h3>
-        <a data-toggle="collapse"  href="#collapseExpressionInfo">
+        <h3 class="box-title"><?php echo $_POST['entity']?><span class="text-sm text-gray" style="padding: 0px 3px 0px 3px;"> > </span> Keys</h3>
+        <a data-toggle="collapse"  href="#collapseKeysInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
             </div>
@@ -11,27 +11,19 @@
     </div>
      
 
-     <div class="box-body no-margin" id="boxIntent"  style="padding-top: 0px;">
+     <div class="box-body no-margin" id="boxKeys"  style="padding-top: 0px;">
             <div class="row">
                 <div class="col-md-12">
                     <h5 class="box-title">
-                        <div class="input-group no-margin">
-                            <input type="text" class="form-control" id="user-expression" name="user-expression" placeholder="Add user expression" onkeyup="checkKeyCode(this,event.keyCode)"  style="width: 96%;">
-                            <span class="input-group-btn">
-                            <button class="btn btn-success flat pull-right" id="btnAddExpression"  style="width: 120px;" alt="Add expression" disabled>Add Expression</button>
-                            </span>
-                        </div>
+                    <div class="inner-addon left-addon">
+                        <i class="fa fa-language text-red"></i>
+                        <input type="text" class="form-control" id="key-entity" name="key-entity" placeholder="add entity keys" onkeydown="checkKeyCode(this,event.keyCode)"  style="padding-left: 35px;">
+                    </div>
                     </h5>
                 </div>
             </div>
 
-         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUserExpression">
-             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
-             <i class="icon fa fa-check" id="iconAlertUserExpression"></i>
-             <span id="msgAlertUserExpression">You can add user expressions and save it</span>
-         </div>
-
-             <div id="collapseExpressionInfo" class="panel-collapse collapse">
+             <div id="collapseKeysInfo" class="panel-collapse collapse">
                  <div class="box-body">
                      <div class="overlay center-block">
                          <section class="content bg-gray-light" >
@@ -55,14 +47,7 @@
                  </div>
              </div>
 
-            <div class="row" id="userexpression-list"></div>
-
-         <!--<div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUserExpression">
-              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                 <i class="icon fa fa-check" id="iconAlertUserExpression"></i>
-                 <span id="msgAlertUserExpression"></span>
-            </div>
-     -->
+            <div class="row" id="entityKeys-list"></div>
     </div>
 
 </div>

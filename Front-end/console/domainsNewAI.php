@@ -57,7 +57,8 @@
   <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
   <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> 
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="./plugins/iCheck/all.css">
   <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
@@ -109,6 +110,7 @@
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 <script src="./plugins/shared/shared.js"></script>
+<script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/domain/domain.js"></script>
 
 <script>
@@ -128,6 +130,12 @@
   function searchDomain(str) {
     showDomains(str,0);
   }
+
+  //iCheck for checkbox and radio inputs
+  $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
+      checkboxClass: 'icheckbox_minimal-blue',
+      radioClass: 'iradio_minimal-blue'
+  });
 </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
    
     <div class="box-header with-border">
         <i class="fa fa-sitemap text-yellow"></i>
-        <h3 class="box-title">Entities</h3>
+        <h3 class="box-title">New Entity</h3>
         <a data-toggle="collapse"  href="#collapseEntitiesInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -13,13 +13,11 @@
 
     <div class="box-body" id="boxEntities">
         <div class="bootstrap-filestyle input-group" id="GrpEntityButton">
-            <input type="text" class="form-control" id="inputEntityName" placeholder="Enter entity name" style="width: 96%;">
+            <form method="POST" name="entityCreateForm" action="./entityelement.php" onsubmit="RecursiveUnbind($('#wrapper'));">
+                <input type="text" class="form-control" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;">
+            </form>
             <div class="input-group-btn" tabindex="0">
-                <form method="POST" name="entityCreateForm" onsubmit="RecursiveUnbind($('#wrapper'));">
-
-                    fa-plus
-                    <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" alt="create entity" disabled><i class="fa fa-plus-circle" ></i> Add Entity</button>
-                </form>
+                <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" alt="create entity" disabled> Create Entity</button>
             </div>
         </div>
         <p></p>

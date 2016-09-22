@@ -2,7 +2,7 @@
    
     <div class="box-header with-border">
         <i class="fa fa-commenting-o text-green"></i>
-        <h3 class="box-title">Intents</h3>
+        <h3 class="box-title">New Intents</h3>
         <a data-toggle="collapse"  href="#collapseIntentsInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -14,14 +14,14 @@
     <div class="box-body" id="boxIntents">
         <div class="bootstrap-filestyle input-group" id="GrpIntentButton">
             <form method="POST" name="intentCreateForm" action="./intentelement.php" onsubmit="RecursiveUnbind($('#wrapper'));">
-            <input type="text" class="form-control" id="inputIntentName" name="intent" placeholder="Enter intent name" style="width: 96%;">
+                <input type="text" class="form-control" id="inputIntentName" name="intent" placeholder="Enter intent name" style="width: 96%;">
             </form>
             <div class="input-group-btn" tabindex="0">
-                    <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" alt="create intent" disabled>Create Intent</button>
+                <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" alt="create intent" disabled>Create Intent</button>
             </div>
-
         </div>
         <p></p>
+        
         
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntent">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->

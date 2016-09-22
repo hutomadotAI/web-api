@@ -7,14 +7,16 @@ document.getElementById("ai_price").addEventListener("keyup", checkValue);
 function wizardNext() {
     $("#btnSave").prop("disabled",true);
     $("#btnCancel").prop("disabled",true);
-
+/*
     if(isContainInvalidCharacters($("#ai_price").val())) {
         msgAlert(2, 'The price needs contains only a price format. Please insert the correct value');
         return;
     }
+    */
 
     if(document.marketNewAIform.onsubmit)
         return;
+    
     RecursiveUnbind($('#wrapper'));
     document.marketNewAIform.submit();
 }
