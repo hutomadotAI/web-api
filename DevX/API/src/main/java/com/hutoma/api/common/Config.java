@@ -149,26 +149,4 @@ public class Config {
         return value;
     }
 
-    @Deprecated
-    public static String getConfigProp(String p) {
-        java.util.Properties prop = new java.util.Properties();
-        try {
-            prop.load(new FileInputStream(System.getProperty("user.home") + "/ai/v1.config.properties"));
-
-            String value = prop.getProperty(p);
-            switch (p) {
-                case "connection_string": {
-                    value = enforceNewDBCredentials(value);
-                    break;
-                }
-            }
-            return value;
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

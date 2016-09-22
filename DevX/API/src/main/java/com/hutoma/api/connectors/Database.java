@@ -5,7 +5,6 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.RateLimitStatus;
-import hutoma.api.server.db.memory;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -41,7 +40,7 @@ public class Database {
     public boolean createDev(String username, String email, String password, String passwordSalt, String name, String attempt, String dev_token, int planId, String devid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("addUserComplete", 10).add(username).add(email).add(password).add(passwordSalt).add(name).addTimestamp().add(attempt).add(dev_token).add(planId).add(devid);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -56,7 +55,7 @@ public class Database {
             // then delete the user
             try (DatabaseCall deleteUserCall = callProvider.get()) {
                 deleteUserCall.initialise("deleteUser", 1).add(devid);
-                return deleteUserCall.executeUpdate()>0;
+                return deleteUserCall.executeUpdate() > 0;
             }
         }
     }
@@ -69,7 +68,7 @@ public class Database {
                     .add(aiid).add(name).add(description).add(devid).add(is_private)
                     .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
                     .add(status).add(client_token).add(trainingFile);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -112,7 +111,7 @@ public class Database {
     public boolean deleteAi(UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("deleteAI", 1).add(aiid);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -182,7 +181,7 @@ public class Database {
     public boolean updateAiTrainingFile(UUID aiUUID, String trainingData) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -203,7 +202,7 @@ public class Database {
 
     public List<ApiMemoryToken> getAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
         try {
-            return memory.get_all_user_variables(dev_id, aiid, uid);
+            return null; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -211,16 +210,16 @@ public class Database {
 
     public ApiMemoryToken getUserVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
         try {
-            return memory.get_user_variable(dev_id, aiid, uid, variable);
+            return null; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
     }
 
     public boolean setUserVariable(String dev_id, String aiid, String uid, int expires_seconds, int n_prompt,
-                                        String variable_type, String variable_name, String variable_value) throws DatabaseException {
+                                   String variable_type, String variable_name, String variable_value) throws DatabaseException {
         try {
-            return memory.set_variable(dev_id, aiid, uid, expires_seconds, n_prompt, variable_type, variable_name, variable_value);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -229,7 +228,7 @@ public class Database {
 
     public boolean removeVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
         try {
-            return memory.remove_variable(dev_id, aiid, uid, variable);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -237,7 +236,7 @@ public class Database {
 
     public boolean removeAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
         try {
-            return memory.remove_all_user_variables(dev_id, aiid, uid);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -245,7 +244,7 @@ public class Database {
 
     public boolean removeAllAiVariables(String dev_id, String aiid) throws DatabaseException {
         try {
-            return memory.remove_all_ai_variables(dev_id, aiid);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
