@@ -18,7 +18,9 @@
                 <input type="checkbox" class="minimal" checked>
             </label>
         </div>
-        <br></br>
+        <br>
+        
+        </br>
 
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->

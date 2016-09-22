@@ -79,7 +79,6 @@
                 <td class="text-center" id="status-training-file">phase 2</td>
                 <td>
                     <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
-
                         <div class="progress-bar progress-bar-success"  id="progress-training-file" style="width:0%;"></div>
                     </div>
                 </td>
