@@ -57,7 +57,7 @@
 
             <!-- ================ USER ACTION ================= -->
             <ul class="sidebar-menu">
-                <li class="header">WORKPLACE</li>
+                <li class="header" style="text-align: center;">CONSOLE</li>
                 <li><a href="./home.php" tabindex="-1"><i class="fa fa-home text-light-blue" tabindex="-1"></i><span>home</span></a></li>
                 <li class="active">
                     <a href="#" tabindex="-1">
@@ -77,7 +77,7 @@
             </ul>
 
             <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-                <li class="header" style="text-align: center;">ACTION</li>
+                <li class="header" style="text-align: center;">MY ACCOUNT</li>
                 <li><a href="#" tabindex="-1" ><i class="fa fa-shopping-cart text-green" style="position: relative;" tabindex="-1" ></i> <span>Marketplace</span></a></li>
                 <li><a href="#" tabindex="-1" ><i class="fa fa-user text-blue" tabindex="-1" ></i> <span>Account</span></a></li>
                 <li><a href="./logout.php" tabindex="-1" ><i class="fa fa-power-off text-red" tabindex="-1" ></i> <span>LOGOUT</span></a></li>

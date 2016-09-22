@@ -10,10 +10,10 @@
             echo('<div class="box-body table-responsive">');
             echo('<table class="table table" id="listTable">');
             echo('<tr disabled>');
-            echo('<th class="text-center" style="border:0;">ID</th>');
-            echo('<th class="text-left" style="border:0;">AI Name</th>');
-            echo('<th class="text-left" style="border:0;">Description</th>');
-            echo('<th style="border:0;">Status</th>');
+            echo('<th class="text-center" style="border:0;width:35%">ID</th>');
+            echo('<th class="text-left" style="border:0;width:20%">AI Name</th>');
+            echo('<th class="text-left" style="border:0;width:30%">Description</th>');
+            echo('<th style="border:0;"width:15%>Status</th>');
             //echo('<th style="border:0;">Date</th>');
             echo('</tr>');
 
