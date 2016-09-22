@@ -283,7 +283,7 @@ function pingErrorCall(){
                     if ( parseFloat(error) > parseFloat(max_error))
                         max_error = error;
 
-                    var new_width = parseInt(error);//100 - (error *(100 /max_error));
+                    var new_width = 100 - (error *(100 /max_error));
                     document.getElementById("progress-training-file").style.width = (parseInt(new_width)) + '%';
                     document.getElementById('status-bagde-training').innerHTML = parseInt(new_width) + '%';
                 }
