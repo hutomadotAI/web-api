@@ -4,6 +4,8 @@
         header('Location: ./error.php?err=1');
         exit;
     }
+
+    
 ?>
 <!DOCTYPE html>
 <html>

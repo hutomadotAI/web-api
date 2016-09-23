@@ -17,7 +17,7 @@
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone'] = $_POST['ai_timezone'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality'] = $_POST['ai_personality'];
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['sex'] = $_POST['ai_sex'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = $_POST['ai_voice'];
 
     $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
 
@@ -36,7 +36,7 @@
             isset($_POST['ai_timezone']) &&
             isset($_POST['ai_confidence']) &&
             isset($_POST['ai_personality']) &&
-            isset($_POST['ai_sex'])
+            isset($_POST['ai_voice'])
         );
     }
 ?>
@@ -76,7 +76,7 @@
         <!-- ================ USER ACTION ================== -->
         <ul class="sidebar-menu">
             <li class="header" style="text-align: center;">CONSOLE</li>
-            <li class="active"><a href="#" tabindex="-1"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
+            <li class="active"><a href="./home.php" tabindex="-1"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
             <li><a href="#" tabindex="-1"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
         </ul>
 

@@ -1,6 +1,6 @@
 <div class="nav-tabs-custom no-shadow flat">
     <ul class="nav nav-tabs pull-right">
-        <li><a href="#trainingweb" data-toggle="tab">Video</a></li>
+        <!-- <li><a href="#trainingweb" data-toggle="tab">Video</a></li> -->
         <li><a href="#trainingbook" data-toggle="tab">Book Pages</a></li>
         <li class="active"><a href="#trainingfile" data-toggle="tab">Chat Examples</a></li>
         <li class="pull-left text-md"><i class="fa fa-cloud-upload text-info" style="padding-top:10px;padding-left:10px;padding-right:10px;"></i>AI Training</li>
@@ -37,6 +37,7 @@
             </div>
         </div>
 
+
         <div class="tab-pane" id="trainingweb">
             <p></p>
             
@@ -49,11 +50,12 @@
             
             <p></p>
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadUrl">
-                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+
                 <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
                 <span id="msgAlertUploadUrl">Before start training you need add a url</span>
             </div>
         </div>
+       
 
     </div>
 
