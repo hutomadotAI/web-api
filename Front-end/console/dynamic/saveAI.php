@@ -29,7 +29,7 @@
     $response = hutoma\console::createAI(   \hutoma\console::getDevToken(),
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'],
-                                            true,
+                                            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'],

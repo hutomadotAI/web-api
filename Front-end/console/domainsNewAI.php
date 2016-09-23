@@ -11,6 +11,12 @@
         exit;
     }
 
+    if( isset($_POST['ai_public']) && $_POST['ai_public']=='on')
+        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'] = 0;
+    else
+        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'] = 1;
+
+
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $_POST['ai_name'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $_POST['ai_description'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = $_POST['ai_language'];
@@ -20,7 +26,6 @@
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = $_POST['ai_voice'];
 
     $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
-
 
     if ($response['status']['code'] !== 200) {
         unset($response);

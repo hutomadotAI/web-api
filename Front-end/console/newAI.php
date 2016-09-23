@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="./plugins/bootstrap-slider/slider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
+    <link rel="stylesheet" href="./plugins/iCheck/all.css">
     <link rel="stylesheet" href="./plugins/select2/select2.min.css">
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
@@ -80,6 +81,7 @@
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
+<script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/createAI/createAI.js"></script>
 
 </body>
