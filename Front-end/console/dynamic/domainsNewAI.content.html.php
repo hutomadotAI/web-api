@@ -19,7 +19,7 @@
             </label>
         </div>
         <br>
-        
+
         </br>
 
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
@@ -64,7 +64,7 @@
 
 
 
-<form method="POST" name="domainsNewAIform" action="./market.php">
+<form method="POST" name="domainsNewAIform" action="./dynamic/saveAI.php"><!-- across market page for demo -->
         <p></p>
         <h2></h2>
         <p id="domsearch"></p>

@@ -1165,7 +1165,7 @@ class console
 
   
   // FOR API
-  public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$sex,$contract,$payment_type,$price){
+  public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$voice,$contract,$payment_type,$price){
       if (self::$loggedIn) {
           $path = 'ai';
           $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);

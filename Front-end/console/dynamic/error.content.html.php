@@ -74,7 +74,7 @@ if (isset($_GET['err'])) {
             $details =' We could not find the data you were looking for';
             break;
         case 18 :
-            $msg ='AI TRAINING GET INFO ERROR';
+            $msg ='AI TRAINING GET INF4O ERROR';
             $details =' We could not find the data you were looking for';
             break;
         default:
