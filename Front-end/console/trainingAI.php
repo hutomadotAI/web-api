@@ -7,7 +7,6 @@
         exit();
     }
 
-
     if (isset($_POST['ai']) )
         CallGetSingleAI($_POST['ai']);
 
@@ -16,14 +15,24 @@
         if ($singleAI['status']['code'] === 200) {
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'] = $singleAI['aiid'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $singleAI['name'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'] = $singleAI['description'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $singleAI['description'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on'] = $singleAI['created_on'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['is_private'] = $singleAI['is_private'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'] = $singleAI['is_private'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info'] = $singleAI['ai']['training_debug_info'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status'] = $singleAI['training_status'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai_status'];
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
+
+            // NEED TO MODIFY CREATE AI IN 
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = 'English';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']= 'GMT +00:00 UTC (UTC)';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']= 'Often';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']= 'No';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = 'Male';
+
+
+
         }else{
             unset($response);
             unset($singleAI);
@@ -75,7 +84,6 @@
                     <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-
                     <li class="active"><a href="#"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
                     <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
                     <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>

@@ -191,6 +191,17 @@ body.hold-transition .main-header .logo {
 	border: 1px solid #d2d6de;
 }
 
+.content-alert{
+	min-height: 80px;
+	height: 100%;
+	background: #f6f6f6;
+	padding: 10px;
+	margin-right: auto;
+	margin-left: auto;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
 .content-border{
 	min-height: 80px;
 	height: 100%;
