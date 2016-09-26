@@ -46,8 +46,6 @@
 
         <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
             <li class="header" style="text-align: center;">MY ACCOUNT</li>
-           <li><a href="#" tabindex="-1"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
-           <li><a href="#" tabindex="-1"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
            <li><a href="./logout.php" tabindex="-1"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
        </ul>
    </section>

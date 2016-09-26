@@ -14,5 +14,5 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </a>
-    <?php //include './dynamic/navigationbar.html.php'; ?>
+    <?php include './dynamic/navigationbar.account.html.php'; ?>
 </nav>
