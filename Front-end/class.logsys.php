@@ -4,6 +4,17 @@ namespace hutoma;
 /** ANDREA **/
 date_default_timezone_set('Europe/London');
 
+/**
+ *
+ * Disable XML entity loading.
+ * Note: this will disable loading any external xml entities including
+ * url loading in simplexml_load_file() and likely other libxml based functions that deal with URLs
+ * as well as <xsl:import />
+ */
+if (function_exists('libxml_disable_entity_loader')) {
+    libxml_disable_entity_loader(true);
+}
+
 require_once("console/common/curlHelper.php");
 
 class console
