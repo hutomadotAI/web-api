@@ -68,17 +68,21 @@
                         <li><a href="./trainingAI.php" tabindex="-1"><i class="fa fa-graduation-cap text-purple" tabindex="-1"></i> <span>training</span></a></li>
                         <li class="active"><a href="./intent.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i><span>intents</span></a></li>
                         <li><a href="./entity.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
-                        <li><a href="./integrations.php" tabindex="-1" ><i class="glyphicon glyphicon-list-alt text-default" tabindex="-1"></i>integrations</a></li>
                         <li><a href="./settingsAI.php" tabindex="-1"><i class="fa fa-gear text-black" tabindex="-1"></i>settings</a></li>
                     </ul>
                 </li>
-                <li><a href="#" tabindex="-1"><i class="fa fa-book text-purple" tabindex="-1"></i> <span>Documentation</span></a></li>
+                <li>
+                    <a href="#">
+                        <i class="fa fa-book text-purple"></i> <span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
+                    </ul>
+                </li>
             </ul>
 
             <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
                 <li class="header" style="text-align: center;">MY ACCOUNT</li>
-                <li><a href="#" tabindex="-1" ><i class="fa fa-shopping-cart text-green" style="position: relative;" tabindex="-1" ></i> <span>Marketplace</span></a></li>
-                <li><a href="#" tabindex="-1" ><i class="fa fa-user text-blue" tabindex="-1" ></i> <span>Account</span></a></li>
                 <li><a href="./logout.php" tabindex="-1" ><i class="fa fa-power-off text-red" tabindex="-1" ></i> <span>LOGOUT</span></a></li>
             </ul>
         </section>
