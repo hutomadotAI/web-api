@@ -9,6 +9,10 @@
            <param-name>javax.ws.rs.Application</param-name>
            <param-value>com.hutoma.api.ServerApp</param-value>
        </init-param>
+       <init-param>
+           <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+           <param-value>com.hutoma.api.access.CORSResponseFilter</param-value>
+       </init-param>
        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
