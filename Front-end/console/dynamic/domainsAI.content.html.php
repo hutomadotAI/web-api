@@ -1,4 +1,4 @@
-<form method="POST" name="domainsNewAIform" action="./saveAI.php">
+<form method="POST" name="domainsAIform" action="./saveAI.php">
     <a href="#" class="btn btn-primary flat" id="btnBack" onClick="history.go(-1); return false;">back</a>
     <button type="submit" class="btn btn-success flat" id="btnNext" value="" onClick="">next</button>
     <p></p>

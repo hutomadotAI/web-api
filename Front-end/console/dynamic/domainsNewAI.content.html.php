@@ -56,8 +56,7 @@
     </div>
 
     <div class="box-footer">
-        <a href="#" class="btn btn-primary flat" id="btnCancel" onClick="history.go(-1); return false;">cancel</a>
-        <!--<a href="#" class="btn btn-primary flat" id="btnBack">back</a>-->
+        <button type="submit" id="btnBack" class="btn btn-primary flat" alt="back step">back</button>
         <button type="submit" id="btnNext" class="btn btn-success flat" alt="next step">next</button>
     </div>
 </div>
@@ -71,6 +70,9 @@
         <input type="hidden" name="userActivedDomains" value="">
 </form>
 
+<form method="POST" name="domainsNewAIformGoBack">
+    <input type="hidden" name="prova" value="5">
+</form>
 
 <!-- Modal DETAILS INFO-->
 <div class="modal fade" id="detailsDomain" role="dialog">

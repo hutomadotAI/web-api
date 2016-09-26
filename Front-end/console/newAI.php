@@ -5,7 +5,19 @@
         exit;
     }
 
-    
+    function isPreviousFieldsFilled(){
+        return  (
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'])
+        );
+    }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -72,6 +84,11 @@
     
 </div>
 
+<script>
+    var previousFilled = '<?php if (isPreviousFieldsFilled()) echo '1'; else echo '0'; ?>';
+    var previousField = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
+</script>
+
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
@@ -82,6 +99,7 @@
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/iCheck/icheck.min.js"></script>
+<script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/createAI/createAI.js"></script>
 
 </body>

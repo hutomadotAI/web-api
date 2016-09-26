@@ -1,19 +1,12 @@
 document.getElementById("btnNext").addEventListener("click", wizardNext);
-document.getElementById("btnCancel").addEventListener("click", clearInputFields);
 document.getElementById("ai_name").addEventListener("keyup", activeBtnNext);
-
-var ai_name = $("#ai_name").val();
-if ( ai_name.length > 0 )
-    $("#btnNext").prop("disabled",false);
-else
-    $("#btnNext").prop("disabled",true);
 
 function wizardNext() {
     $(this).prop("disabled",true);
     $("#btnCancel").prop("disabled",true);
 
     if(isContainInvalidCharacters($("#ai_name").val())) {
-        msgAlert(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 character');
+        msgAlertNameAI(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 character and without spaces');
         inputsActiveDeactive(false);
         return;
     }
@@ -55,48 +48,13 @@ function isContainInvalidCharacters(txt) {
         return true;
 }
 
-function clearInputFields() {
-    $("#btnNext").prop("disabled",true);
-    document.getElementById('containerMsgAlertNameAI').style.display = 'none';
-    $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
-    $("#icongAlertNameAI").attr('class', 'icon fa fa-check');
-
-    document.getElementById('ai_name').style.borderColor = "#d2d6de";
-    document.getElementById('ai_name').value = '';
-
-    document.getElementById("ai_sex")[0].selected = true;
-    document.getElementById("ai_sex")[1].selected = false;
-    document.getElementById("ai_sex")[0].value = ("Male");
-}
-
-function msgAlert(alarm,msg){
-    document.getElementById('containerMsgAlertNameAI').style.display = 'block';
-    switch (alarm){
-        case 0:
-            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
-            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
-            document.getElementById('ai_name').style.borderColor = "#d2d6de";
-            break;
-        case 1:
-            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-warning');
-            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
-            document.getElementById('ai_name').style.borderColor = "orange";
-            break;
-        case 2:
-            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-danger');
-            $("#iconAlertNameAI").attr('class', 'icon fa fa-warning');
-            document.getElementById('ai_name').style.borderColor = "red";
-            break
-    }
-    document.getElementById('msgAlertNameAI').innerText = msg;
-}
     
 $(function () {
     $(".select2").select2();
 });
 
 $(function () {
-    $('.slider').slider();
+
     $("#ai_confidence").ionRangeSlider({
         type: "single",
         min: 1,
@@ -114,8 +72,52 @@ $(function () {
     });
 });
 
-//iCheck for checkbox and radio inputs
-$('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
-    checkboxClass: 'icheckbox_minimal-blue',
-    radioClass: 'iradio_minimal-blue'
+
+
+//Flat red color scheme for iCheck
+$('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+    checkboxClass: 'icheckbox_flat-blue',
 });
+
+
+$(document).ready(function(){
+
+    if ( previousFilled == 1 ){
+       
+        document.getElementById('ai_name').value = previousField.name;
+        document.getElementById('ai_description').value = previousField.description;
+
+        selectInputElement('ai_language',previousField.language);
+        selectInputElement('ai_timezone',previousField.timezone);
+        selectInputElement('ai_voice',previousField.voice);
+        selectInputElement('ai_personality',previousField.personality);
+
+
+        document.getElementById('ai_confidence').value = previousField.confidence;
+        $("#ai_confidence").ionRangeSlider('upload');
+
+
+        //enable / disable checkbox public AI
+
+        if(previousField.private == '1') {
+            $('input[type="checkbox"].flat-red').prop("checked",false)
+        }
+        else {
+            $('input[type="checkbox"].flat-red').prop("checked", true);
+        }
+
+        // active button next if are previous inserted data
+        if (  $("#ai_name").val().length > 0 )
+            $("#btnNext").prop("disabled", false);
+        else
+            $("#btnNext").prop("disabled",true);
+    }
+
+});
+
+function selectInputElement(id,valueToSelect) {
+    var element = document.getElementById(id);
+    element.value = valueToSelect;
+    element.selected = true;
+    document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
+}

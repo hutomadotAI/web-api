@@ -1,4 +1,34 @@
 
+function msgAlertNameAI(alarm,msg){
+    document.getElementById('containerMsgAlertNameAI').style.display = 'block';
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
+            document.getElementById('ai_name').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-check');
+            document.getElementById('ai_name').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertNameAI").attr('class', 'icon fa fa-warning');
+            document.getElementById('ai_name').style.borderColor = "red";
+            break
+        case 3:
+            $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-success');
+            $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
+            break
+        case 4:
+            $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-primary');
+            $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
+            break
+    }
+    document.getElementById('msgAlertNameAI').innerText = msg;
+}
+
 function msgAlertUploadFile(alarm,msg){
     document.getElementById('containerMsgAlertUploadFile').style.display = 'block';
     switch (alarm){

@@ -1,16 +1,15 @@
-document.getElementById("btnNext").addEventListener("click", wizardNext);
-//document.getElementById("btnBack").addEventListener("click", backPage);
-
+document.getElementById('btnNext').addEventListener('click', wizardNext);
+document.getElementById('btnBack').addEventListener('click', backPage);
 
 function wizardNext() {
-    $(this).prop("disabled",true);
-    $("#btnCancel").prop("disabled",true);
-    $("#domsearch").prop("disabled",true);
+    $(this).prop('disabled',true);
+    $('#btnBack').prop('disabled',true);
+    $('#domsearch').prop('disabled',true);
 
     if(document.domainsNewAIform.onsubmit) {
         return;
     }
-
+    
     RecursiveUnbind($('#wrapper'));
     var JsonStringActiveDomains = JSON.stringify(userActived);
     $("#userActivedDomains").attr("value", JsonStringActiveDomains);
@@ -18,9 +17,8 @@ function wizardNext() {
 }
 
 function backPage(){
-    $(this).prop("disabled",true);
-    history.go(-1);
-    return false;
+    document.domainsNewAIformGoBack.action = './newAI.php';
+    document.domainsNewAIformGoBack.submit();
 }
 
 

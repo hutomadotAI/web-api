@@ -56,7 +56,7 @@
 
             <div class="row">
 
-                <!-- Learn new Answer -->
+                <!-- Create a new Answer -->
                 <div class="col-md-6">
                     <a data-toggle="collapse"  href="#collapseLearn" tabindex="-1">
                         <div class=" pull-right">more info
@@ -75,7 +75,7 @@
                     </div>
                 </div>
 
-                <!-- INPUT Personality -->
+                <!-- INPUT Voice -->
                 <div class="col-md-6">
                     <?php include './dynamic/input.personality.html.php'; ?>
                     <div class="form-group">
@@ -89,12 +89,13 @@
 
             </div>
 
+            <!-- INPUT Public -->
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group pull-right no-margin" style="padding-top: 5px;">
                         <span style="padding-right:5px;">Make this AI public</span>
                         <label>
-                            <input type="checkbox" name="ai_public" class="minimal" checked>
+                            <input type="checkbox" name="ai_public" id="ai_public" class="flat-red" checked>
                         </label>
                     </div>
                 </div>
