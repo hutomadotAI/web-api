@@ -16,7 +16,7 @@
 <div id="collapseConfidence" class="panel-collapse collapse">
     <div class="box-body">
         <div class="overlay center-block">
-            <section class="content-alert" >
+            <section class="content-info" >
                 <div class="box-body">
                     <dt>What does this mean?</dt>
                     <dd>By enabling this functionality you will let the AI decide when to follow pre-pacakged answers vs creating new ones based on the trainig data you provide.</dd>

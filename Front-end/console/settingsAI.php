@@ -11,6 +11,22 @@ if (! isSessionVariablesAvailable() ) {
     exit;
 }
 
+$response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
+if ($response['status']['code'] !== 200) {
+    unset($response);
+    header('Location: ./error.php?err=3');
+    exit;
+}
+
+/*
+$usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+if ($usr_domains['status']['code'] !== 200) {
+    unset($usr_domains);
+    header('Location: ./error.php?err=3');
+    exit;
+}
+*/
+
 function isSessionVariablesAvailable(){
     return  (
         isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
@@ -76,7 +92,6 @@ function isSessionVariablesAvailable(){
                         <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
                         <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
                         <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
-                        <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
                         <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
                         <li class="active"><a href="#"><i class="fa fa-gear text-black"></i>settings</a></li>
                     </ul>
@@ -86,8 +101,6 @@ function isSessionVariablesAvailable(){
 
             <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
                 <li class="header" style="text-align: center;">MY ACCOUNT</li>
-                <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
-                <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
                 <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
             </ul>
         </section>
@@ -103,7 +116,7 @@ function isSessionVariablesAvailable(){
             <div class="nav-tabs-custom flat no-shadow">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_general" data-toggle="tab">General</a></li>
-                    <li><a href="#tab_emotion" data-toggle="tab">Emotions</a></li>
+                    <li><a href="#tab_domains" data-toggle="tab">Pre-training Neural Networks</a></li>
                 </ul>
 
                 <div class="tab-content">
@@ -111,9 +124,9 @@ function isSessionVariablesAvailable(){
                     <div class="tab-pane active" id="tab_general">
                         <?php include './dynamic/settings.content.input.html.php'; ?>
                     </div>
-                    <!-- EMOTION TAB -->
-                    <div class="tab-pane" id="tab_emotion">
-                        <?php include './dynamic/settings.content.emotion.html.php'; ?>
+                    <!-- DOMAINS TAB -->
+                    <div class="tab-pane" id="tab_domains">
+                        <?php include './dynamic/settings.content.domains.html.php'; ?>
                     </div>
                 </div>
             </div>
@@ -144,11 +157,59 @@ function isSessionVariablesAvailable(){
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 <script src="./plugins/clipboard/clipboard.min.js"></script>
 <script src="./plugins/deleteAI/deleteAI.js"></script>
+<script src="./plugins/domain/domain.js"></script>
 <script src="./plugins/setting/setting.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 
 <script>
     var previousField = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
+</script>
+
+<script>
+    // API JSON REQUEST DOMAIN RESPONSE
+
+    var domains = <?php  echo json_encode($response['_domainList']);  unset($response); ?>;
+    var userActived ={};
+    for (var x in domains){
+        var key = domains[x].dom_id;
+        userActived[key]=false;
+    }
+
+    var newNode = document.createElement('div');
+    newNode.className = 'row';
+    newNode.id = 'domains_list';
+
+    /* NEED BIND WITH API DATA STORED
+    var domains = <?php //echo json_encode($response['_domainList']); unset($response);?>;
+    var usr_domains =<?php //echo json_encode($usr_domains); unset($usr_domains);?>;
+
+    var userActived ={};
+    for (var x in domains){
+        var key = usr_domains[x].dom_id;
+        if(key!=null)
+            userActived[key] = usr_domains[x].active;
+        else
+            userActived[domains[x].dom_id] = false;
+    }
+    var newNode = document.createElement('div');
+    newNode.className = 'row';
+    newNode.id = 'domains_list';
+    */
+</script>
+
+<script>
+    function searchDomain(str) {
+        showDomains(str,1);
+    }
+</script>
+
+
+<script>
+    //iCheck for checkbox and radio inputs
+    $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
+        checkboxClass: 'icheckbox_minimal-blue',
+        radioClass: 'iradio_minimal-blue'
+    });
 </script>
 
 </body>

@@ -1,3 +1,38 @@
+<div class="box-header with-border">
+    <i class="fa fa-sliders text-success"></i>
+    <h3 class="box-title">General Informations</h3>
+    <a data-toggle="collapse"  href="#collapseInfoGeneral">
+        <div class=" pull-right">more info
+            <i class="fa fa-question-circle text-md text-yellow"></i>
+        </div>
+    </a>
+</div>
+
+<div id="collapseInfoGeneral" class="panel-collapse collapse">
+    <div class="box-body">
+        <div class="overlay center-block">
+            <section class="content-info" >
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Description General aspectog AI</dt>
+                        <dd>Before start training process, y.</dd>
+                        <dt>Euismod</dt>
+                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
+                        <dt>Malesuada porta</dt>
+                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
+                        <dt>Felis euismod semper eget lacinia</dt>
+                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                    </dl>
+                </div>
+            </section>
+            <p></p>
+            need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+        </div>
+    </div>
+</div>
+
+
 <form role="form">
     <div class="box-body">
         <div class="row">

@@ -1,6 +1,3 @@
-document.getElementById('btnNext').addEventListener('click', wizardNext);
-document.getElementById('btnBack').addEventListener('click', backPage);
-
 function wizardNext() {
     $(this).prop('disabled',true);
     $('#btnBack').prop('disabled',true);

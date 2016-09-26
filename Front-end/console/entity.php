@@ -47,7 +47,6 @@ require "../pages/config.php";
                         <li><a href="./trainingAI.php"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
                         <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
                         <li class="active"><a href="#"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
-                        <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
                         <li><a href="./integrations.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
                         <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
                     </ul>

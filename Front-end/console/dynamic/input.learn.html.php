@@ -17,7 +17,7 @@
 <div id="collapseLearn" class="panel-collapse collapse">
     <div class="box-body">
         <div class="overlay center-block">
-            <section class="content-alert" >
+            <section class="content-info" >
                 <div class="box-body">
                     <dt>What does this mean?</dt>
                     <dd>NOT YET IMPLEMENTED</dd>

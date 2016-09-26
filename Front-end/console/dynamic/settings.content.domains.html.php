@@ -1,15 +1,15 @@
-<div class="box box-solid box-clean flat no-shadow" id="newAicontent">
+
     <div class="box-header with-border">
         <i class="fa fa-th text-red"></i>
         <h3 class="box-title">Pre-training Neural Networks</h3>
-        <a data-toggle="collapse"  href="#collapseInfoNewDomains">
+        <a data-toggle="collapse"  href="#collapseInfoDomains">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
             </div>
         </a>
     </div>
 
-    <div class="box-body" id="boxNewDomains">
+    <div class="box-body" id="boxDomains">
         <p></p>
         <input class="form-control " value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
         <div class="form-group pull-right no-margin" style="padding-top: 5px;">
@@ -28,13 +28,11 @@
             <span id="msgAlertNewDomains">You can search and select one or more pre-training neural networks</span>
         </div>
     </div>
-
-
-
-    <div id="collapseInfoNewDomains" class="panel-collapse collapse">
+    
+    <div id="collapseInfoDomains" class="panel-collapse collapse">
         <div class="box-body">
             <div class="overlay center-block">
-                <section class="content bg-gray-light" >
+                <section class="content-info" >
                     <div class="box-body">
                         <dl class="dl-horizontal">
                             <dt>Description New Domains Manipulation</dt>
@@ -56,18 +54,16 @@
     </div>
 
     <div class="box-footer">
-        <button type="submit" id="btnBack" class="btn btn-primary flat" onCLick="backPage()" alt="back step">back</button>
-        <button type="submit" id="btnNext" class="btn btn-success flat" onClick="wizardNext()" alt="next step">next</button>
+        <button type="submit" id="btnCakncel" class="btn btn-primary flat" alt="cancel">cancel</button>
+        <button type="submit" id="btnSave" class="btn btn-success flat" alt="save">save</button>
     </div>
-</div>
-
 
 
 <form method="POST" name="domainsNewAIform" action="./dynamic/saveAI.php"><!-- across market page for demo -->
-        <p></p>
-        <h2></h2>
-        <p id="domsearch"></p>
-        <input type="hidden" name="userActivedDomains" value="">
+    <p></p>
+    <h2></h2>
+    <p id="domsearch"></p>
+    <input type="hidden" name="userActivedDomains" value="">
 </form>
 
 <form method="POST" name="domainsNewAIformGoBack">

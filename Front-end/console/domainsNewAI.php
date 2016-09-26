@@ -17,7 +17,6 @@
     else
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '1';
 
-
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $_POST['ai_name'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $_POST['ai_description'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = $_POST['ai_language'];
