@@ -10,14 +10,8 @@ msg.pitch = 1
 
 
 function afterAiSpeech(){
-
     enableSpeech(true);
     enableChat(true);
-    if ( continuousSpeech == 1) {
-        // startDictation('andrea','andrea');
-    }
-    else{
-    }
 }
 
 function speak(text) {
