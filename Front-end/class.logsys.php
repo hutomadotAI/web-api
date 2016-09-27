@@ -1260,7 +1260,6 @@ class console
           $path = 'ai/' . $aiid . '/chat';
           $api_response_parameters = array('q' => $q, 'uid' => $uid, 'chat_history' => $history);
           $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
-
           $curl = new curlHelper($service_url, $dev_token);
           $curl_response = $curl->exec();
           if ($curl_response === false) {
@@ -1274,32 +1273,32 @@ class console
       }
   }
 
-  // FOR API
-  public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
+    // FOR API
+    public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
       if (self::$loggedIn) {
-          $path = 'ai/' . $aiid . '/training';
+        $path = 'ai/' . $aiid . '/training';
 
-          $filename = $file['tmp_name'];
-          $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
+        $filename = $file['tmp_name'];
+        $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
 
-          $api_response_parameters = array('source_type' => $source_type);
-          $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
+        $api_response_parameters = array('source_type' => $source_type);
+        $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
 
-          $curl = new curlHelper($service_url, $dev_token);
-          $curl->setOpt(CURLOPT_POST, true);
-          $curl->setOpt(CURLOPT_POSTFIELDS, $args);
-          $curl_response = $curl->exec();
-          if ($curl_response === false) {
-              $info = $curl->getInfo();
-              $curl->close();
-              die('Error: uploadfile curl: ' . $info);
-          }
-          $json_response = json_decode($curl_response, true);
+        $curl = new curlHelper($service_url, $dev_token);
+        $curl->setOpt(CURLOPT_POST, true);
+        $curl->setOpt(CURLOPT_POSTFIELDS, $args);
+        $curl_response = $curl->exec();
+        if ($curl_response === false) {
+          $info = $curl->getInfo();
           $curl->close();
+          die('Error: uploadfile curl: ' . $info);
+        }
+        $json_response = json_decode($curl_response, true);
+        $curl->close();
 
-          return $json_response;
+        return $json_response;
       }
-  }
+    }
 
 
   // FOR API

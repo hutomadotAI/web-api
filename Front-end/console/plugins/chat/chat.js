@@ -101,7 +101,7 @@ function createRightMsg(ai_name,msg,error) {
         $('#chat').scrollTop(height);
     }
     
-    if ( document.getElementById('speech-option').value == '1')
+    if ( document.getElementById('speech-option').value == '0')
         speak(msg);
     else
         enableChat(true);
