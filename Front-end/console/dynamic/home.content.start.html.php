@@ -20,7 +20,7 @@
         <div id="collapseStart" class="panel-collapse collapse">
             <div class="box-body">
                 <div class="overlay center-block">
-                    <section class="content bg-gray-light" >
+                    <section class="content-info" >
                         <div class="box-body">
                             <dl class="dl-horizontal">
                                 <dt>Description Actions</dt>
