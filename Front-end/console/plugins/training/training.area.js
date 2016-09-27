@@ -23,6 +23,7 @@ function init_for_Demo(){
 }
 
 function activeMonitors(status,error){
+
     if (status != 0)
         activePhaseOne();
     if ( status == 'training_in_progress' || status == 'training_queued' ) {
@@ -128,8 +129,12 @@ function uploadStructure(){
         msgAlertUploadStructure(1,'You need choose complex file first');
         return;
     }
-    else
+    else {
+        resetPhaseTwoComponents();
+        block_server_ping = true;
         $("#btnUploadStructure").prop("disabled", true);
+    }
+
 
     var xmlhttp;
     var file_data = new FormData();
@@ -148,14 +153,19 @@ function uploadStructure(){
             var JSONresponse = xmlhttp.responseText;
             try {
                 var JSONdata = JSON.parse(JSONresponse);
-                if (JSONdata['status']['code'] === 200)
-                    msgAlertUploadStructure(4,'Complex file Uploaded!!!');
-                else
+                if (JSONdata['status']['code'] === 200) {
+                    msgAlertUploadStructure(4, 'Complex file Uploaded!!!');
+                    resetPhaseOneComponents();
+                    updatePhaseOneComponents();
+                }
+                else{
                     msgAlertUploadStructure(2,'Something is gone wrong. Complex file not uploaded');
+                    $("#btnUploadStructure").prop("disabled", false);
+                }
             }catch (e){
                 msgAlertUploadStructure(2,'Something is gone wrong. JSON error on complex file transfer');
+                $("#btnUploadStructure").prop("disabled", false);
             }
-            $("#btnUploadStructure").prop("disabled", false);
         }
     };
     msgAlertUploadStructure(1,'Uploading complex file...');
@@ -221,7 +231,7 @@ function updatePhaseOneComponents() {
     }
     else {
         activePhaseTwo();
-        pingError();
+        //pingError();
     }
 }
 
@@ -235,6 +245,7 @@ function activePhaseTwo(){
     $('#progress-upload-file-action').removeClass('active');
     $('#progress-upload-file-action').removeClass('progress-striped');
 
+    /*
     $('#btnUploadFile').prop('disabled', false);
     $('#trainingbar').prop('hidden', false);
 
@@ -243,6 +254,7 @@ function activePhaseTwo(){
     document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
 
     document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
+    */
     msgAlertProgressBar(0,'Now you can talk with your AI');
     //closingMsgAlertProgressBarTemporized();
     block_server_ping = false;

@@ -30,9 +30,7 @@
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']= 'Often';
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']= 'No';
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = 'Male';
-
-
-
+            
         }else{
             unset($response);
             unset($singleAI);
@@ -119,7 +117,6 @@
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/training/training.area.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
@@ -128,6 +125,8 @@
         MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","training",1,true,false]);
     </script>
 </form>
+
+<script src="./plugins/training/training.area.js"></script>
 
 </body>
 </html>

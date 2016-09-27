@@ -10,10 +10,7 @@
 
     function decodeAIState($state){
         switch ($state) {
-
-            case -1 :
-                return('<span class="label label-muted">Empty</span>');
-                break;
+            
             case 'training_queued' :
                 return('<span class="label label-primary">Queued</span>');
                 break;
