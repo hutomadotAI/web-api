@@ -6,7 +6,7 @@ if (isset($_GET['err'])) {
     switch ($_GET['err']) {
 
         case 1 :
-            $msg ='SESSION EXIPED';
+            $msg ='SESSION_EXPIRED';
             $details =' We could not find the data you were looking for';
             break;
         case 2 :
@@ -83,7 +83,7 @@ if (isset($_GET['err'])) {
     }
 }
 else {
-    $msg = 'UNESPECTED ERROR OCCURED';
+    $msg = 'UNEXPECTED ERROR OCCURRED';
     $details = 'Error not catchable';
 }
 ?>

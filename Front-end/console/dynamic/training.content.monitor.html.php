@@ -14,26 +14,38 @@
             case -1 :
                 return('<span class="label label-muted">Empty</span>');
                 break;
-            case '0' :
+            case 'training_queued' :
                 return('<span class="label label-primary">Queued</span>');
                 break;
-            case 'training_in_progress' :
-                return('<span class="label label-warning">Training</span>');
+            case 'preprocess_training_text' :
+                return('<span class="label label-primary">Preprocess Text</span>');
                 break;
-            case 2 :
+            case 'preprocess_completed' :
+                return('<span class="label label-primary">Preprocess Completed</span>');
+                break;
+            case 'ready_for_training' :
+                return('<span class="label label-warning">Ready</span>');
+                break;
+            case 'start_training' :
+                return('<span class="label label-warning">Start</span>');
+                break;
+            case 'training_completed' :
                 return('<span class="label label-success">Trained</span>');
                 break;
-            case 3 :
-                return('<span class="label label-warning">Stopping</span>');
+            case 'delete_training' :
+                return('<span class="label label-warning">Delete Training</span>');
                 break;
-            case 4 :
+            case 'stop_training' :
                 return('<span class="label label-primary">Stopped</span>');
                 break;
-            case 5 :
-                return('<span class="label label-danger">Limited</span>');
+            case 'malformed_training_file' :
+                return('<span class="label label-danger">Malformed Training File</span>');
+                break;
+            case 'training_stopped_maxtime' :
+                return('<span class="label label-danger">Stopped Max Time</span>');
                 break;
             default:
-                return('<span class="label label-danger">Error</span>');
+                return('<span class="label label-danger">Internal Error</span>');
         }
     }
 ?>
@@ -61,33 +73,35 @@
                 <th class="text-center no-border" style="width: 10%;">Completed</th>
             </tr>
             <tr>
+                <!-- Phase1 is the "time" to wait for upload training file -->
                 <td class="text-center" id="status-upload-file">phase 1</td>
                 <td>
-                    <div class="progress progress-xs progress-striped active" id="progress-upload-file-action"style="margin-top:9px;">
-                       <div class="progress-bar progress-bar-primary" id="progress-upload-file" style="width:0%;"></div>
+                    <div class="progress progress-xs progress-striped active" id="progress-upload-file-action" style="margin-top:9px;">
+                       <div class="progress-bar progress-bar-primary" id="progress-upload-file" style="width:0;"></div>
                     </div>
                 </td>
                 <td class="text-center"><span id="status-bagde-upload" class="badge btn-primary">0%</span></td>
             </tr>
 
-            <tr id="trainingbar"hidden>
+            <tr id="trainingbar" hidden>
+                <!-- Phase2 is the "time" to monitoring the training error progress -->
                 <td class="text-center" id="status-training-file">phase 2</td>
                 <td>
                     <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
-                        <div class="progress-bar progress-bar-success"  id="progress-training-file" style="width:0%;"></div>
+                        <div class="progress-bar progress-bar-success"  id="progress-training-file" style="width:0;"></div>
                     </div>
                 </td>
                 <td class="text-center"><span id="status-bagde-training" class="badge btn-success">0%</span></td>
             </tr>
         </table>
 
-        <tr>
-            <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="display: none">
-                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
-                <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
-                <span id="msgAlertProgressBar"></span>
-            </div>
-        </tr>
+
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="display: none">
+            <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+            <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
+            <span id="msgAlertProgressBar"></span>
+        </div>
+
 
     </div>
 
@@ -110,7 +124,7 @@
                     </div>
                 </section>
                 <p></p>
-                need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
 
             </div>
         </div>

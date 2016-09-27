@@ -1,11 +1,11 @@
-document.getElementById("btnNext").addEventListener("click", wizardNext);
-document.getElementById("ai_name").addEventListener("keyup", activeBtnNext);
+document.getElementById('btnNext').addEventListener('click', wizardNext);
+document.getElementById('ai_name').addEventListener('keyup', activeBtnNext);
 
 function wizardNext() {
-    $(this).prop("disabled",true);
-    $("#btnCancel").prop("disabled",true);
+    $(this).prop('disabled',true);
+    $('#btnCancel').prop('disabled',true);
 
-    if(isContainInvalidCharacters($("#ai_name").val())) {
+    if(isContainInvalidCharacters($('#ai_name').val())) {
         msgAlertNameAI(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 character and without spaces');
         inputsActiveDeactive(false);
         return;
@@ -20,7 +20,7 @@ function wizardNext() {
 function activeBtnNext() {
     var ai_name = $("#ai_name").val();
     if ( ai_name.length > 0 ) {
-        $("#btnNext").prop("disabled", false);
+        $('#btnNext').prop('disabled', false);
         document.getElementById('containerMsgAlertNameAI').style.display = 'none';
         document.getElementById('ai_name').style.borderColor = "#d2d6de";
     }
@@ -29,33 +29,32 @@ function activeBtnNext() {
 }
 
 function inputsActiveDeactive(flag){
-    $("#btnNext").prop("disabled",!flag);
-    $("#btnCancel").prop("disabled",flag);
-    $("#ai_name").prop("disabled",flag);
-    $("#ai_description").prop("disabled",flag);
-    $("#ai_confidence").prop("disabled",flag);
-    $("#ai_timezone").prop("disabled",flag);
-    $("#ai_sex").prop("disabled",flag);
-    $("#ai_language").prop("disabled",flag);
-    $("#ai_personality").prop("disabled",flag);
+    $('#btnNext').prop('disabled',!flag);
+    $('#btnCancel').prop('disabled',flag);
+    $('#ai_name').prop('disabled',flag);
+    $('#ai_description').prop('disabled',flag);
+    $('#ai_confidence').prop('disabled',flag);
+    $('#ai_timezone').prop('disabled',flag);
+    $('#ai_sex').prop('disabled',flag);
+    $('#ai_language').prop('disabled',flag);
+    $('#ai_personality').prop('disabled',flag);
 }
 
 function isContainInvalidCharacters(txt) {
     var letters = /^[0-9a-zA-Z]+$/;
     if (letters.test(txt))
         return false;
-    else
-        return true;
+    return true;
 }
 
     
 $(function () {
-    $(".select2").select2();
+    $('.select2').select2();
 });
 
 $(function () {
-
-    $("#ai_confidence").ionRangeSlider({
+    
+    $('#ai_confidence').ionRangeSlider({
         type: "single",
         min: 1,
         max: 4,
@@ -64,10 +63,10 @@ $(function () {
         step: 1,
         grid: true,
         keyboard: true,
-        onStart: function (data) {console.log("onStart"); },
-        onChange: function (data) {console.log("onChange"); },
-        onFinish: function (data) { console.log("onFinish"); },
-        onUpdate: function (data) {console.log("onUpdate"); },
+        onStart: function (data) {console.log('onStart'); },
+        onChange: function (data) {console.log('onChange'); },
+        onFinish: function (data) { console.log('onFinish'); },
+        onUpdate: function (data) {console.log('onUpdate'); },
         values: ["never", "sometimes", "often","always"]
     });
 });
@@ -76,7 +75,7 @@ $(function () {
 
 //Flat red color scheme for iCheck
 $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
-    checkboxClass: 'icheckbox_flat-blue',
+    checkboxClass: 'icheckbox_flat-blue'
 });
 
 
@@ -85,10 +84,10 @@ $(document).ready(function(){
     if ( previousFilled == 1 ){
         fillInputFields();
         // active button next if are previous inserted data
-        if (  $("#ai_name").val().length > 0 )
-            $("#btnNext").prop("disabled", false);
+        if (  $('#ai_name').val().length > 0 )
+            $('#btnNext').prop('disabled', false);
         else
-            $("#btnNext").prop("disabled",true);
+            $('#btnNext').prop('disabled',true);
     }
 });
 
@@ -114,10 +113,10 @@ function fillInputFields(){
     // enable/disable checkbox public AI
 
     if(previousField.private == '1') {
-        $('input[type="checkbox"].flat-red').prop("checked",false)
+        $('input[type="checkbox"].flat-red').prop('checked',false)
     }
     else {
-        $('input[type="checkbox"].flat-red').prop("checked", true);
+        $('input[type="checkbox"].flat-red').prop('checked', true);
     }
 
 }
