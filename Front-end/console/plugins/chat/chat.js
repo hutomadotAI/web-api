@@ -1,16 +1,20 @@
 var isChrome = !!window.chrome;
 var continuousSpeech = '0';
 var speechResponse = '1'; // voice activated true for default
-var jsonResponse = '1'; // voice activated true for default
+var jsonResponse   = '1'; // voice activated true for default
 var colorVoice = '0';
 var muteMicrophone = '0';
 var chat = 1;  // start enable chatting buttons
 
 
 if (isChrome)
-    document.getElementById("btnSpeech").addEventListener("click", start);
+    document.getElementById('btnSpeech').addEventListener('click', start);
 else{
-    document.getElementById("btnSpeech").setAttribute('data-toggle','tooltip');
+
+
+    document.getElementById('deactive-icon').setAttribute('class','fa fa-bullhorn text-gray');
+    document.getElementById('deactive-text').setAttribute('class','text-gray');
+    document.getElementById("btnSpeech").setAttribute('title','Available on Chrome');
     document.getElementById("btnSpeech").setAttribute('title','Available on Chrome');
     document.getElementById("microphone").className ='fa fa-microphone-slash text-coral';
 

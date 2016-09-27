@@ -5,13 +5,13 @@
         <h3 class="box-title"><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></h3>
         <div class="box-tools pull-right">
             <ul class="dropdown-menu flat">
-                <li class="footer"><a href="#">  <i class="fa fa-bullhorn"></i> Deactive Voice</a></li>
-                <li class="footer"><a href="#">  <i class="fa fa-microphone-slash"></i> Mute Microphone</a></li>
-                <li class="footer"><a href="#">  <i class="fa fa-adjust"></i> Color Voice</a></li>
-                <li class="footer" id="json-option" value ="0" onClick="jsonOption(this.value)" onMouseOver="this.style.cursor='pointer'">
-                    <a id="json-type" ><i id="json-icon" class="fa fa-file-code-o text-red"></i><spam id="json-text" class="text-red"> Show Json Message</spam></a>
+                <li class="footer" id="deactive-option" value="0" onClick="voiceOption(this.value)" onMouseOver="this.style.cursor='pointer'">
+                    <a id="deactive-type"><i id="deactive-icon" class="fa fa-bullhorn"></i><spam id="deactive-text" class=""> Active Voice</spam></a>
                 </li>
-                <li class="footer" id="continuous-option" value ="0"  class="fa fa-retweet"></i><spam id="continuous-text"> Continuous Speech  <h7>beta</h7></spam></a>
+                <!--<li class="footer" id="mute-option"><a href="#">  <i class="fa fa-microphone-slash"></i> Mute Microphone</a></li>-->
+                <!--li class="footer" id="color-option"><a href="#">  <i class="fa fa-adjust"></i> Color Voice</a></li>-->
+                <li class="footer" id="json-option" value ="0" onClick="jsonOption(this.value)" onMouseOver="this.style.cursor='pointer'">
+                    <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-red"></i><spam id="json-text" class="text-red"> Show Json Message</spam></a>
                 </li>
             </ul>
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" >
