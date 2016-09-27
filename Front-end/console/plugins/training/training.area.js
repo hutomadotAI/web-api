@@ -2,7 +2,7 @@ var max_error = -1.0;
 var block_server_ping = false;
 
 initializedEventListeners();
-init_for_Demo();
+//init_for_Demo();
 activeMonitors(status,error);
 
 function initializedEventListeners(){
@@ -41,16 +41,16 @@ function enableUploadFile() {
 }
 
 function enableUploadStructure() {
-    /*  real implemented
+    // real implemented
     if ( $(this).val() == null || $(this).val == "")
         $("#btnUploadStructure").prop("disabled", true);
     else
         $("#btnUploadStructure").prop("disabled", false);
     msgAlertUploadStructure(0,'Now you can upload your complex file');
-    */
+
 
     // for demo
-    $("#btnUploadStructure").prop("disabled", true);
+    //$("#btnUploadStructure").prop("disabled", true);
 }
 
 function enableUploadUrl() {

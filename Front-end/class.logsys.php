@@ -1260,6 +1260,7 @@ class console
           $path = 'ai/' . $aiid . '/chat';
           $api_response_parameters = array('q' => $q, 'uid' => $uid, 'chat_history' => $history);
           $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
+
           $curl = new curlHelper($service_url, $dev_token);
           $curl_response = $curl->exec();
           if ($curl_response === false) {
@@ -1281,7 +1282,10 @@ class console
           $filename = $file['tmp_name'];
           $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
 
-          $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
+          $api_response_parameters = array('source_type' => $source_type);
+          $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
+
+          $curl = new curlHelper($service_url, $dev_token);
           $curl->setOpt(CURLOPT_POST, true);
           $curl->setOpt(CURLOPT_POSTFIELDS, $args);
           $curl_response = $curl->exec();
