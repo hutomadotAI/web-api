@@ -19,11 +19,11 @@
             <section class="content-info" >
                 <div class="box-body">
                     <dt>What does this mean?</dt>
-                    <dd>By enabling this functionality you will let the AI decide when to follow pre-pacakged answers vs creating new ones based on the trainig data you provide.</dd>
+                    <dd>By enabling this functionality you will let the AI decide when to follow pre-packaged answers vs creating new ones based on the trainig data you provide.</dd>
                 </div>
             </section>
             <p></p>
-            need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+            need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
         </div>
     </div>
 </div>

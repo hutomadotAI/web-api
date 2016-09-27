@@ -1316,21 +1316,20 @@ class console
       }
   }
   
-  // FAKE
-  public static function getDevToken(){
-        if (self::$loggedIn) {
-            $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";            return $dev_token;
-        }
-  }
-  // FAKE
+    // FAKE
+    public static function getDevToken(){
+          if (self::$loggedIn) {
+              $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";            return $dev_token;
+          }
+    }
+
     public static function isSessionActive () {
-      if (!isset($_SESSION['CREATED'])) {
-        $_SESSION['CREATED'] = time();
-      } else if (time() - $_SESSION['CREATED'] > 1800) {
-        // session started more than 30 minutes ago
-        session_regenerate_id(true);    // change session ID for the current session and invalidate old session ID
-        $_SESSION['CREATED'] = time();  // update creation time
+      if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
+        // last request was more than 30 minutes ago
+        session_unset();     // unset $_SESSION variable
+        session_destroy();   // destroy session
       }
+      $_SESSION['LAST_ACTIVITY'] = time();
       return function_exists ( 'session_status' ) ? ( PHP_SESSION_ACTIVE == session_status () ) : ( ! empty ( session_id () ) );
     }
 

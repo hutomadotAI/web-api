@@ -18,12 +18,14 @@
 
 <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
+        <!--
         <li>
           <a href="#" tabindex="-1">
             <i class="fa fa-shopping-cart text-green" style="position: relative;"></i>
             <span>Marketplace</span>
           </a>
         </li>
+        -->
 
         <!-- User Account: style can be found in dropdown.less -->
         <li class="dropdown user user-menu">

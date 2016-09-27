@@ -11,7 +11,7 @@
     </div>
 
 
-     <div class="box-body no-margin" id="boxAction" style="padding-top: 0px;">
+     <div class="box-body no-margin" id="boxAction" style="padding-top: 0;">
         
          <div class="row">
              <div class="col-md-12">
@@ -43,12 +43,12 @@
                          </div>
                      </section>
                      <p></p>
-                     need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                     need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
                  </div>
              </div>
          </div>
 
-         <div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;paddind-bottom:3px;">
+         <div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px; padding-bottom:3px;">
              <div class="row">
                  <div class="col-xs-3 border-right">
                      <div class="text-center" >

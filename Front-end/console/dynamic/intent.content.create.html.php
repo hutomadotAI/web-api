@@ -17,7 +17,7 @@
                 <input type="text" class="form-control" id="inputIntentName" name="intent" placeholder="Enter intent name" style="width: 96%;">
             </form>
             <div class="input-group-btn" tabindex="0">
-                <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" alt="create intent" disabled>Create Intent</button>
+                <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" disabled>Create Intent</button>
             </div>
         </div>
         <p></p>
@@ -51,7 +51,7 @@
                     </div>
                 </section>
                 <p></p>
-                need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
             </div>
         </div>
     </div>

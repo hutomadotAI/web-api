@@ -4,8 +4,8 @@
             <i class="fa fa-question-circle text-md text-yellow"></i>
         </div>
     </a>
-    <label>Learn from Users</label>
-    <select class="form-control select2" name="ai_personality" id="ai_personality"style="width: 100%;">
+    <label for="ai_personality">Learn from Users</label>
+    <select class="form-control select2" name="ai_personality" id="ai_personality" style="width: 100%;">
         <option disabled="disabled">Yes</option>
         <option selected="selected">No</option>
         <option disabled="disabled">Yes but supervised</option>
@@ -24,7 +24,7 @@
                 </div>
             </section>
             <p></p>
-            need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+            need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
         </div>
     </div>
 </div>

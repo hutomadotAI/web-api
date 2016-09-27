@@ -20,7 +20,7 @@
         </div>
         <br>
 
-        </br>
+      
 
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
@@ -48,14 +48,14 @@
                     </div>
                 </section>
                 <p></p>
-                need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
             </div>
         </div>
     </div>
 
     <div class="box-footer">
-        <button type="submit" id="btnDomainsCancel" class="btn btn-primary flat" alt="cancel">cancel</button>
-        <button type="submit" id="btnSave" class="btn btn-success flat" alt="save">save</button>
+        <button type="submit" id="btnDomainsCancel" class="btn btn-primary flat">cancel</button>
+        <button type="submit" id="btnSave" class="btn btn-success flat">save</button>
     </div>
 
 

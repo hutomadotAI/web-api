@@ -27,7 +27,7 @@
                 </div>
             </section>
             <p></p>
-            need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+            need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
         </div>
     </div>
 </div>
@@ -96,8 +96,8 @@
 
 
 <div class="box-footer">
-    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" alt="cancel">cancel</button>
-    <button  name="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat" alt="save" disabled>save</button>
+    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" >cancel</button>
+    <button  name="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat" disabled>save</button>
     <button  name="btnDelete" id="btnDelete"  data-toggle="modal" data-target="#deleteAI" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" alt="delete">delete AI</button>
 </div>
 

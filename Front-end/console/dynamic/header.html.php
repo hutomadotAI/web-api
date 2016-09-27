@@ -3,7 +3,7 @@
         <b>hu</b>
     </span>
     <span class="logo-lg">
-        <b class="title">hu<font color="green">:</font><font color="CornflowerBlue">toma</font></b>
+        <b class="text">hu</b><b class="text-green">:</b><b class="text-blue">toma</b>
     </span>
 </a>
 

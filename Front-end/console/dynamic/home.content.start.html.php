@@ -1,7 +1,7 @@
 <div class='box box-solid box-clean flat no-shadow'>
     <div class='box-header with-border'>
         <i class="fa fa-user-plus text-light-blue" ></i>
-        <h3 class='box-title'>Welcome to hu:toma - Tech Preview</h3>
+        <h3 class='box-title'>Welcome - Tech Preview</h3><!-- to hu:toma -->
         <a data-toggle="collapse"  href="#collapseStart" tabindex="-1">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -10,10 +10,10 @@
     </div>
 
     <div class='box-body'>
-        Howdy! Thanks for signing up with our tech preview. You are now just seconds away from creating your own conversational AI powered by deep learning. If you need help feel free to email us at hello@hutoma.com
+        Howdy! Thanks for signing up with our tech preview. You are now just seconds away from creating your own conversational AI powered by deep learning. If you need help feel free to email us at hello@email.com
         <br/><br/>
         <form method="POST" name="startForm" action="./newAI.php">
-            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI" style="width: 120px;" alt="create AI">Create AI</button>
+            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI" style="width: 120px;">Create AI</button>
         </form>
         <br/><br/>
 
@@ -41,7 +41,7 @@
     </div>
 
     <div class="box-footer">
-        <span>need help? check our <a href='#' tabindex="-1">video tutorial </a> or email us <a href='#' tabindex="-1">hello@hutoma.com</a></span>
+        <span>need help? check our <a href='#' tabindex="-1">video tutorial </a> or email us <a href='#' tabindex="-1">hello@email.com</a></span>
 
     </div>
 
