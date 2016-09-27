@@ -694,10 +694,12 @@ class console
           <blockquote>
             <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
           </blockquote>";
-          self::sendMail($email, $subject, $body);
-
-          echo "<p>Your password reset email has been sent. Do not forget to check your spam folder too.</p>";
-          $curStatus = "emailSent"; // E-Mail has been sent
+            if (self::sendMail($email, $subject, $body)) {
+                echo "<p>Your password reset email has been sent. Do not forget to check your spam folder too.</p>";
+                $curStatus = "emailSent"; // E-Mail has been sent
+            } else {
+                echo "<p>There was a problem sending the reset e-mail. Please go back and try again.</p>";
+            }
         }
       }
     }
