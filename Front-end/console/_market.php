@@ -50,33 +50,14 @@
         <?php include './dynamic/header.html.php'; ?>
     </header>
 
+    <!-- ================ MENU CONSOLE ================= -->
     <aside class="main-sidebar ">
         <section class="sidebar">
-            <!-- ================ USER PANEL ================== -->
-            <?php include './dynamic/userpanel.html.php'; ?>
-            <!-- ================ USER ACTION ================= -->
-            <ul class="sidebar-menu">
-                <li class="header" style="text-align: center;">CONSOLE</li>
-                <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
-                <li>
-                    <a href="#">
-                        <i class="fa fa-book text-purple"></i> <span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-                <li class="header" style="text-align: center;">MY ACCOUNT</li>
-                <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
-            </ul>
+            <p id="sidebarmenu"></p>
         </section>
     </aside>
 
-    <!-- =============================================== -->
     <!-- ================ PAGE CONTENT ================= -->
-    <!-- =============================================== -->
     <div class="content-wrapper">
         <section class="content">
             <?php include './dynamic/market.content.html.php'; ?>
@@ -99,6 +80,13 @@
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/createAI/createAI.js"></script>
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","market",1,true]);
+    </script>
+</form>
 
 </body>
 </html>

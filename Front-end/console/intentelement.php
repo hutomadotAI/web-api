@@ -36,12 +36,8 @@
     <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="./plugins/iCheck/skins/square/red.css">
     <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
-
-
     <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
-
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
@@ -50,41 +46,10 @@
         <?php include './dynamic/header.html.php'; ?>
     </header>
 
+    <!-- ================ MENU CONSOLE ================= -->
     <aside class="main-sidebar ">
         <section class="sidebar">
-            <!-- ================ USER PANEL ================== -->
-            <?php include './dynamic/userpanel.html.php'; ?>
-
-            <!-- ================ USER ACTION ================= -->
-            <ul class="sidebar-menu">
-                <li class="header" style="text-align: center;">CONSOLE</li>
-                <li><a href="./home.php" tabindex="-1"><i class="fa fa-home text-light-blue" tabindex="-1"></i><span>home</span></a></li>
-                <li class="active">
-                    <a href="#" tabindex="-1">
-                        <i class="fa fa-user text-olive" tabindex="-1" ></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-
-                        <li><a href="./trainingAI.php" tabindex="-1"><i class="fa fa-graduation-cap text-purple" tabindex="-1"></i> <span>training</span></a></li>
-                        <li class="active"><a href="./intent.php" tabindex="-1"><i class="fa fa-commenting-o text-green" tabindex="-1"></i><span>intents</span></a></li>
-                        <li><a href="./entity.php"tabindex="-1" ><i class="fa fa-sitemap text-yellow" tabindex="-1"></i> <span>entities</span></a></li>
-                        <li><a href="./settingsAI.php" tabindex="-1"><i class="fa fa-gear text-black" tabindex="-1"></i>settings</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="fa fa-book text-purple"></i> <span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
-                    </ul>
-                </li>
-            </ul>
-
-            <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-                <li class="header" style="text-align: center;">MY ACCOUNT</li>
-                <li><a href="./logout.php" tabindex="-1" ><i class="fa fa-power-off text-red" tabindex="-1" ></i> <span>LOGOUT</span></a></li>
-            </ul>
+            <p id="sidebarmenu"></p>
         </section>
     </aside>
 
@@ -126,13 +91,20 @@
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./dist/js/demo.js"></script>
-<script src="./plugins/iCheck/icheck.js"></script>
 <script src="./plugins/intent/intent.element.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/jQuery/jquery.omniselect.js"></script>
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","intents",1,false,false]);
+    </script>
+</form>
+
 <script>
     var entityListFromServer = <?php echo json_encode($entityList); unset($entityList);?>;
     var expressionListFromServer = <?php echo json_encode($expressionList); unset($expressionList);?>;
