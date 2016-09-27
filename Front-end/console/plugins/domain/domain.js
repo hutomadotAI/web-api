@@ -19,7 +19,6 @@ function backPage(){
 }
 
 
-
 function showDomains(str,size){
   var wHTML = "";
   for (var x in domains) {

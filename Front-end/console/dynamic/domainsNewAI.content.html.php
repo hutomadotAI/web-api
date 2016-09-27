@@ -11,7 +11,7 @@
 
     <div class="box-body" id="boxNewDomains">
         <p></p>
-        <input class="form-control " value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
+        <input class="form-control" value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
         <div class="form-group pull-right no-margin" style="padding-top: 5px;">
             <span style="padding-right:5px;">Show Free Neural Networks Only</span>
             <label>

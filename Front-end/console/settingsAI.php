@@ -69,7 +69,7 @@ function isSessionVariablesAvailable(){
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini">
+<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showDomains('',1)">
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>

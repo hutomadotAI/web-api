@@ -1,4 +1,5 @@
 document.getElementById("btnCancel").addEventListener("click", fillInputFields);
+document.getElementById("btnDomainsCancel").addEventListener("click", resetDomainsData);
 
 $(function () {
     $(".select2").select2();
@@ -63,4 +64,10 @@ function fillInputFields(){
     else {
         $('input[type="checkbox"].flat-red').prop("checked", true);
     }
+}
+
+function resetDomainsData(){
+    var str='';
+    document.getElementById('searchInputDomains').value = str;
+    showDomains(str,1);
 }
