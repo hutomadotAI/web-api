@@ -5,6 +5,8 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.validation.TestParameterValidation;
+import com.hutoma.api.validation.Validate;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,10 +36,11 @@ public class TestTrainingLogic {
     SecurityContext fakeContext;
     HTMLExtractor fakeExtractor;
     FormDataContentDisposition fakeContentDisposition;
+    Validate fakeValidation;
     TrainingLogic logic;
 
     private String DEVID = "devid";
-    private String AIID = "aiid";
+    private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private String UURL = "url://";
     private String SOMETEXT = "some text";
@@ -50,16 +53,17 @@ public class TestTrainingLogic {
         this.fakeConfig = mock(Config.class);
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         this.fakeDatabase = mock(Database.class);
-        when(fakeDatabase.updateAiTrainingFile(anyString(), anyString())).thenReturn(true);
+        when(fakeDatabase.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         this.fakeContext = mock(SecurityContext.class);
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(Logger.class);
         when(fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        when(fakeTools.textSanitizer(anyString())).thenCallRealMethod();
+        this.fakeValidation = TestParameterValidation.getFakeValidation();
+        when(fakeValidation.textSanitizer(anyString())).thenCallRealMethod();
         this.fakeExtractor = mock(HTMLExtractor.class);
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
-        logic = new TrainingLogic(fakeConfig, fakeSerializer, fakeMessageQueue, fakeExtractor, fakeDatabase, fakeTools, fakeLogger);
+        logic = new TrainingLogic(fakeConfig, fakeSerializer, fakeMessageQueue, fakeExtractor, fakeDatabase, fakeTools, fakeLogger, fakeValidation);
 
         when(fakeConfig.getMaxUploadSize()).thenReturn(65536L);
         when(fakeConfig.getMaxClusterLines()).thenReturn(65536);
@@ -139,7 +143,7 @@ public class TestTrainingLogic {
     }
 
     void makeDBFail(int trainingType) throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
-        doThrow(new Database.DatabaseException(new Exception("test"))).when(fakeDatabase).updateAiTrainingFile(anyString(), anyString());
+        doThrow(new Database.DatabaseException(new Exception("test"))).when(fakeDatabase).updateAiTrainingFile(any(), anyString());
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
@@ -165,7 +169,7 @@ public class TestTrainingLogic {
     }
 
     void makeDBUpdateZeroRows(int trainingType) throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
-        when(fakeDatabase.updateAiTrainingFile(anyString(), anyString())).thenReturn(false);
+        when(fakeDatabase.updateAiTrainingFile(any(), anyString())).thenReturn(false);
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
@@ -191,8 +195,8 @@ public class TestTrainingLogic {
     }
 
     void makeMessageQueueFail(int trainingType) throws Exception {
-        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessageReadyForTraining(anyString(), anyString());
-        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), anyString());
+        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessageReadyForTraining(anyString(), any());
+        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), any());
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);

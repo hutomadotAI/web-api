@@ -48,10 +48,18 @@ if(isset($_POST['action_login'])){
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/animate.css">
     <link rel="stylesheet" href="../css/main.css">
-    <script src="../js/modernizr-2.6.2.min.js"></script>
-    <script type="text/javascript" src="../js/jquery-1.10.1.min.js"></script>
-
-
+    <link rel="stylesheet" href="../console/plugins/cookiePolicyBar/cookiePolicyBar.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="../js/modernizr-2.6.2.min.js"></script>
+    <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript">
+        var options = {
+            declineButtonText: ''
+        };
+        $(document).ready(function () {
+            $.cookiePolicyBar(options);
+        });
+    </script>
 <style>
 .newa {
   color: #3c8dbc;

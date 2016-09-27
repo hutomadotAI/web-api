@@ -96,7 +96,8 @@ body {
 
 <?php
       if(isset($_POST['submit'])){
-
+     #  When commenting out this code make sure you use the secured curlHelper instead of file_get_contents
+     #  to obtain the response from the captcha service
      #   if(isset($_POST['g-recaptcha-response'])) {
      #     $captcha=$_POST['g-recaptcha-response'];
      #     $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);

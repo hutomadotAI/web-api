@@ -8,11 +8,14 @@ import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.validation.Validate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.SecurityContext;
+
+import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,7 +38,7 @@ public class TestChatLogic {
     Logger fakeLogger;
 
     private String DEVID = "devid";
-    private String AIID = "aiid";
+    private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private String UID = "uid";
     private String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private String SEMANTICRESULT = "semanticresult";

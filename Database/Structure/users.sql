@@ -112,6 +112,15 @@ GRANT USAGE ON *.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY PASSWORD '*C520DACC
 GRANT ALL PRIVILEGES ON `phpmyadmin`.* TO 'phpmyadmin'@'localhost';
 
 
+# Privileges for `rateLimiter`@`localhost`
+
+GRANT USAGE ON *.* TO 'rateLimiter'@'localhost';
+
+GRANT DELETE, EXECUTE ON `hutoma`.* TO 'rateLimiter'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`api_rate_limit` TO 'rateLimiter'@'localhost';
+
+
 # Privileges for `root`@`%`
 
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E';

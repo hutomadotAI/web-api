@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="HutomaAPI:war">
-    <output-path>$PROJECT_DIR$/target</output-path>
-    <root id="archive" name="HutomaAPI.war">
-      <element id="artifact" artifact-name="HutomaAPI:war exploded" />
-    </root>
-  </artifact>
-</component>

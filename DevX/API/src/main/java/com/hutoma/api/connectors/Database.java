@@ -4,7 +4,7 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
-import hutoma.api.server.db.memory;
+import com.hutoma.api.containers.sub.RateLimitStatus;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -39,7 +40,7 @@ public class Database {
     public boolean createDev(String username, String email, String password, String passwordSalt, String name, String attempt, String dev_token, int planId, String devid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("addUserComplete", 10).add(username).add(email).add(password).add(passwordSalt).add(name).addTimestamp().add(attempt).add(dev_token).add(planId).add(devid);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -54,12 +55,12 @@ public class Database {
             // then delete the user
             try (DatabaseCall deleteUserCall = callProvider.get()) {
                 deleteUserCall.initialise("deleteUser", 1).add(devid);
-                return deleteUserCall.executeUpdate()>0;
+                return deleteUserCall.executeUpdate() > 0;
             }
         }
     }
 
-    public boolean createAI(String aiid, String name, String description, String devid,
+    public boolean createAI(UUID aiid, String name, String description, String devid,
                             boolean is_private, double deep_learning_error, int deep_learning_status,
                             int shallow_learning_status, int status, String client_token, String trainingFile) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
@@ -67,7 +68,7 @@ public class Database {
                     .add(aiid).add(name).add(description).add(devid).add(is_private)
                     .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
                     .add(status).add(client_token).add(trainingFile);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -90,7 +91,7 @@ public class Database {
         }
     }
 
-    public ApiAi getAI(String aiid) throws DatabaseException {
+    public ApiAi getAI(UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("getAI", 1).add(aiid);
             ResultSet rs = call.executeQuery();
@@ -107,10 +108,10 @@ public class Database {
         }
     }
 
-    public boolean deleteAi(String aiid) throws DatabaseException {
+    public boolean deleteAi(UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("deleteAI", 1).add(aiid);
-            return call.executeUpdate()>0;
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -131,7 +132,7 @@ public class Database {
         }
     }
 
-    public boolean isNeuralNetworkServerActive(String dev_id, String aiid) throws DatabaseException {
+    public boolean isNeuralNetworkServerActive(String dev_id, UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("getAiActive", 2).add(aiid).add(dev_id);
             ResultSet rs = call.executeQuery();
@@ -146,7 +147,7 @@ public class Database {
         }
     }
 
-    public long insertNeuralNetworkQuestion(String dev_id, String uid, String aiid, String q) throws DatabaseException {
+    public long insertNeuralNetworkQuestion(String dev_id, String uid, UUID aiid, String q) throws DatabaseException {
 
         try (DatabaseCall call = callProvider.get()) {
             call.initialise("insertQuestion", 4).add(dev_id).add(uid).add(aiid).add(q);
@@ -177,16 +178,31 @@ public class Database {
         }
     }
 
-    public boolean updateAiTrainingFile(String aiid, String trainingData) throws DatabaseException {
+    public boolean updateAiTrainingFile(UUID aiUUID, String trainingData) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
-            call.initialise("updateTrainingData", 2).add(aiid).add(trainingData);
-            return call.executeUpdate()>0;
+            call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public RateLimitStatus checkRateLimit(String dev_id, String rateKey, double burst, double frequency) throws DatabaseException {
+        try (DatabaseCall call = callProvider.get()) {
+            call.initialise("rate_limit_check", 4).add(dev_id).add(rateKey).add(burst).add(frequency);
+            ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return new RateLimitStatus(rs.getBoolean("rate_limit"), rs.getFloat("tokens"));
+                }
+                throw new DatabaseException(new Exception("stored proc should have returned a row but it returned none"));
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
         }
     }
 
     public List<ApiMemoryToken> getAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
         try {
-            return memory.get_all_user_variables(dev_id, aiid, uid);
+            return null; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -194,16 +210,16 @@ public class Database {
 
     public ApiMemoryToken getUserVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
         try {
-            return memory.get_user_variable(dev_id, aiid, uid, variable);
+            return null; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
     }
 
     public boolean setUserVariable(String dev_id, String aiid, String uid, int expires_seconds, int n_prompt,
-                                        String variable_type, String variable_name, String variable_value) throws DatabaseException {
+                                   String variable_type, String variable_name, String variable_value) throws DatabaseException {
         try {
-            return memory.set_variable(dev_id, aiid, uid, expires_seconds, n_prompt, variable_type, variable_name, variable_value);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -212,7 +228,7 @@ public class Database {
 
     public boolean removeVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
         try {
-            return memory.remove_variable(dev_id, aiid, uid, variable);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -220,7 +236,7 @@ public class Database {
 
     public boolean removeAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
         try {
-            return memory.remove_all_user_variables(dev_id, aiid, uid);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -228,7 +244,7 @@ public class Database {
 
     public boolean removeAllAiVariables(String dev_id, String aiid) throws DatabaseException {
         try {
-            return memory.remove_all_ai_variables(dev_id, aiid);
+            return false; // FIXME
         } catch (Exception e) {
             throw new DatabaseException(e);
         }

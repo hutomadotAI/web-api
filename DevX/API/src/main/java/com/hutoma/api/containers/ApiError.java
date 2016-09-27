@@ -1,5 +1,6 @@
 package com.hutoma.api.containers;
 
+import com.hutoma.api.validation.Validate;
 import com.hutoma.api.containers.sub.Status;
 
 import java.net.HttpURLConnection;
@@ -41,6 +42,10 @@ public class ApiError extends ApiResult {
         return ApiError.getBadRequest("Bad request");
     }
 
+    public static ApiError getBadRequest(Validate.ParameterValidationException pve) {
+        return ApiError.getBadRequest(pve.getMessage());
+    }
+
     public static ApiError getNotFound(String message) {
         return ApiError.getError(HttpURLConnection.HTTP_NOT_FOUND, message);
     }
@@ -51,6 +56,10 @@ public class ApiError extends ApiResult {
 
     public static ApiError getNoResponse(String message) {
         return ApiError.getError(HttpURLConnection.HTTP_ACCEPTED, message);
+    }
+
+    public static ApiError getRateLimited() {
+        return ApiError.getError(429, "too many requests");
     }
 
 }

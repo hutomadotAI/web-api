@@ -37,7 +37,6 @@ public class AIDomainLogic {
 
         try {
             logger.logDebug(LOGFROM, "request to get all domains ");
-            //TODO: distinguish between db fail and not found
             List<AiDomain> domainList = database.getAiDomainList();
             if (domainList.size()==0) {
                 logger.logDebug(LOGFROM, "no domains found");

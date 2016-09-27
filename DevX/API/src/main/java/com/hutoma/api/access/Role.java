@@ -1,4 +1,4 @@
-package com.hutoma.api.auth;
+package com.hutoma.api.access;
 
 /**
  * Created by mauriziocibelli on 25/04/16.

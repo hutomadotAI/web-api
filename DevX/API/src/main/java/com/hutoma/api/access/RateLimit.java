@@ -1,4 +1,4 @@
-package com.hutoma.api.auth;
+package com.hutoma.api.access;
 
 import javax.ws.rs.NameBinding;
 import java.lang.annotation.ElementType;
@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @NameBinding
-public @interface Secured {
-    Role[] value() default {};
+public @interface RateLimit {
+    RateKey value() default RateKey.None;
 }
+

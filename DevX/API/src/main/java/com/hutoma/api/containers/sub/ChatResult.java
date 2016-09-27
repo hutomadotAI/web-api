@@ -8,18 +8,16 @@ import java.util.List;
  */
 public class ChatResult {
 
-
-    double score;
-    String query = "";
-    String answer = "";
-    double elapsed_time;
-    String action;
-    List<Parameter> parameters;
-    public ArrayList<Intent> intent;
-    String context;
-
-    String topic_in = "";
-    String topic_out = "";
+    private double score;
+    private String query = "";
+    private String answer = "";
+    private double elapsed_time;
+    private String action;
+    private List<Parameter> parameters;
+    private ArrayList<Intent> intent;
+    private String context;
+    private String topic_in = "";
+    private String topic_out = "";
 
     public String getAnswer() {
         return answer;

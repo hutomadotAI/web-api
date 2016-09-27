@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 
 import javax.inject.Inject;
 import java.sql.*;
+import java.util.UUID;
 
 /**
  * Created by David MG on 30/08/2016.
@@ -152,6 +153,10 @@ public class DatabaseCall implements AutoCloseable {
             throw new Database.DatabaseException(e);
         }
         return this;
+    }
+
+    DatabaseCall add(UUID param) throws Database.DatabaseException {
+        return this.add(param.toString());
     }
 
     @Override
