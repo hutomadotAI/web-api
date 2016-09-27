@@ -197,8 +197,8 @@ body {
         <p class="login-box-msg"><b>password reset</b></p>
 
          <?php
-           require "config.php";
-           \Fr\LS::forgotPassword();
+            require "config.php";
+            hutoma\console::forgotPassword();
          ?>
 
       </div>
