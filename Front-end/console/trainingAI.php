@@ -7,7 +7,6 @@
         exit();
     }
 
-
     if (isset($_POST['ai']) )
         CallGetSingleAI($_POST['ai']);
 
@@ -16,14 +15,22 @@
         if ($singleAI['status']['code'] === 200) {
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'] = $singleAI['aiid'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $singleAI['name'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'] = $singleAI['description'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $singleAI['description'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on'] = $singleAI['created_on'];
-            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['is_private'] = $singleAI['is_private'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'] = $singleAI['is_private'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info'] = $singleAI['ai']['training_debug_info'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status'] = $singleAI['training_status'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai_status'];
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
+
+            // NEED TO MODIFY CREATE AI IN 
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = 'English';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']= 'GMT +00:00 UTC (UTC)';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']= 'Often';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']= 'No';
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = 'Male';
+            
         }else{
             unset($response);
             unset($singleAI);
@@ -61,39 +68,11 @@
       <?php include './dynamic/header.html.php'; ?>
     </header>
 
+    <!-- ================ MENU CONSOLE ================= -->
     <aside class="main-sidebar ">
-    <section class="sidebar">
-        <!-- ================ USER PANEL ================== -->
-        <?php include './dynamic/userpanel.html.php'; ?>
-
-        <!-- ================ USER ACTION ================= -->
-        <ul class="sidebar-menu">
-            <li class="header">WORKPLACE</li>
-            <li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
-            <li class="active">
-                <a href="#">
-                    <i class="fa fa-user text-olive"></i><span><?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?></span><i class="fa fa-ellipsis-v pull-right"></i>
-                </a>
-                <ul class="treeview-menu">
-
-                    <li class="active"><a href="#"><i class="fa fa-graduation-cap text-purple"></i> <span>training</span></a></li>
-                    <li><a href="./intent.php"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>
-                    <li><a href="./entity.php"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>
-                    <li><a href="./domainsAI.php"><i class="fa fa-th text-red"></i> <span>domains</span></a></li>
-                    <li><a href="./integrationsAI.php"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>
-                    <li><a href="./settingsAI.php"><i class="fa fa-gear text-black"></i>settings</a></li>
-                </ul>
-            </li>
-            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
-        </ul>
-
-        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-            <li class="header" style="text-align: center;">ACTION</li>
-            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
-            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-            <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
-        </ul>
-    </section>
+        <section class="sidebar">
+            <p id="sidebarmenu"></p>
+        </section>
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
@@ -103,7 +82,7 @@
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>
                 <?php include './dynamic/training.content.monitor.html.php'; ?>
-                <?php include './dynamic/training.content.domains.html.php'; ?>
+                <?php //include './dynamic/training.content.domains.html.php'; ?>
                 <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
             <div class="col-md-5">
@@ -137,9 +116,17 @@
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
-<script src="./plugins/clipboard/copyToClipboard.js"></script>
-<script src="./plugins/training/training.area.js"></script>
+<script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","training",1,true,false]);
+    </script>
+</form>
+
+<script src="./plugins/training/training.area.js"></script>
 
 </body>
 </html>

@@ -2,7 +2,7 @@
    
     <div class="box-header with-border ">
         <!--<i class="fa fa-comment-o text-green"></i>-->
-        <h3 class="box-title"><?php echo $_POST['entity']?><span class="text-sm text-gray" style="padding: 0px 3px 0px 3px;"> > </span> Keys</h3>
+        <h3 class="box-title"><?php echo $_POST['entity']?><span class="text-sm text-gray" style="padding: 0 3px 0 3px;"> > </span> Keys</h3>
         <a data-toggle="collapse"  href="#collapseKeysInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -11,7 +11,7 @@
     </div>
      
 
-     <div class="box-body no-margin" id="boxKeys"  style="padding-top: 0px;">
+     <div class="box-body no-margin" id="boxKeys"  style="padding-top: 0;">
             <div class="row">
                 <div class="col-md-12">
                     <h5 class="box-title">
@@ -42,7 +42,7 @@
                              </div>
                          </section>
                          <p></p>
-                         need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                         need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
                      </div>
                  </div>
              </div>

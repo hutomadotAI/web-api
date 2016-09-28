@@ -1,97 +1,73 @@
-<script src="./plugins/clipboard/clipboard.min.js"></script>
-<script src="./plugins/deleteAI/deleteAI.js"></script>
+<div class="box-header with-border">
+    <i class="fa fa-sliders text-success"></i>
+    <h3 class="box-title">General Informations</h3>
+    <a data-toggle="collapse"  href="#collapseInfoGeneral">
+        <div class=" pull-right">more info
+            <i class="fa fa-question-circle text-md text-yellow"></i>
+        </div>
+    </a>
+</div>
+
+<div id="collapseInfoGeneral" class="panel-collapse collapse">
+    <div class="box-body">
+        <div class="overlay center-block">
+            <section class="content-info" >
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Description General aspectog AI</dt>
+                        <dd>Before start training process, y.</dd>
+                        <dt>Euismod</dt>
+                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
+                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
+                        <dt>Malesuada porta</dt>
+                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
+                        <dt>Felis euismod semper eget lacinia</dt>
+                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                    </dl>
+                </div>
+            </section>
+            <p></p>
+            need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+        </div>
+    </div>
+</div>
+
 
 <form role="form">
     <div class="box-body">
         <div class="row">
-
-            <!-- INPUT Name -->
             <div class="col-md-6">
-                <div class="form-group">
-                    <label for="ainame">Name</label>
-                    <div class="input-group">
-                        <div class="input-group-addon">
-                            <i class="glyphicon glyphicon-user"></i>
-                        </div>
-                        <?php echo('<input type="text" class="form-control" name="ai_name" id="ai_name" placeholder="'.$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'].'"disabled>');?>
-                    </div>
-                </div>
+                <?php include './dynamic/input.name.html.php'; ?>
             </div>
-
-            <!-- INPUT Language -->
             <div class="col-md-6">
-                <?php include 'input.language.html.php'; ?>
+                <?php include './dynamic/input.language.html.php'; ?>
             </div>
         </div>
-        <div class="row">
-            <!-- INPUT Description -->
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="aidesciption">Description</label>
-                    <div class="input-group">
-                        <div class="input-group-addon">
-                            <i class="glyphicon glyphicon-pencil"></i>
-                        </div>
-                        <?php echo('<input type="text" class="form-control" name="ai_description" id="ai_description" placeholder="'.$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['descritpion'].'">'); ?>
-                    </div>
-                </div>
-            </div>
 
-            <!-- INPUT Time Zone -->
+        <div class="row">
+            <div class="col-md-6">
+                <?php include './dynamic/input.description.html.php'; ?>
+            </div>
             <div class="col-md-6">
                 <?php include './dynamic/input.timezone.html.php'; ?>
             </div>
         </div>
 
         <div class="row">
-
-            <!-- Learn new Answer -->
             <div class="col-md-6">
-                <a data-toggle="collapse"  href="#collapsePersonality">
-                    <div class=" pull-right">more info
-                        <i class="fa fa-question-circle text-md text-yellow"></i>
-                    </div>
-                </a>
-                <label>Learn new answers</label>
-                <div class="box box-solid box-clean-fixed flat no-shadow">
-                    <div class="box-body">
-                        <div class="row margin">
-                            <div class="col-sm-12">
-                                <input id="confidence" type="hidden" name="ai_confidence" id_confidence="ai_confidence" value="0;10">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php include './dynamic/input.confidence.html.php'; ?>
             </div>
 
-            <!-- INPUT Personality -->
             <div class="col-md-6">
-                <?php include './dynamic/input.personality.html.php'; ?>
-                <?php include './dynamic/input.avatar.html.php'; ?>
+                <?php include './dynamic/input.learn.html.php'; ?>
+                <?php include './dynamic/input.voice.html.php'; ?>
             </div>
+
         </div>
 
-        <div id="collapsePersonality" class="panel-collapse collapse">
-            <div class="box-body">
-                <div class="overlay center-block">
-                    <section class="content bg-gray-light" >
-                        <div class="box-body">
-                            <dl class="dl-horizontal">
-                                <dt>Description Actions</dt>
-                                <dd>Tell the AI learning ...</dd>
-                                <dt>Euismod</dt>
-                                <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                <dt>Malesuada porta</dt>
-                                <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                <dt>Felis euismod semper eget lacinia</dt>
-                                <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                            </dl>
-                        </div>
-                    </section>
-                    <p></p>
-                    need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
-                </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?php include './dynamic/input.public.html.php'; ?>
             </div>
         </div>
 
@@ -120,8 +96,8 @@
 
 
 <div class="box-footer">
-    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" alt="cancel">cancel</button>
-    <button  name="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat" alt="save" disabled>save</button>
+    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" >cancel</button>
+    <button  name="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat" disabled>save</button>
     <button  name="btnDelete" id="btnDelete"  data-toggle="modal" data-target="#deleteAI" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" alt="delete">delete AI</button>
 </div>
 

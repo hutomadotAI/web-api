@@ -18,15 +18,21 @@
 
 <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
+        <!--
+        <li>
+          <a href="#" tabindex="-1">
+            <i class="fa fa-shopping-cart text-green" style="position: relative;"></i>
+            <span>Marketplace</span>
+          </a>
+        </li>
+        -->
 
         <!-- User Account: style can be found in dropdown.less -->
         <li class="dropdown user user-menu">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1" >
-            <img src="./dist/img/user1-160x160.jpg" class="user-image" alt="User Image" tabindex="-1" >
-            <span class="hidden-xs">
-            <?php echo $username ?>
-            </span>
+            <i class="fa fa-user text-blue" tabindex="-1"></i><span>Account</span>
           </a>
+
           <ul class="dropdown-menu">
             <!-- User image -->
             <li class="user-header">
@@ -49,11 +55,6 @@
             </li>
           </ul>
         </li>
-        <!-- Control Sidebar Toggle Button
-        <li>
-          <a href="#" data-toggle="control-sidebar" tabindex="-1" ><i class="fa fa-gears" tabindex="-1" ></i></a>
-        </li>
-        -->
       </ul>
 </div>
 <?php unset($username); unset($plan); unset($joined); ?>

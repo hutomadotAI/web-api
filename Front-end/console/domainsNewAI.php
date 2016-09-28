@@ -11,16 +11,21 @@
         exit;
     }
 
+
+    if( isset($_POST['ai_public']) && $_POST['ai_public']=='on')
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '0';
+    else
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '1';
+
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $_POST['ai_name'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $_POST['ai_description'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = $_POST['ai_language'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone'] = $_POST['ai_timezone'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
     $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality'] = $_POST['ai_personality'];
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['sex'] = $_POST['ai_sex'];
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = $_POST['ai_voice'];
 
     $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
-
 
     if ($response['status']['code'] !== 200) {
         unset($response);
@@ -36,30 +41,30 @@
             isset($_POST['ai_timezone']) &&
             isset($_POST['ai_confidence']) &&
             isset($_POST['ai_personality']) &&
-            isset($_POST['ai_sex'])
+            isset($_POST['ai_voice'])
         );
     }
 ?>
 
 <!DOCTYPE html>
 <html>
-  <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>hu:toma | domains new AI</title>
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-  <link rel="stylesheet" href="./dist/css/ionicons.min.css">
-  <link rel="stylesheet" href="./dist/css/hutoma.css">
-  <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-  <link rel="stylesheet" href="./plugins/switch/switch.css">
-  <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
-  <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <link rel="stylesheet" href="./plugins/iCheck/all.css">
-  <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>hu:toma | domains new AI</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./dist/css/ionicons.min.css">
+    <link rel="stylesheet" href="./dist/css/hutoma.css">
+    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="./plugins/switch/switch.css">
+    <link rel="stylesheet" href="./plugins/iCheck/all.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
+    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showDomains('',0)">
@@ -68,30 +73,14 @@
     <?php include './dynamic/header.html.php'; ?>
     </header>
 
-
+    <!-- ================ MENU CONSOLE ================= -->
     <aside class="main-sidebar ">
-    <section class="sidebar">
-        <!-- ================ USER PANEL ================== -->
-        <?php include './dynamic/userpanel.html.php'; ?>
-        <!-- ================ USER ACTION ================== -->
-        <ul class="sidebar-menu">
-            <li class="header" style="text-align: center;">WORKPLACE</li>
-            <li class="active"><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
-            <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
-        </ul>
-
-        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-            <li class="header" style="text-align: center;">ACTION</li>
-            <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
-            <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-            <li><a href="#"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
-        </ul>
-    </section>
+        <section class="sidebar">
+            <p id="sidebarmenu"></p>
+        </section>
     </aside>
 
-    <!-- =============================================== -->
     <!-- ================ PAGE CONTENT ================= -->
-    <!-- =============================================== -->
     <div class="content-wrapper">
     <section class="content">
             <?php include './dynamic/domainsNewAI.content.html.php'; ?>
@@ -112,6 +101,13 @@
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/domain/domain.js"></script>
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init([ "","home",0,true,true]);
+    </script>
+</form>
 
 <script>
   var domains = <?php  echo json_encode($response['_domainList']);  unset($response); ?>;

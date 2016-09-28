@@ -32,30 +32,14 @@
     <?php include './dynamic/header.html.php'; ?>
     </header>
 
+    <!-- ================ MENU CONSOLE ================= -->
     <aside class="main-sidebar ">
-    <section class="sidebar">
+        <section class="sidebar">
+            <p id="sidebarmenu"></p>
+        </section>
+    </aside>
 
-        <!-- ================ USER PANEL ================== -->
-        <?php include './dynamic/userpanel.html.php'; ?>
-        <!-- ================ USER ACTION ================= -->
-        <ul class="sidebar-menu">
-           <li class="header" style="text-align: center;">CONSOLE</li>
-           <li class="active"><a href="#"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>
-           <li><a href="#"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>
-        </ul>
-
-        <ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">
-            <li class="header" style="text-align: center;">MY ACCOUNT</li>
-           <li><a href="#"><i class="fa fa-shopping-cart text-green" style="position: relative;"></i> <span>Marketplace</span></a></li>
-           <li><a href="#"><i class="fa fa-user text-blue"></i> <span>Account</span></a></li>
-           <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
-       </ul>
-   </section>
-   </aside>
-
-   <!-- =============================================== -->
     <!-- ================ PAGE CONTENT ================= -->
-    <!-- =============================================== -->
     <div class="content-wrapper">
     <section class="content">
     <?php
@@ -77,6 +61,14 @@
 <script src="./dist/js/app.min.js"></script>
 <script src="./plugins/home/home.js"></script>
 <script src="./plugins/shared/shared.js"></script>
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init([ "","home",0,true,true]);
+    </script>
+</form>
+
 
 </body>
 </html>

@@ -1179,7 +1179,7 @@ class console
 
   
   // FOR API
-  public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$sex,$contract,$payment_type,$price){
+  public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$voice,$contract,$payment_type,$price){
       if (self::$loggedIn) {
           $path = 'ai';
           $api_response_parameters = array('name'=> $name,'description' => $description,'is_private' =>$private);
@@ -1273,29 +1273,32 @@ class console
       }
   }
 
-  // FOR API
-  public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
+    // FOR API
+    public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
       if (self::$loggedIn) {
-          $path = 'ai/' . $aiid . '/training';
+        $path = 'ai/' . $aiid . '/training';
 
-          $filename = $file['tmp_name'];
-          $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
+        $filename = $file['tmp_name'];
+        $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
 
-          $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
-          $curl->setOpt(CURLOPT_POST, true);
-          $curl->setOpt(CURLOPT_POSTFIELDS, $args);
-          $curl_response = $curl->exec();
-          if ($curl_response === false) {
-              $info = $curl->getInfo();
-              $curl->close();
-              die('Error: uploadfile curl: ' . $info);
-          }
-          $json_response = json_decode($curl_response, true);
+        $api_response_parameters = array('source_type' => $source_type);
+        $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
+
+        $curl = new curlHelper($service_url, $dev_token);
+        $curl->setOpt(CURLOPT_POST, true);
+        $curl->setOpt(CURLOPT_POSTFIELDS, $args);
+        $curl_response = $curl->exec();
+        if ($curl_response === false) {
+          $info = $curl->getInfo();
           $curl->close();
+          die('Error: uploadfile curl: ' . $info);
+        }
+        $json_response = json_decode($curl_response, true);
+        $curl->close();
 
-          return $json_response;
+        return $json_response;
       }
-  }
+    }
 
 
   // FOR API
@@ -1316,14 +1319,20 @@ class console
       }
   }
   
-  // FAKE
-  public static function getDevToken(){
-        if (self::$loggedIn) {
-            $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";            return $dev_token;
-        }
-  }
-  // FAKE
+    // FAKE
+    public static function getDevToken(){
+          if (self::$loggedIn) {
+              $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";            return $dev_token;
+          }
+    }
+
     public static function isSessionActive () {
+      if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
+        // last request was more than 30 minutes ago
+        session_unset();     // unset $_SESSION variable
+        session_destroy();   // destroy session
+      }
+      $_SESSION['LAST_ACTIVITY'] = time();
       return function_exists ( 'session_status' ) ? ( PHP_SESSION_ACTIVE == session_status () ) : ( ! empty ( session_id () ) );
     }
 

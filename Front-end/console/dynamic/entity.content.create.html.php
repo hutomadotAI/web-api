@@ -17,7 +17,7 @@
                 <input type="text" class="form-control" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;">
             </form>
             <div class="input-group-btn" tabindex="0">
-                <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" alt="create entity" disabled> Create Entity</button>
+                <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" disabled> Create Entity</button>
             </div>
         </div>
         <p></p>
@@ -50,7 +50,7 @@
                     </div>
                 </section>
                 <p></p>
-                need help? check our <a href='#''>video tutorial</a> or email us <a href='#'>hello@hutoma.com</a>
+                need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
             </div>
         </div>
     </div>

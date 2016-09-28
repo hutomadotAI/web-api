@@ -6,7 +6,7 @@ if (isset($_GET['err'])) {
     switch ($_GET['err']) {
 
         case 1 :
-            $msg ='SESSION EXIPED';
+            $msg ='SESSION_EXPIRED';
             $details =' We could not find the data you were looking for';
             break;
         case 2 :
@@ -73,13 +73,17 @@ if (isset($_GET['err'])) {
             $msg ='NEW ENTITY NAME TRASMISSION FAILED';
             $details =' We could not find the data you were looking for';
             break;
+        case 18 :
+            $msg ='AI TRAINING GET INF4O ERROR';
+            $details =' We could not find the data you were looking for';
+            break;
         default:
             $msg ='UNDEFINED ERROR';
             $details =' We could not find the data you were looking for';
     }
 }
 else {
-    $msg = 'UNESPECTED ERROR OCCURED';
+    $msg = 'UNEXPECTED ERROR OCCURRED';
     $details = 'Error not catchable';
 }
 ?>

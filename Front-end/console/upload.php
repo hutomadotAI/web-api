@@ -36,6 +36,7 @@ require "../pages/config.php";
              break;
 
         case 'structure':
+            
             if (!isset($_FILES['inputstructure'])) {
                 echo 'Upload complex file failed';
                 exit;
@@ -51,7 +52,7 @@ require "../pages/config.php";
 
             //$source_type = 0;
             //$url = "";
-            $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputstructure'],0,'');
+            $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputstructure'],1,'');
 
             break;
 

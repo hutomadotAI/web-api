@@ -1,28 +1,29 @@
 var isChrome = !!window.chrome;
 var continuousSpeech = '0';
 var speechResponse = '1'; // voice activated true for default
-var jsonResponse = '1'; // voice activated true for default
+var jsonResponse   = '1'; // voice activated true for default
 var colorVoice = '0';
 var muteMicrophone = '0';
 var chat = 1;  // start enable chatting buttons
 
 
 if (isChrome)
-    document.getElementById("btnSpeech").addEventListener("click", start);
+    document.getElementById('btnSpeech').addEventListener('click', start);
 else{
-    document.getElementById("btnSpeech").setAttribute('data-toggle','tooltip');
+    document.getElementById('deactive-icon').setAttribute('class','fa fa-bullhorn text-gray');
+    document.getElementById('deactive-text').setAttribute('class','text-gray');
+    document.getElementById("btnSpeech").setAttribute('title','Available on Chrome');
     document.getElementById("btnSpeech").setAttribute('title','Available on Chrome');
     document.getElementById("microphone").className ='fa fa-microphone-slash text-coral';
-
 }
 
 function start(){
-    startDictation('human', 'cpu');
+    startDictation('human', 'AI');
 }
 
 function keyboardChat(e){
     if(e.keyCode == 13 && document.getElementById("message").value )
-     createNodeChat('human','cpu');
+     createNodeChat('human','AI');
 }
 
 function createNodeChat(human_name, ai_name) {
@@ -83,7 +84,7 @@ function createRightMsg(ai_name,msg,error) {
     wHTML += ('</span>');
     wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
     wHTML += ('</div>');
-    wHTML += ('<img class="direct-chat-img" src="./dist/img/user3-128x128.jpg" alt="AI image">');
+    wHTML += ('<img class="direct-chat-img" src="./dist/img/user7-128x128.jpg" alt="AI image">');
     if (error)
         wHTML += ('<div class="direct-chat-text bg-warning">');
     else
@@ -99,7 +100,8 @@ function createRightMsg(ai_name,msg,error) {
         height = parseInt(height) + 5;
         $('#chat').scrollTop(height);
     }
-    if ( speechResponse == 1)
+    
+    if ( document.getElementById('speech-option').value == '0')
         speak(msg);
     else
         enableChat(true);
@@ -149,7 +151,6 @@ function enableChat(flag){
 
 function enableSpeech(flag){
     if(flag) {
-
         // document.getElementById('microphone').onclick = startDictation(+ human_name +' \', \' '+ ai_name +' \'";
         document.getElementById('microphone').disabled = false;
         document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-red');
@@ -161,17 +162,33 @@ function enableSpeech(flag){
 }
 
 
-function continuousOption(value){
-    continuousSpeech = (value+1)%(2);
-    $('#continuous-option').attr('value', continuousSpeech);
-    $('#continuous-icon').toggleClass("text-red");
-    $('#continuous-text').toggleClass("text-red");
+function speechOption(value){
+    speechResponse = (value+1)%(2);
+    if ( speechResponse == 1) {
+        document.getElementById('speech-option').value = '1';
+        document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
+        document.getElementById('btnSpeech').style.cursor = 'default';
+
+        document.getElementById('microphone').disabled = true;
+        document.getElementById('btnSpeech').removeEventListener('click', start);
+    }
+    else {
+        document.getElementById('speech-option').value = '0';
+        document.getElementById('microphone').disabled = false;
+        document.getElementById('microphone').className = ('fa fa-microphone text-red');
+        document.getElementById('btnSpeech').addEventListener('click', start);
+    }
+
+    $('#speech-icon').toggleClass("text-light-blue");
+    $('#speech-text').toggleClass("text-light-blue");
 }
 
 function jsonOption(value){
     jsonResponse = (value+1)%(2);
-    $('#json-icon').toggleClass("text-red");
-    $('#json-text').toggleClass("text-red");
+    $('#json-icon').toggleClass("text-light-blue");
+    $('#json-text').toggleClass("text-light-blue");
+
+    // hide json window
     $('#jsonBox').toggle();
 }
 
@@ -217,7 +234,6 @@ function cleanChat(msg){
     msg = msg.replace('\/','&#47');
     return msg.replace('\<','&#60').replace('\>','&#62;');
 }
-
 
 String.prototype.toHtmlEntities = function() {
     return this.replace(/./gm, function(s) {

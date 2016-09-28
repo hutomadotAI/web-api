@@ -6,22 +6,35 @@
         exit;
     }
 
-    if ( isPostInputAvailable() ) {
+    if ( !isPostInputAvailable() ) {
+        \hutoma\console::redirect('./error.php?err=2');
+        exit;
+    }
+
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains'] = $_POST['userActivedDomains'];
+
+
+    if ( isPostSkipInputAvailable() ) {
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['contract'] = $_POST['ai_contract'];
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['payment_type'] = $_POST['ai_payment_type'];
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['price'] = $_POST['ai_price'];
-
+    }else{
+        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['contract'] = 'skipped';
+        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['payment_type'] = 'skipped';
+        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['price'] = 'skipped';
     }
+
+
 
     $response = hutoma\console::createAI(   \hutoma\console::getDevToken(),
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'],
-                                            true,
+                                            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality'],
-                                            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['sex'],
+                                            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['contract'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['payment_type'],
                                             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['price']
@@ -45,8 +58,13 @@
         exit;
     }
 
-
     function isPostInputAvailable(){
+        return  (
+        isset($_POST['userActivedDomains'])
+        );
+    }
+
+    function isPostSkipInputAvailable(){
         return  (
             isset($_POST['ai_contract']) &&
             isset($_POST['ai_payment_type']) &&
