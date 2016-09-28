@@ -1,6 +1,9 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
@@ -19,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.MISSING_RESPONSE;
+import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.NO_CONTENT;
+
 
 /**
  * Created by mauriziocibelli on 28/04/16.
@@ -36,8 +42,11 @@ public class TrainingLogic {
 
     private final String LOGFROM = "traininglogic";
 
+    private static final String EOL = "\n";
+
     public class UploadTooLargeException extends Exception {
     }
+
 
     @Inject
     public TrainingLogic(Config config, JsonSerializer jsonSerializer, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
@@ -69,14 +78,20 @@ public class TrainingLogic {
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
-                    if (!database.updateAiTrainingFile(aiid, parseTrainingFile(source))) {
+                    TrainingFileParsingResult result = parseTrainingFile(source);
+                    // Bail out if there are fatal events during the parsing
+                    if (result.hasFatalEvents()) {
+                        return ApiError.getBadRequest(result.getJson(this.jsonSerializer));
+                    }
+                    if (!database.updateAiTrainingFile(aiid, result.getTrainingText())) {
                         return ApiError.getNotFound("ai not found");
                     }
                     messageQueue.pushMessageReadyForTraining(devid, aiid);
                     if (source.size() > config.getMaxClusterLines()) {
                         messageQueue.pushMessageClusterSplit(devid, aiid, config.getClusterMinProbability());
                     }
-                    return new ApiResult().setSuccessStatus("upload accepted");
+                    return new ApiResult().setSuccessStatus("upload accepted",
+                            result.getEventCount() == 0 ? null : result.getJson(this.jsonSerializer));
 
                 // 1 = training file is a document
                 case 1:
@@ -86,7 +101,7 @@ public class TrainingLogic {
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
-                    if (!database.updateAiTrainingFile(aiid, String.join("\n", source))) {
+                    if (!database.updateAiTrainingFile(aiid, String.join(EOL, source))) {
                         return ApiError.getNotFound("ai not found");
                     }
                     messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
@@ -181,48 +196,82 @@ public class TrainingLogic {
      * @param training list of strings, one for each line of conversation
      * @return single string with processed training
      */
-    String parseTrainingFile(List<String> training) {
+    TrainingFileParsingResult parseTrainingFile(List<String> training) {
 
-        StringBuilder parsedFile = new StringBuilder();
-        String lastAISentence = "";
-
+        final String emptyString = "";
+        TrainingFileParsingResult result = new TrainingFileParsingResult();
+        String lastAISentence = emptyString;
+        String lastSentence = emptyString;
+        List<String> validConversation = new ArrayList<>();
         boolean humanTalkingNow = true;
         boolean lastLineEmpty = true;
+
         for (String currentSentence:training) {
 
             // empty line means a new conversation exchange
             if (currentSentence.isEmpty()) {
-                // the human starts
-                humanTalkingNow = true;
-                // no previous AI response
-                lastAISentence = "";
-                // only one empty line at a time
                 if (!lastLineEmpty) {
-                    parsedFile.append('\n');
-                    lastLineEmpty = true;
+                    // If the last question didn't have an answer then
+                    // ignore the last question
+                    if (!humanTalkingNow) {
+                        int lastPos = validConversation.size() - 1;
+                        result.addEvent(MISSING_RESPONSE, validConversation.get(lastPos));
+                        validConversation.remove(lastPos);
+                    }
+                    // New conversation
+                    validConversation.add(emptyString);
                 }
-            } else {
-                // if it's the human's turn and there was a previous AI response
-                // then we prepend it in square brackets
-                if (humanTalkingNow && (!lastAISentence.isEmpty())) {
-                    parsedFile.append('[').append(lastAISentence).append("] ");
-                }
-                // and we list the sentence
-                parsedFile.append(currentSentence).append('\n');
-                // if the AI is talking then store the reponse
-                if (!humanTalkingNow) {
-                    lastAISentence = currentSentence;
-                }
-                // switch turns from human to AI
-                humanTalkingNow = !humanTalkingNow;
-                lastLineEmpty = false;
+                humanTalkingNow = true;
+                lastLineEmpty = true;
+                continue;
             }
+
+            // if it's the human's turn and there was a previous AI response
+            // then we prepend it in square brackets
+            if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
+                validConversation.add(String.format("[%s] %s", lastAISentence, currentSentence));
+            } else {
+                // and we list the sentence
+                validConversation.add(currentSentence);
+            }
+            // if the AI is talking then store the response
+            if (!humanTalkingNow) {
+                lastAISentence = currentSentence;
+            }
+
+            humanTalkingNow = !humanTalkingNow;
+            lastLineEmpty = false;
+
+            lastSentence = currentSentence;
         }
+
         // add an empty line if there wasn't one already
         if (!lastLineEmpty) {
-            parsedFile.append('\n');
+            validConversation.add(emptyString);
         }
-        return parsedFile.toString();
+
+        // Check for missing response
+        if (!humanTalkingNow) {
+            // remove the last sentence
+            for (int i = validConversation.size() - 1; i >= 0; i--) {
+                if (!validConversation.get(i).equals(emptyString)) {
+                    result.addEvent(MISSING_RESPONSE, lastSentence);
+                    validConversation.remove(i);
+                    break;
+                }
+            }
+        }
+
+        if (validConversation.stream().anyMatch(s -> !s.isEmpty())) {
+            StringBuilder parsedFile = new StringBuilder();
+            validConversation.stream().forEach(s -> parsedFile.append(s).append(EOL));
+            result.setTrainingText(parsedFile.toString());
+        } else {
+            result.addEvent(NO_CONTENT, null);
+            result.setTrainingText(emptyString);
+        }
+
+        return result;
     }
 
     /**

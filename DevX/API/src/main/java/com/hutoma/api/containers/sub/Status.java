@@ -9,6 +9,7 @@ public class Status {
 
     int code;
     String info;
+    Object additionalInfo;
 
     public int getCode() {
         return code;
@@ -22,8 +23,17 @@ public class Status {
         return (new Status()).setCode(HttpURLConnection.HTTP_OK).setInfo(message);
     }
 
+    public static Status getSuccess(String message, Object additionalInfo) {
+        return getSuccess(message).setAdditionalInfo(additionalInfo);
+    }
+
     public Status setCode(int code) {
         this.code = code;
+        return this;
+    }
+
+    public Status setAdditionalInfo(Object additionalInfo) {
+        this.additionalInfo = additionalInfo;
         return this;
     }
 

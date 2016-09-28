@@ -43,7 +43,7 @@ public class TestTrainingLogic {
     private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private String UURL = "url://";
-    private String SOMETEXT = "some text";
+    private String SOMETEXT = "some text\nsome response";
     private String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
 
     @Before
