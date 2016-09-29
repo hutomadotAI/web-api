@@ -50,4 +50,6 @@ public class Logger {
         logOutput(Level.ERROR, fromLabel, logComment);
     }
 
+    public void initialize(Config config) {
+    }
 }

@@ -20,7 +20,7 @@ public class ServerBinder extends AbstractBinder {
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
-        bind(Logger.class).to(Logger.class).in(Singleton.class);
+        bind(TelemetryLogger.class).to(TelemetryLogger.class).to(Logger.class).in(Singleton.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);

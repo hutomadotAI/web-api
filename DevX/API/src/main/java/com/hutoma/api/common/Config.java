@@ -119,6 +119,10 @@ public class Config {
         return Double.valueOf(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
     }
 
+    public String getTelemetryKey(String appName) {
+        return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
+    }
+
     private String getConfigFromProperties(String p, String defaultValue) {
         if (null == properties) {
             logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");

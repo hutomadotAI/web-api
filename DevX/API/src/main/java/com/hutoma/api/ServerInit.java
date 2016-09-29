@@ -44,6 +44,7 @@ public class ServerInit implements ApplicationEventListener {
     private void initialise(ApplicationEvent applicationEvent) {
         Logger logger = serviceLocator.getService(Logger.class);
         config = serviceLocator.getService(Config.class);
+        logger.initialize(config);
         DatabaseConnectionPool connectionPool = serviceLocator.getService(DatabaseConnectionPool.class);
         try {
             connectionPool.borrowConnection().close();
