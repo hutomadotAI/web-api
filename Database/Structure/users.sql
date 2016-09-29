@@ -75,9 +75,9 @@ GRANT USAGE ON *.* TO 'domainsReader'@'localhost' IDENTIFIED BY PASSWORD '*D62B7
 
 GRANT EXECUTE ON `hutoma`.* TO 'domainsReader'@'localhost';
 
-GRANT SELECT ON `hutoma`.`userAIDomains` TO 'domainsReader'@'localhost';
-
 GRANT SELECT ON `hutoma`.`domains` TO 'domainsReader'@'localhost';
+
+GRANT SELECT ON `hutoma`.`userAIDomains` TO 'domainsReader'@'localhost';
 
 
 # Privileges for `domainsWriter`@`localhost`
@@ -87,6 +87,17 @@ GRANT USAGE ON *.* TO 'domainsWriter'@'localhost' IDENTIFIED BY PASSWORD '*79415
 GRANT EXECUTE ON `hutoma`.* TO 'domainsWriter'@'localhost';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`userAIDomains` TO 'domainsWriter'@'localhost';
+
+
+# Privileges for `entityUser`@`localhost`
+
+GRANT USAGE ON *.* TO 'entityUser'@'localhost' IDENTIFIED BY PASSWORD '*DC83C11DF8A0AA5DA890988DD0CF05804F300974';
+
+GRANT EXECUTE ON `hutoma`.* TO 'entityUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity_value` TO 'entityUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity` TO 'entityUser'@'localhost';
 
 
 # Privileges for `hutoma_caller`@`%`
@@ -105,6 +116,28 @@ GRANT EXECUTE ON `hutoma`.* TO 'integrReader'@'localhost';
 GRANT SELECT ON `hutoma`.`integrations` TO 'integrReader'@'localhost';
 
 
+# Privileges for `intentUser`@`localhost`
+
+GRANT EXECUTE ON *.* TO 'intentUser'@'localhost' IDENTIFIED BY PASSWORD '*D79A180712799AD35A24608FFDDAEC055ECB7D94';
+
+GRANT EXECUTE ON `hutoma`.* TO 'intentUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_variable_prompt` TO 'intentUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_user_says` TO 'intentUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_variable` TO 'intentUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_response` TO 'intentUser'@'localhost';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent` TO 'intentUser'@'localhost';
+
+
+# Privileges for `intentVarReader`@`localhost`
+
+GRANT EXECUTE ON *.* TO 'intentVarReader'@'localhost';
+
+
 # Privileges for `phpmyadmin`@`localhost`
 
 GRANT USAGE ON *.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY PASSWORD '*C520DACC162F4BC391740E48C79814189D4780C7';
@@ -114,7 +147,7 @@ GRANT ALL PRIVILEGES ON `phpmyadmin`.* TO 'phpmyadmin'@'localhost';
 
 # Privileges for `rateLimiter`@`localhost`
 
-GRANT USAGE ON *.* TO 'rateLimiter'@'localhost';
+GRANT USAGE ON *.* TO 'rateLimiter'@'localhost' IDENTIFIED BY PASSWORD '*57A6F03B1B99E90CB68F0572DC0DD96F2D7A913C';
 
 GRANT DELETE, EXECUTE ON `hutoma`.* TO 'rateLimiter'@'localhost';
 

@@ -41,8 +41,9 @@ CREATE TABLE `ai` (
   `NNActive` int(11) NOT NULL DEFAULT '0',
   `model_files_available` int(11) NOT NULL DEFAULT '0',
   `dl_debug` varchar(500) DEFAULT 'no debug info yet',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=889 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `aiid_UNIQUE` (`aiid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1025 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,7 +101,7 @@ CREATE TABLE `chatlog` (
   `answer` varchar(2000) DEFAULT NULL,
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1124 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1933 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -114,7 +115,7 @@ CREATE TABLE `debug` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=273 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=833 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -167,11 +168,44 @@ CREATE TABLE `entities` (
   `entity_id` varchar(50) NOT NULL,
   `dev_id` varchar(50) NOT NULL,
   `entity_name` varchar(50) NOT NULL,
-  `entity_keys` text NOT NULL,
-  `prompts` text NOT NULL,
-  `max_prompts` int(11) NOT NULL,
-  `required` tinyint(1) NOT NULL,
-  PRIMARY KEY (`entity_id`,`dev_id`,`entity_name`)
+  `entity_key` varchar(250) NOT NULL,
+  PRIMARY KEY (`entity_id`,`entity_name`,`entity_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `entity`
+--
+
+DROP TABLE IF EXISTS `entity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `entity` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `dev_id` varchar(50) NOT NULL,
+  `name` varchar(250) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `dev_id` (`dev_id`,`name`),
+  CONSTRAINT `entity_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `entity_value`
+--
+
+DROP TABLE IF EXISTS `entity_value`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `entity_value` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_id` int(11) NOT NULL,
+  `value` varchar(250) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `entity_id` (`entity_id`,`value`),
+  CONSTRAINT `entity_value_ibfk_1` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -193,6 +227,124 @@ CREATE TABLE `integrations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `intent`
+--
+
+DROP TABLE IF EXISTS `intent`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `aiid` varchar(50) NOT NULL,
+  `name` varchar(250) NOT NULL,
+  `topic_in` varchar(250) DEFAULT NULL,
+  `topic_out` varchar(250) DEFAULT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `aiid` (`aiid`,`name`),
+  CONSTRAINT `intent_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `intent_response`
+--
+
+DROP TABLE IF EXISTS `intent_response`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intent_response` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `intent_id` int(11) NOT NULL,
+  `response` varchar(250) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `intent_id` (`intent_id`,`response`),
+  CONSTRAINT `intent_response_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `intent_user_says`
+--
+
+DROP TABLE IF EXISTS `intent_user_says`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intent_user_says` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `intent_id` int(11) NOT NULL,
+  `says` varchar(250) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `intent_id` (`intent_id`,`says`),
+  CONSTRAINT `intent_user_says_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `intent_variable`
+--
+
+DROP TABLE IF EXISTS `intent_variable`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intent_variable` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `intent_id` int(11) NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `required` int(1) DEFAULT '0',
+  `n_prompts` int(11) DEFAULT '3',
+  `value` varchar(250) DEFAULT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `dummy` int(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `intent_id` (`intent_id`,`entity_id`),
+  KEY `entity_id` (`entity_id`),
+  CONSTRAINT `intent_variable_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `intent_variable_ibfk_2` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `intent_variable_prompt`
+--
+
+DROP TABLE IF EXISTS `intent_variable_prompt`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intent_variable_prompt` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `intent_variable_id` int(11) NOT NULL,
+  `prompt` varchar(250) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `intent_variable_id` (`intent_variable_id`,`prompt`),
+  CONSTRAINT `intent_variable_prompt_ibfk_1` FOREIGN KEY (`intent_variable_id`) REFERENCES `intent_variable` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `intent_variables`
+--
+
+DROP TABLE IF EXISTS `intent_variables`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intent_variables` (
+  `intent_id` varchar(50) NOT NULL,
+  `entity_id` varchar(50) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `response` text NOT NULL,
+  `dev_id` varchar(50) NOT NULL,
+  `nprompts` int(11) NOT NULL DEFAULT '3',
+  `required` tinyint(4) NOT NULL DEFAULT '0',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `intents`
 --
 
@@ -208,7 +360,6 @@ CREATE TABLE `intents` (
   `response` text NOT NULL,
   `intent_name` varchar(50) NOT NULL,
   `dev_id` varchar(50) NOT NULL,
-  `entity_list` text NOT NULL,
   PRIMARY KEY (`intent_id`,`aiid`,`intent_name`,`dev_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -264,8 +415,9 @@ CREATE TABLE `users` (
   `plan_id` int(11) NOT NULL DEFAULT '0',
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
-) ENGINE=MyISAM AUTO_INCREMENT=449 DEFAULT CHARSET=latin1;
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `dev_id_UNIQUE` (`dev_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=460 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -315,6 +467,209 @@ CREATE DEFINER=`aiWriter`@`localhost` PROCEDURE `addAI`(IN `param_aiid` varchar(
 BEGIN
 	insert into ai (aiid, ai_name, ai_description,dev_id, is_private,deep_learning_error,deep_learning_status,shallow_learning_status,ai_status,client_token,ai_trainingfile)
                                  values (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status, param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addEntity` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `addEntity`(
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250))
+BEGIN
+	INSERT INTO `entity` (`dev_id`, `name`) VALUES (`in_dev_id`, `in_name`);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addEntityValue` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `addEntityValue`(
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250),
+ IN in_value VARCHAR(250))
+BEGIN
+	INSERT INTO `entity_value` (`entity_id`,`value`)
+    SELECT `id`, `in_value` FROM `entity`
+    WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addIntentResponse` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentResponse`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
+ IN in_response VARCHAR(250))
+BEGIN
+	INSERT INTO `intent_response` (`intent_id`, `response`)
+    SELECT `id`, `in_response` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addIntentUserSays` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentUserSays`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
+ IN in_says VARCHAR(250))
+BEGIN
+	INSERT INTO `intent_user_says` (`intent_id`, `says`)
+    SELECT `id`, `in_says` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addIntentVariablePrompt` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentVariablePrompt`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT,
+ IN in_prompt VARCHAR(250)
+ )
+BEGIN
+    
+	INSERT INTO `intent_variable_prompt` (`intent_variable_id`, `prompt`)   
+    SELECT `intent_variable`.`id`, `in_prompt` 
+    FROM `intent_variable`, `intent`
+    WHERE `in_intent_variable_id` = `intent_variable`.`id`
+    AND `intent_variable`.`intent_id` = `intent`.`id`
+    AND `in_aiid` = `intent`.`aiid`
+    AND `intent`.`aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
+	    
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addUpdateIntent` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addUpdateIntent`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name varchar(250),
+ IN in_topic_in varchar(250),
+ IN in_topic_out varchar(250)
+ )
+BEGIN
+	INSERT INTO `intent` (`aiid`, `name`, `topic_in`, `topic_out`)
+    SELECT `aiid`, `in_name`, `in_topic_in`, `in_topic_out` 
+    FROM ai 
+    WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`
+    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addUpdateIntentVariable` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addUpdateIntentVariable`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_name VARCHAR(250),
+ IN in_entity_name VARCHAR(250),
+ IN in_required int(1),
+ IN in_n_prompts int,
+ IN in_value varchar(250)
+ )
+BEGIN
+	DECLARE update_count INT;
+    
+	INSERT INTO `intent_variable` (`intent_id`, `entity_id`, `required`, `n_prompts`, `value`)
+    SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`
+	FROM `intent`, `entity` 
+    WHERE `intent`.`id` = 
+		(SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
+	AND `entity`.`id` =
+		(SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`)
+	ON DUPLICATE KEY UPDATE
+		`required`=`in_required`, `n_prompts`=`in_n_prompts`, `value`=`in_value`, 
+        `entity_id`= (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`),
+        `dummy` = NOT `dummy`,
+        `id` = LAST_INSERT_ID(`intent_variable`.`id`);
+        
+    SET update_count = row_count();
+        
+	SELECT update_count AS `update`, IF (update_count>0, last_insert_id(), -1) AS `affected_id`;
+	    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -382,6 +737,26 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteAI_v1` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiDeleter`@`localhost` PROCEDURE `deleteAI_v1`(IN in_dev_id VARCHAR(50), IN `in_aiid` varchar(50))
+    MODIFIES SQL DATA
+BEGIN
+	delete from ai WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `deleteAllAIs` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -396,6 +771,194 @@ CREATE DEFINER=`aiDeleter`@`localhost` PROCEDURE `deleteAllAIs`(IN `param_devid`
     MODIFIES SQL DATA
 BEGIN
 	delete from ai where dev_id=param_devid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteEntity` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `deleteEntity`( 
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250))
+BEGIN
+	DELETE FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteEntityValue` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `deleteEntityValue`( 
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250), 
+ IN in_value VARCHAR(250))
+BEGIN
+	DELETE FROM `entity_value` WHERE `in_value`=`value` AND `entity_id`= 
+    (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteIntent` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntent`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name varchar(250)
+ )
+BEGIN
+	DELETE FROM `intent` 
+    WHERE `in_aiid`=`aiid`
+    AND `in_name`=`name`
+    AND `aiid` IN 
+    (SELECT `aiid` FROM ai 
+    WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteIntentResponse` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentResponse`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
+ IN in_response VARCHAR(250))
+BEGIN
+	DELETE FROM `intent_response`
+	WHERE `in_response`=`response` AND `intent_id`=
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteIntentUserSays` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentUserSays`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
+ IN in_says VARCHAR(250))
+BEGIN
+	DELETE FROM `intent_user_says`
+	WHERE `in_says`=`says` AND `intent_id`=
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteIntentVariable` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentVariable`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT
+ )
+BEGIN
+
+	DELETE FROM `intent_variable`
+    WHERE `in_intent_variable_id`=`intent_variable`.`id`
+    AND `intent_id` IN 
+		(SELECT `id` FROM `intent` WHERE `in_aiid`=`aiid` AND `in_aiid` IN
+		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+	    
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteIntentVariablePrompt` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentVariablePrompt`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT,
+ IN in_prompt VARCHAR(250)
+ )
+BEGIN
+
+    DELETE FROM `intent_variable_prompt` WHERE
+    `intent_variable_prompt`.`intent_variable_id`=`in_intent_variable_id` AND
+    `intent_variable_prompt`.`prompt`=`in_prompt` AND
+	`in_intent_variable_id` IN 
+    (SELECT `intent_variable`.`id` 
+    FROM `intent_variable`, `intent`
+    WHERE `intent_variable`.`intent_id` = `intent`.`id`
+    AND `in_aiid` = `intent`.`aiid`
+    AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+	    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -432,10 +995,10 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAI`(IN `param_aiid` varchar(50))
+CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAI`(IN `param_aiid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-	SELECT * FROM ai WHERE aiid=param_aiid;
+	SELECT * FROM ai WHERE aiid=param_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -476,6 +1039,26 @@ CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAIs`(IN `param_devid` varcha
     READS SQL DATA
 BEGIN
 	SELECT * FROM ai WHERE dev_id=param_devid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getAI_v1` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAI_v1`(IN in_dev_id VARCHAR(50), IN `in_aiid` VARCHAR(50))
+    READS SQL DATA
+BEGIN
+	SELECT * FROM ai WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -563,6 +1146,50 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getEntities` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntities`( 
+ IN in_dev_id VARCHAR(50))
+BEGIN
+	SELECT `name` FROM `entity` WHERE `in_dev_id`=`dev_id`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getEntityValues` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntityValues`( 
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250))
+BEGIN
+	SELECT `entity_value`.`value` FROM `entity`,`entity_value` 
+    WHERE `entity`.`dev_id`=`in_dev_id` 
+    AND `entity`.`name`=`in_name`
+    AND `entity`.`id`=`entity_value`.`entity_id`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getIntegrations` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -577,6 +1204,208 @@ CREATE DEFINER=`integrReader`@`localhost` PROCEDURE `getIntegrations`()
     READS SQL DATA
 BEGIN
   SELECT * FROM `integrations`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntentIDs` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentIDs`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50)
+ )
+BEGIN
+
+	SELECT `intent`.`id` from `intent`, `ai` 
+    WHERE `ai`.`dev_id` = `in_dev_id`
+    AND `ai`.`aiid` = `in_aiid`
+	AND `intent`.`aiid` = `in_aiid`;
+    		
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntentResponses` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentResponses`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250))
+BEGIN
+	SELECT `response`
+	FROM `intent_response` WHERE `intent_id` IN
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntents` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntents`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50))
+BEGIN
+	SELECT `id`, `name`, `topic_in`, `topic_out`
+	FROM `intent` WHERE `intent`.`id` IN
+		(SELECT `intent`.`id` from `intent`, `ai` 
+		WHERE `ai`.`dev_id` = `in_dev_id`
+		AND `ai`.`aiid` = `in_aiid`
+		AND `intent`.`aiid` = `in_aiid`);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntentUserSays` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentUserSays`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250))
+BEGIN
+	SELECT `says`
+	FROM `intent_user_says` WHERE `intent_id` IN
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntentVariableIDs` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariableIDs`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_id INT
+ )
+BEGIN
+
+	SELECT `intent_variable`.`id` FROM `intent_variable`, `intent`, `ai` 
+    WHERE `ai`.`dev_id` = `in_dev_id`
+    AND `ai`.`aiid` = `in_aiid`
+	AND `intent`.`aiid` = `in_aiid`
+    AND `intent_variable`.`intent_id` = `in_intent_id`
+    AND `intent_variable`.`intent_id` = `intent`.`id`;    
+    		
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntentVariablePrompts` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariablePrompts`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT
+ )
+BEGIN
+	
+    SELECT `prompt` FROM `intent_variable_prompt` WHERE
+    `intent_variable_prompt`.`intent_variable_id`=`in_intent_variable_id` AND
+	`in_intent_variable_id` IN 
+    (SELECT `intent_variable`.`id` 
+    FROM `intent_variable`, `intent`
+    WHERE `intent_variable`.`intent_id` = `intent`.`id`
+    AND `in_aiid` = `intent`.`aiid`
+    AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+	    
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getIntentVariables` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariables`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_name VARCHAR(250)
+ )
+BEGIN
+
+	SELECT 
+    `intent_variable`.`id` AS `id`, 
+    `entity`.`name` AS `entity_name`, 
+    `intent_variable`.`required` AS `required`, 
+    `intent_variable`.`n_prompts` AS `n_prompts`,
+    `intent_variable`.`value` AS `value`
+	FROM `intent_variable`, `entity`    
+    WHERE `intent_variable`.`intent_id` = 
+		(SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
+    AND `entity`.`id` =
+		(SELECT `id` FROM `entity` WHERE `id` = `intent_variable`.`entity_id` AND `in_dev_id`=`dev_id`);
+	    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -834,4 +1663,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-09-15 10:58:22
+-- Dump completed on 2016-09-29 11:14:21
