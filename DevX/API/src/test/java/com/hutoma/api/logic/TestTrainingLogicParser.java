@@ -106,10 +106,19 @@ public class TestTrainingLogicParser {
 
     @Test
     public void testParse_NoResponse_multiple() {
+        // In separate conversations
         TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList("Q1", "", "Q2", "", "Q3", "R3"));
         List<String> eventsForNoResponse = result.getEventsFor(MISSING_RESPONSE);
         Assert.assertEquals(2, eventsForNoResponse.size());
         Assert.assertEquals("Q1", eventsForNoResponse.get(0));
         Assert.assertEquals("Q2", eventsForNoResponse.get(1));
+
+        // Within a conversation and at the end
+        result = logic.parseTrainingFile(Arrays.asList("Q1", "R1", "Q2", "", "Q3", "R3", "Q4", "", "Q5"));
+        eventsForNoResponse = result.getEventsFor(MISSING_RESPONSE);
+        Assert.assertEquals(3, eventsForNoResponse.size());
+        Assert.assertEquals("Q2", eventsForNoResponse.get(0));
+        Assert.assertEquals("Q4", eventsForNoResponse.get(1));
+        Assert.assertEquals("Q5", eventsForNoResponse.get(2));
     }
 }

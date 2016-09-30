@@ -74,6 +74,30 @@ function resetPhaseTwoComponents(){
     document.getElementById('containerMsgAlertProgressBar').style.display = 'none';
 }
 
+function getUploadWarnings(info) {
+    var warnings = [];
+    var maxItemsToShow = 5;
+    var itemsToShow = Math.min(info.length, maxItemsToShow);
+    for (var i = 0; i < itemsToShow; i++) {
+        if (info[i]['key'] === 'MISSING_RESPONSE') {
+            warnings.push("Missing response for '" + info[i]['value'] + "'");
+        }
+    }
+    if (info.length > maxItemsToShow) {
+        warnings.push("...");
+    }
+    return warnings;
+}
+
+function haNoContentError(info) {
+    for (var i = 0; i < info.length; i++) {
+        if (info[i]['key'] === 'NO_CONTENT') {
+            return true;
+        }
+    }
+    return false;
+}
+
 function uploadFile(){
     if ( $('#inputfile').val() == null ||  $('#inputfile').val() == "") {
         $("#btnUploadFile").prop("disabled", true);
@@ -103,13 +127,26 @@ function uploadFile(){
             var JSONresponse = xmlhttp.responseText;
             try {
                 var JSONdata = JSON.parse(JSONresponse);
-                if (JSONdata['status']['code'] === 200) {
-                    msgAlertUploadFile(4, 'File Uploaded!!!');
+                var statusCode = JSONdata['status']['code'];
+                if (statusCode === 200) {
+                    var uploadWarnings = null;
+                    var additionalInfo = JSONdata['status']['additionalInfo'];
+                    if (additionalInfo != null) {
+                        uploadWarnings = getUploadWarnings(JSON.parse(JSONdata['status']['additionalInfo']));
+                    }
+                    if (uploadWarnings != null && uploadWarnings.length > 0) {
+                        msgAlertUploadFile(4, 'File Uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
+                    } else {
+                        msgAlertUploadFile(4, 'File Uploaded!!!');
+                    }
                     resetPhaseOneComponents();
                     updatePhaseOneComponents();
-                }
-                else {
-                    msgAlertUploadFile(2, 'Something is gone wrong. File not uploaded');
+                } else {
+                    if (statusCode == 400 && haNoContentError(JSON.parse(JSONdata['status']['info']))) {
+                        msgAlertUploadFile(2, 'File not uploaded for training as no content was found!');
+                    } else {
+                        msgAlertUploadFile(2, 'Something is gone wrong. File not uploaded');
+                    }
                     $("#btnUploadFile").prop("disabled", false);
                 }
             }catch (e){

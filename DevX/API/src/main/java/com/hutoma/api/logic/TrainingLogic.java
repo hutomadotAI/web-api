@@ -42,6 +42,9 @@ public class TrainingLogic {
 
     private final String LOGFROM = "traininglogic";
 
+    private static final String EMPTY_STRING= "";
+    private static final String PREVIOUS_AI_PREFIX = "[";
+    private static final String PREVIOUS_AI_SUFFIX = "] ";
     private static final String EOL = "\n";
 
     public class UploadTooLargeException extends Exception {
@@ -81,6 +84,7 @@ public class TrainingLogic {
                     TrainingFileParsingResult result = parseTrainingFile(source);
                     // Bail out if there are fatal events during the parsing
                     if (result.hasFatalEvents()) {
+
                         return ApiError.getBadRequest(result.getJson(this.jsonSerializer));
                     }
                     if (!database.updateAiTrainingFile(aiid, result.getTrainingText())) {
@@ -192,16 +196,28 @@ public class TrainingLogic {
     }
 
     /**
+     * Remove the last conversation item.
+     * @param conversation the conversation so far
+     */
+    private void removeLastConversationEntry(final List<String> conversation) {
+        for (int i = conversation.size() - 1; i >= 0; i--) {
+            if (!conversation.get(i).equals(EMPTY_STRING)) {
+                conversation.remove(i);
+                break;
+            }
+        }
+    }
+
+    /**
      * Adds context to conversational exchanges
      * @param training list of strings, one for each line of conversation
      * @return single string with processed training
      */
     TrainingFileParsingResult parseTrainingFile(List<String> training) {
 
-        final String emptyString = "";
         TrainingFileParsingResult result = new TrainingFileParsingResult();
-        String lastAISentence = emptyString;
-        String lastSentence = emptyString;
+        String lastAISentence = EMPTY_STRING;
+        String lastHumanSentence = EMPTY_STRING;
         List<String> validConversation = new ArrayList<>();
         boolean humanTalkingNow = true;
         boolean lastLineEmpty = true;
@@ -214,12 +230,11 @@ public class TrainingLogic {
                     // If the last question didn't have an answer then
                     // ignore the last question
                     if (!humanTalkingNow) {
-                        int lastPos = validConversation.size() - 1;
-                        result.addEvent(MISSING_RESPONSE, validConversation.get(lastPos));
-                        validConversation.remove(lastPos);
+                        removeLastConversationEntry(validConversation);
+                        result.addEvent(MISSING_RESPONSE, lastHumanSentence);
                     }
                     // New conversation
-                    validConversation.add(emptyString);
+                    validConversation.add(EMPTY_STRING);
                 }
                 humanTalkingNow = true;
                 lastLineEmpty = true;
@@ -229,7 +244,9 @@ public class TrainingLogic {
             // if it's the human's turn and there was a previous AI response
             // then we prepend it in square brackets
             if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
-                validConversation.add(String.format("[%s] %s", lastAISentence, currentSentence));
+                lastHumanSentence = currentSentence;
+                validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
+                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
             } else {
                 // and we list the sentence
                 validConversation.add(currentSentence);
@@ -238,28 +255,22 @@ public class TrainingLogic {
             if (!humanTalkingNow) {
                 lastAISentence = currentSentence;
             }
+            lastHumanSentence = currentSentence;
 
             humanTalkingNow = !humanTalkingNow;
             lastLineEmpty = false;
-
-            lastSentence = currentSentence;
         }
 
         // add an empty line if there wasn't one already
         if (!lastLineEmpty) {
-            validConversation.add(emptyString);
+            validConversation.add(EMPTY_STRING);
         }
 
         // Check for missing response
         if (!humanTalkingNow) {
             // remove the last sentence
-            for (int i = validConversation.size() - 1; i >= 0; i--) {
-                if (!validConversation.get(i).equals(emptyString)) {
-                    result.addEvent(MISSING_RESPONSE, lastSentence);
-                    validConversation.remove(i);
-                    break;
-                }
-            }
+            removeLastConversationEntry(validConversation);
+            result.addEvent(MISSING_RESPONSE, lastHumanSentence);
         }
 
         if (validConversation.stream().anyMatch(s -> !s.isEmpty())) {
@@ -268,7 +279,7 @@ public class TrainingLogic {
             result.setTrainingText(parsedFile.toString());
         } else {
             result.addEvent(NO_CONTENT, null);
-            result.setTrainingText(emptyString);
+            result.setTrainingText(EMPTY_STRING);
         }
 
         return result;
