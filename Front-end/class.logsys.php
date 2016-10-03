@@ -259,7 +259,7 @@ class console
 
   public static function construct($called_from = "")
   {
-    
+
     if (self::$constructed === false) {
       self::config(null, false);
       self::$constructed = true;
@@ -377,6 +377,7 @@ class console
   public static function login($username, $password, $remember_me = false, $cookies = true)
   {
     self::construct("login");
+
     if (self::$db === true) {
       /**
        * We Add LIMIT to 1 in SQL query because to
@@ -409,7 +410,6 @@ class console
         $us_salt = $rows['password_salt'];
         $status = $rows['attempt'];
         $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $us_salt);
-
         if (substr($status, 0, 2) == "b-") {
           $blockedTime = substr($status, 2);
           if (time() < $blockedTime) {
@@ -517,25 +517,23 @@ class console
     if (self::userExists($id) || (isset($other['email']) && self::userExists($other['email']))) {
       return "exists";
     } else {
-      $randomSalt = self::rand_string(20);
-      $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
-
-      $query = "CALL addUser(:email, :password, :passwordSalt, :userName, :fullName, :creationDate)";
-      $sql = self::$dbh->prepare($query);
-
-      /* Bind the values */
-      $sql->bindValue(":email", $id);
-      $sql->bindValue(":password", $saltedPass);
-      $sql->bindValue(":passwordSalt", $randomSalt);
-      $sql->bindValue(":userName", $username);
-      $sql->bindValue(":fullName", $fullname);
-      $sql->bindValue(":creationDate", $created);
-      $sql->execute();
-
-      // finally fetch the additional sql row for stored proc calls
-      $sql->nextRowset();
-
-      return true;
+      try {
+        $randomSalt = self::rand_string(20);
+        $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
+        $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
+        $service_url = 'http://localhost:8080/v1/admin/?email='.$id.'&username='.$username.'&password='.$saltedPass.'&password_salt='.$randomSalt.'&first_name='.$fullname;
+        $curl = curl_init($service_url);
+        $headr = array();
+        $headr[] = 'Content-type: application/json';
+        $headr[] = 'Authorization: Bearer '.$dev_token;
+        curl_setopt($curl, CURLOPT_HTTPHEADER,$headr);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        $res = json_decode(curl_exec($curl),true)['status']['code'];
+        curl_close($curl);
+        if ($res =='200') return true;
+      } catch (Exception $e) {}
+      return false;
     }
   }
 
@@ -666,40 +664,52 @@ class console
 
       } else {
         //TODO: move this to a stored procedure - at the moment this code is not being used.
-        $sql = self::$dbh->prepare("SELECT `email`, `id` FROM `" . self::$config['db']['table'] . "` WHERE `username`=:login OR `email`=:login");
-        $sql->bindValue(":login", $identification);
-        $sql->execute();
+
+          $query = "CALL getUser(:userName, :checkEmail)";
+          $sql = self::$dbh->prepare($query);
+          $sql->execute(array(
+              ":userName" => $identification,
+              ":checkEmail" => (self::$config['features']['email_login'] === true)
+          ));
         if ($sql->rowCount() == 0) {
-          echo "<h3>Error : User Not Found</h3>";
+            $notfound  ='<div class="alert alert-danger">';
+            $notfound .='<i class="icon fa fa-warning"></i> User Not Found.';
+            $notfound .='</div>';
+          echo $notfound;
           $curStatus = "userNotFound"; // The user with the identity given was not found in the users database
-        } else {
-          $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-          $email = $rows['email'];
-          $uid = $rows['id'];
+        }
+        else {
+            $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+            $email = $rows['email'];
+            $uid = $rows['id'];
+            $token = self::rand_string(40);
+            $query = "CALL insertResetToken(:token, :uid)";
+            $sql = self::$dbh->prepare($query);
+            $sql->execute(array(
+                ":token" => $token,
+                ":uid" => $uid
+            ));
 
-          /**
-           * Make token and insert into the table
-           */
-          $token = self::rand_string(40);
-          //TODO: move this to a stored procedure - at the moment this code is not being used.
-          $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['token_table'] . "` (`token`, `uid`, `requested`) VALUES (?, ?, NOW())");
-          $sql->execute(array($token, $uid));
-          $encodedToken = urlencode($token);
-
-          /**
-           * Prepare the email to be sent
-           */
-          $subject = "Reset Password";
-          $body = "You requested for resetting your password on " . self::$config['basic']['company'] . ". For this, please click the following link :
-          <blockquote>
-            <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
-          </blockquote>";
-            if (self::sendMail($email, $subject, $body)) {
-                echo "<p>Your password reset email has been sent. Do not forget to check your spam folder too.</p>";
-                $curStatus = "emailSent"; // E-Mail has been sent
-            } else {
-                echo "<p>There was a problem sending the reset e-mail. Please go back and try again.</p>";
+            if ($sql->rowCount() == 0) {
+                $notfound  ='<div class="alert alert-danger">';
+                $notfound .='<i class="icon fa fa-warning"></i> User Not Found.';
+                $notfound .='</div>';
+                echo $notfound;
+                $curStatus = "userNotFound"; // The user with the identity given was not found in the users database
             }
+
+            $encodedToken = urlencode($token);
+            $subject = "Hu:toma Password Reset";
+            $body = "Hi, We got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
+              <blockquote>
+                <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
+              </blockquote>";
+                if (self::sendMail($email, $subject, $body)) {
+                    echo "<p>Your password reset email has been sent. Do not forget to check your spam folder too.</p>";
+                    $curStatus = "emailSent"; // E-Mail has been sent
+                } else {
+                    echo "<p>There was a problem sending the reset e-mail. Please go back and try again.</p>";
+                }
         }
       }
     }
@@ -1177,7 +1187,7 @@ class console
    * ---------------------
    */
 
-  
+
   // FOR API
   public static function createAI($dev_token,$name,$description,$private,$language,$timezone,$condifence,$voice,$contract,$payment_type,$price){
       if (self::$loggedIn) {
@@ -1318,7 +1328,7 @@ class console
           return $json_response;
       }
   }
-  
+
     // FAKE
     public static function getDevToken(){
           if (self::$loggedIn) {
@@ -1333,7 +1343,8 @@ class console
         session_destroy();   // destroy session
       }
       $_SESSION['LAST_ACTIVITY'] = time();
-      return function_exists ( 'session_status' ) ? ( PHP_SESSION_ACTIVE == session_status () ) : ( ! empty ( session_id () ) );
+      $sid = session_id ();
+      return function_exists ( 'session_status' ) ? ( PHP_SESSION_ACTIVE == session_status () ) : (!empty($sid));
     }
 
     // FAKE
@@ -1409,8 +1420,13 @@ class console
         }
     }
 
+    function debug( $data) {
+        echo 'console.log(' . $data. ');';
+    }
+
 
 
 }
+
 
 ?>

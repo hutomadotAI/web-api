@@ -23,13 +23,16 @@ include "config.php";
           content="Hutoma builds emotionally evolved AIs and Digital Employees that can have intelligent conversations with you or your customers.">
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../css/font-awesome.min.css">
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/animate.css">
+    <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../console/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../console/dist/css/animate.css">
      <link rel="stylesheet" href="../console/dist/css/hutoma.min.css">
-    <link rel="stylesheet" href="../css/main.css">
-    <script src="../js/modernizr-2.6.2.min.js"></script>
-    <script type="text/javascript" src="../js/jquery-1.10.1.min.js"></script>
+    <link rel="stylesheet" href="../console/dist/css/main.css">
+    <script src="../console/dist/js/modernizr-2.6.2.min.js"></script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script src="../console/plugins/jQuery/jQuery-2.1.4.min.js"></script>
+    <script src="../console/bootstrap/js/bootstrap.min.js"></script>
+
 
 
 <style>
@@ -98,74 +101,83 @@ body {
 </head>
   <body class="hold-transition register-page">
     <?php
-      if(isset($_POST['submit'])){
 
-     #  When commenting out this code make sure you use the secured curlHelper instead of file_get_contents
-     #  to obtain the response from the captcha service
-     #   if(isset($_POST['g-recaptcha-response'])) {
-     #     $captcha=$_POST['g-recaptcha-response'];
-     #     $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
-     #   if($response['success'] == false)
-     #   {
-     #      $captcha  ='<div class="alert alert-warning">';
-     #      $captcha .='<i class="icon fa fa-exclamation"></i> You did not passed the captcha test';
-     #      $captcha .='</div>';
-     #      return $captcha;
-     #   }
-     # }
-     # else
-     #  {
-     #   $captchamsg  ='<div class="alert alert-warning">';
-     #   $captchamsg .='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
-     #   $captchamsg .='</div>';
-     #   return $captchamsg;
-     #   }
+      if(isset($_POST['submit'])) {
 
-        $email = $_POST['email'];
-        $password = $_POST['pass'];
-        $retyped_password = $_POST['retyped_password'];
-        $name = $_POST['username'];
-        $terms = isset($_POST['terms']);
+        if(isset($_POST['g-recaptcha-response'])) {
+          $captcha=$_POST['g-recaptcha-response'];
+          $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+           if($response['success'] == false)
+            {
+               $msg ='<div class="alert alert-warning">';
+               $msg .='<i class="icon fa fa-exclamation"></i> You did not passed the captcha test';
+               $msg .='</div>';
+            }
+            else {
+                  $email = $_POST['email'];
+                  $password = $_POST['pass'];
+                  $retyped_password = $_POST['retyped_password'];
+                  $name = $_POST['username'];
+                  $terms = isset($_POST['terms']);
+                  $invite_code =$_POST['invite_code'];
 
-        $missingfields  ='<div class="alert alert-warning">';
-        $missingfields .='<i class="icon fa fa-exclamation"></i> Some Fields were left blank.';
-        $missingfields .='</div>';
+                  $missingfields  ='<div class="alert alert-warning">';
+                  $missingfields .='<i class="icon fa fa-exclamation"></i> Some Fields were left blank.';
+                  $missingfields .='</div>';
 
-        $passwordmismatch  ='<div class="alert alert-warning">';
-        $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The Passwords you entered do not match.';
-        $passwordmismatch .='</div>';
+                  $passwordmismatch  ='<div class="alert alert-warning">';
+                  $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The Passwords you entered do not match.';
+                  $passwordmismatch .='</div>';
 
-        $termsmsg  ='<div class="alert alert-warning">';
-        $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the Terms and Conditions and Privacy Policy';
-        $termsmsg .='</div>';
+                  $termsmsg  ='<div class="alert alert-warning">';
+                  $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the Terms and Conditions and Privacy Policy';
+                  $termsmsg .='</div>';
 
-        $userexists  ='<div class="alert alert-warning">';
-        $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
-        $userexists .='</div>';
+                  $userexists  ='<div class="alert alert-warning">';
+                  $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
+                  $userexists .='</div>';
 
-        $msg= $missingfields;
+                  $invalidcode  ='<div class="alert alert-warning">';
+                  $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
+                  $invalidcode .='</div>';
 
-        if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
-          elseif($password != $retyped_password) $msg= $passwordmismatch;
-            elseif($terms != 'True') $msg= $termsmsg;
-        else{
-          $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
-          if($createAccount === "exists"){
-             $msg= $userexists;
-          }elseif($createAccount === true){
-            // redirect to the login page
-            \hutoma\console::logout();
-            exit();
+                  $msg= $missingfields;
+
+                  if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
+                    elseif($password != $retyped_password) $msg= $passwordmismatch;
+                      elseif($terms != 'True') $msg= $termsmsg;
+                       # TODO: Tech Previw Hack. Need to remove it
+                       elseif($invite_code!='R4d1prGQl7wJXqgj') $msg=$invalidcode;
+                  else{
+                    $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
+
+                    if($createAccount === "exists"){
+                       $msg= $userexists;
+                    }elseif($createAccount === true){
+                      // redirect to the login page
+                      \hutoma\console::logout();
+                      exit();
+                    }
+                    else  $msg= $userexists;
+
+                }
+
+            }
           }
-          else  $msg= $createAccount;
+         else
+           {
+            $msg  ='<div class="alert alert-warning">';
+            $msg.='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
+            $msg .='</div>';
+            }
 
-      }
+
     }
-      ?>
+   ?>
 
 
-        <header id="navigation" class="navbar-fixed-top navbar">
+      <header id="navigation" class="navbar-fixed-top navbar">
       <div class="container" style="font-weight: bold">
           <div class="navbar-header">
               <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -173,7 +185,7 @@ body {
                   <i class="fa fa-bars fa-2x"></i>
               </button>
               <a class="navbar-brand" href="#body">
-                  <h1 style="padding: 5px;font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;" >
+                  <h1 style="padding: 10px; margin:-5px;font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;" >
                      <b> hu:toma </b>
                   </h1>
               </a>
@@ -213,6 +225,10 @@ body {
             <input name="retyped_password"  type="password" class="form-control" placeholder="Retype password">
             <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
           </div>
+            <div class="form-group has-feedback">
+                <input name="invite_code"  type="invite_code" class="form-control" placeholder="Invitation Code">
+                <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
+            </div>
           <div class="row">
             <div class="col-xs-8">
               <div class="checkbox icheck" style="margin-left:20px">
@@ -221,12 +237,15 @@ body {
                 </label>
               </div>
             </div><!-- /.col -->
+
             <div class="col-xs-4">
               <button type="submit" name="submit" class="btn btn-primary btn-block btn-flat">Register</button>
             </div><!-- /.col -->
           </div>
           <br/>
-          <br/>
+          <div class="g-recaptcha" data-sitekey="6LcArBsTAAAAADPS78hYLKb05FNfwY0cMQBJZLAV"></div>
+
+
 
         <!--   <div class="g-recaptcha" data-sitekey="6LcArBsTAAAAADPS78hYLKb05FNfwY0cMQBJZLAV"></div> -->
 
@@ -238,14 +257,11 @@ body {
           <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign up using Google+</a>
         </div>
  -->
-        <a href="login.php" class="text-center newa">I already have an account</a>
+        <a href="login.php" class="text-center newa">I already have an account</a><br/>
+         <a href="https://www.hutoma.com" class="text-center newa">I need an invitation code</a>
       </div><!-- /.form-box -->
     </div><!-- /.register-box -->
 
-    <!-- jQuery 2.1.4 -->
-    <script src="../console/plugins/jQuery/jQuery-2.1.4.min.js"></script>
-    <!-- Bootstrap 3.3.5 -->
-    <script src="../console/bootstrap/js/bootstrap.min.js"></script>
 
 
 <footer id="footer" class="footer">
@@ -299,23 +315,6 @@ body {
             </div>
     </div>
 </footer>
-  <script src="../js/wow.min.js"></script>
-
-  <script>
-    var wow = new WOW ({
-        boxClass:     'wow',      // animated element css class (default is wow)
-        animateClass: 'animated', // animation css class (default is animated)
-        offset:       120,          // distance to the element when triggering the animation (default is 0)
-        mobile:       false,       // trigger animations on mobile devices (default is true)
-        live:         true        // act on asynchronously loaded content (default is true)
-        }
-      );
-      wow.init();
-  </script>
-
-
-
-  <script src="../js/custom.js"></script>
-
+<script src="../console/dist/js/custom.js"></script>
 </body>
 </html>

@@ -11,9 +11,7 @@
       $plan = $_SESSION[$_SESSION['navigation_id']]['user_plan'];
     if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"]))
       $joined = $_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"];
-  }catch(Exception $e){
-
-  }
+  }catch(Exception $e){}
 ?>
 
 <div class="navbar-custom-menu">

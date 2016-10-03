@@ -1,5 +1,6 @@
 <?php
 require "config.php";
+
 if(isset($_POST['action_login'])){
   $identification = $_POST['login'];
   $password = $_POST['password'];
@@ -13,7 +14,7 @@ if(isset($_POST['action_login'])){
   }else{
     $login = \hutoma\console::login($identification, $password, isset($_POST['remember_me']));
     if($login === false){
-      $msg = array("Error", $loginerror);
+        $msg = array("Error", $loginerror);
     }else if(is_array($login) && $login['status'] == "blocked"){
       $msg = array("Error", "Too many login attempts. You can attempt login after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
     }
@@ -44,14 +45,18 @@ if(isset($_POST['action_login'])){
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../console/dist/css/hutoma.min.css">
-    <link rel="stylesheet" href="../css/font-awesome.min.css">
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/animate.css">
-    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../console/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../console/dist/css/animate.css">
+    <link rel="stylesheet" href="../console/dist/css/main.css">
+
     <link rel="stylesheet" href="../console/plugins/cookiePolicyBar/cookiePolicyBar.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../js/modernizr-2.6.2.min.js"></script>
+    <script type="text/javascript" src="../console/dist/js/modernizr-2.6.2.min.js"></script>
     <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/icheck/1.0.2/icheck.min.js"></script>
+
+
     <script type="text/javascript">
         var options = {
             declineButtonText: ''
@@ -253,32 +258,6 @@ body {
             </div>
     </div>
 </footer>
-  <script src="../js/wow.min.js"></script>
-
-  <script>
-    var wow = new WOW ({
-        boxClass:     'wow',      // animated element css class (default is wow)
-        animateClass: 'animated', // animation css class (default is animated)
-        offset:       120,          // distance to the element when triggering the animation (default is 0)
-        mobile:       false,       // trigger animations on mobile devices (default is true)
-        live:         true        // act on asynchronously loaded content (default is true)
-        }
-      );
-      wow.init();
-  </script>
-
-   <script>
-      $(function () {
-        $('input').iCheck({
-          checkboxClass: 'icheckbox_square-blue',
-          radioClass: 'iradio_square-blue',
-          increaseArea: '20%' // optional
-        });
-      });
-    </script>
-
-
-  <script src="../js/custom.js"></script>
 
 </body>
 </html>

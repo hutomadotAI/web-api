@@ -12,7 +12,8 @@ require __DIR__ . "/../class.logsys.php";
     "password" => '>YR"khuN*.gF)V4#',
     "name" => "hutoma",
     "ai" => "ai",
-    "table" => "users"
+    "table" => "users",
+    "token_table" =>  "resetTokens"
   ),
   "features" => array(
     "auto_init" => true
@@ -20,11 +21,11 @@ require __DIR__ . "/../class.logsys.php";
   "pages" => array(
     "no_login" => array(
       "/",
-      "/pages/reset.php",
-      "/pages/register.php"
+      "/Hutoma/Front-end/pages/reset.php",
+      "/Hutoma/Front-end/pages/register.php"
     ),
-    "login_page" => "/pages/login.php",
-    "home_page" => "/console/home.php"
+    "login_page" => "/Hutoma/Front-end/pages/login.php",
+    "home_page" => "/Hutoma/Front-end/console/home.php"
   )
 ));
 
