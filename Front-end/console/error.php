@@ -29,10 +29,7 @@
 
     <aside class="main-sidebar ">
         <section class="sidebar">
-            <!-- ================ USER PANEL ================== -->
-            <?php include './dynamic/userpanel.html.php'; ?>
             <!-- ================ USER ACTION ================= -->
-
             <ul class="sidebar-menu disabled" style="position: absolute; bottom:0; width: 230px; min-height: 135px;">
                 <li class="header" style="text-align: center;">MY ACCOUNT</li>
                 <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
@@ -40,9 +37,7 @@
         </section>
     </aside>
 
-    <!-- =============================================== -->
     <!-- ================ PAGE CONTENT ================= -->
-    <!-- =============================================== -->
     <div class="content-wrapper">
         <section class="content">
             <?php include './dynamic/error.content.html.php'; ?>
@@ -66,6 +61,5 @@
 <script src="./plugins/select2/select2.full.min.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/createAI/createAI.js"></script>
 </body>
 </html>

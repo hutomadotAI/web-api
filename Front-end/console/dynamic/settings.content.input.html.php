@@ -71,23 +71,39 @@
             </div>
         </div>
 
-        <h3><p class="text-muted">API key</p></h3>
+        <h3><p class="text-muted">API keys</p></h3>
         <div class="row">
             <div class="col-md-6">
                 <div class="input-group">
-                    <span class="input-group-addon">Developer key</i></span>
-                    <input type="text" class="form-control" id="devkey" value=" <?php echo \hutoma\console::getDevToken();?>" disabled>
-                    <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')" ><i class="fa fa-clipboard"></i></span>
+                    <span class="input-group-addon" style="width:90px;">Ai key</i></span>
+                    <input type="text" class="form-control" id="aikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'];?>" disabled>
+                    <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#aikey" id="aikeytooltip" title="copy to clipboard" onclick="copyToClipboard('aikey')" ><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="input-group">
-                    <span class="input-group-addon">Client key</i></span>
-                    <input type="text" class="form-control" id="clikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_id'];?>" disabled>
+                    <span class="input-group-addon" style="width:90px;">Dev key</i></span>
+                    <input type="text" class="form-control" id="devkey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_id'];?>" disabled>
+                    <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')"><i class="fa fa-clipboard"></i></span>
+                </div>
+            </div>
+        </div>
+        <p></p>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:90px;">Client key</i></span>
+                    <input type="text" class="form-control" id="clikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'];?>" disabled>
                     <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#clikey" id="clikeytooltip" title="copy to clipboard" onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
+        </div>
+
+        <p></p>
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUpdateAI">
+            <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
+            <span id="msgAlertUpdateAI">You can change main AI parameter and save it</span>
         </div>
 
     </div>
@@ -96,8 +112,8 @@
 
 
 <div class="box-footer">
-    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" >cancel</button>
-    <button  name="btnSave"  id="btnSave"   value="_next"   class="btn btn-success flat" disabled>save</button>
+    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" disabled>cancel</button>
+    <button  name="btnSave"  id="btnSave"   value="_save"   class="btn btn-success flat" disabled>save</button>
     <button  name="btnDelete" id="btnDelete"  data-toggle="modal" data-target="#deleteAI" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" alt="delete">delete AI</button>
 </div>
 
@@ -118,7 +134,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <form method="POST" id="deleteForm" action="./deleteAI.php">
+                <form method="POST" id="deleteForm" action="./dynamic/deleteAI.php">
                 <button type="submit" class="btn btn-primary flat" id="modalDelete" data-dismiss="modal">Delete</button>
                 <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel</button>
                 </form>

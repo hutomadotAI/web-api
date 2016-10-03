@@ -10,10 +10,14 @@ function wizardNext() {
 
 function sendAIID(elem){
     var value = elem.value;
-    $(elem).prop("disabled",true);
+    document.getElementById('btnSelectAI').setAttribute('disabled','disabled');
+    //$(elem).prop("disabled",true);
     if(document.viewAllForm.onsubmit)
         return;
     RecursiveUnbind($('#listTable'));
+
+    deactiveButtons();
+
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();
 }
@@ -28,3 +32,15 @@ function publishAI(elem){
         elem.innerHTML = '<i class="fa fa-globe"></i> Publish AI';
     }
 }
+
+function deactiveButtons(){
+    document.getElementById('btnCreateAI').setAttribute('disabled','disabled');
+}
+
+
+
+// VIDEO TUTORIAL
+$("#collapseFirstVideoTutorial").on('hidden.bs.collapse', function(){
+    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+});

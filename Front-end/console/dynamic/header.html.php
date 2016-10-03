@@ -1,12 +1,10 @@
-<a href="./home.php" class="logo" tabindex="-1">
-    <!--
+<a href="http://hutoma.com" class="logo" tabindex="-1">
     <span class="logo-mini">
         <b>hu</b>
     </span>
     <span class="logo-lg">
         <b class="text">hu</b><b class="text-green">:</b><b class="text-blue">toma</b>
     </span>
-    -->
 </a>
 
 <nav class="navbar navbar-static-top" role="navigation">

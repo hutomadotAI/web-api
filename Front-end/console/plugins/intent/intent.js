@@ -172,3 +172,9 @@ $('#deleteIntent').on('show.bs.modal', function(e) {
     elem.innerHTML = 'Are you sure you would like to delete <label>' +  value +'</label> intent ? ';
     elemBtn.setAttribute("value", esseyId);
 });
+
+// VIDEO TUTORIAL
+$("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function(){
+    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+});

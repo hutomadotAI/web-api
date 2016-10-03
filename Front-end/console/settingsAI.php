@@ -18,6 +18,7 @@ if ($response['status']['code'] !== 200) {
     exit;
 }
 
+
 /*
 $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
 if ($usr_domains['status']['code'] !== 200) {
@@ -37,7 +38,8 @@ function isSessionVariablesAvailable(){
         isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
         isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
         isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'])
     );
 }
 ?>
@@ -133,6 +135,7 @@ function isSessionVariablesAvailable(){
 <script src="./plugins/deleteAI/deleteAI.js"></script>
 <script src="./plugins/domain/domain.js"></script>
 <script src="./plugins/setting/setting.js"></script>
+<script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 

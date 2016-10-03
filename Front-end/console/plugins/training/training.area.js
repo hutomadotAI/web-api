@@ -2,7 +2,6 @@ var max_error = -1.0;
 var block_server_ping = false;
 
 initializedEventListeners();
-//init_for_Demo();
 activeMonitors(status,error);
 
 function initializedEventListeners(){
@@ -15,20 +14,16 @@ function initializedEventListeners(){
     document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
 }
 
-function init_for_Demo(){
-    $("#btnUploadStructure").prop("disabled", true);
-    $("#btnUploadUrl").prop("disabled", true);
-    msgAlertUploadStructure(2,'NOT YET IMPLEMENTED');
-    msgAlertUploadUrl(2,'NOT YET IMPLEMENTED');
-}
-
 function activeMonitors(status,error){
 
     if (status != 0)
         activePhaseOne();
-    if ( status == 'training_in_progress' || status == 'training_queued' ) {
+    if ( status == 'training_in_progress' || status == 'training_queued') {
         activePhaseTwo();
         pingError();
+    }
+    if ( status == 'internal_error') {
+        activePhaseTwo();
     }
 
 }
@@ -103,12 +98,15 @@ function uploadFile(){
         $("#btnUploadFile").prop("disabled", true);
         msgAlertUploadFile(1,'You need choose file first');
         return;
-    }
-    else {
-        resetPhaseTwoComponents();
-        block_server_ping = true;
-        $("#btnUploadFile").prop("disabled", true);
-    }
+    };
+
+    if ( !checkFileSize('inputfile',2) )
+        return;
+
+    resetPhaseTwoComponents();
+    block_server_ping = true;
+    $("#btnUploadFile").prop("disabled", true);
+
 
     var xmlhttp;
     var file_data = new FormData();
@@ -166,12 +164,13 @@ function uploadStructure(){
         msgAlertUploadStructure(1,'You need choose complex file first');
         return;
     }
-    else {
-        resetPhaseTwoComponents();
-        block_server_ping = true;
-        $("#btnUploadStructure").prop("disabled", true);
-    }
 
+    if ( !checkFileSize('inputstructure',10) )
+        return;
+
+    resetPhaseTwoComponents();
+    block_server_ping = true;
+    $("#btnUploadStructure").prop("disabled", true);
 
     var xmlhttp;
     var file_data = new FormData();
@@ -282,7 +281,7 @@ function activePhaseTwo(){
     $('#progress-upload-file-action').removeClass('active');
     $('#progress-upload-file-action').removeClass('progress-striped');
 
-    /*
+
     $('#btnUploadFile').prop('disabled', false);
     $('#trainingbar').prop('hidden', false);
 
@@ -291,10 +290,16 @@ function activePhaseTwo(){
     document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
 
     document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
-    */
+
     msgAlertProgressBar(0,'Now you can talk with your AI');
     //closingMsgAlertProgressBarTemporized();
     block_server_ping = false;
+}
+
+function notifyError(){
+    $('#progress-upload-file-action').removeClass('active');
+    $('#progress-upload-file-action').removeClass('progress-striped');
+    msgAlertProgressBar(2,'Internal error occured');
 }
 
 function pingError(){
@@ -358,3 +363,55 @@ function getGreenToRed(percent){
 function learnRegExp(url){
     return /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(url);
 }
+
+function checkFileSize(fileID,size) {
+    var input, file;
+    input = document.getElementById(fileID);
+    if (!window.FileReader) {
+        msgAlertUploadFile(2,'The file API isn\'t supported on this browser');
+        return false;
+    }
+    if (!input.files) {
+        msgAlertUploadFile(2,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
+        return false;
+    }
+    file = input.files[0];
+    if(file.size > size*1048476) {
+        msgAlertUploadFile(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
+        return false;
+    }
+    return true;
+}
+
+function checkStructureSize(fileID,size) {
+    var input, file;
+    input = document.getElementById(fileID);
+    if (!window.FileReader) {
+        msgAlertUploadStructure(2,'The file API isn\'t supported on this browser');
+        return false;
+    }
+    if (!input.files) {
+        msgAlertUploadStructure(2,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
+        return false;
+    }
+    file = input.files[0];
+    if(file.size > size*1048476) {
+        msgAlertUploadStructure(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
+        return false;
+    }
+    return true;
+}
+
+
+
+// VIDEO TUTORIAL TRAINING CHAT EXAMPLE
+$("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function(){
+    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+});
+
+// VIDEO TUTORIAL TRAINING BOOK
+$("#collapseVideoTutorialTrainingBook").on('hidden.bs.collapse', function(){
+    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+});

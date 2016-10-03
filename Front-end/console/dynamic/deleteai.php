@@ -1,10 +1,11 @@
 <?php
-  require "../pages/config.php";
+  require "../../pages/config.php";
 
   if ( !\hutoma\console::isSessionActive()) {
-    header('Location: ./error.php?err=1');
+      \hutoma\console::redirect('./error.php?err=101');
     exit;
   }
+
 
   if (isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])) {
 
@@ -18,7 +19,7 @@
       unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']);
       unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']);
       unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']);
-      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['sex']);
+      unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']);
       unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['userActivedDomains']);
 
       unset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
@@ -37,11 +38,12 @@
     }
     else{
       unset($response);
-      header('Location: ./error.php?err=9');
+        \hutoma\console::redirect('./error.php?err=203');
       exit;
     }
+
     unset($response);
-    header('Location: ./home.php');
+    \hutoma\console::redirect('../home.php');
   }
 ?>
 

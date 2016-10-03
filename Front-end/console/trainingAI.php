@@ -1,5 +1,4 @@
 <?php
-
     require "../pages/config.php";
 
     if ( !\hutoma\console::isSessionActive()) {
@@ -22,6 +21,8 @@
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_debug_info'] = $singleAI['ai']['training_debug_info'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status'] = $singleAI['training_status'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai_status'];
+            $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'] = $singleAI['client_token'];
+
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
 
             // NEED TO MODIFY CREATE AI IN 
@@ -38,7 +39,6 @@
             exit;
         }
     }
-
 ?>
 
 <!DOCTYPE html>
@@ -82,7 +82,6 @@
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>
                 <?php include './dynamic/training.content.monitor.html.php'; ?>
-                <?php //include './dynamic/training.content.domains.html.php'; ?>
                 <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
             <div class="col-md-5">
@@ -120,13 +119,16 @@
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
+<script>
+    var lang = '<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']; ?>';
+    var voice = '<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] ?>';
+</script>
+
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","training",1,true,false]);
     </script>
 </form>
-
 <script src="./plugins/training/training.area.js"></script>
-
 </body>
 </html>

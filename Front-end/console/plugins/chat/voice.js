@@ -1,17 +1,22 @@
 var msg = new SpeechSynthesisUtterance();
-var recognizer;
-
-msg.addEventListener('start', function () {});
-msg.addEventListener('end', function () {  enableSpeech(true); enableChat(true);});
+var recognition;
+msg.addEventListener('start', function () { });
+msg.addEventListener('end', function () { activeSpeechButton(); enableChat();});
 msg.lang = 'en-US';
 msg.volume = 1;
 msg.rate = 1;
-msg.pitch = 1
+msg.pitch = 1;
 
-
-function afterAiSpeech(){
-    enableSpeech(true);
-    enableChat(true);
+function setLanguage(lang,voice){
+    switch(lang){
+        case 'Deutsch':     return 'en-US';
+        case 'English':     return 'en-US';
+        case 'Français':    return 'en-US';
+        case 'Italiano':    return 'it';
+        case 'Nederlands':  return 'en-US';
+        case 'Português':   return 'en-US';
+        default :           return 'en-US';
+    }
 }
 
 function speak(text) {
@@ -24,11 +29,12 @@ function loadVoices() {
 }
 
 function startDictation(human_name, ai_name) {
-    document.getElementById('microphone').setAttribute('class','fa fa-microphone text-light-gray flashing');
+    blockMultiClick();
 
+    document.getElementById('microphone').setAttribute('class','fa fa-microphone text-light-gray flashing');
     if (window.hasOwnProperty('webkitSpeechRecognition')) {
 
-        var recognition = new webkitSpeechRecognition();
+        recognition = new webkitSpeechRecognition();
 
         recognition.continuous = false;
         recognition.interimResults = false;
@@ -47,6 +53,20 @@ function startDictation(human_name, ai_name) {
         }
 
     }
+}
+
+function stopSynthesis(){
+    window.speechSynthesis.cancel();
+}
+
+function stopDictation(){
+
+}
+
+function blockMultiClick(){
+    // block clicking on microphone icon
+    document.getElementById('btnSpeech').removeEventListener('click', start);
+
 }
 
 

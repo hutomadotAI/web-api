@@ -2,9 +2,20 @@
     require "../pages/config.php";
 
     if ( !\hutoma\console::isSessionActive()) {
-        header('Location: ./error.php?err=1');
+        \hutoma\console::redirect('./error.php?err=101');
         exit();
     }
+
+    $response = \hutoma\console::getIntegrations(\hutoma\console::getDevToken());
+
+
+    /* CHECK RESPONSE NEEDS API CALL
+    if ($response['status']['code'] !== 200) {
+        unset($response);
+        \hutoma\console::redirect('./error.php?err=104');
+        exit;
+    }*/
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -87,7 +98,10 @@
 
 
 <script>
-  var integrations = <?php echo json_encode(\hutoma\console::getIntegrations())?>;
+  // JSON RESPONSE NEEDS API CALL
+  // var integrations = <?php  //echo json_encode($response['_integrationList']);  unset($response); ?>;
+  var integrations = <?php  echo json_encode($response);  unset($response); ?>;
+
   var newNode = document.createElement('div');
   newNode.className = 'row';
   newNode.id = 'integrations_list';

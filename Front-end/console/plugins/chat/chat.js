@@ -1,20 +1,24 @@
 var isChrome = !!window.chrome;
 var continuousSpeech = '0';
-var speechResponse = '1'; // voice activated true for default
+var speechResponse = 1; // voice activated true for default
 var jsonResponse   = '1'; // voice activated true for default
 var colorVoice = '0';
 var muteMicrophone = '0';
-var chat = 1;  // start enable chatting buttons
+var chatSemaphore = 0;
 
 
-if (isChrome)
+if (isChrome) {
+    unlockSpeechOption();
     document.getElementById('btnSpeech').addEventListener('click', start);
+    document.getElementById('btnSpeech').style.cursor = 'pointer';
+}
 else{
-    document.getElementById('deactive-icon').setAttribute('class','fa fa-bullhorn text-gray');
-    document.getElementById('deactive-text').setAttribute('class','text-gray');
-    document.getElementById("btnSpeech").setAttribute('title','Available on Chrome');
-    document.getElementById("btnSpeech").setAttribute('title','Available on Chrome');
-    document.getElementById("microphone").className ='fa fa-microphone-slash text-coral';
+    lockSpeechOption();
+    document.getElementById('speech-icon').className ='fa fa-bullhorn text-gray';
+    document.getElementById('speech-text').className ='text-gray';
+    document.getElementById('btnSpeech').setAttribute('title','Available on Chrome');
+    document.getElementById('btnSpeech').style.cursor = 'not-allowed';
+    document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
 }
 
 function start(){
@@ -27,10 +31,13 @@ function keyboardChat(e){
 }
 
 function createNodeChat(human_name, ai_name) {
-   if ( chat == 1) {
-       chat = (chat+1)%(2);
+   if ( chatSemaphore == 0) {
+       chatSemaphore = (chatSemaphore+1)%(2);
        var msg = $('#message').val();
        if (msg.length != 0) {
+           disableChat();
+           deactiveSpeechButton();
+           lockSpeechOption();
            createLeftMsg(human_name, msg);
            requestAnswerAI(ai_name, msg);
        }
@@ -51,7 +58,7 @@ function createLeftMsg(human_name,msg){
     wHTML +=(human_name);
     wHTML +=('</span>');
     wHTML +=('<span class="direct-chat-timestamp pull-right">'+date+'</span>');
-    wHTML +=('</div><!-- /.direct-chat-info -->');
+    wHTML +=('</div>');
     wHTML +=('<img class="direct-chat-img" src="./dist/img/user1-128x128.jpg" alt="User image">');
     wHTML +=('<div class="direct-chat-text bg-white">');
     wHTML += cleanChat(msg);
@@ -100,11 +107,15 @@ function createRightMsg(ai_name,msg,error) {
         height = parseInt(height) + 5;
         $('#chat').scrollTop(height);
     }
-    
-    if ( document.getElementById('speech-option').value == '0')
+
+
+    if ( speechResponse == 1)
         speak(msg);
     else
-        enableChat(true);
+        enableChat();
+
+    if (isChrome)
+        unlockSpeechOption();
 }
 
 
@@ -135,50 +146,62 @@ function requestAnswerAI(ai_name, question) {
     }
 }
 
-function enableChat(flag){
-    if(flag) {
-        document.getElementById('message').disabled = false;
-        document.getElementById('message').value = '';
-        document.getElementById("message").focus();
-        chat = (chat+1)%(2);
-    }
-    else{
-        document.getElementById('message').disabled = true;
-        document.getElementById('message').value = '';
-    }
+function enableChat(){
+    document.getElementById('bodyChat').style.cursor = 'auto';
+    document.getElementById('message').disabled = false;
+    document.getElementById('message').value = '';
+    document.getElementById("message").focus();
+
+    // release block for chatting
+    chatSemaphore = (chatSemaphore+1)%(2);
 }
 
+function disableChat(){
+    document.getElementById('bodyChat').style.cursor = 'progress';
+    document.getElementById('message').disabled = true;
+    document.getElementById('message').value = '';
+}
 
-function enableSpeech(flag){
-    if(flag) {
-        // document.getElementById('microphone').onclick = startDictation(+ human_name +' \', \' '+ ai_name +' \'";
+function activeSpeechButton(){
+    if (speechResponse == 1) {
+        document.getElementById('btnSpeech').addEventListener('click', start);
+        document.getElementById('btnSpeech').style.cursor = 'pointer';
+        document.getElementById('microphone').className = ('fa fa-microphone text-red');
+
         document.getElementById('microphone').disabled = false;
-        document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-red');
-    }
-    else{
-        document.getElementById('microphone').disabled = true;
-        document.getElementById('microphone').setAttribute('class', 'fa fa-microphone text-coral');
     }
 }
 
+function deactiveSpeechButton(){
+    document.getElementById('microphone').disabled = true;
+
+    document.getElementById('btnSpeech').removeEventListener('click', start);
+    document.getElementById('btnSpeech').style.cursor = 'not-allowed';
+    document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
+
+}
+
+function lockSpeechOption(){
+    document.getElementById('speech-option').setAttribute('class','disabled');
+    document.getElementById('speech-option').setAttribute('onClick','');
+}
+
+function unlockSpeechOption(){
+    document.getElementById('speech-option').setAttribute('class','');
+    document.getElementById('speech-option').setAttribute('onClick','speechOption(this.value)');
+}
 
 function speechOption(value){
-    speechResponse = (value+1)%(2);
-    if ( speechResponse == 1) {
-        document.getElementById('speech-option').value = '1';
-        document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
-        document.getElementById('btnSpeech').style.cursor = 'default';
-
-        document.getElementById('microphone').disabled = true;
-        document.getElementById('btnSpeech').removeEventListener('click', start);
+    if ( speechResponse == 0) {
+        speechResponse = (speechResponse+1)%(2);
+        activeSpeechButton();
     }
     else {
-        document.getElementById('speech-option').value = '0';
-        document.getElementById('microphone').disabled = false;
-        document.getElementById('microphone').className = ('fa fa-microphone text-red');
-        document.getElementById('btnSpeech').addEventListener('click', start);
+        // deactive speech buttons
+        speechResponse = (speechResponse+1)%2;
+        deactiveSpeechButton();
+        stopSynthesis();
     }
-
     $('#speech-icon').toggleClass("text-light-blue");
     $('#speech-text').toggleClass("text-light-blue");
 }

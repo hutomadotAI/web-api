@@ -26,6 +26,9 @@
             case 'start_training' :
                 return('<span class="label label-warning">Start</span>');
                 break;
+            case 'training_in_progress' :
+                return('<span class="label label-primary">Training in progress</span>');
+                break;
             case 'training_completed' :
                 return('<span class="label label-success">Trained</span>');
                 break;

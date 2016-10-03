@@ -6,7 +6,7 @@ function wizardNext() {
     $('#btnCancel').prop('disabled',true);
 
     if(isContainInvalidCharacters($('#ai_name').val())) {
-        msgAlertNameAI(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 character and without spaces');
+        msgAlertNameAI(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 _ or -');
         inputsActiveDeactive(false);
         return;
     }
@@ -41,7 +41,7 @@ function inputsActiveDeactive(flag){
 }
 
 function isContainInvalidCharacters(txt) {
-    var letters = /^[0-9a-zA-Z]+$/;
+    var letters = /^[0-9a-zA-Z \-'_]+$/;
     if (letters.test(txt))
         return false;
     return true;

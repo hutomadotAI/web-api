@@ -13,7 +13,7 @@
         Howdy! Thanks for signing up with our tech preview. You are now just seconds away from creating your own conversational AI powered by deep learning. If you need help feel free to email us at hello@email.com
         <br/><br/>
         <form method="POST" name="startForm" action="./newAI.php">
-            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI" style="width: 120px;">Create AI</button>
+            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI" style="width: 120px;"> <i class="fa fa-user-plus" ></i> Create AI</button>
         </form>
         <br/><br/>
 

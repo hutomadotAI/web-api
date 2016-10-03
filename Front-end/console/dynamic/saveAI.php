@@ -2,7 +2,7 @@
     require '../../pages/config.php';
 
     if ( !\hutoma\console::isSessionActive()) {
-        \hutoma\console::redirect('./error.php?err=1');
+        \hutoma\console::redirect('./error.php?err=101');
         exit;
     }
 
@@ -54,7 +54,7 @@
     }
     else{
         unset($_response);
-        \hutoma\console::redirect('./error.php?err=5');
+        \hutoma\console::redirect('../error.php?err=201');
         exit;
     }
 

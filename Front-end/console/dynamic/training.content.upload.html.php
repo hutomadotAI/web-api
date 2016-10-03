@@ -21,6 +21,23 @@
                 <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
                 <span id="msgAlertUploadFile">Before start training you need upload your text file</span>
             </div>
+
+            check our <a data-toggle="collapse"  href="#collapseVideoTutorialTraining">Training video tutorial</a>
+            <p></p>
+
+            <div id="collapseVideoTutorialTraining" class="panel-collapse collapse">
+                <div class="box-body flat" >
+                    <div class="overlay center-block">
+                        <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
+                            <iframe
+                                src="//www.youtube.com/embed/N4IMIpgUVis?controls=1&hd=1&enablejsapi=1"
+                                frameborder="0" allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="tab-pane" id="trainingbook">
@@ -35,6 +52,23 @@
                 <i class="icon fa fa-check" id="iconAlertUploadStructure"></i>
                 <span id="msgAlertUploadStructure">Before start training you need upload your complex text file</span>
             </div>
+
+            check our <a data-toggle="collapse"  href="#collapseVideoTutorialTrainingBook">Training video tutorial</a>
+            <p></p>
+
+            <div id="collapseVideoTutorialTrainingBook" class="panel-collapse collapse">
+                <div class="box-body flat" >
+                    <div class="overlay center-block">
+                        <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
+                            <iframe
+                                src="//www.youtube.com/embed/N4IMIpgUVis?controls=1&hd=1&enablejsapi=1"
+                                frameborder="0" allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
 
 
@@ -49,11 +83,13 @@
                 </div>
             
             <p></p>
-            <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadUrl">
 
+            <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadUrl">
                 <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
                 <span id="msgAlertUploadUrl">Before start training you need add a url</span>
             </div>
+
+
         </div>
        
 
@@ -62,4 +98,5 @@
 
 
 </div>
+
 

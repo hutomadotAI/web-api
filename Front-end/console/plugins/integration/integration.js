@@ -3,7 +3,7 @@ function showIntegrations(str){
     wHTML += ('<div class="box-body">');
 
     for (var x in integrations) {
-      if ( (str!=" ") && ( (str.length==0) || (integrations[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  { 
+        if ( (str!=" ") && ( (str.length==0) || (integrations[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
        
             wHTML += ('<div class="box-body bg-white" style=" border: 1px solid #d2d6de;">');
             wHTML += ('<div class="row">');
@@ -40,8 +40,6 @@ function showIntegrations(str){
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('<p></p>');
-
-      
         
     }
   }

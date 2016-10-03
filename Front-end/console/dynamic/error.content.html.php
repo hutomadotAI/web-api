@@ -21,10 +21,6 @@ if (isset($_GET['err'])) {
             $msg ='RESPONSE JSON USER DOMAINS ERROR';
             $details =' We could not find the data you were looking for';
             break;
-        case 5 :
-            $msg ='RESPONSE JSON CREATE AI ERROR';
-            $details =' We could not find the data you were looking for';
-            break;
         case 6 :
             $msg ='NO CURRENT AI SET';
             $details =' We could not find the data you were looking for';
@@ -35,10 +31,6 @@ if (isset($_GET['err'])) {
             break;
         case 8 :
             $msg ='JSON list of AIs error';
-            $details =' We could not find the data you were looking for';
-            break;
-        case 9 :
-            $msg ='JSON Delete AI ERROR';
             $details =' We could not find the data you were looking for';
             break;
         case 0 :
@@ -75,6 +67,86 @@ if (isset($_GET['err'])) {
             break;
         case 18 :
             $msg ='AI TRAINING GET INF4O ERROR';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 100 :
+            $msg ='SESSION USER INFO FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 101 :
+            $msg ='SESSION EXPIRED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 102 :
+            $msg ='NAVIGATION ID MISSING';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 103 :
+            $msg ='DOMAINS GET INFO ERROR';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 104 :
+            $msg ='INTEGRATION GET INFO ERROR';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 110 :
+            $msg ='POSTING NEW AI INFO FOR UPLOAD FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 150 :
+            $msg ='COOKIES NOT ACTIVATED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 200 :
+            $msg ='GET INFO AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 201 :
+            $msg ='CREATE AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 202 :
+            $msg ='UPDATE AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 203 :
+            $msg ='DELETE AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 301 :
+            $msg ='INTERNAL ERROR - CREATE AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 302 :
+            $msg ='INTERNAL ERROR - GET MULTIPLE AIs INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 303 :
+            $msg ='INTERNAL ERROR - GET SINGLE AI INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 304 :
+            $msg ='INTERNAL ERROR - UPDATE AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 305 :
+            $msg ='INTERNAL ERROR - DELETE AI FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 330 :
+            $msg ='INTERNAL ERROR - REQUEST CHATTING FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 350 :
+            $msg ='INTERNAL ERROR - UPLOAD FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 360 :
+            $msg ='INTERNAL ERROR - REQUEST DOMAINS INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 370 :
+            $msg ='INTERNAL ERROR - REQUEST INTEGRATION INFORMATION FAILED';
             $details =' We could not find the data you were looking for';
             break;
         default:

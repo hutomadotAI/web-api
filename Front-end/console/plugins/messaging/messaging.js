@@ -138,6 +138,35 @@ function msgAlertProgressBar(alarm,msg){
     document.getElementById('msgAlertProgressBar').innerText = msg;
 }
 
+
+
+function msgAlertUpdateAI(alarm,msg){
+    document.getElementById('containerMsgAlertUpdateAI').style.display = 'block';
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
+            break;
+        case 1:
+            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
+            break;
+        case 2:
+            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertUpdateAI").attr('class', 'icon fa fa-warning');
+            break
+        case 3:
+            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-success');
+            $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
+            break
+        case 4:
+            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-primary');
+            $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
+            break
+    }
+    document.getElementById('msgAlertUpdateAI').innerText = msg;
+}
+
 function closingMsgAlertProgressBarTemporized() {
     setTimeout(function(){ document.getElementById('containerMsgAlertProgressBar').style.display = 'none'; }, 6000);
 }

@@ -1,9 +1,20 @@
 <?php
     require '../pages/config.php';
 
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details'] = \hutoma\console::getUser();
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[ $_SESSION['navigation_id'] ]['user_details']);
+    if ( !\hutoma\console::isSessionActive()) {
+        \hutoma\console::redirect('./error.php?err=100');
+        exit;
+    }
 
+    /*
+    if ( !isset($_SESSION['navigation_id'])) {
+        \hutoma\console::redirect('./error.php?err=102');
+        exit;
+    }
+    */
+
+    $_SESSION[ $_SESSION['navigation_id'] ]['user_details'] = \hutoma\console::getUser();
+    //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[ $_SESSION['navigation_id'] ]['user_details']);
     $response_getAIs = \hutoma\console::getAIs(\hutoma\console::getDevToken());
 ?>
 
@@ -43,6 +54,7 @@
     <div class="content-wrapper">
     <section class="content">
     <?php
+
         include './dynamic/home.content.start.html.php';
         include './dynamic/home.viewall.html.php';
     ?>

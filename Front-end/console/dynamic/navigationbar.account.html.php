@@ -1,19 +1,19 @@
 <?php
-
-  $username = 'unknown';
-  $plan = 'not defined';
+  // default values
+  $username = 'not available';
+  $plan = 'not available';
   $joined ='not available';
 
-  try {
-    if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['username']))
-      $username = $_SESSION[$_SESSION['navigation_id']]['user_details']['username'];
-    if (isset($_SESSION[$_SESSION['navigation_id']]['user_plan']))
-      $plan = $_SESSION[$_SESSION['navigation_id']]['user_plan'];
-    if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"]))
-      $joined = $_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"];
-  }catch(Exception $e){
+  if ( isset($_SESSION['navigation_id'])) {
+        if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['username']))
+          $username = $_SESSION[$_SESSION['navigation_id']]['user_details']['username'];
+        if (isset($_SESSION[$_SESSION['navigation_id']]['user_plan']))
+          $plan = $_SESSION[$_SESSION['navigation_id']]['user_plan'];
+        if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"]))
+          $joined = $_SESSION[$_SESSION['navigation_id']]['user_details']["user_joined"];
 
   }
+
 ?>
 
 <div class="navbar-custom-menu">

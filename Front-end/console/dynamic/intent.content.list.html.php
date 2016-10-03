@@ -2,7 +2,7 @@
 
     <div class="box-header with-border">
         <i class="fa fa-commenting-o text-green"></i>
-        <h3 class="box-title">Entities List</h3>
+        <h3 class="box-title">Intents List</h3>
         <a data-toggle="collapse"  href="#collapseIntentsListInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
