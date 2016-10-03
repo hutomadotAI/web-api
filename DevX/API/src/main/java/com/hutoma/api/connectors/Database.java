@@ -37,9 +37,10 @@ public class Database {
         this.callProvider = callProvider;
     }
 
-    public boolean createDev(String username, String email, String password, String passwordSalt, String name, String attempt, String dev_token, int planId, String devid) throws DatabaseException {
+
+    public boolean createDev(String username, String email, String password, String passwordSalt, String first_name, String last_name, String dev_token, int plan_id, String dev_id, String client_token) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
-            call.initialise("addUserComplete", 10).add(username).add(email).add(password).add(passwordSalt).add(name).addTimestamp().add(attempt).add(dev_token).add(planId).add(devid);
+            call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt).add(first_name).add(last_name).add(dev_token).add(plan_id).add(dev_id).add(client_token);
             return call.executeUpdate() > 0;
         }
     }

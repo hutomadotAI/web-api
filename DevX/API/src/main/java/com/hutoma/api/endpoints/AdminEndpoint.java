@@ -36,28 +36,25 @@ public class AdminEndpoint {
     public Response adminPost(
             @Context SecurityContext securityContext,
             @DefaultValue("ROLE_FREE") @QueryParam("role") String securityRole,
-            @DefaultValue("") @QueryParam("devid") String developerID,
             @DefaultValue("") @QueryParam("username") String username,
             @DefaultValue("") @QueryParam("email") String email,
             @DefaultValue("") @QueryParam("password") String password,
             @DefaultValue("") @QueryParam("password_salt") String passwordSalt,
-            @DefaultValue("") @QueryParam("name")  String name,
-            @DefaultValue("") @QueryParam("attempt") String attempt,
-            @DefaultValue("") @QueryParam("dev_token") String developerToken,
-            @DefaultValue("1") @QueryParam("plan_id") int planId,
-            @DefaultValue("") @QueryParam("dev_id") String dev_id) {
+            @DefaultValue("") @QueryParam("first_name")  String first_name,
+            @DefaultValue("") @QueryParam("last_name") String last_name,
+            @DefaultValue("1") @QueryParam("plan_id") int planId) {
 
-        ApiResult result = adminLogic.createDev(securityContext, securityRole,
-                developerID,
+        ApiResult result = adminLogic.createDev(
+                securityContext,
+                securityRole,
                 username,
                 email,
                 password,
                 passwordSalt,
-                name,
-                attempt,
-                developerToken,
-                planId,
-                dev_id);
+                first_name,
+                last_name,
+                planId
+        );
         return result.getResponse(serializer).build();
     }
 
@@ -66,6 +63,17 @@ public class AdminEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response delete_dev(
+            @Context SecurityContext securityContext,
+            @DefaultValue("") @QueryParam("devid") String devid) {
+        ApiResult result = adminLogic.deleteDev(securityContext, devid);
+        return result.getResponse(serializer).build();
+    }
+
+
+
+    @Secured({Role.ROLE_ADMIN})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getToken(
             @Context SecurityContext securityContext,
             @DefaultValue("") @QueryParam("devid") String devid) {
         ApiResult result = adminLogic.deleteDev(securityContext, devid);
