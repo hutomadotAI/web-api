@@ -10,8 +10,8 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.MISSING_RESPONSE;
-import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.NO_CONTENT;
+import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
+import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
 import static junitparams.JUnitParamsRunner.$;
 
 
@@ -34,7 +34,7 @@ public class TestTrainingLogicParser {
 
     @Before
     public void setup() {
-        logic = new TrainingLogic(null, null, null, null, null, null, null, null);
+        logic = new TrainingLogic(null, null, null, null, null, null, null);
     }
 
     private String parse(String[] input) {
@@ -49,7 +49,7 @@ public class TestTrainingLogicParser {
     @Test
     public void testParse_noInputText() {
         TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList("", "", ""));
-        List<String> eventsForNoResponse = result.getEventsFor(NO_CONTENT);
+        List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_NO_CONTENT);
         Assert.assertEquals(1, eventsForNoResponse.size());
         Assert.assertEquals("", result.getTrainingText());
     }
@@ -99,7 +99,7 @@ public class TestTrainingLogicParser {
     @Parameters(method = "noResponseDataProvider")
     public void testParse_NoResponse(final String[] textLines) {
         TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList(textLines));
-        List<String> eventsForNoResponse = result.getEventsFor(MISSING_RESPONSE);
+        List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
         Assert.assertEquals(1, eventsForNoResponse.size());
         Assert.assertEquals("Q", eventsForNoResponse.get(0));
     }
@@ -108,14 +108,14 @@ public class TestTrainingLogicParser {
     public void testParse_NoResponse_multiple() {
         // In separate conversations
         TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList("Q1", "", "Q2", "", "Q3", "R3"));
-        List<String> eventsForNoResponse = result.getEventsFor(MISSING_RESPONSE);
+        List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
         Assert.assertEquals(2, eventsForNoResponse.size());
         Assert.assertEquals("Q1", eventsForNoResponse.get(0));
         Assert.assertEquals("Q2", eventsForNoResponse.get(1));
 
         // Within a conversation and at the end
         result = logic.parseTrainingFile(Arrays.asList("Q1", "R1", "Q2", "", "Q3", "R3", "Q4", "", "Q5"));
-        eventsForNoResponse = result.getEventsFor(MISSING_RESPONSE);
+        eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
         Assert.assertEquals(3, eventsForNoResponse.size());
         Assert.assertEquals("Q2", eventsForNoResponse.get(0));
         Assert.assertEquals("Q4", eventsForNoResponse.get(1));

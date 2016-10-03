@@ -1,9 +1,8 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ResultEvent;
+import com.hutoma.api.containers.sub.ResultEventList;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,15 +12,7 @@ import java.util.stream.Collectors;
 final class TrainingFileParsingResult {
 
     private String trainingText;
-    private List<AbstractMap.SimpleEntry<ParsingResultEvent, String>> events = new ArrayList<>();
-
-    /**
-     * Gets the JSON for the events.
-     * @return the events in JSON
-     */
-    String getJson(JsonSerializer serializer) {
-        return serializer.serialize(events);
-    }
+    private ResultEventList events = new ResultEventList();
 
     /**
      * Gets the training text (line separated).
@@ -52,7 +43,7 @@ final class TrainingFileParsingResult {
      * @param eventType the event type
      * @return the list of events
      */
-    List<String> getEventsFor(ParsingResultEvent eventType) {
+    List<String> getEventsFor(ResultEvent eventType) {
         return events.stream()
                 .filter(x -> x.getKey() == eventType)
                 .map(e -> e.getValue())
@@ -64,7 +55,7 @@ final class TrainingFileParsingResult {
      * @param eventIndex the event position
      * @return the event type
      */
-    ParsingResultEvent getEventType(final int eventIndex) {
+    ResultEvent getEventType(final int eventIndex) {
         return this.events.get(eventIndex).getKey();
     }
 
@@ -81,7 +72,7 @@ final class TrainingFileParsingResult {
      * Gets all the events.
      * @return the list of all the events
      */
-    List<AbstractMap.SimpleEntry<ParsingResultEvent, String>> getEvents() {
+    ResultEventList getEvents() {
         return this.events;
     }
 
@@ -90,8 +81,8 @@ final class TrainingFileParsingResult {
      * @param eventType the event type
      * @param text the event text
      */
-    void addEvent(final ParsingResultEvent eventType, final String text) {
-        this.events.add(new AbstractMap.SimpleEntry<>(eventType, text));
+    void addEvent(final ResultEvent eventType, final String text) {
+        events.addEvent(eventType, text);
     }
 
     /**
@@ -101,14 +92,7 @@ final class TrainingFileParsingResult {
      */
     boolean hasFatalEvents() {
         return this.events.stream().anyMatch(e ->
-                e.getKey() == ParsingResultEvent.NO_CONTENT);
+                e.getKey() == ResultEvent.UPLOAD_NO_CONTENT);
     }
 
-    /**
-     * Event types.
-     */
-    enum ParsingResultEvent {
-        MISSING_RESPONSE,
-        NO_CONTENT
-    }
 }

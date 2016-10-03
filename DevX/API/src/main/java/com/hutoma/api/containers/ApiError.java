@@ -1,5 +1,6 @@
 package com.hutoma.api.containers;
 
+import com.hutoma.api.containers.sub.ResultEventList;
 import com.hutoma.api.validation.Validate;
 import com.hutoma.api.containers.sub.Status;
 
@@ -10,9 +11,26 @@ import java.net.HttpURLConnection;
  */
 public class ApiError extends ApiResult {
 
+    /***
+     * Create an error result
+     * @param code http error code
+     * @param info some textual description of what just happened
+     * @return an error response
+     */
     protected static ApiError getError(int code, String info) {
+        return ApiError.getError(code, info, null);
+    }
+
+    /***
+     * Create an error result with additionalInfo in the form of an array of resultevents
+     * @param code http error code
+     * @param info some textual description of what just happened
+     * @param errors the resultevents
+     * @return an error response
+     */
+    protected static ApiError getError(int code, String info, ResultEventList errors) {
         ApiError error = new ApiError();
-        error.status = (new Status()).setCode(code).setInfo(info);
+        error.status = (new Status()).setCode(code).setInfo(info).setAdditionalInfo(errors);
         return error;
     }
 
@@ -27,23 +45,42 @@ public class ApiError extends ApiResult {
     }
 
     public static ApiError getInternalServerError() {
-        return ApiError.getInternalServerError("Internal server error");
+        return ApiError.getInternalServerError("Internal Server Error");
     }
 
     public static ApiError getPayloadTooLarge() {
-        return ApiError.getError(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, "Payload too large");
+        return ApiError.getError(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, "Payload Too Large");
     }
 
+    /***
+     * Create en error response for a bad request, with a list of resultevents to detail what went wrong
+     * @param reason textual representation of what went wrong
+     * @param errorDetails list of resultevents
+     * @return error response
+     */
+    public static ApiError getBadRequest(String reason, ResultEventList errorDetails) {
+        return ApiError.getError(HttpURLConnection.HTTP_BAD_REQUEST, reason, errorDetails);
+    }
+
+    /***
+     * General case of bad request, with a textual reason
+     * @param reason textual representation of what went wrong
+     * @return error response
+     */
     public static ApiError getBadRequest(String reason) {
-        return ApiError.getError(HttpURLConnection.HTTP_BAD_REQUEST, reason);
+        return ApiError.getBadRequest(reason, null);
     }
 
+    /***
+     * General case of bad request
+     * @return error response
+     */
     public static ApiError getBadRequest() {
-        return ApiError.getBadRequest("Bad request");
+        return ApiError.getBadRequest("Bad Request", null);
     }
 
     public static ApiError getBadRequest(Validate.ParameterValidationException pve) {
-        return ApiError.getBadRequest(pve.getMessage());
+        return ApiError.getBadRequest(pve.getMessage(), null);
     }
 
     public static ApiError getNotFound(String message) {
@@ -51,7 +88,7 @@ public class ApiError extends ApiResult {
     }
 
     public static ApiError getNotFound() {
-        return ApiError.getNotFound("not found");
+        return ApiError.getNotFound("Not Found");
     }
 
     public static ApiError getNoResponse(String message) {
@@ -59,7 +96,7 @@ public class ApiError extends ApiResult {
     }
 
     public static ApiError getRateLimited() {
-        return ApiError.getError(429, "too many requests");
+        return ApiError.getError(429, "Too Many Requests");
     }
 
 }

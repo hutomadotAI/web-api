@@ -33,7 +33,7 @@ function enableUploadFile() {
         $('#btnUploadFile').prop('disabled', true);
     else
         $('#btnUploadFile').prop('disabled', false);
-    msgAlertUploadFile(0,'Now you can upload your file');
+    msgAlertUploadFile(0,'You can now upload your file');
 }
 
 function enableUploadStructure() {
@@ -42,7 +42,7 @@ function enableUploadStructure() {
         $("#btnUploadStructure").prop("disabled", true);
     else
         $("#btnUploadStructure").prop("disabled", false);
-    msgAlertUploadStructure(0,'Now you can upload your complex file');
+    msgAlertUploadStructure(0,'You can now upload your complex file');
 
 
     // for demo
@@ -74,7 +74,7 @@ function getUploadWarnings(info) {
     var maxItemsToShow = 5;
     var itemsToShow = Math.min(info.length, maxItemsToShow);
     for (var i = 0; i < itemsToShow; i++) {
-        if (info[i]['key'] === 'MISSING_RESPONSE') {
+        if (info[i]['key'] === 'UPLOAD_MISSING_RESPONSE') {
             warnings.push("Missing response for '" + info[i]['value'] + "'");
         }
     }
@@ -86,7 +86,7 @@ function getUploadWarnings(info) {
 
 function haNoContentError(info) {
     for (var i = 0; i < info.length; i++) {
-        if (info[i]['key'] === 'NO_CONTENT') {
+        if (info[i]['key'] === 'UPLOAD_NO_CONTENT') {
             return true;
         }
     }
@@ -96,7 +96,7 @@ function haNoContentError(info) {
 function uploadFile(){
     if ( $('#inputfile').val() == null ||  $('#inputfile').val() == "") {
         $("#btnUploadFile").prop("disabled", true);
-        msgAlertUploadFile(1,'You need choose file first');
+        msgAlertUploadFile(1,'You need to choose a file first');
         return;
     };
 
@@ -130,25 +130,25 @@ function uploadFile(){
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
                     if (additionalInfo != null) {
-                        uploadWarnings = getUploadWarnings(JSON.parse(JSONdata['status']['additionalInfo']));
+                        uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
                     }
                     if (uploadWarnings != null && uploadWarnings.length > 0) {
-                        msgAlertUploadFile(4, 'File Uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
+                        msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
                     } else {
-                        msgAlertUploadFile(4, 'File Uploaded!!!');
+                        msgAlertUploadFile(4, 'File uploaded');
                     }
                     resetPhaseOneComponents();
                     updatePhaseOneComponents();
                 } else {
-                    if (statusCode == 400 && haNoContentError(JSON.parse(JSONdata['status']['info']))) {
-                        msgAlertUploadFile(2, 'File not uploaded for training as no content was found!');
+                    if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
+                        msgAlertUploadFile(2, 'File not uploaded. No content was found.');
                     } else {
-                        msgAlertUploadFile(2, 'Something is gone wrong. File not uploaded');
+                        msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded');
                     }
                     $("#btnUploadFile").prop("disabled", false);
                 }
-            }catch (e){
-                msgAlertUploadFile(2,'Generic error accured');
+            } catch (e) {
+                msgAlertUploadFile(2,'A generic error occurred');
                 $("#btnUploadFile").prop("disabled", false);
             }
         }
@@ -161,7 +161,7 @@ function uploadFile(){
 function uploadStructure(){
     if ( $('#inputstructure').val() == null ||  $('#inputstructure').val() == "") {
         $("#btnUploadStructure").prop("disabled", true);
-        msgAlertUploadStructure(1,'You need choose complex file first');
+        msgAlertUploadStructure(1,'You need to choose a complex file first');
         return;
     }
 
@@ -195,11 +195,11 @@ function uploadStructure(){
                     updatePhaseOneComponents();
                 }
                 else{
-                    msgAlertUploadStructure(2,'Something is gone wrong. Complex file not uploaded');
+                    msgAlertUploadStructure(2,'Something has gone wrong. Complex file not uploaded');
                     $("#btnUploadStructure").prop("disabled", false);
                 }
             }catch (e){
-                msgAlertUploadStructure(2,'Something is gone wrong. JSON error on complex file transfer');
+                msgAlertUploadStructure(2,'Something has gone wrong; JSON error on complex file transfer');
                 $("#btnUploadStructure").prop("disabled", false);
             }
         }
@@ -212,7 +212,7 @@ function uploadStructure(){
 function uploadUrl(){
     if ( $('#inputurl').val() == null ||  $('#inputurl').val() == "") {
         $("#btnUploadUrl").prop("disabled", true);
-        msgAlertUploadStructure(1,'You need choose complex file first');
+        msgAlertUploadStructure(1,'You need to choose a complex file first');
         return;
     }
     else
@@ -237,9 +237,9 @@ function uploadUrl(){
                 if (JSONdata['status']['code'] === 200)
                     msgAlertUploadUrl(4,'Video Uploaded!!!');
                 else
-                    msgAlertUploadUrl(2,'Something is gone wrong. Video not uploaded');
+                    msgAlertUploadUrl(2,'Something has gone wrong. Video not uploaded');
             }catch (e){
-                msgAlertUploadUrl(2,'Something is gone wrong. JSON error on Video transfer');
+                msgAlertUploadUrl(2,'Something has gone wrong. JSON error on video transfer');
             }
             $("#btnUploadUrl").prop("disabled", false);
         }
@@ -272,7 +272,7 @@ function updatePhaseOneComponents() {
 }
 
 function activePhaseOne(){
-    msgAlertUploadFile(0, 'A file is already loaded!');
+    msgAlertUploadFile(0, 'A file is already loaded');
     document.getElementById('progress-upload-file').style.width = '100%';
     document.getElementById('status-bagde-upload').innerHTML = '100%';
 }
@@ -291,7 +291,7 @@ function activePhaseTwo(){
 
     document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
 
-    msgAlertProgressBar(0,'Now you can talk with your AI');
+    msgAlertProgressBar(0,'You can now talk to your AI.');
     //closingMsgAlertProgressBarTemporized();
     block_server_ping = false;
 }
@@ -342,10 +342,10 @@ function pingErrorCall(){
                     document.getElementById('status-bagde-training').innerHTML = parseInt(new_width) + '%';
                 }
                 else {
-                    msgAlertUploadStructure(2,'Something is gone wrong. Update status training ERROR');
+                    msgAlertUploadStructure(2,'Something has gone wrong. Update status training ERROR');
                 }
             }catch (e){
-                msgAlertUploadStructure(2,'Something is gone wrong. Update status training ERROR');
+                msgAlertUploadStructure(2,'Something has gone wrong. Update status training ERROR');
             }
         }
     };

@@ -1,7 +1,6 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
@@ -22,9 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.MISSING_RESPONSE;
-import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.NO_CONTENT;
-
+import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
+import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
 
 /**
  * Created by mauriziocibelli on 28/04/16.
@@ -32,7 +30,6 @@ import static com.hutoma.api.logic.TrainingFileParsingResult.ParsingResultEvent.
 public class TrainingLogic {
 
     Config config;
-    JsonSerializer jsonSerializer;
     MessageQueue messageQueue;
     HTMLExtractor htmlExtractor;
     Database database;
@@ -52,10 +49,9 @@ public class TrainingLogic {
 
 
     @Inject
-    public TrainingLogic(Config config, JsonSerializer jsonSerializer, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
+    public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
                          Database database, Tools tools, Logger logger, Validate validate) {
         this.config = config;
-        this.jsonSerializer = jsonSerializer;
         this.messageQueue = messageQueue;
         this.htmlExtractor = htmlExtractor;
         this.database = database;
@@ -84,8 +80,7 @@ public class TrainingLogic {
                     TrainingFileParsingResult result = parseTrainingFile(source);
                     // Bail out if there are fatal events during the parsing
                     if (result.hasFatalEvents()) {
-
-                        return ApiError.getBadRequest(result.getJson(this.jsonSerializer));
+                        return ApiError.getBadRequest("upload parsing errors", result.getEvents());
                     }
                     if (!database.updateAiTrainingFile(aiid, result.getTrainingText())) {
                         return ApiError.getNotFound("ai not found");
@@ -95,7 +90,7 @@ public class TrainingLogic {
                         messageQueue.pushMessageClusterSplit(devid, aiid, config.getClusterMinProbability());
                     }
                     return new ApiResult().setSuccessStatus("upload accepted",
-                            result.getEventCount() == 0 ? null : result.getJson(this.jsonSerializer));
+                            result.getEventCount() == 0 ? null : result.getEvents());
 
                 // 1 = training file is a document
                 case 1:
@@ -231,7 +226,7 @@ public class TrainingLogic {
                     // ignore the last question
                     if (!humanTalkingNow) {
                         removeLastConversationEntry(validConversation);
-                        result.addEvent(MISSING_RESPONSE, lastHumanSentence);
+                        result.addEvent(UPLOAD_MISSING_RESPONSE, lastHumanSentence);
                     }
                     // New conversation
                     validConversation.add(EMPTY_STRING);
@@ -270,7 +265,7 @@ public class TrainingLogic {
         if (!humanTalkingNow) {
             // remove the last sentence
             removeLastConversationEntry(validConversation);
-            result.addEvent(MISSING_RESPONSE, lastHumanSentence);
+            result.addEvent(UPLOAD_MISSING_RESPONSE, lastHumanSentence);
         }
 
         if (validConversation.stream().anyMatch(s -> !s.isEmpty())) {
@@ -278,7 +273,7 @@ public class TrainingLogic {
             validConversation.stream().forEach(s -> parsedFile.append(s).append(EOL));
             result.setTrainingText(parsedFile.toString());
         } else {
-            result.addEvent(NO_CONTENT, null);
+            result.addEvent(UPLOAD_NO_CONTENT, null);
             result.setTrainingText(EMPTY_STRING);
         }
 

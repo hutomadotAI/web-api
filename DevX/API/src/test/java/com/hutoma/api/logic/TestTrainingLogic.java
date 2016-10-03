@@ -28,7 +28,6 @@ import static org.mockito.Mockito.*;
 public class TestTrainingLogic {
 
     Config fakeConfig;
-    JsonSerializer fakeSerializer;
     MessageQueue fakeMessageQueue;
     Database fakeDatabase;
     Tools fakeTools;
@@ -49,7 +48,6 @@ public class TestTrainingLogic {
     @Before
     public void setup() throws Database.DatabaseException {
 
-        this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         this.fakeDatabase = mock(Database.class);
@@ -63,7 +61,7 @@ public class TestTrainingLogic {
         when(fakeValidation.textSanitizer(anyString())).thenCallRealMethod();
         this.fakeExtractor = mock(HTMLExtractor.class);
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
-        logic = new TrainingLogic(fakeConfig, fakeSerializer, fakeMessageQueue, fakeExtractor, fakeDatabase, fakeTools, fakeLogger, fakeValidation);
+        logic = new TrainingLogic(fakeConfig, fakeMessageQueue, fakeExtractor, fakeDatabase, fakeTools, fakeLogger, fakeValidation);
 
         when(fakeConfig.getMaxUploadSize()).thenReturn(65536L);
         when(fakeConfig.getMaxClusterLines()).thenReturn(65536);
