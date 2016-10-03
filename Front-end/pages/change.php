@@ -16,9 +16,9 @@ require "config.php";
         $retype_password = $_POST['retype_password'];
           
         if($new_password != $retype_password){
-          echo "<p><h2>Passwords Doesn't match</h2><p>The passwords you entered didn't match. Try again.</p></p>";
+          echo "<p><h2>Password don't match</h2><p>The passwords you entered don't match. Try again.</p></p>";
         }else if(\Fr\LS::login(\Fr\LS::getUser("username"), "", false, false) == false){
-          echo "<h2>Current Password Wrong!</h2><p>The password you entered for your account is wrong.</p>";
+          echo "<h2>Incorrect Password</h2><p>The password you entered for your account is wrong.</p>";
         }else{
           $change_password = \Fr\LS::changePassword($new_password);
           if($change_password === true){
@@ -26,7 +26,7 @@ require "config.php";
           }
         }
       }else{
-        echo "<p><h2>Password Fields was blank</h2><p>Form fields were left blank</p></p>";
+        echo "<p><h2>Password field was blank</h2><p>Form fields were left blank</p></p>";
       }
     }
     ?>

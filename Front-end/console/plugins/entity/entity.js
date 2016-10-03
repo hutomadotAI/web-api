@@ -11,7 +11,7 @@ function activeButtonCreate() {
             $("#btnCreateEntity").prop("disabled",true);
             break;
         case 0:
-            msgAlert(0,'In this section you can create different entitises.');
+            msgAlert(0,'In this section you can create different entities.');
             $("#btnCreateEntity").prop("disabled", false);
             break;
         case 1:
@@ -83,7 +83,7 @@ function showEntities(str){
     if (entities.length < 1)
         msgAlert(0,'No entities yet. Create the first one.');
     else
-        msgAlert(0,'In this section you can create different entitises.');
+        msgAlert(0,'In this section you can create different entities.');
 
     for (var x in entities) {
         if ( (str!=" ") && ( (str.length==0) || (entities[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {

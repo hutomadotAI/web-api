@@ -10,7 +10,7 @@ if (isset($_GET['err'])) {
             $details =' We could not find the data you were looking for';
             break;
         case 2 :
-            $msg ='POST AI VARIABILES INCOMPLETE';
+            $msg ='POST AI VARIABLES INCOMPLETE';
             $details =' We could not find the data you were looking for';
             break;
         case 3 :
@@ -26,7 +26,7 @@ if (isset($_GET['err'])) {
             $details =' We could not find the data you were looking for';
             break;
         case 7 :
-            $msg ='OVERFLOW list of seleted AIs';
+            $msg ='OVERFLOW list of selected AIs';
             $details =' We could not find the data you were looking for';
             break;
         case 8 :
@@ -58,11 +58,11 @@ if (isset($_GET['err'])) {
             $details =' We could not find the data you were looking for';
             break;
         case 16 :
-            $msg ='NEW INTENT NAME TRASMISSION FAILED';
+            $msg ='NEW INTENT NAME TRANSMISSION FAILED';
             $details =' We could not find the data you were looking for';
             break;
         case 17 :
-            $msg ='NEW ENTITY NAME TRASMISSION FAILED';
+            $msg ='NEW ENTITY NAME TRANSMISSION FAILED';
             $details =' We could not find the data you were looking for';
             break;
         case 18 :

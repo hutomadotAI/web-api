@@ -33,7 +33,7 @@
         </div>
         <div class="col-xs-12 center-block text-center">
 
-        Open our <a data-toggle="collapse"  href="#collapseFirstVideoTutorial"> video tutorial</a>
+        Open our <a data-toggle="collapse"  href="#collapseFirstVideoTutorial">video tutorial</a>
         <p></p>
 
                 <div id="collapseFirstVideoTutorial" class="panel-collapse collapse">

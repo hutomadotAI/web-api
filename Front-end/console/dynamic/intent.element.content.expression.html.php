@@ -28,7 +28,7 @@
          <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUserExpression">
              <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
              <i class="icon fa fa-check" id="iconAlertUserExpression"></i>
-             <span id="msgAlertUserExpression">You can add user expressions and save it</span>
+             <span id="msgAlertUserExpression">You can add user expressions and save them</span>
          </div>
 
              <div id="collapseExpressionInfo" class="panel-collapse collapse">
@@ -50,7 +50,7 @@
                              </div>
                          </section>
                          <p></p>
-                         need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                         need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
                      </div>
                  </div>
              </div>

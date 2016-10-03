@@ -286,7 +286,7 @@ function activePhaseTwo(){
     $('#trainingbar').prop('hidden', false);
 
     // force flashing initialization text
-    document.getElementById('status-training-file').innerText ='initilization';
+    document.getElementById('status-training-file').innerText ='initialising';
     document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
 
     document.getElementById('containerMsgAlertProgressBar').style.display = 'block';

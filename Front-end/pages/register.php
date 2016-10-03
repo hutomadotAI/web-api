@@ -110,7 +110,7 @@ body {
            if($response['success'] == false)
             {
                $msg ='<div class="alert alert-warning">';
-               $msg .='<i class="icon fa fa-exclamation"></i> You did not passed the captcha test';
+               $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
                $msg .='</div>';
             }
             else {
@@ -122,11 +122,11 @@ body {
                   $invite_code =$_POST['invite_code'];
 
                   $missingfields  ='<div class="alert alert-warning">';
-                  $missingfields .='<i class="icon fa fa-exclamation"></i> Some Fields were left blank.';
+                  $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
                   $missingfields .='</div>';
 
                   $passwordmismatch  ='<div class="alert alert-warning">';
-                  $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The Passwords you entered do not match.';
+                  $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
                   $passwordmismatch .='</div>';
 
                   $termsmsg  ='<div class="alert alert-warning">';

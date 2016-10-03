@@ -41,7 +41,7 @@
     </div>
 
     <div class="box-footer">
-        <span>need help? check our <a href='#' tabindex="-1">video tutorial </a> or email us <a href='#' tabindex="-1">hello@email.com</a></span>
+        <span>need help? check out our <a href='#' tabindex="-1">video tutorial </a> or email us <a href='#' tabindex="-1">hello@email.com</a></span>
 
     </div>
 

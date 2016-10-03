@@ -3,7 +3,7 @@
         <i class="fa fa-question-circle text-md text-yellow"></i>
     </div>
 </a>
-<label>Create new Answers</label>
+<label>Create new answers</label>
 <div class="box box-solid box-clean-fixed flat no-shadow">
     <div class="box-body">
         <div class="row margin">
@@ -19,11 +19,11 @@
             <section class="content-info" >
                 <div class="box-body">
                     <dt>What does this mean?</dt>
-                    <dd>By enabling this functionality you will let the AI decide when to follow pre-packaged answers vs creating new ones based on the trainig data you provide.</dd>
+                    <dd>By enabling this functionality you will let the AI decide when to follow pre-packaged answers vs creating new ones based on the training data you provide.</dd>
                 </div>
             </section>
             <p></p>
-            need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+            need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
         </div>
     </div>
 </div>

@@ -19,10 +19,10 @@
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadFile">
                 <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
-                <span id="msgAlertUploadFile">Before start training you need upload your text file</span>
+                <span id="msgAlertUploadFile">Upload a text file to begin training</span>
             </div>
 
-            check our <a data-toggle="collapse"  href="#collapseVideoTutorialTraining">Training video tutorial</a>
+            check out our <a data-toggle="collapse"  href="#collapseVideoTutorialTraining">Training video tutorial</a>
             <p></p>
 
             <div id="collapseVideoTutorialTraining" class="panel-collapse collapse">
@@ -50,10 +50,10 @@
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadStructure">
                 <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadStructure"></i>
-                <span id="msgAlertUploadStructure">Before start training you need upload your complex text file</span>
+                <span id="msgAlertUploadStructure">Upload a complex text file to begin training</span>
             </div>
 
-            check our <a data-toggle="collapse"  href="#collapseVideoTutorialTrainingBook">Training video tutorial</a>
+            check out our <a data-toggle="collapse"  href="#collapseVideoTutorialTrainingBook">Training video tutorial</a>
             <p></p>
 
             <div id="collapseVideoTutorialTrainingBook" class="panel-collapse collapse">
@@ -86,7 +86,7 @@
 
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadUrl">
                 <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
-                <span id="msgAlertUploadUrl">Before start training you need add a url</span>
+                <span id="msgAlertUploadUrl">Add a URL to begin training</span>
             </div>
 
 

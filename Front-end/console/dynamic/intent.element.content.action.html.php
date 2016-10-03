@@ -43,7 +43,7 @@
                          </div>
                      </section>
                      <p></p>
-                     need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                     need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
                  </div>
              </div>
          </div>

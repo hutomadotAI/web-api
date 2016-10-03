@@ -28,7 +28,7 @@
             <span id="msgAlertEntity"></span>
         </div>
 
-        check our <a data-toggle="collapse"  href="#collapseVideoTutorialEntity">entity video tutorial</a>
+        check out our <a data-toggle="collapse"  href="#collapseVideoTutorialEntity">entity video tutorial</a>
         <p></p>
         
     </div>
@@ -65,7 +65,7 @@
                     </div>
                 </section>
                 <p></p>
-                need help? check our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
             </div>
         </div>
     </div>

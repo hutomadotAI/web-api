@@ -34,7 +34,7 @@
 
 
         <div class="input-group">
-            <input type="text" id="message" placeholder="Type Message ..." class="form-control" onkeydown="keyboardChat(event)"  tabindex="-1">
+            <input type="text" id="message" placeholder="Type a message ..." class="form-control" onkeydown="keyboardChat(event)"  tabindex="-1">
 
             <div class="input-group-addon" id="btnSpeech" onMouseOver="this.style.cursor='pointer'">
                 <i id="microphone" style="font-size: 18px;" class="fa fa-microphone text-red"></i>

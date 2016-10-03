@@ -16,7 +16,7 @@ if(isset($_POST['action_login'])){
     if($login === false){
         $msg = array("Error", $loginerror);
     }else if(is_array($login) && $login['status'] == "blocked"){
-      $msg = array("Error", "Too many login attempts. You can attempt login after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
+      $msg = array("Error", "Too many login attempts. You can try again after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
     }
   }
 }
