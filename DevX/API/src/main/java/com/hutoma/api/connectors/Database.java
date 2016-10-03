@@ -4,6 +4,7 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import org.joda.time.DateTime;
 
@@ -249,6 +250,14 @@ public class Database {
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
+    }
+
+    /***
+     * Temporarily fix build break
+     * @return
+     */
+    public List<AiIntegration> getAiIntegrationList() throws DatabaseException {
+        throw new DatabaseException(new Exception("getAiIntegrationList unimplemented"));
     }
 
 
