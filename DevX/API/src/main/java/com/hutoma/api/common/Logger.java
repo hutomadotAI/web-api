@@ -10,7 +10,7 @@ import javax.inject.Singleton;
  * Created by David MG on 05/08/2016.
  */
 @Singleton
-public class Logger {
+public class Logger implements ILogger {
 
     protected enum Level {
         DEBUG,

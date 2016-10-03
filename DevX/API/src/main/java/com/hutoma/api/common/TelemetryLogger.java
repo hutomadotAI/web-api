@@ -11,7 +11,7 @@ import java.util.Map;
  * Created by pedrotei on 29/09/16.
  */
 @Singleton
-public class TelemetryLogger extends Logger {
+public class TelemetryLogger extends Logger implements ITelemetry{
 
     /**
      * Telemetry app name for config file.
@@ -27,10 +27,7 @@ public class TelemetryLogger extends Logger {
     private boolean isTelemetryEnabled;
 
     /**
-     * Initialize telemetry.
-     * Loads the instrumentation key from configuration and sets up the client.
-     * If the instrumentation key cannot be found then disables telemetry.
-     * @param config the configuration
+     * {@inheritDoc}
      */
     public void initialize(Config config) {
         String key = config.getTelemetryKey(APP_NAME);
@@ -46,32 +43,28 @@ public class TelemetryLogger extends Logger {
     }
 
     /**
-     * Enable the telemetry.
-     * Note: needs the instrumentation key to have been provided initially.
+     * {@inheritDoc}
      */
     public void enableTelemetry() {
         isTelemetryEnabled = true;
     }
 
     /**
-     * Disable telemetry.
+     * {@inheritDoc}
      */
     public void disableTelemetry() {
         isTelemetryEnabled = false;
     }
 
     /**
-     * Gets whether telemetry is currently enabled or not.
-     * @return whether telemetry is currently enabled or not
+     * {@inheritDoc}
      */
     public boolean isTelemetryEnabled() {
         return isTelemetryEnabled;
     }
 
     /**
-     * Add a telemetry event.
-     * @param eventName  the event name
-     * @param properties the property map for the event
+     * {@inheritDoc}
      */
     public void addTelemetryEvent(String eventName, Map<String, String> properties) {
         if (this.isTelemetryEnabled()) {
@@ -80,17 +73,47 @@ public class TelemetryLogger extends Logger {
     }
 
     /**
-     * Add a telemetry event.
-     * @param eventName the event name
+     * {@inheritDoc}
      */
-    public void addTelemetryEvent(String eventName) {
-        this.addTelemetryEvent(eventName, null);
+    public void addTelemetryEvent(String eventName, Exception exception) {
+        this.addTelemetryEvent(eventName, exception, null);
     }
 
     /**
-     * Tracks a metric.
-     * @param metricName  the metric name
-     * @param sampleCount tehe sample count
+     * {@inheritDoc}
+     */
+    public void addTelemetryEvent(String eventName, Exception exception, Map<String, String> properties) {
+        if (this.isTelemetryEnabled()) {
+            Map<String, String> map = new HashMap<>();
+            if (properties != null) {
+                map.putAll(properties);
+            }
+            // Add the exception properties
+            map.put("ExceptionName", exception.getClass().getSimpleName());
+            map.put("ExceptionMessage", exception.getMessage());
+            map.put("ExceptionStackTrace", getStackTraceAsString(exception.getStackTrace()));
+
+            telemetryClient.trackEvent(eventName, map, null);
+        }
+    }
+
+    private String getStackTraceAsString(StackTraceElement[] stackTrace) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement e: stackTrace) {
+            sb.append(e.toString()).append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void addTelemetryEvent(String eventName) {
+        this.addTelemetryEvent(eventName, (Map<String, String>) null);
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public void trackTelemetryMetric(String metricName, int sampleCount) {
         if (this.isTelemetryEnabled()) {
@@ -98,6 +121,9 @@ public class TelemetryLogger extends Logger {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void logError(String fromLabel, String logComment) {
         logOutput(Level.ERROR, fromLabel, logComment);

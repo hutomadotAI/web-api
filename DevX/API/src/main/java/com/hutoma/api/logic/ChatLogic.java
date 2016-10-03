@@ -1,16 +1,21 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.ITelemetry;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.validation.Validate;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -23,12 +28,12 @@ public class ChatLogic {
     SemanticAnalysis semanticAnalysis;
     NeuralNet neuralNet;
     Tools tools;
-    Logger logger;
+    ILogger logger;
 
     private final String LOGFROM = "chatlogic";
 
     @Inject
-    public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis, NeuralNet neuralNet, Tools tools, Logger logger) {
+    public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis, NeuralNet neuralNet, Tools tools, ILogger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.semanticAnalysis = semanticAnalysis;
@@ -53,6 +58,18 @@ public class ChatLogic {
         apiChat.setID(chatID);
 
         long startTime = timestampNow;
+
+        // Add telemetry for the request
+        Map<String, String> telemetryMap = new HashMap<String, String>() {{
+            put("DevId", dev_id);
+            put("AIID", aiid.toString());
+            put("Topic", topic);
+            // TODO: potentially PII info, we may need to mask this later, but for
+            // development purposes log this
+            put("UID", uid);
+            put("History", history);
+            put("Q", q);
+        }};
 
         boolean noResponse = true;
         try {
@@ -82,9 +99,14 @@ public class ChatLogic {
                 apiChat.setTimestamp(endWNetTime);
 
                 logger.logDebug(LOGFROM, "WNET response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                telemetryMap.put("WNETAnswer", chatResult.getAnswer());
+                telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
+                telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
 
                 // if semantic analysis is not confident enough, wait for and process result from neural network
                 if ((semanticScore < min_p) || (0.0d == semanticScore))  {
+
+                    telemetryMap.put("WNETConfident", "false");
 
                     // wait for neural network to complete
                     String RNN_answer = neuralNet.getAnswerResult();
@@ -112,30 +134,53 @@ public class ChatLogic {
                     } else {
                         logger.logDebug(LOGFROM, "RNN invalid/empty response in " + Long.toString(endRNNTime - startTime) + "ms.");
                     }
+
+                    telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
+                    telemetryMap.put("RNNValid", Boolean.toString(validRNN));
+                    // TODO: potentially PII info
+                    telemetryMap.put("RNNAnswer", chatResult.getAnswer());
+                    telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
                 }
             }
         }
         catch (NeuralNet.NeuralNetNotRespondingException nr) {
             logger.logError(LOGFROM, "neural net did not respond in time");
+            this.addTelemetry("ApiChatError", nr, telemetryMap);
             return ApiError.getNoResponse("unable to respond in time. try again");
         }
         catch (NeuralNet.NeuralNetException nne) {
             logger.logError(LOGFROM, "neural net exception: " + nne.toString());
+            this.addTelemetry("ApiChatError", nne, telemetryMap);
             return ApiError.getInternalServerError();
         }
         catch (Exception ex){
             logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
+            this.addTelemetry("ApiChatError", ex, telemetryMap);
             // log the error but don't return a 500
             // because the error may have occurred on the second request and the first may have completed correctly
         }
         if (noResponse) {
             logger.logError(LOGFROM, "chat server returned an empty response");
+            telemetryMap.put("EventType", "No response");
+            this.addTelemetry("ApiChatError", telemetryMap);
             return ApiError.getInternalServerError();
         }
 
+        this.addTelemetry("ApiChat", telemetryMap);
         return apiChat.setSuccessStatus();
     }
 
+    private void addTelemetry(String eventName, Exception ex, Map<String, String> parameters) {
+        if (this.logger instanceof ITelemetry) {
+            ((ITelemetry) logger).addTelemetryEvent(eventName, ex, parameters);
+        }
+    }
+
+    private void addTelemetry(String eventName, Map<String, String> parameters) {
+        if (this.logger instanceof ITelemetry) {
+            ((ITelemetry) logger).addTelemetryEvent(eventName, parameters);
+        }
+    }
 }
 
 
