@@ -437,7 +437,7 @@ class console
           if ($cookies === true) {
 
             $_SESSION['logSyscuruser'] = $us_id;
-
+            
             setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
 
             $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
@@ -1329,10 +1329,9 @@ class console
       }
   }
 
-    // FAKE
     public static function getDevToken(){
           if (self::$loggedIn) {
-              $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";            return $dev_token;
+              return $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_token'];
           }
     }
 
