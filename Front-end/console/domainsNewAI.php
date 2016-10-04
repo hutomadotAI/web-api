@@ -1,12 +1,10 @@
 <?php
     require '../pages/config.php';
 
-    if ( !\hutoma\console::isSessionActive()) {
-        header('Location: ./error.php?err=1');
-        exit;
-    }
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+    
 
-    if (! isPostInputAvailable() ) {
+if (! isPostInputAvailable() ) {
         header("Location: ./error.php?err=2");
         exit;
     }
