@@ -1,5 +1,6 @@
 <?php
 include "config.php";
+
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7]>
