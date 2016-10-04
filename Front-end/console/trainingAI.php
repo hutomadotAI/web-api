@@ -1,7 +1,10 @@
 <?php
     require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
 
+    if ( !\hutoma\console::isSessionActive()) {
+        header('Location: ./error.php?err=1');
+        exit();
+    }
 
     if (isset($_POST['ai']) )
         CallGetSingleAI($_POST['ai']);

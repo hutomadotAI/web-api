@@ -1,9 +1,11 @@
 <?php
     require '../pages/config.php';
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+    if ( !\hutoma\console::isSessionActive()) {
+        header('Location: ./error.php?err=1');
+        exit;
+    }
 
-
-function isPreviousFieldsFilled(){
+    function isPreviousFieldsFilled(){
         return  (
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&

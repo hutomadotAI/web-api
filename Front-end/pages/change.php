@@ -17,10 +17,10 @@ require "config.php";
           
         if($new_password != $retype_password){
           echo "<p><h2>Password don't match</h2><p>The passwords you entered don't match. Try again.</p></p>";
-        }else if(\hutoma\console::login(\hutoma\console::getUser("username"), "", false, false) == false){
+        }else if(\Fr\LS::login(\Fr\LS::getUser("username"), "", false, false) == false){
           echo "<h2>Incorrect Password</h2><p>The password you entered for your account is wrong.</p>";
         }else{
-          $change_password = \hutoma\console::changePassword($new_password);
+          $change_password = \Fr\LS::changePassword($new_password);
           if($change_password === true){
             echo "<h2>Password Changed Successfully</h2>";
           }
@@ -30,7 +30,7 @@ require "config.php";
       }
     }
     ?>
-    <form action="<?php echo \hutoma\console::curPageURL();?>" method='POST'>
+    <form action="<?php echo \Fr\LS::curPageURL();?>" method='POST'>
       <label>
         <p>Current Password</p>
         <input type='password' name='current_password' />

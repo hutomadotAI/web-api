@@ -521,7 +521,7 @@ class console
         $randomSalt = self::rand_string(20);
         $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
         $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-        $service_url = 'https://api.hutoma.com/v1/admin/?email='.$id.'&username='.$username.'&password='.$saltedPass.'&password_salt='.$randomSalt.'&first_name='.$fullname;
+        $service_url = 'http://localhost:8080/v1/admin/?email='.$id.'&username='.$username.'&password='.$saltedPass.'&password_salt='.$randomSalt.'&first_name='.$fullname;
         $curl = curl_init($service_url);
         $headr = array();
         $headr[] = 'Content-type: application/json';

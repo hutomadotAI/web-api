@@ -1,8 +1,13 @@
 <?php
     require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+
+    if ( !\hutoma\console::isSessionActive()) {
+        \hutoma\console::redirect('./error.php?err=101');
+        exit();
+    }
 
     $response = \hutoma\console::getIntegrations(\hutoma\console::getDevToken());
+
 
     /* CHECK RESPONSE NEEDS API CALL
     if ($response['status']['code'] !== 200) {

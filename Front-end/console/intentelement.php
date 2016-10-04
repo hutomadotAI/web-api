@@ -1,9 +1,11 @@
 <?php
 
     require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
-
-// fake request - we need to loading entity for a specific USER,AI, INTENT 
+    if (!isset($_POST['intent']) ) {
+        header('Location: ./error.php?err=16');
+        exit();
+    }
+    // fake request - we need to loading entity for a specific USER,AI, INTENT 
     $entityList = \hutoma\console::getIntegrations();
     $expressionList = \hutoma\console::getIntegrations();
     $parameterList = \hutoma\console::getIntegrations();
