@@ -100,28 +100,28 @@ public class TestAILogic {
 
     @Test
     public void testGetSingle_Valid() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(any())).thenReturn(getAI());
+        when(fakeDatabase.getAI(anyString(), any())).thenReturn(getAI());
         ApiResult result = aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_Valid_Return() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(any())).thenReturn(getAI());
+        when(fakeDatabase.getAI(anyString(), any())).thenReturn(getAI());
         ApiAi result = (ApiAi)aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(AIID.toString(), result.getAiid());
     }
 
     @Test
     public void testGetSingle_DBFail_Error() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(any())).thenThrow(new Database.DatabaseException(new Exception("")));
+        when(fakeDatabase.getAI(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("")));
         ApiResult result = aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_DB_NotFound() throws Database.DatabaseException {
-        when(fakeDatabase.getAI(any())).thenReturn(null);
+        when(fakeDatabase.getAI(anyString(), any())).thenReturn(null);
         ApiResult result = aiLogic.getSingleAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
@@ -165,21 +165,21 @@ public class TestAILogic {
 
     @Test
     public void testDelete_Valid() throws Database.DatabaseException {
-        when(fakeDatabase.deleteAi(any())).thenReturn(true);
+        when(fakeDatabase.deleteAi(anyString(), any())).thenReturn(true);
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testDelete_DBFail_NotFound() throws Database.DatabaseException {
-        when(fakeDatabase.deleteAi(any())).thenReturn(false);
+        when(fakeDatabase.deleteAi(anyString(), any())).thenReturn(false);
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test
     public void testDelete_DBFail_Error() throws Database.DatabaseException {
-        when(fakeDatabase.deleteAi(any())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        when(fakeDatabase.deleteAi(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }

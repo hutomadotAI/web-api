@@ -93,9 +93,9 @@ public class Database {
         }
     }
 
-    public ApiAi getAI(UUID aiid) throws DatabaseException {
+    public ApiAi getAI(String devid, UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
-            call.initialise("getAI", 1).add(aiid);
+            call.initialise("getAI_v1", 2).add(devid).add(aiid);
             ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
@@ -110,9 +110,9 @@ public class Database {
         }
     }
 
-    public boolean deleteAi(UUID aiid) throws DatabaseException {
+    public boolean deleteAi(String devid, UUID aiid) throws DatabaseException {
         try (DatabaseCall call = callProvider.get()) {
-            call.initialise("deleteAI", 1).add(aiid);
+            call.initialise("deleteAI_v1", 2).add(devid).add(aiid);
             return call.executeUpdate() > 0;
         }
     }

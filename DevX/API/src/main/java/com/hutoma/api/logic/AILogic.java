@@ -107,7 +107,7 @@ public class AILogic {
 
         try {
             logger.logDebug(LOGFROM, devid + " request to list " + aiid);
-            ApiAi ai = database.getAI(aiid);
+            ApiAi ai = database.getAI(devid, aiid);
             if (null == ai) {
                 logger.logDebug(LOGFROM, "ai not found");
                 return ApiError.getNotFound();
@@ -128,7 +128,7 @@ public class AILogic {
 
         try {
             logger.logDebug(LOGFROM, devid + " request to delete " + aiid);
-            if(!database.deleteAi(aiid))
+            if(!database.deleteAi(devid, aiid))
             {
                 return ApiError.getNotFound();
             }

@@ -437,7 +437,7 @@ class console
           if ($cookies === true) {
 
             $_SESSION['logSyscuruser'] = $us_id;
-
+            
             setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
 
             $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
@@ -520,8 +520,8 @@ class console
       try {
         $randomSalt = self::rand_string(20);
         $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
-        $dev_token = self::getAdminToken();
-        $service_url =  self::$api_request_url.'admin/?email='.$id.'&username='.$username.'&password='.$saltedPass.'&password_salt='.$randomSalt.'&first_name='.$fullname;
+        $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
+        $service_url = 'http://localhost:8080/v1/admin/?email='.$id.'&username='.$username.'&password='.$saltedPass.'&password_salt='.$randomSalt.'&first_name='.$fullname;
         $curl = curl_init($service_url);
         $headr = array();
         $headr[] = 'Content-type: application/json';
