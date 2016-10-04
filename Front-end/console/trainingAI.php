@@ -46,17 +46,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>hu:toma | training AI</title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-  <link rel="stylesheet" href="./dist/css/ionicons.min.css">
-  <link rel="stylesheet" href="./dist/css/hutoma.css">
-  <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-  <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
-  <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <link rel="stylesheet" href="./plugins/select2/select2.min.css">
-  <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./dist/css/ionicons.min.css">
+    <link rel="stylesheet" href="./dist/css/hutoma.css">
+    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
+    <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" id="trainingBody">

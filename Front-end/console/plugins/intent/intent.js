@@ -11,7 +11,7 @@ function activeButtonCreate() {
             $("#btnCreateIntent").prop("disabled",true);
             break;
         case 0:
-            msgAlertIntent(0,'In this section you can create different intents.');
+            msgAlertIntent(0,'Create an Intent to trigger your own business logic.');
             $("#btnCreateIntent").prop("disabled", false);
             break;
         case 1:
@@ -81,9 +81,9 @@ function showIntents(str){
     var wHTML = "";
 
     if (intents.length < 1)
-        msgAlertIntent(0,'No intents yet. Create the first one.');
+        msgAlertIntent(0,'No intents yet.');
     else
-        msgAlertIntent(0,'In this section you can create different intents.');
+        msgAlertIntent(0,'Create an Intent to trigger your own business logic.');
 
     for (var x in intents) {
         if ( (str!=" ") && ( (str.length==0) || (intents[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {

@@ -12,7 +12,7 @@
 
                 <ul class="dropdown-menu flat">
                     <li id="speech-option">
-                        <a id="speech-type"><i id="speech-icon" class="fa fa-bullhorn text-light-blue"></i><spam id="speech-text" class="text-light-blue"> Active Voice</spam></a>
+                        <a id="speech-type"><i id="speech-icon" class="fa fa-bullhorn text-light-blue"></i><spam id="speech-text" class="text-light-blue"> Speech Recognition</spam></a>
                     </li>
                     <!--<li class="footer" id="mute-option"><a href="#">  <i class="fa fa-microphone-slash"></i> Mute Microphone</a></li>-->
                     <!--li class="footer" id="color-option"><a href="#">  <i class="fa fa-adjust"></i> Color Voice</a></li>-->

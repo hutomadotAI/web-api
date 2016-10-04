@@ -6,20 +6,19 @@
         <li class="pull-left text-md"><i class="fa fa-cloud-upload text-info" style="padding-top:10px;padding-left:10px;padding-right:10px;"></i>AI Training</li>
     </ul>
 
-
     <div class="tab-content">
 
         <div class="tab-pane active" id="trainingfile">
             <button id="btnUploadFile" class="btn btn-success btn-sm pull-right flat" style="width: 120px;" disabled>
-                <i class="fa fa-cloud-upload"></i> Upload file
+                <i class="fa fa-cloud-upload"></i> Upload
             </button>
             <p></p>
-            <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No file" data-buttonText="choose file">
+            <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
             <p></p>
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadFile">
                 <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
-                <span id="msgAlertUploadFile">Upload a text file to begin training</span>
+                <span id="msgAlertUploadFile">Upload a text file with chat examples to begin training</span>
             </div>
 
             check out our <a data-toggle="collapse"  href="#collapseVideoTutorialTraining">Training video tutorial</a>
@@ -42,15 +41,15 @@
 
         <div class="tab-pane" id="trainingbook">
             <button id="btnUploadStructure" class="btn btn-success btn-sm pull-right flat" style="width: 120px;" disabled>
-                <i class="fa fa-cloud-upload"></i> Upload structure
+                <i class="fa fa-cloud-upload"></i> Upload Pages
             </button>
             <p></p>
-            <input type="file" id="inputstructure" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="No complex file" data-buttonText="choose file">
+            <input type="file" id="inputstructure" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
             <p></p>
             <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadStructure">
                 <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                 <i class="icon fa fa-check" id="iconAlertUploadStructure"></i>
-                <span id="msgAlertUploadStructure">Upload a complex text file to begin training</span>
+                <span id="msgAlertUploadStructure">Upload a page from a book to begin training</span>
             </div>
 
             check out our <a data-toggle="collapse"  href="#collapseVideoTutorialTrainingBook">Training video tutorial</a>

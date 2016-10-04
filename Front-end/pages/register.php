@@ -15,7 +15,7 @@ include "config.php";
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>hutoma | registration page</title>
+    <title>Hu:toma | New Account </title>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords"
@@ -24,83 +24,89 @@ include "config.php";
           content="Hutoma builds emotionally evolved AIs and Digital Employees that can have intelligent conversations with you or your customers.">
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../console/dist/css/hutoma.css">
     <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../console/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../console/dist/css/animate.css">
-     <link rel="stylesheet" href="../console/dist/css/hutoma.min.css">
     <link rel="stylesheet" href="../console/dist/css/main.css">
-    <script src="../console/dist/js/modernizr-2.6.2.min.js"></script>
+
+    <link rel="stylesheet" href="../console/plugins/cookiePolicyBar/cookiePolicyBar.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="../console/dist/js/modernizr-2.6.2.min.js"></script>
+    <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/icheck/1.0.2/icheck.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
-    <script src="../console/plugins/jQuery/jQuery-2.1.4.min.js"></script>
-    <script src="../console/bootstrap/js/bootstrap.min.js"></script>
 
 
+    <script type="text/javascript">
+        var options = {
+            declineButtonText: ''
+        };
+        $(document).ready(function () {
+            $.cookiePolicyBar(options);
+        });
+    </script>
+    <style>
+        .newa {
+            color: #3c8dbc;
+        }
+        .newa:hover,
+        .newa:active,
+        .newa:focus {
+            outline: none;
+            text-decoration: none;
+            color: #72afd2;
+        }
 
-<style>
-.newa {
-  color: #3c8dbc;
-}
-.newa:hover,
-.newa:active,
-.newa:focus {
-  outline: none;
-  text-decoration: none;
-  color: #72afd2;
-}
+        /* Sticky footer styles
+        -------------------------------------------------- */
+        html {
+            position: relative;
+            min-height: 100%;
+        }
 
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-  font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 500px;
-  font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        body {
+            background: #d2d6de;
+            /* Margin bottom by footer height */
+            margin-bottom: 350px;
+            font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
+        }
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            /* Set the fixed height of the footer here */
+            height: 200px;
 
-}
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 350px;
+        }
 
-}
+        .af {
+            color: #3c8dbc;
+            font-weight: bold;
+        }
 
- .af {
-     color: #3c8dbc;
-     font-weight: bold;
-    }
+        .af:hover,
+        .af:active,
+        .af:focus {
+            outline: none;
+            text-decoration: none;
+            color: white;
+        }
 
-     .af:hover,
-    .af:active,
-    .af:focus {
-      outline: none;
-      text-decoration: none;
-      color: white;
-    }
+        .container {
+            width: auto;
+            max-width: 100%;
+            padding: 0 15px;
+        }
+        .container .text-muted {
+            margin: 20px 0;
+        }
 
 
-/* Custom page CSS
--------------------------------------------------- */
-/* Not required for template or sticky footer method. */
-
-.container {
-  width: auto;
-  max-width: 100%;
-  padding: 0 15px;
-}
-.container .text-muted {
-  margin: 20px 0;
-}
-</style>
-
+    </style>
 </head>
-  <body class="hold-transition register-page">
+<body class="hold-transition register-page">
     <?php
 
       if(isset($_POST['submit'])) {
@@ -177,31 +183,31 @@ body {
     }
    ?>
 
+    <header id="navigation" class="navbar-fixed-top navbar">
+        <div class="container" style="font-weight: bold">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <i class="fa fa-bars fa-2x"></i>
+                </button>
+                <a class="navbar-brand" href="#body">
+                    <h1 style="padding: 5px;margin-left: 115px;" >
+                        <b> hu:toma </b>
+                    </h1>
+                </a>
+            </div>
+            <nav style="padding: 5px;margin-right: 115px;" class="collapse navbar-collapse navbar-right" role="navigation">
+                <ul id="nav" class="nav navbar-nav">
+                    <li><a href="../index.html" class="external">Home</a></li>
+                    <li><a href="./pages/login.php" class="external">Login</a></li>
+                    <li><a href="../index.html" class="external">Features  </a></li>
+                    <li><a href="../about.html" class="external">About</a></li>
+                    <li><a href="../contactus.html" class="external">Contacts</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-      <header id="navigation" class="navbar-fixed-top navbar">
-      <div class="container" style="font-weight: bold">
-          <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                  <span class="sr-only">Toggle navigation</span>
-                  <i class="fa fa-bars fa-2x"></i>
-              </button>
-              <a class="navbar-brand" href="#body">
-                  <h1 style="padding: 10px; margin:-5px;font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;" >
-                     <b> hu:toma </b>
-                  </h1>
-              </a>
-          </div>
-          <nav class="collapse navbar-collapse navbar-right" role="navigation">
-              <ul id="nav" class="nav navbar-nav">
-                  <li class="current"><a href="../index.html" class="external">Home</a></li>
-                  <li><a href="./login.php" class="external">Login</a></li>
-                  <li><a href="../about.html">Features</a></li>
-                  <li><a href="../about.html" class="external">About</a></li>
-                  <li><a href="../contactus.html" class="external">Contacts</a></li>
-              </ul>
-          </nav>
-      </div>
-  </header>
 
 <div class="register-box">
 
@@ -265,57 +271,57 @@ body {
 
 
 
-<footer id="footer" class="footer">
-    <div class="container" style="font-weight: bold;">
-        <div class="row row-centered">
 
-            <div class="col-md-3 col-sm-3 col-s-3 col-centered wow fadeInUp animated" data-wow-duration="250ms"
-                 data-wow-delay="200ms">
-                <div class="footer-single">
-                    <h6>About</h6>
-                    <ul>
-                        <li><a class="af" href="../about.html">About Hutoma</a></li>
-                        <li><a class="af" href="../pricing.html">Pricing</a></li>
-                        <li><a class="af" href="../contactus.html">Contact Us</a></li>
+    <footer id="footer" class="footer">
+        <div class="container" style="font-weight: bold;">
+            <div class="row row-centered">
 
-                    </ul>
+                <div class="col-md-3 col-sm-3 col-s-3 col-centered wow fadeInUp animated" data-wow-duration="250ms"
+                     data-wow-delay="200ms">
+                    <div class="footer-single">
+                        <h6>About</h6>
+                        <ul>
+                            <li><a class="af" href="../about.html">About Hutoma</a></li>
+                            <li><a class="af" href="../pricing.html">Pricing</a></li>
+                            <li><a class="af" href="../contactus.html">Contact Us</a></li>
+
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-md-3 col-sm-3 col-xs-3 col-centered wow fadeInUp animated" data-wow-duration="250ms"
-                 data-wow-delay="400ms">
-                <div class="footer-single">
-                    <h6>Get in Touch</h6>
-                    <ul>
-                        <li><a class="af"  href="https://twitter.com/hutomata"><i class="fa fa-twitter fa-lg"> </i> twitter</a></li>
-                        <li><a class="af" href="https://www.facebook.com/hutoma.machine/"><i class="fa fa-facebook fa-lg"></i>
-                            facebook</a></li>
-                        <li><a class="af" href="https://www.linkedin.com/company/hutoma"><i class="fa fa-linkedin fa-lg"></i>
-                            linkedin</a></li>
-                    </ul>
+                <div class="col-md-3 col-sm-3 col-xs-3 col-centered wow fadeInUp animated" data-wow-duration="250ms"
+                     data-wow-delay="400ms">
+                    <div class="footer-single">
+                        <h6>Get in Touch</h6>
+                        <ul>
+                            <li><a class="af"  href="https://twitter.com/hutomata"><i class="fa fa-twitter fa-lg"> </i> twitter</a></li>
+                            <li><a class="af" href="https://www.facebook.com/hutoma.machine/"><i class="fa fa-facebook fa-lg"></i>
+                                    facebook</a></li>
+                            <li><a class="af" href="https://www.linkedin.com/company/hutoma"><i class="fa fa-linkedin fa-lg"></i>
+                                    linkedin</a></li>
+                        </ul>
 
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-md-3 col-sm-3 col-xs-3 col-centered wow fadeInUp animated" data-wow-duration="250ms"
-                 data-wow-delay="500ms">
-                <div class="footer-single">
-                    <h6>Enterprise Customers</h6>
-                    <ul>
-                        <li><a class="af" href="mailto:hello@hutoma.com?subject=hutoma demo request">Schedule Demo</a></li>
+                <div class="col-md-3 col-sm-3 col-xs-3 col-centered wow fadeInUp animated" data-wow-duration="250ms"
+                     data-wow-delay="500ms">
+                    <div class="footer-single">
+                        <h6>Enterprise Customers</h6>
+                        <ul>
+                            <li><a class="af" href="mailto:hello@hutoma.com?subject=hutoma demo request">Schedule Demo</a></li>
 
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        <div class="row">
-            <div class="col-md-12">
-                <p class="copyright text-center">
-                    Copyright © 2016 hu:toma</a>
-                </p>
-            </div>
-    </div>
-</footer>
-<script src="../console/dist/js/custom.js"></script>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p class="copyright text-center">
+                            Copyright © 2016 hu:toma</a>
+                        </p>
+                    </div>
+                </div>
+    </footer>
 </body>
 </html>

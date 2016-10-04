@@ -44,9 +44,9 @@ if(isset($_POST['action_login'])){
           content="Hutoma builds emotionally evolved AIs and Digital Employees that can have intelligent conversations with you or your customers.">
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../console/dist/css/hutoma.min.css">
+    <link rel="stylesheet" href="../console/dist/css/hutoma.css">
     <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../console/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../console/dist/css/animate.css">
     <link rel="stylesheet" href="../console/dist/css/main.css">
 
@@ -83,11 +83,12 @@ html {
   position: relative;
   min-height: 100%;
 }
+
 body {
   background: #d2d6de;
   /* Margin bottom by footer height */
-  margin-bottom: 350px;
-   font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin-bottom: 350px;  
+    font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
 }
 .footer {
@@ -99,23 +100,18 @@ body {
 
 }
 
- .af {
-     color: #3c8dbc;
-     font-weight: bold;
-    }
+.af {
+ color: #3c8dbc;
+ font-weight: bold;
+}
 
-     .af:hover,
-    .af:active,
-    .af:focus {
-      outline: none;
-      text-decoration: none;
-      color: white;
-    }
-
-
-/* Custom page CSS
--------------------------------------------------- */
-/* Not required for template or sticky footer method. */
+.af:hover,
+.af:active,
+.af:focus {
+  outline: none;
+  text-decoration: none;
+  color: white;
+}
 
 .container {
   width: auto;
@@ -125,8 +121,6 @@ body {
 .container .text-muted {
   margin: 20px 0;
 }
-
-
 
 
 </style>
@@ -140,12 +134,12 @@ body {
                 <i class="fa fa-bars fa-2x"></i>
             </button>
             <a class="navbar-brand" href="#body">
-                <h1 style="padding: 5px;" >
+                <h1 style="padding: 5px;margin-left: 115px;" >
                    <b> hu:toma </b>
                 </h1>
             </a>
         </div>
-        <nav class="collapse navbar-collapse navbar-right" role="navigation">
+        <nav style="padding: 5px;margin-right: 115px;" class="collapse navbar-collapse navbar-right" role="navigation">
             <ul id="nav" class="nav navbar-nav">
                 <li><a href="../index.html" class="external">Home</a></li>
                 <li><a href="./pages/login.php" class="external">Login</a></li>

@@ -24,20 +24,11 @@
                     <section class="content bg-gray-light" >
                         <div class="box-body">
                             <dl class="dl-horizontal">
-                                <dt>Description Entities Manipulation</dt>
-                                <dd>Before start training process, y.</dd>
-                                <dt>Euismod</dt>
-                                <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                <dt>Malesuada porta</dt>
-                                <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                <dt>Felis euismod semper eget lacinia</dt>
-                                <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                                This is the list of all available intents that can be attached to your AI.
                             </dl>
                         </div>
                     </section>
-                    <p></p>
-                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                    
                 </div>
             </div>
         </div>
