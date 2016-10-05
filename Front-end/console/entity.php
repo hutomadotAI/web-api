@@ -1,5 +1,6 @@
 <?php
 require "../pages/config.php";
+if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
 
     // fake request - here we need the enities from user on specified AI
     $integrations = \hutoma\console::getIntegrations();

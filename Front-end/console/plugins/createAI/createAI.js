@@ -6,7 +6,7 @@ function wizardNext() {
     $('#btnCancel').prop('disabled',true);
 
     if(isContainInvalidCharacters($('#ai_name').val())) {
-        msgAlertNameAI(2, 'Ai name need contain only the following: A-Z, a-z, 0-9 _ or -');
+        msgAlertNameAI(2, 'Invalid name. Please enter a string that contains alphanumeric characters.');
         inputsActiveDeactive(false);
         return;
     }
@@ -47,13 +47,13 @@ function isContainInvalidCharacters(txt) {
     return true;
 }
 
-    
+
 $(function () {
     $('.select2').select2();
 });
 
 $(function () {
-    
+
     $('#ai_confidence').ionRangeSlider({
         type: "single",
         min: 1,

@@ -1,11 +1,9 @@
 <?php
 
     require "../pages/config.php";
-    if (!isset($_POST['entity']) ) {
-        header('Location: ./error.php?err=17');
-        exit();
-    }
-    // fake request - we need to loading entity keys for a specific USER,AI
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+
+// fake request - we need to loading entity keys for a specific USER,AI
     $entityKeys = \hutoma\console::getIntegrations();
 
 

@@ -1329,11 +1329,46 @@ class console
       }
   }
 
-    public static function getDevToken(){
-          if (self::$loggedIn) {
-              return $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_token'];
-          }
+  public static function getAdminToken() {
+    return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
+
+  }
+
+  public static function getDevToken()
+  {
+    $token = "";
+    if (self::$loggedIn) {
+      $query = "CALL getDevToken(:id)";
+      $sql = self::$dbh->prepare($query);
+      $sql->execute(array(
+          ":id" => self::$user
+      ));
+      if ($sql->rowCount() > 0) {
+        $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+        $sql->nextRowset();
+        $token = $rows['dev_token'];
+      }
     }
+    return $token;
+  }
+
+  public static function getClientToken()
+  {
+    $token = "";
+    if (self::$loggedIn) {
+      $query = "CALL getClientToken(:id)";
+      $sql = self::$dbh->prepare($query);
+      $sql->execute(array(
+          ":id" => self::$user
+      ));
+      if ($sql->rowCount() > 0) {
+        $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+        $sql->nextRowset();
+        $token = $rows['client_token'];
+      }
+    }
+    return $token;
+  }
 
     public static function isSessionActive () {
       if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
@@ -1426,6 +1461,4 @@ class console
 
 
 }
-
-
 ?>

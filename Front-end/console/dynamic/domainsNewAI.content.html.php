@@ -1,7 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
-        <i class="fa fa-th text-red"></i>
-        <h3 class="box-title">Pre-training Neural Networks</h3>
+        <h3 class="box-title">Select a pre-trained Neural Network</h3>
         <a data-toggle="collapse"  href="#collapseInfoNewDomains">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -11,20 +10,20 @@
 
     <div class="box-body" id="boxNewDomains">
         <p></p>
-        <input class="form-control" value="" placeholder="This is a non working page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
-        <div class="form-group pull-right no-margin" style="padding-top: 5px;">
+        <input class="form-control" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
+  <!--      <div class="form-group pull-right no-margin" style="padding-top: 5px;">
             <span style="padding-right:5px;">Show Free Neural Networks Only</span>
             <label>
                 <input type="checkbox" class="minimal" checked>
             </label>
         </div>
         <br>
-        
+        -->
 
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertNewDomains"></i>
-            <span id="msgAlertNewDomains">You can search and select one or more pre-training neural networks</span>
+            <span id="msgAlertNewDomains">Combine your AI with pre-trained neural networks made available by others.</span>
         </div>
     </div>
 
@@ -36,15 +35,7 @@
                 <section class="content bg-gray-light" >
                     <div class="box-body">
                         <dl class="dl-horizontal">
-                            <dt>Description New Domains Manipulation</dt>
-                            <dd>Before start training process, y.</dd>
-                            <dt>Euismod</dt>
-                            <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                            <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                            <dt>Malesuada porta</dt>
-                            <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                            <dt>Felis euismod semper eget lacinia</dt>
-                            <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                            Pre-trained neural networks are made available by our community and provide out of the box knowlege to your AI so you don't have to start from scratch.
                         </dl>
                     </div>
                 </section>
@@ -55,8 +46,8 @@
     </div>
 
     <div class="box-footer">
-        <button type="submit" id="btnBack" class="btn btn-primary flat" onCLick="backPage()">back</button>
-        <button type="submit" id="btnNext" class="btn btn-success flat" onClick="wizardNext()">next</button>
+        <button  style="width:100px" type="submit" id="btnBack" class="btn btn-primary flat pull-left" onCLick="backPage()"><b>Back</b></button>
+        <button  style="width:100px" type="submit" id="btnNext" class="btn btn-success flat  pull-right" onClick="wizardNext()"><b>Next</b></button>
     </div>
 </div>
 

@@ -111,20 +111,17 @@
                 <section class="content bg-gray-light" >
                     <div class="box-body">
                         <dl class="dl-horizontal">
-                            <dt>Description Actions</dt>
-                            <dd>Before start training process, y.</dd>
-                            <dt>Euismod</dt>
-                            <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                            <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                            <dt>Malesuada porta</dt>
-                            <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                            <dt>Felis euismod semper eget lacinia</dt>
-                            <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                            Training consists of two main phases:<br /><br/>
+                            <ul>
+                                <li style="text-align:justify"><b>Phase 1 (phrase level learning)</b><br>During the first phase of training, your AI will be learning to respond to end users by leveraging the pre-packaged answers that are contained in your training file. In other words, the AI will understand what of the pre-made answers wil be more appropiate to use. Phrase level learning is usually quicker than Phase 2 and it allows you to interact with your AI almost right away.</li><br/>
+                                <li style="text-align:justify"><b>Phase 2 (word level learning)</b><br>Word level learning teaches your AI to recognize the underlying rules behind the sample conversations you provided. This phase can take days or even several weeks depending on how big your training file is. However once completed, it will allow the AI to formulate completely new answers that will go beyond your pre-packaged answers. Phase 2 responses are usually available after few minutes of training but they require more time to get consistent with the training you provided.</li>
+
+                            </ul>
                         </dl>
                     </div>
                 </section>
                 <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                need help? check out our <a href='#'>video tutorial</a> or email <a href='#'>support@hutoma.com</a>
 
             </div>
         </div>
