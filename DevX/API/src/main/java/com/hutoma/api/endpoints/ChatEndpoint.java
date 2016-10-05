@@ -37,7 +37,7 @@ public class ChatEndpoint {
 
     @GET
     @Path("{aiid}/chat")
-    @ValidateParameters({APIParameter.AIID, APIParameter.UserID, APIParameter.ChatQuestion, APIParameter.ChatHistory, APIParameter.ChatTopic, APIParameter.Min_P})
+    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion, APIParameter.ChatHistory, APIParameter.ChatTopic, APIParameter.Min_P})
     @Secured({Role.ROLE_CLIENTONLY,Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response chat(
@@ -47,7 +47,7 @@ public class ChatEndpoint {
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
-                ParameterFilter.getUserID(requestContext),
+                ParameterFilter.getChatID(requestContext),
                 ParameterFilter.getChatHistory(requestContext),
                 ParameterFilter.getTopic(requestContext),
                 ParameterFilter.getMinP(requestContext));

@@ -46,7 +46,7 @@ public class NeuralNet {
     }
 
     // Neural Network Query
-    public void startAnswerRequest(String dev_id, UUID aiid, String uid, String q) throws NeuralNetException {
+    public void startAnswerRequest(String dev_id, UUID aiid, UUID chatId, String q) throws NeuralNetException {
 
         startTime = tools.getTimestamp();
 
@@ -61,7 +61,7 @@ public class NeuralNet {
         }
 
         try {
-            qid = database.insertNeuralNetworkQuestion(dev_id, uid, aiid, q);
+            qid = database.insertNeuralNetworkQuestion(dev_id, chatId, aiid, q);
         } catch (Database.DatabaseException e) {
             throw new NeuralNetException(e);
         }

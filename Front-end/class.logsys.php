@@ -1264,18 +1264,18 @@ class console
   }
 
   // FOR API
-  public static function chatAI($dev_token,$aiid,$uid,$q,$history,$fs,$min_p)
+  public static function chatAI($dev_token,$aiid,$chatId,$q,$history,$fs,$min_p)
   {
       if (self::$loggedIn) {
           $path = 'ai/' . $aiid . '/chat';
-          $api_response_parameters = array('q' => $q, 'uid' => $uid, 'chat_history' => $history);
+          $api_response_parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history);
           $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
           $curl = new curlHelper($service_url, $dev_token);
           $curl_response = $curl->exec();
           if ($curl_response === false) {
               $info = $curl->getInfo();
               $curl->close();
-              die('Error: deletAI curl: ' . $info);
+              die('Error: chatAI curl: ' . $info);
           }
           $json_response = json_decode($curl_response, true);
           $curl->close();

@@ -34,12 +34,13 @@ function createNodeChat(human_name, ai_name) {
    if ( chatSemaphore == 0) {
        chatSemaphore = (chatSemaphore+1)%(2);
        var msg = $('#message').val();
+       var chatId = $('#chatId').val();
        if (msg.length != 0) {
            disableChat();
            deactiveSpeechButton();
            lockSpeechOption();
            createLeftMsg(human_name, msg);
-           requestAnswerAI(ai_name, msg);
+           requestAnswerAI(ai_name, msg, chatId);
        }
    }
 }
@@ -75,7 +76,10 @@ function createLeftMsg(human_name,msg){
 }
 
 
-function createRightMsg(ai_name,msg,error) {
+function createRightMsg(ai_name,msg,chatId,error) {
+    // Update chatId if needed
+    if ($("#chatId").val() == '') {$("#chatId").val(chatId);}
+
     var height = parseInt($('#chat').scrollTop());
     var interval = window.setInterval(animate, 10);
 
@@ -119,7 +123,7 @@ function createRightMsg(ai_name,msg,error) {
 }
 
 
-function requestAnswerAI(ai_name, question) {
+function requestAnswerAI(ai_name, question, chatId) {
     var xmlhttp;
     if (question == '') {
         return;
@@ -135,13 +139,18 @@ function requestAnswerAI(ai_name, question) {
                 var JSONresponse = xmlhttp.responseText;
                 var JSONdata = JSON.parse(JSONresponse);
                 JSONnode.innerHTML = JSONresponse;
-                if(JSONdata['status']['code'] === 200)
-                    createRightMsg(ai_name, JSONdata['result']['answer'],false);
-                else
-                    createRightMsg(ai_name, JSONdata['status']['info'],true);
+                if (JSONdata['chatId'] === '') {
+                    createRightMsg(ai_name, 'no chat id returned', '', true);
+                } else {
+                    var chatId = JSONdata['chatId'];
+                    if (JSONdata['status']['code'] === 200)
+                        createRightMsg(ai_name, JSONdata['result']['answer'], chatId, false);
+                    else
+                        createRightMsg(ai_name, JSONdata['status']['info'], chatId, true);
+                }
             }
         };
-        xmlhttp.open('GET','chat.php?q='+question,true);
+        xmlhttp.open('GET','chat.php?chatId='+chatId+'&q='+question,true);
         xmlhttp.send();
     }
 }

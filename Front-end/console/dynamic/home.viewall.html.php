@@ -40,7 +40,7 @@
                 return('<span class="label label-primary">Not Started</span>');
         }
     }
-    if (!(array_key_exists("ai_list",$response_getAIs)))
+    if (!isset($response_getAIs) || !(array_key_exists("ai_list",$response_getAIs)))
         include './dynamic/home.content.first.html.php';
     else {
 
@@ -61,7 +61,8 @@
         //echo('<th style="border:0;">Date</th>');
         echo('</tr>');
 
-        foreach (array_reverse($response_getAIs['ai_list']) as $bot) {
+        $aiList = $response_getAIs['ai_list'];
+        foreach (array_reverse($aiList) as $bot) {
             echo('<tr>');
             echo('<td style="padding-top: 15px;">' . $bot['aiid'] . '</td>');
             echo('<td style="padding-top: 15px;">' . $bot['name'] . '</td>');

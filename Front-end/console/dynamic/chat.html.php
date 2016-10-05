@@ -26,6 +26,7 @@
     </div>
           
     <div class="box-body" id="bodyChat">
+        <input type="hidden" id="chatId" name="chatId" value=""/>
         <div class="direct-chat-messages" id="chat">
         </div>
     </div>

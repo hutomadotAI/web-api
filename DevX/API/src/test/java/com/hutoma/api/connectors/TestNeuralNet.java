@@ -29,7 +29,7 @@ public class TestNeuralNet {
 
     private String DEVID = "devid";
     private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private String UID = "uid";
+    private UUID CHATID = UUID.fromString("faad3f6e-cde3-44d5-b74a-26c969ac54a0s");
     private long QID = 42;
     private String RESULT = "result";
 
@@ -51,9 +51,9 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_HappyPath() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
-        neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+        neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
         String result = neuralNet.getAnswerResult();
         Assert.assertEquals(RESULT, result);
     }
@@ -61,9 +61,9 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_Success() throws Database.DatabaseException, NeuralNet.NeuralNetException {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(false);
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
-        neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+        neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
         String result = neuralNet.getAnswerResult();
         Assert.assertEquals(RESULT, result);
     }
@@ -71,10 +71,10 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_DBFail() throws Database.DatabaseException, NeuralNet.NeuralNetException {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
         try {
-            neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+            neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
             String result = neuralNet.getAnswerResult();
             Assert.fail("exception expected");
         } catch (Exception e) {
@@ -86,10 +86,10 @@ public class TestNeuralNet {
     public void testNeuralNet_NeedToStartServer_MessageFail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(false);
         doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(fakeMessageQueue).pushMessageStartRNN(anyString(), any());
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
         try {
-            neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+            neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
             String result = neuralNet.getAnswerResult();
             Assert.fail("exception expected");
         } catch (Exception e) {
@@ -100,10 +100,10 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_Insert_DBFail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(-1L);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(-1L);
         when(fakeDatabase.getAnswer(QID)).thenReturn(RESULT);
         try {
-            neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+            neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
             String result = neuralNet.getAnswerResult();
             Assert.fail("exception expected");
         } catch (NeuralNet.NeuralNetException nne) {
@@ -115,10 +115,10 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_CheckResult_DBFail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenThrow(new Database.DatabaseException(new Exception("test")));
         try {
-            neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+            neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
             String result = neuralNet.getAnswerResult();
             Assert.fail("exception expected");
         } catch (NeuralNet.NeuralNetException nne) {
@@ -130,10 +130,10 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_Timeout_Fail() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn("");
         try {
-            neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+            neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
             String result = neuralNet.getAnswerResult();
             Assert.fail("should have timed out");
         } catch (NeuralNet.NeuralNetNotRespondingException nnnre) {
@@ -145,9 +145,9 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_TakesTime_Success() throws Exception {
         when(fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), anyString(), any(), anyString())).thenReturn(QID);
+        when(fakeDatabase.insertNeuralNetworkQuestion(anyString(), CHATID, any(), anyString())).thenReturn(QID);
         when(fakeDatabase.getAnswer(QID)).thenReturn("").thenReturn("").thenReturn(RESULT);
-        neuralNet.startAnswerRequest(DEVID, AIID, UID, "question");
+        neuralNet.startAnswerRequest(DEVID, AIID, CHATID, "question");
         String result = neuralNet.getAnswerResult();
         Assert.assertEquals(RESULT, result);
         Assert.assertTrue(fakeTools.getTimestamp() >= (2 * NeuralNet.POLLEVERY));
