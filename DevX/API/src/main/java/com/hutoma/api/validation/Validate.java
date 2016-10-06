@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class Validate {
 
     public static class ParameterValidationException extends Exception {
-        public ParameterValidationException(String message) {
+        public ParameterValidationException(final String message) {
             super(message);
         }
     }
@@ -20,6 +20,7 @@ public class Validate {
     static Pattern alphaNumericAndMoreNoAt = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
     static Pattern uuidPattern = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     static Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
+    static Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
 
     @Inject
     public Validate() {
@@ -33,11 +34,11 @@ public class Validate {
      * @return trimmed parameter
      * @throws ParameterValidationException if the parameter is empty, null or invalid
      */
-    private String validatePattern(Pattern pattern, String paramName, String param) throws ParameterValidationException {
+    private String validatePattern(final Pattern pattern, final String paramName, final String param) throws ParameterValidationException {
         if (null == param) {
             throw new ParameterValidationException("missing " + paramName);
         }
-        String result = param.trim();
+        final String result = param.trim();
         if (result.isEmpty()) {
             throw new ParameterValidationException("empty " + paramName);
         }
@@ -55,11 +56,11 @@ public class Validate {
      * @return trimmed parameter, or empty string if it was null or empty
      * @throws ParameterValidationException if the parameter invalid
      */
-    private String validatePatternOptionalField(Pattern pattern, String paramName, String param) throws ParameterValidationException {
+    private String validatePatternOptionalField(final Pattern pattern, final String paramName, final String param) throws ParameterValidationException {
         if (null == param) {
             return "";
         }
-        String result = param.trim();
+        final String result = param.trim();
         if (result.isEmpty()) {
             return "";
         }
@@ -79,7 +80,7 @@ public class Validate {
      * @return valid float representing the input, or fallback
      * @throws ParameterValidationException if the float was invalid or out of range
      */
-    Float validateOptionalFloat(String paramName, float min, float max, float fallback, String param) throws ParameterValidationException {
+    Float validateOptionalFloat(final String paramName, final float min, final float max, final float fallback, String param) throws ParameterValidationException {
         // if empty, return the fallback
         if ((null == param) || (param.isEmpty())) {
             return fallback;
@@ -91,7 +92,7 @@ public class Validate {
             throw new ParameterValidationException("invalid " + paramName);
         }
         // parse
-        float result = Float.parseFloat(param);
+        final float result = Float.parseFloat(param);
         // just in case it's still weirdly invalid
         if (Float.isNaN(result)) {
             throw new ParameterValidationException("invalid " + paramName);
@@ -103,41 +104,45 @@ public class Validate {
         return result;
     }
 
-    UUID validateUuid(String paramName, String param) throws ParameterValidationException {
-        String result = validatePattern(uuidPattern, paramName, param);
+    UUID validateUuid(final String paramName, final String param) throws ParameterValidationException {
+        final String result = validatePattern(uuidPattern, paramName, param);
         try {
-            UUID uuid = UUID.fromString(result);
+            final UUID uuid = UUID.fromString(result);
             return uuid;
-        } catch (IllegalArgumentException iae) {
+        } catch (final IllegalArgumentException iae) {
             throw new ParameterValidationException("invalid characters in " + paramName);
         }
     }
 
-    String validateAlphaNumPlusDashes(String paramName, String param) throws ParameterValidationException {
+    String validateAlphaNumPlusDashes(final String paramName, final String param) throws ParameterValidationException {
         return validatePattern(alphaNumericDashes, paramName, param);
     }
 
-    String validateRequiredSanitized(String paramName, String param) throws ParameterValidationException {
+    String validateRequiredSanitized(final String paramName, final String param) throws ParameterValidationException {
         if (null == param) {
             throw new ParameterValidationException("missing " + paramName);
         }
-        String result = textSanitizer(param);
+        final String result = textSanitizer(param);
         if (result.isEmpty()) {
             throw new ParameterValidationException("empty " + paramName);
         }
         return result;
     }
 
-    String validateOptionalSanitized(String param) throws ParameterValidationException {
+    String validateOptionalSanitized(final String param) throws ParameterValidationException {
         return textSanitizer(param);
     }
 
-    String validateOptionalDescription(String paramName, String param) throws ParameterValidationException {
+    String validateOptionalDescription(final String paramName, final String param) throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
     }
 
-    String validateOptionalSanitizeRemoveAt(String paramName, String param) throws ParameterValidationException {
+    String validateOptionalSanitizeRemoveAt(final String paramName, final String param) throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
+    }
+
+    String validateRequiredObjectName(final String paramName, final String param) throws ParameterValidationException {
+        return validatePattern(alphaNumDashesSomePunctuationAndSpace, paramName, param);
     }
 
     /**
@@ -148,14 +153,14 @@ public class Validate {
      * @param input abc[]<>&  abc
      * @return abc abc
      */
-    public String textSanitizer(String input) {
+    public String textSanitizer(final String input) {
         // null check, fast bail
         if (null == input) {
             return "";
         }
 
-        StringBuilder sb = new StringBuilder();
-        int n = input.length();
+        final StringBuilder sb = new StringBuilder();
+        final int n = input.length();
         boolean lastCharWasSpace = true;
         char c;
         for (int i = 0; i < n; i++) {

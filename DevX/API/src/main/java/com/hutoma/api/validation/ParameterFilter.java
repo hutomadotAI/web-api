@@ -16,28 +16,27 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @ValidateParameters
 @Provider
-@Priority(Priorities.ENTITY_CODER) //Message encoder or decoder filter/interceptor priority. (happens after auth)
+@Priority(Priorities.ENTITY_CODER)
+//Message encoder or decoder filter/interceptor priority. (happens after auth)
 public class ParameterFilter extends Validate implements ContainerRequestFilter {
 
     @Context
     private ResourceInfo resourceInfo;
 
-    @Inject
-    private Logger logger;
+    private final Logger logger;
+    private final Tools tools;
+    private final JsonSerializer serializer;
 
     @Inject
-    private Tools tools;
-
-    @Inject
-    JsonSerializer serializer;
+    public ParameterFilter(final Logger logger, final Tools tools, final JsonSerializer serializer) {
+        this.logger = logger;
+        this.tools = tools;
+        this.serializer = serializer;
+    }
 
     private final String LOGFROM = "validationfilter";
 
@@ -51,105 +50,114 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
     private final String AINAME = "name";
     private final String TOPIC = "current_topic";
     private final String MINP = "confidence_threshold";
+    private final String ENTITYNAME = "entity_name";
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(final ContainerRequestContext requestContext) throws IOException {
 
         // get the list of things that we need to validate
-        HashSet<APIParameter> checkList = new HashSet<>();
-        extractAPIParameters(checkList, resourceInfo.getResourceClass());
-        extractAPIParameters(checkList, resourceInfo.getResourceMethod());
+        final HashSet<APIParameter> checkList = new HashSet<>();
+        extractAPIParameters(checkList, this.resourceInfo.getResourceClass());
+        extractAPIParameters(checkList, this.resourceInfo.getResourceMethod());
 
         try {
             // get maps of parameters
-            MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
-            MultivaluedMap<String, String> queryParameters = requestContext.getUriInfo().getQueryParameters();
+            final MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
+            final MultivaluedMap<String, String> queryParameters = requestContext.getUriInfo().getQueryParameters();
 
             // developer ID is always validated
             requestContext.setProperty(APIParameter.DevID.toString(),
-                    this.validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
+                this.validateAlphaNumPlusDashes(this.DEVID, requestContext.getHeaderString(this.DEVID)));
 
             // extract each parameter as necessary,
             // validate and put the result into a property in the requestcontext
             if (checkList.contains(APIParameter.AIID)) {
                 requestContext.setProperty(APIParameter.AIID.toString(),
-                        this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
+                    this.validateUuid(this.AIID, getFirst(pathParameters.get(this.AIID))));
             }
             if (checkList.contains(APIParameter.ChatID)) {
-                String chatId = getFirstOrDefault(queryParameters.get(CHATID), "");
+                final String chatId = getFirstOrDefault(queryParameters.get(this.CHATID), "");
                 requestContext.setProperty(APIParameter.ChatID.toString(),
-                        this.validateAlphaNumPlusDashes(CHATID,
-                                chatId.isEmpty()
-                                        ? tools.createNewRandomUUID().toString()
-                                        : this.validateAlphaNumPlusDashes(CHATID, chatId)));
+                    this.validateAlphaNumPlusDashes(this.CHATID,
+                        chatId.isEmpty()
+                            ? this.tools.createNewRandomUUID().toString()
+                            : this.validateAlphaNumPlusDashes(this.CHATID, chatId)));
+            }
+            if (checkList.contains(APIParameter.EntityName)) {
+                requestContext.setProperty(APIParameter.EntityName.toString(),
+                    this.validateRequiredObjectName(this.ENTITYNAME, getFirst(queryParameters.get(this.ENTITYNAME))));
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
-                        this.validateRequiredSanitized("question", getFirst(queryParameters.get(CHATQUESTION))));
+                    this.validateRequiredSanitized("question", getFirst(queryParameters.get(this.CHATQUESTION))));
             }
             if (checkList.contains(APIParameter.ChatHistory)) {
                 requestContext.setProperty(APIParameter.ChatHistory.toString(),
-                        this.validateOptionalSanitized(getFirst(queryParameters.get(CHATHISTORY))));
+                    this.validateOptionalSanitized(getFirst(queryParameters.get(this.CHATHISTORY))));
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
-                        this.validateAlphaNumPlusDashes(AINAME, getFirst(queryParameters.get(AINAME))));
+                    this.validateAlphaNumPlusDashes(this.AINAME, getFirst(queryParameters.get(this.AINAME))));
             }
             if (checkList.contains(APIParameter.AIDescription)) {
                 requestContext.setProperty(APIParameter.AIDescription.toString(),
-                        this.validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC))));
+                    this.validateOptionalDescription(this.AIDESC, getFirst(queryParameters.get(this.AIDESC))));
             }
             if (checkList.contains(APIParameter.ChatTopic)) {
                 requestContext.setProperty(APIParameter.ChatTopic.toString(),
-                        this.validateOptionalSanitizeRemoveAt(TOPIC, getFirst(queryParameters.get(TOPIC))));
+                    this.validateOptionalSanitizeRemoveAt(this.TOPIC, getFirst(queryParameters.get(this.TOPIC))));
             }
             if (checkList.contains(APIParameter.Min_P)) {
                 requestContext.setProperty(APIParameter.Min_P.toString(),
-                        this.validateOptionalFloat(MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(MINP))));
+                    this.validateOptionalFloat(this.MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(this.MINP))));
             }
-            logger.logDebug(LOGFROM, "parameter validation passed");
+            this.logger.logDebug(this.LOGFROM, "parameter validation passed");
 
-        } catch (ParameterValidationException pve) {
-            requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(serializer).build());
-            logger.logDebug(LOGFROM, "parameter validation failed");
+        } catch (final ParameterValidationException pve) {
+            requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
+            this.logger.logDebug(this.LOGFROM, "parameter validation failed");
         }
     }
 
     // static accessors to retrieve validated parameters from the request context
-    public static String getDevid(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.DevID.toString());
+    public static String getDevid(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.DevID.toString());
     }
 
-    public static UUID getAiid(ContainerRequestContext requestContext) {
-        return (UUID)requestContext.getProperty(APIParameter.AIID.toString());
+    public static UUID getAiid(final ContainerRequestContext requestContext) {
+        return (UUID) requestContext.getProperty(APIParameter.AIID.toString());
     }
 
-    public static String getChatID(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.ChatID.toString());
+    public static String getChatID(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.ChatID.toString());
     }
 
-    public static String getChatQuestion(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.ChatQuestion.toString());
+    public static String getChatQuestion(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.ChatQuestion.toString());
     }
 
-    public static String getChatHistory(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.ChatHistory.toString());
+    public static String getChatHistory(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.ChatHistory.toString());
     }
 
-    public static String getAiName(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.AIName.toString());
+    public static String getAiName(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.AIName.toString());
     }
 
-    public static String getAiDescription(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.AIDescription.toString());
+    public static String getAiDescription(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.AIDescription.toString());
     }
 
-    public static String getTopic(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.ChatTopic.toString());
+    public static String getTopic(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.ChatTopic.toString());
     }
 
-    public static float getMinP(ContainerRequestContext requestContext) {
-        return (Float)requestContext.getProperty(APIParameter.Min_P.toString());
+    public static float getMinP(final ContainerRequestContext requestContext) {
+        return (Float) requestContext.getProperty(APIParameter.Min_P.toString());
+    }
+
+    public static String getEntityName(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.EntityName.toString());
     }
 
     /***
@@ -157,7 +165,7 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
      * @param list
      * @return empty string or the first string in the list if available
      */
-    private String getFirst(List<String> list) {
+    private String getFirst(final List<String> list) {
         return ((null == list) || (list.isEmpty())) ? "" : list.get(0);
     }
 
@@ -167,18 +175,18 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
      * @param defaultValue
      * @return
      */
-    private String getFirstOrDefault(List<String> list, String defaultValue) {
+    private String getFirstOrDefault(final List<String> list, final String defaultValue) {
         return ((null == list) || (list.isEmpty())) ? defaultValue : list.get(0);
     }
 
     /***
      * Extract the param list from the annotated element
      */
-    private void extractAPIParameters(Set<APIParameter> container, AnnotatedElement annotatedElement) {
+    private void extractAPIParameters(final Set<APIParameter> container, final AnnotatedElement annotatedElement) {
         if (annotatedElement != null) {
-            ValidateParameters validateParameters = annotatedElement.getAnnotation(ValidateParameters.class);
+            final ValidateParameters validateParameters = annotatedElement.getAnnotation(ValidateParameters.class);
             if (validateParameters != null) {
-                APIParameter[] allowedAPIParameters = validateParameters.value();
+                final APIParameter[] allowedAPIParameters = validateParameters.value();
                 container.addAll(Arrays.asList(allowedAPIParameters));
             }
         }

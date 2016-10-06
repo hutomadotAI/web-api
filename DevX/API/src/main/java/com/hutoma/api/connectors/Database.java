@@ -2,6 +2,7 @@ package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.AiIntegration;
@@ -24,7 +25,7 @@ public class Database {
     private final String LOGFROM = "database";
 
     public static class DatabaseException extends Exception {
-        public DatabaseException(Throwable cause) {
+        public DatabaseException(final Throwable cause) {
             super(cause);
         }
     }
@@ -33,221 +34,221 @@ public class Database {
     Provider<DatabaseCall> callProvider;
 
     @Inject
-    public Database(Logger logger, Provider<DatabaseCall> callProvider) {
+    public Database(final Logger logger, final Provider<DatabaseCall> callProvider) {
         this.logger = logger;
         this.callProvider = callProvider;
     }
 
 
-    public boolean createDev(String username, String email, String password, String passwordSalt, String first_name, String last_name, String dev_token, int plan_id, String dev_id, String client_token) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public boolean createDev(final String username, final String email, final String password, final String passwordSalt, final String first_name, final String last_name, final String dev_token, final int plan_id, final String dev_id, final String client_token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt).add(first_name).add(last_name).add(dev_token).add(plan_id).add(dev_id).add(client_token);
             return call.executeUpdate() > 0;
         }
     }
 
-    public boolean deleteDev(String devid) throws DatabaseException {
+    public boolean deleteDev(final String devid) throws DatabaseException {
 
         //TODO: make this a single stored procedure
         // first delete all the user's AIs
-        try (DatabaseCall deleleAICall = callProvider.get()) {
+        try (DatabaseCall deleleAICall = this.callProvider.get()) {
             deleleAICall.initialise("deleteAllAIs", 1).add(devid);
             deleleAICall.executeUpdate();
 
             // then delete the user
-            try (DatabaseCall deleteUserCall = callProvider.get()) {
+            try (DatabaseCall deleteUserCall = this.callProvider.get()) {
                 deleteUserCall.initialise("deleteUser", 1).add(devid);
                 return deleteUserCall.executeUpdate() > 0;
             }
         }
     }
 
-    public boolean createAI(UUID aiid, String name, String description, String devid,
-                            boolean is_private, double deep_learning_error, int deep_learning_status,
-                            int shallow_learning_status, int status, String client_token, String trainingFile) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public boolean createAI(final UUID aiid, final String name, final String description, final String devid,
+                            final boolean is_private, final double deep_learning_error, final int deep_learning_status,
+                            final int shallow_learning_status, final int status, final String client_token, final String trainingFile) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI", 11)
-                    .add(aiid).add(name).add(description).add(devid).add(is_private)
-                    .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
-                    .add(status).add(client_token).add(trainingFile);
+                .add(aiid).add(name).add(description).add(devid).add(is_private)
+                .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
+                .add(status).add(client_token).add(trainingFile);
             return call.executeUpdate() > 0;
         }
     }
 
-    public ArrayList<ApiAi> getAllAIs(String devid) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public ArrayList<ApiAi> getAllAIs(final String devid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIs", 1).add(devid);
-            ResultSet rs = call.executeQuery();
-            ArrayList<ApiAi> res = new ArrayList<>();
+            final ResultSet rs = call.executeQuery();
+            final ArrayList<ApiAi> res = new ArrayList<>();
             try {
                 while (rs.next()) {
-                    ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                    final ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
+                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                     res.add(ai);
                 }
                 return res;
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public ApiAi getAI(String devid, UUID aiid) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public ApiAi getAI(final String devid, final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAI_v1", 2).add(devid).add(aiid);
-            ResultSet rs = call.executeQuery();
+            final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
                     return new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                 }
                 return null;
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public boolean deleteAi(String devid, UUID aiid) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public boolean deleteAi(final String devid, final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAI_v1", 2).add(devid).add(aiid);
             return call.executeUpdate() > 0;
         }
     }
 
     public ArrayList<AiDomain> getAiDomainList() throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDomains", 0);
-            ResultSet rs = call.executeQuery();
+            final ResultSet rs = call.executeQuery();
             try {
-                ArrayList<AiDomain> res = new ArrayList<>();
+                final ArrayList<AiDomain> res = new ArrayList<>();
                 while (rs.next()) {
                     res.add(new AiDomain(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
+                        rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
                 }
                 return res;
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public boolean isNeuralNetworkServerActive(String dev_id, UUID aiid) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public boolean isNeuralNetworkServerActive(final String dev_id, final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAiActive", 2).add(aiid).add(dev_id);
-            ResultSet rs = call.executeQuery();
+            final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
                     return (1 == rs.getInt("NNActive"));
                 }
                 return false;
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public long insertNeuralNetworkQuestion(String dev_id, UUID chatId, UUID aiid, String q) throws DatabaseException {
+    public long insertNeuralNetworkQuestion(final String dev_id, final UUID chatId, final UUID aiid, final String q) throws DatabaseException {
 
-        try (DatabaseCall call = callProvider.get()) {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("insertQuestion", 4).add(dev_id).add(chatId).add(aiid).add(q);
-            ResultSet rs = call.executeQuery();
+            final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
                     return rs.getLong(1);
                 }
                 return -1;
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public String getAnswer(long qid) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public String getAnswer(final long qid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAnswer", 1).add(qid);
-            ResultSet rs = call.executeQuery();
+            final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
                     return rs.getString("answer");
                 }
                 return "";
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public boolean updateAiTrainingFile(UUID aiUUID, String trainingData) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public boolean updateAiTrainingFile(final UUID aiUUID, final String trainingData) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
             return call.executeUpdate() > 0;
         }
     }
 
-    public RateLimitStatus checkRateLimit(String dev_id, String rateKey, double burst, double frequency) throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+    public RateLimitStatus checkRateLimit(final String dev_id, final String rateKey, final double burst, final double frequency) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("rate_limit_check", 4).add(dev_id).add(rateKey).add(burst).add(frequency);
-            ResultSet rs = call.executeQuery();
+            final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
                     return new RateLimitStatus(rs.getBoolean("rate_limit"), rs.getFloat("tokens"));
                 }
                 throw new DatabaseException(new Exception("stored proc should have returned a row but it returned none"));
-            } catch (SQLException sqle) {
+            } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public List<ApiMemoryToken> getAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
+    public List<ApiMemoryToken> getAllUserVariables(final String dev_id, final String aiid, final String uid) throws DatabaseException {
         try {
             return null; // FIXME
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DatabaseException(e);
         }
     }
 
-    public ApiMemoryToken getUserVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
+    public ApiMemoryToken getUserVariable(final String dev_id, final String aiid, final String uid, final String variable) throws DatabaseException {
         try {
             return null; // FIXME
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DatabaseException(e);
         }
     }
 
-    public boolean setUserVariable(String dev_id, String aiid, String uid, int expires_seconds, int n_prompt,
-                                   String variable_type, String variable_name, String variable_value) throws DatabaseException {
+    public boolean setUserVariable(final String dev_id, final String aiid, final String uid, final int expires_seconds, final int n_prompt,
+                                   final String variable_type, final String variable_name, final String variable_value) throws DatabaseException {
         try {
             return false; // FIXME
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DatabaseException(e);
         }
 
     }
 
-    public boolean removeVariable(String dev_id, String aiid, String uid, String variable) throws DatabaseException {
+    public boolean removeVariable(final String dev_id, final String aiid, final String uid, final String variable) throws DatabaseException {
         try {
             return false; // FIXME
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DatabaseException(e);
         }
     }
 
-    public boolean removeAllUserVariables(String dev_id, String aiid, String uid) throws DatabaseException {
+    public boolean removeAllUserVariables(final String dev_id, final String aiid, final String uid) throws DatabaseException {
         try {
             return false; // FIXME
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DatabaseException(e);
         }
     }
 
-    public boolean removeAllAiVariables(String dev_id, String aiid) throws DatabaseException {
+    public boolean removeAllAiVariables(final String dev_id, final String aiid) throws DatabaseException {
         try {
             return false; // FIXME
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DatabaseException(e);
         }
     }
@@ -260,5 +261,35 @@ public class Database {
         throw new DatabaseException(new Exception("getAiIntegrationList unimplemented"));
     }
 
+    public List<ApiEntity> getEntities(final String devid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getEntities", 1).add(devid);
+            final ResultSet rs = call.executeQuery();
+            try {
+                final ArrayList<ApiEntity> entities = new ArrayList<>();
+                while (rs.next()) {
+                    entities.add(new ApiEntity(rs.getString("name")));
+                }
+                return entities;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
 
+    public ApiEntity getEntity(final String devid, final String entityName) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getEntityValues", 2).add(devid).add(entityName);
+            final ResultSet rs = call.executeQuery();
+            try {
+                final ArrayList<String> entityValues = new ArrayList<>();
+                while (rs.next()) {
+                    entityValues.add(rs.getString("value"));
+                }
+                return new ApiEntity(entityName, entityValues);
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
 }

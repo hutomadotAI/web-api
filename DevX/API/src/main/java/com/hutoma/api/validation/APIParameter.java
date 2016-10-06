@@ -12,5 +12,6 @@ public enum APIParameter {
     ChatQuestion,
     ChatHistory,
     ChatTopic,
-    Min_P
+    Min_P,
+    EntityName
 }
