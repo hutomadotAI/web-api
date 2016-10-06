@@ -8,7 +8,6 @@ import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.validation.Validate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class TestChatLogic {
 
     private String DEVID = "devid";
     private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private String UID = "uid";
+    private UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     private String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private String SEMANTICRESULT = "semanticresult";
     private String NEURALRESULT = "neuralresult";
@@ -74,7 +73,7 @@ public class TestChatLogic {
     }
 
     private ApiResult getChat(float min_p) {
-        return chatLogic.chat(fakeContext, AIID, DEVID, "question", UID, "history", "topic", min_p);
+        return chatLogic.chat(fakeContext, AIID, DEVID, "question", CHATID.toString(), "history", "topic", min_p);
     }
 
     @Test
