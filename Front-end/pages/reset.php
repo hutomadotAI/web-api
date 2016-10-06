@@ -21,11 +21,13 @@
           content="Hutoma builds emotionally evolved AIs and Digital Employees that can have intelligent conversations with you or your customers.">
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../console/dist/css/hutoma.css">
     <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../console/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../console/dist/css/animate.css">
-     <link rel="stylesheet" href="../console/dist/css/hutoma.min.css">
     <link rel="stylesheet" href="../console/dist/css/main.css">
+
+    <link rel="stylesheet" href="../console/plugins/cookiePolicyBar/cookiePolicyBar.css">
     <script src="../console/dist/js/modernizr-2.6.2.min.js"></script>
     <script type="text/javascript" src="../console/dist/js/jquery-1.10.1.min.js"></script>
 
@@ -89,38 +91,35 @@ body {
   margin: 20px 0;
 }
 </style>
-
 </head>
-  <body class="hold-transition register-page">
-      <header id="navigation" class="navbar-fixed-top navbar">
-      <div class="container" style="font-weight: bold">
-          <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                  <span class="sr-only">Toggle navigation</span>
-                  <i class="fa fa-bars fa-2x"></i>
-              </button>
-              <a class="navbar-brand" href="#body">
-                  <h1 style="padding: 5px;font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;" >
-                     <b> hu:toma </b>
-                  </h1>
-              </a>
-          </div>
-          <nav class="collapse navbar-collapse navbar-right" role="navigation">
-              <ul id="nav" class="nav navbar-nav">
-                  <li class="current"><a href="../index.html" class="external">Home</a></li>
-                  <li><a href="./login.php" class="external">Login</a></li>
-                  <li><a href="../about.html">Features</a></li>
-                  <li><a href="../about.html" class="external">About</a></li>
-                  <li><a href="../contactus.html" class="external">Contacts</a></li>
-              </ul>
-          </nav>
-      </div>
-  </header>
-
+    <header id="navigation" class="navbar-fixed-top navbar">
+        <div class="container" style="font-weight: bold">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <i class="fa fa-bars fa-2x"></i>
+                </button>
+                <a class="navbar-brand" href="#body">
+                    <h1 style="padding: 5px;margin-left: 115px;" >
+                        <b> hu:toma </b>
+                    </h1>
+                </a>
+            </div>
+            <nav style="padding: 5px;margin-right: 115px;" class="collapse navbar-collapse navbar-right" role="navigation">
+                <ul id="nav" class="nav navbar-nav">
+                    <li><a href="../index.html" class="external">Home</a></li>
+                    <li><a href="./pages/login.php" class="external">Login</a></li>
+                    <li><a href="../index.html" class="external">Features  </a></li>
+                    <li><a href="../about.html" class="external">About</a></li>
+                    <li><a href="../contactus.html" class="external">Contacts</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
   <div class="register-box">
 
 
-      <div class="register-box-body">
+      <div class="register-box-body"  style="border: 1px solid #d2d6de;">
         <p class="login-box-msg"><b>password reset</b></p>
 
          <?php

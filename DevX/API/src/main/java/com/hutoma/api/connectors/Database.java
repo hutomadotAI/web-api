@@ -149,10 +149,10 @@ public class Database {
         }
     }
 
-    public long insertNeuralNetworkQuestion(String dev_id, String uid, UUID aiid, String q) throws DatabaseException {
+    public long insertNeuralNetworkQuestion(String dev_id, UUID chatId, UUID aiid, String q) throws DatabaseException {
 
         try (DatabaseCall call = callProvider.get()) {
-            call.initialise("insertQuestion", 4).add(dev_id).add(uid).add(aiid).add(q);
+            call.initialise("insertQuestion", 4).add(dev_id).add(chatId).add(aiid).add(q);
             ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {

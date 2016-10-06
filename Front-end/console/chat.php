@@ -1,17 +1,22 @@
 <?php
    require "../pages/config.php";
 
-    if ( !\hutoma\console::isSessionActive()) {
-        header('Location: ./error.php?err=1');
-        exit;
-    }
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
 
-    if ( !isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) ){
+
+if ( !isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) ){
         header('Location: ./error.php?err=2');
         exit;
     }
 
-    $response = \hutoma\console::chatAI(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],'1',$_GET['q'],'',false,0.5);
+    $response = \hutoma\console::chatAI(
+        \hutoma\console::getDevToken(), // devId
+        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'], // aiid
+        $_GET['chatId'], // chatId
+        $_GET['q'], // question
+        '', // history
+        false, // fs
+        0.5); // min_p
 
     if ($response['status']['code'] !== 200) {
         echo(json_encode($response,JSON_PRETTY_PRINT));

@@ -2,7 +2,7 @@
    
     <div class="box-header with-border">
         <!--<i class="fa fa-wrench text-success"></i>-->
-        <h3 class="box-title">Action</h3>
+        <h3 class="box-title">Intent Variables</h3>
         <a data-toggle="collapse"  href="#collapseActionInfo" tabindex="-1">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-md text-yellow"></i>
@@ -29,21 +29,12 @@
                  <div class="overlay center-block">
                      <section class="content bg-gray-light" >
                          <div class="box-body">
-                             <dl class="dl-horizontal">
-                                 <dt>Description Action Manipulation</dt>
-                                 <dd>Before start training process, y.</dd>
-                                 <dt>Euismod</dt>
-                                 <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                 <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                 <dt>Malesuada porta</dt>
-                                 <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                 <dt>Felis euismod semper eget lacinia</dt>
-                                 <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
+                             <dl class="dl-horizontal" style="text-align:justify">>
+                                Intent variables are entities that you will want the AI to know before it flags you that the intent is fulfilled. For example, when you order coffee you might be asked what kind of coffee you want. The type of coffee would be a variable you want to model here.
                              </dl>
                          </div>
                      </section>
-                     <p></p>
-                     need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                     
                  </div>
              </div>
          </div>

@@ -41,12 +41,12 @@ public class SemanticAnalysis {
         this.tools = tools;
     }
 
-    public void startAnswerRequest(String devid, UUID aiid, String uid, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
+    public void startAnswerRequest(String devid, UUID aiid, UUID chatId, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
         UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
                 .addParameter("q", q)
                 .addParameter("aiid", aiid.toString())
                 .addParameter("dev_id", devid)
-                .addParameter("uid", uid)
+                .addParameter("uid", chatId.toString())
                 .addParameter("min_p", Float.toString(min_p))
                 .addParameter("multiprocess", "yes")
                 .addParameter("nproc", "8")

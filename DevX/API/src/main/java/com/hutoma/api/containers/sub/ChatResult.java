@@ -2,6 +2,7 @@ package com.hutoma.api.containers.sub;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by David MG on 16/08/2016.
@@ -18,6 +19,7 @@ public class ChatResult {
     private String context;
     private String topic_in = "";
     private String topic_out = "";
+    private UUID chatId;
 
     public String getAnswer() {
         return answer;
@@ -62,4 +64,8 @@ public class ChatResult {
     public double getElapsedTime() {
         return elapsed_time;
     }
+
+    public UUID getChatId() { return this.chatId; }
+
+    public void setChatId(UUID chatId) { this.chatId = chatId; }
 }

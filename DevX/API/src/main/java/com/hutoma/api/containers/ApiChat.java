@@ -10,13 +10,13 @@ import java.util.UUID;
  */
 public class ApiChat extends ApiResult {
 
-    UUID id;
+    UUID chatId;
     long timestamp;
     ChatResult result;
     Metadata metadata;
 
-    public ApiChat(UUID id, long timestamp) {
-        this.id = id;
+    public ApiChat(UUID chatId, long timestamp) {
+        this.chatId = chatId;
         this.timestamp = timestamp;
     }
 
@@ -36,7 +36,7 @@ public class ApiChat extends ApiResult {
         this.timestamp = timestamp;
     }
 
-    public void setID(UUID id) {
-        this.id = id;
+    public void setID(UUID chatId) {
+        this.chatId = chatId;
     }
 }

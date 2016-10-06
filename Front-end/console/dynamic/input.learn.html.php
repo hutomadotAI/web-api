@@ -5,7 +5,7 @@
         </div>
     </a>
     <label for="ai_personality">Learn from Users</label>
-    <select class="form-control select2" name="ai_personality" id="ai_personality" style="width: 100%;">
+    <select class="form-control select 2" name="ai_personality" id="ai_personality" style="width: 100%;">
         <option disabled="disabled">Yes</option>
         <option selected="selected">No</option>
         <option disabled="disabled">Yes but supervised</option>
@@ -20,11 +20,11 @@
             <section class="content-info" >
                 <div class="box-body">
                     <dt>What does this mean?</dt>
-                    <dd>NOT YET IMPLEMENTED</dd>
+                    <dd>(this functionality is not yet available)</dd>
                 </div>
             </section>
             <p></p>
-            need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+            need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>support@hutoma.com</a>
         </div>
     </div>
 </div>

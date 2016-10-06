@@ -2,6 +2,7 @@ package com.hutoma.api.validation;
 
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 
 import javax.annotation.Priority;
@@ -15,7 +16,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @ValidateParameters
 @Provider
@@ -29,6 +34,9 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
     private Logger logger;
 
     @Inject
+    private Tools tools;
+
+    @Inject
     JsonSerializer serializer;
 
     private final String LOGFROM = "validationfilter";
@@ -36,7 +44,7 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
     // query parameter names
     private final String AIID = "aiid";
     private final String DEVID = "_developer_id";
-    private final String USERID = "uid";
+    private final String CHATID = "chatId";
     private final String CHATQUESTION = "q";
     private final String CHATHISTORY = "chat_history";
     private final String AIDESC = "description";
@@ -67,9 +75,13 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
                 requestContext.setProperty(APIParameter.AIID.toString(),
                         this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
             }
-            if (checkList.contains(APIParameter.UserID)) {
-                requestContext.setProperty(APIParameter.UserID.toString(),
-                        this.validateAlphaNumPlusDashes(USERID, getFirstOrDefault(queryParameters.get(USERID), "1")));
+            if (checkList.contains(APIParameter.ChatID)) {
+                String chatId = getFirstOrDefault(queryParameters.get(CHATID), "");
+                requestContext.setProperty(APIParameter.ChatID.toString(),
+                        this.validateAlphaNumPlusDashes(CHATID,
+                                chatId.isEmpty()
+                                        ? tools.createNewRandomUUID().toString()
+                                        : this.validateAlphaNumPlusDashes(CHATID, chatId)));
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
@@ -112,8 +124,8 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
         return (UUID)requestContext.getProperty(APIParameter.AIID.toString());
     }
 
-    public static String getUserID(ContainerRequestContext requestContext) {
-        return (String)requestContext.getProperty(APIParameter.UserID.toString());
+    public static String getChatID(ContainerRequestContext requestContext) {
+        return (String)requestContext.getProperty(APIParameter.ChatID.toString());
     }
 
     public static String getChatQuestion(ContainerRequestContext requestContext) {

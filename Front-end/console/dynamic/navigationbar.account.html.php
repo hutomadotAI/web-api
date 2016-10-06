@@ -30,7 +30,7 @@
         <!-- User Account: style can be found in dropdown.less -->
         <li class="dropdown user user-menu">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1" >
-            <i class="fa fa-user text-blue" tabindex="-1"></i><span>Account</span>
+            <i class="fa fa-cog text-gray" tabindex="-1"></i><span style="font-size:10px;color:gray;">MY ACCOUNT</span>
           </a>
 
           <ul class="dropdown-menu">

@@ -46,16 +46,16 @@ public class ChatLogic {
         return Math.round(input * 10.0d) / 10.0d;
     }
 
-    public ApiResult chat(SecurityContext context, UUID aiid, String dev_id, String q, String uid, String history,
+    public ApiResult chat(SecurityContext context, UUID aiid, String dev_id, String q, String chatId, String history,
                           String topic, float min_p) {
 
         long timestampNow = tools.getTimestamp();
-        UUID chatID = tools.createNewRandomUUID();
+        UUID chatUuid = UUID.fromString(chatId);
 
-        ApiChat apiChat = new ApiChat(tools.createNewRandomUUID(), timestampNow);
+        ApiChat apiChat = new ApiChat(chatUuid, timestampNow);
         ChatResult chatResult = new ChatResult();
         apiChat.setResult(chatResult);
-        apiChat.setID(chatID);
+        apiChat.setID(chatUuid);
 
         long startTime = timestampNow;
 
@@ -66,7 +66,7 @@ public class ChatLogic {
             put("Topic", topic);
             // TODO: potentially PII info, we may need to mask this later, but for
             // development purposes log this
-            put("UID", uid);
+            put("UID", chatUuid.toString());
             put("History", history);
             put("Q", q);
         }};
@@ -76,8 +76,8 @@ public class ChatLogic {
             logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
 
             // async start both requests
-            semanticAnalysis.startAnswerRequest(dev_id, aiid, uid, topic, history, q, min_p);
-            neuralNet.startAnswerRequest(dev_id, aiid, uid, q);
+            semanticAnalysis.startAnswerRequest(dev_id, aiid, chatUuid, topic, history, q, min_p);
+            neuralNet.startAnswerRequest(dev_id, aiid, chatUuid, q);
 
             // wait for semantic result to complete
             ChatResult semanticAnalysisResult = semanticAnalysis.getAnswerResult();
@@ -89,6 +89,7 @@ public class ChatLogic {
                 }
 
                 double semanticScore = semanticAnalysisResult.getScore();
+                chatResult.setChatId(chatUuid);
                 chatResult.setScore(toOneDecimalPlace(semanticScore));
                 chatResult.setTopic_out(semanticAnalysisResult.getTopic_out());
                 chatResult.setAnswer(semanticAnalysisResult.getAnswer());
