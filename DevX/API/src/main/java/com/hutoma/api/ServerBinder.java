@@ -29,6 +29,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(TrainingLogic.class).to(TrainingLogic.class);
         bind(EntityLogic.class).to(EntityLogic.class);
+        bind(IntentLogic.class).to(IntentLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

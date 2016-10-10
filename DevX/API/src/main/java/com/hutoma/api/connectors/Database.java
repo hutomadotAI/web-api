@@ -3,9 +3,11 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import org.joda.time.DateTime;
 
@@ -284,9 +286,83 @@ public class Database {
         }
     }
 
+    public List<String> getIntents(String devid, UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIntents", 2).add(devid).add(aiid);
+            ResultSet rs = call.executeQuery();
+            ArrayList<String> intents = new ArrayList<>();
+            while (rs.next()) {
+                intents.add(rs.getString("name"));
+            }
+            return intents;
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public ApiIntent getIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
+
+        // cascading tries for DB call is temporary
+        // and will be replaced by transactions very soon.
+        // transactions will have a single cleanup for multiple db calls.
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIntent", 3).add(devid).add(aiid).add(intentName);
+            ResultSet rs = call.executeQuery();
+            if (!rs.next()) {
+                // not found
+                return null;
+            }
+            // create the intent
+            ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
+
+            // get the user triggers
+            try (DatabaseCall saysCall = this.callProvider.get()) {
+                saysCall.initialise("getIntentUserSays", 3).add(devid).add(aiid).add(intentName);
+                ResultSet saysRs = saysCall.executeQuery();
+                while (saysRs.next()) {
+                    intent.addUserSays(saysRs.getString("says"));
+                }
+            }
+
+            // get the list of responses
+            try (DatabaseCall intentResponseCall = this.callProvider.get()) {
+                intentResponseCall.initialise("getIntentResponses", 3).add(devid).add(aiid).add(intentName);
+                ResultSet intentResponseRs = intentResponseCall.executeQuery();
+                while (intentResponseRs.next()) {
+                    intent.addResponse(intentResponseRs.getString("response"));
+                }
+            }
+
+            // get each intent variable
+            try (DatabaseCall varCall = this.callProvider.get()) {
+                varCall.initialise("getIntentVariables", 3).add(devid).add(aiid).add(intentName);
+                ResultSet varRs = varCall.executeQuery();
+                while (varRs.next()) {
+                    int varID = varRs.getInt("id");
+                    IntentVariable variable = new IntentVariable(
+                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
+
+                    // for each variable get all its prompts
+                    try (DatabaseCall promptCall = this.callProvider.get()) {
+                        promptCall.initialise("getIntentVariablePrompts", 3).add(devid).add(aiid).add(varID);
+                        ResultSet promptRs = promptCall.executeQuery();
+                        while (promptRs.next()) {
+                            variable.addPrompt(promptRs.getString("prompt"));
+                        }
+                    }
+                    intent.addVariable(variable);
+                }
+            }
+            return intent;
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     public static class DatabaseException extends Exception {
         public DatabaseException(final Throwable cause) {
             super(cause);
         }
     }
+
 }

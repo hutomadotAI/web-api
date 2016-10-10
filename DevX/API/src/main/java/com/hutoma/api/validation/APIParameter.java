@@ -13,5 +13,6 @@ public enum APIParameter {
     ChatHistory,
     ChatTopic,
     Min_P,
+    IntentName,
     EntityName
 }
