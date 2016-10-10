@@ -23,22 +23,13 @@ import java.util.UUID;
 public class Database {
 
     private final String LOGFROM = "database";
-
-    public static class DatabaseException extends Exception {
-        public DatabaseException(final Throwable cause) {
-            super(cause);
-        }
-    }
-
     Logger logger;
     Provider<DatabaseCall> callProvider;
-
     @Inject
     public Database(final Logger logger, final Provider<DatabaseCall> callProvider) {
         this.logger = logger;
         this.callProvider = callProvider;
     }
-
 
     public boolean createDev(final String username, final String email, final String password, final String passwordSalt, final String first_name, final String last_name, final String dev_token, final int plan_id, final String dev_id, final String client_token) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
@@ -261,14 +252,14 @@ public class Database {
         throw new DatabaseException(new Exception("getAiIntegrationList unimplemented"));
     }
 
-    public List<ApiEntity> getEntities(final String devid) throws DatabaseException {
+    public List<String> getEntities(final String devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntities", 1).add(devid);
             final ResultSet rs = call.executeQuery();
             try {
-                final ArrayList<ApiEntity> entities = new ArrayList<>();
+                final ArrayList<String> entities = new ArrayList<>();
                 while (rs.next()) {
-                    entities.add(new ApiEntity(rs.getString("name")));
+                    entities.add(rs.getString("name"));
                 }
                 return entities;
             } catch (final SQLException sqle) {
@@ -290,6 +281,12 @@ public class Database {
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        }
+    }
+
+    public static class DatabaseException extends Exception {
+        public DatabaseException(final Throwable cause) {
+            super(cause);
         }
     }
 }

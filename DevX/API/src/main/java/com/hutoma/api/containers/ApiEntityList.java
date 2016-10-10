@@ -7,13 +7,13 @@ import java.util.List;
  */
 public class ApiEntityList extends ApiResult {
 
-    List<ApiEntity> entities;
+    List<String> entity_name;
 
-    public ApiEntityList(final List<ApiEntity> entities) {
-        this.entities = entities;
+    public ApiEntityList(List<String> entity_name) {
+        this.entity_name = entity_name;
     }
 
-    public List<ApiEntity> getEntities() {
-        return this.entities;
+    public List<String> getEntities() {
+        return this.entity_name;
     }
 }

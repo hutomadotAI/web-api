@@ -20,6 +20,7 @@ public class EntityLogic {
     private final Config config;
     private final Logger logger;
     private final Database database;
+    private final String LOGFROM = "entitylogic";
 
     @Inject
     public EntityLogic(final Config config, final Logger logger, final Database database) {
@@ -28,12 +29,10 @@ public class EntityLogic {
         this.database = database;
     }
 
-    private final String LOGFROM = "entitylogic";
-
     public ApiResult getEntities(final SecurityContext securityContext, final String devid) {
         try {
             this.logger.logDebug(this.LOGFROM, "request to list entities from " + devid);
-            final List<ApiEntity> entityList = this.database.getEntities(devid);
+            final List<String> entityList = this.database.getEntities(devid);
             if (entityList.isEmpty()) {
                 return ApiError.getNotFound();
             }

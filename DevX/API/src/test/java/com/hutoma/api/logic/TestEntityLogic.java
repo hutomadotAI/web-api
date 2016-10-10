@@ -26,18 +26,16 @@ import static org.mockito.Mockito.when;
  */
 public class TestEntityLogic {
 
+    private final String DEVID = "devid";
+    private final String AIID = "aiid";
+    private final String UID = "uid";
+    private final String ENTNAME = "entity";
     SecurityContext fakeContext;
     Database fakeDatabase;
     Config fakeConfig;
     Tools fakeTools;
     EntityLogic entityLogic;
     Logger fakeLogger;
-
-    private final String DEVID = "devid";
-    private final String AIID = "aiid";
-    private final String UID = "uid";
-    private final String ENTNAME = "entity";
-
 
     @Before
     public void setup() {
@@ -49,8 +47,8 @@ public class TestEntityLogic {
         this.entityLogic = new EntityLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase);
     }
 
-    private List<ApiEntity> getEntitiesList() {
-        return Arrays.asList(new ApiEntity[] {getEntityEmpty()});
+    private List<String> getEntitiesList() {
+        return Arrays.asList(new String[] {this.ENTNAME});
     }
 
     private ApiEntity getEntity() {
@@ -73,12 +71,12 @@ public class TestEntityLogic {
         when(this.fakeDatabase.getEntities(anyString())).thenReturn(getEntitiesList());
         final ApiResult result = this.entityLogic.getEntities(this.fakeContext, this.DEVID);
         Assert.assertEquals(1, ((ApiEntityList) result).getEntities().size());
-        Assert.assertEquals(this.ENTNAME, ((ApiEntityList) result).getEntities().get(0).getEntityName());
+        Assert.assertEquals(this.ENTNAME, ((ApiEntityList) result).getEntities().get(0));
     }
 
     @Test
     public void testGetEntities_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getEntities(anyString())).thenReturn(new ArrayList<ApiEntity>());
+        when(this.fakeDatabase.getEntities(anyString())).thenReturn(new ArrayList<String>());
         final ApiResult result = this.entityLogic.getEntities(this.fakeContext, this.DEVID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
