@@ -9,12 +9,6 @@ import java.util.regex.Pattern;
  */
 public class Validate {
 
-    public static class ParameterValidationException extends Exception {
-        public ParameterValidationException(final String message) {
-            super(message);
-        }
-    }
-
     static Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
     static Pattern alphaNumericAndMoreDesc = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\@\\? ]+$");
     static Pattern alphaNumericAndMoreNoAt = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
@@ -149,7 +143,6 @@ public class Validate {
      * Returns the same string with anything over char 127 or below char 32 removed
      * Also, []<>& are removed altogther
      * Whitespaces are deduped and the string is trimmed of leading and trailing whitespaces.
-     *
      * @param input abc[]<>&  abc
      * @return abc abc
      */
@@ -195,6 +188,12 @@ public class Validate {
             sb.setLength((sb.length() - 1));
         }
         return sb.toString();
+    }
+
+    public static class ParameterValidationException extends Exception {
+        public ParameterValidationException(final String message) {
+            super(message);
+        }
     }
 
 }

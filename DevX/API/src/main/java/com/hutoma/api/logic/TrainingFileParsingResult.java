@@ -44,10 +44,10 @@ final class TrainingFileParsingResult {
      * @return the list of events
      */
     List<String> getEventsFor(ResultEvent eventType) {
-        return events.stream()
-                .filter(x -> x.getKey() == eventType)
-                .map(e -> e.getValue())
-                .collect(Collectors.toList());
+        return this.events.stream()
+            .filter(x -> x.getKey() == eventType)
+            .map(e -> e.getValue())
+            .collect(Collectors.toList());
     }
 
     /**
@@ -79,10 +79,10 @@ final class TrainingFileParsingResult {
     /**
      * Adds a new event.
      * @param eventType the event type
-     * @param text the event text
+     * @param text      the event text
      */
     void addEvent(final ResultEvent eventType, final String text) {
-        events.addEvent(eventType, text);
+        this.events.addEvent(eventType, text);
     }
 
     /**
@@ -92,7 +92,7 @@ final class TrainingFileParsingResult {
      */
     boolean hasFatalEvents() {
         return this.events.stream().anyMatch(e ->
-                e.getKey() == ResultEvent.UPLOAD_NO_CONTENT);
+            e.getKey() == ResultEvent.UPLOAD_NO_CONTENT);
     }
 
 }

@@ -11,7 +11,7 @@ import java.util.Map;
  * Created by pedrotei on 29/09/16.
  */
 @Singleton
-public class TelemetryLogger extends Logger implements ITelemetry{
+public class TelemetryLogger extends Logger implements ITelemetry {
 
     /**
      * Telemetry app name for config file.
@@ -34,11 +34,11 @@ public class TelemetryLogger extends Logger implements ITelemetry{
         if (key != null) {
             TelemetryConfiguration telemetryConfig = TelemetryConfiguration.getActive();
             telemetryConfig.setInstrumentationKey(key);
-            telemetryClient = new TelemetryClient(telemetryConfig);
-            isTelemetryEnabled = true;
+            this.telemetryClient = new TelemetryClient(telemetryConfig);
+            this.isTelemetryEnabled = true;
             this.logInfo("telemetrylogger", String.format("Initialized telemetry for key: [%s]", key));
         } else {
-            isTelemetryEnabled = false;
+            this.isTelemetryEnabled = false;
         }
     }
 
@@ -46,21 +46,21 @@ public class TelemetryLogger extends Logger implements ITelemetry{
      * {@inheritDoc}
      */
     public void enableTelemetry() {
-        isTelemetryEnabled = true;
+        this.isTelemetryEnabled = true;
     }
 
     /**
      * {@inheritDoc}
      */
     public void disableTelemetry() {
-        isTelemetryEnabled = false;
+        this.isTelemetryEnabled = false;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isTelemetryEnabled() {
-        return isTelemetryEnabled;
+        return this.isTelemetryEnabled;
     }
 
     /**
@@ -68,7 +68,7 @@ public class TelemetryLogger extends Logger implements ITelemetry{
      */
     public void addTelemetryEvent(String eventName, Map<String, String> properties) {
         if (this.isTelemetryEnabled()) {
-            telemetryClient.trackEvent(eventName, properties, null);
+            this.telemetryClient.trackEvent(eventName, properties, null);
         }
     }
 
@@ -93,13 +93,13 @@ public class TelemetryLogger extends Logger implements ITelemetry{
             map.put("ExceptionMessage", exception.getMessage());
             map.put("ExceptionStackTrace", getStackTraceAsString(exception.getStackTrace()));
 
-            telemetryClient.trackEvent(eventName, map, null);
+            this.telemetryClient.trackEvent(eventName, map, null);
         }
     }
 
     private String getStackTraceAsString(StackTraceElement[] stackTrace) {
         StringBuilder sb = new StringBuilder();
-        for (StackTraceElement e: stackTrace) {
+        for (StackTraceElement e : stackTrace) {
             sb.append(e.toString()).append("\n");
         }
         return sb.toString();
@@ -117,7 +117,7 @@ public class TelemetryLogger extends Logger implements ITelemetry{
      */
     public void trackTelemetryMetric(String metricName, int sampleCount) {
         if (this.isTelemetryEnabled()) {
-            telemetryClient.trackMetric(metricName, sampleCount);
+            this.telemetryClient.trackMetric(metricName, sampleCount);
         }
     }
 

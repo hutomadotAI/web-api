@@ -12,22 +12,15 @@ import javax.inject.Singleton;
 @Singleton
 public class Logger implements ILogger {
 
-    protected enum Level {
-        DEBUG,
-        INFO,
-        WARNING,
-        ERROR,
-    }
-
     protected void logOutput(Level level, String fromLabel, String logComment) {
         DateTimeFormatter dateFormat = DateTimeFormat.mediumDateTime();
         DateTime dateTime = new DateTime();
 
-        if ((null==fromLabel) || fromLabel.isEmpty()) {
+        if ((null == fromLabel) || fromLabel.isEmpty()) {
             fromLabel = "none";
         }
 
-        if ((null==logComment) || logComment.isEmpty()) {
+        if ((null == logComment) || logComment.isEmpty()) {
             logComment = "";
         }
 
@@ -51,5 +44,12 @@ public class Logger implements ILogger {
     }
 
     public void initialize(Config config) {
+    }
+
+    protected enum Level {
+        DEBUG,
+        INFO,
+        WARNING,
+        ERROR,
     }
 }

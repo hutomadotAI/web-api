@@ -18,20 +18,12 @@ import java.util.concurrent.Future;
  */
 public class SemanticAnalysis {
 
+    private final String LOGFROM = "wnetconnector";
     Config config;
     Logger logger;
     JsonSerializer serializer;
     Tools tools;
-
-    private final String LOGFROM = "wnetconnector";
-
     Future<Response> responseFuture;
-
-    public static class SemanticAnalysisException extends Exception {
-        public SemanticAnalysisException(Throwable cause) {
-            super(cause);
-        }
-    }
 
     @Inject
     public SemanticAnalysis(Config config, Logger logger, JsonSerializer serializer, Tools tools) {
@@ -42,29 +34,35 @@ public class SemanticAnalysis {
     }
 
     public void startAnswerRequest(String devid, UUID aiid, UUID chatId, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
-        UrlBuilder url = UrlBuilder.fromString(config.getWNetServer())
-                .addParameter("q", q)
-                .addParameter("aiid", aiid.toString())
-                .addParameter("dev_id", devid)
-                .addParameter("uid", chatId.toString())
-                .addParameter("min_p", Float.toString(min_p))
-                .addParameter("multiprocess", "yes")
-                .addParameter("nproc", "8")
-                .addParameter("topic", topic)
-                .addParameter("nproc", config.getWnetNumberOfCPUS())
-                .addParameter("history", history);
-        responseFuture = ClientBuilder.newClient().target(url.toString()).request().async().get();
+        UrlBuilder url = UrlBuilder.fromString(this.config.getWNetServer())
+            .addParameter("q", q)
+            .addParameter("aiid", aiid.toString())
+            .addParameter("dev_id", devid)
+            .addParameter("uid", chatId.toString())
+            .addParameter("min_p", Float.toString(min_p))
+            .addParameter("multiprocess", "yes")
+            .addParameter("nproc", "8")
+            .addParameter("topic", topic)
+            .addParameter("nproc", this.config.getWnetNumberOfCPUS())
+            .addParameter("history", history);
+        this.responseFuture = ClientBuilder.newClient().target(url.toString()).request().async().get();
     }
 
     public ChatResult getAnswerResult() throws SemanticAnalysisException {
         ChatResult result = null;
         try {
-            String content = responseFuture.get().readEntity(String.class);
-            result = (ChatResult) serializer.deserialize(content, ChatResult.class);
+            String content = this.responseFuture.get().readEntity(String.class);
+            result = (ChatResult) this.serializer.deserialize(content, ChatResult.class);
         } catch (Exception e) {
             throw new SemanticAnalysisException(e);
         }
         return result;
+    }
+
+    public static class SemanticAnalysisException extends Exception {
+        public SemanticAnalysisException(Throwable cause) {
+            super(cause);
+        }
     }
 
 }

@@ -9,13 +9,6 @@ import java.net.URL;
  */
 public class HTMLExtractor {
 
-    public class HtmlExtractionException extends Exception {
-
-        public HtmlExtractionException(Throwable cause) {
-            super(cause);
-        }
-    }
-
     public String getTextFromUrl(String url) throws HtmlExtractionException {
         String result;
         try {
@@ -28,5 +21,12 @@ public class HTMLExtractor {
             throw new HtmlExtractionException(e);
         }
         return result;
+    }
+
+    public class HtmlExtractionException extends Exception {
+
+        public HtmlExtractionException(Throwable cause) {
+            super(cause);
+        }
     }
 }

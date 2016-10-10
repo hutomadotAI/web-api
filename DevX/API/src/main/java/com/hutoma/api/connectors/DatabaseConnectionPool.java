@@ -14,18 +14,17 @@ import java.sql.SQLException;
  */
 public class DatabaseConnectionPool {
 
+    private final String LOGFROM = "dbconnectionpool";
     Config config;
     Logger logger;
     DataSource dataSource;
     int maxActiveConnections;
 
-    private final String LOGFROM = "dbconnectionpool";
-
     @Inject
     public DatabaseConnectionPool(Config config, Logger logger) {
         this.config = config;
         this.logger = logger;
-        maxActiveConnections = config.getDatabaseConnectionPoolMaximumSize();
+        this.maxActiveConnections = config.getDatabaseConnectionPoolMaximumSize();
 
         PoolProperties p = new PoolProperties();
         p.setUrl(config.getDatabaseConnectionString());
@@ -37,7 +36,7 @@ public class DatabaseConnectionPool {
         p.setTestOnReturn(true);
         p.setValidationInterval(30000);
         p.setTimeBetweenEvictionRunsMillis(30000);
-        p.setMaxActive(maxActiveConnections);
+        p.setMaxActive(this.maxActiveConnections);
         p.setMaxIdle(config.getDatabaseConnectionPoolMaximumSize());
         p.setInitialSize(config.getDatabaseConnectionPoolMinimumSize());
         p.setMinIdle(config.getDatabaseConnectionPoolMinimumSize());
@@ -47,20 +46,20 @@ public class DatabaseConnectionPool {
         p.setLogAbandoned(false);
         p.setRemoveAbandoned(true);
         p.setJdbcInterceptors(
-                "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
-                        "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
-        dataSource = new DataSource();
-        dataSource.setPoolProperties(p);
+            "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
+                "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+        this.dataSource = new DataSource();
+        this.dataSource.setPoolProperties(p);
     }
 
     public Connection borrowConnection() throws Database.DatabaseException {
-        int activeConnections = dataSource.getActive();
-        logger.logDebug(LOGFROM, "idle/active/maxactive " + dataSource.getIdle() +"/" + activeConnections + "/" + maxActiveConnections);
-        if ((activeConnections+1) >= maxActiveConnections) {
-            logger.logWarning(LOGFROM, "reached maximum number of active connections: " + maxActiveConnections);
+        int activeConnections = this.dataSource.getActive();
+        this.logger.logDebug(this.LOGFROM, "idle/active/maxactive " + this.dataSource.getIdle() + "/" + activeConnections + "/" + this.maxActiveConnections);
+        if ((activeConnections + 1) >= this.maxActiveConnections) {
+            this.logger.logWarning(this.LOGFROM, "reached maximum number of active connections: " + this.maxActiveConnections);
         }
         try {
-            return dataSource.getConnection();
+            return this.dataSource.getConnection();
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }

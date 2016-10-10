@@ -1,6 +1,5 @@
 package com.hutoma.api.containers;
 
-import com.hutoma.api.containers.sub.Status;
 import org.joda.time.DateTime;
 
 /**
@@ -42,10 +41,10 @@ public class ApiAi extends ApiResult {
     }
 
     public String getAiid() {
-        return aiid;
+        return this.aiid;
     }
 
     public String getClient_token() {
-        return client_token;
+        return this.client_token;
     }
 }

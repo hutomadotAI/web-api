@@ -16,32 +16,32 @@ public class JsonSerializer {
     Gson gson;
 
     public JsonSerializer() {
-        gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(DateTime.class, new com.google.gson.JsonSerializer<DateTime>(){
-                    @Override
-                    public JsonElement serialize(DateTime json, Type typeOfSrc, JsonSerializationContext context) {
-                        return new JsonPrimitive(ISODateTimeFormat.dateTime().print(json));
-                    }
-                })
-                .create();
+        this.gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(DateTime.class, new com.google.gson.JsonSerializer<DateTime>() {
+                @Override
+                public JsonElement serialize(DateTime json, Type typeOfSrc, JsonSerializationContext context) {
+                    return new JsonPrimitive(ISODateTimeFormat.dateTime().print(json));
+                }
+            })
+            .create();
     }
 
     public String serialize(Object o) {
-        return gson.toJson(o);
+        return this.gson.toJson(o);
     }
 
     public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
-        Object o = gson.fromJson(new InputStreamReader(stream), resultClass);
-        if (null==o) {
+        Object o = this.gson.fromJson(new InputStreamReader(stream), resultClass);
+        if (null == o) {
             throw new JsonParseException("cannot deserialize valid object from json");
         }
         return o;
     }
 
     public Object deserialize(String content, Class resultClass) throws JsonParseException {
-        Object o = gson.fromJson(content, resultClass);
-        if (null==o) {
+        Object o = this.gson.fromJson(content, resultClass);
+        if (null == o) {
             throw new JsonParseException("cannot deserialize valid object from json");
         }
         return o;

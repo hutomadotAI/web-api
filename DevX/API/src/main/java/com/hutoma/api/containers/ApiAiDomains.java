@@ -1,7 +1,6 @@
 package com.hutoma.api.containers;
 
 import com.hutoma.api.containers.sub.AiDomain;
-import com.hutoma.api.containers.sub.Status;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class ApiAiDomains extends ApiResult {
     }
 
     public List<AiDomain> getDomainList() {
-        return _domainList;
+        return this._domainList;
     }
 
 }

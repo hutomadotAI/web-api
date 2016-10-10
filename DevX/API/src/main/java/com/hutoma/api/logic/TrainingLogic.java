@@ -29,6 +29,11 @@ import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
  */
 public class TrainingLogic {
 
+    private static final String EMPTY_STRING = "";
+    private static final String PREVIOUS_AI_PREFIX = "[";
+    private static final String PREVIOUS_AI_SUFFIX = "] ";
+    private static final String EOL = "\n";
+    private final String LOGFROM = "traininglogic";
     Config config;
     MessageQueue messageQueue;
     HTMLExtractor htmlExtractor;
@@ -36,17 +41,6 @@ public class TrainingLogic {
     Tools tools;
     Logger logger;
     Validate validate;
-
-    private final String LOGFROM = "traininglogic";
-
-    private static final String EMPTY_STRING= "";
-    private static final String PREVIOUS_AI_PREFIX = "[";
-    private static final String PREVIOUS_AI_SUFFIX = "] ";
-    private static final String EOL = "\n";
-
-    public class UploadTooLargeException extends Exception {
-    }
-
 
     @Inject
     public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
@@ -64,15 +58,15 @@ public class TrainingLogic {
 
         ArrayList<String> source;
 
-        long maxUploadFileSize = config.getMaxUploadSize();
+        long maxUploadFileSize = this.config.getMaxUploadSize();
 
         try {
             switch (type) {
 
                 // 0 = training file is text chat
                 case 0:
-                    logger.logDebug(LOGFROM, "training from uploaded training file");
-                    if (null==fileDetail) {
+                    this.logger.logDebug(this.LOGFROM, "training from uploaded training file");
+                    if (null == fileDetail) {
                         return ApiError.getBadRequest("upload could not be processed");
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
@@ -82,73 +76,68 @@ public class TrainingLogic {
                     if (result.hasFatalEvents()) {
                         return ApiError.getBadRequest("upload parsing errors", result.getEvents());
                     }
-                    if (!database.updateAiTrainingFile(aiid, result.getTrainingText())) {
+                    if (!this.database.updateAiTrainingFile(aiid, result.getTrainingText())) {
                         return ApiError.getNotFound("ai not found");
                     }
-                    messageQueue.pushMessageReadyForTraining(devid, aiid);
-                    if (source.size() > config.getMaxClusterLines()) {
-                        messageQueue.pushMessageClusterSplit(devid, aiid, config.getClusterMinProbability());
+                    this.messageQueue.pushMessageReadyForTraining(devid, aiid);
+                    if (source.size() > this.config.getMaxClusterLines()) {
+                        this.messageQueue.pushMessageClusterSplit(devid, aiid, this.config.getClusterMinProbability());
                     }
                     return new ApiResult().setSuccessStatus("upload accepted",
-                            result.getEventCount() == 0 ? null : result.getEvents());
+                        result.getEventCount() == 0 ? null : result.getEvents());
 
                 // 1 = training file is a document
                 case 1:
-                    logger.logDebug(LOGFROM, "training from uploaded document");
-                    if (null==fileDetail) {
+                    this.logger.logDebug(this.LOGFROM, "training from uploaded document");
+                    if (null == fileDetail) {
                         return ApiError.getBadRequest("upload could not be processed");
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
-                    if (!database.updateAiTrainingFile(aiid, String.join(EOL, source))) {
+                    if (!this.database.updateAiTrainingFile(aiid, String.join(EOL, source))) {
                         return ApiError.getNotFound("ai not found");
                     }
-                    messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
+                    this.messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
                     return new ApiResult().setSuccessStatus("upload document accepted");
 
                 // 2 = training file is a webpage
                 case 2:
-                    logger.logDebug(LOGFROM, "training from uploaded URL");
-                    if (!database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
+                    this.logger.logDebug(this.LOGFROM, "training from uploaded URL");
+                    if (!this.database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
                         return ApiError.getNotFound("ai not found");
                     }
-                    messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
+                    this.messageQueue.pushMessagePreprocessTrainingText(devid, aiid);
                     return new ApiResult().setSuccessStatus("url training accepted");
 
                 default:
                     return ApiError.getBadRequest("incorrect training type");
             }
-        }
-        catch (IOException ioe) {
-            logger.logInfo(LOGFROM, "html extraction error " + ioe.toString());
+        } catch (IOException ioe) {
+            this.logger.logInfo(this.LOGFROM, "html extraction error " + ioe.toString());
             return ApiError.getBadRequest();
-        }
-        catch (HTMLExtractor.HtmlExtractionException ht) {
-            logger.logInfo(LOGFROM, "html extraction error " + ht.getCause().toString());
+        } catch (HTMLExtractor.HtmlExtractionException ht) {
+            this.logger.logInfo(this.LOGFROM, "html extraction error " + ht.getCause().toString());
             return ApiError.getBadRequest("html extraction error");
-        }
-        catch (UploadTooLargeException tooLarge) {
-            logger.logInfo(LOGFROM, "upload attempt was larger than maximum allowed");
+        } catch (UploadTooLargeException tooLarge) {
+            this.logger.logInfo(this.LOGFROM, "upload attempt was larger than maximum allowed");
             return ApiError.getPayloadTooLarge();
-        }
-        catch (Database.DatabaseException dde) {
-            logger.logError(LOGFROM, "database error " + dde.getCause().toString());
+        } catch (Database.DatabaseException dde) {
+            this.logger.logError(this.LOGFROM, "database error " + dde.getCause().toString());
             return ApiError.getInternalServerError();
-        }
-        catch (Exception ex) {
-            logger.logError(LOGFROM, "exception " + ex.toString());
+        } catch (Exception ex) {
+            this.logger.logError(this.LOGFROM, "exception " + ex.toString());
             return ApiError.getInternalServerError();
-        }
-        finally {
+        } finally {
             try {
                 uploadedInputStream.close();
-            } catch (Throwable ignore) {}
+            } catch (Throwable ignore) {
+            }
         }
     }
 
     void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize) throws UploadTooLargeException {
-        if (null!=fileDetail) {
-            if (fileDetail.getSize()>maxUploadFileSize) {
+        if (null != fileDetail) {
+            if (fileDetail.getSize() > maxUploadFileSize) {
                 throw new UploadTooLargeException();
             }
         }
@@ -156,10 +145,10 @@ public class TrainingLogic {
 
     public ApiResult delete(SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            logger.logDebug(LOGFROM, "request to delete training for " + aiid);
-            messageQueue.pushMessageDeleteTraining(devid, aiid);
+            this.logger.logDebug(this.LOGFROM, "request to delete training for " + aiid);
+            this.messageQueue.pushMessageDeleteTraining(devid, aiid);
         } catch (MessageQueue.MessageQueueException e) {
-            logger.logError(LOGFROM, "message queue exception " + e.toString());
+            this.logger.logError(this.LOGFROM, "message queue exception " + e.toString());
             return ApiError.getInternalServerError();
         }
         return new ApiResult().setSuccessStatus("successfully queued for deletion");
@@ -173,9 +162,9 @@ public class TrainingLogic {
      */
     private String getTextFromUrl(String url, long maxUploadFileSize) throws Exception {
         // retrieve the url and extract the text
-        String article = htmlExtractor.getTextFromUrl(url);
+        String article = this.htmlExtractor.getTextFromUrl(url);
 
-        if (article.length()>maxUploadFileSize) {
+        if (article.length() > maxUploadFileSize) {
             throw new UploadTooLargeException();
         }
 
@@ -184,8 +173,8 @@ public class TrainingLogic {
 
         // recombine the lines after they've been sanitised
         StringBuilder sb = new StringBuilder();
-        for(String line: text) {
-            sb.append(validate.textSanitizer(line)).append('\n');
+        for (String line : text) {
+            sb.append(this.validate.textSanitizer(line)).append('\n');
         }
         return sb.toString();
     }
@@ -217,7 +206,7 @@ public class TrainingLogic {
         boolean humanTalkingNow = true;
         boolean lastLineEmpty = true;
 
-        for (String currentSentence:training) {
+        for (String currentSentence : training) {
 
             // empty line means a new conversation exchange
             if (currentSentence.isEmpty()) {
@@ -241,7 +230,7 @@ public class TrainingLogic {
             if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
                 lastHumanSentence = currentSentence;
                 validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
-                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
+                    lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
             } else {
                 // and we list the sentence
                 validConversation.add(currentSentence);
@@ -302,18 +291,20 @@ public class TrainingLogic {
                 lineSize = line.length() + 2;
                 // if the line doesn't push us over the upload limit
                 if ((fileSize + lineSize) < maxUploadSize) {
-                    source.add(validate.textSanitizer(line));
+                    source.add(this.validate.textSanitizer(line));
                     fileSize += lineSize;
                 } else {
                     throw new UploadTooLargeException();
                 }
             }
-        }
-        finally {
-            if (null!=reader) {
+        } finally {
+            if (null != reader) {
                 reader.close();
             }
         }
         return source;
+    }
+
+    public class UploadTooLargeException extends Exception {
     }
 }

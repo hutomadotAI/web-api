@@ -1,8 +1,8 @@
 package com.hutoma.api.containers;
 
 import com.hutoma.api.containers.sub.ResultEventList;
-import com.hutoma.api.validation.Validate;
 import com.hutoma.api.containers.sub.Status;
+import com.hutoma.api.validation.Validate;
 
 import java.net.HttpURLConnection;
 
@@ -37,6 +37,7 @@ public class ApiError extends ApiResult {
     /**
      * Use with care. Don't give too much information about what is happening internally.
      * For most situations, use the version of this call without a parameter
+     *
      * @param reason
      * @return
      */

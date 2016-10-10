@@ -27,9 +27,9 @@ import java.util.List;
 @Priority(Priorities.AUTHENTICATION)
 public class AuthFilter implements ContainerRequestFilter {
 
+    private final String LOGFROM = "authfilter";
     @Context
     private ResourceInfo resourceInfo;
-
     private Logger logger;
     private Config config;
 
@@ -39,21 +39,19 @@ public class AuthFilter implements ContainerRequestFilter {
         this.config = config;
     }
 
-    private final String LOGFROM = "authfilter";
-
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        logger.logDebug(LOGFROM, "endpoint secured");
+        this.logger.logDebug(this.LOGFROM, "endpoint secured");
 
         try {
 
-            String encoding_key = config.getEncodingKey();
+            String encoding_key = this.config.getEncodingKey();
 
             String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             String _devrole = "";
             String _aiid = "";
-            String _devid ="";
+            String _devid = "";
             MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
 
             // Check if the HTTP Authorization header is present and formatted correctly
@@ -61,36 +59,39 @@ public class AuthFilter implements ContainerRequestFilter {
                 requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
             }
 
-            String requested_aiid="";
+            String requested_aiid = "";
             try {
                 requested_aiid = pathParameters.get("aiid").get(0);
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
 
             // Extract the token from the HTTP Authorization header
             String token = authorizationHeader.substring("Bearer".length()).trim();
 
             try {
-                _devid =Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().getSubject().toString();
-                requestContext.getHeaders().add("_developer_id",_devid);
-                if (_devid.isEmpty()) requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                _devid = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().getSubject().toString();
+                requestContext.getHeaders().add("_developer_id", _devid);
+                if (_devid.isEmpty()) {
+                    requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                }
 
                 try {
                     _aiid = "" + Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("AIID").toString();
-                    if (!requested_aiid.equals(_aiid))
+                    if (!requested_aiid.equals(_aiid)) {
                         requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                    }
+                } catch (Exception ex) {
                 }
-                catch (Exception ex) {}
 
                 _devrole = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("ROLE").toString();
-                logger.logDebug(LOGFROM, "devrole " + _devrole);
+                this.logger.logDebug(this.LOGFROM, "devrole " + _devrole);
             } catch (Exception e) {
                 requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
-            Class<?> resourceClass = resourceInfo.getResourceClass();
+            Class<?> resourceClass = this.resourceInfo.getResourceClass();
             List<Role> classRoles = extractRoles(resourceClass);
-            Method resourceMethod = resourceInfo.getResourceMethod();
+            Method resourceMethod = this.resourceInfo.getResourceMethod();
             List<Role> methodRoles = extractRoles(resourceMethod);
 
             try {
@@ -107,8 +108,7 @@ public class AuthFilter implements ContainerRequestFilter {
             } catch (Exception e) {
                 requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
         }
 
@@ -129,10 +129,12 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    private boolean checkPermissions(String dev_role,List<Role> allowedRoles) throws Exception {
+    private boolean checkPermissions(String dev_role, List<Role> allowedRoles) throws Exception {
 
-        for (int i =0;i<allowedRoles.size();i++) {
-         if (allowedRoles.get(i).toString().equals(dev_role)) return true;
+        for (int i = 0; i < allowedRoles.size(); i++) {
+            if (allowedRoles.get(i).toString().equals(dev_role)) {
+                return true;
+            }
         }
         return false;
     }

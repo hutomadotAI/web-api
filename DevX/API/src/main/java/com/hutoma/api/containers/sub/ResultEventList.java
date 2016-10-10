@@ -10,12 +10,12 @@ import java.util.ArrayList;
  */
 public class ResultEventList extends ArrayList<AbstractMap.SimpleEntry<ResultEvent, String>> {
 
-  /***
-   * Add a mapping from result event to a text description
-   * @param eventType
-   * @param text
-   */
-  public void addEvent(final ResultEvent eventType, final String text) {
-    this.add(new AbstractMap.SimpleEntry<>(eventType, text));
-  }
+    /***
+     * Add a mapping from result event to a text description
+     * @param eventType
+     * @param text
+     */
+    public void addEvent(final ResultEvent eventType, final String text) {
+        this.add(new AbstractMap.SimpleEntry<>(eventType, text));
+    }
 }

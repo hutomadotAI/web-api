@@ -16,11 +16,11 @@ public class ApiResult {
     }
 
     public Status getStatus() {
-        return status;
+        return this.status;
     }
 
     public Response.ResponseBuilder getResponse(JsonSerializer serializer) {
-        return Response.status(status.getCode()).entity(serializer.serialize(this));
+        return Response.status(this.status.getCode()).entity(serializer.serialize(this));
     }
 
     public ApiResult setSuccessStatus() {
@@ -34,7 +34,7 @@ public class ApiResult {
 
     public ApiResult setSuccessStatus(String message, Object additionalInfo) {
         this.status = additionalInfo == null ?
-                Status.getSuccess(message) : Status.getSuccess(message, additionalInfo);
+            Status.getSuccess(message) : Status.getSuccess(message, additionalInfo);
         return this;
     }
 

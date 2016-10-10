@@ -22,26 +22,26 @@ public class AiDomain {
     }
 
     public String getDomID() {
-        return dom_id;
+        return this.dom_id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getIcon() {
-        return icon;
+        return this.icon;
     }
 
     public String getColor() {
-        return color;
+        return this.color;
     }
 
     public boolean isAvailable() {
-        return available;
+        return this.available;
     }
 }

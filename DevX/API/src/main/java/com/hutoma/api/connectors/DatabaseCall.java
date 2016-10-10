@@ -4,7 +4,10 @@ import com.hutoma.api.common.Config;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
 /**
@@ -30,25 +33,25 @@ public class DatabaseCall implements AutoCloseable {
     }
 
     private Connection getConnection() throws Database.DatabaseException {
-        return pool.borrowConnection();
+        return this.pool.borrowConnection();
     }
 
     private void checkPosition() throws Database.DatabaseException {
-        if (paramSetIndex>=paramCount) {
-            throw new Database.DatabaseException(new Exception("too many parameters added in call " + callName));
+        if (this.paramSetIndex >= this.paramCount) {
+            throw new Database.DatabaseException(new Exception("too many parameters added in call " + this.callName));
         }
     }
 
     private void checkParamsSet() throws Database.DatabaseException {
-        if (paramSetIndex!=paramCount) {
-            throw new Database.DatabaseException(new Exception("not enough parameters added in call " + callName));
+        if (this.paramSetIndex != this.paramCount) {
+            throw new Database.DatabaseException(new Exception("not enough parameters added in call " + this.callName));
         }
     }
 
     ResultSet executeQuery() throws Database.DatabaseException {
         checkParamsSet();
         try {
-            return statement.executeQuery();
+            return this.statement.executeQuery();
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -57,7 +60,7 @@ public class DatabaseCall implements AutoCloseable {
     int executeUpdate() throws Database.DatabaseException {
         checkParamsSet();
         try {
-            return statement.executeUpdate();
+            return this.statement.executeUpdate();
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -73,8 +76,8 @@ public class DatabaseCall implements AutoCloseable {
         StringBuilder sb = new StringBuilder("CALL ");
         sb.append(storedProcedureName);
         sb.append("(");
-        for(int i=0; i<numberOfParams; i++) {
-            if (i>0) {
+        for (int i = 0; i < numberOfParams; i++) {
+            if (i > 0) {
                 sb.append(", ");
             }
             sb.append("?");
@@ -83,8 +86,8 @@ public class DatabaseCall implements AutoCloseable {
 
         // prepare the statement
         try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sb.toString());
+            this.connection = getConnection();
+            this.statement = this.connection.prepareStatement(sb.toString());
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -94,7 +97,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseCall add(String param) throws Database.DatabaseException {
         checkPosition();
         try {
-            statement.setString(++paramSetIndex, param);
+            this.statement.setString(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -104,7 +107,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseCall add(int param) throws Database.DatabaseException {
         checkPosition();
         try {
-            statement.setInt(++paramSetIndex, param);
+            this.statement.setInt(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -114,7 +117,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseCall add(long param) throws Database.DatabaseException {
         checkPosition();
         try {
-            statement.setLong(++paramSetIndex, param);
+            this.statement.setLong(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -124,7 +127,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseCall add(boolean param) throws Database.DatabaseException {
         checkPosition();
         try {
-            statement.setBoolean(++paramSetIndex, param);
+            this.statement.setBoolean(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -134,7 +137,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseCall add(double param) throws Database.DatabaseException {
         checkPosition();
         try {
-            statement.setDouble(++paramSetIndex, param);
+            this.statement.setDouble(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -148,7 +151,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseCall add(DateTime param) throws Database.DatabaseException {
         checkPosition();
         try {
-            statement.setDate(++paramSetIndex, new java.sql.Date(param.getMillis()));
+            this.statement.setDate(++this.paramSetIndex, new java.sql.Date(param.getMillis()));
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -162,18 +165,18 @@ public class DatabaseCall implements AutoCloseable {
     @Override
     public void close() {
         try {
-            if ((null != statement) && (!statement.isClosed())) {
-                statement.close();
+            if ((null != this.statement) && (!this.statement.isClosed())) {
+                this.statement.close();
             }
         } catch (SQLException e) {
         }
-        statement = null;
-        if (null!=connection) {
+        this.statement = null;
+        if (null != this.connection) {
             try {
-                connection.close();
+                this.connection.close();
             } catch (SQLException e) {
             }
-            connection = null;
+            this.connection = null;
         }
     }
 }

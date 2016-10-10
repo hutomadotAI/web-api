@@ -1,10 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
@@ -23,14 +19,13 @@ import java.util.UUID;
  */
 public class ChatLogic {
 
+    private final String LOGFROM = "chatlogic";
     Config config;
     JsonSerializer jsonSerializer;
     SemanticAnalysis semanticAnalysis;
     NeuralNet neuralNet;
     Tools tools;
     ILogger logger;
-
-    private final String LOGFROM = "chatlogic";
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis, NeuralNet neuralNet, Tools tools, ILogger logger) {
@@ -49,7 +44,7 @@ public class ChatLogic {
     public ApiResult chat(SecurityContext context, UUID aiid, String dev_id, String q, String chatId, String history,
                           String topic, float min_p) {
 
-        long timestampNow = tools.getTimestamp();
+        long timestampNow = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
         ApiChat apiChat = new ApiChat(chatUuid, timestampNow);
@@ -73,17 +68,17 @@ public class ChatLogic {
 
         boolean noResponse = true;
         try {
-            logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
+            this.logger.logDebug(this.LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
 
             // async start both requests
-            semanticAnalysis.startAnswerRequest(dev_id, aiid, chatUuid, topic, history, q, min_p);
-            neuralNet.startAnswerRequest(dev_id, aiid, chatUuid, q);
+            this.semanticAnalysis.startAnswerRequest(dev_id, aiid, chatUuid, topic, history, q, min_p);
+            this.neuralNet.startAnswerRequest(dev_id, aiid, chatUuid, q);
 
             // wait for semantic result to complete
-            ChatResult semanticAnalysisResult = semanticAnalysis.getAnswerResult();
+            ChatResult semanticAnalysisResult = this.semanticAnalysis.getAnswerResult();
 
             // process result from semantic analysis
-            if (null!=semanticAnalysisResult.getAnswer()) {
+            if (null != semanticAnalysisResult.getAnswer()) {
                 if (!semanticAnalysisResult.getAnswer().isEmpty()) {
                     noResponse = false;
                 }
@@ -94,46 +89,46 @@ public class ChatLogic {
                 chatResult.setTopic_out(semanticAnalysisResult.getTopic_out());
                 chatResult.setAnswer(semanticAnalysisResult.getAnswer());
 
-                long endWNetTime = tools.getTimestamp();
-                chatResult.setElapsedTime((endWNetTime - startTime)/1000.0d);
+                long endWNetTime = this.tools.getTimestamp();
+                chatResult.setElapsedTime((endWNetTime - startTime) / 1000.0d);
 
                 apiChat.setTimestamp(endWNetTime);
 
-                logger.logDebug(LOGFROM, "WNET response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                this.logger.logDebug(this.LOGFROM, "WNET response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
                 telemetryMap.put("WNETAnswer", chatResult.getAnswer());
                 telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
                 telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
 
                 // if semantic analysis is not confident enough, wait for and process result from neural network
-                if ((semanticScore < min_p) || (0.0d == semanticScore))  {
+                if ((semanticScore < min_p) || (0.0d == semanticScore)) {
 
                     telemetryMap.put("WNETConfident", "false");
 
                     // wait for neural network to complete
-                    String RNN_answer = neuralNet.getAnswerResult();
+                    String RNN_answer = this.neuralNet.getAnswerResult();
                     if (!RNN_answer.isEmpty()) {
                         noResponse = false;
                     }
-                    long endRNNTime = tools.getTimestamp();
+                    long endRNNTime = this.tools.getTimestamp();
 
                     boolean validRNN = false;
-                    if ((RNN_answer!=null) && (!RNN_answer.isEmpty())) {
+                    if ((RNN_answer != null) && (!RNN_answer.isEmpty())) {
 
                         // rnn returns result in the form
                         // 0.157760821867|tell me then .
                         int splitIndex = RNN_answer.indexOf('|');
-                        if (splitIndex>0) {
+                        if (splitIndex > 0) {
                             double neuralNetConfidence = Double.valueOf(RNN_answer.substring(0, splitIndex));
-                            chatResult.setAnswer(RNN_answer.substring(splitIndex+1));
+                            chatResult.setAnswer(RNN_answer.substring(splitIndex + 1));
                             chatResult.setScore(toOneDecimalPlace(neuralNetConfidence));
-                            chatResult.setElapsedTime((endRNNTime - startTime)/1000.0d);
+                            chatResult.setElapsedTime((endRNNTime - startTime) / 1000.0d);
                             validRNN = true;
                         }
                     }
                     if (validRNN) {
-                        logger.logDebug(LOGFROM, "RNN response in " + Long.toString(endRNNTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                        this.logger.logDebug(this.LOGFROM, "RNN response in " + Long.toString(endRNNTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
                     } else {
-                        logger.logDebug(LOGFROM, "RNN invalid/empty response in " + Long.toString(endRNNTime - startTime) + "ms.");
+                        this.logger.logDebug(this.LOGFROM, "RNN invalid/empty response in " + Long.toString(endRNNTime - startTime) + "ms.");
                     }
 
                     telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
@@ -143,25 +138,22 @@ public class ChatLogic {
                     telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
                 }
             }
-        }
-        catch (NeuralNet.NeuralNetNotRespondingException nr) {
-            logger.logError(LOGFROM, "neural net did not respond in time");
+        } catch (NeuralNet.NeuralNetNotRespondingException nr) {
+            this.logger.logError(this.LOGFROM, "neural net did not respond in time");
             this.addTelemetry("ApiChatError", nr, telemetryMap);
             return ApiError.getNoResponse("unable to respond in time. try again");
-        }
-        catch (NeuralNet.NeuralNetException nne) {
-            logger.logError(LOGFROM, "neural net exception: " + nne.toString());
+        } catch (NeuralNet.NeuralNetException nne) {
+            this.logger.logError(this.LOGFROM, "neural net exception: " + nne.toString());
             this.addTelemetry("ApiChatError", nne, telemetryMap);
             return ApiError.getInternalServerError();
-        }
-        catch (Exception ex){
-            logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
+        } catch (Exception ex) {
+            this.logger.logError(this.LOGFROM, "AI chat request exception: " + ex.toString());
             this.addTelemetry("ApiChatError", ex, telemetryMap);
             // log the error but don't return a 500
             // because the error may have occurred on the second request and the first may have completed correctly
         }
         if (noResponse) {
-            logger.logError(LOGFROM, "chat server returned an empty response");
+            this.logger.logError(this.LOGFROM, "chat server returned an empty response");
             telemetryMap.put("EventType", "No response");
             this.addTelemetry("ApiChatError", telemetryMap);
             return ApiError.getInternalServerError();
@@ -173,13 +165,13 @@ public class ChatLogic {
 
     private void addTelemetry(String eventName, Exception ex, Map<String, String> parameters) {
         if (this.logger instanceof ITelemetry) {
-            ((ITelemetry) logger).addTelemetryEvent(eventName, ex, parameters);
+            ((ITelemetry) this.logger).addTelemetryEvent(eventName, ex, parameters);
         }
     }
 
     private void addTelemetry(String eventName, Map<String, String> parameters) {
         if (this.logger instanceof ITelemetry) {
-            ((ITelemetry) logger).addTelemetryEvent(eventName, parameters);
+            ((ITelemetry) this.logger).addTelemetryEvent(eventName, parameters);
         }
     }
 }

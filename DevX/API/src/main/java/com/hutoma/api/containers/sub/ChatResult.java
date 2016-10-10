@@ -22,19 +22,15 @@ public class ChatResult {
     private UUID chatId;
 
     public String getAnswer() {
-        return answer;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
-    public void setQuery(String query) {
-        this.query = query;
+        return this.answer;
     }
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     public void setAction(String action) {
@@ -46,26 +42,34 @@ public class ChatResult {
     }
 
     public double getScore() {
-        return score;
+        return this.score;
     }
 
-    public void setElapsedTime(double elapsed_time) {
-        this.elapsed_time = elapsed_time;
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public String getTopic_out() {
+        return this.topic_out;
     }
 
     public void setTopic_out(String topic_out) {
         this.topic_out = topic_out;
     }
 
-    public String getTopic_out() {
-        return topic_out;
-    }
-
     public double getElapsedTime() {
-        return elapsed_time;
+        return this.elapsed_time;
     }
 
-    public UUID getChatId() { return this.chatId; }
+    public void setElapsedTime(double elapsed_time) {
+        this.elapsed_time = elapsed_time;
+    }
 
-    public void setChatId(UUID chatId) { this.chatId = chatId; }
+    public UUID getChatId() {
+        return this.chatId;
+    }
+
+    public void setChatId(UUID chatId) {
+        this.chatId = chatId;
+    }
 }

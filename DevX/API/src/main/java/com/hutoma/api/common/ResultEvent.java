@@ -6,7 +6,7 @@ package com.hutoma.api.common;
  * Actual text here is sent back to the client or caller
  */
 public enum ResultEvent {
-  UPLOAD_MISSING_RESPONSE,
-  UPLOAD_NO_CONTENT
+    UPLOAD_MISSING_RESPONSE,
+    UPLOAD_NO_CONTENT
 }
 

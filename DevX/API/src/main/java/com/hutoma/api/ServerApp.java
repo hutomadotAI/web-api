@@ -1,6 +1,5 @@
 package com.hutoma.api;
 
-
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 

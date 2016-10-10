@@ -14,10 +14,10 @@ public class RateLimitStatus {
     }
 
     public boolean isRateLimited() {
-        return rateLimited;
+        return this.rateLimited;
     }
 
     public double getTokens() {
-        return tokens;
+        return this.tokens;
     }
 }

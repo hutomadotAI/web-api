@@ -17,7 +17,7 @@ import javax.ws.rs.core.SecurityContext;
  * Created by David MG on 28/07/2016.
  */
 @Path("/admin/")
-@Secured({Role.ROLE_ADMIN})
+@Secured( {Role.ROLE_ADMIN})
 public class AdminEndpoint {
 
     AdminLogic adminLogic;
@@ -31,53 +31,52 @@ public class AdminEndpoint {
 
     //curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test&role=ROLE_CLIENTONLY
     @POST
-    @Secured({Role.ROLE_ADMIN})
+    @Secured( {Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response adminPost(
-            @Context SecurityContext securityContext,
-            @DefaultValue("ROLE_FREE") @QueryParam("role") String securityRole,
-            @DefaultValue("") @QueryParam("username") String username,
-            @DefaultValue("") @QueryParam("email") String email,
-            @DefaultValue("") @QueryParam("password") String password,
-            @DefaultValue("") @QueryParam("password_salt") String passwordSalt,
-            @DefaultValue("") @QueryParam("first_name")  String first_name,
-            @DefaultValue("") @QueryParam("last_name") String last_name,
-            @DefaultValue("1") @QueryParam("plan_id") int planId) {
+        @Context SecurityContext securityContext,
+        @DefaultValue("ROLE_FREE") @QueryParam("role") String securityRole,
+        @DefaultValue("") @QueryParam("username") String username,
+        @DefaultValue("") @QueryParam("email") String email,
+        @DefaultValue("") @QueryParam("password") String password,
+        @DefaultValue("") @QueryParam("password_salt") String passwordSalt,
+        @DefaultValue("") @QueryParam("first_name") String first_name,
+        @DefaultValue("") @QueryParam("last_name") String last_name,
+        @DefaultValue("1") @QueryParam("plan_id") int planId) {
 
-        ApiResult result = adminLogic.createDev(
-                securityContext,
-                securityRole,
-                username,
-                email,
-                password,
-                passwordSalt,
-                first_name,
-                last_name,
-                planId
+        ApiResult result = this.adminLogic.createDev(
+            securityContext,
+            securityRole,
+            username,
+            email,
+            password,
+            passwordSalt,
+            first_name,
+            last_name,
+            planId
         );
-        return result.getResponse(serializer).build();
+        return result.getResponse(this.serializer).build();
     }
 
     // curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJTY4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test2
     @DELETE
-    @Secured({Role.ROLE_ADMIN})
+    @Secured( {Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response delete_dev(
-            @Context SecurityContext securityContext,
-            @DefaultValue("") @QueryParam("devid") String devid) {
-        ApiResult result = adminLogic.deleteDev(securityContext, devid);
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext,
+        @DefaultValue("") @QueryParam("devid") String devid) {
+        ApiResult result = this.adminLogic.deleteDev(securityContext, devid);
+        return result.getResponse(this.serializer).build();
     }
 
 
-
-    @Secured({Role.ROLE_ADMIN})
+    @Secured( {Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getToken(
-            @Context SecurityContext securityContext,
-            @DefaultValue("") @QueryParam("devid") String devid) {
-        ApiResult result = adminLogic.deleteDev(securityContext, devid);
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext,
+        @DefaultValue("") @QueryParam("devid") String devid) {
+        ApiResult result = this.adminLogic.deleteDev(securityContext, devid);
+        return result.getResponse(this.serializer).build();
     }
 
 }

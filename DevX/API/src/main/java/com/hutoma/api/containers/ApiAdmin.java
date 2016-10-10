@@ -1,7 +1,5 @@
 package com.hutoma.api.containers;
 
-import com.hutoma.api.containers.sub.Status;
-
 /**
  * Created by David MG on 15/08/2016.
  */
@@ -16,10 +14,10 @@ public class ApiAdmin extends ApiResult {
     }
 
     public String getDev_token() {
-        return dev_token;
+        return this.dev_token;
     }
 
     public String getDevid() {
-        return devid;
+        return this.devid;
     }
 }

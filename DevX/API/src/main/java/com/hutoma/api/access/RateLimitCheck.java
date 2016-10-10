@@ -24,21 +24,13 @@ import java.lang.reflect.AnnotatedElement;
 @Priority(Priorities.USER) //User priority. (happens after data validation)
 public class RateLimitCheck implements ContainerRequestFilter {
 
-    @Context
-    private ResourceInfo resourceInfo;
-
+    private final String LOGFROM = "ratelimitcheck";
     Database database;
     Logger logger;
     Config config;
     JsonSerializer serializer;
-
-    public static class RateLimitedException extends Exception {
-        public RateLimitedException(String message) {
-            super(message);
-        }
-    }
-
-    private final String LOGFROM = "ratelimitcheck";
+    @Context
+    private ResourceInfo resourceInfo;
 
     @Inject
     public RateLimitCheck(Database database, Logger logger, Config config, JsonSerializer serializer) {
@@ -53,33 +45,33 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
         try {
             // get the bucket that we will use to rate limit this resource
-            RateKey rateKey = determineRateKey(resourceInfo);
+            RateKey rateKey = determineRateKey(this.resourceInfo);
 
             // retrieve a validated devid, or bundle ratelimiting with anonymous
             String devid = ParameterFilter.getDevid(requestContext);
-            if ((null==devid) || (devid.isEmpty())) {
+            if ((null == devid) || (devid.isEmpty())) {
                 devid = "anonymous";
             }
 
-            switch(rateKey) {
+            switch (rateKey) {
                 case Chat:
                     checkRateLimitReached(devid, rateKey,
-                            config.getRateLimit_Chat_BurstRequests(), config.getRateLimit_Chat_Frequency());
+                        this.config.getRateLimit_Chat_BurstRequests(), this.config.getRateLimit_Chat_Frequency());
                     break;
                 case QuickRead:
                     checkRateLimitReached(devid, rateKey,
-                            config.getRateLimit_QuickRead_BurstRequests(), config.getRateLimit_QuickRead_Frequency());
+                        this.config.getRateLimit_QuickRead_BurstRequests(), this.config.getRateLimit_QuickRead_Frequency());
                     break;
                 case None:
                 default:
                     break;
             }
         } catch (RateLimitedException rle) {
-            requestContext.abortWith(ApiError.getRateLimited().getResponse(serializer).build());
-            logger.logInfo(LOGFROM, rle.getMessage());
+            requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
+            this.logger.logInfo(this.LOGFROM, rle.getMessage());
         } catch (Exception e) {
-            requestContext.abortWith(ApiError.getInternalServerError().getResponse(serializer).build());
-            logger.logError(LOGFROM, e.toString());
+            requestContext.abortWith(ApiError.getInternalServerError().getResponse(this.serializer).build());
+            this.logger.logError(this.LOGFROM, e.toString());
         }
     }
 
@@ -93,7 +85,7 @@ public class RateLimitCheck implements ContainerRequestFilter {
         if (null == rateKey) {
             rateKey = extractRateLimitBucket(resourceInfo.getResourceClass());
         }
-        return (null==rateKey)? RateKey.None:rateKey;
+        return (null == rateKey) ? RateKey.None : rateKey;
     }
 
     /***
@@ -106,12 +98,12 @@ public class RateLimitCheck implements ContainerRequestFilter {
      * @throws RateLimitedException if we should fail the call due to limiting
      */
     private void checkRateLimitReached(String devid, RateKey rateKey, double burst, double frequency) throws Database.DatabaseException, RateLimitedException {
-        RateLimitStatus rateLimitStatus = database.checkRateLimit(devid, rateKey.toString(), burst, frequency);
+        RateLimitStatus rateLimitStatus = this.database.checkRateLimit(devid, rateKey.toString(), burst, frequency);
         if (rateLimitStatus.isRateLimited()) {
             long blockedFor = Math.round(1000.0d * (1.0d - rateLimitStatus.getTokens()) * frequency);
             throw new RateLimitedException(devid + " hit limit on " + rateKey.toString() + ". BLOCKED for the next " + blockedFor + "ms.");
         }
-        logger.logDebug(LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens() + " tokens remaining.");
+        this.logger.logDebug(this.LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens() + " tokens remaining.");
     }
 
     /***
@@ -121,10 +113,16 @@ public class RateLimitCheck implements ContainerRequestFilter {
         if (annotatedElement != null) {
             RateLimit limited = annotatedElement.getAnnotation(RateLimit.class);
             if (limited != null) {
-                 return limited.value();
+                return limited.value();
             }
         }
         return null;
+    }
+
+    public static class RateLimitedException extends Exception {
+        public RateLimitedException(String message) {
+            super(message);
+        }
     }
 
 }

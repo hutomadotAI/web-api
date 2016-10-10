@@ -30,8 +30,8 @@ public class ServerInit implements ApplicationEventListener {
                 initialise(applicationEvent);
                 break;
             case RELOAD_FINISHED:
-                if (null!=config) {
-                    config.loadPropertiesFile();
+                if (null != this.config) {
+                    this.config.loadPropertiesFile();
                 }
                 break;
             case INITIALIZATION_START:
@@ -42,15 +42,15 @@ public class ServerInit implements ApplicationEventListener {
     }
 
     private void initialise(ApplicationEvent applicationEvent) {
-        Logger logger = serviceLocator.getService(Logger.class);
-        config = serviceLocator.getService(Config.class);
-        logger.initialize(config);
-        DatabaseConnectionPool connectionPool = serviceLocator.getService(DatabaseConnectionPool.class);
+        Logger logger = this.serviceLocator.getService(Logger.class);
+        this.config = this.serviceLocator.getService(Config.class);
+        logger.initialize(this.config);
+        DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
         try {
             connectionPool.borrowConnection().close();
-            logger.logInfo(LOGFROM, "initialisation finished");
+            logger.logInfo(this.LOGFROM, "initialisation finished");
         } catch (Exception e) {
-            logger.logError(LOGFROM, "initialisation error: " + e.toString());
+            logger.logError(this.LOGFROM, "initialisation error: " + e.toString());
         }
     }
 

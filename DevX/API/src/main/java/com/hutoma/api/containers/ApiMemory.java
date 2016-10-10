@@ -14,6 +14,6 @@ public class ApiMemory extends ApiResult {
     }
 
     public List<ApiMemoryToken> getMemoryList() {
-        return memoryList;
+        return this.memoryList;
     }
 }

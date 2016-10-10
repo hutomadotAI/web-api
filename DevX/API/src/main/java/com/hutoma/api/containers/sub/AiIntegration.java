@@ -20,22 +20,22 @@ public class AiIntegration {
     }
 
     public String getIntID() {
-        return int_id;
+        return this.int_id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getIcon() {
-        return icon;
+        return this.icon;
     }
 
     public boolean isAvailable() {
-        return available;
+        return this.available;
     }
 }

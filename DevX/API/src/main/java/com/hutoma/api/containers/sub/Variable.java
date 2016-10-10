@@ -12,10 +12,10 @@ package com.hutoma.api.containers.sub;
 
 public class Variable {
 
-     // Variable Name
-     String var="";
-     // Variable Key
-     String key="";
+    // Variable Name
+    String var = "";
+    // Variable Key
+    String key = "";
 
 
     /***
@@ -23,7 +23,7 @@ public class Variable {
      * @param var variable name
      * @param key variable key
      */
-    public void setVar(String var,String key) {
+    public void setVar(String var, String key) {
         this.var = var;
         this.key = key;
     }
@@ -34,9 +34,8 @@ public class Variable {
      * @return the key associated to that variable
      */
     public String getVar(String var) {
-        return key;
+        return this.key;
     }
-
 
 
 }

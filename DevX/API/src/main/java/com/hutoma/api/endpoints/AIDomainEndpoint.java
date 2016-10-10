@@ -34,11 +34,11 @@ public class AIDomainEndpoint {
     }
 
     @GET
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDomains(
-            @Context SecurityContext securityContext) {
-        ApiResult result = aiDomainLogic.getDomains(securityContext);
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext) {
+        ApiResult result = this.aiDomainLogic.getDomains(securityContext);
+        return result.getResponse(this.serializer).build();
     }
 }

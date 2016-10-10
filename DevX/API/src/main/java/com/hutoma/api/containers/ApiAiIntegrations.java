@@ -1,7 +1,6 @@
 package com.hutoma.api.containers;
 
 import com.hutoma.api.containers.sub.AiIntegration;
-import com.hutoma.api.containers.sub.Status;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class ApiAiIntegrations extends ApiResult {
     }
 
     public List<AiIntegration> getIntegrationList() {
-        return _integrationList;
+        return this._integrationList;
     }
 
 }

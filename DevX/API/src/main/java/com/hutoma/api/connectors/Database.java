@@ -27,6 +27,7 @@ public class Database {
     private final String LOGFROM = "database";
     Logger logger;
     Provider<DatabaseCall> callProvider;
+
     @Inject
     public Database(final Logger logger, final Provider<DatabaseCall> callProvider) {
         this.logger = logger;

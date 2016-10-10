@@ -12,29 +12,15 @@ import java.util.UUID;
  */
 public class NeuralNet {
 
+    static long POLLEVERY = 1000;                                  // hard-coded to one second
+    private final String LOGFROM = "neuralnetconnector";
     Database database;
     MessageQueue messageQueue;
     Logger logger;
     Config config;
     Tools tools;
-
-    private final String LOGFROM = "neuralnetconnector";
-    static long POLLEVERY = 1000;                                  // hard-coded to one second
-
     long startTime;
     long qid = 0;
-
-    public static class NeuralNetException extends Exception {
-        public NeuralNetException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    public static class NeuralNetNotRespondingException extends NeuralNetException {
-        public NeuralNetNotRespondingException() {
-            super(new Exception("not responding"));
-        }
-    }
 
     @Inject
     public NeuralNet(Database database, MessageQueue messageQueue, Logger logger, Config config, Tools tools) {
@@ -48,26 +34,26 @@ public class NeuralNet {
     // Neural Network Query
     public void startAnswerRequest(String dev_id, UUID aiid, UUID chatId, String q) throws NeuralNetException {
 
-        startTime = tools.getTimestamp();
+        this.startTime = this.tools.getTimestamp();
 
         // if the RNN network is not active, then push a message to get it activated
         try {
-            if (!database.isNeuralNetworkServerActive(dev_id, aiid)) {
-                messageQueue.pushMessageStartRNN(dev_id, aiid);
+            if (!this.database.isNeuralNetworkServerActive(dev_id, aiid)) {
+                this.messageQueue.pushMessageStartRNN(dev_id, aiid);
             }
         } catch (Exception e) {
-            logger.logError(LOGFROM, "failed to check/start server " + e.toString());
+            this.logger.logError(this.LOGFROM, "failed to check/start server " + e.toString());
             throw new NeuralNetException(e);
         }
 
         try {
-            qid = database.insertNeuralNetworkQuestion(dev_id, chatId, aiid, q);
+            this.qid = this.database.insertNeuralNetworkQuestion(dev_id, chatId, aiid, q);
         } catch (Database.DatabaseException e) {
             throw new NeuralNetException(e);
         }
 
         // if less than zero then an error has occurred
-        if (qid < 0) {
+        if (this.qid < 0) {
             throw new NeuralNetException(new Exception("negative qid"));
         }
     }
@@ -77,23 +63,23 @@ public class NeuralNet {
         String answer = "";
 
         // timeout in seconds
-        long timeout = config.getNeuralNetworkTimeout();
+        long timeout = this.config.getNeuralNetworkTimeout();
         // calculate the exact time that we give up
-        long endTime = startTime + (timeout * 1000);
+        long endTime = this.startTime + (timeout * 1000);
 
         long timeNow;
         long timeRemaining;
         try {
             do {
                 // do we have an answer?
-                answer = database.getAnswer(qid);
-                if ((null!=answer) && (!answer.isEmpty())) {
+                answer = this.database.getAnswer(this.qid);
+                if ((null != answer) && (!answer.isEmpty())) {
                     // yes, end and return
                     return answer;
                 }
-                timeNow = tools.getTimestamp();
+                timeNow = this.tools.getTimestamp();
                 timeRemaining = Math.max(0, endTime - timeNow);
-                tools.threadSleep(Math.min(POLLEVERY, timeRemaining));
+                this.tools.threadSleep(Math.min(POLLEVERY, timeRemaining));
             } while (timeRemaining > 0);
         } catch (Database.DatabaseException dbe) {
             throw new NeuralNetException(dbe);
@@ -101,5 +87,17 @@ public class NeuralNet {
 
         // otherwise no response appeared in a reasonable amount of time
         throw new NeuralNetNotRespondingException();
+    }
+
+    public static class NeuralNetException extends Exception {
+        public NeuralNetException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    public static class NeuralNetNotRespondingException extends NeuralNetException {
+        public NeuralNetNotRespondingException() {
+            super(new Exception("not responding"));
+        }
     }
 }

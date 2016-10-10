@@ -8,8 +8,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.validation.APIParameter;
-import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ParameterFilter;
+import com.hutoma.api.validation.ValidateParameters;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -34,62 +34,61 @@ public class AIEndpoint {
         this.aiLogic = aiLogic;
         this.serializer = serializer;
     }
-    
+
     @POST
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIName, APIParameter.AIDescription})
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters( {APIParameter.AIName, APIParameter.AIDescription})
     @Produces(MediaType.APPLICATION_JSON)
     public Response createAI(
-            @Context SecurityContext securityContext,
-            @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid,
-            @DefaultValue("false") @QueryParam("is_private") boolean is_private,
-            @DefaultValue("0.0") @QueryParam("deep_learning_error") double deep_learning_error,
-            @DefaultValue("0") @QueryParam("deep_learning_status") int deep_learning_status,
-            @DefaultValue("0") @QueryParam("shallow_learning_status") int shallow_learning_status,
-            @DefaultValue("0") @QueryParam("status") int status)
-    {
-        ApiResult result = aiLogic.createAI(securityContext, devid,
-                ParameterFilter.getAiName(requestContext), ParameterFilter.getAiDescription(requestContext),
-                is_private, deep_learning_error, deep_learning_status, shallow_learning_status, status);
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext,
+        @Context ContainerRequestContext requestContext,
+        @DefaultValue("") @HeaderParam("_developer_id") String devid,
+        @DefaultValue("false") @QueryParam("is_private") boolean is_private,
+        @DefaultValue("0.0") @QueryParam("deep_learning_error") double deep_learning_error,
+        @DefaultValue("0") @QueryParam("deep_learning_status") int deep_learning_status,
+        @DefaultValue("0") @QueryParam("shallow_learning_status") int shallow_learning_status,
+        @DefaultValue("0") @QueryParam("status") int status) {
+        ApiResult result = this.aiLogic.createAI(securityContext, devid,
+            ParameterFilter.getAiName(requestContext), ParameterFilter.getAiDescription(requestContext),
+            is_private, deep_learning_error, deep_learning_status, shallow_learning_status, status);
+        return result.getResponse(this.serializer).build();
     }
 
     @GET
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAIs(
-            @Context SecurityContext securityContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = aiLogic.getAIs(securityContext, devid);
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext,
+        @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+        ApiResult result = this.aiLogic.getAIs(securityContext, devid);
+        return result.getResponse(this.serializer).build();
     }
 
     @Path("{aiid}")
     @GET
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters( {APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSingleAI(
-            @Context SecurityContext securityContext,
-            @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = aiLogic.getSingleAI(securityContext, devid,
-                ParameterFilter.getAiid(requestContext));
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext,
+        @Context ContainerRequestContext requestContext,
+        @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+        ApiResult result = this.aiLogic.getSingleAI(securityContext, devid,
+            ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
     }
 
     @Path("{aiid}")
     @DELETE
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters( {APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAI(
-            @Context SecurityContext securityContext,
-            @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = aiLogic.deleteAI(securityContext, devid,
-                ParameterFilter.getAiid(requestContext));
-        return result.getResponse(serializer).build();
+        @Context SecurityContext securityContext,
+        @Context ContainerRequestContext requestContext,
+        @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+        ApiResult result = this.aiLogic.deleteAI(securityContext, devid,
+            ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
     }
 }

@@ -18,17 +18,33 @@ import java.util.Properties;
 @Singleton
 public class Config {
 
+    private final String LOGFROM = "config";
     Logger logger;
     Properties properties;
     HashSet<String> propertyLoaded;
-
-    private final String LOGFROM = "config";
 
     @Inject
     public Config(Logger logger) {
         this.logger = logger;
         this.propertyLoaded = new HashSet<>();
         loadPropertiesFile();
+    }
+
+    /***
+     * Throw an exception if we are using a username that starts with 'admin' or 'root'
+     * @param value connection string
+     * @return same connection string
+     * @throws Exception if username is admin... or root...
+     */
+    private static String enforceNewDBCredentials(String value) throws Exception {
+        int startUserName = value.indexOf("user=");
+        if (startUserName >= 0) {
+            String prefixUsername = value.substring(startUserName + ("user=".length())).toLowerCase();
+            if ((prefixUsername.startsWith("admin")) || (prefixUsername.startsWith("root"))) {
+                throw new Exception("db connection string uses root/admin access. please update your config properties file.");
+            }
+        }
+        return value;
     }
 
     public void loadPropertiesFile() {
@@ -38,10 +54,10 @@ public class Config {
         try (InputStream fileInputStream = new FileInputStream(configPath.toFile())) {
             Properties loadProperties = new Properties();
             loadProperties.load(fileInputStream);
-            properties = loadProperties;
-            logger.logInfo(LOGFROM, "loaded " + properties.size() + " properties file from " + configPath.toString());
+            this.properties = loadProperties;
+            this.logger.logInfo(this.LOGFROM, "loaded " + this.properties.size() + " properties file from " + configPath.toString());
         } catch (IOException e) {
-            logger.logError(LOGFROM, "failed to load valid properties file: " + e.toString());
+            this.logger.logError(this.LOGFROM, "failed to load valid properties file: " + e.toString());
         }
     }
 
@@ -86,7 +102,7 @@ public class Config {
         try {
             return enforceNewDBCredentials(getConfigFromProperties("connection_string", ""));
         } catch (Exception e) {
-            logger.logError(LOGFROM, e.getMessage());
+            this.logger.logError(this.LOGFROM, e.getMessage());
         }
         return "";
     }
@@ -124,33 +140,16 @@ public class Config {
     }
 
     private String getConfigFromProperties(String p, String defaultValue) {
-        if (null == properties) {
-            logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
+        if (null == this.properties) {
+            this.logger.logWarning(this.LOGFROM, "no properties file loaded. using internal defaults where available");
             return defaultValue;
         }
         // keep a list of used properties
         // if this is the first time we are accessing a property and we are using defaults then log a warning
-        if (propertyLoaded.add(p) && (!properties.containsKey(p))) {
-            logger.logWarning(LOGFROM, "no property set for " + p + ". using hard-coded default " + defaultValue);
+        if (this.propertyLoaded.add(p) && (!this.properties.containsKey(p))) {
+            this.logger.logWarning(this.LOGFROM, "no property set for " + p + ". using hard-coded default " + defaultValue);
         }
-        return properties.getProperty(p, defaultValue);
-    }
-
-    /***
-     * Throw an exception if we are using a username that starts with 'admin' or 'root'
-     * @param value connection string
-     * @return same connection string
-     * @throws Exception if username is admin... or root...
-     */
-    private static String enforceNewDBCredentials(String value) throws Exception {
-        int startUserName = value.indexOf("user=");
-        if (startUserName >= 0) {
-            String prefixUsername = value.substring(startUserName + ("user=".length())).toLowerCase();
-            if ((prefixUsername.startsWith("admin")) || (prefixUsername.startsWith("root"))) {
-                throw new Exception("db connection string uses root/admin access. please update your config properties file.");
-            }
-        }
-        return value;
+        return this.properties.getProperty(p, defaultValue);
     }
 
 }
