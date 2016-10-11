@@ -27,4 +27,20 @@ public class IntentVariable {
         this.prompts.add(prompt);
         return this;
     }
+
+    public String getEntityName() {
+        return this.entity_name;
+    }
+
+    public boolean isRequired() {
+        return this.required;
+    }
+
+    public int getNumPrompts() {
+        return this.n_prompts;
+    }
+
+    public List<String> getPrompts() {
+        return this.prompts;
+    }
 }

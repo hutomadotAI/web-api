@@ -3,6 +3,7 @@ package com.hutoma.api.containers;
 import com.hutoma.api.containers.sub.IntentVariable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -39,5 +40,9 @@ public class ApiIntent extends ApiResult {
     public ApiIntent addResponse(String response) {
         this.responses.add(response);
         return this;
+    }
+
+    public List<IntentVariable> getVariables() {
+        return this.variables;
     }
 }

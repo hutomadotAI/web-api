@@ -1,12 +1,19 @@
 package com.hutoma.api.common;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.reflect.TypeToken;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -45,5 +52,13 @@ public class JsonSerializer {
             throw new JsonParseException("cannot deserialize valid object from json");
         }
         return o;
+    }
+
+    public <T> List<T> deserializeList(String content) throws JsonParseException {
+        List<T> list = gson.fromJson(content, new TypeToken<List<T>>(){}.getType());
+        if (list == null) {
+            throw new JsonParseException("cannot deserialize valid object from json");
+        }
+        return list;
     }
 }

@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors;
 
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
@@ -9,6 +10,8 @@ import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -25,13 +28,26 @@ import java.util.UUID;
 public class Database {
 
     private final String LOGFROM = "database";
-    Logger logger;
-    Provider<DatabaseCall> callProvider;
+    private Logger logger;
+    private Provider<DatabaseCall> callProvider;
 
     @Inject
     public Database(final Logger logger, final Provider<DatabaseCall> callProvider) {
         this.logger = logger;
         this.callProvider = callProvider;
+    }
+
+    private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try {
+            List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"));
+            return new MemoryIntent(rs.getString("intentName"),
+                    UUID.fromString(rs.getString("aiid")),
+                    UUID.fromString(rs.getString("chatId")),
+                    variables);
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
     }
 
     public boolean createDev(final String username, final String email, final String password, final String passwordSalt, final String first_name, final String last_name, final String dev_token, final int plan_id, final String dev_id, final String client_token) throws DatabaseException {
@@ -62,9 +78,9 @@ public class Database {
                             final int shallow_learning_status, final int status, final String client_token, final String trainingFile) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI", 11)
-                .add(aiid).add(name).add(description).add(devid).add(is_private)
-                .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
-                .add(status).add(client_token).add(trainingFile);
+                    .add(aiid).add(name).add(description).add(devid).add(is_private)
+                    .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
+                    .add(status).add(client_token).add(trainingFile);
             return call.executeUpdate() > 0;
         }
     }
@@ -77,8 +93,8 @@ public class Database {
             try {
                 while (rs.next()) {
                     final ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                     res.add(ai);
                 }
                 return res;
@@ -95,8 +111,8 @@ public class Database {
             try {
                 if (rs.next()) {
                     return new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                 }
                 return null;
             } catch (final SQLException sqle) {
@@ -120,7 +136,7 @@ public class Database {
                 final ArrayList<AiDomain> res = new ArrayList<>();
                 while (rs.next()) {
                     res.add(new AiDomain(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                        rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
+                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -271,6 +287,40 @@ public class Database {
         }
     }
 
+    public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
+                                        final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = callProvider.get()) {
+            call.initialise("getMemoryIntent", 3).add(intentName).add(aiid).add(chatId);
+            ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return loadMemoryIntent(rs, jsonSerializer);
+                }
+                return null;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = callProvider.get()) {
+            call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
+            ResultSet rs = call.executeQuery();
+            List<MemoryIntent> intents = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    intents.add(loadMemoryIntent(rs, jsonSerializer));
+                }
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+            return intents;
+        }
+    }
+
     public ApiEntity getEntity(final String devid, final String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntityValues", 2).add(devid).add(entityName);
@@ -341,7 +391,7 @@ public class Database {
                 while (varRs.next()) {
                     int varID = varRs.getInt("id");
                     IntentVariable variable = new IntentVariable(
-                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
+                            varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
 
                     // for each variable get all its prompts
                     try (DatabaseCall promptCall = this.callProvider.get()) {
@@ -360,10 +410,22 @@ public class Database {
         }
     }
 
+    public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = callProvider.get()) {
+            String variables = jsonSerializer.serialize(intent.getVariables());
+            call.initialise("updateMemoryIntent", 4)
+                    .add(intent.getName())
+                    .add(intent.getAiid())
+                    .add(intent.getChatId())
+                    .add(variables);
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public static class DatabaseException extends Exception {
         public DatabaseException(final Throwable cause) {
             super(cause);
         }
     }
-
 }

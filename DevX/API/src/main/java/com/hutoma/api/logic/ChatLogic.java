@@ -1,17 +1,28 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.ITelemetry;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.memory.IEntityRecognizer;
+import com.hutoma.api.memory.IMemoryIntentHandler;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,15 +37,21 @@ public class ChatLogic {
     NeuralNet neuralNet;
     Tools tools;
     ILogger logger;
+    IMemoryIntentHandler intentHandler;
+    IEntityRecognizer entityRecognizer;
 
     @Inject
-    public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis, NeuralNet neuralNet, Tools tools, ILogger logger) {
+    public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis,
+                     NeuralNet neuralNet, Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
+                     IEntityRecognizer entityRecognizer) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.semanticAnalysis = semanticAnalysis;
         this.neuralNet = neuralNet;
         this.tools = tools;
         this.logger = logger;
+        this.intentHandler = intentHandler;
+        this.entityRecognizer = entityRecognizer;
     }
 
     private double toOneDecimalPlace(double input) {
@@ -61,7 +78,7 @@ public class ChatLogic {
             put("Topic", topic);
             // TODO: potentially PII info, we may need to mask this later, but for
             // development purposes log this
-            put("UID", chatUuid.toString());
+            put("ChatId", chatUuid.toString());
             put("History", history);
             put("Q", q);
         }};
@@ -94,7 +111,9 @@ public class ChatLogic {
 
                 apiChat.setTimestamp(endWNetTime);
 
-                this.logger.logDebug(this.LOGFROM, "WNET response in " + Long.toString(endWNetTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                logger.logDebug(LOGFROM, String.format("WNET response in %dms with confidence %f",
+                        (endWNetTime - startTime), chatResult.getScore()));
+
                 telemetryMap.put("WNETAnswer", chatResult.getAnswer());
                 telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
                 telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
@@ -112,8 +131,7 @@ public class ChatLogic {
                     long endRNNTime = this.tools.getTimestamp();
 
                     boolean validRNN = false;
-                    if ((RNN_answer != null) && (!RNN_answer.isEmpty())) {
-
+                    if (!RNN_answer.isEmpty()) {
                         // rnn returns result in the form
                         // 0.157760821867|tell me then .
                         int splitIndex = RNN_answer.indexOf('|');
@@ -126,9 +144,11 @@ public class ChatLogic {
                         }
                     }
                     if (validRNN) {
-                        this.logger.logDebug(this.LOGFROM, "RNN response in " + Long.toString(endRNNTime - startTime) + "ms with confidence " + Double.toString(chatResult.getScore()));
+                        logger.logDebug(LOGFROM, String.format("RNN response in %dms with confidence %f",
+                                (endRNNTime - startTime), chatResult.getScore()));
                     } else {
-                        this.logger.logDebug(this.LOGFROM, "RNN invalid/empty response in " + Long.toString(endRNNTime - startTime) + "ms.");
+                        logger.logDebug(LOGFROM, String.format("RNN invalid/empty response in %dms",
+                                (endRNNTime - startTime)));
                     }
 
                     telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
@@ -137,6 +157,8 @@ public class ChatLogic {
                     telemetryMap.put("RNNAnswer", chatResult.getAnswer());
                     telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
                 }
+
+                this.handleIntents(chatResult, dev_id, aiid, chatUuid, q, telemetryMap);
             }
         } catch (NeuralNet.NeuralNetNotRespondingException nr) {
             this.logger.logError(this.LOGFROM, "neural net did not respond in time");
@@ -173,6 +195,77 @@ public class ChatLogic {
         if (this.logger instanceof ITelemetry) {
             ((ITelemetry) this.logger).addTelemetryEvent(eventName, parameters);
         }
+    }
+
+    /**
+     * Handle any intents.
+     * @param chatResult the current chat result
+     * @param aiid the AI ID
+     * @param chatUuid the Chat ID
+     * @param question the question
+     * @param telemetryMap the telemetry map
+     */
+    private void handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
+                               final String question, final Map<String, String> telemetryMap) {
+        // Now that have the chat result, we need to check if there's an intent being returned
+        MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
+                devId, aiid, chatUuid, chatResult.getAnswer());
+        if (memoryIntent != null) { // Intent was recognized
+            telemetryMap.put("IntentRecognized", memoryIntent.getName());
+            if (memoryIntent.getUnfulfilledVariables().isEmpty()) {
+                memoryIntent.setIsFulfilled(true);
+                telemetryMap.put("IntentFulfilled", memoryIntent.getName());
+            } else {
+                // Attempt to retrieve entities from the question
+                List<Pair<String, String>> entities = entityRecognizer.retrieveEntities(question,
+                        memoryIntent.getVariables());
+                if (!entities.isEmpty()) {
+                    memoryIntent.fulfillVariables(entities);
+                }
+
+                // We've now fulfilled any variables present on the user's question.
+                // Need to determine if there are still any unfulfilled variable
+                // and prompt for it
+                List<MemoryVariable> vars = memoryIntent.getUnfulfilledVariables();
+                if (vars.isEmpty()) {
+                    memoryIntent.setIsFulfilled(true);
+                    telemetryMap.put("IntentFulfilled", memoryIntent.getName());
+                } else {
+                    // For now get the first unfulfilled variable with numPrompts>0
+                    // or we could do random just to make it a 'surprise!' :)
+                    Optional<MemoryVariable> optVariable = vars.stream()
+                            .filter(x -> x.getTimesToPrompt() > 0).findFirst();
+                    if (optVariable.isPresent()) {
+                        MemoryVariable variable = optVariable.get();
+                        if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
+                            logger.logError(LOGFROM, "Variable with no prompts defined!");
+                        } else {
+                            // And prompt the user for the value for that variable
+                            int pos = variable.getPrompts().size() >= variable.getTimesToPrompt()
+                                    ? variable.getPrompts().size() - variable.getTimesToPrompt()
+                                    : 0;
+                            chatResult.setAnswer(variable.getPrompts().get(pos));
+                            // and decrement the number of prompts
+                            variable.setTimesPrompted(variable.getTimesToPrompt() - 1);
+                            telemetryMap.put("IntentPrompt",
+                                    String.format("intent:'%s' variable:'%s' remainingPrompts:%d",
+                                            memoryIntent.getName(), variable.getName(), variable.getTimesToPrompt()));
+
+                        }
+                    } else { // intent not fulfilled but no variables left to handle
+                        // TODO: Currently we're not doing anything when the number of prompts is exceeded
+                        // we just stop asking for that prompt, which means that the intent will remain
+                        // unfulfilled after using all the prompts and the user may be left on their own
+                        telemetryMap.put("IntentNotFulfilled", memoryIntent.getName());
+                    }
+
+                }
+            }
+            intentHandler.updateStatus(memoryIntent);
+        }
+
+        // Add the current intents state to the chat response
+        chatResult.setIntents(intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
     }
 }
 
