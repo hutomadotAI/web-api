@@ -12,6 +12,7 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.*;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -75,7 +76,7 @@ public class Database {
 
     public boolean createAI(final UUID aiid, final String name, final String description, final String devid,
                             final boolean is_private, final double deep_learning_error, final int deep_learning_status,
-                            final int shallow_learning_status, final int status, final String client_token, final String trainingFile) throws DatabaseException {
+                            final int shallow_learning_status, final TrainingStatus.trainingStatus status, final String client_token, final String trainingFile) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI", 11)
                     .add(aiid).add(name).add(description).add(devid).add(is_private)

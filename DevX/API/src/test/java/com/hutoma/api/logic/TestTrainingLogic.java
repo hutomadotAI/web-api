@@ -4,10 +4,13 @@ import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.validation.TestParameterValidation;
 import com.hutoma.api.validation.Validate;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +22,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import static com.hutoma.api.containers.sub.TrainingStatus.trainingStatus.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -45,6 +49,10 @@ public class TestTrainingLogic {
     private String SOMETEXT = "some text\nsome response";
     private String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
 
+    private ApiAi getFakeAI(TrainingStatus.trainingStatus status) {
+        return new ApiAi(AIID.toString(), "client_token", "ai_name", "ai_description", new DateTime(), false,0, "", "", status.name(), null);
+    }
+
     @Before
     public void setup() throws Database.DatabaseException {
 
@@ -70,7 +78,7 @@ public class TestTrainingLogic {
     InputStream createUpload(String content) {
         InputStream stream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         try {
-            when(fakeContentDisposition.getSize()).thenReturn((long)stream.available());
+            when(fakeContentDisposition.getSize()).thenReturn((long) stream.available());
         } catch (IOException e) {
             // ignore!
         }
@@ -101,7 +109,7 @@ public class TestTrainingLogic {
     @Test
     public void testTrain_Text_UploadTooLarge() {
         InputStream stream = createUpload(TEXTMULTILINE);
-        when(fakeConfig.getMaxUploadSize()).thenReturn((long)TEXTMULTILINE.length()-1);
+        when(fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
         Assert.assertEquals(413, result.getStatus().getCode());
     }
@@ -109,7 +117,7 @@ public class TestTrainingLogic {
     @Test
     public void testTrain_Doc_UploadTooLarge() {
         InputStream stream = createUpload(TEXTMULTILINE);
-        when(fakeConfig.getMaxUploadSize()).thenReturn((long)TEXTMULTILINE.length()-1);
+        when(fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 1, UURL, stream, fakeContentDisposition);
         Assert.assertEquals(413, result.getStatus().getCode());
     }
@@ -117,7 +125,7 @@ public class TestTrainingLogic {
     @Test
     public void testTrain_Url_ExtractTooLarge() throws HTMLExtractor.HtmlExtractionException {
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(TEXTMULTILINE);
-        when(fakeConfig.getMaxUploadSize()).thenReturn((long)TEXTMULTILINE.length()-1);
+        when(fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 2, UURL, null, null);
         Assert.assertEquals(413, result.getStatus().getCode());
     }
@@ -198,6 +206,8 @@ public class TestTrainingLogic {
         InputStream stream = createUpload(SOMETEXT);
         when(fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, trainingType, UURL, stream, fakeContentDisposition);
+
+        result = logic.startTraining(fakeContext, DEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
@@ -207,4 +217,114 @@ public class TestTrainingLogic {
         ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, -1, UURL, stream, fakeContentDisposition);
         Assert.assertEquals(400, result.getStatus().getCode());
     }
+
+
+    @Test
+    public void testStartTraining() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_not_started));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.startTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStartTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_completed));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.startTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStartTraining_BadRequest_TrainingIsInProgress() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_in_progress));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.startTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStartTraining_TrainingWasStopped() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_stopped));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.startTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+
+    @Test
+    public void testStartTraining_TrainingAlreadyQueued() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_queued));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.startTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+
+    @Test
+    public void testStartTraining_TrainigWasDeleted() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_deleted));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.startTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+
+    @Test
+    public void testStopTraining() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_in_progress));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.stopTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStopTraining_BadRequest_TrainingWasNotInProgress() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_not_started));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.stopTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStopTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_completed));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.stopTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStopTraining_BadRequest_TrainingIsOnlyQueued() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_queued));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.stopTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testStopTraining_BadRequest_TrainingWasDeleted() throws Database.DatabaseException {
+        when(fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(training_deleted));
+        InputStream stream = createUpload(SOMETEXT);
+        ApiResult result = logic.uploadFile(fakeContext, DEVID, AIID, 0, UURL, stream, fakeContentDisposition);
+        result = logic.stopTraining(fakeContext, DEVID, AIID);
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+
+
+
+
+
+
 }

@@ -41,10 +41,17 @@ public class ApiAi extends ApiResult {
     }
 
     public String getAiid() {
+
         return this.aiid;
     }
 
     public String getClient_token() {
+
         return this.client_token;
+    }
+
+    public String getAiStatus() {
+
+        return this.ai_status;
     }
 }

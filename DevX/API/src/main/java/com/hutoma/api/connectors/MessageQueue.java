@@ -53,6 +53,13 @@ public class MessageQueue {
         pushMessage(this.config.getCoreQueue(), AwsMessage.delete_training + "|" + devid + "|" + aiid.toString());
     }
 
+    public void pushMessageStopTraining(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(this.config.getCoreQueue(),AwsMessage.stop_training + "|" + devid + "|" + aiid.toString());
+    }
+
+    public void pushMessageUpdateTraining(String devid, UUID aiid) throws MessageQueueException {
+        pushMessage(this.config.getCoreQueue(),AwsMessage.update_training+ "|" + devid + "|" + aiid.toString());
+    }
     protected void pushMessage(String queue, String message) throws MessageQueueException {
         AWSCredentials credentials = null;
         try {
@@ -84,13 +91,9 @@ public class MessageQueue {
         stop_training,
         start_training,
         delete_training,
+        update_training,
         internal_error,
         malformed_training_file,
-        training_queued,
-        training_in_progress,
-        training_in_progress_rnnavailable,
-        training_stopped_maxtime,
-        training_completed,
         start_RNN
     }
 

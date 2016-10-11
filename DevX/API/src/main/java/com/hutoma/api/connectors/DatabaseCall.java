@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -138,6 +139,16 @@ public class DatabaseCall implements AutoCloseable {
         checkPosition();
         try {
             this.statement.setDouble(++this.paramSetIndex, param);
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+        return this;
+    }
+
+    DatabaseCall add(TrainingStatus.trainingStatus param) throws Database.DatabaseException {
+        checkPosition();
+        try {
+            statement.setString(++paramSetIndex, String.valueOf(param));
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }

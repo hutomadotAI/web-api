@@ -20,12 +20,19 @@ import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.hutoma.api.containers.sub.TrainingStatus.trainingStatus.training_not_started;
+
+
 /**
  * Created by mauriziocibelli on 27/04/16.
  */
 public class AILogic {
 
     private final String LOGFROM = "ailogic";
+    private final double DEEP_LEARNING_ERROR = -1.0;
+    private final int DEEP_LEARNING_STATUS = -1;
+    private final int DEFAULT_WNET_ERROR = -1;
+
     Config config;
     JsonSerializer jsonSerializer;
     Database database;
@@ -69,9 +76,8 @@ public class AILogic {
                 .compact();
 
             if (!this.database.createAI(aiUUID, name, description, devid, is_private,
-                deep_learning_error, deep_learning_status,
-                shallow_learning_status, status, token, "")) {
-                this.logger.logInfo(this.LOGFROM, "db fail creating new ai");
+                    DEEP_LEARNING_ERROR, DEEP_LEARNING_STATUS,DEFAULT_WNET_ERROR, training_not_started, token, "")) {
+                logger.logInfo(LOGFROM, "db fail creating new ai");
                 return ApiError.getInternalServerError();
             }
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
