@@ -9,6 +9,7 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     private static final String LOGFROM = "intenthandler";
 
 
+    @Inject
     public MemoryIntentHandler(final JsonSerializer jsonSerializer, final Database database, final ILogger logger) {
         this.logger = logger;
         this.database = database;

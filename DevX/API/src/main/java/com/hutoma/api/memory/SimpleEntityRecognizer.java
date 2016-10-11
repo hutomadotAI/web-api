@@ -4,6 +4,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.sub.MemoryVariable;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -22,6 +23,7 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
      * Ctor.
      * @param logger the logger
      */
+    @Inject
     public SimpleEntityRecognizer(ILogger logger) {
         this.logger = logger;
     }
