@@ -2,6 +2,7 @@ package com.hutoma.api.access;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import javax.annotation.Priority;
@@ -18,9 +19,7 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Secured
 @Provider
@@ -43,59 +42,68 @@ public class AuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        this.logger.logDebug(LOGFROM, "endpoint secured");
-
         try {
 
-            String encoding_key = this.config.getEncodingKey();
-
+            // try to get the auth header
             String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-            String _devrole = "";
-            String _aiid = "";
-            String _devid = "";
-            MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
 
             // Check if the HTTP Authorization header is present and formatted correctly
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+
+                // not valid; tell the user to authenticate
+                this.logger.logDebug(LOGFROM, "missing or invalid auth header");
+                requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
                 return;
             }
 
-            String requested_aiid = "";
-            try {
-                requested_aiid = pathParameters.get("aiid").get(0);
-            } catch (Exception e) {
-                this.logger.logError(LOGFROM, e.getMessage());
-            }
+            // get the path parameters
+            MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
 
             // Extract the token from the HTTP Authorization header
             String token = authorizationHeader.substring("Bearer".length()).trim();
 
-            try {
-                _devid = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().getSubject();
-                if (_devid.isEmpty()) {
+            // get the encoding key to decode the token
+            String encoding_key = this.config.getEncodingKey();
+
+            // decode the token
+            Claims claims = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody();
+
+            // get the owner devid
+            String devID = claims.getSubject();
+            if (devID.isEmpty()) {
+                this.logger.logInfo(LOGFROM, "missing or invalid devid");
+                requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                return;
+            }
+
+            // store the decoded devid
+            requestContext.getHeaders().add("_developer_id", devID);
+
+            // is this a user token for a specific AIID?
+            if (claims.containsKey("AIID")) {
+                try {
+                    UUID userTokenAIID = UUID.fromString(claims.get("AIID").toString());
+
+                    // is this a request for a specific aiid?
+                    if (pathParameters.containsKey("aiid")) {
+                        UUID requestAIID = UUID.fromString(pathParameters.get("aiid").get(0));
+
+                        // if request and token don't match then forbid
+                        if (0 != userTokenAIID.compareTo(requestAIID)) {
+                            this.logger.logInfo(LOGFROM, "aiid access denied by user token");
+                            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                            return;
+                        }
+                    }
+
+                } catch (IllegalFormatException ife) {
+                    this.logger.logInfo(LOGFROM, "invalid aiid format");
                     requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
                     return;
                 }
-                requestContext.getHeaders().add("_developer_id", _devid);
-
-                try {
-                    _aiid = "" + Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("AIID").toString();
-                    if (!requested_aiid.equals(_aiid)) {
-                        requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-                        return;
-                    }
-                } catch (Exception ex) {
-                    this.logger.logError(LOGFROM, ex.getMessage());
-                    return;
-                }
-
-                _devrole = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("ROLE").toString();
-                this.logger.logDebug(LOGFROM, "devrole " + _devrole);
-            } catch (Exception e) {
-                requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
-                return;
             }
+
+            String _devrole = claims.get("ROLE").toString();
 
             Class<?> resourceClass = this.resourceInfo.getResourceClass();
             List<Role> classRoles = extractRoles(resourceClass);
@@ -111,15 +119,23 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
 
                 if (!is_valid) {
+                    this.logger.logInfo(LOGFROM, "access denied for devrole to endpoint");
                     requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                    return;
                 }
             } catch (Exception e) {
+                this.logger.logInfo(LOGFROM, "error checking devrole permissions");
                 requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                return;
             }
-        } catch (Exception e) {
-            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-        }
 
+            this.logger.logDebug(LOGFROM, "authorized request from dev " + devID + " in role " + _devrole);
+
+        } catch (Exception e) {
+            this.logger.logInfo(LOGFROM, "auth verification error: " + e.toString());
+            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+            return;
+        }
     }
 
     // Extract the roles from the annotated element
