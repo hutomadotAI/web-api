@@ -14,7 +14,6 @@ public class Validate {
     static Pattern alphaNumericAndMoreNoAt = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
     static Pattern uuidPattern = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     static Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
-    static Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
 
     @Inject
     public Validate() {
@@ -133,10 +132,6 @@ public class Validate {
 
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param) throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
-    }
-
-    String validateRequiredObjectName(final String paramName, final String param) throws ParameterValidationException {
-        return validatePattern(alphaNumDashesSomePunctuationAndSpace, paramName, param);
     }
 
     /**

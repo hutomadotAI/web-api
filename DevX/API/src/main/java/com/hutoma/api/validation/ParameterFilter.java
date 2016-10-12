@@ -24,9 +24,6 @@ import java.util.*;
 //Message encoder or decoder filter/interceptor priority. (happens after auth)
 public class ParameterFilter extends Validate implements ContainerRequestFilter {
 
-    private final Logger logger;
-    private final Tools tools;
-    private final JsonSerializer serializer;
     private static final String LOGFROM = "validationfilter";
     // query parameter names
     private static final String AIID = "aiid";
@@ -40,6 +37,9 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
     private static final String MINP = "confidence_threshold";
     private static final String ENTITYNAME = "entity_name";
     private static final String INTENTNAME = "intent_name";
+    private final Logger logger;
+    private final Tools tools;
+    private final JsonSerializer serializer;
     @Context
     private ResourceInfo resourceInfo;
 
@@ -128,11 +128,11 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
             }
             if (checkList.contains(APIParameter.EntityName)) {
                 requestContext.setProperty(APIParameter.EntityName.toString(),
-                    this.validateRequiredObjectName(ENTITYNAME, getFirst(queryParameters.get(ENTITYNAME))));
+                    this.validateAlphaNumPlusDashes(ENTITYNAME, getFirst(queryParameters.get(ENTITYNAME))));
             }
             if (checkList.contains(APIParameter.IntentName)) {
                 requestContext.setProperty(APIParameter.IntentName.toString(),
-                    this.validateRequiredObjectName(INTENTNAME, getFirst(queryParameters.get(INTENTNAME))));
+                    this.validateAlphaNumPlusDashes(INTENTNAME, getFirst(queryParameters.get(INTENTNAME))));
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
