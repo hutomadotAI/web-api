@@ -18,10 +18,10 @@ import java.util.Properties;
 @Singleton
 public class Config {
 
-    private final String LOGFROM = "config";
-    Logger logger;
-    Properties properties;
-    HashSet<String> propertyLoaded;
+    private static final String LOGFROM = "config";
+    private Logger logger;
+    private Properties properties;
+    private HashSet<String> propertyLoaded;
 
     @Inject
     public Config(Logger logger) {
@@ -55,9 +55,9 @@ public class Config {
             Properties loadProperties = new Properties();
             loadProperties.load(fileInputStream);
             this.properties = loadProperties;
-            this.logger.logInfo(this.LOGFROM, "loaded " + this.properties.size() + " properties file from " + configPath.toString());
+            this.logger.logInfo(LOGFROM, "loaded " + this.properties.size() + " properties file from " + configPath.toString());
         } catch (IOException e) {
-            this.logger.logError(this.LOGFROM, "failed to load valid properties file: " + e.toString());
+            this.logger.logError(LOGFROM, "failed to load valid properties file: " + e.toString());
         }
     }
 
@@ -86,15 +86,15 @@ public class Config {
     }
 
     public long getNeuralNetworkTimeout() {
-        return Long.valueOf(getConfigFromProperties("rnn_timeout", "60"));
+        return Long.parseLong(getConfigFromProperties("rnn_timeout", "60"));
     }
 
     public long getMaxUploadSize() {
-        return Long.valueOf(getConfigFromProperties("max_upload_size", "65536"));
+        return Long.parseLong(getConfigFromProperties("max_upload_size", "65536"));
     }
 
     public int getMaxClusterLines() {
-        return Integer.valueOf(getConfigFromProperties("max_cluster_lines", "10000"));
+        return Integer.parseInt(getConfigFromProperties("max_cluster_lines", "10000"));
     }
 
     public String getDatabaseConnectionString() {
@@ -102,37 +102,37 @@ public class Config {
         try {
             return enforceNewDBCredentials(getConfigFromProperties("connection_string", ""));
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, e.getMessage());
+            this.logger.logError(LOGFROM, e.getMessage());
         }
         return "";
     }
 
     public int getDatabaseConnectionPoolMinimumSize() {
-        return Integer.valueOf(getConfigFromProperties("dbconnectionpool_min_size", "8"));
+        return Integer.parseInt(getConfigFromProperties("dbconnectionpool_min_size", "8"));
     }
 
     public int getDatabaseConnectionPoolMaximumSize() {
-        return Integer.valueOf(getConfigFromProperties("dbconnectionpool_max_size", "64"));
+        return Integer.parseInt(getConfigFromProperties("dbconnectionpool_max_size", "64"));
     }
 
     public double getClusterMinProbability() {
-        return Double.valueOf(getConfigFromProperties("cluster_min_probability", "0.7"));
+        return Double.parseDouble(getConfigFromProperties("cluster_min_probability", "0.7"));
     }
 
     public double getRateLimit_Chat_BurstRequests() {
-        return Double.valueOf(getConfigFromProperties("ratelimit_chat_burst", "3.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_chat_burst", "3.0"));
     }
 
     public double getRateLimit_Chat_Frequency() {
-        return Double.valueOf(getConfigFromProperties("ratelimit_chat_frequency", "2.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_chat_frequency", "2.0"));
     }
 
     public double getRateLimit_QuickRead_BurstRequests() {
-        return Double.valueOf(getConfigFromProperties("ratelimit_quickread_burst", "5.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_quickread_burst", "5.0"));
     }
 
     public double getRateLimit_QuickRead_Frequency() {
-        return Double.valueOf(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
     }
 
     public String getTelemetryKey(String appName) {
@@ -141,13 +141,13 @@ public class Config {
 
     private String getConfigFromProperties(String p, String defaultValue) {
         if (null == this.properties) {
-            this.logger.logWarning(this.LOGFROM, "no properties file loaded. using internal defaults where available");
+            this.logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
             return defaultValue;
         }
         // keep a list of used properties
         // if this is the first time we are accessing a property and we are using defaults then log a warning
         if (this.propertyLoaded.add(p) && (!this.properties.containsKey(p))) {
-            this.logger.logWarning(this.LOGFROM, "no property set for " + p + ". using hard-coded default " + defaultValue);
+            this.logger.logWarning(LOGFROM, "no property set for " + p + ". using hard-coded default " + defaultValue);
         }
         return this.properties.getProperty(p, defaultValue);
     }

@@ -18,11 +18,11 @@ import java.util.List;
  */
 public class AIDomainLogic {
 
-    private final String LOGFROM = "aidomainlogic";
-    Config config;
-    JsonSerializer jsonSerializer;
-    Database database;
-    Logger logger;
+    private static final String LOGFROM = "aidomainlogic";
+    private Config config;
+    private JsonSerializer jsonSerializer;
+    private Database database;
+    private Logger logger;
 
     @Inject
     public AIDomainLogic(Config config, JsonSerializer jsonSerializer, Database database, Logger logger) {
@@ -36,15 +36,15 @@ public class AIDomainLogic {
         SecurityContext securityContext) {
 
         try {
-            this.logger.logDebug(this.LOGFROM, "request to get all domains ");
+            this.logger.logDebug(LOGFROM, "request to get all domains ");
             List<AiDomain> domainList = this.database.getAiDomainList();
             if (domainList.size() == 0) {
-                this.logger.logDebug(this.LOGFROM, "no domains found");
+                this.logger.logDebug(LOGFROM, "no domains found");
                 return ApiError.getNotFound();
             }
             return new ApiAiDomains(domainList).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "could not get all domains; " + e.toString());
+            this.logger.logError(LOGFROM, "could not get all domains; " + e.toString());
             return ApiError.getInternalServerError();
         }
     }

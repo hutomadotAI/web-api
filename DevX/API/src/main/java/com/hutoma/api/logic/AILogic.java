@@ -32,13 +32,12 @@ public class AILogic {
     private final double DEEP_LEARNING_ERROR = -1.0;
     private final int DEEP_LEARNING_STATUS = -1;
     private final int DEFAULT_WNET_ERROR = -1;
-
-    Config config;
-    JsonSerializer jsonSerializer;
-    Database database;
-    MessageQueue messageQueue;
-    Logger logger;
-    Tools tools;
+    private Config config;
+    private JsonSerializer jsonSerializer;
+    private Database database;
+    private MessageQueue messageQueue;
+    private Logger logger;
+    private Tools tools;
 
     @Inject
     public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,

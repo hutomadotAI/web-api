@@ -20,7 +20,7 @@ public class EntityLogic {
     private final Config config;
     private final Logger logger;
     private final Database database;
-    private final String LOGFROM = "entitylogic";
+    private static final String LOGFROM = "entitylogic";
 
     @Inject
     public EntityLogic(final Config config, final Logger logger, final Database database) {
@@ -31,28 +31,25 @@ public class EntityLogic {
 
     public ApiResult getEntities(final SecurityContext securityContext, final String devid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to list entities from " + devid);
+            this.logger.logDebug(LOGFROM, "request to list entities from " + devid);
             final List<String> entityList = this.database.getEntities(devid);
             if (entityList.isEmpty()) {
                 return ApiError.getNotFound();
             }
             return new ApiEntityList(entityList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(this.LOGFROM, "error getting entities: " + e.toString());
+            this.logger.logError(LOGFROM, "error getting entities: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult getEntity(final SecurityContext securityContext, final String devid, final String entityName) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to list entity " + entityName + " from " + devid);
+            this.logger.logDebug(LOGFROM, "request to list entity " + entityName + " from " + devid);
             final ApiEntity entity = this.database.getEntity(devid, entityName);
-            if (null == entity) {
-                return ApiError.getNotFound();
-            }
             return entity.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(this.LOGFROM, "error getting entity: " + e.toString());
+            this.logger.logError(LOGFROM, "error getting entity: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }

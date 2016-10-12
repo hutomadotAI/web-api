@@ -18,12 +18,11 @@ import java.util.concurrent.Future;
  */
 public class SemanticAnalysis {
 
-    private final String LOGFROM = "wnetconnector";
-    Config config;
-    Logger logger;
-    JsonSerializer serializer;
-    Tools tools;
-    Future<Response> responseFuture;
+    private Config config;
+    private Logger logger;
+    private JsonSerializer serializer;
+    private Tools tools;
+    private Future<Response> responseFuture;
 
     @Inject
     public SemanticAnalysis(Config config, Logger logger, JsonSerializer serializer, Tools tools) {

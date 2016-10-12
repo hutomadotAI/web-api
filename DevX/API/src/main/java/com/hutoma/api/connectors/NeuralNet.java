@@ -12,15 +12,15 @@ import java.util.UUID;
  */
 public class NeuralNet {
 
-    static long POLLEVERY = 1000;                                  // hard-coded to one second
-    private final String LOGFROM = "neuralnetconnector";
-    Database database;
-    MessageQueue messageQueue;
-    Logger logger;
-    Config config;
-    Tools tools;
-    long startTime;
-    long qid = 0;
+    static long POLLEVERY = 1000;   // hard-coded to one second
+    private static final String LOGFROM = "neuralnetconnector";
+    private Database database;
+    private MessageQueue messageQueue;
+    private Logger logger;
+    private Config config;
+    private Tools tools;
+    private long startTime;
+    private long qid = 0;
 
     @Inject
     public NeuralNet(Database database, MessageQueue messageQueue, Logger logger, Config config, Tools tools) {
@@ -42,7 +42,7 @@ public class NeuralNet {
                 this.messageQueue.pushMessageStartRNN(dev_id, aiid);
             }
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to check/start server " + e.toString());
+            this.logger.logError(LOGFROM, "failed to check/start server " + e.toString());
             throw new NeuralNetException(e);
         }
 

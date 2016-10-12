@@ -23,7 +23,7 @@ public class HTMLExtractor {
         return result;
     }
 
-    public class HtmlExtractionException extends Exception {
+    public static class HtmlExtractionException extends Exception {
 
         public HtmlExtractionException(Throwable cause) {
             super(cause);

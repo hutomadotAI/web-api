@@ -1,5 +1,6 @@
 package com.hutoma.api.containers.sub;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +14,6 @@ public class ChatResult {
     private String answer = "";
     private double elapsed_time;
     private String action;
-    private List<Parameter> parameters;
     private String context;
     private String topic_in = "";
     private String topic_out = "";
@@ -69,8 +69,15 @@ public class ChatResult {
         return this.chatId;
     }
 
-    public void setChatId(UUID chatId) { this.chatId = chatId; }
+    public void setChatId(UUID chatId) {
+        this.chatId = chatId;
+    }
 
-    public List<MemoryIntent> getIntents() { return this.intents; }
-    public void setIntents(final List<MemoryIntent> intents) { this.intents = intents; }
+    public List<MemoryIntent> getIntents() {
+        return this.intents;
+    }
+
+    public void setIntents(List<MemoryIntent> intents) {
+        this.intents = intents;
+    }
 }

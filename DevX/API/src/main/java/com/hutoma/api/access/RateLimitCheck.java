@@ -24,7 +24,7 @@ import java.lang.reflect.AnnotatedElement;
 @Priority(Priorities.USER) //User priority. (happens after data validation)
 public class RateLimitCheck implements ContainerRequestFilter {
 
-    private final String LOGFROM = "ratelimitcheck";
+    private static final String LOGFROM = "ratelimitcheck";
     Database database;
     Logger logger;
     Config config;
@@ -68,10 +68,10 @@ public class RateLimitCheck implements ContainerRequestFilter {
             }
         } catch (RateLimitedException rle) {
             requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
-            this.logger.logInfo(this.LOGFROM, rle.getMessage());
+            this.logger.logInfo(LOGFROM, rle.getMessage());
         } catch (Exception e) {
             requestContext.abortWith(ApiError.getInternalServerError().getResponse(this.serializer).build());
-            this.logger.logError(this.LOGFROM, e.toString());
+            this.logger.logError(LOGFROM, e.toString());
         }
     }
 
@@ -103,7 +103,7 @@ public class RateLimitCheck implements ContainerRequestFilter {
             long blockedFor = Math.round(1000.0d * (1.0d - rateLimitStatus.getTokens()) * frequency);
             throw new RateLimitedException(devid + " hit limit on " + rateKey.toString() + ". BLOCKED for the next " + blockedFor + "ms.");
         }
-        this.logger.logDebug(this.LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens() + " tokens remaining.");
+        this.logger.logDebug(LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens() + " tokens remaining.");
     }
 
     /***

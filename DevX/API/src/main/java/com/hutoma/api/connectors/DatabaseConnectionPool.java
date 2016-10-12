@@ -14,11 +14,11 @@ import java.sql.SQLException;
  */
 public class DatabaseConnectionPool {
 
-    private final String LOGFROM = "dbconnectionpool";
-    Config config;
-    Logger logger;
-    DataSource dataSource;
-    int maxActiveConnections;
+    private final static String LOGFROM = "dbconnectionpool";
+    private Config config;
+    private Logger logger;
+    private DataSource dataSource;
+    private int maxActiveConnections;
 
     @Inject
     public DatabaseConnectionPool(Config config, Logger logger) {
@@ -54,9 +54,9 @@ public class DatabaseConnectionPool {
 
     public Connection borrowConnection() throws Database.DatabaseException {
         int activeConnections = this.dataSource.getActive();
-        this.logger.logDebug(this.LOGFROM, "idle/active/maxactive " + this.dataSource.getIdle() + "/" + activeConnections + "/" + this.maxActiveConnections);
+        this.logger.logDebug(LOGFROM, "idle/active/maxactive " + this.dataSource.getIdle() + "/" + activeConnections + "/" + this.maxActiveConnections);
         if ((activeConnections + 1) >= this.maxActiveConnections) {
-            this.logger.logWarning(this.LOGFROM, "reached maximum number of active connections: " + this.maxActiveConnections);
+            this.logger.logWarning(LOGFROM, "reached maximum number of active connections: " + this.maxActiveConnections);
         }
         try {
             return this.dataSource.getConnection();

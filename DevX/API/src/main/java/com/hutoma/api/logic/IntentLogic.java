@@ -21,7 +21,7 @@ public class IntentLogic {
     private final Config config;
     private final Logger logger;
     private final Database database;
-    private final String LOGFROM = "intentlogic";
+    private static final String LOGFROM = "intentlogic";
 
     @Inject
     public IntentLogic(final Config config, final Logger logger, final Database database) {
@@ -32,28 +32,28 @@ public class IntentLogic {
 
     public ApiResult getIntents(SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to list intents for " + aiid.toString() + " from " + devid);
+            this.logger.logDebug(LOGFROM, "request to list intents for " + aiid.toString() + " from " + devid);
             final List<String> intentList = this.database.getIntents(devid, aiid);
             if (intentList.isEmpty()) {
                 return ApiError.getNotFound();
             }
             return new ApiIntentList(aiid, intentList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(this.LOGFROM, "error getting intents: " + e.toString());
+            this.logger.logError(LOGFROM, "error getting intents: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult getIntent(SecurityContext securityContext, String devid, UUID aiid, String intentName) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to list intent " + intentName + " for AI " + aiid);
+            this.logger.logDebug(LOGFROM, "request to list intent " + intentName + " for AI " + aiid);
             ApiIntent intent = this.database.getIntent(devid, aiid, intentName);
             if (null == intent) {
                 return ApiError.getNotFound();
             }
             return intent.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(this.LOGFROM, "error getting intent: " + e.toString());
+            this.logger.logError(LOGFROM, "error getting intent: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }

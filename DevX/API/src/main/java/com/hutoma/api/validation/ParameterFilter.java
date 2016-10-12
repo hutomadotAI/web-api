@@ -27,19 +27,19 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
     private final Logger logger;
     private final Tools tools;
     private final JsonSerializer serializer;
-    private final String LOGFROM = "validationfilter";
+    private static final String LOGFROM = "validationfilter";
     // query parameter names
-    private final String AIID = "aiid";
-    private final String DEVID = "_developer_id";
-    private final String CHATID = "chatId";
-    private final String CHATQUESTION = "q";
-    private final String CHATHISTORY = "chat_history";
-    private final String AIDESC = "description";
-    private final String AINAME = "name";
-    private final String TOPIC = "current_topic";
-    private final String MINP = "confidence_threshold";
-    private final String ENTITYNAME = "entity_name";
-    private final String INTENTNAME = "intent_name";
+    private static final String AIID = "aiid";
+    private static final String DEVID = "_developer_id";
+    private static final String CHATID = "chatId";
+    private static final String CHATQUESTION = "q";
+    private static final String CHATHISTORY = "chat_history";
+    private static final String AIDESC = "description";
+    private static final String AINAME = "name";
+    private static final String TOPIC = "current_topic";
+    private static final String MINP = "confidence_threshold";
+    private static final String ENTITYNAME = "entity_name";
+    private static final String INTENTNAME = "intent_name";
     @Context
     private ResourceInfo resourceInfo;
 
@@ -110,59 +110,59 @@ public class ParameterFilter extends Validate implements ContainerRequestFilter 
 
             // developer ID is always validated
             requestContext.setProperty(APIParameter.DevID.toString(),
-                this.validateAlphaNumPlusDashes(this.DEVID, requestContext.getHeaderString(this.DEVID)));
+                this.validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
 
             // extract each parameter as necessary,
             // validate and put the result into a property in the requestcontext
             if (checkList.contains(APIParameter.AIID)) {
                 requestContext.setProperty(APIParameter.AIID.toString(),
-                    this.validateUuid(this.AIID, getFirst(pathParameters.get(this.AIID))));
+                    this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
             }
             if (checkList.contains(APIParameter.ChatID)) {
-                final String chatId = getFirstOrDefault(queryParameters.get(this.CHATID), "");
+                final String chatId = getFirstOrDefault(queryParameters.get(CHATID), "");
                 requestContext.setProperty(APIParameter.ChatID.toString(),
-                    this.validateAlphaNumPlusDashes(this.CHATID,
+                    this.validateAlphaNumPlusDashes(CHATID,
                         chatId.isEmpty()
                             ? this.tools.createNewRandomUUID().toString()
-                            : this.validateAlphaNumPlusDashes(this.CHATID, chatId)));
+                            : this.validateAlphaNumPlusDashes(CHATID, chatId)));
             }
             if (checkList.contains(APIParameter.EntityName)) {
                 requestContext.setProperty(APIParameter.EntityName.toString(),
-                    this.validateRequiredObjectName(this.ENTITYNAME, getFirst(queryParameters.get(this.ENTITYNAME))));
+                    this.validateRequiredObjectName(ENTITYNAME, getFirst(queryParameters.get(ENTITYNAME))));
             }
             if (checkList.contains(APIParameter.IntentName)) {
                 requestContext.setProperty(APIParameter.IntentName.toString(),
-                    this.validateRequiredObjectName(this.INTENTNAME, getFirst(queryParameters.get(this.INTENTNAME))));
+                    this.validateRequiredObjectName(INTENTNAME, getFirst(queryParameters.get(INTENTNAME))));
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
-                    this.validateRequiredSanitized("question", getFirst(queryParameters.get(this.CHATQUESTION))));
+                    this.validateRequiredSanitized("question", getFirst(queryParameters.get(CHATQUESTION))));
             }
             if (checkList.contains(APIParameter.ChatHistory)) {
                 requestContext.setProperty(APIParameter.ChatHistory.toString(),
-                    this.validateOptionalSanitized(getFirst(queryParameters.get(this.CHATHISTORY))));
+                    this.validateOptionalSanitized(getFirst(queryParameters.get(CHATHISTORY))));
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
-                    this.validateAlphaNumPlusDashes(this.AINAME, getFirst(queryParameters.get(this.AINAME))));
+                    this.validateAlphaNumPlusDashes(AINAME, getFirst(queryParameters.get(AINAME))));
             }
             if (checkList.contains(APIParameter.AIDescription)) {
                 requestContext.setProperty(APIParameter.AIDescription.toString(),
-                    this.validateOptionalDescription(this.AIDESC, getFirst(queryParameters.get(this.AIDESC))));
+                    this.validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC))));
             }
             if (checkList.contains(APIParameter.ChatTopic)) {
                 requestContext.setProperty(APIParameter.ChatTopic.toString(),
-                    this.validateOptionalSanitizeRemoveAt(this.TOPIC, getFirst(queryParameters.get(this.TOPIC))));
+                    this.validateOptionalSanitizeRemoveAt(TOPIC, getFirst(queryParameters.get(TOPIC))));
             }
             if (checkList.contains(APIParameter.Min_P)) {
                 requestContext.setProperty(APIParameter.Min_P.toString(),
-                    this.validateOptionalFloat(this.MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(this.MINP))));
+                    this.validateOptionalFloat(MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(MINP))));
             }
-            this.logger.logDebug(this.LOGFROM, "parameter validation passed");
+            this.logger.logDebug(LOGFROM, "parameter validation passed");
 
         } catch (final ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
-            this.logger.logDebug(this.LOGFROM, "parameter validation failed");
+            this.logger.logDebug(LOGFROM, "parameter validation failed");
         }
     }
 

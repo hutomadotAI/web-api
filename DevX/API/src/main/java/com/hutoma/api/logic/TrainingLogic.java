@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,14 +36,15 @@ public class TrainingLogic {
     private static final String PREVIOUS_AI_PREFIX = "[";
     private static final String PREVIOUS_AI_SUFFIX = "] ";
     private static final String EOL = "\n";
-    private final String LOGFROM = "traininglogic";
-    Config config;
-    MessageQueue messageQueue;
-    HTMLExtractor htmlExtractor;
-    Database database;
-    Tools tools;
-    Logger logger;
-    Validate validate;
+    private static final String LOGFROM = "traininglogic";
+
+    private Config config;
+    private MessageQueue messageQueue;
+    private HTMLExtractor htmlExtractor;
+    private Database database;
+    private Tools tools;
+    private Logger logger;
+    private Validate validate;
 
     @Inject
     public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
@@ -67,7 +69,7 @@ public class TrainingLogic {
 
                 // 0 = training file is text chat
                 case 0:
-                    this.logger.logDebug(this.LOGFROM, "training from uploaded training file");
+                    this.logger.logDebug(LOGFROM, "training from uploaded training file");
                     if (null == fileDetail) {
                         return ApiError.getBadRequest("upload could not be processed");
                     }
@@ -87,7 +89,7 @@ public class TrainingLogic {
 
                 // 1 = training file is a document
                 case 1:
-                    this.logger.logDebug(this.LOGFROM, "training from uploaded document");
+                    this.logger.logDebug(LOGFROM, "training from uploaded document");
                     if (null == fileDetail) {
                         return ApiError.getBadRequest("upload could not be processed");
                     }
@@ -103,7 +105,7 @@ public class TrainingLogic {
 
                     // 2 = training file is a webpage
                 case 2:
-                    this.logger.logDebug(this.LOGFROM, "training from uploaded URL");
+                    this.logger.logDebug(LOGFROM, "training from uploaded URL");
                     if (!this.database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
                         return ApiError.getNotFound("ai not found");
                     }
@@ -115,19 +117,19 @@ public class TrainingLogic {
                     return ApiError.getBadRequest("incorrect training type");
             }
         } catch (IOException ioe) {
-            this.logger.logInfo(this.LOGFROM, "html extraction error " + ioe.toString());
+            this.logger.logInfo(LOGFROM, "html extraction error " + ioe.toString());
             return ApiError.getBadRequest();
         } catch (HTMLExtractor.HtmlExtractionException ht) {
-            this.logger.logInfo(this.LOGFROM, "html extraction error " + ht.getCause().toString());
+            this.logger.logInfo(LOGFROM, "html extraction error " + ht.getCause().toString());
             return ApiError.getBadRequest("html extraction error");
         } catch (UploadTooLargeException tooLarge) {
-            this.logger.logInfo(this.LOGFROM, "upload attempt was larger than maximum allowed");
+            this.logger.logInfo(LOGFROM, "upload attempt was larger than maximum allowed");
             return ApiError.getPayloadTooLarge();
         } catch (Database.DatabaseException dde) {
-            this.logger.logError(this.LOGFROM, "database error " + dde.getCause().toString());
+            this.logger.logError(LOGFROM, "database error " + dde.getCause().toString());
             return ApiError.getInternalServerError();
         } catch (Exception ex) {
-            this.logger.logError(this.LOGFROM, "exception " + ex.toString());
+            this.logger.logError(LOGFROM, "exception " + ex.toString());
             return ApiError.getInternalServerError();
         } finally {
             try {
@@ -147,11 +149,11 @@ public class TrainingLogic {
 
     public ApiResult delete(SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to delete training for " + aiid);
+            this.logger.logDebug(LOGFROM, "request to delete training for " + aiid);
             this.messageQueue.pushMessageDeleteTraining(devid, aiid);
         } catch (MessageQueue.MessageQueueException e) {
-            this.logger.logError(this.LOGFROM, "message queue exception " + e.toString());
-            this.logger.logDebug(this.LOGFROM, "request to delete training for " + aiid);
+            this.logger.logError(LOGFROM, "message queue exception " + e.toString());
+            this.logger.logDebug(LOGFROM, "request to delete training for " + aiid);
             return ApiError.getInternalServerError();
 
         }
@@ -288,7 +290,7 @@ public class TrainingLogic {
 
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(uploadedInputStream));
+            reader = new BufferedReader(new InputStreamReader(uploadedInputStream, StandardCharsets.UTF_8));
             String line;
             int lineSize;
             while ((line = reader.readLine()) != null) {
@@ -309,6 +311,10 @@ public class TrainingLogic {
         return source;
     }
 
+
+    public static class UploadTooLargeException extends Exception {
+    }
+
     /**
      * Submit a training request to SQS only if the training file is avaialable or a previous valid training session was stopped.
      * In all other cases we return an error
@@ -320,7 +326,7 @@ public class TrainingLogic {
      */
     public ApiResult startTraining (SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "on demand training start");
+            this.logger.logDebug(LOGFROM, "on demand training start");
             String trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
             if ((TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_not_started) ||
                     (TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_stopped)) {
@@ -342,7 +348,7 @@ public class TrainingLogic {
             }
         }
         catch (Exception ex) {
-            this.logger.logError(this.LOGFROM, "exception (startTraining):" + ex.toString());
+            this.logger.logError(LOGFROM, "exception (startTraining):" + ex.toString());
             return ApiError.getInternalServerError("Malformed training file. Training could not be started.");
 
         }
@@ -358,7 +364,7 @@ public class TrainingLogic {
 
     public ApiResult stopTraining (SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "on demand training stop");
+            this.logger.logDebug(LOGFROM, "on demand training stop");
             String trainigStatus = this.database.getAI(devid, aiid).getAiStatus();
 
             if (TrainingStatus.trainingStatus.valueOf(trainigStatus) == training_in_progress) {
@@ -367,7 +373,7 @@ public class TrainingLogic {
             }
         }
         catch (Exception ex) {
-            this.logger.logError(this.LOGFROM, "exception (stopTraining):" + ex.toString());
+            this.logger.logError(LOGFROM, "exception (stopTraining):" + ex.toString());
             return ApiError.getInternalServerError("Internal server error. Training could not be stopped.");
 
         }
@@ -393,22 +399,19 @@ public class TrainingLogic {
                 case training_stopped:
                 case training_completed:
                 case training_deleted:
-                    this.logger.logDebug(this.LOGFROM, "on demand training update");
+                    this.logger.logDebug(LOGFROM, "on demand training update");
                     this.messageQueue.pushMessageUpdateTraining(devid, aiid);
                     return new ApiResult().setSuccessStatus("Training session updated.");
                 default:
-                    this.logger.logError(this.LOGFROM, "it was impossible to update training session for aiid:" + aiid.toString() + " devid:" + devid);
+                    this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:" + aiid.toString() + " devid:" + devid);
                     return ApiError.getInternalServerError("Impossible to update the current training session.");
 
                 }
         }
         catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "exception (stopTraining):" + e.toString());
+            this.logger.logError(LOGFROM, "exception (stopTraining):" + e.toString());
             return ApiError.getInternalServerError("Internal server error. Training could not be updated.");
 
         }
-    }
-
-    public class UploadTooLargeException extends Exception {
     }
 }

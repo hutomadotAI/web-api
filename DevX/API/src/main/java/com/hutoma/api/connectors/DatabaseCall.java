@@ -1,5 +1,13 @@
 package com.hutoma.api.connectors;
 
+import com.hutoma.api.containers.sub.TrainingStatus;
+import org.joda.time.DateTime;
+
+import javax.inject.Inject;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import org.joda.time.DateTime;
@@ -16,8 +24,6 @@ import java.util.UUID;
  */
 public class DatabaseCall implements AutoCloseable {
 
-    Config config;
-
     Connection connection;
     PreparedStatement statement;
     int paramCount;
@@ -26,8 +32,7 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseConnectionPool pool;
 
     @Inject
-    public DatabaseCall(Config config, DatabaseConnectionPool pool) {
-        this.config = config;
+    public DatabaseCall(DatabaseConnectionPool pool) {
         this.pool = pool;
         this.statement = null;
         this.connection = null;
@@ -67,6 +72,8 @@ public class DatabaseCall implements AutoCloseable {
         }
     }
 
+    @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
     DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws Database.DatabaseException {
 
         this.paramCount = numberOfParams;

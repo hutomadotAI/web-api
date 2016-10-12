@@ -27,7 +27,8 @@ import java.util.List;
 @Priority(Priorities.AUTHENTICATION)
 public class AuthFilter implements ContainerRequestFilter {
 
-    private final String LOGFROM = "authfilter";
+    private static final String LOGFROM = "authfilter";
+
     @Context
     private ResourceInfo resourceInfo;
     private Logger logger;
@@ -42,7 +43,7 @@ public class AuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        this.logger.logDebug(this.LOGFROM, "endpoint secured");
+        this.logger.logDebug(LOGFROM, "endpoint secured");
 
         try {
 
@@ -57,36 +58,43 @@ public class AuthFilter implements ContainerRequestFilter {
             // Check if the HTTP Authorization header is present and formatted correctly
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
                 requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                return;
             }
 
             String requested_aiid = "";
             try {
                 requested_aiid = pathParameters.get("aiid").get(0);
             } catch (Exception e) {
+                this.logger.logError(LOGFROM, e.getMessage());
             }
 
             // Extract the token from the HTTP Authorization header
             String token = authorizationHeader.substring("Bearer".length()).trim();
 
             try {
-                _devid = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().getSubject().toString();
-                requestContext.getHeaders().add("_developer_id", _devid);
+                _devid = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().getSubject();
                 if (_devid.isEmpty()) {
                     requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                    return;
                 }
+                requestContext.getHeaders().add("_developer_id", _devid);
 
                 try {
                     _aiid = "" + Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("AIID").toString();
                     if (!requested_aiid.equals(_aiid)) {
                         requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                        return;
                     }
                 } catch (Exception ex) {
+                    this.logger.logError(LOGFROM, ex.getMessage());
+                    return;
                 }
 
                 _devrole = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody().get("ROLE").toString();
-                this.logger.logDebug(this.LOGFROM, "devrole " + _devrole);
+                this.logger.logDebug(LOGFROM, "devrole " + _devrole);
             } catch (Exception e) {
                 requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+                return;
             }
 
             Class<?> resourceClass = this.resourceInfo.getResourceClass();

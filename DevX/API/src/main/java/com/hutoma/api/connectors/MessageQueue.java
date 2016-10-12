@@ -15,9 +15,9 @@ import java.util.UUID;
 
 public class MessageQueue {
 
-    private final String LOGFROM = "messagequeue";
-    Config config;
-    Logger logger;
+    private static final String LOGFROM = "messagequeue";
+    private Config config;
+    private Logger logger;
 
     @Inject
     public MessageQueue(Config config, Logger logger) {
@@ -65,7 +65,7 @@ public class MessageQueue {
         try {
             credentials = new ProfileCredentialsProvider().getCredentials();
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "getCredentials error " + e.toString());
+            this.logger.logError(LOGFROM, "getCredentials error " + e.toString());
             throw new MessageQueueException(e);
         }
 
@@ -76,7 +76,7 @@ public class MessageQueue {
         try {
             sqs.sendMessage(new SendMessageRequest(queue, message));
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "sendMessage error " + e.toString());
+            this.logger.logError(LOGFROM, "sendMessage error " + e.toString());
             throw new MessageQueueException(e);
         }
     }

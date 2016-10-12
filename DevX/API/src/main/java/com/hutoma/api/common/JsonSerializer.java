@@ -13,6 +13,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class JsonSerializer {
 
-    Gson gson;
+    private Gson gson;
 
     public JsonSerializer() {
         this.gson = new GsonBuilder()
@@ -39,7 +40,7 @@ public class JsonSerializer {
     }
 
     public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
-        Object o = this.gson.fromJson(new InputStreamReader(stream), resultClass);
+        Object o = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
         if (null == o) {
             throw new JsonParseException("cannot deserialize valid object from json");
         }

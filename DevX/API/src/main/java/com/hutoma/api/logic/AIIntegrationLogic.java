@@ -18,11 +18,11 @@ import java.util.List;
  */
 public class AIIntegrationLogic {
 
-    private final String LOGFROM = "aiintegrationlogic";
-    Config config;
-    JsonSerializer jsonSerializer;
-    Database database;
-    Logger logger;
+    private static final String LOGFROM = "aiintegrationlogic";
+    private Config config;
+    private JsonSerializer jsonSerializer;
+    private Database database;
+    private Logger logger;
 
     @Inject
     public AIIntegrationLogic(Config config, JsonSerializer jsonSerializer, Database database, Logger logger) {
@@ -36,15 +36,15 @@ public class AIIntegrationLogic {
         SecurityContext securityContext) {
 
         try {
-            this.logger.logDebug(this.LOGFROM, "request to get all integration ");
+            this.logger.logDebug(LOGFROM, "request to get all integration ");
             List<AiIntegration> integrationList = this.database.getAiIntegrationList();
             if (integrationList.size() == 0) {
-                this.logger.logDebug(this.LOGFROM, "no integration found");
+                this.logger.logDebug(LOGFROM, "no integration found");
                 return ApiError.getNotFound();
             }
             return new ApiAiIntegrations(integrationList).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "could not get all integration; " + e.toString());
+            this.logger.logError(LOGFROM, "could not get all integration; " + e.toString());
             return ApiError.getInternalServerError();
         }
     }

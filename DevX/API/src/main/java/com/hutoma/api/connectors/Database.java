@@ -28,7 +28,7 @@ import java.util.UUID;
  */
 public class Database {
 
-    private final String LOGFROM = "database";
+    private static final String LOGFROM = "database";
     private Logger logger;
     private Provider<DatabaseCall> callProvider;
 

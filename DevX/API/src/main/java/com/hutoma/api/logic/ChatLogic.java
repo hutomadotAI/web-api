@@ -30,15 +30,15 @@ import java.util.UUID;
  */
 public class ChatLogic {
 
-    private final String LOGFROM = "chatlogic";
-    Config config;
-    JsonSerializer jsonSerializer;
-    SemanticAnalysis semanticAnalysis;
-    NeuralNet neuralNet;
-    Tools tools;
-    ILogger logger;
-    IMemoryIntentHandler intentHandler;
-    IEntityRecognizer entityRecognizer;
+    private static final String LOGFROM = "chatlogic";
+    private Config config;
+    private JsonSerializer jsonSerializer;
+    private SemanticAnalysis semanticAnalysis;
+    private NeuralNet neuralNet;
+    private Tools tools;
+    private ILogger logger;
+    private IMemoryIntentHandler intentHandler;
+    private IEntityRecognizer entityRecognizer;
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis,
@@ -85,7 +85,7 @@ public class ChatLogic {
 
         boolean noResponse = true;
         try {
-            this.logger.logDebug(this.LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
+            this.logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
 
             // async start both requests
             this.semanticAnalysis.startAnswerRequest(dev_id, aiid, chatUuid, topic, history, q, min_p);
@@ -161,21 +161,21 @@ public class ChatLogic {
                 this.handleIntents(chatResult, dev_id, aiid, chatUuid, q, telemetryMap);
             }
         } catch (NeuralNet.NeuralNetNotRespondingException nr) {
-            this.logger.logError(this.LOGFROM, "neural net did not respond in time");
+            this.logger.logError(LOGFROM, "neural net did not respond in time");
             this.addTelemetry("ApiChatError", nr, telemetryMap);
             return ApiError.getNoResponse("unable to respond in time. try again");
         } catch (NeuralNet.NeuralNetException nne) {
-            this.logger.logError(this.LOGFROM, "neural net exception: " + nne.toString());
+            this.logger.logError(LOGFROM, "neural net exception: " + nne.toString());
             this.addTelemetry("ApiChatError", nne, telemetryMap);
             return ApiError.getInternalServerError();
         } catch (Exception ex) {
-            this.logger.logError(this.LOGFROM, "AI chat request exception: " + ex.toString());
+            this.logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
             this.addTelemetry("ApiChatError", ex, telemetryMap);
             // log the error but don't return a 500
             // because the error may have occurred on the second request and the first may have completed correctly
         }
         if (noResponse) {
-            this.logger.logError(this.LOGFROM, "chat server returned an empty response");
+            this.logger.logError(LOGFROM, "chat server returned an empty response");
             telemetryMap.put("EventType", "No response");
             this.addTelemetry("ApiChatError", telemetryMap);
             return ApiError.getInternalServerError();

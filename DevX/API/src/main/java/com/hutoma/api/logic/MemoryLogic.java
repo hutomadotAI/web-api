@@ -15,11 +15,11 @@ import java.util.List;
 
 public class MemoryLogic {
 
-    private final String LOGFROM = "memorylogic";
-    Config config;
-    Database database;
-    Tools tools;
-    Logger logger;
+    private static final String LOGFROM = "memorylogic";
+    private Config config;
+    private Database database;
+    private Tools tools;
+    private Logger logger;
 
     @Inject
     public MemoryLogic(Config config, Database database, Tools tools, Logger logger) {
@@ -34,18 +34,18 @@ public class MemoryLogic {
                                   String aiid,
                                   String uid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to load all user variables for " + dev_id);
+            this.logger.logDebug(LOGFROM, "request to load all user variables for " + dev_id);
             // load everything
             List<ApiMemoryToken> resultList = this.database.getAllUserVariables(dev_id, aiid, uid);
 
             // if the list is empty then throw a 404
             if (resultList.isEmpty()) {
-                this.logger.logDebug(this.LOGFROM, "no variables found");
+                this.logger.logDebug(LOGFROM, "no variables found");
                 return ApiError.getNotFound("user variable not found");
             }
             return new ApiMemory(resultList).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to get memory variables " + e.toString());
+            this.logger.logError(LOGFROM, "failed to get memory variables " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -56,17 +56,17 @@ public class MemoryLogic {
                                        String uid,
                                        String variable) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to load single user variable for " + dev_id);
+            this.logger.logDebug(LOGFROM, "request to load single user variable for " + dev_id);
             ApiMemoryToken token = this.database.getUserVariable(dev_id, aiid, uid, variable);
 
             // if the token is null then throw a 404
             if (null == token) {
-                this.logger.logDebug(this.LOGFROM, "variable not found");
+                this.logger.logDebug(LOGFROM, "variable not found");
                 return ApiError.getNotFound("user variable not found");
             }
             return token.setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to get memory variable " + e.toString());
+            this.logger.logError(LOGFROM, "failed to get memory variable " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -82,15 +82,15 @@ public class MemoryLogic {
                                  String label
     ) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to set user variable for " + dev_id);
+            this.logger.logDebug(LOGFROM, "request to set user variable for " + dev_id);
             boolean success = this.database.setUserVariable(dev_id, aiid, uid, expires_seconds, n_prompts, label, variable, value);
             if (!success) {
-                this.logger.logInfo(this.LOGFROM, "zero rows changed on attempt to set variable");
+                this.logger.logInfo(LOGFROM, "zero rows changed on attempt to set variable");
                 return ApiError.getBadRequest("could not set variable");
             }
             return new ApiResult().setSuccessStatus("variable set");
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to set memory variable " + e.toString());
+            this.logger.logError(LOGFROM, "failed to set memory variable " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -101,15 +101,15 @@ public class MemoryLogic {
                                  String uid,
                                  String variable) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to delete user variable for " + dev_id);
+            this.logger.logDebug(LOGFROM, "request to delete user variable for " + dev_id);
             boolean deleted = this.database.removeVariable(dev_id, aiid, uid, variable);
             if (!deleted) {
-                this.logger.logDebug(this.LOGFROM, "variable not found");
+                this.logger.logDebug(LOGFROM, "variable not found");
                 return ApiError.getNotFound("variable not found");
             }
             return new ApiResult().setSuccessStatus("deleted");
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to delete memory variable " + e.toString());
+            this.logger.logError(LOGFROM, "failed to delete memory variable " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -119,15 +119,15 @@ public class MemoryLogic {
                                             String aiid,
                                             String uid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to delete all user variables " + dev_id);
+            this.logger.logDebug(LOGFROM, "request to delete all user variables " + dev_id);
             boolean deleted = this.database.removeAllUserVariables(dev_id, aiid, uid);
             if (!deleted) {
-                this.logger.logDebug(this.LOGFROM, "variables not found");
+                this.logger.logDebug(LOGFROM, "variables not found");
                 return ApiError.getNotFound("variables not found");
             }
             return new ApiResult().setSuccessStatus("deleted");
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to delete user memory variables " + e.toString());
+            this.logger.logError(LOGFROM, "failed to delete user memory variables " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -136,15 +136,15 @@ public class MemoryLogic {
                                           String dev_id,
                                           String aiid) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to delete all ai variables " + dev_id);
+            this.logger.logDebug(LOGFROM, "request to delete all ai variables " + dev_id);
             boolean deleted = this.database.removeAllAiVariables(dev_id, aiid);
             if (!deleted) {
-                this.logger.logDebug(this.LOGFROM, "variables not found");
+                this.logger.logDebug(LOGFROM, "variables not found");
                 return ApiError.getNotFound("variables not found");
             }
             return new ApiResult().setSuccessStatus("deleted");
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "failed to delete ai memory variables " + e.toString());
+            this.logger.logError(LOGFROM, "failed to delete ai memory variables " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
