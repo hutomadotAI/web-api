@@ -43,6 +43,15 @@ public class TestMemoryIntentHandler {
     private Logger fakeLogger;
     private IEntityRecognizer fakeRecognizer;
 
+    private static Object[] recognizeIntentDataProvider() {
+        return $(
+                $("@meta.intent." + INTENT_NAME),
+                $("@meta.intent." + INTENT_NAME + " "),
+                $("@meta.intent." + INTENT_NAME + " this is something else"),
+                $("@meta.intent." + INTENT_NAME + " line1\nline2")
+        );
+    }
+
     @Before
     public void setup() {
         this.fakeSerializer = new FakeJsonSerializer();
@@ -85,7 +94,7 @@ public class TestMemoryIntentHandler {
         this.memoryIntentHandler.updateStatus(mi);
         try {
             // This seems to count once for the invocation above and another for this
-            verify(fakeDatabase, atMost(2)).updateMemoryIntent(mi, fakeSerializer);
+            verify(this.fakeDatabase, atMost(2)).updateMemoryIntent(mi, this.fakeSerializer);
         } catch (Database.DatabaseException dbe) {
             Assert.fail(dbe.getMessage());
         }
@@ -112,7 +121,7 @@ public class TestMemoryIntentHandler {
     public void testIntentUpdateDBException() throws Database.DatabaseException {
         MemoryIntent mi = this.setDummyMemoryIntent("");
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(fakeDatabase.updateMemoryIntent(any(), any())).thenThrow(exception);
+        when(this.fakeDatabase.updateMemoryIntent(any(), any())).thenThrow(exception);
         this.memoryIntentHandler.updateStatus(mi);
         verify(this.fakeLogger).logError(anyString(), anyString());
     }
@@ -120,7 +129,7 @@ public class TestMemoryIntentHandler {
     @Test()
     public void testGetCurrentStateForChatDBException() throws Database.DatabaseException {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(fakeDatabase.getMemoryIntentsForChat(any(), any(), any())).thenThrow(exception);
+        when(this.fakeDatabase.getMemoryIntentsForChat(any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.getCurrentIntentsStateForChat(AIID, CHATID);
         verify(this.fakeLogger).logError(anyString(), anyString());
     }
@@ -128,7 +137,7 @@ public class TestMemoryIntentHandler {
     @Test
     public void testLoadIntentForAiDBException() throws Database.DatabaseException {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
+        when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, DEFAULT_INTENT);
         verify(this.fakeLogger).logError(anyString(), anyString());
     }
@@ -177,19 +186,16 @@ public class TestMemoryIntentHandler {
         Assert.assertEquals(values, mv.getEntityKeys());
     }
 
+    @Test
+    public void testIntentDeleteAllAIIntents() throws Database.DatabaseException {
+        this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
+        verify(this.fakeDatabase).deleteAllMemoryIntents(AIID);
+    }
+
     private MemoryIntent setDummyMemoryIntent(final String response) throws Database.DatabaseException {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
                 Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
         when(this.fakeDatabase.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
         return this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, response);
-    }
-
-    private static Object[] recognizeIntentDataProvider() {
-        return $(
-                $("@meta.intent." + INTENT_NAME),
-                $("@meta.intent." + INTENT_NAME + " "),
-                $("@meta.intent." + INTENT_NAME + " this is something else"),
-                $("@meta.intent." + INTENT_NAME + " line1\nline2")
-        );
     }
 }

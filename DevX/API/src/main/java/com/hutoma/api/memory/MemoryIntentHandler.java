@@ -21,14 +21,13 @@ import java.util.regex.Pattern;
  */
 public class MemoryIntentHandler implements IMemoryIntentHandler {
 
-    private final ILogger logger;
-    private final Database database;
-    private final JsonSerializer jsonSerializer;
-
     private static final String META_INTENT_TAG = "@meta.intent.";
     private static final Pattern META_INTEG_PATTERN =
             Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";
+    private final ILogger logger;
+    private final Database database;
+    private final JsonSerializer jsonSerializer;
 
 
     @Inject
@@ -55,13 +54,16 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
     public List<MemoryIntent> getCurrentIntentsStateForChat(final UUID aiid, final UUID chatId) {
         try {
-            return database.getMemoryIntentsForChat(aiid, chatId, this.jsonSerializer);
+            return this.database.getMemoryIntentsForChat(aiid, chatId, this.jsonSerializer);
         } catch (Database.DatabaseException e) {
             this.logger.logError(LOGFROM, e.getMessage());
         }
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void updateStatus(final MemoryIntent intent) {
         try {
             this.database.updateMemoryIntent(intent, this.jsonSerializer);
@@ -70,17 +72,29 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         }
     }
 
-    private MemoryIntent loadIntentForAi(String devid, UUID aiid, UUID chatId, String intentName) {
+    /**
+     * {@inheritDoc}
+     */
+    public void deleteAllIntentsForAi(final UUID aiid) {
+        try {
+            this.database.deleteAllMemoryIntents(aiid);
+        } catch (Database.DatabaseException e) {
+            this.logger.logError(LOGFROM, e.getMessage());
+        }
+    }
+
+    private MemoryIntent loadIntentForAi(final String devid, final UUID aiid, final UUID chatId,
+                                         final String intentName) {
         MemoryIntent intent = null;
         try {
-            intent = database.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
+            intent = this.database.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
             if (intent == null) {
-                ApiIntent apiIntent = database.getIntent(devid, aiid, intentName);
+                ApiIntent apiIntent = this.database.getIntent(devid, aiid, intentName);
                 List<MemoryVariable> variables = new ArrayList<>();
                 // This intent is not yet available in the db, so we need to initialize it from the existing
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
-                    ApiEntity apiEntity = database.getEntity(devid, intentVar.getEntityName());
+                    ApiEntity apiEntity = this.database.getEntity(devid, intentVar.getEntityName());
                     MemoryVariable v = new MemoryVariable(intentVar.getEntityName(), apiEntity.getEntityList());
                     v.setPrompts(intentVar.getPrompts());
                     v.setIsMandatory(intentVar.isRequired());
@@ -89,7 +103,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 }
                 intent = new MemoryIntent(intentName, aiid, chatId, variables);
                 // write it to the db
-                database.updateMemoryIntent(intent, this.jsonSerializer);
+                this.database.updateMemoryIntent(intent, this.jsonSerializer);
             }
         } catch (Database.DatabaseException e) {
             this.logger.logError(LOGFROM, e.getMessage());

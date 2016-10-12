@@ -9,10 +9,10 @@ import com.hutoma.api.containers.ApiMemoryToken;
 import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -29,8 +29,8 @@ import java.util.UUID;
 public class Database {
 
     private static final String LOGFROM = "database";
-    private Logger logger;
-    private Provider<DatabaseCall> callProvider;
+    private final Logger logger;
+    private final Provider<DatabaseCall> callProvider;
 
     @Inject
     public Database(final Logger logger, final Provider<DatabaseCall> callProvider) {
@@ -291,7 +291,7 @@ public class Database {
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
                                         final JsonSerializer jsonSerializer)
             throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntent", 3).add(intentName).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
             try {
@@ -307,7 +307,7 @@ public class Database {
 
     public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId, final JsonSerializer jsonSerializer)
             throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+        try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
             List<MemoryIntent> intents = new ArrayList<>();
@@ -413,13 +413,20 @@ public class Database {
 
     public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
             throws DatabaseException {
-        try (DatabaseCall call = callProvider.get()) {
+        try (DatabaseCall call = this.callProvider.get()) {
             String variables = jsonSerializer.serialize(intent.getVariables());
             call.initialise("updateMemoryIntent", 4)
                     .add(intent.getName())
                     .add(intent.getAiid())
                     .add(intent.getChatId())
                     .add(variables);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteAllMemoryIntents(final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteAllMemoryIntents", 1).add(aiid);
             return call.executeUpdate() > 0;
         }
     }

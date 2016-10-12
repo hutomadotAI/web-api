@@ -11,8 +11,8 @@ import java.util.UUID;
 public interface IMemoryIntentHandler {
     /**
      * Parses the AI response in search for an intent.
-     * @param aaid the AI ID
-     * @param chatId the Chat ID
+     * @param aaid     the AI ID
+     * @param chatId   the Chat ID
      * @param response the AI response
      * @return the MemoryIntent, or null if no intent was found
      */
@@ -20,7 +20,7 @@ public interface IMemoryIntentHandler {
 
     /**
      * Gets the current intents state for this chat
-     * @param aiid the AI ID
+     * @param aiid   the AI ID
      * @param chatId the Chat ID
      * @return the list of current intent states
      */
@@ -31,4 +31,10 @@ public interface IMemoryIntentHandler {
      * @param intent the intent
      */
     void updateStatus(MemoryIntent intent);
+
+    /**
+     * Deletes all memory intents currently on storage that belong to the given aiid.
+     * @param aiid the AI ID
+     */
+    void deleteAllIntentsForAi(UUID aiid);
 }
