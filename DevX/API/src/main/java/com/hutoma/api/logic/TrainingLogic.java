@@ -12,6 +12,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -50,10 +51,12 @@ public class TrainingLogic {
     private final Tools tools;
     private final Logger logger;
     private final Validate validate;
+    private final IMemoryIntentHandler memoryIntentHandler;
 
     @Inject
     public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
-                         Database database, Tools tools, Logger logger, Validate validate) {
+                         Database database, Tools tools, Logger logger, Validate validate,
+                         IMemoryIntentHandler memoryIntentHandler) {
         this.config = config;
         this.messageQueue = messageQueue;
         this.htmlExtractor = htmlExtractor;
@@ -61,6 +64,7 @@ public class TrainingLogic {
         this.tools = tools;
         this.logger = logger;
         this.validate = validate;
+        this.memoryIntentHandler = memoryIntentHandler;
     }
 
     public ApiResult uploadFile(SecurityContext securityContext, String devid, UUID aiid, int type, String url, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
@@ -172,6 +176,8 @@ public class TrainingLogic {
             if ((TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_not_started) ||
                     (TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_stopped)) {
                 this.messageQueue.pushMessageReadyForTraining(devid, aiid);
+                // Delete all memory variables for this AI
+                this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                 return new ApiResult().setSuccessStatus("Training session started.");
             }
 
@@ -239,6 +245,8 @@ public class TrainingLogic {
                 case training_deleted:
                     this.logger.logDebug(LOGFROM, "on demand training update");
                     this.messageQueue.pushMessageUpdateTraining(devid, aiid);
+                    // Delete all memory variables for this AI
+                    this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                     return new ApiResult().setSuccessStatus("Training session updated.");
                 default:
                     this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:" + aiid.toString() + " devid:" + devid);

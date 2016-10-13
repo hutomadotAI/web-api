@@ -34,11 +34,7 @@ public class TestTrainingLogicParser {
 
     @Before
     public void setup() {
-        logic = new TrainingLogic(null, null, null, null, null, null, null);
-    }
-
-    private String parse(String[] input) {
-        return logic.parseTrainingFile(Arrays.asList(input)).getTrainingText().replace('\n', '^');
+        logic = new TrainingLogic(null, null, null, null, null, null, null, null);
     }
 
     @Test
@@ -120,5 +116,9 @@ public class TestTrainingLogicParser {
         Assert.assertEquals("Q2", eventsForNoResponse.get(0));
         Assert.assertEquals("Q4", eventsForNoResponse.get(1));
         Assert.assertEquals("Q5", eventsForNoResponse.get(2));
+    }
+
+    private String parse(String[] input) {
+        return logic.parseTrainingFile(Arrays.asList(input)).getTrainingText().replace('\n', '^');
     }
 }

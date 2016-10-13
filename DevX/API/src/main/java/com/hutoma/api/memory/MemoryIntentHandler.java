@@ -35,7 +35,6 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         this.logger = logger;
         this.database = database;
         this.jsonSerializer = jsonSerializer;
-
     }
 
     /**

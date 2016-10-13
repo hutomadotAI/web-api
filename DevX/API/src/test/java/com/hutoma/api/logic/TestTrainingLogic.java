@@ -12,6 +12,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.TestParameterValidation;
 import com.hutoma.api.validation.Validate;
@@ -59,6 +60,7 @@ public class TestTrainingLogic {
     private FormDataContentDisposition fakeContentDisposition;
     private Validate fakeValidation;
     private TrainingLogic logic;
+    private IMemoryIntentHandler fakeIntentHandler;
 
     @Before
     public void setup() throws Database.DatabaseException {
@@ -76,7 +78,9 @@ public class TestTrainingLogic {
         when(this.fakeValidation.textSanitizer(anyString())).thenCallRealMethod();
         this.fakeExtractor = mock(HTMLExtractor.class);
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
-        this.logic = new TrainingLogic(this.fakeConfig, this.fakeMessageQueue, this.fakeExtractor, this.fakeDatabase, this.fakeTools, this.fakeLogger, this.fakeValidation);
+        this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
+        this.logic = new TrainingLogic(this.fakeConfig, this.fakeMessageQueue, this.fakeExtractor, this.fakeDatabase, this.fakeTools, this.fakeLogger,
+                this.fakeValidation, this.fakeIntentHandler);
 
         when(this.fakeConfig.getMaxUploadSize()).thenReturn(65536L);
         when(this.fakeConfig.getMaxClusterLines()).thenReturn(65536);
