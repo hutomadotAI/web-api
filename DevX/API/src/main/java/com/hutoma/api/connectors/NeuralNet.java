@@ -12,8 +12,9 @@ import java.util.UUID;
  */
 public class NeuralNet {
 
-    static long POLLEVERY = 1000;   // hard-coded to one second
     private static final String LOGFROM = "neuralnetconnector";
+    static long POLLEVERY = 1000;   // hard-coded to one second
+    private final int RNNRESET = 0;
     private Database database;
     private MessageQueue messageQueue;
     private Logger logger;
@@ -58,7 +59,7 @@ public class NeuralNet {
         }
     }
 
-    public String getAnswerResult() throws NeuralNetException {
+    public String getAnswerResult(String devid, UUID aiid) throws NeuralNetException, Database.DatabaseException {
 
         String answer = "";
 
@@ -84,7 +85,9 @@ public class NeuralNet {
         } catch (Database.DatabaseException dbe) {
             throw new NeuralNetException(dbe);
         }
-
+        // if the RNN does not answer in time, we are going to assume it crashed.
+        // as temporary patch we will try to awake it again at the next chat session
+        this.database.setRnnStatus(devid, aiid, this.RNNRESET);
         // otherwise no response appeared in a reasonable amount of time
         throw new NeuralNetNotRespondingException();
     }
@@ -97,6 +100,7 @@ public class NeuralNet {
 
     public static class NeuralNetNotRespondingException extends NeuralNetException {
         public NeuralNetNotRespondingException() {
+
             super(new Exception("not responding"));
         }
     }

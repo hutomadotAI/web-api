@@ -13,6 +13,7 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.*;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -431,7 +432,20 @@ public class Database {
         }
     }
 
+    public boolean setRnnStatus(String devid, UUID aiid, int Status) throws DatabaseException {
+
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setRnnStatus", 3).add(Status).add(devid).add(aiid);
+            ResultSet rs = call.executeQuery();
+        } catch (Exception e) {
+            this.logger.logError("Exception while updating RNN status for devid:" + devid + ", aiid:" + aiid, "Something went wrong during the setRnnStatus update");
+            return false;
+        }
+        return true;
+    }
+
     public static class DatabaseException extends Exception {
+
         public DatabaseException(final Throwable cause) {
             super(cause);
         }

@@ -1,29 +1,20 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.memory.IEntityRecognizer;
-import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.memory.IEntityRecognizer;
+import com.hutoma.api.memory.IMemoryIntentHandler;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by mauriziocibelli on 24/04/16.
@@ -111,7 +102,7 @@ public class ChatLogic {
 
                 apiChat.setTimestamp(endWNetTime);
 
-                logger.logDebug(LOGFROM, String.format("WNET response in %dms with confidence %f",
+                this.logger.logDebug(LOGFROM, String.format("WNET response in %dms with confidence %f",
                         (endWNetTime - startTime), chatResult.getScore()));
 
                 telemetryMap.put("WNETAnswer", chatResult.getAnswer());
@@ -124,7 +115,7 @@ public class ChatLogic {
                     telemetryMap.put("WNETConfident", "false");
 
                     // wait for neural network to complete
-                    String RNN_answer = this.neuralNet.getAnswerResult();
+                    String RNN_answer = this.neuralNet.getAnswerResult(dev_id, aiid);
                     if (!RNN_answer.isEmpty()) {
                         noResponse = false;
                     }
@@ -144,10 +135,10 @@ public class ChatLogic {
                         }
                     }
                     if (validRNN) {
-                        logger.logDebug(LOGFROM, String.format("RNN response in %dms with confidence %f",
+                        this.logger.logDebug(LOGFROM, String.format("RNN response in %dms with confidence %f",
                                 (endRNNTime - startTime), chatResult.getScore()));
                     } else {
-                        logger.logDebug(LOGFROM, String.format("RNN invalid/empty response in %dms",
+                        this.logger.logDebug(LOGFROM, String.format("RNN invalid/empty response in %dms",
                                 (endRNNTime - startTime)));
                     }
 
@@ -217,7 +208,7 @@ public class ChatLogic {
                 telemetryMap.put("IntentFulfilled", memoryIntent.getName());
             } else {
                 // Attempt to retrieve entities from the question
-                List<Pair<String, String>> entities = entityRecognizer.retrieveEntities(question,
+                List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
                         memoryIntent.getVariables());
                 if (!entities.isEmpty()) {
                     memoryIntent.fulfillVariables(entities);
@@ -238,7 +229,7 @@ public class ChatLogic {
                     if (optVariable.isPresent()) {
                         MemoryVariable variable = optVariable.get();
                         if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
-                            logger.logError(LOGFROM, "Variable with no prompts defined!");
+                            this.logger.logError(LOGFROM, "Variable with no prompts defined!");
                         } else {
                             // And prompt the user for the value for that variable
                             int pos = variable.getPrompts().size() >= variable.getTimesToPrompt()
@@ -261,11 +252,11 @@ public class ChatLogic {
 
                 }
             }
-            intentHandler.updateStatus(memoryIntent);
+            this.intentHandler.updateStatus(memoryIntent);
         }
 
         // Add the current intents state to the chat response
-        chatResult.setIntents(intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
+        chatResult.setIntents(this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
     }
 }
 

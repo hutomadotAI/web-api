@@ -333,7 +333,6 @@
             <artifactId>xml-maven-plugin</artifactId>
             <version>1.0</version>
         </dependency>
-
     </dependencies>
 
     <properties>
