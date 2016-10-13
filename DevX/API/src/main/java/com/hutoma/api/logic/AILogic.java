@@ -63,6 +63,13 @@ public class AILogic {
         try {
             this.logger.logDebug(this.LOGFROM, "request to create new ai from " + devid);
 
+            ArrayList<ApiAi> AIs = this.database.getAllAIs(devid);
+            if (AIs.size() > this.config.getMaxAllowedAIperAccount()) {
+                this.logger.logInfo(this.LOGFROM, "user " + devid + " reached the max number of allowed AIs");
+                return ApiError.getBadRequest("Sorry you reached the maximum number of AIs you can create per account.");
+            }
+
+
             String encoding_key = this.config.getEncodingKey();
             UUID aiUUID = this.tools.createNewRandomUUID();
 
@@ -75,8 +82,8 @@ public class AILogic {
                 .compact();
 
             if (!this.database.createAI(aiUUID, name, description, devid, is_private,
-                    DEEP_LEARNING_ERROR, DEEP_LEARNING_STATUS,DEFAULT_WNET_ERROR, training_not_started, token, "")) {
-                logger.logInfo(LOGFROM, "db fail creating new ai");
+                    this.DEEP_LEARNING_ERROR, this.DEEP_LEARNING_STATUS, this.DEFAULT_WNET_ERROR, training_not_started, token, "")) {
+                this.logger.logInfo(this.LOGFROM, "db fail creating new ai");
                 return ApiError.getInternalServerError();
             }
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
