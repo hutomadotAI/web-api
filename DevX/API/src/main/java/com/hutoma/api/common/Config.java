@@ -139,10 +139,6 @@ public class Config {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }
 
-    public int getMaxAllowedAIperAccount() {
-        return Integer.parseInt(getConfigFromProperties("max_ai_per_account", "3"));
-    }
-
     private String getConfigFromProperties(String p, String defaultValue) {
         if (null == this.properties) {
             this.logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");

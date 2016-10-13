@@ -16,5 +16,4 @@ public class ApiAiList extends ApiResult {
     public List<ApiAi> getAiList() {
         return this.ai_list;
     }
-
 }
