@@ -6,9 +6,13 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
@@ -25,6 +29,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
+import static com.hutoma.api.connectors.Database.DatabaseException;
 import static com.hutoma.api.containers.sub.TrainingStatus.trainingStatus.*;
 
 /**
@@ -38,13 +43,13 @@ public class TrainingLogic {
     private static final String EOL = "\n";
     private static final String LOGFROM = "traininglogic";
 
-    private Config config;
-    private MessageQueue messageQueue;
-    private HTMLExtractor htmlExtractor;
-    private Database database;
-    private Tools tools;
-    private Logger logger;
-    private Validate validate;
+    private final Config config;
+    private final MessageQueue messageQueue;
+    private final HTMLExtractor htmlExtractor;
+    private final Database database;
+    private final Tools tools;
+    private final Logger logger;
+    private final Validate validate;
 
     @Inject
     public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
@@ -85,7 +90,7 @@ public class TrainingLogic {
                     }
 
                     return new ApiResult().setSuccessStatus("upload accepted",
-                        result.getEventCount() == 0 ? null : result.getEvents());
+                            result.getEventCount() == 0 ? null : result.getEvents());
 
                 // 1 = training file is a document
                 case 1:
@@ -103,7 +108,7 @@ public class TrainingLogic {
                     //  so unless the upload fails then we always return ok
                     return new ApiResult().setSuccessStatus("upload document accepted");
 
-                    // 2 = training file is a webpage
+                // 2 = training file is a webpage
                 case 2:
                     this.logger.logDebug(LOGFROM, "training from uploaded URL");
                     if (!this.database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
@@ -125,7 +130,7 @@ public class TrainingLogic {
         } catch (UploadTooLargeException tooLarge) {
             this.logger.logInfo(LOGFROM, "upload attempt was larger than maximum allowed");
             return ApiError.getPayloadTooLarge();
-        } catch (Database.DatabaseException dde) {
+        } catch (DatabaseException dde) {
             this.logger.logError(LOGFROM, "database error " + dde.getCause().toString());
             return ApiError.getInternalServerError();
         } catch (Exception ex) {
@@ -135,14 +140,6 @@ public class TrainingLogic {
             try {
                 uploadedInputStream.close();
             } catch (Throwable ignore) {
-            }
-        }
-    }
-
-    void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize) throws UploadTooLargeException {
-        if (null != fileDetail) {
-            if (fileDetail.getSize() > maxUploadFileSize) {
-                throw new UploadTooLargeException();
             }
         }
     }
@@ -158,6 +155,136 @@ public class TrainingLogic {
 
         }
         return new ApiResult().setSuccessStatus("successfully queued for deletion");
+    }
+
+    /**
+     * Submit a training request to SQS only if the training file is avaialable or a previous valid training session was stopped.
+     * In all other cases we return an error
+     * @param securityContext
+     * @param devid
+     * @param aiid
+     * @return
+     */
+    public ApiResult startTraining(SecurityContext securityContext, String devid, UUID aiid) {
+        try {
+            this.logger.logDebug(LOGFROM, "on demand training start");
+            String trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
+            if ((TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_not_started) ||
+                    (TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_stopped)) {
+                this.messageQueue.pushMessageReadyForTraining(devid, aiid);
+                return new ApiResult().setSuccessStatus("Training session started.");
+            }
+
+            switch (TrainingStatus.trainingStatus.valueOf(trainingStatus)) {
+                case training_completed:
+                    return new ApiError().getBadRequest("Training could not be started because it was already completed.");
+                case training_in_progress:
+                    return new ApiError().getBadRequest("A training session is already running.");
+                case training_queued:
+                    return new ApiError().getBadRequest("A training session is already queued.");
+                case training_stopped_maxtime:
+                    return new ApiError().getBadRequest("You reached the maximum allocated time to train your AI. Please upgrade your subscription.");
+                default:
+                    return ApiError.getBadRequest("Malformed training file. Training could not be started.");
+            }
+        } catch (Exception ex) {
+            this.logger.logError(LOGFROM, "exception (startTraining):" + ex.toString());
+            return ApiError.getInternalServerError("Malformed training file. Training could not be started.");
+
+        }
+    }
+
+    /**
+     * Send a stop msg to SQS only if a training session is currently ongoing
+     * @param securityContext
+     * @param devid
+     * @param aiid
+     * @return
+     */
+
+    public ApiResult stopTraining(SecurityContext securityContext, String devid, UUID aiid) {
+        try {
+            this.logger.logDebug(LOGFROM, "on demand training stop");
+            String trainigStatus = this.database.getAI(devid, aiid).getAiStatus();
+
+            if (TrainingStatus.trainingStatus.valueOf(trainigStatus) == training_in_progress) {
+                this.messageQueue.pushMessageStopTraining(devid, aiid);
+                return new ApiResult().setSuccessStatus("Training session stopped.");
+            }
+        } catch (Exception ex) {
+            this.logger.logError(LOGFROM, "exception (stopTraining):" + ex.toString());
+            return ApiError.getInternalServerError("Internal server error. Training could not be stopped.");
+
+        }
+        return ApiError.getBadRequest("Impossible to stop the current training session. ");
+    }
+
+    /**
+     * An update to an existing training session means we will have to delete any existing neural network and start from scratch.
+     * @param securityContext
+     * @param devid
+     * @param aiid
+     * @return
+     */
+
+    public ApiResult updateTraining(SecurityContext securityContext, String devid, UUID aiid) {
+        try {
+            String status = this.database.getAI(devid, aiid).getAiStatus();
+
+            switch (TrainingStatus.trainingStatus.valueOf(status)) {
+                case training_in_progress:
+                case training_not_started:
+                case training_stopped:
+                case training_completed:
+                case training_deleted:
+                    this.logger.logDebug(LOGFROM, "on demand training update");
+                    this.messageQueue.pushMessageUpdateTraining(devid, aiid);
+                    return new ApiResult().setSuccessStatus("Training session updated.");
+                default:
+                    this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:" + aiid.toString() + " devid:" + devid);
+                    return ApiError.getInternalServerError("Impossible to update the current training session.");
+
+            }
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, "exception (stopTraining):" + e.toString());
+            return ApiError.getInternalServerError("Internal server error. Training could not be updated.");
+
+        }
+    }
+
+    /**
+     * Gets the training materials for an AI.
+     * @param securityContext
+     * @param devId
+     * @param aiid
+     * @return
+     */
+    public ApiResult getTrainingMaterials(final SecurityContext securityContext, final String devId, final UUID aiid) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            ApiAi ai = this.database.getAI(devId, aiid);
+            if (ai == null) {
+                return ApiError.getNotFound(String.format("AI id not found: %s", aiid));
+            }
+            String userTrainingFile = this.database.getAiTrainingFile(aiid);
+            if (userTrainingFile != null) {
+                sb.append(userTrainingFile);
+            }
+            for (String intentName : this.database.getIntents(devId, aiid)) {
+                ApiIntent intent = this.database.getIntent(devId, aiid, intentName);
+                for (String userSays : intent.getUserSays()) {
+                    sb.append(EOL);
+                    sb.append(userSays).append(EOL);
+                    sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentName).append(EOL);
+                }
+            }
+            ApiTrainingMaterials result = new ApiTrainingMaterials(sb.toString());
+            result.setSuccessStatus();
+            return result;
+        } catch (DatabaseException dbe) {
+            this.logger.logError(LOGFROM, "exception (getTrainingMaterials):" + dbe.toString());
+            return ApiError.getInternalServerError("Internal server error. Could not get the training materials.");
+        }
     }
 
     /**
@@ -194,6 +321,17 @@ public class TrainingLogic {
             if (!conversation.get(i).equals(EMPTY_STRING)) {
                 conversation.remove(i);
                 break;
+            }
+        }
+    }
+
+    public static class UploadTooLargeException extends Exception {
+    }
+
+    void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize) throws UploadTooLargeException {
+        if (null != fileDetail) {
+            if (fileDetail.getSize() > maxUploadFileSize) {
+                throw new UploadTooLargeException();
             }
         }
     }
@@ -236,7 +374,7 @@ public class TrainingLogic {
             if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
                 lastHumanSentence = currentSentence;
                 validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
-                    lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
+                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
             } else {
                 // and we list the sentence
                 validConversation.add(currentSentence);
@@ -309,109 +447,5 @@ public class TrainingLogic {
             }
         }
         return source;
-    }
-
-
-    public static class UploadTooLargeException extends Exception {
-    }
-
-    /**
-     * Submit a training request to SQS only if the training file is avaialable or a previous valid training session was stopped.
-     * In all other cases we return an error
-     *
-     * @param securityContext
-     * @param devid
-     * @param aiid
-     * @return
-     */
-    public ApiResult startTraining (SecurityContext securityContext, String devid, UUID aiid) {
-        try {
-            this.logger.logDebug(LOGFROM, "on demand training start");
-            String trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
-            if ((TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_not_started) ||
-                    (TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_stopped)) {
-                this.messageQueue.pushMessageReadyForTraining(devid, aiid);
-                return new ApiResult().setSuccessStatus("Training session started.");
-            }
-
-            switch (TrainingStatus.trainingStatus.valueOf(trainingStatus)) {
-                case training_completed:
-                    return new ApiError().getBadRequest("Training could not be started because it was already completed.");
-                case training_in_progress:
-                    return new ApiError().getBadRequest("A training session is already running.");
-                case training_queued:
-                    return new ApiError().getBadRequest("A training session is already queued.");
-                case training_stopped_maxtime:
-                    return new ApiError().getBadRequest("You reached the maximum allocated time to train your AI. Please upgrade your subscription.");
-                default:
-                    return ApiError.getBadRequest("Malformed training file. Training could not be started.");
-            }
-        }
-        catch (Exception ex) {
-            this.logger.logError(LOGFROM, "exception (startTraining):" + ex.toString());
-            return ApiError.getInternalServerError("Malformed training file. Training could not be started.");
-
-        }
-    }
-
-    /**
-     * Send a stop msg to SQS only if a training session is currently ongoing
-     * @param securityContext
-     * @param devid
-     * @param aiid
-     * @return
-     */
-
-    public ApiResult stopTraining (SecurityContext securityContext, String devid, UUID aiid) {
-        try {
-            this.logger.logDebug(LOGFROM, "on demand training stop");
-            String trainigStatus = this.database.getAI(devid, aiid).getAiStatus();
-
-            if (TrainingStatus.trainingStatus.valueOf(trainigStatus) == training_in_progress) {
-                this.messageQueue.pushMessageStopTraining(devid, aiid);
-                return new ApiResult().setSuccessStatus("Training session stopped.");
-            }
-        }
-        catch (Exception ex) {
-            this.logger.logError(LOGFROM, "exception (stopTraining):" + ex.toString());
-            return ApiError.getInternalServerError("Internal server error. Training could not be stopped.");
-
-        }
-        return ApiError.getBadRequest("Impossible to stop the current training session. ");
-    }
-
-    /**
-     * An update to an existing training session means we will have to delete any existing neural network and start from scratch.
-     *
-     * @param securityContext
-     * @param devid
-     * @param aiid
-     * @return
-     */
-
-    public ApiResult updateTraining (SecurityContext securityContext, String devid, UUID aiid) {
-        try {
-            String status = this.database.getAI(devid, aiid).getAiStatus();
-
-            switch (TrainingStatus.trainingStatus.valueOf(status)) {
-                case training_in_progress:
-                case training_not_started:
-                case training_stopped:
-                case training_completed:
-                case training_deleted:
-                    this.logger.logDebug(LOGFROM, "on demand training update");
-                    this.messageQueue.pushMessageUpdateTraining(devid, aiid);
-                    return new ApiResult().setSuccessStatus("Training session updated.");
-                default:
-                    this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:" + aiid.toString() + " devid:" + devid);
-                    return ApiError.getInternalServerError("Impossible to update the current training session.");
-
-                }
-        }
-        catch (Exception e) {
-            this.logger.logError(LOGFROM, "exception (stopTraining):" + e.toString());
-            return ApiError.getInternalServerError("Internal server error. Training could not be updated.");
-
-        }
     }
 }

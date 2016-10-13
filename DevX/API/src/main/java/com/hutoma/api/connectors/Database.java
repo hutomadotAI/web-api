@@ -13,7 +13,6 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.containers.sub.*;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -115,6 +114,21 @@ public class Database {
                     return new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
                             new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
                             null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                }
+                return null;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public String getAiTrainingFile(final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getAiTrainingFile", 1).add(aiid);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getString("ai_trainingfile");
                 }
                 return null;
             } catch (final SQLException sqle) {

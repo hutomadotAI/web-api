@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class MemoryIntentHandler implements IMemoryIntentHandler {
 
-    private static final String META_INTENT_TAG = "@meta.intent.";
+    public static final String META_INTENT_TAG = "@meta.intent.";
     private static final Pattern META_INTEG_PATTERN =
             Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";

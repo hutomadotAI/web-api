@@ -9,7 +9,15 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.MemoryLogic;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,12 +29,13 @@ import java.io.IOException;
 @RateLimit(RateKey.None)
 public class MemoryEndpoint {
 
-    SecurityContext securityContext;
-    JsonSerializer serializer;
-    MemoryLogic memoryLogic;
+    private final JsonSerializer serializer;
+    private final MemoryLogic memoryLogic;
+    private final SecurityContext securityContext;
 
     @Inject
-    public MemoryEndpoint(SecurityContext securityContext, JsonSerializer serializer, MemoryLogic memoryLogic) {
+    public MemoryEndpoint(final SecurityContext securityContext, final JsonSerializer serializer,
+                          final MemoryLogic memoryLogic) {
         this.securityContext = securityContext;
         this.serializer = serializer;
         this.memoryLogic = memoryLogic;
@@ -44,7 +53,7 @@ public class MemoryEndpoint {
      */
     @GET
     @Path("{aiid}/{userid}/memory")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getVariables(@Context SecurityContext securityContext,
                                  @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
@@ -68,7 +77,7 @@ public class MemoryEndpoint {
      */
     @GET
     @Path("{aiid}/{userid}/memory/{variable}")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getVariable(@Context SecurityContext securityContext,
                                 @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
@@ -97,7 +106,7 @@ public class MemoryEndpoint {
      */
     @PUT
     @Path("{aiid}/{userid}/memory/{variable}/{value}")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response setVariable(@Context SecurityContext securityContext,
                                 @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
@@ -126,7 +135,7 @@ public class MemoryEndpoint {
      */
     @DELETE
     @Path("{aiid}/{userid}/memory/{variable}")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response del_variable(@Context SecurityContext securityContext,
                                  @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
@@ -150,7 +159,7 @@ public class MemoryEndpoint {
      */
     @DELETE
     @Path("{aiid}/{userid}/memory")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response del_all_variable(@Context SecurityContext securityContext,
                                      @DefaultValue("") @HeaderParam("_developer_id") String dev_id,
@@ -173,7 +182,7 @@ public class MemoryEndpoint {
      */
     @DELETE
     @Path("{aiid}/memory")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response del_all_variable(@Context SecurityContext securityContext,
                                      @DefaultValue("") @HeaderParam("_developer_id") String dev_id,

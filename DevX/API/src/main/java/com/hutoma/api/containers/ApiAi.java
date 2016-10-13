@@ -7,18 +7,18 @@ import org.joda.time.DateTime;
  */
 public class ApiAi extends ApiResult {
 
-    String aiid;
-    String client_token;
+    private final String aiid;
+    private final String client_token;
 
-    String name;
-    String description;
-    DateTime created_on;
-    boolean is_private;
-    double deep_learning_error;
-    String training_debug_info;
-    String training_status;
-    String ai_status;
-    String ai_training_file;
+    private String name;
+    private String description;
+    private DateTime created_on;
+    private boolean is_private;
+    private double deep_learning_error;
+    private String training_debug_info;
+    private String training_status;
+    private String ai_status;
+    private String ai_training_file;
 
     public ApiAi(String aiid, String client_token) {
         this.aiid = aiid;

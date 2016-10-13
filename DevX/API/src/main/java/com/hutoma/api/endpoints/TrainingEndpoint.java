@@ -14,7 +14,15 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -29,8 +37,8 @@ import java.io.InputStream;
 @RateLimit(RateKey.QuickRead)
 public class TrainingEndpoint {
 
-    TrainingLogic trainingLogic;
-    JsonSerializer serializer;
+    private final TrainingLogic trainingLogic;
+    private final JsonSerializer serializer;
 
     @Inject
     public TrainingEndpoint(TrainingLogic trainingLogic, JsonSerializer serializer) {
@@ -40,8 +48,8 @@ public class TrainingEndpoint {
 
     @POST
     @Path("/{aiid}/training")
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters( {APIParameter.AIID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadTrainingFile(@Context SecurityContext securityContext,
@@ -52,64 +60,77 @@ public class TrainingEndpoint {
                                        @FormDataParam("file") InputStream uploadedInputStream,
                                        @FormDataParam("file") FormDataContentDisposition fileDetail) {
         ApiResult result = this.trainingLogic.uploadFile(securityContext, devid,
-            ParameterFilter.getAiid(requestContext),
-            type, url, uploadedInputStream, fileDetail);
+                ParameterFilter.getAiid(requestContext),
+                type, url, uploadedInputStream, fileDetail);
         return result.getResponse(this.serializer).build();
     }
 
     @PUT
     @Path("/{aiid}/training/start")
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response trainingStart(@Context SecurityContext securityContext,
                                   @Context ContainerRequestContext requestContext,
                                   @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = trainingLogic.startTraining(securityContext, devid, ParameterFilter.getAiid(requestContext));
-        return result.getResponse(serializer).build();
+        ApiResult result = this.trainingLogic.startTraining(securityContext, devid, ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
     }
+
     @PUT
     @Path("/{aiid}/training/stop")
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response trainingStop(@Context SecurityContext securityContext,
                                  @Context ContainerRequestContext requestContext,
                                  @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = trainingLogic.stopTraining(securityContext, devid, ParameterFilter.getAiid(requestContext));
-        return result.getResponse(serializer).build();
+        ApiResult result = this.trainingLogic.stopTraining(securityContext, devid, ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
     }
 
     @PUT
     @Path("/{aiid}/training/update")
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response trainingUpdate( @Context SecurityContext securityContext,
-                                    @Context ContainerRequestContext requestContext,
-                                    @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+    public Response trainingUpdate(@Context SecurityContext securityContext,
+                                   @Context ContainerRequestContext requestContext,
+                                   @DefaultValue("") @HeaderParam("_developer_id") String devid) {
 
-        ApiResult result = trainingLogic.updateTraining(securityContext, devid,
+        ApiResult result = this.trainingLogic.updateTraining(securityContext, devid,
                 ParameterFilter.getAiid(requestContext));
-        return result.getResponse(serializer).build();
+        return result.getResponse(this.serializer).build();
     }
 
     @PUT
     @Path("/{aiid}/training/delete")
-    @Secured({Role.ROLE_FREE,Role.ROLE_PLAN_1,Role.ROLE_PLAN_2,Role.ROLE_PLAN_3,Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response trainingDelete( @Context SecurityContext securityContext,
-                                    @Context ContainerRequestContext requestContext,
-                                    @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+    public Response trainingDelete(@Context SecurityContext securityContext,
+                                   @Context ContainerRequestContext requestContext,
+                                   @DefaultValue("") @HeaderParam("_developer_id") String devid) {
 
         ApiResult result = this.trainingLogic.delete(securityContext, devid,
-            ParameterFilter.getAiid(requestContext));
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
+    @GET
+    @Path("/{aiid}/training/materials")
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @Produces(MediaType.TEXT_PLAIN) // TODO: Produce MediaType.APPLICATION_OCTET_STREAM to support large files
+    public Response trainingGetMaterials(@Context SecurityContext securityContext,
+                                         @Context ContainerRequestContext requestContext,
+                                         @DefaultValue("") @HeaderParam("_developer_id") String devid) {
+        ApiResult result = this.trainingLogic.getTrainingMaterials(securityContext, devid,
+                ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
 }
