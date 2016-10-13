@@ -3,6 +3,10 @@ package com.hutoma.api;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.*;
+import com.hutoma.api.connectors.db.DatabaseCall;
+import com.hutoma.api.connectors.db.DatabaseConnectionPool;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.logic.*;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -40,7 +44,9 @@ public class ServerBinder extends AbstractBinder {
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
         bind(Database.class).to(Database.class);
+        bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
+        bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
         bind(MessageQueue.class).to(MessageQueue.class);
         bind(Tools.class).to(Tools.class);
         bind(NeuralNet.class).to(NeuralNet.class);
@@ -48,5 +54,6 @@ public class ServerBinder extends AbstractBinder {
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
+
     }
 }

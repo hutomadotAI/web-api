@@ -1,15 +1,9 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.connectors.db;
 
-import com.hutoma.api.containers.sub.TrainingStatus;
-import org.joda.time.DateTime;
-
-import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.UUID;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;
@@ -24,6 +18,8 @@ import java.util.UUID;
  */
 public class DatabaseCall implements AutoCloseable {
 
+    Config config;
+
     Connection connection;
     PreparedStatement statement;
     int paramCount;
@@ -32,13 +28,14 @@ public class DatabaseCall implements AutoCloseable {
     DatabaseConnectionPool pool;
 
     @Inject
-    public DatabaseCall(DatabaseConnectionPool pool) {
+    public DatabaseCall(Config config, DatabaseConnectionPool pool) {
+        this.config = config;
         this.pool = pool;
         this.statement = null;
         this.connection = null;
     }
 
-    private Connection getConnection() throws Database.DatabaseException {
+    protected Connection getConnection() throws Database.DatabaseException {
         return this.pool.borrowConnection();
     }
 
@@ -54,7 +51,7 @@ public class DatabaseCall implements AutoCloseable {
         }
     }
 
-    ResultSet executeQuery() throws Database.DatabaseException {
+    public ResultSet executeQuery() throws Database.DatabaseException {
         checkParamsSet();
         try {
             return this.statement.executeQuery();
@@ -63,7 +60,7 @@ public class DatabaseCall implements AutoCloseable {
         }
     }
 
-    int executeUpdate() throws Database.DatabaseException {
+    public int executeUpdate() throws Database.DatabaseException {
         checkParamsSet();
         try {
             return this.statement.executeUpdate();
@@ -73,8 +70,8 @@ public class DatabaseCall implements AutoCloseable {
     }
 
     @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
-    DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws Database.DatabaseException {
+        justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
+    public DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws Database.DatabaseException {
 
         this.paramCount = numberOfParams;
         this.paramSetIndex = 0;
@@ -102,7 +99,7 @@ public class DatabaseCall implements AutoCloseable {
         return this;
     }
 
-    DatabaseCall add(String param) throws Database.DatabaseException {
+    public DatabaseCall add(String param) throws Database.DatabaseException {
         checkPosition();
         try {
             this.statement.setString(++this.paramSetIndex, param);
@@ -132,7 +129,7 @@ public class DatabaseCall implements AutoCloseable {
         return this;
     }
 
-    DatabaseCall add(boolean param) throws Database.DatabaseException {
+    public DatabaseCall add(boolean param) throws Database.DatabaseException {
         checkPosition();
         try {
             this.statement.setBoolean(++this.paramSetIndex, param);
@@ -142,20 +139,10 @@ public class DatabaseCall implements AutoCloseable {
         return this;
     }
 
-    DatabaseCall add(double param) throws Database.DatabaseException {
+    public DatabaseCall add(double param) throws Database.DatabaseException {
         checkPosition();
         try {
             this.statement.setDouble(++this.paramSetIndex, param);
-        } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
-        }
-        return this;
-    }
-
-    DatabaseCall add(TrainingStatus.trainingStatus param) throws Database.DatabaseException {
-        checkPosition();
-        try {
-            statement.setString(++paramSetIndex, String.valueOf(param));
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
@@ -176,8 +163,28 @@ public class DatabaseCall implements AutoCloseable {
         return this;
     }
 
-    DatabaseCall add(UUID param) throws Database.DatabaseException {
+    public DatabaseCall add(UUID param) throws Database.DatabaseException {
         return this.add(param.toString());
+    }
+
+    public DatabaseCall add(TrainingStatus.trainingStatus param) throws Database.DatabaseException {
+        checkPosition();
+        try {
+            this.statement.setString(++this.paramSetIndex, String.valueOf(param));
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+        return this;
+    }
+
+    protected void closeConnection() {
+        if (null != this.connection) {
+            try {
+                this.connection.close();
+            } catch (SQLException e) {
+            }
+            this.connection = null;
+        }
     }
 
     @Override
@@ -189,12 +196,6 @@ public class DatabaseCall implements AutoCloseable {
         } catch (SQLException e) {
         }
         this.statement = null;
-        if (null != this.connection) {
-            try {
-                this.connection.close();
-            } catch (SQLException e) {
-            }
-            this.connection = null;
-        }
+        closeConnection();
     }
 }

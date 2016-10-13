@@ -2,7 +2,7 @@ package com.hutoma.api;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
-import com.hutoma.api.connectors.DatabaseConnectionPool;
+import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.monitoring.ApplicationEvent;
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener;

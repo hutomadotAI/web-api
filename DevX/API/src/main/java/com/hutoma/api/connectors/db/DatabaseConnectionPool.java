@@ -1,7 +1,8 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
+import com.hutoma.api.connectors.Database;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
@@ -48,6 +49,7 @@ public class DatabaseConnectionPool {
         p.setJdbcInterceptors(
             "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
                 "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+        p.setDefaultAutoCommit(true);
         this.dataSource = new DataSource();
         this.dataSource.setPoolProperties(p);
     }
