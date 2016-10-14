@@ -7,17 +7,23 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.ApiMemoryToken;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
+
 import org.joda.time.DateTime;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -37,13 +43,13 @@ public class Database {
     }
 
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try {
             List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"));
             return new MemoryIntent(rs.getString("intentName"),
-                UUID.fromString(rs.getString("aiid")),
-                UUID.fromString(rs.getString("chatId")),
-                variables);
+                    UUID.fromString(rs.getString("aiid")),
+                    UUID.fromString(rs.getString("chatId")),
+                    variables);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -82,9 +88,9 @@ public class Database {
                             final int shallow_learning_status, final TrainingStatus.trainingStatus status, final String client_token, final String trainingFile) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI", 11)
-                .add(aiid).add(name).add(description).add(devid).add(is_private)
-                .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
-                .add(status).add(client_token).add(trainingFile);
+                    .add(aiid).add(name).add(description).add(devid).add(is_private)
+                    .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
+                    .add(status).add(client_token).add(trainingFile);
             return call.executeUpdate() > 0;
         }
     }
@@ -97,8 +103,8 @@ public class Database {
             try {
                 while (rs.next()) {
                     final ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                     res.add(ai);
                 }
                 return res;
@@ -115,8 +121,8 @@ public class Database {
             try {
                 if (rs.next()) {
                     return new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                        new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                        null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
+                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
                 }
                 return null;
             } catch (final SQLException sqle) {
@@ -155,7 +161,7 @@ public class Database {
                 final ArrayList<AiDomain> res = new ArrayList<>();
                 while (rs.next()) {
                     res.add(new AiDomain(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                        rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
+                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -232,56 +238,6 @@ public class Database {
         }
     }
 
-    public List<ApiMemoryToken> getAllUserVariables(final String dev_id, final String aiid, final String uid) throws DatabaseException {
-        try {
-            return null; // FIXME
-        } catch (final Exception e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    public ApiMemoryToken getUserVariable(final String dev_id, final String aiid, final String uid, final String variable) throws DatabaseException {
-        try {
-            return null; // FIXME
-        } catch (final Exception e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    public boolean setUserVariable(final String dev_id, final String aiid, final String uid, final int expires_seconds, final int n_prompt,
-                                   final String variable_type, final String variable_name, final String variable_value) throws DatabaseException {
-        try {
-            return false; // FIXME
-        } catch (final Exception e) {
-            throw new DatabaseException(e);
-        }
-
-    }
-
-    public boolean removeVariable(final String dev_id, final String aiid, final String uid, final String variable) throws DatabaseException {
-        try {
-            return false; // FIXME
-        } catch (final Exception e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    public boolean removeAllUserVariables(final String dev_id, final String aiid, final String uid) throws DatabaseException {
-        try {
-            return false; // FIXME
-        } catch (final Exception e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    public boolean removeAllAiVariables(final String dev_id, final String aiid) throws DatabaseException {
-        try {
-            return false; // FIXME
-        } catch (final Exception e) {
-            throw new DatabaseException(e);
-        }
-    }
-
     /***
      * Temporarily fix build break
      * @return
@@ -308,7 +264,7 @@ public class Database {
 
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
                                         final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntent", 3).add(intentName).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -324,7 +280,7 @@ public class Database {
     }
 
     public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId, final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -393,29 +349,29 @@ public class Database {
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                .add(devid).add(aiid).add(intentName).executeQuery();
+                    .add(devid).add(aiid).add(intentName).executeQuery();
             while (saysRs.next()) {
                 intent.addUserSays(saysRs.getString("says"));
             }
 
             // get the list of responses
             ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                .add(devid).add(aiid).add(intentName).executeQuery();
+                    .add(devid).add(aiid).add(intentName).executeQuery();
             while (intentResponseRs.next()) {
                 intent.addResponse(intentResponseRs.getString("response"));
             }
 
             // get each intent variable
             ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                .add(devid).add(aiid).add(intentName).executeQuery();
+                    .add(devid).add(aiid).add(intentName).executeQuery();
             while (varRs.next()) {
                 int varID = varRs.getInt("id");
                 IntentVariable variable = new IntentVariable(
-                    varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
+                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
 
                 // for each variable get all its prompts
                 ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                    .add(devid).add(aiid).add(varID).executeQuery();
+                        .add(devid).add(aiid).add(varID).executeQuery();
                 while (promptRs.next()) {
                     variable.addPrompt(promptRs.getString("prompt"));
                 }
@@ -432,14 +388,14 @@ public class Database {
     }
 
     public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String variables = jsonSerializer.serialize(intent.getVariables());
             call.initialise("updateMemoryIntent", 4)
-                .add(intent.getName())
-                .add(intent.getAiid())
-                .add(intent.getChatId())
-                .add(variables);
+                    .add(intent.getName())
+                    .add(intent.getAiid())
+                    .add(intent.getChatId())
+                    .add(variables);
             return call.executeUpdate() > 0;
         }
     }
