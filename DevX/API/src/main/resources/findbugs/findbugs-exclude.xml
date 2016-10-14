@@ -4,5 +4,14 @@
         <!-- Exclude unread filters until the API stabilizes and we can safely remove fields which will not be used -->
         <Bug pattern="URF_UNREAD_FIELD"/>
     </Match>
+    <Match>
+        <Package name="KPI.*"/>
+    </Match>
+    <Match>
+        <Package name="~test\.functional.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.Test.*"/>
+    </Match>
 </FindBugsFilter>
 
