@@ -1,10 +1,23 @@
+<script type="text/javascript">
+
+    function clearSpaces(input) {
+        input.value = input.value.replace(/\s/g, "");
+    }
+
+    function blockSpace(event) {
+        return event.which != 32;
+    }
+
+</script>
+
 <div class="form-group">
     <label>Name</label>
     <div class="input-group">
         <div class="input-group-addon">
             <i class="glyphicon glyphicon-user"></i>
         </div>
-        <input type="text" class="form-control" id="ai_name" name="ai_name" placeholder="Enter your AI name">
+        <input type="text" class="form-control" id="ai_name" name="ai_name" placeholder="Enter your AI name"
+               onkeydown="return blockSpace(event);" onchange="clearSpaces(this);">
     </div>
 </div>
 
