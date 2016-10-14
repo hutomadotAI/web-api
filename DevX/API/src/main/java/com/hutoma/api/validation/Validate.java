@@ -1,6 +1,9 @@
 package com.hutoma.api.validation;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -14,6 +17,7 @@ public class Validate {
     static Pattern alphaNumericAndMoreNoAt = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
     static Pattern uuidPattern = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     static Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
+    static Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
 
     @Inject
     public Validate() {
@@ -61,6 +65,27 @@ public class Validate {
             throw new ParameterValidationException("invalid characters in " + paramName);
         }
         return result;
+    }
+
+    /***
+     * Validates a list of strings against a pattern, checking for unique entries
+     * @param pattern the static pattern to match to
+     * @param paramName the name of the param, to use in the exception message
+     * @param paramList the list of param values
+     * @return list of trimmed parameters, or empty list if it was null or empty
+     * @throws ParameterValidationException
+     */
+    private List<String> validatePatternUniqueList(Pattern pattern, String paramName, List<String> paramList) throws ParameterValidationException {
+        LinkedHashSet<String> results = new LinkedHashSet<>();
+        if (null != paramList) {
+            for (String param : paramList) {
+                String validatedParam = validatePattern(pattern, paramName, param);
+                if (!results.add(validatedParam)) {
+                    throw new ParameterValidationException("duplicate items in " + paramName);
+                }
+            }
+        }
+        return new ArrayList<>(results);
     }
 
     /***
@@ -132,6 +157,10 @@ public class Validate {
 
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param) throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
+    }
+
+    List<String> validateRequiredObjectValues(String paramName, List<String> paramList) throws ParameterValidationException {
+        return validatePatternUniqueList(alphaNumDashesSomePunctuationAndSpace, paramName, paramList);
     }
 
     /**

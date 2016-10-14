@@ -1,11 +1,6 @@
 package com.hutoma.api.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -40,26 +35,39 @@ public class JsonSerializer {
     }
 
     public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
-        Object o = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
-        if (null == o) {
-            throw new JsonParseException("cannot deserialize valid object from json");
+        try {
+            Object o = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
+            if (null == o) {
+                throw new JsonParseException("cannot deserialize valid object from json");
+            }
+            return o;
+        } catch (JsonSyntaxException jse) {
+            throw new JsonParseException(jse);
         }
-        return o;
     }
 
     public Object deserialize(String content, Class resultClass) throws JsonParseException {
-        Object o = this.gson.fromJson(content, resultClass);
-        if (null == o) {
-            throw new JsonParseException("cannot deserialize valid object from json");
+        try {
+            Object o = this.gson.fromJson(content, resultClass);
+            if (null == o) {
+                throw new JsonParseException("cannot deserialize valid object from json");
+            }
+            return o;
+        } catch (JsonSyntaxException jse) {
+            throw new JsonParseException(jse);
         }
-        return o;
     }
 
     public <T> List<T> deserializeList(String content) throws JsonParseException {
-        List<T> list = gson.fromJson(content, new TypeToken<List<T>>(){}.getType());
-        if (list == null) {
-            throw new JsonParseException("cannot deserialize valid object from json");
+        try {
+            List<T> list = this.gson.fromJson(content, new TypeToken<List<T>>() {
+            }.getType());
+            if (list == null) {
+                throw new JsonParseException("cannot deserialize valid object from json");
+            }
+            return list;
+        } catch (JsonSyntaxException jse) {
+            throw new JsonParseException(jse);
         }
-        return list;
     }
 }
