@@ -22,11 +22,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.SecurityContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,21 +90,21 @@ public class TestTrainingLogic {
     public void testTrain_TextSimple() {
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpServletResponse.SC_OK, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_DocSimple() {
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpServletResponse.SC_OK, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_UrlSimple() throws HTMLExtractor.HtmlExtractionException {
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 2, UURL, null, null);
-        Assert.assertEquals(HttpServletResponse.SC_OK, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class TestTrainingLogic {
         InputStream stream = createUpload(TEXTMULTILINE);
         when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class TestTrainingLogic {
         InputStream stream = createUpload(TEXTMULTILINE);
         when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
 
     @Test
@@ -128,7 +128,7 @@ public class TestTrainingLogic {
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(TEXTMULTILINE);
         when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 2, UURL, null, null);
-        Assert.assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
 
     @Test
@@ -189,62 +189,62 @@ public class TestTrainingLogic {
     public void testTrain_BadTrainingType() {
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, -1, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testStartTraining() throws Database.DatabaseException {
-        testStartTrainingCommon(training_not_started, HttpServletResponse.SC_OK);
+        testStartTrainingCommon(training_not_started, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     public void testStartTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
-        testStartTrainingCommon(training_completed, HttpServletResponse.SC_BAD_REQUEST);
+        testStartTrainingCommon(training_completed, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStartTraining_BadRequest_TrainingIsInProgress() throws Database.DatabaseException {
-        testStartTrainingCommon(training_in_progress, HttpServletResponse.SC_BAD_REQUEST);
+        testStartTrainingCommon(training_in_progress, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStartTraining_TrainingWasStopped() throws Database.DatabaseException {
-        testStartTrainingCommon(training_stopped, HttpServletResponse.SC_OK);
+        testStartTrainingCommon(training_stopped, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     public void testStartTraining_TrainingAlreadyQueued() throws Database.DatabaseException {
-        testStartTrainingCommon(training_queued, HttpServletResponse.SC_BAD_REQUEST);
+        testStartTrainingCommon(training_queued, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStartTraining_TrainigWasDeleted() throws Database.DatabaseException {
-        testStartTrainingCommon(training_deleted, HttpServletResponse.SC_BAD_REQUEST);
+        testStartTrainingCommon(training_deleted, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining() throws Database.DatabaseException {
-        testStopTrainingCommon(training_in_progress, HttpServletResponse.SC_OK);
+        testStopTrainingCommon(training_in_progress, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingWasNotInProgress() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_not_started, HttpServletResponse.SC_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.trainingStatus.training_not_started, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_completed, HttpServletResponse.SC_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.trainingStatus.training_completed, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingIsOnlyQueued() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_queued, HttpServletResponse.SC_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.trainingStatus.training_queued, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingWasDeleted() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_deleted, HttpServletResponse.SC_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.trainingStatus.training_deleted, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
@@ -278,7 +278,7 @@ public class TestTrainingLogic {
         sb.append(userSaysIntent2.get(0)).append(EOL);
         sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(1)).append(EOL);
 
-        Assert.assertEquals(HttpServletResponse.SC_OK, materials.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
         Assert.assertEquals(sb.toString(), materials.getTrainingFile());
     }
 
@@ -298,7 +298,7 @@ public class TestTrainingLogic {
         ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", "", null);
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
-        Assert.assertEquals(HttpServletResponse.SC_OK, materials.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
         Assert.assertEquals("", materials.getTrainingFile());
     }
 
@@ -306,7 +306,7 @@ public class TestTrainingLogic {
     public void testGetTrainingMaterials_invalidAiid() throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
         ApiError error = (ApiError) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
-        Assert.assertEquals(HttpServletResponse.SC_NOT_FOUND, error.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, error.getStatus().getCode());
     }
 
     @Test
@@ -320,7 +320,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(Collections.singletonList(intentName));
         when(this.fakeDatabase.getIntent(DEVID, AIID, intentName)).thenReturn(intent1);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
-        Assert.assertEquals(HttpServletResponse.SC_OK, materials.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
 
         StringBuilder sb = new StringBuilder();
         sb.append(EOL);
@@ -334,7 +334,7 @@ public class TestTrainingLogic {
         Database.DatabaseException exception = new Database.DatabaseException(new Exception("dummy exception"));
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenThrow(exception);
         ApiError error = (ApiError) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
-        Assert.assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, error.getStatus().getCode());
         verify(this.fakeLogger).logError(anyString(), anyString());
     }
 
@@ -374,7 +374,7 @@ public class TestTrainingLogic {
         InputStream stream = createUpload(SOMETEXT);
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     private void makeDBUpdateZeroRows(int trainingType) throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
@@ -393,7 +393,7 @@ public class TestTrainingLogic {
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);
 
         result = this.logic.startTraining(this.fakeContext, DEVID, AIID);
-        Assert.assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
 

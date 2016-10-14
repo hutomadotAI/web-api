@@ -6,6 +6,7 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 /**
  * Created by David MG on 09/08/2016.
@@ -131,6 +133,12 @@ public class TrainingEndpoint {
                                          @DefaultValue("") @HeaderParam("_developer_id") String devid) {
         ApiResult result = this.trainingLogic.getTrainingMaterials(securityContext, devid,
                 ParameterFilter.getAiid(requestContext));
-        return result.getResponse(this.serializer).build();
+
+        // TODO: send out a properly formatted JSON response when we no longer use SQS.
+        return Response.status(result.getStatus().getCode())
+                .entity(result.getStatus().getCode() == HttpURLConnection.HTTP_OK
+                        ? ((ApiTrainingMaterials) result).getTrainingFile()
+                        : this.serializer.serialize(result))
+                .build();
     }
 }
