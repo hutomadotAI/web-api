@@ -1,5 +1,6 @@
 package com.hutoma.api.containers;
 
+import com.hutoma.api.containers.sub.TrainingStatus;
 import org.joda.time.DateTime;
 
 /**
@@ -17,7 +18,7 @@ public class ApiAi extends ApiResult {
     private double deep_learning_error;
     private String training_debug_info;
     private String training_status;
-    private String ai_status;
+    private TrainingStatus ai_status;
     private String ai_training_file;
 
     public ApiAi(String aiid, String client_token) {
@@ -26,7 +27,7 @@ public class ApiAi extends ApiResult {
     }
 
     public ApiAi(String aiid, String client_token, String name, String description, DateTime created_on, boolean is_private,
-                 double deep_learning_error, String training_debug_info, String training_status, String ai_status, String ai_training_file) {
+                 double deep_learning_error, String training_debug_info, String training_status, TrainingStatus ai_status, String ai_training_file) {
         this.aiid = aiid;
         this.client_token = client_token;
         this.name = name;
@@ -50,7 +51,7 @@ public class ApiAi extends ApiResult {
         return this.client_token;
     }
 
-    public String getAiStatus() {
+    public TrainingStatus getAiStatus() {
 
         return this.ai_status;
     }

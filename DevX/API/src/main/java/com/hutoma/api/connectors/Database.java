@@ -55,6 +55,15 @@ public class Database {
         }
     }
 
+    private static TrainingStatus getTrainingStatusValue(final String value)
+            throws DatabaseException {
+        TrainingStatus trainingStatus = TrainingStatus.forValue(value);
+        if (trainingStatus == null) {
+            throw new DatabaseException("ai_status field does not contain an expected status");
+        }
+        return trainingStatus;
+    }
+
     public boolean createDev(final String username, final String email, final String password, final String passwordSalt, final String first_name, final String last_name, final String dev_token, final int plan_id, final String dev_id, final String client_token) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt).add(first_name).add(last_name).add(dev_token).add(plan_id).add(dev_id).add(client_token);
@@ -85,7 +94,7 @@ public class Database {
 
     public boolean createAI(final UUID aiid, final String name, final String description, final String devid,
                             final boolean is_private, final double deep_learning_error, final int deep_learning_status,
-                            final int shallow_learning_status, final TrainingStatus.trainingStatus status, final String client_token, final String trainingFile) throws DatabaseException {
+                            final int shallow_learning_status, final TrainingStatus status, final String client_token, final String trainingFile) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI", 11)
                     .add(aiid).add(name).add(description).add(devid).add(is_private)
@@ -104,7 +113,7 @@ public class Database {
                 while (rs.next()) {
                     final ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
                             new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                            null, rs.getString("deep_learning_status"), getTrainingStatusValue(rs.getString("ai_status")), null);
                     res.add(ai);
                 }
                 return res;
@@ -122,7 +131,7 @@ public class Database {
                 if (rs.next()) {
                     return new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
                             new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                            null, rs.getString("deep_learning_status"), rs.getString("ai_status"), null);
+                            null, rs.getString("deep_learning_status"), getTrainingStatusValue(rs.getString("ai_status")), null);
                 }
                 return null;
             } catch (final SQLException sqle) {
@@ -418,6 +427,10 @@ public class Database {
 
         public DatabaseException(final Throwable cause) {
             super(cause);
+        }
+
+        public DatabaseException(final String message) {
+            super(message);
         }
     }
 }

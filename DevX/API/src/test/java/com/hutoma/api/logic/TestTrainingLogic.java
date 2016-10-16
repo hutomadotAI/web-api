@@ -16,13 +16,13 @@ import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.TestParameterValidation;
 import com.hutoma.api.validation.Validate;
+
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +33,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.SecurityContext;
 
-import static com.hutoma.api.containers.sub.TrainingStatus.trainingStatus.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -194,57 +194,57 @@ public class TestTrainingLogic {
 
     @Test
     public void testStartTraining() throws Database.DatabaseException {
-        testStartTrainingCommon(training_not_started, HttpURLConnection.HTTP_OK);
+        testStartTrainingCommon(TrainingStatus.NOT_STARTED, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     public void testStartTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
-        testStartTrainingCommon(training_completed, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStartTrainingCommon(TrainingStatus.COMPLETED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStartTraining_BadRequest_TrainingIsInProgress() throws Database.DatabaseException {
-        testStartTrainingCommon(training_in_progress, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStartTrainingCommon(TrainingStatus.IN_PROGRESS, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStartTraining_TrainingWasStopped() throws Database.DatabaseException {
-        testStartTrainingCommon(training_stopped, HttpURLConnection.HTTP_OK);
+        testStartTrainingCommon(TrainingStatus.STOPPED, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     public void testStartTraining_TrainingAlreadyQueued() throws Database.DatabaseException {
-        testStartTrainingCommon(training_queued, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStartTrainingCommon(TrainingStatus.QUEUED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStartTraining_TrainigWasDeleted() throws Database.DatabaseException {
-        testStartTrainingCommon(training_deleted, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStartTrainingCommon(TrainingStatus.DELETED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining() throws Database.DatabaseException {
-        testStopTrainingCommon(training_in_progress, HttpURLConnection.HTTP_OK);
+        testStopTrainingCommon(TrainingStatus.IN_PROGRESS, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingWasNotInProgress() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_not_started, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.NOT_STARTED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_completed, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.COMPLETED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingIsOnlyQueued() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_queued, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.QUEUED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
     public void testStopTraining_BadRequest_TrainingWasDeleted() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.trainingStatus.training_deleted, HttpURLConnection.HTTP_BAD_REQUEST);
+        testStopTrainingCommon(TrainingStatus.DELETED, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
@@ -254,7 +254,7 @@ public class TestTrainingLogic {
         final List<String> userSaysIntent1 = Arrays.asList("a b", "xy");
         final List<String> userSaysIntent2 = Collections.singletonList("request something");
 
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", "", null);
+        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
         ApiIntent intent1 = new ApiIntent(intentNames.get(0), "", "");
         intent1.setUserSays(userSaysIntent1);
         ApiIntent intent2 = new ApiIntent(intentNames.get(1), "", "");
@@ -285,7 +285,7 @@ public class TestTrainingLogic {
     @Test
     public void testGetTrainingMaterials_noIntents() throws Database.DatabaseException {
         final String trainingFile = "Q1\nA1\n";
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", "", null);
+        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         when(this.fakeDatabase.getAiTrainingFile(AIID)).thenReturn(trainingFile);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(new ArrayList<>());
@@ -295,7 +295,7 @@ public class TestTrainingLogic {
 
     @Test
     public void testGetTrainingMaterials_noTrainingFileNoIntents() throws Database.DatabaseException {
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", "", null);
+        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
@@ -313,7 +313,7 @@ public class TestTrainingLogic {
     public void testGetTrainingMaterials_withIntentsNoTrainingFile() throws Database.DatabaseException {
         final String userSays = "the user says";
         final String intentName = "intent1";
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", "", null);
+        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
         ApiIntent intent1 = new ApiIntent(intentName, "", "");
         intent1.setUserSays(Collections.singletonList(userSays));
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
@@ -338,7 +338,7 @@ public class TestTrainingLogic {
         verify(this.fakeLogger).logError(anyString(), anyString());
     }
 
-    private void testStartTrainingCommon(final TrainingStatus.trainingStatus trainingStatus, final int expectedStatus)
+    private void testStartTrainingCommon(final TrainingStatus trainingStatus, final int expectedStatus)
             throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(trainingStatus));
         InputStream stream = createUpload(SOMETEXT);
@@ -347,11 +347,11 @@ public class TestTrainingLogic {
         Assert.assertEquals(expectedStatus, result.getStatus().getCode());
     }
 
-    private ApiAi getFakeAI(TrainingStatus.trainingStatus status) {
-        return new ApiAi(AIID.toString(), "client_token", "ai_name", "ai_description", new DateTime(), false, 0, "", "", status.name(), null);
+    private ApiAi getFakeAI(TrainingStatus status) {
+        return new ApiAi(AIID.toString(), "client_token", "ai_name", "ai_description", new DateTime(), false, 0, "", "", status, null);
     }
 
-    private void testStopTrainingCommon(final TrainingStatus.trainingStatus status, final int expectedCode) throws Database.DatabaseException {
+    private void testStopTrainingCommon(final TrainingStatus status, final int expectedCode) throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(status));
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);

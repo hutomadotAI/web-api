@@ -31,7 +31,6 @@ import java.util.UUID;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
 import static com.hutoma.api.connectors.Database.DatabaseException;
-import static com.hutoma.api.containers.sub.TrainingStatus.trainingStatus.*;
 
 /**
  * Created by mauriziocibelli on 28/04/16.
@@ -172,24 +171,23 @@ public class TrainingLogic {
     public ApiResult startTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
             this.logger.logDebug(LOGFROM, "on demand training start");
-            String trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
-            if ((TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_not_started) ||
-                    (TrainingStatus.trainingStatus.valueOf(trainingStatus) == training_stopped)) {
+            TrainingStatus trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
+            if (trainingStatus == TrainingStatus.NOT_STARTED || trainingStatus == TrainingStatus.STOPPED) {
                 this.messageQueue.pushMessageReadyForTraining(devid, aiid);
                 // Delete all memory variables for this AI
                 this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                 return new ApiResult().setSuccessStatus("Training session started.");
             }
 
-            switch (TrainingStatus.trainingStatus.valueOf(trainingStatus)) {
-                case training_completed:
-                    return new ApiError().getBadRequest("Training could not be started because it was already completed.");
-                case training_in_progress:
-                    return new ApiError().getBadRequest("A training session is already running.");
-                case training_queued:
-                    return new ApiError().getBadRequest("A training session is already queued.");
-                case training_stopped_maxtime:
-                    return new ApiError().getBadRequest("You reached the maximum allocated time to train your AI. Please upgrade your subscription.");
+            switch (trainingStatus) {
+                case COMPLETED:
+                    return ApiError.getBadRequest("Training could not be started because it was already completed.");
+                case IN_PROGRESS:
+                    return ApiError.getBadRequest("A training session is already running.");
+                case QUEUED:
+                    return ApiError.getBadRequest("A training session is already queued.");
+                case STOPPED_MAX_TIME:
+                    return ApiError.getBadRequest("You reached the maximum allocated time to train your AI. Please upgrade your subscription.");
                 default:
                     return ApiError.getBadRequest("Malformed training file. Training could not be started.");
             }
@@ -211,9 +209,9 @@ public class TrainingLogic {
     public ApiResult stopTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
             this.logger.logDebug(LOGFROM, "on demand training stop");
-            String trainigStatus = this.database.getAI(devid, aiid).getAiStatus();
+            TrainingStatus trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
 
-            if (TrainingStatus.trainingStatus.valueOf(trainigStatus) == training_in_progress) {
+            if (trainingStatus == TrainingStatus.IN_PROGRESS) {
                 this.messageQueue.pushMessageStopTraining(devid, aiid);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             }
@@ -235,14 +233,14 @@ public class TrainingLogic {
 
     public ApiResult updateTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            String status = this.database.getAI(devid, aiid).getAiStatus();
+            TrainingStatus status = this.database.getAI(devid, aiid).getAiStatus();
 
-            switch (TrainingStatus.trainingStatus.valueOf(status)) {
-                case training_in_progress:
-                case training_not_started:
-                case training_stopped:
-                case training_completed:
-                case training_deleted:
+            switch (status) {
+                case IN_PROGRESS:   // fallthrough
+                case NOT_STARTED:   // fallthrough
+                case STOPPED:       // fallthrough
+                case COMPLETED:     // fallthrough
+                case DELETED:
                     this.logger.logDebug(LOGFROM, "on demand training update");
                     this.messageQueue.pushMessageUpdateTraining(devid, aiid);
                     // Delete all memory variables for this AI

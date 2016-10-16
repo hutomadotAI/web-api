@@ -1,11 +1,11 @@
 package com.hutoma.api.validation;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 
 /**
  * Created by David MG on 06/09/2016.
@@ -21,6 +21,57 @@ public class Validate {
 
     @Inject
     public Validate() {
+    }
+
+    /**
+     * Returns the same string with anything over char 127 or below char 32 removed
+     * Also, []<>& are removed altogther
+     * Whitespaces are deduped and the string is trimmed of leading and trailing whitespaces.
+     * @param input abc[]<>&  abc
+     * @return abc abc
+     */
+    public String textSanitizer(final String input) {
+        // null check, fast bail
+        if (null == input) {
+            return "";
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        final int n = input.length();
+        boolean lastCharWasSpace = true;
+        char c;
+        for (int i = 0; i < n; i++) {
+            c = input.charAt(i);
+            // all whitespaces
+            if (Character.isWhitespace(c)) {
+                if (!lastCharWasSpace) {
+                    sb.append(' ');
+                    lastCharWasSpace = true;
+                }
+            } else {
+                // ignore out of range characters
+                if ((c >= 32) && (c < 127)) {
+                    switch (c) {
+                        // characters to omit
+                        case '[':
+                        case ']':
+                        case '<':
+                        case '>':
+                        case '&':
+                            break;
+                        // characters to retain unchanged
+                        default:
+                            sb.append(c);
+                            lastCharWasSpace = false;
+                    }
+                }
+            }
+        }
+        // removed trailing space if present
+        if ((lastCharWasSpace) && (sb.length() > 0)) {
+            sb.setLength((sb.length() - 1));
+        }
+        return sb.toString();
     }
 
     /***
@@ -86,6 +137,12 @@ public class Validate {
             }
         }
         return new ArrayList<>(results);
+    }
+
+    public static class ParameterValidationException extends Exception {
+        public ParameterValidationException(final String message) {
+            super(message);
+        }
     }
 
     /***
@@ -161,63 +218,6 @@ public class Validate {
 
     List<String> validateRequiredObjectValues(String paramName, List<String> paramList) throws ParameterValidationException {
         return validatePatternUniqueList(alphaNumDashesSomePunctuationAndSpace, paramName, paramList);
-    }
-
-    /**
-     * Returns the same string with anything over char 127 or below char 32 removed
-     * Also, []<>& are removed altogther
-     * Whitespaces are deduped and the string is trimmed of leading and trailing whitespaces.
-     * @param input abc[]<>&  abc
-     * @return abc abc
-     */
-    public String textSanitizer(final String input) {
-        // null check, fast bail
-        if (null == input) {
-            return "";
-        }
-
-        final StringBuilder sb = new StringBuilder();
-        final int n = input.length();
-        boolean lastCharWasSpace = true;
-        char c;
-        for (int i = 0; i < n; i++) {
-            c = input.charAt(i);
-            // all whitespaces
-            if (Character.isWhitespace(c)) {
-                if (!lastCharWasSpace) {
-                    sb.append(' ');
-                    lastCharWasSpace = true;
-                }
-            } else {
-                // ignore out of range characters
-                if ((c >= 32) && (c < 127)) {
-                    switch (c) {
-                        // characters to omit
-                        case '[':
-                        case ']':
-                        case '<':
-                        case '>':
-                        case '&':
-                            break;
-                        // characters to retain unchanged
-                        default:
-                            sb.append(c);
-                            lastCharWasSpace = false;
-                    }
-                }
-            }
-        }
-        // removed trailing space if present
-        if ((lastCharWasSpace) && (sb.length() > 0)) {
-            sb.setLength((sb.length() - 1));
-        }
-        return sb.toString();
-    }
-
-    public static class ParameterValidationException extends Exception {
-        public ParameterValidationException(final String message) {
-            super(message);
-        }
     }
 
 }

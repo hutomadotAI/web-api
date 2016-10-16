@@ -57,16 +57,6 @@ public class TestAILogic {
         aiLogic = new AILogic(fakeConfig, fakeSerializer, fakeDatabase, fakeMessageQueue, fakeLogger, fakeTools);
     }
 
-    private ApiAi getAI() {
-        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.0d, null, "status", "status", null);
-    }
-
-    private ArrayList<ApiAi> getAIList() {
-        ArrayList<ApiAi> returnList = new ArrayList<>();
-        returnList.add(getAI());
-        return returnList;
-    }
-
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
         when(fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), anyString())).thenReturn(true);
@@ -182,6 +172,16 @@ public class TestAILogic {
         when(fakeDatabase.deleteAi(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
         ApiResult result = aiLogic.deleteAI(fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    private ApiAi getAI() {
+        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.0d, null, "status", null, null);
+    }
+
+    private ArrayList<ApiAi> getAIList() {
+        ArrayList<ApiAi> returnList = new ArrayList<>();
+        returnList.add(getAI());
+        return returnList;
     }
 }
 

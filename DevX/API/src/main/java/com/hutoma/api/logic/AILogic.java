@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -19,8 +20,6 @@ import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 import java.util.UUID;
-
-import static com.hutoma.api.containers.sub.TrainingStatus.trainingStatus.training_not_started;
 
 
 /**
@@ -32,12 +31,12 @@ public class AILogic {
     private final double DEEP_LEARNING_ERROR = -1.0;
     private final int DEEP_LEARNING_STATUS = -1;
     private final int DEFAULT_WNET_ERROR = -1;
-    private Config config;
-    private JsonSerializer jsonSerializer;
-    private Database database;
-    private MessageQueue messageQueue;
-    private Logger logger;
-    private Tools tools;
+    private final Config config;
+    private final JsonSerializer jsonSerializer;
+    private final Database database;
+    private final MessageQueue messageQueue;
+    private final Logger logger;
+    private final Tools tools;
 
     @Inject
     public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,
@@ -51,15 +50,15 @@ public class AILogic {
     }
 
     public ApiResult createAI(
-        SecurityContext securityContext,
-        String devid,
-        String name,
-        String description,
-        boolean is_private,
-        double deep_learning_error,
-        int deep_learning_status,
-        int shallow_learning_status,
-        int status) {
+            SecurityContext securityContext,
+            String devid,
+            String name,
+            String description,
+            boolean is_private,
+            double deep_learning_error,
+            int deep_learning_status,
+            int shallow_learning_status,
+            int status) {
         try {
             this.logger.logDebug(this.LOGFROM, "request to create new ai from " + devid);
 
@@ -67,16 +66,16 @@ public class AILogic {
             UUID aiUUID = this.tools.createNewRandomUUID();
 
             String token = Jwts.builder()
-                .claim("ROLE", Role.ROLE_CLIENTONLY)
-                .claim("AIID", aiUUID)
-                .setSubject(devid)
-                .compressWith(CompressionCodecs.DEFLATE)
-                .signWith(SignatureAlgorithm.HS256, encoding_key)
-                .compact();
+                    .claim("ROLE", Role.ROLE_CLIENTONLY)
+                    .claim("AIID", aiUUID)
+                    .setSubject(devid)
+                    .compressWith(CompressionCodecs.DEFLATE)
+                    .signWith(SignatureAlgorithm.HS256, encoding_key)
+                    .compact();
 
             if (!this.database.createAI(aiUUID, name, description, devid, is_private,
-                    DEEP_LEARNING_ERROR, DEEP_LEARNING_STATUS,DEFAULT_WNET_ERROR, training_not_started, token, "")) {
-                logger.logInfo(LOGFROM, "db fail creating new ai");
+                    this.DEEP_LEARNING_ERROR, this.DEEP_LEARNING_STATUS, this.DEFAULT_WNET_ERROR, TrainingStatus.NOT_STARTED, token, "")) {
+                this.logger.logInfo(this.LOGFROM, "db fail creating new ai");
                 return ApiError.getInternalServerError();
             }
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
@@ -87,8 +86,8 @@ public class AILogic {
     }
 
     public ApiResult getAIs(
-        SecurityContext securityContext,
-        String devid) {
+            SecurityContext securityContext,
+            String devid) {
 
         try {
             this.logger.logDebug(this.LOGFROM, "request to list all ais");
@@ -105,9 +104,9 @@ public class AILogic {
     }
 
     public ApiResult getSingleAI(
-        SecurityContext securityContext,
-        String devid,
-        UUID aiid) {
+            SecurityContext securityContext,
+            String devid,
+            UUID aiid) {
 
         try {
             this.logger.logDebug(this.LOGFROM, devid + " request to list " + aiid);
@@ -125,9 +124,9 @@ public class AILogic {
     }
 
     public ApiResult deleteAI(
-        SecurityContext securityContext,
-        String devid,
-        UUID aiid) {
+            SecurityContext securityContext,
+            String devid,
+            UUID aiid) {
 
         try {
             this.logger.logDebug(this.LOGFROM, devid + " request to delete " + aiid);
