@@ -1,14 +1,21 @@
 package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
+import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
+
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
+import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -20,11 +27,6 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 @ValidatePost
 @Provider
@@ -59,6 +61,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             switch (param) {
                 case EntityJson:
                     expectingJson = true;
+                    break;
+                case AIName:
+                    expectingForm = true;
+                    break;
+                case AIDescription:
+                    expectingForm = true;
                     break;
                 default:
                     break;
@@ -101,6 +109,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logDebug(LOGFROM, "parameter validation failed");
+            ITelemetry.addTelemetryEvent(this.logger, "ParamValidationFailed (POST)");
         }
     }
 
@@ -113,7 +122,27 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         request.bufferEntity();
         // get the form as a multivalued map
         final MultivaluedMap<String, String> form = request.readEntity(Form.class).asMap();
-        // perform any form validation here
+
+        if (checkList.contains(APIParameter.AIName)) {
+            request.setProperty(APIParameter.AIName.toString(),
+                    this.validateAlphaNumPlusDashes(AINAME, getFirst(form.get(AINAME))));
+        }
+        if (checkList.contains(APIParameter.AIDescription)) {
+            request.setProperty(APIParameter.AIDescription.toString(),
+                    this.validateOptionalDescription(AIDESC, getFirst(form.get(AIDESC))));
+        }
+        if (checkList.contains(APIParameter.AiConfidence)) {
+            request.setProperty(APIParameter.AiConfidence.toString(),
+                    this.validateFloat(AICONFIDENCE, 0.0f, 1.0f, getFirst(form.get(AICONFIDENCE))));
+        }
+        if (checkList.contains(APIParameter.Timezone)) {
+            request.setProperty(APIParameter.Timezone.toString(),
+                    this.validateTimezoneString(TIMEZONE, getFirst(form.get(TIMEZONE))));
+        }
+        if (checkList.contains(APIParameter.Locale)) {
+            request.setProperty(APIParameter.Locale.toString(),
+                    this.validateLocale(LOCALE, getFirst(form.get(LOCALE))));
+        }
     }
 
     private void processJson(ContainerRequest request, HashSet<APIParameter> checkList) throws ParameterValidationException {
@@ -127,8 +156,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         try {
             if (checkList.contains(APIParameter.EntityJson)) {
                 ApiEntity entity = (ApiEntity) this.serializer.deserialize(request.getEntityStream(), ApiEntity.class);
-                this.validateAlphaNumPlusDashes(this.ENTITYNAME, entity.getEntityName());
-                this.validateRequiredObjectValues(this.ENTITYVALUE, entity.getEntityList());
+                this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
+                this.validateRequiredObjectValues(ENTITYVALUE, entity.getEntityList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
             }
         } catch (JsonParseException jpe) {
@@ -149,5 +178,4 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
         }
     }
-
 }

@@ -15,5 +15,8 @@ public enum APIParameter {
     Min_P,
     IntentName,
     EntityName,
-    EntityJson
+    EntityJson,
+    AiConfidence,
+    Timezone,
+    Locale
 }

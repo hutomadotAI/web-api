@@ -50,8 +50,13 @@ if ($response['status']['code'] === 200) {
         exit;
     }
 } else {
-    \hutoma\console::redirect('../error.php?errObj=' . json_encode($response));
-    unset($_response);
+    if (isset($response)) {
+        \hutoma\console::redirect('../error.php?errObj=' . json_encode($response));
+        unset($_response);
+    } else {
+        unset($_response);
+        \hutoma\console::redirect('./error.php?err=15');
+    }
     exit;
 }
 

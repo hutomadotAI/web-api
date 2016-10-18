@@ -1,6 +1,11 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.ITelemetry;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
@@ -12,9 +17,13 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.*;
 
 /**
  * Created by mauriziocibelli on 24/04/16.
@@ -153,39 +162,27 @@ public class ChatLogic {
             }
         } catch (NeuralNet.NeuralNetNotRespondingException nr) {
             this.logger.logError(LOGFROM, "neural net did not respond in time");
-            this.addTelemetry("ApiChatError", nr, telemetryMap);
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nr, telemetryMap);
             return ApiError.getNoResponse("unable to respond in time. try again");
         } catch (NeuralNet.NeuralNetException nne) {
             this.logger.logError(LOGFROM, "neural net exception: " + nne.toString());
-            this.addTelemetry("ApiChatError", nne, telemetryMap);
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nne, telemetryMap);
             return ApiError.getInternalServerError();
         } catch (Exception ex) {
             this.logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
-            this.addTelemetry("ApiChatError", ex, telemetryMap);
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", ex, telemetryMap);
             // log the error but don't return a 500
             // because the error may have occurred on the second request and the first may have completed correctly
         }
         if (noResponse) {
             this.logger.logError(LOGFROM, "chat server returned an empty response");
             telemetryMap.put("EventType", "No response");
-            this.addTelemetry("ApiChatError", telemetryMap);
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", telemetryMap);
             return ApiError.getInternalServerError();
         }
 
-        this.addTelemetry("ApiChat", telemetryMap);
+        ITelemetry.addTelemetryEvent(this.logger, "ApiChat", telemetryMap);
         return apiChat.setSuccessStatus();
-    }
-
-    private void addTelemetry(String eventName, Exception ex, Map<String, String> parameters) {
-        if (this.logger instanceof ITelemetry) {
-            ((ITelemetry) this.logger).addTelemetryEvent(eventName, ex, parameters);
-        }
-    }
-
-    private void addTelemetry(String eventName, Map<String, String> parameters) {
-        if (this.logger instanceof ITelemetry) {
-            ((ITelemetry) this.logger).addTelemetryEvent(eventName, parameters);
-        }
     }
 
     /**

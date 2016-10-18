@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 import javax.ws.rs.core.SecurityContext;
 
@@ -61,6 +63,12 @@ public class TestTrainingLogic {
     private Validate fakeValidation;
     private TrainingLogic logic;
     private IMemoryIntentHandler fakeIntentHandler;
+
+    private static ApiAi getCommonAi(TrainingStatus status, boolean isPrivate) {
+        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, 0.5, "debuginfo",
+                "trainstatus", status, "", false, 0.0, 1, Locale.getDefault(),
+                TimeZone.getDefault());
+    }
 
     @Before
     public void setup() throws Database.DatabaseException {
@@ -254,7 +262,7 @@ public class TestTrainingLogic {
         final List<String> userSaysIntent1 = Arrays.asList("a b", "xy");
         final List<String> userSaysIntent2 = Collections.singletonList("request something");
 
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
+        ApiAi apiAi = getCommonAi(TrainingStatus.NOT_STARTED, true);
         ApiIntent intent1 = new ApiIntent(intentNames.get(0), "", "");
         intent1.setUserSays(userSaysIntent1);
         ApiIntent intent2 = new ApiIntent(intentNames.get(1), "", "");
@@ -285,7 +293,7 @@ public class TestTrainingLogic {
     @Test
     public void testGetTrainingMaterials_noIntents() throws Database.DatabaseException {
         final String trainingFile = "Q1\nA1\n";
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
+        ApiAi apiAi = getCommonAi(TrainingStatus.NOT_STARTED, true);
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         when(this.fakeDatabase.getAiTrainingFile(AIID)).thenReturn(trainingFile);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(new ArrayList<>());
@@ -295,7 +303,7 @@ public class TestTrainingLogic {
 
     @Test
     public void testGetTrainingMaterials_noTrainingFileNoIntents() throws Database.DatabaseException {
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
+        ApiAi apiAi = getCommonAi(TrainingStatus.NOT_STARTED, true);
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
@@ -313,7 +321,7 @@ public class TestTrainingLogic {
     public void testGetTrainingMaterials_withIntentsNoTrainingFile() throws Database.DatabaseException {
         final String userSays = "the user says";
         final String intentName = "intent1";
-        ApiAi apiAi = new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), true, 0.5, "", "", null, null);
+        ApiAi apiAi = getCommonAi(TrainingStatus.NOT_STARTED, true);
         ApiIntent intent1 = new ApiIntent(intentName, "", "");
         intent1.setUserSays(Collections.singletonList(userSays));
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
@@ -340,19 +348,15 @@ public class TestTrainingLogic {
 
     private void testStartTrainingCommon(final TrainingStatus trainingStatus, final int expectedStatus)
             throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(trainingStatus));
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(trainingStatus, false));
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
         result = this.logic.startTraining(this.fakeContext, DEVID, AIID);
         Assert.assertEquals(expectedStatus, result.getStatus().getCode());
     }
 
-    private ApiAi getFakeAI(TrainingStatus status) {
-        return new ApiAi(AIID.toString(), "client_token", "ai_name", "ai_description", new DateTime(), false, 0, "", "", status, null);
-    }
-
     private void testStopTrainingCommon(final TrainingStatus status, final int expectedCode) throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getFakeAI(status));
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(status, false));
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
         result = this.logic.stopTraining(this.fakeContext, DEVID, AIID);

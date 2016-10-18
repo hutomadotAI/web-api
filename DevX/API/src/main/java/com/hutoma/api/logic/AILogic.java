@@ -16,10 +16,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.ArrayList;
-import java.util.UUID;
 
 
 /**
@@ -58,7 +59,12 @@ public class AILogic {
             double deep_learning_error,
             int deep_learning_status,
             int shallow_learning_status,
-            int status) {
+            int status,
+            boolean hasPersonality,
+            double confidence,
+            int voice,
+            Locale language,
+            String timezone) {
         try {
             this.logger.logDebug(this.LOGFROM, "request to create new ai from " + devid);
 
@@ -73,8 +79,11 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encoding_key)
                     .compact();
 
-            if (!this.database.createAI(aiUUID, name, description, devid, is_private,
-                    this.DEEP_LEARNING_ERROR, this.DEEP_LEARNING_STATUS, this.DEFAULT_WNET_ERROR, TrainingStatus.NOT_STARTED, token, "")) {
+            if (!this.database.createAI(aiUUID, name, description, devid, is_private, this.DEEP_LEARNING_ERROR,
+                    this.DEEP_LEARNING_STATUS, this.DEFAULT_WNET_ERROR, TrainingStatus.NOT_STARTED, token, null,
+                    language,
+                    timezone,
+                    confidence, hasPersonality, voice)) {
                 this.logger.logInfo(this.LOGFROM, "db fail creating new ai");
                 return ApiError.getInternalServerError();
             }

@@ -3,23 +3,24 @@ package com.hutoma.api.connectors.db;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
-import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.inject.Inject;
 
 /**
  * Created by David MG on 02/09/2016.
  */
 public class DatabaseConnectionPool {
 
-    private final static String LOGFROM = "dbconnectionpool";
-    private Config config;
-    private Logger logger;
-    private DataSource dataSource;
-    private int maxActiveConnections;
+    private static final String LOGFROM = "dbconnectionpool";
+    private final Config config;
+    private final Logger logger;
+    private final DataSource dataSource;
+    private final int maxActiveConnections;
 
     @Inject
     public DatabaseConnectionPool(Config config, Logger logger) {
@@ -47,8 +48,8 @@ public class DatabaseConnectionPool {
         p.setLogAbandoned(false);
         p.setRemoveAbandoned(true);
         p.setJdbcInterceptors(
-            "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
-                "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+                "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
+                        "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
         p.setDefaultAutoCommit(true);
         this.dataSource = new DataSource();
         this.dataSource.setPoolProperties(p);

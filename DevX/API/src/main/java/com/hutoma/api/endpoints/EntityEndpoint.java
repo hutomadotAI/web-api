@@ -5,10 +5,13 @@ import com.hutoma.api.access.RateLimit;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.EntityLogic;
-import com.hutoma.api.validation.*;
+import com.hutoma.api.validation.APIParameter;
+import com.hutoma.api.validation.ParameterFilter;
+import com.hutoma.api.validation.PostFilter;
+import com.hutoma.api.validation.ValidateParameters;
+import com.hutoma.api.validation.ValidatePost;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -38,29 +41,29 @@ public class EntityEndpoint {
     }
 
     @GET
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters( {APIParameter.DevID, APIParameter.EntityName})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName})
     public Response getEntity(
-        @Context final SecurityContext securityContext,
-        @Context final ContainerRequestContext requestContext) {
+            @Context final SecurityContext securityContext,
+            @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.entityLogic.getEntity(securityContext,
-            ParameterFilter.getDevid(requestContext),
-            ParameterFilter.getEntityName(requestContext));
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getEntityName(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
     @POST
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters( {APIParameter.DevID, APIParameter.EntityName})
-    @ValidatePost( {APIParameter.EntityJson})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName})
+    @ValidatePost({APIParameter.EntityJson})
     public Response postEntity(
-        @Context final SecurityContext securityContext,
-        @Context final ContainerRequestContext requestContext) {
+            @Context final SecurityContext securityContext,
+            @Context final ContainerRequestContext requestContext) {
 
         // validation placeholder for entity write
-        ApiEntity entity = PostFilter.getEntity(requestContext);
+        PostFilter.getEntity(requestContext);
         // if we get this far then we have successfully deserialized and validated an Entity
         return new ApiResult().setSuccessStatus().getResponse(this.serializer).build();
     }

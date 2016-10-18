@@ -1,8 +1,11 @@
 package com.hutoma.api.validation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -155,19 +158,34 @@ public class Validate {
      * @return valid float representing the input, or fallback
      * @throws ParameterValidationException if the float was invalid or out of range
      */
-    Float validateOptionalFloat(final String paramName, final float min, final float max, final float fallback, String param) throws ParameterValidationException {
+    Float validateOptionalFloat(final String paramName, final float min, final float max, final float fallback,
+                                final String param) throws ParameterValidationException {
         // if empty, return the fallback
         if ((null == param) || (param.isEmpty())) {
             return fallback;
         }
+        return validateFloat(paramName, min, max, param);
+    }
+
+    /***
+     * Validates a floating point number
+     * @param paramName parameter name used for exception
+     * @param min valid range lowest value
+     * @param max valid range highest value
+     * @param param the parameter value
+     * @return valid float representing the input, or fallback
+     * @throws ParameterValidationException if the float was invalid or out of range
+     */
+    Float validateFloat(final String paramName, final float min, final float max, final String param)
+            throws ParameterValidationException {
         // trim and convert commas to full-stops
-        param = param.trim().replace(',', '.');
+        String newParam = param.trim().replace(',', '.');
         // check that it generally matches
-        if (!floatPattern.matcher(param).matches()) {
+        if (!floatPattern.matcher(newParam).matches()) {
             throw new ParameterValidationException("invalid " + paramName);
         }
         // parse
-        final float result = Float.parseFloat(param);
+        final float result = Float.parseFloat(newParam);
         // just in case it's still weirdly invalid
         if (Float.isNaN(result)) {
             throw new ParameterValidationException("invalid " + paramName);
@@ -179,11 +197,31 @@ public class Validate {
         return result;
     }
 
+    String validateTimezoneString(final String paramName, final String param) throws ParameterValidationException {
+        if (param == null || param.isEmpty()) {
+            throw new ParameterValidationException("invalid " + paramName);
+        }
+        if (!Arrays.stream(TimeZone.getAvailableIDs()).anyMatch(x -> x.equals(param))) {
+            throw new ParameterValidationException("invalid timezone value " + param);
+        }
+        return param;
+    }
+
+    Locale validateLocale(final String paramName, final String param) throws ParameterValidationException {
+        if (param == null || param.isEmpty()) {
+            throw new ParameterValidationException("invalid " + paramName);
+        }
+        if (!Arrays.stream(Locale.getAvailableLocales()).anyMatch(x -> x.toLanguageTag().equals(param))) {
+            throw new ParameterValidationException("invalid locale " + param);
+        }
+        // At this moment we know the locale is correctly formatted
+        return Locale.forLanguageTag(param);
+    }
+
     UUID validateUuid(final String paramName, final String param) throws ParameterValidationException {
         final String result = validatePattern(uuidPattern, paramName, param);
         try {
-            final UUID uuid = UUID.fromString(result);
-            return uuid;
+            return UUID.fromString(result);
         } catch (final IllegalArgumentException iae) {
             throw new ParameterValidationException("invalid characters in " + paramName);
         }

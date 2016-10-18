@@ -15,12 +15,15 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
+import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -94,12 +97,28 @@ public class Database {
 
     public boolean createAI(final UUID aiid, final String name, final String description, final String devid,
                             final boolean is_private, final double deep_learning_error, final int deep_learning_status,
-                            final int shallow_learning_status, final TrainingStatus status, final String client_token, final String trainingFile) throws DatabaseException {
+                            final int shallow_learning_status, final TrainingStatus status, final String client_token,
+                            final String trainingFile, final Locale language, final String timezoneString,
+                            final double confidence, final boolean hasPersonality, final int voice)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addAI", 11)
-                    .add(aiid).add(name).add(description).add(devid).add(is_private)
-                    .add(deep_learning_error).add(deep_learning_status).add(shallow_learning_status)
-                    .add(status).add(client_token).add(trainingFile);
+            call.initialise("addAI_v1", 16)
+                    .add(aiid)
+                    .add(name)
+                    .add(description)
+                    .add(devid)
+                    .add(is_private)
+                    .add(deep_learning_error)
+                    .add(deep_learning_status)
+                    .add(shallow_learning_status)
+                    .add(status)
+                    .add(client_token)
+                    .add(trainingFile)
+                    .add(language == null ? null : language.toLanguageTag())
+                    .add(timezoneString)
+                    .add(confidence)
+                    .add(hasPersonality)
+                    .add(voice);
             return call.executeUpdate() > 0;
         }
     }
@@ -111,10 +130,7 @@ public class Database {
             final ArrayList<ApiAi> res = new ArrayList<>();
             try {
                 while (rs.next()) {
-                    final ApiAi ai = new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                            null, rs.getString("deep_learning_status"), getTrainingStatusValue(rs.getString("ai_status")), null);
-                    res.add(ai);
+                    res.add(getAiFromResultset(rs));
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -129,9 +145,7 @@ public class Database {
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return new ApiAi(rs.getString("aiid"), rs.getString("client_token"), rs.getString("ai_name"), rs.getString("ai_description"),
-                            new DateTime(rs.getDate("created_on")), rs.getBoolean("is_private"), rs.getDouble("deep_learning_error"),
-                            null, rs.getString("deep_learning_status"), getTrainingStatusValue(rs.getString("ai_status")), null);
+                    return getAiFromResultset(rs);
                 }
                 return null;
             } catch (final SQLException sqle) {
@@ -421,6 +435,28 @@ public class Database {
             int rowsChanged = call.initialise("setRnnStatus", 3).add(status).add(devid).add(aiid).executeUpdate();
             return rowsChanged > 0;
         }
+    }
+
+    private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {
+        String localeString = rs.getString("ai_language");
+        String timezoneString = rs.getString("ai_timezone");
+        return new ApiAi(rs.getString("aiid"),
+                rs.getString("client_token"),
+                rs.getString("ai_name"),
+                rs.getString("ai_description"),
+                new DateTime(rs.getDate("created_on")),
+                rs.getBoolean("is_private"),
+                rs.getDouble("deep_learning_error"),
+                null /*training_debug_info*/,
+                rs.getString("deep_learning_status"),
+                getTrainingStatusValue(rs.getString("ai_status")),
+                null /*training file*/,
+                rs.getBoolean("ai_personality"),
+                rs.getDouble("ai_confidence"),
+                rs.getInt("ai_voice"),
+                // Java, being funny, can't follow rfc5646 so we need to replace the separator
+                localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
+                timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
     }
 
     public static class DatabaseException extends Exception {

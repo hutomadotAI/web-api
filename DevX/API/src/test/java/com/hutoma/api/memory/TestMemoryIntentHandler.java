@@ -11,6 +11,7 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -190,6 +191,14 @@ public class TestMemoryIntentHandler {
     public void testIntentDeleteAllAIIntents() throws Database.DatabaseException {
         this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
         verify(this.fakeDatabase).deleteAllMemoryIntents(AIID);
+    }
+
+    @Test
+    public void testIntentDeleteAllAIIntentsDbException() throws Database.DatabaseException {
+        Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
+        when(this.fakeDatabase.deleteAllMemoryIntents(any())).thenThrow(exception);
+        this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
+        verify(this.fakeLogger).logError(anyString(), anyString());
     }
 
     private MemoryIntent setDummyMemoryIntent(final String response) throws Database.DatabaseException {

@@ -8,6 +8,51 @@ import java.util.Map;
 public interface ITelemetry {
 
     /**
+     * Default method to add a telemetry event.
+     * @param eventName the event name
+     */
+    static void addTelemetryEvent(ILogger logger, String eventName) {
+        if (logger instanceof ITelemetry) {
+            ((ITelemetry) logger).addTelemetryEvent(eventName);
+        }
+    }
+
+    /**
+     * Default method to add a telemetry event.
+     * @param eventName  the event name
+     * @param properties the properties map
+     */
+    static void addTelemetryEvent(ILogger logger, String eventName, Map<String, String> properties) {
+        if (logger instanceof ITelemetry) {
+            ((ITelemetry) logger).addTelemetryEvent(eventName, properties);
+        }
+    }
+
+    /**
+     * Default method to add a telemetry event.
+     * @param eventName the event name
+     * @param exception the exception
+     */
+    static void addTelemetryEvent(ILogger logger, String eventName, Exception exception) {
+        if (logger instanceof ITelemetry) {
+            ((ITelemetry) logger).addTelemetryEvent(eventName, exception);
+        }
+    }
+
+    /**
+     * Default method to add a telemetry event.
+     * @param eventName  the event name
+     * @param exception  the exception
+     * @param properties the properties map
+     */
+    static void addTelemetryEvent(ILogger logger, String eventName, Exception exception,
+                                  Map<String, String> properties) {
+        if (logger instanceof ITelemetry) {
+            ((ITelemetry) logger).addTelemetryEvent(eventName, exception, properties);
+        }
+    }
+
+    /**
      * Add a telemetry event.
      * @param eventName the event name
      */

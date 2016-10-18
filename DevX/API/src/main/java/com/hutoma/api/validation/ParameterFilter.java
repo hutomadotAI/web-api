@@ -5,16 +5,20 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
-import java.util.List;
-import java.util.UUID;
 
 public class ParameterFilter extends Validate {
 
     // parameter names
     protected static final String AIID = "aiid";
     protected static final String DEVID = "_developer_id";
+    protected static final String AICONFIDENCE = "confidence";
+    protected static final String TIMEZONE = "timezone";
+    protected static final String LOCALE = "locale";
     protected static final String CHATID = "chatId";
     protected static final String CHATQUESTION = "q";
     protected static final String CHATHISTORY = "chat_history";
@@ -82,8 +86,20 @@ public class ParameterFilter extends Validate {
         return (String) requestContext.getProperty(APIParameter.IntentName.toString());
     }
 
+    public static String getTimezone(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.Timezone.toString());
+    }
+
+    public static Locale getLocale(final ContainerRequestContext requestContext) {
+        return (Locale) requestContext.getProperty(APIParameter.Locale.toString());
+    }
+
     public static ApiEntity getEntity(final ContainerRequestContext requestContext) {
         return (ApiEntity) requestContext.getProperty(APIParameter.EntityJson.toString());
+    }
+
+    public static Float getAiConfidence(final ContainerRequestContext requestContext) {
+        return (Float) requestContext.getProperty(APIParameter.AiConfidence.toString());
     }
 
     /***
