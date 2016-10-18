@@ -14,10 +14,7 @@ import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ValidatePost;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -61,10 +58,23 @@ public class EntityEndpoint {
     public Response postEntity(
             @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
+        final ApiResult result = this.entityLogic.writeEntity(
+            ParameterFilter.getDevid(requestContext),
+            ParameterFilter.getEntityName(requestContext),
+            ParameterFilter.getEntity(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
 
-        // validation placeholder for entity write
-        PostFilter.getEntity(requestContext);
-        // if we get this far then we have successfully deserialized and validated an Entity
-        return new ApiResult().setSuccessStatus().getResponse(this.serializer).build();
+    @DELETE
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ValidateParameters( {APIParameter.DevID, APIParameter.EntityName})
+    public Response deleteEntity(
+        @Context final SecurityContext securityContext,
+        @Context final ContainerRequestContext requestContext) {
+        final ApiResult result = this.entityLogic.deleteEntity(
+            ParameterFilter.getDevid(requestContext),
+            ParameterFilter.getEntityName(requestContext));
+        return result.getResponse(this.serializer).build();
     }
 }

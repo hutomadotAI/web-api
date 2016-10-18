@@ -23,7 +23,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
     public static final String META_INTENT_TAG = "@meta.intent.";
     private static final Pattern META_INTEG_PATTERN =
-            Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
+        Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";
     private final ILogger logger;
     private final Database database;
@@ -94,7 +94,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
                     ApiEntity apiEntity = this.database.getEntity(devid, intentVar.getEntityName());
-                    MemoryVariable v = new MemoryVariable(intentVar.getEntityName(), apiEntity.getEntityList());
+                    MemoryVariable v = new MemoryVariable(intentVar.getEntityName(), apiEntity.getEntityValueList());
                     v.setPrompts(intentVar.getPrompts());
                     v.setIsMandatory(intentVar.isRequired());
                     v.setTimesPrompted(intentVar.getNumPrompts());

@@ -48,6 +48,8 @@ public class DatabaseCall implements AutoCloseable {
         checkParamsSet();
         try {
             return this.statement.executeUpdate();
+        } catch (java.sql.SQLIntegrityConstraintViolationException icve) {
+            throw new Database.DatabaseIntegrtityViolationException(icve);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }

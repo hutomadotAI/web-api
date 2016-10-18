@@ -7,26 +7,20 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.AiDomain;
-import com.hutoma.api.containers.sub.AiIntegration;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.RateLimitStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
-
+import com.hutoma.api.containers.sub.*;
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -46,20 +40,20 @@ public class Database {
     }
 
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
-            throws DatabaseException {
+        throws DatabaseException {
         try {
             List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"));
             return new MemoryIntent(rs.getString("intentName"),
-                    UUID.fromString(rs.getString("aiid")),
-                    UUID.fromString(rs.getString("chatId")),
-                    variables);
+                UUID.fromString(rs.getString("aiid")),
+                UUID.fromString(rs.getString("chatId")),
+                variables);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
     }
 
     private static TrainingStatus getTrainingStatusValue(final String value)
-            throws DatabaseException {
+        throws DatabaseException {
         TrainingStatus trainingStatus = TrainingStatus.forValue(value);
         if (trainingStatus == null) {
             throw new DatabaseException("ai_status field does not contain an expected status");
@@ -184,7 +178,7 @@ public class Database {
                 final ArrayList<AiDomain> res = new ArrayList<>();
                 while (rs.next()) {
                     res.add(new AiDomain(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
+                        rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -287,7 +281,7 @@ public class Database {
 
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
                                         final JsonSerializer jsonSerializer)
-            throws DatabaseException {
+        throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntent", 3).add(intentName).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -303,7 +297,7 @@ public class Database {
     }
 
     public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId, final JsonSerializer jsonSerializer)
-            throws DatabaseException {
+        throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -372,29 +366,29 @@ public class Database {
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+                .add(devid).add(aiid).add(intentName).executeQuery();
             while (saysRs.next()) {
                 intent.addUserSays(saysRs.getString("says"));
             }
 
             // get the list of responses
             ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+                .add(devid).add(aiid).add(intentName).executeQuery();
             while (intentResponseRs.next()) {
                 intent.addResponse(intentResponseRs.getString("response"));
             }
 
             // get each intent variable
             ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+                .add(devid).add(aiid).add(intentName).executeQuery();
             while (varRs.next()) {
                 int varID = varRs.getInt("id");
                 IntentVariable variable = new IntentVariable(
-                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
+                    varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
 
                 // for each variable get all its prompts
                 ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                        .add(devid).add(aiid).add(varID).executeQuery();
+                    .add(devid).add(aiid).add(varID).executeQuery();
                 while (promptRs.next()) {
                     variable.addPrompt(promptRs.getString("prompt"));
                 }
@@ -411,14 +405,14 @@ public class Database {
     }
 
     public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
-            throws DatabaseException {
+        throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String variables = jsonSerializer.serialize(intent.getVariables());
             call.initialise("updateMemoryIntent", 4)
-                    .add(intent.getName())
-                    .add(intent.getAiid())
-                    .add(intent.getChatId())
-                    .add(variables);
+                .add(intent.getName())
+                .add(intent.getAiid())
+                .add(intent.getChatId())
+                .add(variables);
             return call.executeUpdate() > 0;
         }
     }
@@ -459,8 +453,54 @@ public class Database {
                 timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
     }
 
-    public static class DatabaseException extends Exception {
+    public void writeEntity(String devid, String entityOldName, ApiEntity entity) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
+            // add or update the entity
+            transaction.getDatabaseCall().initialise("addUpdateEntity", 3)
+                .add(devid).add(entityOldName).add(entity.getEntityName()).executeUpdate();
+
+            // read the entity's values
+            ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 2)
+                .add(devid).add(entity.getEntityName()).executeQuery();
+
+            // put them into a set
+            HashSet<String> currentValues = new HashSet<>();
+            while (valuesRs.next()) {
+                currentValues.add(valuesRs.getString("value"));
+            }
+
+            // for each new entity value, check if it was already there
+            for (String entityValue : entity.getEntityValueList()) {
+                // if it was then remove it, otherwise it is new - add it
+                if (!currentValues.remove(entityValue)) {
+                    transaction.getDatabaseCall().initialise("addEntityValue", 3)
+                        .add(devid).add(entity.getEntityName()).add(entityValue).executeUpdate();
+                }
+            }
+
+            // anything left over is an old obsolete value - delete it
+            for (String obsoleteEntityValue : currentValues) {
+                transaction.getDatabaseCall().initialise("deleteEntityValue", 3)
+                    .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).executeUpdate();
+            }
+
+            // commit everything
+            transaction.commit();
+
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    public boolean deleteEntity(String devid, String entityName) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityName).executeUpdate();
+            return rowCount > 0;
+        }
+    }
+
+    public static class DatabaseException extends Exception {
         public DatabaseException(final Throwable cause) {
             super(cause);
         }
@@ -469,4 +509,11 @@ public class Database {
             super(message);
         }
     }
+
+    public static class DatabaseIntegrtityViolationException extends DatabaseException {
+        public DatabaseIntegrtityViolationException(Throwable cause) {
+            super(cause);
+        }
+    }
+
 }

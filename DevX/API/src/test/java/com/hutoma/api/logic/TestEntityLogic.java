@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by David MG on 06/10/2016.
@@ -113,7 +113,7 @@ public class TestEntityLogic {
         final ApiResult result = this.entityLogic.getEntity(this.fakeContext, this.DEVID, this.ENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
         Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
-        Assert.assertEquals(0, ((ApiEntity) result).getEntityList().size());
+        Assert.assertEquals(0, ((ApiEntity) result).getEntityValueList().size());
     }
 
     @Test
@@ -122,4 +122,49 @@ public class TestEntityLogic {
         final ApiResult result = this.entityLogic.getEntity(this.fakeContext, this.DEVID, this.ENTNAME);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
+
+
+    @Test
+    public void testWriteEntity_Success() throws Database.DatabaseException {
+        final ApiResult result = this.entityLogic.writeEntity(this.DEVID, this.ENTNAME, new ApiEntity(this.ENTNAME));
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteEntity_Error() throws Database.DatabaseException {
+        doThrow(new Database.DatabaseException(new Exception("test"))).when(this.fakeDatabase).writeEntity(anyString(), anyString(), any());
+        final ApiResult result = this.entityLogic.writeEntity(this.DEVID, this.ENTNAME, new ApiEntity(this.ENTNAME));
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteEntity_RenameClash() throws Database.DatabaseException {
+        doThrow(new Database.DatabaseIntegrtityViolationException(new Exception("test"))).when(this.fakeDatabase).writeEntity(anyString(), anyString(), any());
+        final ApiResult result = this.entityLogic.writeEntity(this.DEVID, this.ENTNAME, new ApiEntity("nameclash"));
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+
+    @Test
+    public void testDeleteEntity_Success() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteEntity(anyString(), anyString())).thenReturn(true);
+        final ApiResult result = this.entityLogic.deleteEntity(this.DEVID, this.ENTNAME);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteEntity_Error() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteEntity(anyString(), anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        final ApiResult result = this.entityLogic.deleteEntity(this.DEVID, this.ENTNAME);
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteEntity_NotFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteEntity(anyString(), anyString())).thenReturn(false);
+        final ApiResult result = this.entityLogic.deleteEntity(this.DEVID, this.ENTNAME);
+        Assert.assertEquals(404, result.getStatus().getCode());
+    }
+
+
 }

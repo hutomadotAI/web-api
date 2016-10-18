@@ -23,7 +23,7 @@ public class ApiEntity extends ApiResult {
         return this.entity_name;
     }
 
-    public List<String> getEntityList() {
+    public List<String> getEntityValueList() {
         return this.entity_values;
     }
 }

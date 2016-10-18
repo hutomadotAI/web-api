@@ -17,10 +17,10 @@ import java.util.List;
  */
 public class EntityLogic {
 
+    private static final String LOGFROM = "entitylogic";
     private final Config config;
     private final Logger logger;
     private final Database database;
-    private static final String LOGFROM = "entitylogic";
 
     @Inject
     public EntityLogic(final Config config, final Logger logger, final Database database) {
@@ -50,6 +50,33 @@ public class EntityLogic {
             return entity.setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logError(LOGFROM, "error getting entity: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult writeEntity(final String devid, final String entityName, final ApiEntity entity) {
+        try {
+            this.logger.logDebug(LOGFROM, "request to edit entity " + entityName + " from " + devid);
+            this.database.writeEntity(devid, entityName, entity);
+            return new ApiResult().setSuccessStatus();
+        } catch (Database.DatabaseIntegrtityViolationException dive) {
+            this.logger.logDebug(LOGFROM, "attempt to rename to existing name");
+            return ApiError.getBadRequest("entity name already in use");
+        } catch (final Exception e) {
+            this.logger.logError(LOGFROM, "error writing entity: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult deleteEntity(final String devid, final String entityName) {
+        try {
+            this.logger.logDebug(LOGFROM, "request to delete entity " + entityName + " from " + devid);
+            if (!this.database.deleteEntity(devid, entityName)) {
+                return ApiError.getNotFound();
+            }
+            return new ApiResult().setSuccessStatus();
+        } catch (final Exception e) {
+            this.logger.logError(LOGFROM, "error writing entity: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
