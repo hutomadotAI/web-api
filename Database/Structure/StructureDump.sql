@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.12, for osx10.9 (x86_64)
 --
 -- Host: 52.44.215.190    Database: hutoma
 -- ------------------------------------------------------
@@ -43,7 +43,7 @@ CREATE TABLE `ai` (
   `dl_debug` varchar(500) DEFAULT 'no debug info yet',
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1118 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1126 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -101,7 +101,7 @@ CREATE TABLE `chatlog` (
   `answer` varchar(2000) DEFAULT NULL,
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2808 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2846 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +115,7 @@ CREATE TABLE `debug` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,22 +189,6 @@ CREATE TABLE `entity` (
   UNIQUE KEY `dev_id` (`dev_id`,`name`),
   CONSTRAINT `entity_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `entity_prompt`
---
-
-DROP TABLE IF EXISTS `entity_prompt`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `entity_prompt` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `entity_id` int(11) NOT NULL,
-  `prompt` varchar(250) NOT NULL,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -341,13 +325,13 @@ CREATE TABLE `intent_variable_prompt` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `intent_variables`
+-- Table structure for table `intent_variables_TOBE_DELETED`
 --
 
-DROP TABLE IF EXISTS `intent_variables`;
+DROP TABLE IF EXISTS `intent_variables_TOBE_DELETED`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `intent_variables` (
+CREATE TABLE `intent_variables_TOBE_DELETED` (
   `intent_id` varchar(50) NOT NULL,
   `entity_id` varchar(50) NOT NULL,
   `aiid` varchar(50) NOT NULL,
@@ -395,7 +379,8 @@ CREATE TABLE `memoryIntent` (
   `lastAccess` datetime NOT NULL,
   PRIMARY KEY (`aiid`,`chatId`),
   UNIQUE KEY `idx_memoryIntent_aiid_chatId_name` (`aiid`,`chatId`,`name`),
-  KEY `idx_memoryIntent_lastAccess` (`lastAccess`)
+  KEY `idx_memoryIntent_lastAccess` (`lastAccess`),
+  KEY `idx_aiid` (`aiid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -451,9 +436,10 @@ CREATE TABLE `users` (
   `client_token` varchar(250) NOT NULL,
   `last_name` varchar(30) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `valid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id_UNIQUE` (`dev_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -500,9 +486,9 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`localhost` PROCEDURE `addAI`(IN `param_aiid` varchar(50), IN `param_ai_name` varchar(50), IN `param_ai_description` varchar(250),IN `param_dev_id` varchar(50), IN `param_is_private` tinyint(1),IN `param_deep_learning_error` double,IN `param_deep_learning_status` tinyint(4),IN `param_shallow_learning_status` int(11),IN `param_ai_status` varchar(50),IN `param_client_token` varchar(250),IN `param_ai_trainingfile` text)
     MODIFIES SQL DATA
-BEGIN
+BEGIN
 	insert into ai (aiid, ai_name, ai_description,dev_id, is_private,deep_learning_error,deep_learning_status,shallow_learning_status,ai_status,client_token,ai_trainingfile)
-                                 values (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status, param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile);
+                                 values (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status, param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -519,11 +505,11 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `addEntity`(
- IN in_dev_id VARCHAR(50),
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `addEntity`(
+ IN in_dev_id VARCHAR(50),
  IN in_name VARCHAR(250))
-BEGIN
-	INSERT INTO `entity` (`dev_id`, `name`) VALUES (`in_dev_id`, `in_name`);
+BEGIN
+	INSERT INTO `entity` (`dev_id`, `name`) VALUES (`in_dev_id`, `in_name`);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -540,14 +526,14 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `addEntityValue`(
- IN in_dev_id VARCHAR(50),
- IN in_name VARCHAR(250),
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `addEntityValue`(
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250),
  IN in_value VARCHAR(250))
-BEGIN
-	INSERT INTO `entity_value` (`entity_id`,`value`)
-    SELECT `id`, `in_value` FROM `entity`
-    WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`;
+BEGIN
+	INSERT INTO `entity_value` (`entity_id`,`value`)
+    SELECT `id`, `in_value` FROM `entity`
+    WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -564,15 +550,15 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentResponse`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_name VARCHAR(250),
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentResponse`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
  IN in_response VARCHAR(250))
-BEGIN
-	INSERT INTO `intent_response` (`intent_id`, `response`)
-    SELECT `id`, `in_response` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
+BEGIN
+	INSERT INTO `intent_response` (`intent_id`, `response`)
+    SELECT `id`, `in_response` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -589,15 +575,15 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentUserSays`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_name VARCHAR(250),
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentUserSays`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
  IN in_says VARCHAR(250))
-BEGIN
-	INSERT INTO `intent_user_says` (`intent_id`, `says`)
-    SELECT `id`, `in_says` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
+BEGIN
+	INSERT INTO `intent_user_says` (`intent_id`, `says`)
+    SELECT `id`, `in_says` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -614,23 +600,23 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentVariablePrompt`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_variable_id INT,
- IN in_prompt VARCHAR(250)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addIntentVariablePrompt`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT,
+ IN in_prompt VARCHAR(250)
  )
-BEGIN
-    
-	INSERT INTO `intent_variable_prompt` (`intent_variable_id`, `prompt`)   
-    SELECT `intent_variable`.`id`, `in_prompt` 
-    FROM `intent_variable`, `intent`
-    WHERE `in_intent_variable_id` = `intent_variable`.`id`
-    AND `intent_variable`.`intent_id` = `intent`.`id`
-    AND `in_aiid` = `intent`.`aiid`
-    AND `intent`.`aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
-	    
+BEGIN
+
+	INSERT INTO `intent_variable_prompt` (`intent_variable_id`, `prompt`)
+    SELECT `intent_variable`.`id`, `in_prompt`
+    FROM `intent_variable`, `intent`
+    WHERE `in_intent_variable_id` = `intent_variable`.`id`
+    AND `intent_variable`.`intent_id` = `intent`.`id`
+    AND `in_aiid` = `intent`.`aiid`
+    AND `intent`.`aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -647,19 +633,19 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addUpdateIntent`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_name varchar(250),
- IN in_topic_in varchar(250),
- IN in_topic_out varchar(250)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addUpdateIntent`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name varchar(250),
+ IN in_topic_in varchar(250),
+ IN in_topic_out varchar(250)
  )
-BEGIN
-	INSERT INTO `intent` (`aiid`, `name`, `topic_in`, `topic_out`)
-    SELECT `aiid`, `in_name`, `in_topic_in`, `in_topic_out` 
-    FROM ai 
-    WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`
-    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`;
+BEGIN
+	INSERT INTO `intent` (`aiid`, `name`, `topic_in`, `topic_out`)
+    SELECT `aiid`, `in_name`, `in_topic_in`, `in_topic_out`
+    FROM ai
+    WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`
+    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -676,36 +662,36 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addUpdateIntentVariable`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_name VARCHAR(250),
- IN in_entity_name VARCHAR(250),
- IN in_required int(1),
- IN in_n_prompts int,
- IN in_value varchar(250)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `addUpdateIntentVariable`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_name VARCHAR(250),
+ IN in_entity_name VARCHAR(250),
+ IN in_required int(1),
+ IN in_n_prompts int,
+ IN in_value varchar(250)
  )
-BEGIN
-	DECLARE update_count INT;
-    
-	INSERT INTO `intent_variable` (`intent_id`, `entity_id`, `required`, `n_prompts`, `value`)
-    SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`
-	FROM `intent`, `entity` 
-    WHERE `intent`.`id` = 
-		(SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
-	AND `entity`.`id` =
-		(SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`)
-	ON DUPLICATE KEY UPDATE
-		`required`=`in_required`, `n_prompts`=`in_n_prompts`, `value`=`in_value`, 
-        `entity_id`= (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`),
-        `dummy` = NOT `dummy`,
-        `id` = LAST_INSERT_ID(`intent_variable`.`id`);
-        
-    SET update_count = row_count();
-        
-	SELECT update_count AS `update`, IF (update_count>0, last_insert_id(), -1) AS `affected_id`;
-	    
+BEGIN
+	DECLARE update_count INT;
+
+	INSERT INTO `intent_variable` (`intent_id`, `entity_id`, `required`, `n_prompts`, `value`)
+    SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`
+	FROM `intent`, `entity`
+    WHERE `intent`.`id` =
+		(SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
+	AND `entity`.`id` =
+		(SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`)
+	ON DUPLICATE KEY UPDATE
+		`required`=`in_required`, `n_prompts`=`in_n_prompts`, `value`=`in_value`,
+        `entity_id`= (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`),
+        `dummy` = NOT `dummy`,
+        `id` = LAST_INSERT_ID(`intent_variable`.`id`);
+
+    SET update_count = row_count();
+
+	SELECT update_count AS `update`, IF (update_count>0, last_insert_id(), -1) AS `affected_id`;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -724,9 +710,9 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `addUser`(IN `username` VARCHAR(50), IN `email` TINYTEXT, IN `password` VARCHAR(64), IN `password_salt` VARCHAR(250), IN `first_name	` VARCHAR(30), IN `last_name` VARCHAR(30), IN `dev_token` VARCHAR(250), IN `plan_id` INT, IN `dev_id` VARCHAR(50), IN `client_token` VARCHAR(250))
     MODIFIES SQL DATA
-BEGIN
-INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`, `client_token`) 
-VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id, client_token);
+BEGIN
+INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`, `client_token`)
+VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id, client_token);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -766,7 +752,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiDeleter`@`localhost` PROCEDURE `deleteAI`(IN `param_aiid` varchar(50))
     MODIFIES SQL DATA
-BEGIN
+BEGIN
 	delete from ai where aiid=param_aiid;
 END ;;
 DELIMITER ;
@@ -806,8 +792,27 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiDeleter`@`localhost` PROCEDURE `deleteAllAIs`(IN `param_devid` varchar(50))
     MODIFIES SQL DATA
-BEGIN
+BEGIN
 	delete from ai where dev_id=param_devid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteAllMemoryIntents` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`localhost` PROCEDURE `deleteAllMemoryIntents`(IN `param_aiid` VARCHAR(50))
+BEGIN
+	DELETE FROM memoryIntent WHERE aiid = param_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -824,11 +829,11 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `deleteEntity`( 
- IN in_dev_id VARCHAR(50),
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `deleteEntity`(
+ IN in_dev_id VARCHAR(50),
  IN in_name VARCHAR(250))
-BEGIN
-	DELETE FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`;
+BEGIN
+	DELETE FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -845,13 +850,13 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `deleteEntityValue`( 
- IN in_dev_id VARCHAR(50),
- IN in_name VARCHAR(250), 
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `deleteEntityValue`(
+ IN in_dev_id VARCHAR(50),
+ IN in_name VARCHAR(250),
  IN in_value VARCHAR(250))
-BEGIN
-	DELETE FROM `entity_value` WHERE `in_value`=`value` AND `entity_id`= 
-    (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`);
+BEGIN
+	DELETE FROM `entity_value` WHERE `in_value`=`value` AND `entity_id`=
+    (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_name`=`name`);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -868,18 +873,18 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntent`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_name varchar(250)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntent`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name varchar(250)
  )
-BEGIN
-	DELETE FROM `intent` 
-    WHERE `in_aiid`=`aiid`
-    AND `in_name`=`name`
-    AND `aiid` IN 
-    (SELECT `aiid` FROM ai 
-    WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`);
+BEGIN
+	DELETE FROM `intent`
+    WHERE `in_aiid`=`aiid`
+    AND `in_name`=`name`
+    AND `aiid` IN
+    (SELECT `aiid` FROM ai
+    WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -896,16 +901,16 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentResponse`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_name VARCHAR(250),
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentResponse`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
  IN in_response VARCHAR(250))
-BEGIN
-	DELETE FROM `intent_response`
-	WHERE `in_response`=`response` AND `intent_id`=
-    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+BEGIN
+	DELETE FROM `intent_response`
+	WHERE `in_response`=`response` AND `intent_id`=
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -922,16 +927,16 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentUserSays`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_name VARCHAR(250),
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentUserSays`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_name VARCHAR(250),
  IN in_says VARCHAR(250))
-BEGIN
-	DELETE FROM `intent_user_says`
-	WHERE `in_says`=`says` AND `intent_id`=
-    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+BEGIN
+	DELETE FROM `intent_user_says`
+	WHERE `in_says`=`says` AND `intent_id`=
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -948,19 +953,19 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentVariable`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_variable_id INT
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentVariable`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT
  )
-BEGIN
-
-	DELETE FROM `intent_variable`
-    WHERE `in_intent_variable_id`=`intent_variable`.`id`
-    AND `intent_id` IN 
-		(SELECT `id` FROM `intent` WHERE `in_aiid`=`aiid` AND `in_aiid` IN
-		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
-	    
+BEGIN
+
+	DELETE FROM `intent_variable`
+    WHERE `in_intent_variable_id`=`intent_variable`.`id`
+    AND `intent_id` IN
+		(SELECT `id` FROM `intent` WHERE `in_aiid`=`aiid` AND `in_aiid` IN
+		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -977,25 +982,25 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentVariablePrompt`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_variable_id INT,
- IN in_prompt VARCHAR(250)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `deleteIntentVariablePrompt`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT,
+ IN in_prompt VARCHAR(250)
  )
-BEGIN
-
-    DELETE FROM `intent_variable_prompt` WHERE
-    `intent_variable_prompt`.`intent_variable_id`=`in_intent_variable_id` AND
-    `intent_variable_prompt`.`prompt`=`in_prompt` AND
-	`in_intent_variable_id` IN 
-    (SELECT `intent_variable`.`id` 
-    FROM `intent_variable`, `intent`
-    WHERE `intent_variable`.`intent_id` = `intent`.`id`
-    AND `in_aiid` = `intent`.`aiid`
-    AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
-	    
+BEGIN
+
+    DELETE FROM `intent_variable_prompt` WHERE
+    `intent_variable_prompt`.`intent_variable_id`=`in_intent_variable_id` AND
+    `intent_variable_prompt`.`prompt`=`in_prompt` AND
+	`in_intent_variable_id` IN
+    (SELECT `intent_variable`.`id`
+    FROM `intent_variable`, `intent`
+    WHERE `intent_variable`.`intent_id` = `intent`.`id`
+    AND `in_aiid` = `intent`.`aiid`
+    AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1014,7 +1019,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`userDeleter`@`localhost` PROCEDURE `deleteUser`(IN `param_devid` varchar(50))
     MODIFIES SQL DATA
-BEGIN
+BEGIN
 	delete from users where dev_id=param_devid;
 END ;;
 DELIMITER ;
@@ -1034,8 +1039,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAI`(IN `param_aiid` VARCHAR(50))
     READS SQL DATA
-BEGIN
-	SELECT * FROM ai WHERE aiid=param_aiid;
+BEGIN
+	SELECT * FROM ai WHERE aiid=param_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1062,36 +1067,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getAiIntentVariables` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getAiIntentVariables`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50)
- )
-BEGIN
-
-	SELECT `intent`.`name` as `intent_name`, `entity`.`name` as `entity_name`, `intent_variable`.`required`, `intent_variable`.`n_prompts` 
-	FROM `intent`, `intent_variable`, `entity`
-	WHERE `intent`.`aiid`=`in_aiid`
-	AND `intent_variable`.`intent_id` = `intent`.`id`
-	AND `intent_variable`.`entity_id` = `entity`.`id`
-	AND `aiid` IN 
-		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
-
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getAIs` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1102,10 +1077,31 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAIs`(IN `param_devid` varchar(50))
+CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAIs`(IN `param_devid` VARCHAR(50))
     READS SQL DATA
-BEGIN
+BEGIN
 	SELECT * FROM ai WHERE dev_id=param_devid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getAiTrainingFile` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAiTrainingFile`(IN `param_aiid` varchar(50))
+    READS SQL DATA
+BEGIN
+
+	SELECT ai_trainingfile FROM ai WHERE aiid=param_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1164,9 +1160,9 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`hutoma_caller`@`localhost` PROCEDURE `getClientToken`(IN `id` INT)
     NO SQL
-BEGIN
-SELECT `client_token` FROM `users` 
-WHERE `id`=id;
+BEGIN
+SELECT `client_token` FROM `users`
+WHERE `id`=id;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1186,8 +1182,8 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getDebug`(IN `l1` INT UNSIGNED)
     READS SQL DATA
     COMMENT 'this is a test procedure to help confirm functionality'
-SELECT * 
-FROM `debug` 
+SELECT *
+FROM `debug`
 LIMIT 0 , l1 ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1206,8 +1202,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`hutoma_caller`@`localhost` PROCEDURE `getDevToken`(IN `uid` INT)
     NO SQL
-BEGIN
-SELECT `dev_token` FROM `users` WHERE `id` = 8;
+BEGIN
+SELECT `dev_token` FROM `users` WHERE `id` = 8;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1226,8 +1222,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`domainsReader`@`localhost` PROCEDURE `getDomains`()
     READS SQL DATA
-BEGIN
-  SELECT * FROM `domains`;
+BEGIN
+  SELECT * FROM `domains`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1246,8 +1242,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`domainsReader`@`localhost` PROCEDURE `getDomainsAndUserActiveDomains`(IN `param_dev_id` VARCHAR(50), IN `param_aiid` VARCHAR(50))
     READS SQL DATA
-BEGIN
-  SELECT * FROM `domains` AS d LEFT OUTER JOIN ( SELECT * FROM `userAIDomains` WHERE `dev_id` = param_dev_id AND  `aiid`= param_aiid ) AS u ON u.dom_id = d.dom_id;
+BEGIN
+  SELECT * FROM `domains` AS d LEFT OUTER JOIN ( SELECT * FROM `userAIDomains` WHERE `dev_id` = param_dev_id AND  `aiid`= param_aiid ) AS u ON u.dom_id = d.dom_id;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1264,33 +1260,10 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntities`( 
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntities`(
  IN in_dev_id VARCHAR(50))
-BEGIN
-	SELECT `name` FROM `entity` WHERE `in_dev_id`=`dev_id`;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getEntityPrompts` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntityPrompts`(IN `in_dev_id` VARCHAR(50), IN `in_name` VARCHAR(250))
-    READS SQL DATA
-BEGIN
-	SELECT `entity_prompt`.`prompt` FROM `entity`,`entity_prompt` 
-    WHERE `entity`.`dev_id`=`in_dev_id` 
-    AND `entity`.`name`=`in_name`
-    AND `entity`.`id`=`entity_prompt`.`entity_id`;
+BEGIN
+	SELECT `name` FROM `entity` WHERE `in_dev_id`=`dev_id`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1307,14 +1280,14 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntityValues`( 
- IN in_dev_id VARCHAR(50),
+CREATE DEFINER=`entityUser`@`localhost` PROCEDURE `getEntityValues`(
+ IN in_dev_id VARCHAR(50),
  IN in_name VARCHAR(250))
-BEGIN
-	SELECT `entity_value`.`value` FROM `entity`,`entity_value` 
-    WHERE `entity`.`dev_id`=`in_dev_id` 
-    AND `entity`.`name`=`in_name`
-    AND `entity`.`id`=`entity_value`.`entity_id`;
+BEGIN
+	SELECT `entity_value`.`value` FROM `entity`,`entity_value`
+    WHERE `entity`.`dev_id`=`in_dev_id`
+    AND `entity`.`name`=`in_name`
+    AND `entity`.`id`=`entity_value`.`entity_id`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1333,8 +1306,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`integrReader`@`localhost` PROCEDURE `getIntegrations`()
     READS SQL DATA
-BEGIN
-  SELECT * FROM `integrations`;
+BEGIN
+  SELECT * FROM `integrations`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1357,10 +1330,10 @@ CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntent`(
  IN in_name VARCHAR(250))
 BEGIN
 	SELECT `id`, `name`, `topic_in`, `topic_out`
-	FROM `intent` 
+	FROM `intent`
     WHERE `intent`.`name`=`in_name`
     AND `intent`.`id` IN
-		(SELECT `intent`.`id` from `intent`, `ai` 
+		(SELECT `intent`.`id` from `intent`, `ai`
 		WHERE `ai`.`dev_id` = `in_dev_id`
 		AND `ai`.`aiid` = `in_aiid`
 		AND `intent`.`aiid` = `in_aiid`);
@@ -1380,17 +1353,17 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentIDs`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentIDs`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50)
  )
-BEGIN
-
-	SELECT `intent`.`id` from `intent`, `ai` 
-    WHERE `ai`.`dev_id` = `in_dev_id`
-    AND `ai`.`aiid` = `in_aiid`
-	AND `intent`.`aiid` = `in_aiid`;
-    		
+BEGIN
+
+	SELECT `intent`.`id` from `intent`, `ai`
+    WHERE `ai`.`dev_id` = `in_dev_id`
+    AND `ai`.`aiid` = `in_aiid`
+	AND `intent`.`aiid` = `in_aiid`;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1407,15 +1380,15 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentResponses`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentResponses`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
  IN in_name VARCHAR(250))
-BEGIN
-	SELECT `response`
-	FROM `intent_response` WHERE `intent_id` IN
-    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+BEGIN
+	SELECT `response`
+	FROM `intent_response` WHERE `intent_id` IN
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1438,7 +1411,7 @@ CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntents`(
 BEGIN
 	SELECT `id`, `name`
 	FROM `intent` WHERE `intent`.`id` IN
-		(SELECT `intent`.`id` from `intent`, `ai` 
+		(SELECT `intent`.`id` from `intent`, `ai`
 		WHERE `ai`.`dev_id` = `in_dev_id`
 		AND `ai`.`aiid` = `in_aiid`
 		AND `intent`.`aiid` = `in_aiid`);
@@ -1458,15 +1431,15 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentUserSays`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentUserSays`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
  IN in_name VARCHAR(250))
-BEGIN
-	SELECT `says`
-	FROM `intent_user_says` WHERE `intent_id` IN
-    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+BEGIN
+	SELECT `says`
+	FROM `intent_user_says` WHERE `intent_id` IN
+    (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1483,20 +1456,20 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariableIDs`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_id INT
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariableIDs`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_id INT
  )
-BEGIN
-
-	SELECT `intent_variable`.`id` FROM `intent_variable`, `intent`, `ai` 
-    WHERE `ai`.`dev_id` = `in_dev_id`
-    AND `ai`.`aiid` = `in_aiid`
-	AND `intent`.`aiid` = `in_aiid`
-    AND `intent_variable`.`intent_id` = `in_intent_id`
-    AND `intent_variable`.`intent_id` = `intent`.`id`;    
-    		
+BEGIN
+
+	SELECT `intent_variable`.`id` FROM `intent_variable`, `intent`, `ai`
+    WHERE `ai`.`dev_id` = `in_dev_id`
+    AND `ai`.`aiid` = `in_aiid`
+	AND `intent`.`aiid` = `in_aiid`
+    AND `intent_variable`.`intent_id` = `in_intent_id`
+    AND `intent_variable`.`intent_id` = `intent`.`id`;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1513,23 +1486,23 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariablePrompts`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_variable_id INT
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariablePrompts`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_variable_id INT
  )
-BEGIN
-	
-    SELECT `prompt` FROM `intent_variable_prompt` WHERE
-    `intent_variable_prompt`.`intent_variable_id`=`in_intent_variable_id` AND
-	`in_intent_variable_id` IN 
-    (SELECT `intent_variable`.`id` 
-    FROM `intent_variable`, `intent`
-    WHERE `intent_variable`.`intent_id` = `intent`.`id`
-    AND `in_aiid` = `intent`.`aiid`
-    AND `in_aiid` IN
-    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
-	    
+BEGIN
+
+    SELECT `prompt` FROM `intent_variable_prompt` WHERE
+    `intent_variable_prompt`.`intent_variable_id`=`in_intent_variable_id` AND
+	`in_intent_variable_id` IN
+    (SELECT `intent_variable`.`id`
+    FROM `intent_variable`, `intent`
+    WHERE `intent_variable`.`intent_id` = `intent`.`id`
+    AND `in_aiid` = `intent`.`aiid`
+    AND `in_aiid` IN
+    (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1546,26 +1519,26 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariables`(
- IN in_dev_id VARCHAR(50),
- IN in_aiid VARCHAR(50),
- IN in_intent_name VARCHAR(250)
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getIntentVariables`(
+ IN in_dev_id VARCHAR(50),
+ IN in_aiid VARCHAR(50),
+ IN in_intent_name VARCHAR(250)
  )
-BEGIN
-
-	SELECT 
-    `intent_variable`.`id` AS `id`, 
-    `entity`.`name` AS `entity_name`, 
-    `intent_variable`.`required` AS `required`, 
-    `intent_variable`.`n_prompts` AS `n_prompts`,
-    `intent_variable`.`value` AS `value`
-	FROM `intent_variable`, `entity`    
-    WHERE `intent_variable`.`intent_id` = 
-		(SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
-    AND `entity`.`id` =
-		(SELECT `id` FROM `entity` WHERE `id` = `intent_variable`.`entity_id` AND `in_dev_id`=`dev_id`);
-	    
+BEGIN
+
+	SELECT
+    `intent_variable`.`id` AS `id`,
+    `entity`.`name` AS `entity_name`,
+    `intent_variable`.`required` AS `required`,
+    `intent_variable`.`n_prompts` AS `n_prompts`,
+    `intent_variable`.`value` AS `value`
+	FROM `intent_variable`, `entity`
+    WHERE `intent_variable`.`intent_id` =
+		(SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+		(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
+    AND `entity`.`id` =
+		(SELECT `id` FROM `entity` WHERE `id` = `intent_variable`.`entity_id` AND `in_dev_id`=`dev_id`);
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1582,9 +1555,9 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`localhost` PROCEDURE `getMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
-BEGIN
-	SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId AND `name` = param_name;
+CREATE DEFINER=`userTableReader`@`localhost` PROCEDURE `getMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
+BEGIN
+	SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId AND `name` = param_name;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1601,9 +1574,9 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`localhost` PROCEDURE `getMemoryIntentsForChat`(IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
-BEGIN
-	SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId;
+CREATE DEFINER=`userTableReader`@`localhost` PROCEDURE `getMemoryIntentsForChat`(IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
+BEGIN
+	SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1622,12 +1595,16 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`localhost` PROCEDURE `getUser`(IN `uname` VARCHAR(50), IN `checkEmail` BOOLEAN)
     READS SQL DATA
-BEGIN
-IF checkEmail THEN
-  SELECT `email`, `id`, `password`, `password_salt`, `attempt` FROM users WHERE `username`=uname OR `email`=uname ORDER BY `id` LIMIT 1;
-ELSE
-  SELECT `email`, `id`, `password`, `attempt` FROM users WHERE `username`=uname ORDER BY `id` LIMIT 1;
-END IF;
+BEGIN
+IF checkEmail THEN
+  SELECT `email`, `id`, `password`, `password_salt`, `attempt`
+  FROM users
+  WHERE `valid`=1 AND (`username`=uname OR `email`=uname) ORDER BY `id` LIMIT 1;
+ELSE
+  SELECT `email`, `id`, `password`, `attempt`
+  FROM users
+  WHERE `valid`=1 AND `username`=uname ORDER BY `id` LIMIT 1;
+END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1646,13 +1623,13 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`localhost` PROCEDURE `getUserById`(IN `idValue` INT(11), IN `columnValues` TINYTEXT)
     READS SQL DATA
-BEGIN
-SET @s=CONCAT('SELECT ',columnValues,' FROM users WHERE `id`=', idValue, ' ORDER BY `id` LIMIT 1');
-PREPARE stmt1 FROM @s;
-EXECUTE stmt1;
-DEALLOCATE PREPARE stmt1;
-
-
+BEGIN
+SET @s=CONCAT('SELECT ',columnValues,' FROM users WHERE `id`=', idValue, ' ORDER BY `id` LIMIT 1');
+PREPARE stmt1 FROM @s;
+EXECUTE stmt1;
+DEALLOCATE PREPARE stmt1;
+
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1671,16 +1648,16 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`localhost` PROCEDURE `getUserId`(IN `nameOfUser` VARCHAR(50) CHARSET latin1, IN `checkEmail` BOOLEAN)
     READS SQL DATA
-BEGIN
-IF checkEmail THEN
-  SELECT id 
-  FROM users
-  WHERE username=nameOfUser OR email=nameOfUser;
-ELSE
-  SELECT id 
-  FROM users
-  WHERE username=nameOfUser;
-END IF;
+BEGIN
+IF checkEmail THEN
+  SELECT id
+  FROM users
+  WHERE username=nameOfUser OR email=nameOfUser;
+ELSE
+  SELECT id
+  FROM users
+  WHERE username=nameOfUser;
+END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1699,10 +1676,10 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`chatlogWriter`@`localhost` PROCEDURE `insertQuestion`(IN `param_dev_id` VARCHAR(50), IN `param_message_from` VARCHAR(50), IN `param_message_to` VARCHAR(50), IN `param_question` TEXT)
     MODIFIES SQL DATA
-BEGIN
-	insert into chatlog (dev_id, message_from, message_to, question)
-                     values (param_dev_id, param_message_from, param_message_to, param_question);
-	select last_insert_id();
+BEGIN
+	insert into chatlog (dev_id, message_from, message_to, question)
+                     values (param_dev_id, param_message_from, param_message_to, param_question);
+	select last_insert_id();
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1721,8 +1698,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`hutoma_caller`@`localhost` PROCEDURE `insertResetToken`(IN `token` VARCHAR(40), IN `uid` INT)
     NO SQL
-BEGIN
-INSERT INTO `resetTokens`(`token`, `uid`) VALUES (token,uid);
+BEGIN
+INSERT INTO `resetTokens`(`token`, `uid`) VALUES (token,uid);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1741,36 +1718,36 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`domainsWriter`@`localhost` PROCEDURE `insertUserActiveDomain`(IN `param_dev_id` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_dom_id` VARCHAR(50), IN `param_active` BOOLEAN)
     MODIFIES SQL DATA
-BEGIN
-	IF EXISTS (
-        		SELECT 1 = 1 
-               	  FROM userAIDomains 
-               	 WHERE dom_id = param_dom_id
-        		   AND aiid = param_aiid 
-               	   AND dev_id = param_dev_id
-    		  ) 
-	THEN
-				UPDATE userAIDomains 
-			   	   SET active = param_active
-			 	 WHERE dom_id = param_dom_id
-			   	   AND aiid = param_aiid 
-			       AND dev_id = param_dev_id;
-	ELSEIF ( param_active=1) THEN
-		   INSERT INTO userAIDomains (
-            							dev_id, 
-            							aiid, 
-            							dom_id,
-            							active,
-            							created_on
-        						  	 ) 
-				VALUES (
-            			param_dev_id,
-            			param_aiid,
-            			param_dom_id,
-            			param_active,
-            			NOW()
-              	);
-	END IF;
+BEGIN
+	IF EXISTS (
+        		SELECT 1 = 1
+               	  FROM userAIDomains
+               	 WHERE dom_id = param_dom_id
+        		   AND aiid = param_aiid
+               	   AND dev_id = param_dev_id
+    		  )
+	THEN
+				UPDATE userAIDomains
+			   	   SET active = param_active
+			 	 WHERE dom_id = param_dom_id
+			   	   AND aiid = param_aiid
+			       AND dev_id = param_dev_id;
+	ELSEIF ( param_active=1) THEN
+		   INSERT INTO userAIDomains (
+            							dev_id,
+            							aiid,
+            							dom_id,
+            							active,
+            							created_on
+        						  	 )
+				VALUES (
+            			param_dev_id,
+            			param_aiid,
+            			param_dom_id,
+            			param_active,
+            			NOW()
+              	);
+	END IF;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1789,42 +1766,64 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`rateLimiter`@`localhost` PROCEDURE `rate_limit_check`(IN `in_dev_id` VARCHAR(50) CHARSET utf8, IN `in_rate_key` VARCHAR(50) CHARSET utf8, IN `token_ceiling` FLOAT, IN `token_increment_delay_seconds` FLOAT)
     MODIFIES SQL DATA
-BEGIN
-
-DECLARE time_now BIGINT;
-
-DECLARE var_uuid VARCHAR(32);
-
-SET var_uuid = uuid(); 
-
-SET time_now = CONV(CONCAT(SUBSTR(var_uuid, 16, 3),SUBSTR(var_uuid, 10, 4),SUBSTR(var_uuid, 1, 8)), 16, 10) / 10000 - (141427 * 24 * 60 * 60); 
-
-INSERT INTO api_rate_limit (dev_id, rate_key, tokens, token_update_time) 
-
-VALUES (in_dev_id, in_rate_key, token_ceiling, time_now)
-
-ON DUPLICATE KEY UPDATE 
-
-tokens = LEAST(tokens + (time_now - token_update_time)/(1000.0 * token_increment_delay_seconds), token_ceiling),
-
-token_update_time = time_now;
-
-UPDATE api_rate_limit SET 
-
-tokens = tokens-1.0, 
-
-expires = now() + INTERVAL (token_ceiling * token_increment_delay_seconds) SECOND
-
-WHERE
-
-dev_id = in_dev_id AND rate_key = in_rate_key AND
-
-tokens >= 1.0;
-
-SELECT IF(ROW_COUNT()>0, 0, 1) AS rate_limit, tokens FROM api_rate_limit WHERE
-
-dev_id = in_dev_id AND rate_key = in_rate_key;
-
+BEGIN
+
+DECLARE time_now BIGINT;
+
+DECLARE var_uuid VARCHAR(32);
+
+SET var_uuid = uuid();
+
+SET time_now = CONV(CONCAT(SUBSTR(var_uuid, 16, 3),SUBSTR(var_uuid, 10, 4),SUBSTR(var_uuid, 1, 8)), 16, 10) / 10000 - (141427 * 24 * 60 * 60);
+
+INSERT INTO api_rate_limit (dev_id, rate_key, tokens, token_update_time)
+
+VALUES (in_dev_id, in_rate_key, token_ceiling, time_now)
+
+ON DUPLICATE KEY UPDATE
+
+tokens = LEAST(tokens + (time_now - token_update_time)/(1000.0 * token_increment_delay_seconds), token_ceiling),
+
+token_update_time = time_now;
+
+UPDATE api_rate_limit SET
+
+tokens = tokens-1.0,
+
+expires = now() + INTERVAL (token_ceiling * token_increment_delay_seconds) SECOND
+
+WHERE
+
+dev_id = in_dev_id AND rate_key = in_rate_key AND
+
+tokens >= 1.0;
+
+SELECT IF(ROW_COUNT()>0, 0, 1) AS rate_limit, tokens FROM api_rate_limit WHERE
+
+dev_id = in_dev_id AND rate_key = in_rate_key;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `setRnnStatus` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`rnnWriter`@`%` PROCEDURE `setRnnStatus`(IN `status` INT, IN `param_devid` VARCHAR(50), IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+	UPDATE `ai`
+    SET `NNActive`= status
+	WHERE `aiid` = param_aiid AND `dev_id` = param_devid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1843,11 +1842,11 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`localhost` PROCEDURE `updateAI`(IN `param_aiid` VARCHAR(50), IN `param_description` VARCHAR(250), IN `param_private` TINYINT(1) UNSIGNED)
     MODIFIES SQL DATA
-BEGIN
-	UPDATE ai SET
-		ai_description=param_description,
-		is_private=param_private
-	WHERE aiid=param_aiid;
+BEGIN
+	UPDATE ai SET
+		ai_description=param_description,
+		is_private=param_private
+	WHERE aiid=param_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1865,11 +1864,11 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`userTableWriter`@`localhost` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50), IN `param_variables` TEXT)
-BEGIN
-	INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess)
-		VALUES(param_aiid, param_chatId, param_name, param_variables, NOW())
-		
-	ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW();
+BEGIN
+	INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess)
+		VALUES(param_aiid, param_chatId, param_name, param_variables, NOW())
+
+	ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW();
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1888,7 +1887,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`localhost` PROCEDURE `updateTrainingData`(IN `param_aiid` varchar(50), IN `param_ai_trainingfile` text)
     MODIFIES SQL DATA
-BEGIN
+BEGIN
 	update ai set ai_trainingfile=param_ai_trainingfile where aiid=param_aiid;
 END ;;
 DELIMITER ;
@@ -1908,8 +1907,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`userTableWriter`@`localhost` PROCEDURE `updateUserLoginAttempts`(IN `userId` INT(11), IN `newAttempt` VARCHAR(15))
     MODIFIES SQL DATA
-BEGIN
-	UPDATE `users` SET `attempt` = newAttempt WHERE `id`=userId;
+BEGIN
+	UPDATE `users` SET `attempt` = newAttempt WHERE `id`=userId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1926,4 +1925,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-12 10:23:35
+-- Dump completed on 2016-10-13 14:53:15
