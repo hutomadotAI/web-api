@@ -7,12 +7,17 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
+
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,6 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -105,7 +112,7 @@ public class Database {
                     .add(deep_learning_error)
                     .add(deep_learning_status)
                     .add(shallow_learning_status)
-                    .add(status)
+                    .add(status.value())
                     .add(client_token)
                     .add(trainingFile)
                     .add(language == null ? null : language.toLanguageTag())
@@ -431,28 +438,6 @@ public class Database {
         }
     }
 
-    private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {
-        String localeString = rs.getString("ai_language");
-        String timezoneString = rs.getString("ai_timezone");
-        return new ApiAi(rs.getString("aiid"),
-                rs.getString("client_token"),
-                rs.getString("ai_name"),
-                rs.getString("ai_description"),
-                new DateTime(rs.getDate("created_on")),
-                rs.getBoolean("is_private"),
-                rs.getDouble("deep_learning_error"),
-                null /*training_debug_info*/,
-                rs.getString("deep_learning_status"),
-                getTrainingStatusValue(rs.getString("ai_status")),
-                null /*training file*/,
-                rs.getBoolean("ai_personality"),
-                rs.getDouble("ai_confidence"),
-                rs.getInt("ai_voice"),
-                // Java, being funny, can't follow rfc5646 so we need to replace the separator
-                localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
-                timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
-    }
-
     public void writeEntity(String devid, String entityOldName, ApiEntity entity) throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
@@ -498,6 +483,28 @@ public class Database {
             int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityName).executeUpdate();
             return rowCount > 0;
         }
+    }
+
+    private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {
+        String localeString = rs.getString("ai_language");
+        String timezoneString = rs.getString("ai_timezone");
+        return new ApiAi(rs.getString("aiid"),
+                rs.getString("client_token"),
+                rs.getString("ai_name"),
+                rs.getString("ai_description"),
+                new DateTime(rs.getDate("created_on")),
+                rs.getBoolean("is_private"),
+                rs.getDouble("deep_learning_error"),
+                null /*training_debug_info*/,
+                rs.getString("deep_learning_status"),
+                getTrainingStatusValue(rs.getString("ai_status")),
+                null /*training file*/,
+                rs.getBoolean("ai_personality"),
+                rs.getDouble("ai_confidence"),
+                rs.getInt("ai_voice"),
+                // Java, being funny, can't follow rfc5646 so we need to replace the separator
+                localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
+                timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
     }
 
     public static class DatabaseException extends Exception {
