@@ -16,6 +16,7 @@ public enum APIParameter {
     IntentName,
     EntityName,
     EntityJson,
+    IntentJson,
     AiConfidence,
     Timezone,
     Locale

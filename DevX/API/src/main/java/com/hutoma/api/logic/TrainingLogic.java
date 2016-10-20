@@ -3,14 +3,10 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiTrainingMaterials;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -46,7 +42,7 @@ public class TrainingLogic {
     private final Config config;
     private final MessageQueue messageQueue;
     private final HTMLExtractor htmlExtractor;
-    private final Database database;
+    private final DatabaseEntitiesIntents database;
     private final Tools tools;
     private final Logger logger;
     private final Validate validate;
@@ -54,7 +50,7 @@ public class TrainingLogic {
 
     @Inject
     public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
-                         Database database, Tools tools, Logger logger, Validate validate,
+                         DatabaseEntitiesIntents database, Tools tools, Logger logger, Validate validate,
                          IMemoryIntentHandler memoryIntentHandler) {
         this.config = config;
         this.messageQueue = messageQueue;
@@ -93,7 +89,7 @@ public class TrainingLogic {
                     }
 
                     return new ApiResult().setSuccessStatus("upload accepted",
-                            result.getEventCount() == 0 ? null : result.getEvents());
+                        result.getEventCount() == 0 ? null : result.getEvents());
 
                 // 1 = training file is a document
                 case 1:
@@ -331,9 +327,6 @@ public class TrainingLogic {
         }
     }
 
-    public static class UploadTooLargeException extends Exception {
-    }
-
     void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize) throws UploadTooLargeException {
         if (null != fileDetail) {
             if (fileDetail.getSize() > maxUploadFileSize) {
@@ -380,7 +373,7 @@ public class TrainingLogic {
             if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
                 lastHumanSentence = currentSentence;
                 validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
-                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
+                    lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
             } else {
                 // and we list the sentence
                 validConversation.add(currentSentence);
@@ -453,5 +446,8 @@ public class TrainingLogic {
             }
         }
         return source;
+    }
+
+    public static class UploadTooLargeException extends Exception {
     }
 }

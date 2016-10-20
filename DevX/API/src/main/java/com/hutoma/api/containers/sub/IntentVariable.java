@@ -12,6 +12,7 @@ public class IntentVariable {
     private boolean required;
     private int n_prompts;
     private String value;
+    private int id;
 
     private List<String> prompts;
 
@@ -21,6 +22,11 @@ public class IntentVariable {
         this.n_prompts = n_prompts;
         this.value = value;
         this.prompts = new ArrayList<>();
+    }
+
+    public IntentVariable(String entity_name, boolean required, int n_prompts, String value, int id) {
+        this(entity_name, required, n_prompts, value);
+        this.id = id;
     }
 
     public IntentVariable addPrompt(String prompt) {
@@ -42,5 +48,21 @@ public class IntentVariable {
 
     public List<String> getPrompts() {
         return this.prompts;
+    }
+
+    public void setPrompts(List<String> prompts) {
+        this.prompts = prompts;
+    }
+
+    public String getValue() {
+        return this.value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public int getId() {
+        return this.id;
     }
 }

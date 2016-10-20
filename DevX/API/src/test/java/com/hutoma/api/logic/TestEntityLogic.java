@@ -5,6 +5,7 @@ import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiResult;
@@ -31,7 +32,7 @@ public class TestEntityLogic {
     private final String UID = "uid";
     private final String ENTNAME = "entity";
     SecurityContext fakeContext;
-    Database fakeDatabase;
+    DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     Tools fakeTools;
     EntityLogic entityLogic;
@@ -40,7 +41,7 @@ public class TestEntityLogic {
     @Before
     public void setup() {
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         this.fakeContext = mock(SecurityContext.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(Logger.class);
@@ -139,7 +140,7 @@ public class TestEntityLogic {
 
     @Test
     public void testWriteEntity_RenameClash() throws Database.DatabaseException {
-        doThrow(new Database.DatabaseIntegrtityViolationException(new Exception("test"))).when(this.fakeDatabase).writeEntity(anyString(), anyString(), any());
+        doThrow(new Database.DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabase).writeEntity(anyString(), anyString(), any());
         final ApiResult result = this.entityLogic.writeEntity(this.DEVID, this.ENTNAME, new ApiEntity("nameclash"));
         Assert.assertEquals(400, result.getStatus().getCode());
     }

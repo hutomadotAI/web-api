@@ -11,10 +11,10 @@ import java.util.List;
 public class ApiIntent extends ApiResult {
 
     private final List<IntentVariable> variables = new ArrayList<>();
-    private final List<String> responses = new ArrayList<>();
     private final String intent_name;
     private final String topic_in;
     private final String topic_out;
+    private List<String> responses = new ArrayList<>();
     private List<String> user_says = new ArrayList<>();
 
     public ApiIntent(String intent_name, String topic_in, String topic_out) {
@@ -52,5 +52,21 @@ public class ApiIntent extends ApiResult {
 
     public void setUserSays(final List<String> userSays) {
         this.user_says = userSays;
+    }
+
+    public List<String> getResponses() {
+        return this.responses;
+    }
+
+    public void setResponses(List<String> responses) {
+        this.responses = responses;
+    }
+
+    public String getTopicIn() {
+        return this.topic_in;
+    }
+
+    public String getTopicOut() {
+        return this.topic_out;
     }
 }

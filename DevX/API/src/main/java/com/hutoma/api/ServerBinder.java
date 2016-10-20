@@ -8,10 +8,10 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.logic.*;
+import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.memory.SimpleEntityRecognizer;
-import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
@@ -44,6 +44,7 @@ public class ServerBinder extends AbstractBinder {
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
         bind(Database.class).to(Database.class);
+        bind(DatabaseEntitiesIntents.class).to(DatabaseEntitiesIntents.class);
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);

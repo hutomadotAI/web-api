@@ -5,39 +5,25 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiEntity;
-import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.AiDomain;
-import com.hutoma.api.containers.sub.AiIntegration;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.RateLimitStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
-
+import com.hutoma.api.containers.sub.*;
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Created by David MG on 02/08/2016.
  */
 public class Database {
 
-    private static final String LOGFROM = "database";
-    private final Logger logger;
-    private final Provider<DatabaseCall> callProvider;
-    Provider<DatabaseTransaction> transactionProvider;
+    protected static final String LOGFROM = "database";
+    protected final Logger logger;
+    protected final Provider<DatabaseCall> callProvider;
+    protected Provider<DatabaseTransaction> transactionProvider;
 
     @Inject
     public Database(Logger logger, Provider<DatabaseCall> callProvider, Provider<DatabaseTransaction> transactionProvider) {
@@ -101,25 +87,25 @@ public class Database {
                             final int shallow_learning_status, final TrainingStatus status, final String client_token,
                             final String trainingFile, final Locale language, final String timezoneString,
                             final double confidence, final boolean hasPersonality, final int voice)
-            throws DatabaseException {
+        throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI_v1", 16)
-                    .add(aiid)
-                    .add(name)
-                    .add(description)
-                    .add(devid)
-                    .add(is_private)
-                    .add(deep_learning_error)
-                    .add(deep_learning_status)
-                    .add(shallow_learning_status)
-                    .add(status.value())
-                    .add(client_token)
-                    .add(trainingFile)
-                    .add(language == null ? null : language.toLanguageTag())
-                    .add(timezoneString)
-                    .add(confidence)
-                    .add(hasPersonality)
-                    .add(voice);
+                .add(aiid)
+                .add(name)
+                .add(description)
+                .add(devid)
+                .add(is_private)
+                .add(deep_learning_error)
+                .add(deep_learning_status)
+                .add(shallow_learning_status)
+                .add(status.value())
+                .add(client_token)
+                .add(trainingFile)
+                .add(language == null ? null : language.toLanguageTag())
+                .add(timezoneString)
+                .add(confidence)
+                .add(hasPersonality)
+                .add(voice);
             return call.executeUpdate() > 0;
         }
     }
@@ -270,22 +256,6 @@ public class Database {
         throw new DatabaseException(new Exception("getAiIntegrationList unimplemented"));
     }
 
-    public List<String> getEntities(final String devid) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntities", 1).add(devid);
-            final ResultSet rs = call.executeQuery();
-            try {
-                final ArrayList<String> entities = new ArrayList<>();
-                while (rs.next()) {
-                    entities.add(rs.getString("name"));
-                }
-                return entities;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
                                         final JsonSerializer jsonSerializer)
         throws DatabaseException {
@@ -320,97 +290,6 @@ public class Database {
         }
     }
 
-    public ApiEntity getEntity(final String devid, final String entityName) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntityValues", 2).add(devid).add(entityName);
-            final ResultSet rs = call.executeQuery();
-            try {
-                final ArrayList<String> entityValues = new ArrayList<>();
-                while (rs.next()) {
-                    entityValues.add(rs.getString("value"));
-                }
-                return new ApiEntity(entityName, entityValues);
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
-    public List<String> getIntents(String devid, UUID aiid) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getIntents", 2).add(devid).add(aiid);
-            ResultSet rs = call.executeQuery();
-            ArrayList<String> intents = new ArrayList<>();
-            while (rs.next()) {
-                intents.add(rs.getString("name"));
-            }
-            return intents;
-        } catch (final SQLException sqle) {
-            throw new DatabaseException(sqle);
-        }
-    }
-
-    /***
-     * Gets a fully populated intent object
-     * including intent, usersays, variables and prompts
-     * @param devid owner dev
-     * @param aiid the aiid that owns the intent
-     * @param intentName
-     * @return an intent
-     * @throws DatabaseException if things go wrong
-     */
-    public ApiIntent getIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
-
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 3).add(devid).add(aiid).add(intentName).executeQuery();
-            if (!rs.next()) {
-                // the intent was not found at all
-                return null;
-            }
-
-            // build the intent
-            ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
-
-            // get the user triggers
-            ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                .add(devid).add(aiid).add(intentName).executeQuery();
-            while (saysRs.next()) {
-                intent.addUserSays(saysRs.getString("says"));
-            }
-
-            // get the list of responses
-            ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                .add(devid).add(aiid).add(intentName).executeQuery();
-            while (intentResponseRs.next()) {
-                intent.addResponse(intentResponseRs.getString("response"));
-            }
-
-            // get each intent variable
-            ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                .add(devid).add(aiid).add(intentName).executeQuery();
-            while (varRs.next()) {
-                int varID = varRs.getInt("id");
-                IntentVariable variable = new IntentVariable(
-                    varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
-
-                // for each variable get all its prompts
-                ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                    .add(devid).add(aiid).add(varID).executeQuery();
-                while (promptRs.next()) {
-                    variable.addPrompt(promptRs.getString("prompt"));
-                }
-
-                intent.addVariable(variable);
-            }
-
-            // nothing was written but this prevents an auto-rollback
-            transaction.commit();
-            return intent;
-        } catch (SQLException sqle) {
-            throw new DatabaseException(sqle);
-        }
-    }
-
     public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
         throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
@@ -438,75 +317,31 @@ public class Database {
         }
     }
 
-    public void writeEntity(String devid, String entityOldName, ApiEntity entity) throws DatabaseException {
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-
-            // add or update the entity
-            transaction.getDatabaseCall().initialise("addUpdateEntity", 3)
-                .add(devid).add(entityOldName).add(entity.getEntityName()).executeUpdate();
-
-            // read the entity's values
-            ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 2)
-                .add(devid).add(entity.getEntityName()).executeQuery();
-
-            // put them into a set
-            HashSet<String> currentValues = new HashSet<>();
-            while (valuesRs.next()) {
-                currentValues.add(valuesRs.getString("value"));
-            }
-
-            // for each new entity value, check if it was already there
-            for (String entityValue : entity.getEntityValueList()) {
-                // if it was then remove it, otherwise it is new - add it
-                if (!currentValues.remove(entityValue)) {
-                    transaction.getDatabaseCall().initialise("addEntityValue", 3)
-                        .add(devid).add(entity.getEntityName()).add(entityValue).executeUpdate();
-                }
-            }
-
-            // anything left over is an old obsolete value - delete it
-            for (String obsoleteEntityValue : currentValues) {
-                transaction.getDatabaseCall().initialise("deleteEntityValue", 3)
-                    .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).executeUpdate();
-            }
-
-            // commit everything
-            transaction.commit();
-
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    public boolean deleteEntity(String devid, String entityName) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityName).executeUpdate();
-            return rowCount > 0;
-        }
-    }
-
     private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {
         String localeString = rs.getString("ai_language");
         String timezoneString = rs.getString("ai_timezone");
         return new ApiAi(rs.getString("aiid"),
-                rs.getString("client_token"),
-                rs.getString("ai_name"),
-                rs.getString("ai_description"),
-                new DateTime(rs.getDate("created_on")),
-                rs.getBoolean("is_private"),
-                rs.getDouble("deep_learning_error"),
-                null /*training_debug_info*/,
-                rs.getString("deep_learning_status"),
-                getTrainingStatusValue(rs.getString("ai_status")),
-                null /*training file*/,
-                rs.getBoolean("ai_personality"),
-                rs.getDouble("ai_confidence"),
-                rs.getInt("ai_voice"),
-                // Java, being funny, can't follow rfc5646 so we need to replace the separator
-                localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
-                timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
+            rs.getString("client_token"),
+            rs.getString("ai_name"),
+            rs.getString("ai_description"),
+            new DateTime(rs.getDate("created_on")),
+            rs.getBoolean("is_private"),
+            rs.getDouble("deep_learning_error"),
+            null /*training_debug_info*/,
+            rs.getString("deep_learning_status"),
+            getTrainingStatusValue(rs.getString("ai_status")),
+            null /*training file*/,
+            rs.getBoolean("ai_personality"),
+            rs.getDouble("ai_confidence"),
+            rs.getInt("ai_voice"),
+            // Java, being funny, can't follow rfc5646 so we need to replace the separator
+            localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
+            timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
     }
 
+    /***
+     * General exception for database errors
+     */
     public static class DatabaseException extends Exception {
         public DatabaseException(final Throwable cause) {
             super(cause);
@@ -517,10 +352,12 @@ public class Database {
         }
     }
 
-    public static class DatabaseIntegrtityViolationException extends DatabaseException {
-        public DatabaseIntegrtityViolationException(Throwable cause) {
+    /***
+     * Happens when we violate a constraint, most commonly trying to create a duplicate in a unique field
+     */
+    public static class DatabaseIntegrityViolationException extends DatabaseException {
+        public DatabaseIntegrityViolationException(Throwable cause) {
             super(cause);
         }
     }
-
 }

@@ -3,6 +3,7 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiError;
@@ -20,10 +21,10 @@ public class EntityLogic {
     private static final String LOGFROM = "entitylogic";
     private final Config config;
     private final Logger logger;
-    private final Database database;
+    private final DatabaseEntitiesIntents database;
 
     @Inject
-    public EntityLogic(final Config config, final Logger logger, final Database database) {
+    public EntityLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database) {
         this.config = config;
         this.logger = logger;
         this.database = database;
@@ -59,7 +60,7 @@ public class EntityLogic {
             this.logger.logDebug(LOGFROM, "request to edit entity " + entityName + " from " + devid);
             this.database.writeEntity(devid, entityName, entity);
             return new ApiResult().setSuccessStatus();
-        } catch (Database.DatabaseIntegrtityViolationException dive) {
+        } catch (Database.DatabaseIntegrityViolationException dive) {
             this.logger.logDebug(LOGFROM, "attempt to rename to existing name");
             return ApiError.getBadRequest("entity name already in use");
         } catch (final Exception e) {

@@ -3,6 +3,7 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
@@ -18,13 +19,13 @@ import java.util.UUID;
  */
 public class IntentLogic {
 
+    private static final String LOGFROM = "intentlogic";
     private final Config config;
     private final Logger logger;
-    private final Database database;
-    private static final String LOGFROM = "intentlogic";
+    private final DatabaseEntitiesIntents database;
 
     @Inject
-    public IntentLogic(final Config config, final Logger logger, final Database database) {
+    public IntentLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database) {
         this.config = config;
         this.logger = logger;
         this.database = database;
@@ -57,4 +58,24 @@ public class IntentLogic {
             return ApiError.getInternalServerError();
         }
     }
+
+    public ApiResult writeIntent(String devid, UUID aiid, String intentName, ApiIntent intent) {
+        try {
+            this.logger.logDebug(LOGFROM, "request to edit intent " + intent.getIntentName() + " from " + devid);
+            this.database.writeIntent(devid, aiid, intentName, intent);
+            return new ApiResult().setSuccessStatus();
+        } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
+            this.logger.logDebug(LOGFROM, "entity " + dmee.getMessage() + " duplicated or non-existent");
+            return ApiError.getBadRequest("duplicate or missing entity_name");
+        } catch (Database.DatabaseIntegrityViolationException dive) {
+            this.logger.logDebug(LOGFROM, "attempt to rename to existing name");
+            return ApiError.getBadRequest("intent name already in use");
+        } catch (final Exception e) {
+            this.logger.logError(LOGFROM, "error writing intent: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
+
 }
+
+

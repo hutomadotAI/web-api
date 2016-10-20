@@ -49,14 +49,14 @@ public class DatabaseCall implements AutoCloseable {
         try {
             return this.statement.executeUpdate();
         } catch (java.sql.SQLIntegrityConstraintViolationException icve) {
-            throw new Database.DatabaseIntegrtityViolationException(icve);
+            throw new Database.DatabaseIntegrityViolationException(icve);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
     }
 
     @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
+        justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
     public DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws Database.DatabaseException {
 
         this.paramCount = numberOfParams;

@@ -3,6 +3,7 @@ package com.hutoma.api.memory;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -26,12 +27,12 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";
     private final ILogger logger;
-    private final Database database;
+    private final DatabaseEntitiesIntents database;
     private final JsonSerializer jsonSerializer;
 
 
     @Inject
-    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final Database database, final ILogger logger) {
+    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents database, final ILogger logger) {
         this.logger = logger;
         this.database = database;
         this.jsonSerializer = jsonSerializer;

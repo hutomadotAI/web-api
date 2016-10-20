@@ -4,6 +4,7 @@ import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -11,17 +12,12 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Mockito.*;
@@ -40,23 +36,23 @@ public class TestMemoryIntentHandler {
 
     private MemoryIntentHandler memoryIntentHandler;
     private FakeJsonSerializer fakeSerializer;
-    private Database fakeDatabase;
+    private DatabaseEntitiesIntents fakeDatabase;
     private Logger fakeLogger;
     private IEntityRecognizer fakeRecognizer;
 
     private static Object[] recognizeIntentDataProvider() {
         return $(
-                $("@meta.intent." + INTENT_NAME),
-                $("@meta.intent." + INTENT_NAME + " "),
-                $("@meta.intent." + INTENT_NAME + " this is something else"),
-                $("@meta.intent." + INTENT_NAME + " line1\nline2")
+            $("@meta.intent." + INTENT_NAME),
+            $("@meta.intent." + INTENT_NAME + " "),
+            $("@meta.intent." + INTENT_NAME + " this is something else"),
+            $("@meta.intent." + INTENT_NAME + " line1\nline2")
         );
     }
 
     @Before
     public void setup() {
         this.fakeSerializer = new FakeJsonSerializer();
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         this.fakeLogger = mock(Logger.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.memoryIntentHandler = new MemoryIntentHandler(this.fakeSerializer, this.fakeDatabase, this.fakeLogger);
@@ -82,8 +78,8 @@ public class TestMemoryIntentHandler {
         final String entityName = "name";
         final String entityValue = "a";
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
-                Collections.singletonList(
-                        new MemoryVariable(entityName, Arrays.asList(entityValue, "b", "c"))));
+            Collections.singletonList(
+                new MemoryVariable(entityName, Arrays.asList(entityValue, "b", "c"))));
         List<Pair<String, String>> entities = Collections.singletonList(new Pair<>(entityName, entityValue));
         mi.fulfillVariables(entities);
         Assert.assertEquals(0, mi.getUnfulfilledVariables().size());
@@ -203,7 +199,7 @@ public class TestMemoryIntentHandler {
 
     private MemoryIntent setDummyMemoryIntent(final String response) throws Database.DatabaseException {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
-                Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
+            Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
         when(this.fakeDatabase.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
         return this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, response);
     }

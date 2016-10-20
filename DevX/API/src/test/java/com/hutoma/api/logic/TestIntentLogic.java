@@ -5,6 +5,7 @@ import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
@@ -21,8 +22,7 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by David MG on 10/10/2016.
@@ -35,7 +35,7 @@ public class TestIntentLogic {
     private final String TOPICIN = "topicin";
     private final String TOPICOUT = "topicout";
     SecurityContext fakeContext;
-    Database fakeDatabase;
+    DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     Tools fakeTools;
     IntentLogic intentLogic;
@@ -44,7 +44,7 @@ public class TestIntentLogic {
     @Before
     public void setup() {
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         this.fakeContext = mock(SecurityContext.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(Logger.class);
@@ -122,4 +122,32 @@ public class TestIntentLogic {
         final ApiResult result = this.intentLogic.getIntent(this.fakeContext, this.DEVID, this.AIID, this.INTENTNAME);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
+
+    @Test
+    public void testWriteIntent_Success() throws Database.DatabaseException {
+        final ApiResult result = this.intentLogic.writeIntent(this.DEVID, this.AIID, this.INTENTNAME, this.getIntent());
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_NonExistentEntity() throws Database.DatabaseException {
+        doThrow(new DatabaseEntitiesIntents.DatabaseEntityException("test")).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
+        final ApiResult result = this.intentLogic.writeIntent(this.DEVID, this.AIID, this.INTENTNAME, this.getIntent());
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_DuplicateName() throws Database.DatabaseException {
+        doThrow(new Database.DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
+        final ApiResult result = this.intentLogic.writeIntent(this.DEVID, this.AIID, this.INTENTNAME, this.getIntent());
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_InternalError() throws Database.DatabaseException {
+        doThrow(new Database.DatabaseException("test")).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
+        final ApiResult result = this.intentLogic.writeIntent(this.DEVID, this.AIID, this.INTENTNAME, this.getIntent());
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
 }

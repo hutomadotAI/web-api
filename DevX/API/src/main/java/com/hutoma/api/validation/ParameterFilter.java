@@ -4,6 +4,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
+import com.hutoma.api.containers.ApiIntent;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +30,10 @@ public class ParameterFilter extends Validate {
     protected static final String ENTITYNAME = "entity_name";
     protected static final String INTENTNAME = "intent_name";
     protected static final String ENTITYVALUE = "entity_value";
+    protected static final String INTENT_PROMPTLIST = "intent_prompts";
+    protected static final String INTENT_USERSAYS = "intent_usersays";
+    protected static final String INTENT_RESPONSES = "intent_responses";
+    protected static final String INTENT_VAR_VALUE = "intent_variable_value";
 
     protected final Logger logger;
     protected final Tools tools;
@@ -98,6 +103,10 @@ public class ParameterFilter extends Validate {
         return (ApiEntity) requestContext.getProperty(APIParameter.EntityJson.toString());
     }
 
+    public static ApiIntent getIntent(final ContainerRequestContext requestContext) {
+        return (ApiIntent) requestContext.getProperty(APIParameter.IntentJson.toString());
+    }
+    
     public static Float getAiConfidence(final ContainerRequestContext requestContext) {
         return (Float) requestContext.getProperty(APIParameter.AiConfidence.toString());
     }

@@ -142,12 +142,6 @@ public class Validate {
         return new ArrayList<>(results);
     }
 
-    public static class ParameterValidationException extends Exception {
-        public ParameterValidationException(final String message) {
-            super(message);
-        }
-    }
-
     /***
      * Validates an optional floating point number
      * @param paramName parameter name used for exception
@@ -250,12 +244,22 @@ public class Validate {
         return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
     }
 
+    List<String> validateOptionalDescriptionList(String paramName, List<String> paramList) throws ParameterValidationException {
+        return validatePatternUniqueList(alphaNumericAndMoreDesc, paramName, paramList);
+    }
+
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param) throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
     }
 
-    List<String> validateRequiredObjectValues(String paramName, List<String> paramList) throws ParameterValidationException {
+    List<String> validateOptionalObjectValues(String paramName, List<String> paramList) throws ParameterValidationException {
         return validatePatternUniqueList(alphaNumDashesSomePunctuationAndSpace, paramName, paramList);
+    }
+
+    public static class ParameterValidationException extends Exception {
+        public ParameterValidationException(final String message) {
+            super(message);
+        }
     }
 
 }

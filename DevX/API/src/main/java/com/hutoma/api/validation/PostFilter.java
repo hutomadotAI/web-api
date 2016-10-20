@@ -7,15 +7,11 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
-
+import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.IntentVariable;
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
-import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -27,6 +23,11 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @ValidatePost
 @Provider
@@ -59,6 +60,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         // which parameters are of which body type?
         for (APIParameter param : checkList) {
             switch (param) {
+                case IntentJson:
                 case EntityJson:
                     expectingJson = true;
                     break;
@@ -114,7 +116,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
     private void processFormVariables(ContainerRequest request, HashSet<APIParameter> checkList) throws ParameterValidationException {
         // if the body is of the right type
         if (!MediaTypes.typeEqual(MediaType.APPLICATION_FORM_URLENCODED_TYPE, request.getMediaType())
-                && !MediaTypes.typeEqual(MediaType.MULTIPART_FORM_DATA_TYPE, request.getMediaType())) {
+            && !MediaTypes.typeEqual(MediaType.MULTIPART_FORM_DATA_TYPE, request.getMediaType())) {
             throw new ParameterValidationException("expected form urlencoded type");
         }
         // buffer it
@@ -124,23 +126,23 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         if (checkList.contains(APIParameter.AIName)) {
             request.setProperty(APIParameter.AIName.toString(),
-                    this.validateAlphaNumPlusDashes(AINAME, getFirst(form.get(AINAME))));
+                this.validateAlphaNumPlusDashes(AINAME, getFirst(form.get(AINAME))));
         }
         if (checkList.contains(APIParameter.AIDescription)) {
             request.setProperty(APIParameter.AIDescription.toString(),
-                    this.validateOptionalDescription(AIDESC, getFirst(form.get(AIDESC))));
+                this.validateOptionalDescription(AIDESC, getFirst(form.get(AIDESC))));
         }
         if (checkList.contains(APIParameter.AiConfidence)) {
             request.setProperty(APIParameter.AiConfidence.toString(),
-                    this.validateFloat(AICONFIDENCE, 0.0f, 1.0f, getFirst(form.get(AICONFIDENCE))));
+                this.validateFloat(AICONFIDENCE, 0.0f, 1.0f, getFirst(form.get(AICONFIDENCE))));
         }
         if (checkList.contains(APIParameter.Timezone)) {
             request.setProperty(APIParameter.Timezone.toString(),
-                    this.validateTimezoneString(TIMEZONE, getFirst(form.get(TIMEZONE))));
+                this.validateTimezoneString(TIMEZONE, getFirst(form.get(TIMEZONE))));
         }
         if (checkList.contains(APIParameter.Locale)) {
             request.setProperty(APIParameter.Locale.toString(),
-                    this.validateLocale(LOCALE, getFirst(form.get(LOCALE))));
+                this.validateLocale(LOCALE, getFirst(form.get(LOCALE))));
         }
     }
 
@@ -153,11 +155,36 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         request.bufferEntity();
 
         try {
+
             if (checkList.contains(APIParameter.EntityJson)) {
                 ApiEntity entity = (ApiEntity) this.serializer.deserialize(request.getEntityStream(), ApiEntity.class);
                 this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
-                this.validateRequiredObjectValues(ENTITYVALUE, entity.getEntityValueList());
+                this.validateOptionalObjectValues(this.ENTITYVALUE, entity.getEntityValueList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
+            }
+
+            // verify an intent object delivered in json
+            if (checkList.contains(APIParameter.IntentJson)) {
+                // decode
+                ApiIntent intent = (ApiIntent) this.serializer.deserialize(request.getEntityStream(), ApiIntent.class);
+                // validate name
+                this.validateAlphaNumPlusDashes(this.INTENTNAME, intent.getIntentName());
+                // for each variable
+                if (null != intent.getVariables()) {
+                    for (IntentVariable variable : intent.getVariables()) {
+                        // validate the name
+                        this.validateAlphaNumPlusDashes(this.ENTITYNAME, variable.getEntityName());
+                        // the list of prompts
+                        variable.setPrompts(this.validateOptionalDescriptionList(this.INTENT_PROMPTLIST, variable.getPrompts()));
+                        // the value
+                        this.validateOptionalDescription(this.INTENT_VAR_VALUE, variable.getValue());
+                    }
+                    // the list of user_says strings
+                    intent.setUserSays(this.validateOptionalDescriptionList(this.INTENT_USERSAYS, intent.getUserSays()));
+                    // the list of responses
+                    intent.setResponses(this.validateOptionalDescriptionList(this.INTENT_RESPONSES, intent.getResponses()));
+                }
+                request.setProperty(APIParameter.IntentJson.toString(), intent);
             }
         } catch (JsonParseException jpe) {
             throw new ParameterValidationException("error in json format");

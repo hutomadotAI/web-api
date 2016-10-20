@@ -10,9 +10,11 @@ import com.hutoma.api.logic.IntentLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
+import com.hutoma.api.validation.ValidatePost;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -51,5 +53,24 @@ public class IntentEndpoint {
             ParameterFilter.getIntentName(requestContext));
         return result.getResponse(this.serializer).build();
     }
+
+    @POST
+    @Path("{aiid}")
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ValidateParameters( {APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
+    @ValidatePost( {APIParameter.IntentJson})
+    public Response postIntent(
+        @Context final SecurityContext securityContext,
+        @Context final ContainerRequestContext requestContext) {
+
+        final ApiResult result = this.intentLogic.writeIntent(
+            ParameterFilter.getDevid(requestContext),
+            ParameterFilter.getAiid(requestContext),
+            ParameterFilter.getIntentName(requestContext),
+            ParameterFilter.getIntent(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
 
 }
