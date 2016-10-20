@@ -11,11 +11,12 @@
         exit;
     }
 
+
     setSessionVariablesFromPost();
-    $response = \hutoma\console::getDomains();
+    $domains= \hutoma\console::getDomains();
    
-    if ($response['status']['code'] !== 200) {
-        unset($response);
+    if ($domains['status']['code'] !== 200) {
+        unset($domains);
         \hutoma\console::redirect('./error.php?err=103');
         exit;
     }
@@ -60,7 +61,7 @@
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
 
-    <!--<link rel="stylesheet" href="./plugins/iCheck/all.css">-->
+    <link rel="stylesheet" href="./plugins/iCheck/all.css">
     <link rel="stylesheet" href="./plugins/switch/switch.css">
 </head>
 
@@ -81,6 +82,7 @@
     <div class="content-wrapper">
     <section class="content">
             <?php include './dynamic/domainsNewAI.content.html.php'; ?>
+            <?php include './dynamic/domainsNewAI.content.info.details.html.php'; ?>
     </section>
     </div>
 
@@ -97,7 +99,7 @@
 <script src="./dist/js/app.min.js"></script>
 
 <script src="./plugins/domain/domain.js"></script>
-<!--script src="./plugins/iCheck/icheck.min.js"></script>-->
+<script src="./plugins/iCheck/icheck.min.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
@@ -110,7 +112,7 @@
 </form>
 
 <script>
-  var domains = <?php  echo json_encode($response['_domainList']);  unset($response); ?>;
+  var domains = <?php  echo json_encode($domains['_domainList']);  unset($domains); ?>;
   var userActived ={};
   for (var x in domains){
       var key = domains[x].dom_id;

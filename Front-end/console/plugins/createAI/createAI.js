@@ -1,6 +1,6 @@
 document.getElementById('btnNext').addEventListener('click', wizardNext);
-document.getElementById('ai_name').addEventListener('keydown', activeButtonCreate);
-document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLenght);
+document.getElementById('ai_name').addEventListener('keyup', activeButtonCreate);
+document.getElementById('ai_description').addEventListener('keyup', checkDescriptionLength);
 
 function wizardNext() {
     document.getElementById('btnNext').setAttribute('disabled','disabled');
@@ -8,7 +8,7 @@ function wizardNext() {
 
     var value_name = document.getElementById('ai_name').value;
     if(inputValidation(value_name,'ai_name')) {
-        msgAlertNameAI(2, 'Invalid name. Please enter a string that contains alphanumeric characters.');
+        msgAlertNameAI(2, 'Invalid name. Please enter a string that contains alphanumeric characters. No space are allowed.');
         document.getElementById('btnNext').setAttribute('disabled','disabled');
         document.getElementById('btnCancel').removeAttribute('disabled');
         inputsActiveDeactive(false);
@@ -49,17 +49,6 @@ function activeButtonCreate() {
     }
 }
 
-function checkDescriptionLenght() {
-    var limitTextInputSize = 100;
-    if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
-        msgAlertDescriptionAI(1, 'Limit AI description reached.');
-    else {
-        document.getElementById('btnNext').removeAttribute('disabled');
-        document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';
-        document.getElementById('ai_description').style.borderColor = "#d2d6de";
-    }
-}
-
 function setConfidenceValueBeforePosting(){
     var element = document.getElementById('ai_confidence');
     var value = element.value;
@@ -94,5 +83,5 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else
-        setSliderValue('ai_confidence',0.8); // "often"
+        setSliderValue('ai_confidence',0.8); // default value "often"
 });

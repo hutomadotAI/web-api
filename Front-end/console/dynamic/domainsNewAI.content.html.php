@@ -34,7 +34,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                            Pre-trained neural networks are made available by our community and provide out of the box knowlege to your AI so you don't have to start from scratch.
+                        Pre-trained neural networks are made available by our community and provide out of the box knowlege to your AI so you don't have to start from scratch.
                     </div>
                 </section>
                 <p></p>
@@ -53,12 +53,13 @@
     <p></p>
     <h2></h2>
     <p id="domsearch"></p>
-    <input type="hidden" name="userActivedDomains" value="">
+    <input type="hidden" name="userActivedDomains" id="userActivedDomains" val="">
 </form>
 
 <form method="POST" name="domainsNewAIformGoBack">
-    <input type="hidden" name="prova" value="5">
+    <input type="hidden">
 </form>
+
 
 <!-- Modal DETAILS INFO-->
 <div class="modal fade" id="detailsDomain" role="dialog">

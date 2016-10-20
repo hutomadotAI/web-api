@@ -1,12 +1,18 @@
-<div class="alert alert-dismissable flat alert-primary" id="containerMsgAlertDomainsNewAIInfo">
+<div class="alert alert-dismissable flat alert-primary" id="containerMsgAlertDomainsNewAIInfo" style="padding-bottom: 25px;">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
     <span id="msgAlertDomainsNewAIInfo">
-         <dl class="dl-horizontal">
-            <dt>Description pre-trained neural Manipulation</dt>
-            <dd>pre-trained neural networks bla bla bla bla bla bla bla bla bla bla bla</dd>
-            <dt>Euismod</dt>
-            <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-            <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-        </dl>
+        <dt>Add Pre-trained neural networks bla bla bla</dt>
+        <dd>
+            bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+            bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+            bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+            bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla
+        </dd>
+        <div class="pull-right" style="padding-right: 3px;">
+        <label for="ai_public">
+            <input type="checkbox" name="dialog_msg_domains" id="dialog_msg_domains">
+        </label>
+            do not show this message again
+        </div>
     </span>
 </div>

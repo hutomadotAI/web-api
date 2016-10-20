@@ -10,7 +10,8 @@
         CallGetSingleAI($_POST['ai']);
 
     function CallGetSingleAI($aiid){
-        $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(),$aiid);
+        $singleAI = \hutoma\console::getSingleAI($aiid);
+
         if ($singleAI['status']['code'] === 200) {
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'] = $singleAI['aiid'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $singleAI['name'];

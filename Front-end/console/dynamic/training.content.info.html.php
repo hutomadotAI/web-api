@@ -1,7 +1,7 @@
 <div class="alert alert-dismissable flat alert-primary" id="containerMsgAlertTrainingInfo" style="padding-bottom: 25px;">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
     <span id="msgAlertTrainingInfo">
-         <dt>Start info pre-trained neural Manipulation</dt>
+        <dt>Start info pre-trained neural Manipulation</dt>
         <dd>
             The goals of the training program should relate directly to the needs determined by the assessment process outlined above.
             Course objectives should clearly state what behavior or skill will be changed as a result of the training and should relate

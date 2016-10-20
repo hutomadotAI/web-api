@@ -220,7 +220,8 @@ class console
     private static $constructed = false;
     private static $init_called = false;
     private static $cookie, $session, $remember_cookie, $dbh;
-    private static $api_request_url = 'https://api.hutoma.com/v1';//'http://localhost:8081/v1';
+    //private static $api_request_url = 'http://localhost:8081/v1';
+    private static $api_request_url = 'https://api.hutoma.com/v1';
 
     /**
      * Merge user config and default config
@@ -439,10 +440,10 @@ class console
                 $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
                 $service_url = 'https://api.hutoma.com/v1/admin/?email=' . $id . '&username=' . $username . '&password=' . $saltedPass . '&password_salt=' . $randomSalt . '&first_name=' . $fullname;
                 $curl = curl_init($service_url);
-                $headr = array();
-                $headr[] = 'Content-type: application/json';
-                $headr[] = 'Authorization: Bearer ' . $dev_token;
-                curl_setopt($curl, CURLOPT_HTTPHEADER, $headr);
+                $header = array();
+                $header[] = 'Content-type: application/json';
+                $header[] = 'Authorization: Bearer ' . $dev_token;
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($curl, CURLOPT_POST, true);
                 $res = json_decode(curl_exec($curl), true)['status']['code'];
@@ -1186,18 +1187,53 @@ class console
      */
 
 
-    public static function createAI($name,$description,$private,$language,$timezone,$confidence,$voice,$contract,$payment_type,$price){
+    public static function createAI($name, $description, $private, $language, $timezoneString, $confidence,
+                                    $personality, $voice, $contract, $payment_type, $price ){
         if (self::$loggedIn) {
             $path = '/ai';
-            $parameters = array( 'name'=> $name, 'description' => $description,'confidence' =>$confidence,
-                                 'timezone' => 'Europe/London', 'locale' => 'en-US');
+
             $service_url = self::$api_request_url.$path;
+
+            // TODO: move this to a common internationalization class
+            $locales = array(
+                'Deutsch' => 'de-DE',
+                'Español' => 'es-ES',
+                'Français' => 'fr-FR',
+                'Italiano' => 'it-IT',
+                'Nederlands' => 'nl-NL',
+                'Português' => 'pt-PT',
+                'English' => 'en-US'
+            );
+
+            // TODO: accept format from input list - example   GMT +00:00 Atlantic/St Helena (GMT)
+
+            //preg_match('/GMT\s[-|+][0-9]*:[0-9]*\s(.*)\s/', $timezoneString, $matches);
+            preg_match('/GMT\s[-|+][0-9]*:[0-9]*\s(.*)/', $timezoneString, $matches);
+            if (isset($matches)) {
+                $timezone = $matches[1];
+            } else {
+                $timezone = "UTC";
+            }
+
+            //hard coded
+            $timezone = 'Europe/London';
+            $locale = 'en-US';
+
+            $args = array(
+                'name' => $name,
+                'description' => $description,
+                'is_private' => $private,
+                'personality' => $personality,
+                'confidence' => $confidence,
+                'voice' => $voice,
+                'locale' => $locale,
+                'timezone' => $timezone
+            );
 
             $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setOpt(CURLOPT_POST, true);
-            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($parameters));
+            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $curl->exec();
-
             if ($curl_response === false) {
                 $curl->close();
                 \hutoma\console::redirect('./error.php?err=301');
@@ -1205,6 +1241,7 @@ class console
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
+
             return $json_response;
         }
     }
@@ -1227,10 +1264,10 @@ class console
     }
 
 
-    public static function getSingleAI($dev_token,$aiid){
+    public static function getSingleAI($aiid){
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
-            $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
+            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
             $curl_response = $curl->exec();
             if ($curl_response === false) {
                 $curl->close();
@@ -1433,51 +1470,7 @@ class console
         }
     }
 
-
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-    public static function getIntentUserSays($dev_id,$aiid,$name){
-        if(self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getIntentUserSays(?,?,?)");
-
-                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
-                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
-                $sql->bindValue(3, $name, \PDO::PARAM_STR);
-
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=315');
-                exit;
-            }
-            $data = $sql->fetchAll();
-            // finally fetch the additional sql row for stored proc calls
-            $sql->nextRowset();
-            return $data;
-        }
-    }
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-    public static function getIntentVariables($dev_id,$aiid,$name){
-        if(self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getIntentVariables(?,?,?)");
-
-                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
-                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
-                $sql->bindValue(3, $name, \PDO::PARAM_STR);
-
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=316');
-                exit;
-            }
-            $data = $sql->fetchAll();
-            // finally fetch the additional sql row for stored proc calls
-            $sql->nextRowset();
-            return $data;
-        }
-    }
+    
 
     // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
     public static function getIntegrations(){

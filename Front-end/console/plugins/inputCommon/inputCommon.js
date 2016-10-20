@@ -7,8 +7,8 @@ function setInputFields(){
     setCheckValue('ai_public',previousField.private);
     setSelectValue('ai_language',previousField.language);
     setSelectValue('ai_timezone',previousField.timezone);
-    setSelectValue('ai_voice',previousField.voice);
-    setSelectValue('ai_personality',previousField.personality);
+    setSelectByIndex('ai_voice',previousField.voice);
+    setSelectByIndex('ai_personality',previousField.personality);
     setSliderValue('ai_confidence',previousField.confidence);
 }
 
@@ -16,6 +16,12 @@ function setInputValue(id,value){
     var element = document.getElementById(id);
     element.value = value;
 }
+
+function setSelectByIndex(id,i) {
+    var element = document.getElementById(id);
+    element.id[i].selected = true;
+}
+
 
 function setSelectValue(id,valueToSelect) {
     var element = document.getElementById(id);
@@ -37,6 +43,17 @@ function setCheckValue(id,value){
         $('#'+id).iCheck('uncheck');
     else
         $('#'+id).iCheck('check');
+}
+
+function checkDescriptionLength() {
+    var limitTextInputSize = 100;
+    if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
+        msgAlertDescriptionAI(1, 'Limit AI description reached.');
+    else {
+        document.getElementById('btnNext').removeAttribute('disabled');
+        document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';
+        document.getElementById('ai_description').style.borderColor = "#d2d6de";
+    }
 }
 
 function inputsActiveDeactive(flag){

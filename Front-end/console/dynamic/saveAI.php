@@ -11,7 +11,6 @@
 
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['userActivedDomains'] = $_POST['userActivedDomains'];
 
-
     if (isPostSkipInputAvailable()) {
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['contract'] = $_POST['ai_contract'];
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['payment_type'] = $_POST['ai_payment_type'];
@@ -21,7 +20,6 @@
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['payment_type'] = 'skipped';
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['price'] = 'skipped';
     }
-
 
     $response = hutoma\console::createAI(
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'],
@@ -36,7 +34,6 @@
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['payment_type'],
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['price']
     );
-
 
     if ($response['status']['code'] === 200) {
         if (updateData($response['aiid'])) {
@@ -73,7 +70,7 @@
     }
 
     function updateData($aiid){
-        $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(),$aiid);
+        $singleAI = \hutoma\console::getSingleAI($aiid);
 
         if ($singleAI['status']['code'] === 200) {
 
@@ -86,6 +83,10 @@
             //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
 
+            return true;
+
+            // TODO send domain activeted by user
+            /*
             if (updateUserActivedDomains($singleAI['dev_id'], $singleAI['aiid'])) {
                 unset($singleAI);
                 return true;
@@ -93,7 +94,9 @@
                 unset($singleAI);
                 return false;
             }
+            */
         }
+
         unset($singleAI);
         return false;
     }

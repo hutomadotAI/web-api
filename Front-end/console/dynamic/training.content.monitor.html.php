@@ -1,6 +1,6 @@
 <?php
 
-    $singleAI = \hutoma\console::getSingleAI(\hutoma\console::getDevToken(), $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+    $singleAI = \hutoma\console::getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 
     if ($singleAI['status']['code'] !== 200) {
         unset($singleAI);

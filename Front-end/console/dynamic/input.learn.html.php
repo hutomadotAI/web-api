@@ -6,10 +6,10 @@
     </a>
     <label for="ai_personality">Learn from Users</label>
     <select class="form-control select2" name="ai_personality" id="ai_personality" style="width: 100%;">
-        <option disabled="disabled">Yes</option>
-        <option selected="selected">No</option>
-        <option disabled="disabled">Yes but supervised</option>
-        <option disabled="disabled">(TBD)</option>
+        <option disabled="disabled" value="0">Yes</option>
+        <option selected="selected" value="1">No</option>
+        <option disabled="disabled" value="2">Yes but supervised</option>
+        <option disabled="disabled" value="3">(TBD)</option>
     </select>
 </div>
 
