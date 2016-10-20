@@ -63,8 +63,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                     expectingJson = true;
                     break;
                 case AIName:
-                    expectingForm = true;
-                    break;
                 case AIDescription:
                     expectingForm = true;
                     break;
@@ -115,7 +113,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
     private void processFormVariables(ContainerRequest request, HashSet<APIParameter> checkList) throws ParameterValidationException {
         // if the body is of the right type
-        if (!MediaTypes.typeEqual(MediaType.APPLICATION_FORM_URLENCODED_TYPE, request.getMediaType())) {
+        if (!MediaTypes.typeEqual(MediaType.APPLICATION_FORM_URLENCODED_TYPE, request.getMediaType())
+                && !MediaTypes.typeEqual(MediaType.MULTIPART_FORM_DATA_TYPE, request.getMediaType())) {
             throw new ParameterValidationException("expected form urlencoded type");
         }
         // buffer it
@@ -157,7 +156,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (checkList.contains(APIParameter.EntityJson)) {
                 ApiEntity entity = (ApiEntity) this.serializer.deserialize(request.getEntityStream(), ApiEntity.class);
                 this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
-                this.validateRequiredObjectValues(this.ENTITYVALUE, entity.getEntityValueList());
+                this.validateRequiredObjectValues(ENTITYVALUE, entity.getEntityValueList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
             }
         } catch (JsonParseException jpe) {
