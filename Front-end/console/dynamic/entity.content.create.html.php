@@ -2,19 +2,18 @@
    
     <div class="box-header with-border">
         <i class="fa fa-sitemap text-yellow"></i>
-        <h3 class="box-title">New Entity</h3>
+        <div class="box-title"><b>New Entity</b></div>
         <a data-toggle="collapse"  href="#collapseEntitiesInfo">
             <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-md text-yellow"></i>
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
-
-
+    
     <div class="box-body" id="boxEntities">
         <div class="bootstrap-filestyle input-group" id="GrpEntityButton">
             <form method="POST" name="entityCreateForm" action="./entityelement.php" onsubmit="RecursiveUnbind($('#wrapper'));">
-                <input type="text" class="form-control" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;">
+                <input type="text" class="form-control flat no-shadow" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;">
             </form>
             <div class="input-group-btn" tabindex="0">
                 <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" disabled> Create Entity</button>
@@ -28,9 +27,8 @@
             <span id="msgAlertEntity"></span>
         </div>
 
-        check out our <a data-toggle="collapse"  href="#collapseVideoTutorialEntity">entity video tutorial</a>
+        <b>need help?</b> check our <a data-toggle="collapse"  href="#collapseVideoTutorialEntity">Entities tutorial</a> or email <a href='#'>support@hutoma.com</a>
         <p></p>
-        
     </div>
 
     <div id="collapseVideoTutorialEntity" class="panel-collapse collapse">
@@ -49,23 +47,12 @@
     <div id="collapseEntitiesInfo" class="panel-collapse collapse">
         <div class="box-body">
             <div class="overlay center-block">
-                <section class="content bg-gray-light" >
+                <section class="content-info" >
                     <div class="box-body">
-                        <dl class="dl-horizontal">
-                            <dt>Description Entities Manipulation</dt>
-                            <dd>Before start training process, y.</dd>
-                            <dt>Euismod</dt>
-                            <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                            <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                            <dt>Malesuada porta</dt>
-                            <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                            <dt>Felis euismod semper eget lacinia</dt>
-                            <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                        </dl>
+                       bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla
                     </div>
                 </section>
-                <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+
             </div>
         </div>
     </div>

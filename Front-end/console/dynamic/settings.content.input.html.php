@@ -1,9 +1,9 @@
 <div class="box-header with-border">
     <i class="fa fa-sliders text-success"></i>
-    <h3 class="box-title">General Informations</h3>
+    <div class="box-title"><b>General Informations</b></div>
     <a data-toggle="collapse"  href="#collapseInfoGeneral">
         <div class=" pull-right">more info
-            <i class="fa fa-question-circle text-md text-yellow"></i>
+            <i class="fa fa-question-circle text-sm text-yellow"></i>
         </div>
     </a>
 </div>
@@ -75,8 +75,8 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="input-group">
-                    <span class="input-group-addon" style="width:90px;">Ai key</i></span>
-                    <input type="text" class="form-control" id="aikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'];?>" disabled>
+                    <span class="input-group-addon" style="width:90px;">AI ID</i></span>
+                    <input type="text" class="form-control flat no-shadow" id="aikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'];?>" disabled>
                     <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#aikey" id="aikeytooltip" title="copy to clipboard" onclick="copyToClipboard('aikey')" ><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
@@ -84,7 +84,7 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-addon" style="width:90px;">Dev key</i></span>
-                    <input type="text" class="form-control" id="devkey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_id'];?>" disabled>
+                    <input type="text" class="form-control flat no-shadow" id="devkey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_token'];?>" disabled>
                     <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
@@ -94,7 +94,7 @@
             <div class="col-md-12">
                 <div class="input-group">
                     <span class="input-group-addon" style="width:90px;">Client key</i></span>
-                    <input type="text" class="form-control" id="clikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'];?>" disabled>
+                    <input type="text" class="form-control flat no-shadow" id="clikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'];?>" disabled>
                     <span class="input-group-addon" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#clikey" id="clikeytooltip" title="copy to clipboard" onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
@@ -112,8 +112,8 @@
 
 
 <div class="box-footer">
-    <button  name="btnCancel"  id="btnCancel" value="_cancel"   class="btn btn-primary flat" disabled>cancel</button>
-    <button  name="btnSave"  id="btnSave"   value="_save"   class="btn btn-success flat" disabled>save</button>
+    <button  name="btnCancel" id="btnCancel" value="_cancel"   class="btn btn-primary flat" >cancel</button>
+    <button  name="btnSave"   id="btnSave"   value="_save"   class="btn btn-success flat" >save</button>
     <button  name="btnDelete" id="btnDelete"  data-toggle="modal" data-target="#deleteAI" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" alt="delete">delete AI</button>
 </div>
 

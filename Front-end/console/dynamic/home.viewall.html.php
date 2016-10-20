@@ -1,5 +1,4 @@
-
-    <?php
+<?php
     function decodeAIState($state){
         switch ($state) {
 
@@ -43,14 +42,12 @@
     if (!isset($response_getAIs) || !(array_key_exists("ai_list",$response_getAIs)))
         include './dynamic/home.content.first.html.php';
     else {
-
         echo('<div class="box box-solid box-clean flat no-shadow">');
         echo('<div class="box-header with-border">');
-        echo('<h3 class="box-title">Your AIs</h3>');
+        echo('<div class="box-title"><b>Your AIs</b></div>');
         echo('</div>');
 
-
-        echo('<div class="box-body table-responsive">');
+        echo('<div class="box-body table-responsive no-border">');
         echo('<table class="table table" id="listTable">');
         echo('<tr disabled>');
         echo('<th class="text-center" style="border:0;width:35%">ID</th>');
@@ -74,16 +71,14 @@
             echo('<tr>');
         }
 
-
         echo('</table>');
         echo('<form method="POST" name="viewAllForm" action="./trainingAI.php">');
         echo('<input type="hidden" id="ai" name="ai" value="">');
         echo('</form>');
-
 
         echo('</div>');
         echo('</div>');
     }
 
     unset($response_getAIs);
-    ?>
+?>

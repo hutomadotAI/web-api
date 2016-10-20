@@ -1,6 +1,10 @@
 <?php
     require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
 
     if (!isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])){
@@ -35,7 +39,6 @@
   <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> 
-  <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showDomains('',1)" id="body">

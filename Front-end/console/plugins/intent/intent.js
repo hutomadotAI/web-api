@@ -1,10 +1,7 @@
-document.getElementById("inputIntentName").addEventListener("keyup", activeButtonCreate);
+document.getElementById("inputIntentName").addEventListener("keyup", activeButtonCreateIntent);
 document.getElementById("btnCreateIntent").addEventListener("click", PostingIntentName);
 
-if (limitText($("#inputIntentName"))== 0)
-    $("#btnCreateIntent").prop("disabled", false);
-
-function activeButtonCreate() {
+function activeButtonCreateIntent() {
     var limitTextInputSize = 50;
     switch (limitText($("#inputIntentName"), limitTextInputSize)){
         case -1:
@@ -23,87 +20,50 @@ function activeButtonCreate() {
     }
 }
 
-function limitText(limitField, limitNum) {
-    if (limitField.val().length < 1)
-        return -1;
-    if (limitField.val().length >= limitNum) {
-        limitField.val(limitField.val().substring(0, limitNum));
-        return 1;
-    }
-    return 0;
-}
-
-
 function PostingIntentName(){
     $(this).prop("disabled",true);
-    
-    if(isContainInvalidCharacters($("#inputIntentName").val())) {
+
+    if(inputValidation($("#inputIntentName").val(),'intent')) {
         msgAlertIntent(2, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
+        return;
     }
-    else {
-        if(!document.intentCreateForm.onsubmit)
-            return;
-        document.intentCreateForm.submit();
-    }
-}
 
-function isContainInvalidCharacters(txt) {
-    var letters = /^[0-9a-zA-Z]+$/;
-    if (letters.test(txt))
-        return false;
-    else
-        return true;
-}
+    if(document.intentCreateForm.onsubmit)
+        return;
 
-function msgAlertIntent(alarm,msg){
-    switch (alarm){
-        case 0:
-            $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-base');
-            $("#iconAlertIntent").attr('class', 'icon fa fa-check');
-            document.getElementById('inputIntentName').style.borderColor = "#d2d6de";
-            break;
-        case 1:
-            $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-warning');
-            $("#iconAlertIntent").attr('class', 'icon fa fa-check');
-            document.getElementById('inputIntentName').style.borderColor = "orange";
-            break;
-        case 2:
-            $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-danger');
-            $("#iconAlertIntent").attr('class', 'icon fa fa-warning');
-            document.getElementById('inputIntentName').style.borderColor = "red";
-            break
-    }
-    document.getElementById('msgAlertIntent').innerText = msg;
-}
+    RecursiveUnbind($('#wrapper'));
+    document.intentCreateForm.submit();
 
+}
 
 function showIntents(str){
     var wHTML = "";
-
-    if (intents.length < 1)
-        msgAlertIntent(0,'No intents yet.');
+    if (intents.length < 1) {
+        msgAlertIntent(0, 'No intents yet.');
+        return;
+    }
     else
         msgAlertIntent(0,'Create an Intent to trigger your own business logic.');
 
     for (var x in intents) {
-        if ( (str!=" ") && ( (str.length==0) || (intents[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
+        if ( (str!=" ") && ( (str.length==0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
 
             wHTML += ('<div class="col-xs-12">');
             wHTML += ('<div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row">');
-            
+
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">'+intents[x].name+'</div>')
+            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">'+intents[x]+'</div>')
             wHTML += ('</div>');
-            
+
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
             wHTML += ('<a data-toggle="dropdown">');
             wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
             wHTML += ('</a>');
             wHTML += ('<ul class="dropdown-menu flat">');
-            wHTML += ('<li><a onClick="downloadIntent (\''+intents[x].name+'\','+x+',0)">JSON format</a></li>');
-            wHTML += ('<li><a onClick="downloadIntent (\''+intents[x].name+'\','+x+',1)">CSV table</a></li>');
+            wHTML += ('<li><a onClick="downloadIntent (\''+intents[x]+'\','+x+',0)">JSON format</a></li>');
+            wHTML += ('<li><a onClick="downloadIntent (\''+intents[x]+'\','+x+',1)">CSV table</a></li>');
             wHTML += ('</ul>');
             wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="'+x+'" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
@@ -156,13 +116,16 @@ function downloadIntent (name,value,flag) {
     name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
     if( flag === 0){
         var blob = new Blob(["this file contains intent in JSON format"], { type: "text/plain;charset=utf-8;", });
-       saveAs(blob, name+".txt");
+        saveAs(blob, name+".txt");
     }
     else {
         var blob = new Blob(["this file is a simulaion of CVS format file"], { type: "text/plain;charset=utf-8;", });
         saveAs(blob, name+".csv");
     }
 }
+
+if (limitText($("#inputIntentName"))== 0)
+    $("#btnCreateIntent").prop("disabled", false);
 
 $('#deleteIntent').on('show.bs.modal', function(e) {
     var $modal = $(this), esseyId = e.relatedTarget.id;

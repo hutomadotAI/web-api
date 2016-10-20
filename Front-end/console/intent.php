@@ -1,8 +1,25 @@
 <?php
 require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
-    // fake request - here we need the intents from user on specified AI
-    $integrations = \hutoma\console::getIntegrations();
+
+if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
+
+$intents = \hutoma\console::getIntents( \hutoma\console::getDevToken(), $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+
+if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
+    unset($intents);
+    \hutoma\console::redirect('./error.php?err=210');
+    exit;
+}
+
+function echoJsonIntentsResponse($intents){
+    if ( $intents['status']['code'] !== 404)
+        echo json_encode($intents['intent_name']);
+    else
+        echo '""'; // return empty string
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -11,16 +28,12 @@ require "../pages/config.php";
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>hu:toma | intents </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/ionicons.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-    <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showIntents('')">
@@ -38,24 +51,20 @@ require "../pages/config.php";
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-    <section class="content">
+        <section class="content">
             <div class="row">
                 <div class="col-md-7">
-                        <?php include './dynamic/intent.content.create.html.php'; ?>
-                        <?php include './dynamic/intent.content.list.html.php'; ?>
+                    <?php include './dynamic/intent.content.create.html.php'; ?>
+                    <?php include './dynamic/intent.content.list.html.php'; ?>
                 </div>
                 <div class="col-md-5">
-                        <?php include './dynamic/chat.html.php'; ?>
-                        <?php include './dynamic/training.content.json.html.php'; ?>
+                    <?php include './dynamic/chat.html.php'; ?>
+                    <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
             </div>
-    </section>
+        </section>
     </div>
 
-    <!--
-    <aside class="control-sidebar control-sidebar-dark">
-    </aside>
-    -->
 
     <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
@@ -67,15 +76,14 @@ require "../pages/config.php";
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/input-mask/jquery.inputmask.js"></script>
-<script src="./plugins/input-mask/jquery.inputmask.date.extensions.js"></script>
-<script src="./plugins/input-mask/jquery.inputmask.extensions.js"></script>
-<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./dist/js/demo.js"></script>
+
+<script src="./plugins/messaging/messaging.js"></script>
+<script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/intent/intent.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
+
+
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
@@ -86,8 +94,7 @@ require "../pages/config.php";
 </form>
 
 <script>
-    // FAKE API JSON REQUEST INTENTS RESPONSE
-    var intents = <?php echo json_encode($integrations)?>;
+    var intents = <?php echoJsonIntentsResponse($intents); unset($intents); ?>;
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'intents_list';

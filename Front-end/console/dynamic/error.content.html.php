@@ -15,10 +15,6 @@ if (isset($_GET['err'])) {
             $msg = 'POST AI VARIABLES INCOMPLETE';
             $details = ' We could not find the data you were looking for';
             break;
-        case 3 :
-            $msg = 'DOMAINS GET INFO ERROR';
-            $details = ' We could not find the data you were looking for';
-            break;
         case 4 :
             $msg = 'RESPONSE JSON USER DOMAINS ERROR';
             $details = ' We could not find the data you were looking for';
@@ -55,10 +51,6 @@ if (isset($_GET['err'])) {
             $msg = 'Update AI status Failed!';
             $details = ' We could not find the data you were looking for';
             break;
-        case 15 :
-            $msg = 'RESPONSE JSON GET SINGLE AI INFO ERROR';
-            $details = ' We could not find the data you were looking for';
-            break;
         case 16 :
             $msg = 'NEW INTENT NAME TRANSMISSION FAILED';
             $details = ' We could not find the data you were looking for';
@@ -91,9 +83,29 @@ if (isset($_GET['err'])) {
             $msg = 'INTEGRATION GET INFO ERROR';
             $details = ' We could not find the data you were looking for';
             break;
+        case 105 :
+            $msg ='POSTING NEW AI INFO INCOMPLETE';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 106 :
+            $msg ='POSTING NEW DOMAINS ACTIVATED FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
         case 110 :
             $msg = 'POSTING NEW AI INFO FOR UPLOAD FAILED';
             $details = ' We could not find the data you were looking for';
+            break;
+        case 118 :
+            $msg ='POSTING SELECTION INTENT FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 119 :
+            $msg ='POSTING SELECTION ENTITY FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 120 :
+            $msg ='SESSION VARIABLES MISSING';
+            $details =' We could not find the data you were looking for';
             break;
         case 150 :
             $msg = 'COOKIES NOT ACTIVATED';
@@ -115,6 +127,22 @@ if (isset($_GET['err'])) {
             $msg = 'DELETE AI FAILED';
             $details = ' We could not find the data you were looking for';
             break;
+        case 210 :
+            $msg ='GET INFO INTENTS FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 211 :
+            $msg ='GET INFO INTENT FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 220 :
+            $msg ='GET INFO ENTITIES FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 225 :
+            $msg ='GET INFO ENTITY VALUES FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
         case 301 :
             $msg = 'INTERNAL ERROR - CREATE AI FAILED';
             $details = ' We could not find the data you were looking for';
@@ -135,6 +163,30 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - DELETE AI FAILED';
             $details = ' We could not find the data you were looking for';
             break;
+        case 310 :
+            $msg ='INTERNAL ERROR - GET INTENTS INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 311 :
+            $msg ='INTERNAL ERROR - GET INTENT INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 315 :
+            $msg ='INTERNAL ERROR - GET INTENT EXPRESSIONS FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 316 :
+            $msg ='INTERNAL ERROR - GET INTENT VARIABLES FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 320 :
+            $msg ='INTERNAL ERROR - GET ENTITIES INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 325 :
+            $msg ='INTERNAL ERROR - GET ENTITY VALUES INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
         case 330 :
             $msg = 'INTERNAL ERROR - REQUEST CHATTING FAILED';
             $details = ' We could not find the data you were looking for';
@@ -148,6 +200,12 @@ if (isset($_GET['err'])) {
             $details = ' We could not find the data you were looking for';
             break;
         case 370 :
+            $msg ='INTERNAL ERROR - REQUEST INTEGRATION INFORMATION FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
+        case 500 :
+            $msg ='INTERNAL ERROR - UNEXCEPTION ERROR';
+            $details =' We could not find the data you were looking for';
             $msg = 'INTERNAL ERROR - REQUEST INTEGRATION INFORMATION FAILED';
             $details = ' We could not find the data you were looking for';
             break;
@@ -167,6 +225,7 @@ if (isset($_GET['err'])) {
     }
 }
 ?>
+
 
 
 <!-- Main content -->

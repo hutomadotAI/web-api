@@ -17,7 +17,7 @@
                     <h5 class="box-title">
                     <div class="inner-addon left-addon">
                         <i class="fa fa-comments-o text-blue"></i>
-                        <input type="text" class="form-control" id="prompt-entity" name="prompt-entity" placeholder="add entity prompt" onkeydown="checkPromptCode(this,event.keyCode)"  style="padding-left: 35px;">
+                        <input type="text" class="form-control flat no-shadow" id="prompt-entity" name="prompt-entity" placeholder="add entity prompt" onkeydown="checkPromptCode(this,event.keyCode)"  style="padding-left: 35px;">
                     </div>
                     </h5>
                 </div>

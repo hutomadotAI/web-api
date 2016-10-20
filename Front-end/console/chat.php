@@ -1,10 +1,13 @@
 <?php
    require "../pages/config.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
 
-if ( !isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) ){
+    if ( !isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) ){
         header('Location: ./error.php?err=2');
         exit;
     }

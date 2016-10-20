@@ -1,9 +1,12 @@
 <?php
     require '../pages/config.php';
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
 
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
-function isPreviousFieldsFilled(){
+    function isPreviousFieldsFilled(){
         return  (
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
@@ -15,7 +18,6 @@ function isPreviousFieldsFilled(){
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'])
         );
     }
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -24,20 +26,16 @@ function isPreviousFieldsFilled(){
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Hu:toma | create new AI</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
+
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/ionicons.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-slider/slider.css">
+
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
-    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
@@ -69,7 +67,7 @@ function isPreviousFieldsFilled(){
 
 <script>
     var previousFilled = '<?php if (isPreviousFieldsFilled()) echo '1'; else echo '0'; ?>';
-    var previousField = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
+    var previousField  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
 </script>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -77,13 +75,17 @@ function isPreviousFieldsFilled(){
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/select2/select2.full.min.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-<script src="./plugins/iCheck/icheck.min.js"></script>
-<script src="./plugins/messaging/messaging.js"></script>
+
+<script src="./plugins/inputCommon/inputCommon.js"></script>
+<script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/createAI/createAI.js"></script>
+<script src="./plugins/select2/select2.full.min.js"></script>
+<script src="./plugins/iCheck/icheck.min.js"></script>
+<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
+
+<script src="./plugins/messaging/messaging.js"></script>
+<script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <form action="" method="post" enctype="multipart/form-data">

@@ -220,7 +220,7 @@ class console
     private static $constructed = false;
     private static $init_called = false;
     private static $cookie, $session, $remember_cookie, $dbh;
-    private static $api_request_url = 'https://api.hutoma.com/v1/';  //http://52.83.145.18:8080/'; //http://localhost:8081/
+    private static $api_request_url = 'https://api.hutoma.com/v1';//'http://localhost:8081/v1';
 
     /**
      * Merge user config and default config
@@ -437,7 +437,7 @@ class console
                 $randomSalt = self::rand_string(20);
                 $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
                 $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-                $service_url = 'http://localhost:8080/v1/admin/?email=' . $id . '&username=' . $username . '&password=' . $saltedPass . '&password_salt=' . $randomSalt . '&first_name=' . $fullname;
+                $service_url = 'https://api.hutoma.com/v1/admin/?email=' . $id . '&username=' . $username . '&password=' . $saltedPass . '&password_salt=' . $randomSalt . '&first_name=' . $fullname;
                 $curl = curl_init($service_url);
                 $headr = array();
                 $headr[] = 'Content-type: application/json';
@@ -1186,80 +1186,22 @@ class console
      */
 
 
-    // FOR API
-    public static function createAI($dev_token, $name, $description, $private, $language, $timezoneString,
-                                    $confidenceName, $personality, $voiceString, $contract, $payment_type, $price)
-    {
+    public static function createAI($name,$description,$private,$language,$timezone,$confidence,$voice,$contract,$payment_type,$price){
         if (self::$loggedIn) {
-            $path = 'ai';
+            $path = '/ai';
+            $parameters = array( 'name'=> $name, 'description' => $description,'confidence' =>$confidence,
+                                 'timezone' => 'Europe/London', 'locale' => 'en-US');
+            $service_url = self::$api_request_url.$path;
 
-            $service_url = self::$api_request_url . $path;
-
-            // TODO: move this to a common internationalization class
-            $locales = array(
-                'Deutsch' => 'de-DE',
-                'Español' => 'es-ES',
-                'Français' => 'fr-FR',
-                'Italiano' => 'it-IT',
-                'Nederlands' => 'nl-NL',
-                'Português' => 'pt-PT',
-                'English' => 'en-US'
-            );
-
-            if (array_key_exists($language, $locales)) {
-                $locale = $locales[$language];
-            } else {
-                $locale = $locales['English'];
-            }
-
-            $confidenceValues = array(
-                'never' => 0.0,
-                'sometimes' => 0.33,
-                'often' => 0.67,
-                'always' => 1.0
-            );
-            if (array_key_exists($confidenceName, $confidenceValues)) {
-                $confidence = $confidenceValues[$confidenceName];
-            } else {
-                $confidence = 0.5;
-            }
-
-            preg_match('/GMT\s[-|+][0-9]*:[0-9]*\s(.*)\s/', $timezoneString, $matches);
-            if (isset($matches)) {
-                $timezone = $matches[1];
-            } else {
-                $timezone = "UTC";
-            }
-
-            $voiceNames = array(
-                "Male" => 0,
-                "Female" => 1
-            );
-            if (array_key_exists($voiceString, $voiceNames)) {
-                $voice = $voiceNames[$voiceString];
-            } else {
-                $voice = 1;
-            }
-
-            $args = array(
-                'name' => $name,
-                'description' => $description,
-                'is_private' => $private,
-                'has_personality' => $personality,
-                'confidence' => $confidence,
-                'voice' => $voice,
-                'locale' => $locale,
-                'timezone' => $timezone
-            );
-
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setOpt(CURLOPT_POST, true);
-            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
+            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($parameters));
             $curl_response = $curl->exec();
+
             if ($curl_response === false) {
-                $info = $curl->getInfo();
                 $curl->close();
-                die('Error: createAI curl: ' . $info);
+                \hutoma\console::redirect('./error.php?err=301');
+                exit;
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
@@ -1268,17 +1210,32 @@ class console
     }
 
 
-    // FOR API
-    public static function getAIs($dev_token)
-    {
+    public static function getAIs(){
         if (self::$loggedIn) {
-            $path = 'ai';
+            $path = '/ai';
+            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=302');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+
+    public static function getSingleAI($dev_token,$aiid){
+        if (self::$loggedIn) {
+            $path = '/ai/' . $aiid;
             $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
             $curl_response = $curl->exec();
             if ($curl_response === false) {
-                $info = $curl->getInfo();
                 $curl->close();
-                die('Error: getAIs curl: ' . $info);
+                \hutoma\console::redirect('./error.php?err=303');
+                exit;
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
@@ -1286,36 +1243,41 @@ class console
         }
     }
 
-    // FOR API
-    public static function getSingleAI($dev_token, $aiid)
-    {
-        if (self::$loggedIn) {
-            $path = 'ai/' . $aiid;
-            $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $info = $curl->getInfo();
-                $curl->close();
-                die('Error: getSingleAI curl: ' . $info);
+
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
+    public static function updateAI($aiid, $description, $private,$language,$timezone,$personality,$voice,$confidence){
+        if(self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL updateAI(?,?,?)");
+
+                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
+                $sql->bindValue(2, $description, \PDO::PARAM_STR);
+                $sql->bindValue(3, $private, \PDO::PARAM_BOOL);
+
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=304');
+                exit;
             }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
+            $data = $sql->fetchAll();
+            $sql->nextRowset();
+
+            return $data;
         }
     }
 
-    // FOR API
-    public static function deleteAI($dev_token, $aiid)
-    {
+
+    public static function deleteAI($dev_token,$aiid){
         if (self::$loggedIn) {
-            $path = 'ai/' . $aiid;
+            $path = '/ai/' . $aiid;
             $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
             $curl->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
+
             $curl_response = $curl->exec();
             if ($curl_response === false) {
-                $info = $curl->getInfo();
                 $curl->close();
-                die('Error: deletAI curl: ' . $info);
+                \hutoma\console::redirect('./error.php?err=305');
+                exit;
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
@@ -1323,19 +1285,19 @@ class console
         }
     }
 
-    // FOR API
-    public static function chatAI($dev_token, $aiid, $chatId, $q, $history, $fs, $min_p)
-    {
+
+    public static function chatAI($dev_token,$aiid,$chatId,$q,$history,$fs,$min_p){
         if (self::$loggedIn) {
-            $path = 'ai/' . $aiid . '/chat';
-            $api_response_parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
+            $path = '/ai/' . $aiid . '/chat';
+            $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history);
+            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+
             $curl = new curlHelper($service_url, $dev_token);
             $curl_response = $curl->exec();
             if ($curl_response === false) {
-                $info = $curl->getInfo();
                 $curl->close();
-                die('Error: chatAI curl: ' . $info);
+                \hutoma\console::redirect('./error.php?err=330');
+                exit;
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
@@ -1343,26 +1305,25 @@ class console
         }
     }
 
-    // FOR API
-    public static function uploadFile($dev_token, $aiid, $file, $source_type, $url)
-    {
-        if (self::$loggedIn) {
-            $path = 'ai/' . $aiid . '/training';
 
+    public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
+        if (self::$loggedIn) {
+            $path = '/ai/' . $aiid . '/training';
             $filename = $file['tmp_name'];
             $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
 
-            $api_response_parameters = array('source_type' => $source_type);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($api_response_parameters);
+            $parameters = array('source_type' => $source_type);
+            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, $dev_token);
             $curl->setOpt(CURLOPT_POST, true);
             $curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $curl->exec();
+
             if ($curl_response === false) {
-                $info = $curl->getInfo();
                 $curl->close();
-                die('Error: uploadfile curl: ' . $info);
+                \hutoma\console::redirect('./error.php?err=350');
+                exit;
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
@@ -1372,33 +1333,180 @@ class console
     }
 
 
-    // FOR API
-    public static function getDomains($dev_token)
-    {
+    public static function getDomains(){
+
         if (self::$loggedIn) {
-            $path = 'ai/domain';
+            $path = '/ai/domain';
+            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=360');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+
+    public static function getIntents($dev_token,$aiid){
+        if (self::$loggedIn) {
+            $path = '/intents/'.$aiid;
+            $parameters = array('aiid' => $aiid);
+            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+
+            $curl = new curlHelper($service_url, $dev_token);
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=310');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+
+    public static function getIntent($dev_token,$aiid,$name){
+        if (self::$loggedIn) {
+            $path = '/intent/'.$aiid;
+            $parameters = array('aiid' => $aiid,'intent_name' => $name);
+            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+
+            $curl = new curlHelper($service_url, $dev_token);
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=311');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+
+    public static function getEntities($dev_token){
+        if (self::$loggedIn) {
+            $path = '/entities';
             $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
             $curl_response = $curl->exec();
+
             if ($curl_response === false) {
-                $info = $curl->getInfo();
                 $curl->close();
-                die('Error: getDomains curl: ' . $info);
+                \hutoma\console::redirect('./error.php?err=320');
+                exit;
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
-
             return $json_response;
         }
     }
 
-    public static function getAdminToken()
-    {
+
+    public static function getEntityValues($dev_token,$name){
+        if (self::$loggedIn) {
+            $path = '/entity';
+            $parameters = array('entity_name' => $name);
+            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+
+            $curl = new curlHelper($service_url, $dev_token);
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=325');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+
+
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
+    public static function getIntentUserSays($dev_id,$aiid,$name){
+        if(self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL getIntentUserSays(?,?,?)");
+
+                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
+                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
+                $sql->bindValue(3, $name, \PDO::PARAM_STR);
+
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=315');
+                exit;
+            }
+            $data = $sql->fetchAll();
+            // finally fetch the additional sql row for stored proc calls
+            $sql->nextRowset();
+            return $data;
+        }
+    }
+
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
+    public static function getIntentVariables($dev_id,$aiid,$name){
+        if(self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL getIntentVariables(?,?,?)");
+
+                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
+                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
+                $sql->bindValue(3, $name, \PDO::PARAM_STR);
+
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=316');
+                exit;
+            }
+            $data = $sql->fetchAll();
+            // finally fetch the additional sql row for stored proc calls
+            $sql->nextRowset();
+            return $data;
+        }
+    }
+
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
+    public static function getIntegrations(){
+        if(self::$loggedIn){
+            try {
+                $sql = self::$dbh->prepare("CALL getIntegrations()");
+                $sql->execute();
+                $data = $sql->fetchAll();
+
+                // finally fetch the additional sql row for stored proc calls
+                $sql->nextRowset();
+
+            } catch (MySQLException $e) {
+                $e->getMessage();
+                $output = 'Query - sql all integration error' . $e;
+                include 'output.html.php';
+                exit();
+            }
+            return $data;
+        }
+    }
+
+    public static function getAdminToken() {
         return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
 
     }
 
-    public static function getDevToken()
-    {
+
+    public static function getDevToken(){
         $token = "";
         if (self::$loggedIn) {
             $query = "CALL getDevToken(:id)";
@@ -1414,6 +1522,7 @@ class console
         }
         return $token;
     }
+
 
     public static function getClientToken()
     {
@@ -1433,99 +1542,21 @@ class console
         return $token;
     }
 
-    public static function isSessionActive()
-    {
+
+    public static function isSessionActive () {
         if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
         }
         $_SESSION['LAST_ACTIVITY'] = time();
-        $sid = session_id();
-        return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
+        $sid = session_id ();
+        return function_exists ( 'session_status' ) ? ( PHP_SESSION_ACTIVE == session_status () ) : (!empty($sid));
     }
 
-    // FAKE
-    public static function getIntegrations()
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getIntegrations()");
-                $sql->execute();
-                $data = $sql->fetchAll();
-
-                // finally fetch the additional sql row for stored proc calls
-                $sql->nextRowset();
-
-            } catch (MySQLException $e) {
-                $e->getMessage();
-                $output = 'Query - sql all integration error' . $e;
-                include 'output.html.php';
-                exit();
-            }
-            return $data;
-        }
+    function debug( $data) {
+        echo 'console.log(' . $data. ');';
     }
-
-
-    // FOR API STORED PROCEDURE - da cambiare per gli sviluppatori
-    public static function insertUserActiveDomain($dev_id, $aiid, $dom_id, $active)
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL insertUserActiveDomain(?,?,?,?)");
-
-                $sql->bindValue(1, $dev_id, \PDO::PARAM_STR);
-                $sql->bindValue(2, $aiid, \PDO::PARAM_STR);
-                $sql->bindValue(3, $dom_id, \PDO::PARAM_STR);
-                $sql->bindValue(4, $active, \PDO::PARAM_BOOL);
-
-                $sql->execute();
-            } catch (MySQLException $e) {
-                $e->getMessage();
-                $output = 'Query - sql user active update ACTIVE domains error' . $e;
-                exit();
-            }
-
-            $data = $sql->fetchAll();
-
-            // finally fetch the additional sql row for stored proc calls
-            $sql->nextRowset();
-
-            return $data;
-        }
-    }
-
-// FAKE
-    public static function getDomains_and_UserActiveDomains($dev_id, $aiid)
-    {
-        if (self::$loggedIn) {
-            try {
-
-                $sql = self::$dbh->prepare("CALL getDomainsAndUserActiveDomains(:devid, :aiid)");
-                $sql->execute(array(
-                    ":devid" => $dev_id,
-                    ":aiid" => $aiid));
-
-                $data = $sql->fetchAll();
-
-                // finally fetch the additional sql row for stored proc calls
-                $sql->nextRowset();
-
-            } catch (MySQLException $e) {
-                $e->getMessage();
-                $output = 'Query - sql user active AI domains error' . $e;
-                exit();
-            }
-            return $data;
-        }
-    }
-
-    function debug($data)
-    {
-        echo 'console.log(' . $data . ');';
-    }
-
 
 }
 

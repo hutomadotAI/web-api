@@ -12,7 +12,7 @@ function showIntegrations(str){
             wHTML += ('</div>');
             wHTML += ('<div class="col-xs-3">');
             if ( integrations[x].available != '0' )
-                wHTML += ('<label><span class="lead">'+integrations[x].name+'</span></label>');
+                wHTML += ('<label><span class="lead text">'+integrations[x].name+'</span></label>');
             else
                 wHTML += ('<label><span class="lead text-muted">'+integrations[x].name+'</span></label>')
             wHTML += ('</div>');
@@ -22,11 +22,11 @@ function showIntegrations(str){
             wHTML += ('<div class="col-xs-4">');
             if ( integrations[x].available != '0' ){
                 wHTML += ('<a data-toggle="collapse" data-parent="#accordion" href="#collapse'+(integrations[x].name).replace(" ","")+'">');
-                wHTML += ('<button class="btn btn-success pull-right flat" style="margin-right: 5px; width:130px;"><i class="fa fa-download"></i> View more info</button>');
+                wHTML += ('<button class="btn btn-success pull-right text-sm flat" style="margin-right: 5px; width:130px;"><i class="fa fa-download"></i> View more info</button>');
                 wHTML += ('</a>');
             }
             else
-                wHTML += ('<button class="btn btn-warning pull-right flat disabled" style="margin-right: 5px; width:130px;"><i class="fa fa-exclamation-triangle"></i> Coming soon</button>');
+                wHTML += ('<button class="btn btn-warning pull-right text-sm flat disabled" style="margin-right: 5px; width:130px;"><i class="fa fa-exclamation-triangle"></i> Coming soon</button>');
            
             wHTML += ('</div>');
             wHTML += ('</div>');

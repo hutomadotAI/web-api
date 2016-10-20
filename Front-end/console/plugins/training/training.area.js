@@ -12,12 +12,14 @@ function initializedEventListeners(){
     document.getElementById('btnUploadFile').addEventListener('click', uploadFile);
     document.getElementById('btnUploadStructure').addEventListener('click', uploadStructure);
     document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
+
+    document.getElementById('startstop-button').addEventListener('click', startStop);
 }
 
 function activeMonitors(status,error){
-
-    if (status != 0)
+    if (status != 'training_not_started')
         activePhaseOne();
+
     if ( status == 'training_in_progress' || status == 'training_queued') {
         activePhaseTwo();
         pingError();
@@ -25,7 +27,6 @@ function activeMonitors(status,error){
     if ( status == 'internal_error') {
         activePhaseTwo();
     }
-
 }
 
 function enableUploadFile() {
@@ -43,10 +44,6 @@ function enableUploadStructure() {
     else
         $("#btnUploadStructure").prop("disabled", false);
     msgAlertUploadStructure(0,'You can now upload your complex file');
-
-
-    // for demo
-    //$("#btnUploadStructure").prop("disabled", true);
 }
 
 function enableUploadUrl() {
@@ -60,13 +57,6 @@ function enableUploadUrl() {
 
     // for demo
     $("#btnUploadUrl").prop("disabled", true);
-}
-
-
-function resetPhaseTwoComponents(){
-    document.getElementById("progress-training-file").style.width ='0%';
-    document.getElementById('status-bagde-training').innerHTML = '0%';
-    document.getElementById('containerMsgAlertProgressBar').style.display = 'none';
 }
 
 function getUploadWarnings(info) {
@@ -153,6 +143,7 @@ function uploadFile(){
             }
         }
     };
+
     msgAlertUploadFile(1,'Uploading file...');
     xmlhttp.send(file_data);
 }
@@ -161,7 +152,7 @@ function uploadFile(){
 function uploadStructure(){
     if ( $('#inputstructure').val() == null ||  $('#inputstructure').val() == "") {
         $("#btnUploadStructure").prop("disabled", true);
-        msgAlertUploadStructure(1,'You need to choose a complex file first');
+        msgAlertUploadStructure(1,'Upload a page from a book to begin training');
         return;
     }
 
@@ -267,7 +258,7 @@ function updatePhaseOneComponents() {
     }
     else {
         activePhaseTwo();
-        //pingError();
+        pingError();
     }
 }
 
@@ -281,19 +272,60 @@ function activePhaseTwo(){
     $('#progress-upload-file-action').removeClass('active');
     $('#progress-upload-file-action').removeClass('progress-striped');
 
-
+    switchToStop();
+    
     $('#btnUploadFile').prop('disabled', false);
     $('#trainingbar').prop('hidden', false);
 
     // force flashing initialization text
     document.getElementById('status-training-file').innerText ='initialising';
     document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-
-    document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
+    document.getElementById('container_startstop').style.display = 'block';
+    //document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
 
     msgAlertProgressBar(0,'You can now talk to your AI.');
     //closingMsgAlertProgressBarTemporized();
     block_server_ping = false;
+}
+
+function resetPhaseTwoComponents(){
+    document.getElementById('container_startstop').style.display = 'none';
+    document.getElementById("progress-training-file").style.width ='0%';
+    document.getElementById('status-bagde-training').innerHTML = '0%';
+    document.getElementById('containerMsgAlertProgressBar').style.display = 'none';
+    $('#trainingbar').prop('hidden', true);
+}
+
+function startStop() {
+    if (document.getElementById('startstop-button').getAttribute('value') == '_stop')
+        switchToStart();
+    else
+        switchToStop();
+}
+
+function switchToStart(){
+    var elem_icon = document.getElementById('startstop-icon');
+    var elem_btn = document.getElementById('startstop-button');
+    var elem_text = document.getElementById('text-startstop');
+
+    elem_btn.setAttribute('value','_play');
+    elem_btn.setAttribute('class', 'btn btn-app text-light-blue');
+    elem_icon.setAttribute('class', 'fa fa-play no-margin text-light-blue');
+    elem_text.innerText ='resume training';
+    console.log('call stop training');
+
+}
+
+function switchToStop(){
+    var elem_icon = document.getElementById('startstop-icon');
+    var elem_btn = document.getElementById('startstop-button');
+    var elem_text = document.getElementById('text-startstop');
+
+    elem_btn.setAttribute('value','_stop');
+    elem_btn.setAttribute('class', 'btn btn-app text-red');
+    elem_icon.setAttribute('class', 'fa fa-stop no-margin text-red');
+    elem_text.innerText ='stop training';
+    console.log('call resume training');
 }
 
 function notifyError(){
@@ -311,7 +343,6 @@ function pingError(){
     }
 }
 
-
 function pingErrorCall(){
     var xmlhttp;
     if (window.XMLHttpRequest)
@@ -326,6 +357,7 @@ function pingErrorCall(){
 
             // global page error variable
             error = xmlhttp.responseText;
+
             try {
                 if( error != 'error' && !block_server_ping) {
 
@@ -402,7 +434,13 @@ function checkStructureSize(fileID,size) {
     return true;
 }
 
-
+/*
+$(document).ready(function(){
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_minimal'
+    });
+});
+*/
 
 // VIDEO TUTORIAL TRAINING CHAT EXAMPLE
 $("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function(){

@@ -1,21 +1,27 @@
 <?php
-
     require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
 
-// fake request - we need to loading entity keys for a specific USER,AI
-    $entityKeys = \hutoma\console::getIntegrations();
-
-
-
-/*
-    if ($entityList['status']['code'] !== 200) {
-        unset($entityList);
-        header('Location: ./error.php?err=3');
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
         exit;
     }
-    */
 
+    if (!isPostInputAvailable() ) {
+        \hutoma\console::redirect('./error.php?err=119');
+        exit;
+    }
+
+    $entity_values_list = \hutoma\console::getEntityValues( \hutoma\console::getDevToken(),$_POST['entity']);
+    
+    if ($entity_values_list['status']['code'] !== 200) {
+        unset($entity_values_list);
+        \hutoma\console::redirect('./error.php?err=225');
+        exit;
+    }
+
+    function isPostInputAvailable(){
+        return  ( isset($_POST['entity']) );
+    }
 ?>
 <!DOCTYPE html>
 <html>
@@ -24,17 +30,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>hu:toma | Edit Entity </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/ionicons.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-    <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
-    <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
@@ -56,8 +57,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <?php include './dynamic/entity.element.content.head.html.php'; ?>
-                    <?php include './dynamic/entity.element.content.keys.html.php'; ?>
-                    <?php include './dynamic/entity.element.content.prompt.html.php'; ?>
+                    <?php include './dynamic/entity.element.content.values.html.php'; ?>
                 </div>
                 <div class="col-md-4">
                     <?php include './dynamic/chat.html.php'; ?>
@@ -82,17 +82,14 @@
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/input-mask/jquery.inputmask.js"></script>
-<script src="./plugins/input-mask/jquery.inputmask.date.extensions.js"></script>
-<script src="./plugins/input-mask/jquery.inputmask.extensions.js"></script>
-<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./dist/js/demo.js"></script>
-<script src="./plugins/entity/entity.element.js"></script>
+
 <script src="./plugins/saveFile/FileSaver.js"></script>
+<script src="./plugins/validation/validation.js"></script>
+<script src="./plugins/entity/entity.element.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
-<script src="./plugins/jQuery/jquery.omniselect.js"></script>
+
+<script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
@@ -103,7 +100,7 @@
 </form>
 
 <script>
-    var entityKeysListFromServer = <?php echo json_encode($entityKeys); unset($entityKeys);?>;
+    var entityValuesListFromServer = <?php echo json_encode($entity_values_list['entity_values']);  unset($entity_values_list);;?>;
 </script>
 </body>
 </html>

@@ -2,10 +2,10 @@
 
     <div class="box-header with-border">
         <i class="fa fa-sitemap text-yellow"></i>
-        <h3 class="box-title">Entities List</h3>
+        <div class="box-title"><b>Entities List</b></div>
         <a data-toggle="collapse"  href="#collapseEntitiesListInfo">
             <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-md text-yellow"></i>
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
@@ -13,7 +13,7 @@
     <div class="box-body">
 
         <div class="input-group-btn">
-            <input class="form-control pull-right" onkeyup="searchEntities(this.value)" value="" placeholder="Search entities...">
+            <input class="form-control flat no-shadow pull-right" onkeyup="searchEntities(this.value)" value="" placeholder="Search entities...">
         </div>
     
         <p></p>
@@ -21,7 +21,7 @@
         <div id="collapseEntitiesListInfo" class="panel-collapse collapse">
             <div class="box-body">
                 <div class="overlay center-block">
-                    <section class="content bg-gray-light" >
+                    <section class="content-info" >
                         <div class="box-body">
                             <dl class="dl-horizontal">
                                 <dt>Description Entities Manipulation</dt>

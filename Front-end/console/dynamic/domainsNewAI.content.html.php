@@ -1,63 +1,59 @@
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
-        <h3 class="box-title">Select a pre-trained Neural Network</h3>
+        <div class="box-title"><b>Select a pre-trained Neural Network</b></div>
         <a data-toggle="collapse"  href="#collapseInfoNewDomains">
             <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-md text-yellow"></i>
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
 
     <div class="box-body" id="boxNewDomains">
-        <p></p>
-        <input class="form-control" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
-  <!--      <div class="form-group pull-right no-margin" style="padding-top: 5px;">
+        <?php include './dynamic/domainsNewAI.content.info.html.php'; ?>
+        <input class="form-control flat no-shadow" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
+        <!--
+        <div class="form-group pull-right no-margin" style="padding-top: 5px;">
             <span style="padding-right:5px;">Show Free Neural Networks Only</span>
             <label>
-                <input type="checkbox" class="minimal" checked>
+                <input type="checkbox" name="domains_free" id="domains_free" class="icheckbox_square-red" checked>
             </label>
         </div>
         <br>
         -->
+        <p></p>
 
-        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewDomains">
+        <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertNewDomains">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertNewDomains"></i>
             <span id="msgAlertNewDomains">Combine your AI with pre-trained neural networks made available by others.</span>
         </div>
     </div>
 
-
-
     <div id="collapseInfoNewDomains" class="panel-collapse collapse">
-        <div class="box-body">
+        <div class="box-body no-margin">
             <div class="overlay center-block">
-                <section class="content bg-gray-light" >
+                <section class="content-info" >
                     <div class="box-body">
-                        <dl class="dl-horizontal">
                             Pre-trained neural networks are made available by our community and provide out of the box knowlege to your AI so you don't have to start from scratch.
-                        </dl>
                     </div>
                 </section>
                 <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                <span><b>need help?</b> check out our <a href='#' tabindex="-1">video tutorial </a> or email <a href='#' tabindex="-1">support@hutoma.com</a></span>
             </div>
         </div>
     </div>
 
     <div class="box-footer">
         <button  style="width:100px" type="submit" id="btnBack" class="btn btn-primary flat pull-left" onCLick="backPage()"><b>Back</b></button>
-        <button  style="width:100px" type="submit" id="btnNext" class="btn btn-success flat  pull-right" onClick="wizardNext()"><b>Next</b></button>
+        <button  style="width:100px" type="submit" id="btnNext" class="btn btn-success flat pull-right" onClick="wizardNext()"><b>Next</b></button>
     </div>
 </div>
 
-
-
 <form method="POST" name="domainsNewAIform" action="./dynamic/saveAI.php"><!-- across market page for demo -->
-        <p></p>
-        <h2></h2>
-        <p id="domsearch"></p>
-        <input type="hidden" name="userActivedDomains" value="">
+    <p></p>
+    <h2></h2>
+    <p id="domsearch"></p>
+    <input type="hidden" name="userActivedDomains" value="">
 </form>
 
 <form method="POST" name="domainsNewAIformGoBack">

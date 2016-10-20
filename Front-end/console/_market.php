@@ -1,10 +1,12 @@
 <?php
-
     require '../pages/config.php';
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
 
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
-if ( !isPostInputAvailable() ) {
+    if ( !isPostInputAvailable() ) {
         header("Location: ./error.php?err=2");
         exit;
     }
@@ -37,7 +39,6 @@ if ( !isPostInputAvailable() ) {
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
     <link rel="stylesheet" href="./plugins/select2/select2.min.css">
-    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">

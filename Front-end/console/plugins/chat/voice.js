@@ -3,6 +3,7 @@ var recognition;
 msg.addEventListener('start', function () { });
 msg.addEventListener('end', function () { activeSpeechButton(); enableChat();});
 msg.lang = 'en-US';
+//msg.lang = 'it-IT';
 msg.volume = 1;
 msg.rate = 1;
 msg.pitch = 1;
@@ -26,6 +27,8 @@ function speak(text) {
 
 function loadVoices() {
     msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == "Google US English"; })[0];
+    //msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == "Google Italiano"; })[0];
+
 }
 
 function startDictation(human_name, ai_name) {
@@ -40,6 +43,7 @@ function startDictation(human_name, ai_name) {
         recognition.interimResults = false;
 
         recognition.lang = "en-US";
+        //recognition.lang = "it-IT";
         recognition.start();
 
         recognition.onresult = function(e) {

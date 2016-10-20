@@ -1,6 +1,6 @@
 <div class="form-group">
-  <label>Time Zone</label>
-  <select class="form-control select 2" name="ai_timezone" id="ai_timezone" style="width: 100%;">
+  <label for="ai_timezone">Time Zone</label>
+  <select class="form-control select2" name="ai_timezone" id="ai_timezone" style="width: 100%;">
     <option>GMT -11:00 Pacific/Midway (SST)</option>
     <option>GMT -11:00 Pacific/Niue (NUT)</option>
     <option>GMT -11:00 Pacific/Pago Pago (SST)</option>

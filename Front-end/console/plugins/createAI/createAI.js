@@ -1,121 +1,98 @@
 document.getElementById('btnNext').addEventListener('click', wizardNext);
-document.getElementById('ai_name').addEventListener('keyup', activeBtnNext);
+document.getElementById('ai_name').addEventListener('keydown', activeButtonCreate);
+document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLenght);
 
 function wizardNext() {
-    $(this).prop('disabled',true);
-    $('#btnCancel').prop('disabled',true);
+    document.getElementById('btnNext').setAttribute('disabled','disabled');
+    document.getElementById('btnCancel').setAttribute('disabled','disabled');
 
-    if(isContainInvalidCharacters($('#ai_name').val())) {
+    var value_name = document.getElementById('ai_name').value;
+    if(inputValidation(value_name,'ai_name')) {
         msgAlertNameAI(2, 'Invalid name. Please enter a string that contains alphanumeric characters.');
+        document.getElementById('btnNext').setAttribute('disabled','disabled');
+        document.getElementById('btnCancel').removeAttribute('disabled');
+        inputsActiveDeactive(false);
+        return;
+    }
+
+    var value_desc = document.getElementById('ai_description').value;
+    if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
+        msgAlertDescriptionAI(2, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
+        document.getElementById('btnNext').setAttribute('disabled','disabled');
+        document.getElementById('btnCancel').removeAttribute('disabled');
         inputsActiveDeactive(false);
         return;
     }
 
     if(document.createAIform.onsubmit)
         return;
+
     RecursiveUnbind($('#wrapper'));
+    setConfidenceValueBeforePosting();
     document.createAIform.submit();
 }
 
-function activeBtnNext() {
-    var ai_name = $("#ai_name").val();
-    if ( ai_name.length > 0 ) {
-        $('#btnNext').prop('disabled', false);
-        document.getElementById('containerMsgAlertNameAI').style.display = 'none';
-        document.getElementById('ai_name').style.borderColor = "#d2d6de";
+function activeButtonCreate() {
+    var limitTextInputSize = 50;
+    switch (limitText($("#ai_name"), limitTextInputSize)){
+        case -1:
+            document.getElementById('btnNext').setAttribute('disabled','disabled');
+            break;
+        case 0:
+            document.getElementById('btnNext').removeAttribute('disabled');
+            document.getElementById('containerMsgAlertNameAI').style.display = 'none';
+            document.getElementById('ai_name').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            msgAlertNameAI(1, 'Limit AI name reached.');
+            break;
     }
-    else
-        $("#btnNext").prop("disabled",true);
 }
 
-function inputsActiveDeactive(flag){
-    $('#btnNext').prop('disabled',!flag);
-    $('#btnCancel').prop('disabled',flag);
-    $('#ai_name').prop('disabled',flag);
-    $('#ai_description').prop('disabled',flag);
-    $('#ai_confidence').prop('disabled',flag);
-    $('#ai_timezone').prop('disabled',flag);
-    $('#ai_sex').prop('disabled',flag);
-    $('#ai_language').prop('disabled',flag);
-    $('#ai_personality').prop('disabled',flag);
+function checkDescriptionLenght() {
+    var limitTextInputSize = 100;
+    if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
+        msgAlertDescriptionAI(1, 'Limit AI description reached.');
+    else {
+        document.getElementById('btnNext').removeAttribute('disabled');
+        document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';
+        document.getElementById('ai_description').style.borderColor = "#d2d6de";
+    }
 }
 
-function isContainInvalidCharacters(txt) {
-    var letters = /^[0-9a-zA-Z \-'_]+$/;
-    if (letters.test(txt))
-        return false;
-    return true;
+function setConfidenceValueBeforePosting(){
+    var element = document.getElementById('ai_confidence');
+    var value = element.value;
+    element.value = getValueFromConfidence(value);
 }
 
+function getValueFromConfidence(confidence){
+    var values = {"never":0.2, "rarely":0.4, "sometimes":0.6, "often":0.8, "always":1.0};
+    return values[confidence];
+}
 
 $(function () {
-    $('.select2').select2();
-});
-
-$(function () {
-
-    $('#ai_confidence').ionRangeSlider({
+    $("#ai_confidence").ionRangeSlider({
         type: "single",
-        min: 1,
-        max: 4,
-        from:2,
-        from_value:"sometimes",
-        step: 1,
         grid: true,
         keyboard: true,
-        onStart: function (data) {console.log('onStart'); },
-        onChange: function (data) {console.log('onChange'); },
-        onFinish: function (data) { console.log('onFinish'); },
-        onUpdate: function (data) {console.log('onUpdate'); },
-        values: ["never", "sometimes", "often","always"]
+        onStart: function (data) {console.log("onStart"); },
+        onChange: function (data) {console.log("onChange"); },
+        onFinish: function (data) { console.log("onFinish"); },
+        onUpdate: function (data) {console.log("onUpdate"); },
+        values: ["never", "rarely", "sometimes", "often", "always"]
     });
 });
 
-
-//Flat red color scheme for iCheck
-$('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
-    checkboxClass: 'icheckbox_flat-blue'
-});
-
-
 $(document).ready(function(){
-
     if ( previousFilled == 1 ){
-        fillInputFields();
+        setInputFields();
         // active button next if are previous inserted data
-        if (  $('#ai_name').val().length > 0 )
-            $('#btnNext').prop('disabled', false);
+        if ( document.getElementById('ai_name').value.length > 0 )
+            document.getElementById('btnNext').removeAttribute('disabled');
         else
-            $('#btnNext').prop('disabled',true);
+            document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
+    else
+        setSliderValue('ai_confidence',0.8); // "often"
 });
-
-function selectInputElement(id,valueToSelect) {
-    var element = document.getElementById(id);
-    element.value = valueToSelect;
-    element.selected = true;
-    document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
-}
-
-function fillInputFields(){
-    document.getElementById('ai_name').value = previousField.name;
-    document.getElementById('ai_description').value = previousField.description;
-
-    selectInputElement('ai_language',previousField.language);
-    selectInputElement('ai_timezone',previousField.timezone);
-    selectInputElement('ai_voice',previousField.voice);
-    selectInputElement('ai_personality',previousField.personality);
-
-    document.getElementById('ai_confidence').value = previousField.confidence;
-    $("#ai_confidence").ionRangeSlider('upload');
-
-    // enable/disable checkbox public AI
-
-    if(previousField.private == '1') {
-        $('input[type="checkbox"].flat-red').prop('checked',false)
-    }
-    else {
-        $('input[type="checkbox"].flat-red').prop('checked', true);
-    }
-
-}

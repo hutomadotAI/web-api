@@ -2,8 +2,6 @@ var isChrome = !!window.chrome;
 var continuousSpeech = '0';
 var speechResponse = 1; // voice activated true for default
 var jsonResponse   = '1'; // voice activated true for default
-var colorVoice = '0';
-var muteMicrophone = '0';
 var chatSemaphore = 0;
 
 
@@ -111,8 +109,7 @@ function createRightMsg(ai_name,msg,chatId,error) {
         height = parseInt(height) + 5;
         $('#chat').scrollTop(height);
     }
-
-
+    
     if ( speechResponse == 1)
         speak(msg);
     else
@@ -225,7 +222,7 @@ function jsonOption(value){
 }
 
 
-function copyToClipboard(elementId) {
+function copyJsonToClipboard(elementId) {
   var node = document.getElementById('msgJSON');
   var content = (node.innerHTML);
 

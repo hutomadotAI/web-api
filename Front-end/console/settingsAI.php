@@ -1,45 +1,48 @@
 <?php
-require "../pages/config.php";
-
-if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) \hutoma\console::redirect('../pages/login.php');
+    require "../pages/config.php";
 
 
-if (! isSessionVariablesAvailable() ) {
-    header("Location: ./error.php?err=2");
-    exit;
-}
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
-$response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
-if ($response['status']['code'] !== 200) {
-    unset($response);
-    header('Location: ./error.php?err=3');
-    exit;
-}
+    if (! isSessionVariablesAvailable() ) {
+        \hutoma\console::redirect('./error.php?err=105');
+        exit;
+    }
+
+    $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
+    if ($response['status']['code'] !== 200) {
+        unset($response);
+        header('Location: ./error.php?err=3');
+        exit;
+    }
 
 
-/*
-$usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
-if ($usr_domains['status']['code'] !== 200) {
-    unset($usr_domains);
-    header('Location: ./error.php?err=3');
-    exit;
-}
-*/
+    /*
+    $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+    if ($usr_domains['status']['code'] !== 200) {
+        unset($usr_domains);
+        header('Location: ./error.php?err=3');
+        exit;
+    }
+    */
 
-function isSessionVariablesAvailable(){
-    return  (
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'])
-    );
-}
+    function isSessionVariablesAvailable(){
+        return  (
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) &&
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'])
+        );
+    }
 ?>
 
 <!DOCTYPE html>
@@ -49,24 +52,21 @@ function isSessionVariablesAvailable(){
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>hu:toma | option AI</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/ionicons.min.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
-    <link rel="stylesheet" href="./plugins/jvectormap/jquery-jvectormap-1.2.2.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./plugins/select2/select2.min.css">
-    <link rel="stylesheet" href="./plugins/bootstrap-slider/slider.css">
+    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./dist/css/hutoma.css">
+    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
-    <link rel="stylesheet" href="./plugins/switch/switch.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/AdminLTE.min.css">
 
+    <link rel="stylesheet" href="./plugins/bootstrap-slider/slider.css">
+    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
+    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinHTML5.css">
+    <link rel="stylesheet" href="./plugins/switch/switch.css">
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showDomains('',1)">
@@ -123,16 +123,18 @@ function isSessionVariablesAvailable(){
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
+
 <script src="./plugins/select2/select2.full.min.js"></script>
-<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
 <script src="./plugins/iCheck/icheck.min.js"></script>
+<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 <script src="./plugins/clipboard/clipboard.min.js"></script>
 <script src="./plugins/deleteAI/deleteAI.js"></script>
 <script src="./plugins/domain/domain.js"></script>
+<script src="./plugins/inputCommon/inputCommon.js"></script>
 <script src="./plugins/setting/setting.js"></script>
+
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
@@ -180,19 +182,9 @@ function isSessionVariablesAvailable(){
 </script>
 
 <script>
-    function searchDomain(str) {
-        showDomains(str,1);
-    }
+    function searchDomain(str) { showDomains(str,1);}
 </script>
 
-
-<script>
-    //iCheck for checkbox and radio inputs
-    $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
-        checkboxClass: 'icheckbox_minimal-blue',
-        radioClass: 'iradio_minimal-blue'
-    });
-</script>
 
 </body>
 </html>

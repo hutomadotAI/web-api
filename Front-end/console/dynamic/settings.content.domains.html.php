@@ -1,23 +1,24 @@
 
     <div class="box-header with-border">
         <i class="fa fa-th text-red"></i>
-        <h3 class="box-title">Pre-training Neural Networks</h3>
+        <div class="box-title"><b>Pre-training Neural Networks</b></div>
         <a data-toggle="collapse"  href="#collapseInfoDomains">
             <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-md text-yellow"></i>
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
 
     <div class="box-body" id="boxDomains">
         <p></p>
-        <input class="form-control" id="searchInputDomains" value="" placeholder="This is a placeholder page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
+        <input class="form-control flat no-shadow" id="searchInputDomains" value="" placeholder="This is a placeholder page. Please click next" tabindex="0" onkeyup="searchDomain(this.value)">
         <div class="form-group pull-right no-margin" style="padding-top: 5px;">
             <span style="padding-right:5px;">Show Free Neural Networks Only</span>
             <label>
                 <input type="checkbox" class="minimal" checked>
             </label>
         </div>
+        <br>
         <br>
 
       

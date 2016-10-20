@@ -8,12 +8,13 @@ var MENU = MENU || (function(){
                 // _args[1] -> label menu clicked
                 // _args[2] -> level tree menu clicked
                 // _args[3] -> block href link on clicked menu
-                // _args[4] -> limited menu show during creation AI widarz
+                // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
 
-                if (!_args[4])
+                if (!(_args[0]===''))
                     buildConsoleMenu(_args[0],_args[1],_args[2],_args[3]);
                 else
                     buildLimitedConsoleMenu(_args[1]);
+
                 buildAccountMenu();
             }
         };

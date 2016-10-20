@@ -1,8 +1,8 @@
 <?php
   require "../../pages/config.php";
 
-  if ( !\hutoma\console::isSessionActive()) {
-      \hutoma\console::redirect('./error.php?err=101');
+  if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
     exit;
   }
 

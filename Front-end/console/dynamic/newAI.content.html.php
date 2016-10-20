@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
-        <h3 class="box-title">Basic AI Settings</h3>
+        <div class="box-title"><b>Basic AI Settings</b></div>
     </div>
     
     <form method="POST" name="createAIform" action="./domainsNewAI.php">
@@ -41,12 +41,12 @@
                     <?php include './dynamic/input.public.html.php'; ?>
                 </div>
             </div>
-
+        </div>
     </form>
 
     <div class="box-footer">
-            <a href="#" style="width:100px" class="btn btn-primary flat" id="btnCancel  pull-left" onClick="history.go(-1); return false;"><b>Cancel</b></a>
-            <button style="width:100px"  type="submit" id="btnNext" class="btn btn-success flat  pull-right" alt="next step"><b>Next</b></button>
+        <a href="#" style="width:100px" class="btn btn-primary flat" id="btnCancel" onClick="window.location.href='./home.php';"><b>Cancel</b></a>
+        <button style="width:100px"  type="submit" id="btnNext" class="btn btn-success flat pull-right" alt="next step"><b>Next</b></button>
     </div>
 </div>
 

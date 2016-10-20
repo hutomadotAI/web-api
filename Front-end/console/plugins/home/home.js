@@ -10,16 +10,24 @@ function wizardNext() {
 
 function sendAIID(elem){
     var value = elem.value;
-    document.getElementById('btnSelectAI').setAttribute('disabled','disabled');
-    //$(elem).prop("disabled",true);
+    elem.setAttribute('disabled','disabled');
+
+    // color disabled in cascade buttons
+    //$('button[name="btnSelectAI"]').css('background', '#afcbe2');
+
     if(document.viewAllForm.onsubmit)
         return;
     RecursiveUnbind($('#listTable'));
-
     deactiveButtons();
 
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();
+}
+
+function recursiveDisable($jElement){
+    $jElement.children().each(function () {
+        recursiveDisable($(this));
+    });
 }
 
 function publishAI(elem){
@@ -36,8 +44,6 @@ function publishAI(elem){
 function deactiveButtons(){
     document.getElementById('btnCreateAI').setAttribute('disabled','disabled');
 }
-
-
 
 // VIDEO TUTORIAL
 $("#collapseFirstVideoTutorial").on('hidden.bs.collapse', function(){
