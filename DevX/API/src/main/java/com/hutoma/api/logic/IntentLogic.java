@@ -9,10 +9,10 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 import java.util.UUID;
+import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -23,12 +23,15 @@ public class IntentLogic {
     private final Config config;
     private final Logger logger;
     private final DatabaseEntitiesIntents database;
+    private final TrainingLogic trainingLogic;
 
     @Inject
-    public IntentLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database) {
+    public IntentLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database,
+                       final TrainingLogic trainingLogic) {
         this.config = config;
         this.logger = logger;
         this.database = database;
+        this.trainingLogic = trainingLogic;
     }
 
     public ApiResult getIntents(SecurityContext securityContext, String devid, UUID aiid) {
@@ -63,6 +66,7 @@ public class IntentLogic {
         try {
             this.logger.logDebug(LOGFROM, "request to edit intent " + intent.getIntentName() + " from " + devid);
             this.database.writeIntent(devid, aiid, intentName, intent);
+            this.trainingLogic.stopTraining(null, devid, aiid);
             return new ApiResult().setSuccessStatus();
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
             this.logger.logDebug(LOGFROM, "entity " + dmee.getMessage() + " duplicated or non-existent");
@@ -82,6 +86,7 @@ public class IntentLogic {
             if (!this.database.deleteIntent(devid, aiid, intentName)) {
                 return ApiError.getNotFound();
             }
+            this.trainingLogic.stopTraining(null, devid, aiid);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logError(LOGFROM, "error deleting intent: " + e.toString());

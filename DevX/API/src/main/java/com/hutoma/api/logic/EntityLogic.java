@@ -9,9 +9,11 @@ import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.List;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -22,12 +24,15 @@ public class EntityLogic {
     private final Config config;
     private final Logger logger;
     private final DatabaseEntitiesIntents database;
+    private final TrainingLogic trainingLogic;
 
     @Inject
-    public EntityLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database) {
+    public EntityLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database,
+                       final TrainingLogic trainingLogic) {
         this.config = config;
         this.logger = logger;
         this.database = database;
+        this.trainingLogic = trainingLogic;
     }
 
     public ApiResult getEntities(final SecurityContext securityContext, final String devid) {
@@ -58,6 +63,7 @@ public class EntityLogic {
     public ApiResult writeEntity(final String devid, final String entityName, final ApiEntity entity) {
         try {
             this.logger.logDebug(LOGFROM, "request to edit entity " + entityName + " from " + devid);
+            stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseIntegrityViolationException dive) {
@@ -75,10 +81,29 @@ public class EntityLogic {
             if (!this.database.deleteEntity(devid, entityName)) {
                 return ApiError.getNotFound();
             }
+            stopTrainingIfEntityInUse(devid, entityName);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logError(LOGFROM, "error writing entity: " + e.toString());
             return ApiError.getInternalServerError();
+        }
+    }
+
+    private List<UUID> getAisWithEntityInUse(final String devid, final String entityName) {
+        try {
+            return this.database.getAisForEntity(devid, entityName);
+        } catch (final Exception e) {
+            this.logger.logError(LOGFROM, "error getting entities: " + e.toString());
+        }
+        return new ArrayList<>();
+    }
+
+    private void stopTrainingIfEntityInUse(final String devid, final String entityName) {
+        List<UUID> ais = getAisWithEntityInUse(devid, entityName);
+        if (!ais.isEmpty()) {
+            for (UUID ai : ais) {
+                this.trainingLogic.stopTraining(null, devid, ai);
+            }
         }
     }
 }

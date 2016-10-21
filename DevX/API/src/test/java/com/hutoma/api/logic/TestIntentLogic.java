@@ -10,15 +10,16 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.IntentVariable;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -40,6 +41,7 @@ public class TestIntentLogic {
     Tools fakeTools;
     IntentLogic intentLogic;
     Logger fakeLogger;
+    TrainingLogic trainingLogic;
 
     @Before
     public void setup() {
@@ -48,21 +50,8 @@ public class TestIntentLogic {
         this.fakeContext = mock(SecurityContext.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(Logger.class);
-        this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase);
-    }
-
-    private List<String> getIntentsList() {
-        return Arrays.asList(new String[] {this.INTENTNAME, "intent2"});
-    }
-
-    private ApiIntent getIntent() {
-        return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT)
-            .addResponse("response").addUserSays("usersays")
-            .addVariable(new IntentVariable("entity", true, 3, "somevalue").addPrompt("prompt"));
-    }
-
-    private ApiIntent getIntentEmpty() {
-        return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT);
+        this.trainingLogic = mock(TrainingLogic.class);
+        this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);
     }
 
     @Test
@@ -93,7 +82,6 @@ public class TestIntentLogic {
         final ApiResult result = this.intentLogic.getIntents(this.fakeContext, this.DEVID, this.AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
-
 
     @Test
     public void testGetIntent_Success() throws Database.DatabaseException {
@@ -169,5 +157,32 @@ public class TestIntentLogic {
         when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(false);
         final ApiResult result = this.intentLogic.deleteIntent(this.DEVID, this.AIID, this.INTENTNAME);
         Assert.assertEquals(404, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteIntent_triggersTrainingStop() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(true);
+        this.intentLogic.deleteIntent(this.DEVID, this.AIID, this.INTENTNAME);
+        verify(this.trainingLogic).stopTraining(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateIntent_triggersTrainingStop() throws Database.DatabaseException {
+        this.intentLogic.writeIntent(this.DEVID, this.AIID, this.INTENTNAME, getIntent());
+        verify(this.trainingLogic).stopTraining(any(), any(), any());
+    }
+
+    private List<String> getIntentsList() {
+        return Arrays.asList(this.INTENTNAME, "intent2");
+    }
+
+    private ApiIntent getIntent() {
+        return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT)
+                .addResponse("response").addUserSays("usersays")
+                .addVariable(new IntentVariable("entity", true, 3, "somevalue").addPrompt("prompt"));
+    }
+
+    private ApiIntent getIntentEmpty() {
+        return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT);
     }
 }
