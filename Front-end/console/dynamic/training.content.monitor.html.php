@@ -7,45 +7,40 @@
         header('Location: ./error.php?err=18');
         exit;
     }
+    // TO DO loader but API CALL
+    if(\hutoma\console::getAiTrainingFile($singleAI['aiid'])== null)
+        $training_file = false;
+    else
+        $training_file = true;
 
     function decodeAIState($state){
         switch ($state) {
-            
-            case 'training_queued' :
-                return('<span class="label label-primary">Queued</span>');
-                break;
-            case 'preprocess_training_text' :
-                return('<span class="label label-primary">Preprocess Text</span>');
-                break;
-            case 'preprocess_completed' :
-                return('<span class="label label-primary">Preprocess Completed</span>');
-                break;
-            case 'ready_for_training' :
-                return('<span class="label label-warning">Ready</span>');
-                break;
-            case 'start_training' :
-                return('<span class="label label-warning">Start</span>');
-                break;
-            case 'training_in_progress' :
-                return('<span class="label label-primary">Training in progress</span>');
-                break;
-            case 'training_completed' :
-                return('<span class="label label-success">Trained</span>');
-                break;
-            case 'delete_training' :
-                return('<span class="label label-warning">Delete Training</span>');
-                break;
-            case 'stop_training' :
+            case 'STOPPED' :
                 return('<span class="label label-primary">Stopped</span>');
                 break;
-            case 'malformed_training_file' :
-                return('<span class="label label-danger">Malformed Training File</span>');
+            case 'NOT_STARTED' :
+                return('<span class="label label-warning">Not started</span>');
                 break;
-            case 'training_stopped_maxtime' :
-                return('<span class="label label-danger">Stopped Max Time</span>');
+            case 'QUEUED' :
+                return('<span class="label label-warning">Queued</span>');
+                break;
+            case 'IN_PROGRESS' :
+                return('<span class="label label-primary">in progress</span>');
+                break;
+            case 'STOPPED_MAX_TIME' :
+                return('<span class="label label-warning" >Stopped Max Time</span>');
+                break;
+            case 'COMPLETED' :
+                return('<span class="label label-success">Completed</span>');
+                break;
+            case 'ERROR' :
+                return('<span class="label label-danger">Error</span>');
+                break;
+            case 'MALFORMEDFILE' :
+                return('<span class="label label-dangel">Malformed</span>');
                 break;
             default:
-                return('<span class="label label-danger">Internal Error</span>');
+                return('<span class="label label-danger">Undefined</span>');
         }
     }
 ?>
@@ -142,5 +137,6 @@
 </div>
 <script>
     var status = '<?php echo $singleAI['ai_status']; ?>';
+    var training_file = <?php echo json_encode($training_file);?>;
     var error = <?php echo $singleAI['deep_learning_error']; ?>;
 </script>

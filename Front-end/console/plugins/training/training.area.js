@@ -2,7 +2,7 @@ var max_error = -1.0;
 var block_server_ping = false;
 
 initializedEventListeners();
-activeMonitors(status,error);
+activeMonitors(status);
 
 function initializedEventListeners(){
     document.getElementById('inputfile').addEventListener('change', enableUploadFile);
@@ -16,17 +16,53 @@ function initializedEventListeners(){
     document.getElementById('startstop-button').addEventListener('click', startStop);
 }
 
-function activeMonitors(status,error){
-    if (status != 'training_not_started')
-        activePhaseOne();
+function activeMonitors(status){
 
-    if ( status == 'training_in_progress' || status == 'training_queued') {
-        activePhaseTwo();
-        pingError();
+    if(training_file){
+        activePhaseOne();
     }
-    if ( status == 'internal_error') {
-        activePhaseTwo();
-    }
+    else
+        switch(status){
+            case 'NOT_STARTED' : break;
+            case 'QUEUED' : break;
+            case 'IN_PROGRESS' :
+                activePhaseTwo();
+                pingError();
+                break;
+            case 'STOPPED_MAX_TIME' : break;
+            case 'COMPLETED' : break;
+            case 'DELETED' : break;
+            case 'ERROR' : break;
+            case 'MALFORMEDFILE' : break;
+            case 'CANCELLED' : break;
+            default : break;
+        }
+}
+
+function activePhaseOne(){
+    msgAlertUploadFile(0, 'A file is already loaded');
+    document.getElementById('progress-upload-file').style.width = '100%';
+    document.getElementById('status-bagde-upload').innerHTML = '100%';
+}
+
+function activePhaseTwo(){
+    $('#progress-upload-file-action').removeClass('active');
+    $('#progress-upload-file-action').removeClass('progress-striped');
+
+    switchToStop();
+
+    $('#btnUploadFile').prop('disabled', false);
+    $('#trainingbar').prop('hidden', false);
+
+    // force flashing initialization text
+    document.getElementById('status-training-file').innerText ='initialising';
+    document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
+    document.getElementById('container_startstop').style.display = 'block';
+    //document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
+
+    msgAlertProgressBar(0,'You can now talk to your AI.');
+    //closingMsgAlertProgressBarTemporized();
+    block_server_ping = false;
 }
 
 function enableUploadFile() {
@@ -260,32 +296,6 @@ function updatePhaseOneComponents() {
         activePhaseTwo();
         pingError();
     }
-}
-
-function activePhaseOne(){
-    msgAlertUploadFile(0, 'A file is already loaded');
-    document.getElementById('progress-upload-file').style.width = '100%';
-    document.getElementById('status-bagde-upload').innerHTML = '100%';
-}
-
-function activePhaseTwo(){
-    $('#progress-upload-file-action').removeClass('active');
-    $('#progress-upload-file-action').removeClass('progress-striped');
-
-    switchToStop();
-    
-    $('#btnUploadFile').prop('disabled', false);
-    $('#trainingbar').prop('hidden', false);
-
-    // force flashing initialization text
-    document.getElementById('status-training-file').innerText ='initialising';
-    document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-    document.getElementById('container_startstop').style.display = 'block';
-    //document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
-
-    msgAlertProgressBar(0,'You can now talk to your AI.');
-    //closingMsgAlertProgressBarTemporized();
-    block_server_ping = false;
 }
 
 function resetPhaseTwoComponents(){

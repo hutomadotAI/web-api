@@ -11,7 +11,7 @@ if (! isPostInputAvailable() ) {
     exit;
 }
 $entityList = \hutoma\console::getEntities(\hutoma\console::getDevToken());
-$intent     = \hutoma\console::getIntent  (\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['intent']);
+$intent     = \hutoma\console::getIntent  ( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['intent']);
 
 if ($entityList['status']['code'] !== 200 ) {
     unset($entityList);

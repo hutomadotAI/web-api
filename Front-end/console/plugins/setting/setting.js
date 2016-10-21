@@ -1,7 +1,7 @@
 document.getElementById("btnCancel").addEventListener("click", setInputFields);
 document.getElementById("btnSave").addEventListener("click", updateAI);
 document.getElementById("btnDomainsCancel").addEventListener("click", resetDomainsData);
-document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLenght);
+document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLength);
 
 $(function () {
     $("#ai_confidence").ionRangeSlider({
@@ -25,17 +25,6 @@ function resetDomainsData(){
     var str='';
     document.getElementById('searchInputDomains').value = str;
     showDomains(str,1);
-}
-
-function checkDescriptionLenght() {
-    var limitTextInputSize = 100;
-    if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
-        msgAlertDescriptionAI(1, 'Limit AI description reached.');
-    else {
-        msgAlertUpdateAI(0, 'You can change main AI parameter and save it');
-        document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';
-        document.getElementById('ai_description').style.borderColor = "#d2d6de";
-    }
 }
 
 function updateAI(){

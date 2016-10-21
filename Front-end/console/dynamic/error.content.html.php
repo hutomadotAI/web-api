@@ -163,6 +163,10 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - DELETE AI FAILED';
             $details = ' We could not find the data you were looking for';
             break;
+        case 306 :
+            $msg = 'INTERNAL ERROR - GET INFO TRAINING FILE FAILED';
+            $details = ' We could not find the data you were looking for';
+            break;
         case 310 :
             $msg ='INTERNAL ERROR - GET INTENTS INFORMATION FAILED';
             $details =' We could not find the data you were looking for';

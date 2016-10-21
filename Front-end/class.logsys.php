@@ -1280,6 +1280,24 @@ class console
         }
     }
 
+    public static function getAiTrainingFile($aiid){
+        if(self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL updateAI(?)");
+
+                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
+
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=306');
+                exit;
+            }
+            $data = $sql->fetchAll();
+            $sql->nextRowset();
+            return $data;
+        }
+    }
+
 
     // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
     public static function updateAI($aiid, $description, $private,$language,$timezone,$personality,$voice,$confidence){
@@ -1298,7 +1316,6 @@ class console
             }
             $data = $sql->fetchAll();
             $sql->nextRowset();
-
             return $data;
         }
     }
@@ -1364,7 +1381,6 @@ class console
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
-
             return $json_response;
         }
     }
@@ -1390,13 +1406,13 @@ class console
     }
 
 
-    public static function getIntents($dev_token,$aiid){
+    public static function getIntents($aiid){
         if (self::$loggedIn) {
             $path = '/intents/'.$aiid;
             $parameters = array('aiid' => $aiid);
             $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {
@@ -1411,13 +1427,13 @@ class console
     }
 
 
-    public static function getIntent($dev_token,$aiid,$name){
+    public static function getIntent($aiid,$name){
         if (self::$loggedIn) {
             $path = '/intent/'.$aiid;
             $parameters = array('aiid' => $aiid,'intent_name' => $name);
             $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {

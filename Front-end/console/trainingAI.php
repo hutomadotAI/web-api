@@ -24,7 +24,7 @@
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status'] = $singleAI['ai_status'];
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'] = $singleAI['client_token'];
 
-            //$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_file']  = $singleAI['ai']['training_file\''];
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']  =  \hutoma\console::getAiTrainingFile($singleAI['aiid']);
 
             // NEED TO MODIFY CREATE AI IN 
             $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = 'English';
