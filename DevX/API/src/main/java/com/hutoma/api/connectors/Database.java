@@ -5,15 +5,25 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiDomain;
+import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
+
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.UUID;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -33,20 +43,20 @@ public class Database {
     }
 
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try {
             List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"));
             return new MemoryIntent(rs.getString("intentName"),
-                UUID.fromString(rs.getString("aiid")),
-                UUID.fromString(rs.getString("chatId")),
-                variables);
+                    UUID.fromString(rs.getString("aiid")),
+                    UUID.fromString(rs.getString("chatId")),
+                    variables);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
     }
 
     private static TrainingStatus getTrainingStatusValue(final String value)
-        throws DatabaseException {
+            throws DatabaseException {
         TrainingStatus trainingStatus = TrainingStatus.forValue(value);
         if (trainingStatus == null) {
             throw new DatabaseException("ai_status field does not contain an expected status");
@@ -86,26 +96,26 @@ public class Database {
                             final boolean is_private, final double deep_learning_error, final int deep_learning_status,
                             final int shallow_learning_status, final TrainingStatus status, final String client_token,
                             final String trainingFile, final Locale language, final String timezoneString,
-                            final double confidence, final boolean hasPersonality, final int voice)
-        throws DatabaseException {
+                            final double confidence, final int personality, final int voice)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addAI_v1", 16)
-                .add(aiid)
-                .add(name)
-                .add(description)
-                .add(devid)
-                .add(is_private)
-                .add(deep_learning_error)
-                .add(deep_learning_status)
-                .add(shallow_learning_status)
-                .add(status.value())
-                .add(client_token)
-                .add(trainingFile)
-                .add(language == null ? null : language.toLanguageTag())
-                .add(timezoneString)
-                .add(confidence)
-                .add(hasPersonality)
-                .add(voice);
+                    .add(aiid)
+                    .add(name)
+                    .add(description)
+                    .add(devid)
+                    .add(is_private)
+                    .add(deep_learning_error)
+                    .add(deep_learning_status)
+                    .add(shallow_learning_status)
+                    .add(status.value())
+                    .add(client_token)
+                    .add(trainingFile)
+                    .add(language == null ? null : language.toLanguageTag())
+                    .add(timezoneString)
+                    .add(confidence)
+                    .add(personality)
+                    .add(voice);
             return call.executeUpdate() > 0;
         }
     }
@@ -171,7 +181,7 @@ public class Database {
                 final ArrayList<AiDomain> res = new ArrayList<>();
                 while (rs.next()) {
                     res.add(new AiDomain(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                        rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
+                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -258,7 +268,7 @@ public class Database {
 
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
                                         final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntent", 3).add(intentName).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -274,7 +284,7 @@ public class Database {
     }
 
     public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId, final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -291,14 +301,14 @@ public class Database {
     }
 
     public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
-        throws DatabaseException {
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String variables = jsonSerializer.serialize(intent.getVariables());
             call.initialise("updateMemoryIntent", 4)
-                .add(intent.getName())
-                .add(intent.getAiid())
-                .add(intent.getChatId())
-                .add(variables);
+                    .add(intent.getName())
+                    .add(intent.getAiid())
+                    .add(intent.getChatId())
+                    .add(variables);
             return call.executeUpdate() > 0;
         }
     }
@@ -321,22 +331,22 @@ public class Database {
         String localeString = rs.getString("ai_language");
         String timezoneString = rs.getString("ai_timezone");
         return new ApiAi(rs.getString("aiid"),
-            rs.getString("client_token"),
-            rs.getString("ai_name"),
-            rs.getString("ai_description"),
-            new DateTime(rs.getDate("created_on")),
-            rs.getBoolean("is_private"),
-            rs.getDouble("deep_learning_error"),
-            null /*training_debug_info*/,
-            rs.getString("deep_learning_status"),
-            getTrainingStatusValue(rs.getString("ai_status")),
-            null /*training file*/,
-            rs.getBoolean("ai_personality"),
-            rs.getDouble("ai_confidence"),
-            rs.getInt("ai_voice"),
-            // Java, being funny, can't follow rfc5646 so we need to replace the separator
-            localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
-            timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
+                rs.getString("client_token"),
+                rs.getString("ai_name"),
+                rs.getString("ai_description"),
+                new DateTime(rs.getDate("created_on")),
+                rs.getBoolean("is_private"),
+                rs.getDouble("deep_learning_error"),
+                null /*training_debug_info*/,
+                rs.getString("deep_learning_status"),
+                getTrainingStatusValue(rs.getString("ai_status")),
+                null /*training file*/,
+                rs.getBoolean("ai_personality"),
+                rs.getDouble("ai_confidence"),
+                rs.getInt("ai_voice"),
+                // Java, being funny, can't follow rfc5646 so we need to replace the separator
+                localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
+                timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
     }
 
     /***

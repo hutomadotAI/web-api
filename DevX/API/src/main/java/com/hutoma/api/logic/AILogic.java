@@ -28,10 +28,10 @@ import javax.ws.rs.core.SecurityContext;
  */
 public class AILogic {
 
-    private final String LOGFROM = "ailogic";
-    private final double DEEP_LEARNING_ERROR = -1.0;
-    private final int DEEP_LEARNING_STATUS = -1;
-    private final int DEFAULT_WNET_ERROR = -1;
+    private static final double DEEP_LEARNING_ERROR = -1.0;
+    private static final int DEEP_LEARNING_STATUS = -1;
+    private static final int DEFAULT_WNET_ERROR = -1;
+    private static final String LOGFROM = "ailogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
@@ -56,17 +56,13 @@ public class AILogic {
             String name,
             String description,
             boolean is_private,
-            double deep_learning_error,
-            int deep_learning_status,
-            int shallow_learning_status,
-            int status,
-            boolean hasPersonality,
+            int personality,
             double confidence,
             int voice,
             Locale language,
             String timezone) {
         try {
-            this.logger.logDebug(this.LOGFROM, "request to create new ai from " + devid);
+            this.logger.logDebug(LOGFROM, "request to create new ai from " + devid);
 
             String encoding_key = this.config.getEncodingKey();
             UUID aiUUID = this.tools.createNewRandomUUID();
@@ -79,17 +75,29 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encoding_key)
                     .compact();
 
-            if (!this.database.createAI(aiUUID, name, description, devid, is_private, this.DEEP_LEARNING_ERROR,
-                    this.DEEP_LEARNING_STATUS, this.DEFAULT_WNET_ERROR, TrainingStatus.NOT_STARTED, token, null,
+            if (!this.database.createAI(
+                    aiUUID,
+                    name,
+                    description,
+                    devid,
+                    is_private,
+                    DEEP_LEARNING_ERROR,
+                    DEEP_LEARNING_STATUS,
+                    DEFAULT_WNET_ERROR,
+                    TrainingStatus.NOT_STARTED,
+                    token,
+                    null,
                     language,
                     timezone,
-                    confidence, hasPersonality, voice)) {
-                this.logger.logInfo(this.LOGFROM, "db fail creating new ai");
+                    confidence,
+                    personality,
+                    voice)) {
+                this.logger.logInfo(LOGFROM, "db fail creating new ai");
                 return ApiError.getInternalServerError();
             }
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "error creating new ai: " + e.toString());
+            this.logger.logError(LOGFROM, "error creating new ai: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -99,15 +107,15 @@ public class AILogic {
             String devid) {
 
         try {
-            this.logger.logDebug(this.LOGFROM, "request to list all ais");
+            this.logger.logDebug(LOGFROM, "request to list all ais");
             ArrayList<ApiAi> aiList = this.database.getAllAIs(devid);
             if (aiList.isEmpty()) {
-                this.logger.logDebug(this.LOGFROM, "ai list is empty");
+                this.logger.logDebug(LOGFROM, "ai list is empty");
                 return ApiError.getNotFound();
             }
             return new ApiAiList(aiList).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "error getting all ais: " + e.toString());
+            this.logger.logError(LOGFROM, "error getting all ais: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -118,16 +126,16 @@ public class AILogic {
             UUID aiid) {
 
         try {
-            this.logger.logDebug(this.LOGFROM, devid + " request to list " + aiid);
+            this.logger.logDebug(LOGFROM, devid + " request to list " + aiid);
             ApiAi ai = this.database.getAI(devid, aiid);
             if (null == ai) {
-                this.logger.logDebug(this.LOGFROM, "ai not found");
+                this.logger.logDebug(LOGFROM, "ai not found");
                 return ApiError.getNotFound();
             } else {
                 return ai.setSuccessStatus();
             }
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "error getting single ai: " + e.toString());
+            this.logger.logError(LOGFROM, "error getting single ai: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }
@@ -138,14 +146,14 @@ public class AILogic {
             UUID aiid) {
 
         try {
-            this.logger.logDebug(this.LOGFROM, devid + " request to delete " + aiid);
+            this.logger.logDebug(LOGFROM, devid + " request to delete " + aiid);
             if (!this.database.deleteAi(devid, aiid)) {
                 return ApiError.getNotFound();
             }
             this.messageQueue.pushMessageDeleteAI(devid, aiid);
             return new ApiResult().setSuccessStatus("deleted successfully");
         } catch (Exception e) {
-            this.logger.logError(this.LOGFROM, "error deleting ai: " + e.toString());
+            this.logger.logError(LOGFROM, "error deleting ai: " + e.toString());
             return ApiError.getInternalServerError();
         }
     }

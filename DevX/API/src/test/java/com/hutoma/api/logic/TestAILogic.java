@@ -62,15 +62,15 @@ public class TestAILogic {
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
-                anyObject(), anyObject(), anyDouble(), anyBoolean(), anyInt())).thenReturn(true);
-        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0.0d, 0, 0, 0, false, 0.0, 1, null, "");
+                anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
+        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_Valid_Token() throws Database.DatabaseException {
         whenCreateAiReturn(true);
-        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0.0d, 0, 0, 0, false, 0.0, 1, null, "");
+        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertTrue(result instanceof ApiAi);
         Assert.assertNotNull(((ApiAi) result).getClient_token());
         Assert.assertFalse(((ApiAi) result).getClient_token().isEmpty());
@@ -79,15 +79,15 @@ public class TestAILogic {
     @Test
     public void testCreate_DBFail_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
-                anyObject(), anyObject(), anyDouble(), anyBoolean(), anyInt())).thenThrow(new Database.DatabaseException(new Exception("test")));
-        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0.0d, 0, 0, 0, false, 0.0, 1, null, "");
+                anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_DB_NotFound() throws Database.DatabaseException {
         whenCreateAiReturn(false);
-        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0.0d, 0, 0, 0, false, 0.0, 1, null, "");
+        ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
@@ -179,7 +179,7 @@ public class TestAILogic {
 
     private void whenCreateAiReturn(boolean returnValue) throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
-                anyObject(), anyObject(), anyDouble(), anyBoolean(), anyInt())).thenReturn(returnValue);
+                anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(returnValue);
     }
 
     private ApiAi getAI() {
