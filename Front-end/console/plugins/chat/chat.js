@@ -173,18 +173,18 @@ function activeSpeechButton(){
         document.getElementById('btnSpeech').addEventListener('click', start);
         document.getElementById('btnSpeech').style.cursor = 'pointer';
         document.getElementById('microphone').className = ('fa fa-microphone text-red');
-
         document.getElementById('microphone').disabled = false;
+        document.getElementById('speech-text').innerHTML=' Turn Off Speech';
+
     }
 }
 
 function deactiveSpeechButton(){
     document.getElementById('microphone').disabled = true;
-
     document.getElementById('btnSpeech').removeEventListener('click', start);
     document.getElementById('btnSpeech').style.cursor = 'not-allowed';
     document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
-
+    document.getElementById('speech-text').innerHTML=' Turn On Speech';
 }
 
 function lockSpeechOption(){
