@@ -2580,7 +2580,7 @@ a:focus {
 	border-color: #d73925;
 }
 .alert-warning {
-	border-color: #e08e0b;
+	border-color: #ffffff;
 }
 .alert-info {
 	border-color: #00acd6;
@@ -4406,7 +4406,7 @@ table.text-center th {
 .alert-warning,
 .label-warning,
 .modal-warning .modal-body {
-	background-color: #f39c12 !important;
+	background-color: #fffff5 !important;
 }
 .bg-aqua,
 .callout.callout-info,
