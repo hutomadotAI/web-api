@@ -13,7 +13,12 @@ public enum TrainingStatus {
     IN_PROGRESS("training_in_progress"),
     STOPPED_MAX_TIME("training_stopped_maxtime"),
     COMPLETED("training_completed"),
-    DELETED("training_deleted");
+    DELETED("training_deleted"),
+    ERROR("internal_error"),
+    MALFORMEDFILE("malformed_training_file"),
+    CANCELLED("training_cancelled");
+
+
     private final String value;
 
     TrainingStatus(final String value) {
