@@ -93,6 +93,9 @@ include "config.php";
         }
     </style>
 </head>
+<body>
+<?php include_once "../console/common/google_analytics.php"; ?>
+
 <header id="navigation" class="navbar-fixed-top navbar">
     <div class="container" style="font-weight: bold">
         <div class="navbar-header">
@@ -182,17 +185,5 @@ include "config.php";
                 </div>
             </div>
 </footer>
-
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-67014669-1', 'auto');
-    ga('send', 'pageview');
-
-</script>
-
 </body>
 </html>

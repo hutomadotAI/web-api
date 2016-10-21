@@ -7,7 +7,9 @@ require "config.php";
     <title>Change Password</title>
   </head>
   <body>
-    <?php
+  <?php include_once "../google_analytics.php"; ?>
+
+  <?php
     if(isset($_POST['change_password'])){
       if(isset($_POST['current_password']) && $_POST['current_password'] != "" && isset($_POST['new_password']) && $_POST['new_password'] != "" && isset($_POST['retype_password']) && $_POST['retype_password'] != "" && isset($_POST['current_password']) && $_POST['current_password'] != ""){
           

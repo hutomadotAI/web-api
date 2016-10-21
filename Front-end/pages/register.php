@@ -1,6 +1,7 @@
 <?php
 include "config.php";
 ?>
+
 <!DOCTYPE html>
 <!--[if lt IE 7]>
 <html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -103,8 +104,9 @@ include "config.php";
     </style>
 </head>
 <body class="hold-transition register-page">
-<?php
 
+<?php
+include_once "../console/common/google_analytics.php";
 if(isset($_POST['submit'])) {
 
     if(isset($_POST['g-recaptcha-response'])) {
@@ -325,17 +327,5 @@ if(isset($_POST['submit'])) {
                 </div>
             </div>
 </footer>
-
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-67014669-1', 'auto');
-    ga('send', 'pageview');
-
-</script>
-
 </body>
 </html>

@@ -37,6 +37,8 @@ function echoJsonIntentsResponse($intents){
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showIntents('')">
+<?php include_once "../console/common/google_analytics.php"; ?>
+
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>

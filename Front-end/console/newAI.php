@@ -1,6 +1,5 @@
 <?php
     require '../pages/config.php';
-
     if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
         \hutoma\console::redirect('../pages/login.php');
         exit;
@@ -39,6 +38,8 @@
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
+<?php include_once "../console/common/google_analytics.php"; ?>
+
 <div class="wrapper">
 
     <header class="main-header">
@@ -87,12 +88,10 @@
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init([ "","home",0,true,true]);
     </script>
 </form>
-
 </body>
 </html>

@@ -1,6 +1,5 @@
 <?php
     require "../pages/config.php";
-
     if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
         \hutoma\console::redirect('../pages/login.php');
         exit;
@@ -23,6 +22,8 @@
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
+<?php include_once "../console/common/google_analytics.php"; ?>
+
 <div class="wrapper">
 
     <header class="main-header">
@@ -60,6 +61,5 @@
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-
 </body>
 </html>

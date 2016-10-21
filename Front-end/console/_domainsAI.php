@@ -1,6 +1,5 @@
 <?php
     require "../pages/config.php";
-
     if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
         \hutoma\console::redirect('../pages/login.php');
         exit;
@@ -42,6 +41,8 @@
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showDomains('',1)" id="body">
+<?php include_once "../console/common/google_analytics.php"; ?>
+
 <div class="wrapper">
 
     <header class="main-header">

@@ -1,6 +1,5 @@
 <?php
     require '../pages/config.php';
-
     if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
         \hutoma\console::redirect('../pages/login.php');
         exit;
@@ -42,6 +41,8 @@
 </head>
 
 <body class="hold-transition skin-blue-light fixed sidebar-mini">
+<?php include_once "../console/common/google_analytics.php"; ?>
+
 <div class="wrapper">
 
     <header class="main-header">
@@ -85,6 +86,5 @@
         MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","market",1,true]);
     </script>
 </form>
-
 </body>
 </html>
