@@ -13,10 +13,7 @@ import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ValidatePost;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -72,5 +69,20 @@ public class IntentEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @DELETE
+    @Path("{aiid}")
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ValidateParameters( {APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
+    public Response deleteIntent(
+        @Context final SecurityContext securityContext,
+        @Context final ContainerRequestContext requestContext) {
+
+        final ApiResult result = this.intentLogic.deleteIntent(
+            ParameterFilter.getDevid(requestContext),
+            ParameterFilter.getAiid(requestContext),
+            ParameterFilter.getIntentName(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
 
 }

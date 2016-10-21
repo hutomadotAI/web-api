@@ -7,6 +7,7 @@ import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import java.util.*;
  */
 public class DatabaseEntitiesIntents extends Database {
 
+    @Inject
     public DatabaseEntitiesIntents(Logger logger, Provider<DatabaseCall> callProvider, Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
     }
@@ -395,6 +397,21 @@ public class DatabaseEntitiesIntents extends Database {
         transaction.getDatabaseCall().initialise("deleteIntentVariable", 3)
             .add(devid).add(aiid).add(variable.getId())
             .executeUpdate();
+    }
+
+    /***
+     * Deletes an intent and all dependent objects by DB cascade delete
+     * @param devid
+     * @param aiid
+     * @param intentName
+     * @return
+     * @throws DatabaseException
+     */
+    public boolean deleteIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            int rowCount = call.initialise("deleteIntent", 3).add(devid).add(aiid).add(intentName).executeUpdate();
+            return rowCount > 0;
+        }
     }
 
     /***

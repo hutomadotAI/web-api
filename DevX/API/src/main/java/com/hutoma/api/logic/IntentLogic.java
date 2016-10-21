@@ -76,6 +76,18 @@ public class IntentLogic {
         }
     }
 
+    public ApiResult deleteIntent(String devid, UUID aiid, String intentName) {
+        try {
+            this.logger.logDebug(LOGFROM, "request to delete intent " + intentName + " from " + devid);
+            if (!this.database.deleteIntent(devid, aiid, intentName)) {
+                return ApiError.getNotFound();
+            }
+            return new ApiResult().setSuccessStatus();
+        } catch (final Exception e) {
+            this.logger.logError(LOGFROM, "error deleting intent: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
 }
 
 

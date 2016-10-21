@@ -150,4 +150,24 @@ public class TestIntentLogic {
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
+    @Test
+    public void testDeleteIntent_Success() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(true);
+        final ApiResult result = this.intentLogic.deleteIntent(this.DEVID, this.AIID, this.INTENTNAME);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteIntent_Error() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        final ApiResult result = this.intentLogic.deleteIntent(this.DEVID, this.AIID, this.INTENTNAME);
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteIntent_NotFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(false);
+        final ApiResult result = this.intentLogic.deleteIntent(this.DEVID, this.AIID, this.INTENTNAME);
+        Assert.assertEquals(404, result.getStatus().getCode());
+    }
 }
