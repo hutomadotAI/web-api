@@ -10,12 +10,12 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 
 /**
  * Created by pedrotei on 05/10/16.
@@ -24,7 +24,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
     public static final String META_INTENT_TAG = "@meta.intent.";
     private static final Pattern META_INTEG_PATTERN =
-        Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
+            Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";
     private final ILogger logger;
     private final DatabaseEntitiesIntents database;
@@ -41,12 +41,12 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     /**
      * {@inheritDoc}
      */
-    public MemoryIntent parseAiResponseForIntent(final String devid, final UUID aaid, final UUID chatId, final String response) {
+    public MemoryIntent parseAiResponseForIntent(final String devid, final UUID aiid, final UUID chatId, final String response) {
         if (response.trim().startsWith(META_INTENT_TAG)) {
             Matcher m = META_INTEG_PATTERN.matcher(response);
             if (m.find()) {
                 String intentName = m.group(1);
-                return this.loadIntentForAi(devid, aaid, chatId, intentName);
+                return this.loadIntentForAi(devid, aiid, chatId, intentName);
             }
         }
         return null;

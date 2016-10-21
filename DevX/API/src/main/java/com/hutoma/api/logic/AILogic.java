@@ -102,6 +102,40 @@ public class AILogic {
         }
     }
 
+    public ApiResult updateAI(
+            SecurityContext securityContext,
+            String devid,
+            UUID aiid,
+            String description,
+            boolean is_private,
+            int personality,
+            double confidence,
+            int voice,
+            Locale language,
+            String timezone) {
+        try {
+            this.logger.logDebug(LOGFROM, "request to update ai " + aiid);
+
+            if (!this.database.updateAI(
+                    devid,
+                    aiid,
+                    description,
+                    is_private,
+                    language,
+                    timezone,
+                    confidence,
+                    personality,
+                    voice)) {
+                this.logger.logInfo(LOGFROM, "db fail updating ai");
+                return ApiError.getInternalServerError();
+            }
+            return new ApiResult().setSuccessStatus("successfully updated");
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, "error updating ai: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
+
     public ApiResult getAIs(
             SecurityContext securityContext,
             String devid) {

@@ -7,25 +7,36 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
-import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.TestParameterValidation;
 import com.hutoma.api.validation.Validate;
+
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.UUID;
+import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -56,8 +67,8 @@ public class TestTrainingLogic {
 
     private static ApiAi getCommonAi(TrainingStatus status, boolean isPrivate) {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, 0.5, "debuginfo",
-            "trainstatus", status, "", false, 0.0, 1, Locale.getDefault(),
-            TimeZone.getDefault());
+                "trainstatus", status, "", 0, 0.0, 1, Locale.getDefault(),
+                TimeZone.getDefault());
     }
 
     @Before
@@ -78,7 +89,7 @@ public class TestTrainingLogic {
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.logic = new TrainingLogic(this.fakeConfig, this.fakeMessageQueue, this.fakeExtractor, this.fakeDatabase, this.fakeTools, this.fakeLogger,
-            this.fakeValidation, this.fakeIntentHandler);
+                this.fakeValidation, this.fakeIntentHandler);
 
         when(this.fakeConfig.getMaxUploadSize()).thenReturn(65536L);
         when(this.fakeConfig.getMaxClusterLines()).thenReturn(65536);
@@ -337,7 +348,7 @@ public class TestTrainingLogic {
     }
 
     private void testStartTrainingCommon(final TrainingStatus trainingStatus, final int expectedStatus)
-        throws Database.DatabaseException {
+            throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(trainingStatus, false));
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);

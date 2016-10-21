@@ -120,6 +120,25 @@ public class Database {
         }
     }
 
+    public boolean updateAI(final String devId, final UUID aiid, final String description, final boolean is_private,
+                            final Locale language, final String timezoneString, final double confidence,
+                            final int personality, final int voice)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateAI_v1", 9)
+                    .add(aiid)
+                    .add(description)
+                    .add(devId)
+                    .add(is_private)
+                    .add(language == null ? null : language.toLanguageTag())
+                    .add(timezoneString)
+                    .add(confidence)
+                    .add(personality)
+                    .add(voice);
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public ArrayList<ApiAi> getAllAIs(final String devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIs", 1).add(devid);
@@ -341,7 +360,7 @@ public class Database {
                 rs.getString("deep_learning_status"),
                 getTrainingStatusValue(rs.getString("ai_status")),
                 null /*training file*/,
-                rs.getBoolean("ai_personality"),
+                rs.getInt("ai_personality"),
                 rs.getDouble("ai_confidence"),
                 rs.getInt("ai_voice"),
                 // Java, being funny, can't follow rfc5646 so we need to replace the separator

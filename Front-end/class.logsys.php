@@ -1188,11 +1188,12 @@ class console
 
 
     public static function createAI($name, $description, $private, $language, $timezoneString, $confidence,
-                                    $personality, $voice, $contract, $payment_type, $price ){
+                                    $personality, $voice, $contract, $payment_type, $price)
+    {
         if (self::$loggedIn) {
             $path = '/ai';
 
-            $service_url = self::$api_request_url.$path;
+            $service_url = self::$api_request_url . $path;
 
             // TODO: move this to a common internationalization class
             $locales = array(
@@ -1246,8 +1247,26 @@ class console
         }
     }
 
+    public static function getDevToken()
+    {
+        $token = "";
+        if (self::$loggedIn) {
+            $query = "CALL getDevToken(:id)";
+            $sql = self::$dbh->prepare($query);
+            $sql->execute(array(
+                ":id" => self::$user
+            ));
+            if ($sql->rowCount() > 0) {
+                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+                $sql->nextRowset();
+                $token = $rows['dev_token'];
+            }
+        }
+        return $token;
+    }
 
-    public static function getAIs(){
+    public static function getAIs()
+    {
         if (self::$loggedIn) {
             $path = '/ai';
             $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
@@ -1263,8 +1282,8 @@ class console
         }
     }
 
-
-    public static function getSingleAI($aiid){
+    public static function getSingleAI($aiid)
+    {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
             $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
@@ -1280,8 +1299,12 @@ class console
         }
     }
 
-    public static function getAiTrainingFile($aiid){
-        if(self::$loggedIn) {
+
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
+
+    public static function getAiTrainingFile($aiid)
+    {
+        if (self::$loggedIn) {
             try {
                 $sql = self::$dbh->prepare("CALL updateAI(?)");
 
@@ -1298,30 +1321,49 @@ class console
         }
     }
 
+    public static function updateAI($aiid, $description, $private, $language, $timezoneString, $personality, $voice, $confidence)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/' . $aiid;
 
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-    public static function updateAI($aiid, $description, $private,$language,$timezone,$personality,$voice,$confidence){
-        if(self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL updateAI(?,?,?)");
+            $service_url = self::$api_request_url . $path;
 
-                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
-                $sql->bindValue(2, $description, \PDO::PARAM_STR);
-                $sql->bindValue(3, $private, \PDO::PARAM_BOOL);
+            //hard coded
+            $timezone = 'Europe/London';
+            $locale = 'en-US';
+            // Need to be removed once the parameters are being passed as numeric and not strings
+            $personality = 0;
+            $voice = 1;
+            $confidence = 1.0;
 
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=304');
+            $args = array(
+                'description' => $description,
+                'is_private' => $private,
+                'personality' => $personality,
+                'confidence' => $confidence,
+                'voice' => $voice,
+                'locale' => $locale,
+                'timezone' => $timezone
+            );
+
+            $curl = new curlHelper($service_url, self::getDevToken());
+            $curl->setOpt(CURLOPT_POST, true);
+            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=301');
                 exit;
             }
-            $data = $sql->fetchAll();
-            $sql->nextRowset();
-            return $data;
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+
+            return $json_response;
         }
     }
 
-
-    public static function deleteAI($dev_token,$aiid){
+    public static function deleteAI($dev_token, $aiid)
+    {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
             $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
@@ -1339,8 +1381,8 @@ class console
         }
     }
 
-
-    public static function chatAI($dev_token,$aiid,$chatId,$q,$history,$fs,$min_p){
+    public static function chatAI($dev_token, $aiid, $chatId, $q, $history, $fs, $min_p)
+    {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/chat';
             $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history);
@@ -1359,8 +1401,8 @@ class console
         }
     }
 
-
-    public static function uploadFile($dev_token,$aiid,$file,$source_type,$url){
+    public static function uploadFile($dev_token, $aiid, $file, $source_type, $url)
+    {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/training';
             $filename = $file['tmp_name'];
@@ -1385,8 +1427,8 @@ class console
         }
     }
 
-
-    public static function getDomains(){
+    public static function getDomains()
+    {
 
         if (self::$loggedIn) {
             $path = '/ai/domain';
@@ -1405,10 +1447,10 @@ class console
         }
     }
 
-
-    public static function getIntents($aiid){
+    public static function getIntents($aiid)
+    {
         if (self::$loggedIn) {
-            $path = '/intents/'.$aiid;
+            $path = '/intents/' . $aiid;
             $parameters = array('aiid' => $aiid);
             $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
 
@@ -1426,11 +1468,11 @@ class console
         }
     }
 
-
-    public static function getIntent($aiid,$name){
+    public static function getIntent($aiid, $name)
+    {
         if (self::$loggedIn) {
-            $path = '/intent/'.$aiid;
-            $parameters = array('aiid' => $aiid,'intent_name' => $name);
+            $path = '/intent/' . $aiid;
+            $parameters = array('aiid' => $aiid, 'intent_name' => $name);
             $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, self::getDevToken());
@@ -1447,8 +1489,8 @@ class console
         }
     }
 
-
-    public static function getEntities($dev_token){
+    public static function getEntities($dev_token)
+    {
         if (self::$loggedIn) {
             $path = '/entities';
             $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
@@ -1466,7 +1508,10 @@ class console
     }
 
 
-    public static function getEntityValues($dev_token,$name){
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
+
+    public static function getEntityValues($dev_token, $name)
+    {
         if (self::$loggedIn) {
             $path = '/entity';
             $parameters = array('entity_name' => $name);
@@ -1486,11 +1531,9 @@ class console
         }
     }
 
-    
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-    public static function getIntegrations(){
-        if(self::$loggedIn){
+    public static function getIntegrations()
+    {
+        if (self::$loggedIn) {
             try {
                 $sql = self::$dbh->prepare("CALL getIntegrations()");
                 $sql->execute();
@@ -1509,29 +1552,11 @@ class console
         }
     }
 
-    public static function getAdminToken() {
+    public static function getAdminToken()
+    {
         return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
 
     }
-
-
-    public static function getDevToken(){
-        $token = "";
-        if (self::$loggedIn) {
-            $query = "CALL getDevToken(:id)";
-            $sql = self::$dbh->prepare($query);
-            $sql->execute(array(
-                ":id" => self::$user
-            ));
-            if ($sql->rowCount() > 0) {
-                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-                $sql->nextRowset();
-                $token = $rows['dev_token'];
-            }
-        }
-        return $token;
-    }
-
 
     public static function getClientToken()
     {
@@ -1552,19 +1577,21 @@ class console
     }
 
 
-    public static function isSessionActive () {
+    public static function isSessionActive()
+    {
         if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
         }
         $_SESSION['LAST_ACTIVITY'] = time();
-        $sid = session_id ();
-        return function_exists ( 'session_status' ) ? ( PHP_SESSION_ACTIVE == session_status () ) : (!empty($sid));
+        $sid = session_id();
+        return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
     }
 
-    function debug( $data) {
-        echo 'console.log(' . $data. ');';
+    function debug($data)
+    {
+        echo 'console.log(' . $data . ');';
     }
 
 }

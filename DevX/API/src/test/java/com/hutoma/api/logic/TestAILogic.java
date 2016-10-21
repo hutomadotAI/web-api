@@ -184,7 +184,7 @@ public class TestAILogic {
 
     private ApiAi getAI() {
         return new ApiAi(this.AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.5, "debuginfo",
-                "trainstatus", null, "", false, 0.0, 1, Locale.getDefault(),
+                "trainstatus", null, "", 0, 0.0, 1, Locale.getDefault(),
                 TimeZone.getDefault());
     }
 

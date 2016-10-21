@@ -24,7 +24,7 @@ public class ApiAi extends ApiResult {
     private String training_status;
     private TrainingStatus ai_status;
     private String ai_training_file;
-    private boolean personality; // aka. Learn from users
+    private int personality; // aka. Learn from users
     private double confidence; // aka Create new answers
     private int voice;
     private Locale language;
@@ -37,7 +37,7 @@ public class ApiAi extends ApiResult {
 
     public ApiAi(String aiid, String client_token, String name, String description, DateTime created_on,
                  boolean is_private, double deep_learning_error, String training_debug_info, String training_status,
-                 TrainingStatus ai_status, String ai_training_file, boolean personality, double confidence,
+                 TrainingStatus ai_status, String ai_training_file, int personality, double confidence,
                  int voice, Locale language, TimeZone timezone) {
         this.aiid = aiid;
         this.client_token = client_token;

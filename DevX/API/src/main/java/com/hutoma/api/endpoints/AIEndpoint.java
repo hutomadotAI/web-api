@@ -34,8 +34,8 @@ import javax.ws.rs.core.SecurityContext;
 @RateLimit(RateKey.QuickRead)
 public class AIEndpoint {
 
-    AILogic aiLogic;
-    JsonSerializer serializer;
+    private final AILogic aiLogic;
+    private final JsonSerializer serializer;
 
     @Inject
     public AIEndpoint(AILogic aiLogic, JsonSerializer serializer) {
@@ -59,6 +59,34 @@ public class AIEndpoint {
                 securityContext,
                 devid,
                 ParameterFilter.getAiName(requestContext),
+                ParameterFilter.getAiDescription(requestContext),
+                is_private,
+                personality,
+                ParameterFilter.getAiConfidence(requestContext),
+                voice,
+                ParameterFilter.getLocale(requestContext),
+                ParameterFilter.getTimezone(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("{aiid}")
+    @POST
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @ValidatePost({APIParameter.AIDescription, APIParameter.AiConfidence, APIParameter.Timezone,
+            APIParameter.Locale})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateAI(
+            @Context SecurityContext securityContext,
+            @Context ContainerRequestContext requestContext,
+            @DefaultValue("") @HeaderParam("_developer_id") String devid,
+            @DefaultValue("false") @FormParam("is_private") boolean is_private,
+            @DefaultValue("0") @FormParam("personality") int personality,
+            @DefaultValue("0") @FormParam("voice") int voice) {
+        ApiResult result = this.aiLogic.updateAI(
+                securityContext,
+                devid,
+                ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
                 is_private,
                 personality,
