@@ -58,7 +58,7 @@ function createLeftMsg(human_name,msg){
     wHTML +=('</span>');
     wHTML +=('<span class="direct-chat-timestamp pull-right">'+date+'</span>');
     wHTML +=('</div>');
-    wHTML +=('<img class="direct-chat-img" src="./dist/img/user1-128x128.jpg" alt="User image">');
+    wHTML +=('<img class="direct-chat-img" src="./dist/img/human.jpg" alt="User image">');
     wHTML +=('<div class="direct-chat-text bg-white">');
     wHTML += cleanChat(msg);
     wHTML +=('</div>');
@@ -93,7 +93,7 @@ function createRightMsg(ai_name,msg,chatId,error) {
     wHTML += ('</span>');
     wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
     wHTML += ('</div>');
-    wHTML += ('<img class="direct-chat-img" src="./dist/img/user7-128x128.jpg" alt="AI image">');
+    wHTML += ('<img class="direct-chat-img" src="./dist/img/bot.jpg" alt="AI image">');
     if (error)
         wHTML += ('<div class="direct-chat-text bg-warning">');
     else
