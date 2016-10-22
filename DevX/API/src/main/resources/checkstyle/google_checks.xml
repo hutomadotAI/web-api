@@ -13,6 +13,11 @@
  -->
 
 <module name="Checker">
+    <module name="SuppressionFilter">
+        <property name="file" value="${checkstyle.suppressions.file}"
+                  default="checkstyle_suppressions.xml"/>
+    </module>
+
     <property name="charset" value="UTF-8"/>
 
     <property name="severity" value="warning"/>
@@ -22,11 +27,6 @@
     <!-- See http://checkstyle.sf.net/config_whitespace.html -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
-    </module>
-
-    <module name="SuppressionFilter">
-        <property name="file" value="${samedir}/checkstyle_suppressions.xml"
-                  default="src/main/resources/checkstyle/checkstyle_suppressions.xml"/>
     </module>
 
     <module name="TreeWalker">
