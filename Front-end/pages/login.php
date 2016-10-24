@@ -123,8 +123,8 @@ if(isset($_POST['action_login'])){
 <body id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
-<header id="navigation" class="navbar-fixed-top navbar">
-    <div class="container" style="font-weight: bold">
+<header id="navigation" class="navbar-fixed-top navbar" >
+    <div class="container" style="font-weight: bold" >
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -153,7 +153,7 @@ if(isset($_POST['action_login'])){
 <section>
     <div
     <div class="login-box">
-        <div class="login-box-body" style="border: 1px solid #d2d6de;">
+        <div class="login-box-body" style="border: 1px solid #d2d6de; background-color: #202020;">
             <p class="login-box-msg"><b>sign in and start creating awesomeness</b></p>
 
             <form action="login.php" method="POST">

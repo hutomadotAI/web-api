@@ -1,7 +1,7 @@
 .switch {
 width: 42px;
 height: 22px;
-background: #e5e5e5;
+background: #202020;
 z-index: 0;
 margin: auto;
 padding: 10px;
@@ -17,7 +17,7 @@ border-radius:16px;
 .switchOff {
 width: 42px;
 height: 22px;
-background: #f6f6f6;
+background: #202020;
 z-index: 0;
 margin: auto;
 padding: 10px;
@@ -37,7 +37,7 @@ left: 1px;
 top: 1px;
 width: 40px;
 height: 20px;
-background: #fff;
+background: #353939;
 z-index: 1;
 border-radius:16px;
 -moz-border-radius:16px;
@@ -61,7 +61,7 @@ box-shadow: 0 2px 5px #999999;
 }
 
 .switchOn,.switchOn:before {
-background: #4cd964 !important;
+background: #45672C !important;
 }
 
 .switchOn:after {

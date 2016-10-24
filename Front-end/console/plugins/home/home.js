@@ -18,7 +18,7 @@ function sendAIID(elem){
     if(document.viewAllForm.onsubmit)
         return;
     RecursiveUnbind($('#listTable'));
-    deactiveButtons();
+   // deactiveButtons();
 
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();

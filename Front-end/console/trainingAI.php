@@ -51,16 +51,16 @@
   <title>hu:toma | training AI</title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./plugins/select2/select2.min.css">
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini" id="trainingBody">
+<body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
 <div class="wrapper">
     <header class="main-header" id="headerID">
       <?php include './dynamic/header.html.php'; ?>
@@ -85,6 +85,7 @@
         <div class="row">
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>
+                <br/>
                 <?php include './dynamic/training.content.monitor.html.php'; ?>
                 <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
@@ -105,7 +106,7 @@
 
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
+<script src="./bootstrap/js/bootstrap.js"></script>
 <script src="./bootstrap/js/bootstrap-filestyle.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>

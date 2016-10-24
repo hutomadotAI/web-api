@@ -2,8 +2,8 @@
     <div class="box-header with-border">
         <div class="box-title"><b>Select a pre-trained Neural Network</b></div>
         <a data-toggle="collapse"  href="#collapseInfoNewDomains">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sm text-yellow"></i>
+            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"> </i> more info
+
             </div>
         </a>
     </div>
@@ -22,11 +22,11 @@
         -->
         <p></p>
 
-        <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertNewDomains">
-            <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+        <!-- <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertNewDomains">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
             <i class="icon fa fa-check" id="icongAlertNewDomains"></i>
             <span id="msgAlertNewDomains">Combine your AI with pre-trained neural networks made available by others.</span>
-        </div>
+        </div>-->
     </div>
 
     <div id="collapseInfoNewDomains" class="panel-collapse collapse">
@@ -38,7 +38,6 @@
                     </div>
                 </section>
                 <p></p>
-                <span><b>need help?</b> check out our <a href='#' tabindex="-1">video tutorial </a> or email <a href='#' tabindex="-1">support@hutoma.com</a></span>
             </div>
         </div>
     </div>

@@ -26,7 +26,7 @@ function buildConsoleMenu(ai_name,label_menu,level,block) {
     newNode.id = 'console-menu';
     var wHTML = "";
 
-    wHTML += ('<li class="header" style="text-align: center;">CONSOLE</li>');
+    wHTML += ('<li class="header" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
     wHTML += ('<li><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>');
 
     wHTML += ('<li id="level1">');
@@ -43,7 +43,7 @@ function buildConsoleMenu(ai_name,label_menu,level,block) {
 
     wHTML += ('<li id="level2">');
     wHTML += ('<a href="#">');
-    wHTML += ('<i class="fa fa-book text-purple"></i> <span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
+    wHTML += ('<i class="fa fa-book text-purple"></i><span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
     wHTML += ('<li id="menu_integrations"><a href="./integrationsAI.php" id="link_integrations"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>');
@@ -66,12 +66,12 @@ function buildLimitedConsoleMenu(label_menu) {
     newNode.id = 'console-menu';
     var wHTML = "";
 
-    wHTML += ('<li class="header" style="text-align: center;">CONSOLE</li>');
-    wHTML += ('<li id="menu_home"><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>');
+    wHTML += ('<li class="header" style="color:#8A8A8A;text-align: center;"><b>CONSOLE</b></li>');
+    wHTML += ('<li id="menu_home"><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>Home</span></a></li>');
 
     wHTML += ('<li id="level2">');
     wHTML += ('<a href="#">');
-    wHTML += ('<i class="fa fa-book text-purple"></i> <span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
+    wHTML += ('<i class="fa fa-book text-purple"></i><span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
     wHTML += ('<li id="menu_integrations"><a href="./integrationsAI.php" id="link_integrations"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>');
@@ -94,7 +94,7 @@ function buildAccountMenu() {
     var wHTML = "";
 
     wHTML += ('<ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">');
-    wHTML += ('<li class="header" style="text-align: center;">MY ACCOUNT</li>');
+    wHTML += ('<li class="header" style="color:#8A8A8A;text-align: center;"><b>MY ACCOUNT</b></li>');
     wHTML += ('<li id="menu_logout"><a href="./logout.php" id="link_logout"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>');
     wHTML += ('</ul>');
 

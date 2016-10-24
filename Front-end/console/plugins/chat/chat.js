@@ -13,10 +13,9 @@ if (isChrome) {
 else{
     lockSpeechOption();
     document.getElementById('speech-icon').className ='fa fa-bullhorn text-gray';
-    document.getElementById('speech-text').className ='text-gray';
     document.getElementById('btnSpeech').setAttribute('title','Available on Chrome');
     document.getElementById('btnSpeech').style.cursor = 'not-allowed';
-    document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
+    document.getElementById('microphone').className ='fa fa-microphone-slash';
 }
 
 function start(){
@@ -155,8 +154,8 @@ function requestAnswerAI(ai_name, question, chatId) {
 function enableChat(){
     document.getElementById('bodyChat').style.cursor = 'auto';
     document.getElementById('message').disabled = false;
+    document.getElementById('message').style.backgroundColor = '#353939';
     document.getElementById('message').value = '';
-    document.getElementById("message").focus();
 
     // release block for chatting
     chatSemaphore = (chatSemaphore+1)%(2);
@@ -165,6 +164,7 @@ function enableChat(){
 function disableChat(){
     document.getElementById('bodyChat').style.cursor = 'progress';
     document.getElementById('message').disabled = true;
+    document.getElementById('message').style.backgroundColor = '#202020';
     document.getElementById('message').value = '';
 }
 
@@ -185,10 +185,11 @@ function deactiveSpeechButton(){
     document.getElementById('btnSpeech').style.cursor = 'not-allowed';
     document.getElementById('microphone').className ='fa fa-microphone-slash text-coral';
     document.getElementById('speech-text').innerHTML=' Turn On Speech';
+
 }
 
 function lockSpeechOption(){
-    document.getElementById('speech-option').setAttribute('class','disabled');
+    document.getElementById('speech-option').setAttribute('class','disabled text-white');
     document.getElementById('speech-option').setAttribute('onClick','');
 }
 
@@ -208,15 +209,10 @@ function speechOption(value){
         deactiveSpeechButton();
         stopSynthesis();
     }
-    $('#speech-icon').toggleClass("text-light-blue");
-    $('#speech-text').toggleClass("text-light-blue");
 }
 
 function jsonOption(value){
     jsonResponse = (value+1)%(2);
-    $('#json-icon').toggleClass("text-light-blue");
-    $('#json-text').toggleClass("text-light-blue");
-
     // hide json window
     $('#jsonBox').toggle();
 }

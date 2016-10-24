@@ -21,14 +21,14 @@
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-    <header class="main-header">
+    <header class="main-header" style="border:1px solid black;">
         <?php include './dynamic/header.html.php';?>
     </header>
 

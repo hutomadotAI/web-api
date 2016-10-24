@@ -24,7 +24,7 @@
                 return('<span class="label label-danger">Error</span>');
                 break;
             case 'MALFORMEDFILE' :
-                return('<span class="label label-dangel">Malformed</span>');
+                return('<span class="label label-danger">Malformed</span>');
                 break;
             default:
                 return('<span class="label label-danger">Undefined</span>');
@@ -57,7 +57,7 @@
             echo('<td style="padding-top: 15px;">' . $bot['description'] . '</td>');
             echo('<td style="padding-top: 15px;">' . decodeAIState($bot['ai_status']) . '</td>');
             // echo('<td style="padding-top: 15px;">' . $bot['created_on'] . '</td>');
-            echo('<td style="padding-top: 8px;"><button type="button" id="btnSelectAI"  value="' . $bot['aiid'] . '"  onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 5px; width: 115px;"><b> View AI</b></button></td>');
+            echo('<td style="padding-top: 8px;"><button type="button" id="btnSelectAI"  value="' . $bot['aiid'] . '"  onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 5px; width: 115px;"><b> <span class="fa fa-search"></span> View AI </b></button></td>');
             //echo('<td style="padding-top: 8px;"><button type="button" id="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI(this)" class="btn btn-info flat pull-right"    style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');
             echo('<tr>');
         }

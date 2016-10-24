@@ -1,7 +1,8 @@
 <div class="form-group">
     <a data-toggle="collapse"  href="#collapseLearn" tabindex="-1">
-        <div class=" pull-right">more info
-            <i class="fa fa-question-circle text-sm text-yellow"></i>
+        <div class=" pull-right">
+            <i class="fa fa-info-circle text-sm text-yellow"></i> more info
+
         </div>
     </a>
     <label for="ai_personality">Learn from Users</label>
@@ -9,7 +10,6 @@
         <option selected="selected" value="0">No</option>
         <option disabled="disabled" value="1">Yes</option>
         <option disabled="disabled" value="2">Yes but supervised</option>
-        <option disabled="disabled" value="3">(TBD)</option>
     </select>
 </div>
 
@@ -23,8 +23,6 @@
                     <dd>(this functionality is not yet available)</dd>
                 </div>
             </section>
-            <p></p>
-            need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>support@hutoma.com</a>
         </div>
     </div>
 </div>

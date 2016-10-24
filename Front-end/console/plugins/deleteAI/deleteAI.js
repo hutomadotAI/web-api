@@ -25,6 +25,6 @@ $('#deleteAI').on('show.bs.modal', function (e) {
     var deleteBtn = document.getElementById('btnDelete');
     var value = deleteBtn.value;
 
-    elem.innerHTML = 'Are you sure you want to delete permanently <label>' + value + '</label>  AI ? ';
+    elem.innerHTML = 'Are you sure you want to permanently delete <label>' + value + '</label>? ';
     elemBtn.setAttribute("value", esseyId);
 });

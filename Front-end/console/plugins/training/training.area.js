@@ -161,7 +161,7 @@ function uploadFile(){
                     if (uploadWarnings != null && uploadWarnings.length > 0) {
                         msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
                     } else {
-                        msgAlertUploadFile(4, 'File uploaded');
+                        msgAlertUploadFile(4, 'File uploaded. Training started...');
                     }
                     resetPhaseOneComponents();
                     updatePhaseOneComponents();

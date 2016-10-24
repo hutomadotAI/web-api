@@ -32,11 +32,11 @@
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showIntents('')">
+<body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntents('')">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">

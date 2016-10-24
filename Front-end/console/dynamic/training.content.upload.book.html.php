@@ -9,7 +9,7 @@
     <input type="file" id="inputstructure" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
     <p></p>
 
-    <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadStructure">
+    <div class="alert alert-dismissable flat alert-warning" id="containerMsgAlertUploadStructure">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertUploadStructure"></i>
         <span id="msgAlertUploadStructure">Upload a page from a book to begin training</span>

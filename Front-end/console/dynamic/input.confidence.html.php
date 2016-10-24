@@ -1,9 +1,8 @@
 <a data-toggle="collapse"  href="#collapseConfidence" tabindex="-1">
-    <div class=" pull-right">more info
-        <i class="fa fa-question-circle text-sm text-yellow"></i>
+    <div class=" pull-right">  <i class="fa fa-info-circle text-sm text-yellow"></i> more info
     </div>
 </a>
-<label for="ai_confidence">Create new answers</label>
+<label for="ai_confidence">Let the AI create new answers</label>
 <div class="box box-solid box-clean-fixed flat no-shadow">
     <div class="box-body">
         <div class="row margin">
@@ -22,8 +21,6 @@
                     <dd>By enabling this functionality you will let the AI decide when to follow pre-packaged answers vs creating new ones based on the training data you provide.</dd>
                 </div>
             </section>
-            <p></p>
-            need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
         </div>
     </div>
 </div>

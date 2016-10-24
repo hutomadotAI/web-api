@@ -14,19 +14,18 @@
 
             <div class="pull-right">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" >
-                    <i class="fa fa-gears"></i>
+                    <i class="fa fa-gears text-white"></i>
                 </a>
-                <!--<button class="btn btn-box-tool" data-widget="collapse" tabindex="-1" ><i class="fa fa-minus"></i></button>-->
 
                 <ul class="dropdown-menu flat">
                     <li id="speech-option">
-                        <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-light-blue"></i><spam id="speech-text" class="text-light-blue"> Turn Off Speech</spam></a>
+                        <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn Off Speech</spam></a>
                     </li>
                     <!--<li class="footer" id="mute-option"><a href="#">  <i class="fa fa-microphone-slash"></i> Mute Microphone</a></li>-->
                     <!--li class="footer" id="color-option"><a href="#">  <i class="fa fa-adjust"></i> Color Voice</a></li>-->
 
                     <li class="footer" id="json-option" value ="0" onClick="jsonOption(this.value)" onMouseOver="this.style.cursor='pointer'">
-                        <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-light-blue"></i><spam id="json-text" class="text-light-blue"> Show Json Message</spam></a>
+                        <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-white"></i><spam id="json-text" class="text-white"> Show Json Message</spam></a>
                     </li>
                     <!--
                     <li class="divider"></li>
@@ -44,7 +43,7 @@
 
     <div class="box-footer" id="chat-footer">
         <div class="input-group">
-            <input type="text" id="message" placeholder="Type a message ..." class="form-control flat no-shadow" onkeydown="keyboardChat(event)"  tabindex="-1">
+            <input type="text" id="message" placeholder="Type a message ..." class="form-control flat no-shadow" onkeydown="keyboardChat(event)"  tabindex="-1"> 
 
             <div class="input-group-addon" id="btnSpeech">
                 <i id="microphone" style="font-size: 18px; width:20px;" class="fa fa-microphone text-red"></i>

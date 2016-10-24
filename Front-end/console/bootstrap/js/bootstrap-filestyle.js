@@ -175,7 +175,7 @@
 
 		htmlInput : function() {
 			if (this.options.input) {
-				return '<input type="text"  style="width: 96%; background-color: white;" class="form-control flat no-shadow ' + (this.options.size == 'nr' ? '' : 'input-' + this.options.size) + ' " placeholder="'+ this.options.placeholder +'" disabled> ';
+				return '<input type="text"  style="width: 96%; background-color: #353939;" class="form-control flat no-shadow ' + (this.options.size == 'nr' ? '' : 'input-' + this.options.size) + ' " placeholder="'+ this.options.placeholder +'" disabled> ';
 			} else {
 				return '';
 			}

@@ -3,8 +3,8 @@
         <i class="fa fa-th text-red"></i>
         <div class="box-title"><b>Pre-training Neural Networks</b></div>
         <a data-toggle="collapse"  href="#collapseInfoDomains">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sm text-yellow"></i>
+            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"></i> more info
+
             </div>
         </a>
     </div>
@@ -48,8 +48,6 @@
                         </dl>
                     </div>
                 </section>
-                <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
             </div>
         </div>
     </div>

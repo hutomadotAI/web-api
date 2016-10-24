@@ -4633,7 +4633,7 @@ S2.define('select2/defaults',[
       minimumInputLength: 0,
       maximumInputLength: 0,
       maximumSelectionLength: 0,
-      minimumResultsForSearch: 0,
+      minimumResultsForSearch: -1,
       selectOnClose: false,
       sorter: function (data) {
         return data;

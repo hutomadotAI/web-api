@@ -3,9 +3,8 @@
     <div class="box-header with-border">
         <div class="box-title"><b>Welcome to our Tech Preview</b></div><!-- to hu:toma -->
         <a data-toggle="collapse" href="#collapseStart" tabindex="-1">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sm text-yellow"></i>
-            </div>
+
+            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"></i> more info</div>
         </a>
     </div>
 
@@ -14,7 +13,7 @@
         <br>
         <br>
         <form method="POST" name="startForm" action="./newAI.php">
-            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI"> <b>Create New AI</b></button>
+            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI"> <b>Create New AI</b> <span class="fa fa-arrow-circle-right"></span></button>
         </form>
         <p></p>
 

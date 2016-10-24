@@ -4,7 +4,7 @@
         <div class="input-group-addon">
             <i class="glyphicon glyphicon-user"></i>
         </div>
-        <input type="text" class="form-control flat no-shadow" id="ai_name" name="ai_name" placeholder="Enter your AI name">
+        <input type="text" class="form-control flat no-shadow"  id="ai_name" name="ai_name" placeholder="Enter your AI name">
     </div>
 </div>
 

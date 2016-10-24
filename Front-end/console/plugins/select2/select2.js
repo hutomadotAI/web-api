@@ -4145,8 +4145,8 @@ S2.define('select2/dropdown/minimumResultsForSearch',[
     if (this.minimumResultsForSearch < 0) {
       this.minimumResultsForSearch = Infinity;
     }
-
-    decorated.call(this, $element, options, dataAdapter);
+      this.minimumResultsForSearch =-1;
+          decorated.call(this, $element, options, dataAdapter);
   }
 
   MinimumResultsForSearch.prototype.showSearch = function (decorated, params) {

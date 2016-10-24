@@ -123,7 +123,7 @@ include "config.php";
 <div class="register-box">
 
 
-    <div class="register-box-body"  style="border: 1px solid #d2d6de;">
+    <div class="register-box-body"  style="border: 1px solid #d2d6de; background-color: #202020;">
         <p class="login-box-msg"><b>password reset</b></p>
 
         <?php

@@ -216,7 +216,7 @@ if(isset($_POST['submit'])) {
 <div class="register-box">
 
 
-    <div class="register-box-body">
+    <div class="register-box-body" style="background-color: #202020;">
         <p class="login-box-msg"><b>register a new account</b></p>
         <form action="register.php" method="POST">
             <?php if(isset($msg)){echo $msg;}?>

@@ -53,8 +53,8 @@
         <div class="box-title"><b>Training Status</b></div>
 
         <a data-toggle="collapse"  href="#collapseMonitoring">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sm text-yellow"></i>
+            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"></i> more info
+
             </div>
         </a>
     </div>
@@ -99,8 +99,8 @@
                     </div>
                 </td>
                 <td class="text-center no-border" style="width: 120px;">
-                    <a type="submit" class="btn btn-app text-red flat" id="startstop-button" value="_stop" style="margin-left: 0;">
-                        <i class="fa fa-stop no-margin text-red" id="startstop-icon"></i>
+                    <a type="submit" class="btn btn-app flat" id="startstop-button" value="_stop" style="margin-left: 0;">
+                        <i class="fa fa-stop no-margin" id="startstop-icon"></i>
                         <span class="text-sm" id="text-startstop">stop training</span>
                     </a>
                 </td>
@@ -115,7 +115,7 @@
     <div id="collapseMonitoring" class="panel-collapse collapse">
         <div class="box-body">
             <div class="overlay center-block">
-                <section class="content bg-gray-light" >
+                <section class="content-info" >
                     <div class="box-body">
                         <dl class="dl-horizontal">
                             Training consists of two main phases:<br /><br/>
@@ -128,7 +128,6 @@
                     </div>
                 </section>
                 <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email <a href='#'>support@hutoma.com</a>
 
             </div>
         </div>

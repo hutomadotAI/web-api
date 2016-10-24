@@ -3,8 +3,8 @@
     <div class="box-header with-border ">
         <div class="box-title"><span class="text-sm text-gray" style="padding: 0 3px 0 3px;"></span><b>Response</b></div>
         <a data-toggle="collapse"  href="#collapseIntentResponse">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sm text-yellow"></i>
+            <div class=" pull-right"> <i class="fa fa-info-circle text-sm text-yellow"></i> more info
+
             </div>
         </a>
     </div>

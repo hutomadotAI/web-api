@@ -4,8 +4,8 @@
         <i class="fa fa-commenting-o text-green"></i>
         <div class="box-title"><b>Intents List</b></div>
         <a data-toggle="collapse"  href="#collapseIntentsListInfo">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sm text-yellow"></i>
+            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"></i> more info
+          
             </div>
         </a>
     </div>
