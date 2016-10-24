@@ -220,8 +220,6 @@ class console
     private static $constructed = false;
     private static $init_called = false;
     private static $cookie, $session, $remember_cookie, $dbh;
-    //private static $api_request_url = 'http://localhost:8081/v1';
-    private static $api_request_url = 'https://api.hutoma.com/v1';
 
     /**
      * Merge user config and default config
@@ -238,7 +236,7 @@ class console
         }
 
     }
-
+    
     public static function construct($called_from = "")
     {
 
@@ -775,12 +773,6 @@ class console
     }
 
     /**
-     * ---------------------
-     * Extra Tools/Functions
-     * ---------------------
-     */
-
-    /**
      * 2 Step Verification Login Process
      * ---------------------------------
      * When user logs in, it checks whether there is a cookie named "logSysdevice" and if there is :
@@ -933,6 +925,12 @@ class console
          */
         return false;
     }
+
+    /**
+     * ---------------------
+     * Extra Tools/Functions
+     * ---------------------
+     */
 
     /**
      * A function to login the user with the username and password.
@@ -1174,13 +1172,6 @@ class console
     }
 
     /**
-     * -------------------------
-     * End Extra Tools/Functions
-     * -------------------------
-     */
-
-
-    /**
      * ---------------------
      * NEW CONSOLE FUNCTIONS
      * ---------------------
@@ -1193,7 +1184,7 @@ class console
         if (self::$loggedIn) {
             $path = '/ai';
 
-            $service_url = self::$api_request_url . $path;
+            $service_url = self::getApiRequestUrl() . $path;
 
             // TODO: move this to a common internationalization class
             $locales = array(
@@ -1247,6 +1238,16 @@ class console
         }
     }
 
+    /**
+     * -------------------------
+     * End Extra Tools/Functions
+     * -------------------------
+     */
+
+    private static function getApiRequestUrl() {
+        return self::$config["api"]["request_url"];
+    }
+
     public static function getDevToken()
     {
         $token = "";
@@ -1269,7 +1270,7 @@ class console
     {
         if (self::$loggedIn) {
             $path = '/ai';
-            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl_response = $curl->exec();
             if ($curl_response === false) {
                 $curl->close();
@@ -1286,7 +1287,7 @@ class console
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
-            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl_response = $curl->exec();
             if ($curl_response === false) {
                 $curl->close();
@@ -1326,7 +1327,7 @@ class console
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
 
-            $service_url = self::$api_request_url . $path;
+            $service_url = self::getApiRequestUrl() . $path;
 
             //hard coded
             $timezone = 'Europe/London';
@@ -1366,7 +1367,7 @@ class console
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
-            $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
             $curl->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
 
             $curl_response = $curl->exec();
@@ -1386,7 +1387,7 @@ class console
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/chat';
             $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, $dev_token);
             $curl_response = $curl->exec();
@@ -1409,7 +1410,7 @@ class console
             $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
 
             $parameters = array('source_type' => $source_type);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, $dev_token);
             $curl->setOpt(CURLOPT_POST, true);
@@ -1432,7 +1433,7 @@ class console
 
         if (self::$loggedIn) {
             $path = '/ai/domain';
-            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
 
             $curl_response = $curl->exec();
 
@@ -1452,7 +1453,7 @@ class console
         if (self::$loggedIn) {
             $path = '/intents/' . $aiid;
             $parameters = array('aiid' => $aiid);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, self::getDevToken());
             $curl_response = $curl->exec();
@@ -1473,7 +1474,7 @@ class console
         if (self::$loggedIn) {
             $path = '/intent/' . $aiid;
             $parameters = array('aiid' => $aiid, 'intent_name' => $name);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, self::getDevToken());
             $curl_response = $curl->exec();
@@ -1493,7 +1494,7 @@ class console
     {
         if (self::$loggedIn) {
             $path = '/entities';
-            $curl = new curlHelper(self::$api_request_url . $path, $dev_token);
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {
@@ -1515,7 +1516,7 @@ class console
         if (self::$loggedIn) {
             $path = '/entity';
             $parameters = array('entity_name' => $name);
-            $service_url = self::$api_request_url . $path . '?' . http_build_query($parameters);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, $dev_token);
             $curl_response = $curl->exec();
