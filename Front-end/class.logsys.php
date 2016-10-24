@@ -1439,7 +1439,7 @@ class console
         }
     }
 
-    public static function uploadFile($dev_token, $aiid, $file, $source_type, $url)
+    public static function uploadFile( $aiid, $file, $source_type, $url)
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/training';
@@ -1449,7 +1449,7 @@ class console
             $parameters = array('source_type' => $source_type);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setOpt(CURLOPT_POST, true);
             $curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $curl->exec();
@@ -1469,7 +1469,7 @@ class console
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/training/start';
-            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl->setOpt(CURLOPT_CUSTOMREQUEST, "PUT");
 
             $curl_response = $curl->exec();
@@ -1488,7 +1488,7 @@ class console
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/training/stop';
-            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl->setOpt(CURLOPT_CUSTOMREQUEST, "PUT");
 
             $curl_response = $curl->exec();

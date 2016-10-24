@@ -32,7 +32,7 @@
 
              //$source_type = 0;
              //$url = "";
-             $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputfile'],0,'');
+             $response = hutoma\console::uploadFile( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputfile'],0,'');
              break;
 
         case 'structure':
@@ -52,7 +52,7 @@
 
             //$source_type = 0;
             //$url = "";
-            $response = hutoma\console::uploadFile(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputstructure'],1,'');
+            $response = hutoma\console::uploadFile( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_FILES['inputstructure'],1,'');
 
             break;
 
@@ -61,7 +61,7 @@
                 echo 'Send URL failed';
                 exit;
             }
-            $response = hutoma\console::uploadURL(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['url']);
+            // $response = hutoma\console::uploadURL( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['url']);
             break;
     }
 
