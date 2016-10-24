@@ -167,6 +167,18 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - GET INFO TRAINING FILE FAILED';
             $details = ' We could not find the data you were looking for';
             break;
+        case 307 :
+            $msg = 'INTERNAL ERROR - GET INFO AI STATUS FAILED';
+            $details = ' We could not find the data you were looking for';
+            break;
+        case 308 :
+            $msg = 'INTERNAL ERROR - START TRAINING FAILED';
+            $details = ' We could not find the data you were looking for';
+            break;
+        case 309 :
+            $msg ='INTERNAL ERROR - STOP TRAINING FAILED';
+            $details =' We could not find the data you were looking for';
+            break;
         case 310 :
             $msg ='INTERNAL ERROR - GET INTENTS INFORMATION FAILED';
             $details =' We could not find the data you were looking for';
@@ -197,6 +209,10 @@ if (isset($_GET['err'])) {
             break;
         case 350 :
             $msg = 'INTERNAL ERROR - UPLOAD FAILED';
+            $details = ' We could not find the data you were looking for';
+            break;
+        case 351 :
+            $msg = 'INTERNAL ERROR - GET DEEP LEARNING ERROR INFO  FAILED';
             $details = ' We could not find the data you were looking for';
             break;
         case 360 :

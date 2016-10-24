@@ -81,8 +81,8 @@
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['training_status'] = $singleAI['training_status'];
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
-
-            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']  =  \hutoma\console::getAiTrainingFile($singleAI['aiid']);
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']  =  \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
+            
             return true;
 
             // TODO send domain activeted by user

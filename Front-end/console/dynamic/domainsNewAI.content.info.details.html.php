@@ -9,7 +9,7 @@
 <div class="modal fade" id="boxDomainInfo" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal Prompt content-->
-        <div class="modal-content padding">
+        <div class="modal-content padding" style="background-color: #202020">
             <div class="modal-header">
                 <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-tag text-md text-white" style="padding-right:2em"></i>
@@ -25,7 +25,7 @@
 
                         <div class="box box-solid">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Description from FILE of PHP page</h3>
+                                <h3 class="box-title">Description Placeholder</h3>
                             </div><!-- /.box-header -->
                             <div class="box-body">
                                 <dl>

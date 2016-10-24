@@ -1,60 +1,11 @@
-<?php
-
-    $singleAI = \hutoma\console::getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-
-    if ($singleAI['status']['code'] !== 200) {
-        unset($singleAI);
-        header('Location: ./error.php?err=18');
-        exit;
-    }
-    // TO DO loader but API CALL
-    if(\hutoma\console::getAiTrainingFile($singleAI['aiid'])== null)
-        $training_file = false;
-    else
-        $training_file = true;
-
-    function decodeAIState($state){
-        switch ($state) {
-            case 'STOPPED' :
-                return('<span class="label label-primary">Stopped</span>');
-                break;
-            case 'NOT_STARTED' :
-                return('<span class="label label-warning">Not started</span>');
-                break;
-            case 'QUEUED' :
-                return('<span class="label label-warning">Queued</span>');
-                break;
-            case 'IN_PROGRESS' :
-                return('<span class="label label-primary">in progress</span>');
-                break;
-            case 'STOPPED_MAX_TIME' :
-                return('<span class="label label-warning" >Stopped Max Time</span>');
-                break;
-            case 'COMPLETED' :
-                return('<span class="label label-success">Completed</span>');
-                break;
-            case 'ERROR' :
-                return('<span class="label label-danger">Error</span>');
-                break;
-            case 'MALFORMEDFILE' :
-                return('<span class="label label-dangel">Malformed</span>');
-                break;
-            default:
-                return('<span class="label label-danger">Undefined</span>');
-        }
-    }
-?>
-
-
-
 <div class="box box-solid box-clean flat no-shadow" id="box_monitor">
+
     <div class="box-header with-border">
         <i class="fa fa-bar-chart-o text-success"></i>
         <div class="box-title"><b>Training Status</b></div>
-
         <a data-toggle="collapse"  href="#collapseMonitoring">
-            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"></i> more info
-
+            <div class=" pull-right">more info
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
@@ -75,21 +26,22 @@
                        <div class="progress-bar progress-bar-primary" id="progress-upload-file" style="width:0;"></div>
                     </div>
                 </td>
-                <td class="text-center"><span id="status-bagde-upload" class="badge btn-primary">0%</span></td>
+                <td class="text-center"><span id="status-badge-upload" class="badge btn-primary">0%</span></td>
             </tr>
 
             <tr id="trainingbar" hidden>
                 <!-- Phase2 is the "time" to monitoring the training error progress -->
                 <td class="text-center" id="status-training-file">phase 2</td>
                 <td>
-                    <div class="progress progress-xs progress-striped active" style="margin-top:9px;">
+                    <div class="progress progress-xs progress-striped active" id="progress-training-file-action" style="margin-top:9px;">
                         <div class="progress-bar progress-bar-success"  id="progress-training-file" style="width:0;"></div>
                     </div>
                 </td>
-                <td class="text-center" style="width: 120px;"><span id="status-bagde-training" class="badge btn-success">0%</span></td>
+                <td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">0%</span></td>
             </tr>
         </table>
 
+        <!--
         <div id="container_startstop" style="display: none;">
             <table class="table no-margin">
                 <td class="text-left no-border" style="padding-bottom: 0;">
@@ -99,15 +51,17 @@
                     </div>
                 </td>
                 <td class="text-center no-border" style="width: 120px;">
-                    <a type="submit" class="btn btn-app flat" id="startstop-button" value="_stop" style="margin-left: 0;">
-                        <i class="fa fa-stop no-margin" id="startstop-icon"></i>
-                        <span class="text-sm" id="text-startstop">stop training</span>
+                    <a type="submit" class="btn btn-app text-light-blue flat" id="startstop-button" value="_start" style="margin-left: 0;">
+                        <i class="fa fa-play no-margin text-light-blue" id="startstop-icon"></i>
+                        <span class="text-sm" id="text-startstop">start training</span>
                     </a>
                 </td>
             </table>
-            
-
-
+        </div>
+        -->
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
+            <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
+            <span id="msgAlertProgressBar">Training not started. Please upload training data.</span>
         </div>
 
     </div>
@@ -115,7 +69,7 @@
     <div id="collapseMonitoring" class="panel-collapse collapse">
         <div class="box-body">
             <div class="overlay center-block">
-                <section class="content-info" >
+                <section class="content bg-gray-light" >
                     <div class="box-body">
                         <dl class="dl-horizontal">
                             Training consists of two main phases:<br /><br/>
@@ -128,14 +82,11 @@
                     </div>
                 </section>
                 <p></p>
+                need help? check out our <a href='#'>video tutorial</a> or email <a href='#'>support@hutoma.com</a>
 
             </div>
         </div>
     </div>
 
 </div>
-<script>
-    var status = '<?php echo $singleAI['ai_status']; ?>';
-    var training_file = <?php echo json_encode($training_file);?>;
-    var error = <?php echo $singleAI['deep_learning_error']; ?>;
-</script>
+

@@ -2,98 +2,64 @@ var max_error = -1.0;
 var block_server_ping = false;
 
 initializedEventListeners();
-activeMonitors(status);
+
+freezeChat(true);
+activeMonitors();
+
+function freezeChat(){
+ var text='hey you need to start training before you talk to me!';
+}
 
 function initializedEventListeners(){
-    document.getElementById('inputfile').addEventListener('change', enableUploadFile);
+    document.getElementById('inputfile').addEventListener('change', enableUploadTextFile);
     document.getElementById('inputstructure').addEventListener('change', enableUploadStructure);
     document.getElementById('inputurl').addEventListener('keyup', enableUploadUrl);
-
-    document.getElementById('btnUploadFile').addEventListener('click', uploadFile);
+    
+    document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
     document.getElementById('btnUploadStructure').addEventListener('click', uploadStructure);
     document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
 
-    document.getElementById('startstop-button').addEventListener('click', startStop);
+    //document.getElementById('startstop-button').addEventListener('click', startStop);
 }
 
-function activeMonitors(status){
+function activeMonitors(){
+    // TODO decide witch is the format returned by API and made response result control
 
-    if(training_file){
-        activePhaseOne();
-    }
-    else
-        switch(status){
-            case 'NOT_STARTED' : break;
-            case 'QUEUED' : break;
-            case 'IN_PROGRESS' :
-                activePhaseTwo();
-                pingError();
+    if ( training_file == 1 ) {
+        jumpPhaseOne();
+
+        switch (status) {
+            case 'training_not_started' :  // 'NOT_STARTED' :
+                trainingStartCall();
                 break;
-            case 'STOPPED_MAX_TIME' : break;
-            case 'COMPLETED' : break;
-            case 'DELETED' : break;
-            case 'ERROR' : break;
-            case 'MALFORMEDFILE' : break;
-            case 'CANCELLED' : break;
-            default : break;
+            case 'training_stopped' : // 'STOPPED' :
+                createMessageWarningInfoAlert();
+                break;
+            case 'QUEUED' :
+                break;
+            case 'training_in_progress':  // 'IN_PROGRESS' :
+                activeTrainingTextFilePhaseTwo();
+                pingTrainingError();
+                break;
+            case 'STOPPED_MAX_TIME' :
+                break;
+            case 'training_completed' :  //'COMPLETED' :
+                jumpPhaseTwo();
+                break;
+            case 'DELETED' :
+                break;
+            case 'ERROR' :
+                break;
+            case 'MALFORMEDFILE' :
+                break;
+            case 'CANCELLED' :
+                break;
+            default :
+                break;
         }
+    }
 }
 
-function activePhaseOne(){
-    msgAlertUploadFile(0, 'A file is already loaded');
-    document.getElementById('progress-upload-file').style.width = '100%';
-    document.getElementById('status-bagde-upload').innerHTML = '100%';
-}
-
-function activePhaseTwo(){
-    $('#progress-upload-file-action').removeClass('active');
-    $('#progress-upload-file-action').removeClass('progress-striped');
-
-    switchToStop();
-
-    $('#btnUploadFile').prop('disabled', false);
-    $('#trainingbar').prop('hidden', false);
-
-    // force flashing initialization text
-    document.getElementById('status-training-file').innerText ='initialising';
-    document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-    document.getElementById('container_startstop').style.display = 'block';
-    //document.getElementById('containerMsgAlertProgressBar').style.display = 'block';
-
-    msgAlertProgressBar(0,'You can now talk to your AI.');
-    //closingMsgAlertProgressBarTemporized();
-    block_server_ping = false;
-}
-
-function enableUploadFile() {
-    if ( $(this).val() == null || $(this).val == "")
-        $('#btnUploadFile').prop('disabled', true);
-    else
-        $('#btnUploadFile').prop('disabled', false);
-    msgAlertUploadFile(0,'You can now upload your file');
-}
-
-function enableUploadStructure() {
-    // real implemented
-    if ( $(this).val() == null || $(this).val == "")
-        $("#btnUploadStructure").prop("disabled", true);
-    else
-        $("#btnUploadStructure").prop("disabled", false);
-    msgAlertUploadStructure(0,'You can now upload your complex file');
-}
-
-function enableUploadUrl() {
-    /* real implemented
-    var url = $('#inputurl').val();
-    if ( learnRegExp(url) )
-        $('#btnUploadUrl').prop('disabled', false);
-    else
-        $("#btnUploadUrl").prop("disabled", true);
-    */
-
-    // for demo
-    $("#btnUploadUrl").prop("disabled", true);
-}
 
 function getUploadWarnings(info) {
     var warnings = [];
@@ -119,223 +85,10 @@ function haNoContentError(info) {
     return false;
 }
 
-function uploadFile(){
-    if ( $('#inputfile').val() == null ||  $('#inputfile').val() == "") {
-        $("#btnUploadFile").prop("disabled", true);
-        msgAlertUploadFile(1,'You need to choose a file first');
-        return;
-    };
 
-    if ( !checkFileSize('inputfile',2) )
-        return;
-
-    resetPhaseTwoComponents();
-    block_server_ping = true;
-    $("#btnUploadFile").prop("disabled", true);
-
-
-    var xmlhttp;
-    var file_data = new FormData();
-    file_data.append("inputfile", document.getElementById('inputfile').files[0]);
-    file_data.append("tab","file");
-
-    if (window.XMLHttpRequest)
-        xmlhttp = new XMLHttpRequest();
-    else
-        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-
-    xmlhttp.open('POST','upload.php');
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var JSONresponse = xmlhttp.responseText;
-            try {
-                var JSONdata = JSON.parse(JSONresponse);
-                var statusCode = JSONdata['status']['code'];
-                if (statusCode === 200) {
-                    var uploadWarnings = null;
-                    var additionalInfo = JSONdata['status']['additionalInfo'];
-                    if (additionalInfo != null) {
-                        uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
-                    }
-                    if (uploadWarnings != null && uploadWarnings.length > 0) {
-                        msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
-                    } else {
-                        msgAlertUploadFile(4, 'File uploaded. Training started...');
-                    }
-                    resetPhaseOneComponents();
-                    updatePhaseOneComponents();
-                } else {
-                    if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
-                        msgAlertUploadFile(2, 'File not uploaded. No content was found.');
-                    } else {
-                        msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded');
-                    }
-                    $("#btnUploadFile").prop("disabled", false);
-                }
-            } catch (e) {
-                msgAlertUploadFile(2,'A generic error occurred');
-                $("#btnUploadFile").prop("disabled", false);
-            }
-        }
-    };
-
-    msgAlertUploadFile(1,'Uploading file...');
-    xmlhttp.send(file_data);
-}
-
-
-function uploadStructure(){
-    if ( $('#inputstructure').val() == null ||  $('#inputstructure').val() == "") {
-        $("#btnUploadStructure").prop("disabled", true);
-        msgAlertUploadStructure(1,'Upload a page from a book to begin training');
-        return;
-    }
-
-    if ( !checkFileSize('inputstructure',10) )
-        return;
-
-    resetPhaseTwoComponents();
-    block_server_ping = true;
-    $("#btnUploadStructure").prop("disabled", true);
-
-    var xmlhttp;
-    var file_data = new FormData();
-    file_data.append("inputstructure", document.getElementById('inputstructure').files[0]);
-    file_data.append("tab","structure");
-
-    if (window.XMLHttpRequest)
-        xmlhttp = new XMLHttpRequest();
-    else
-        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-
-    xmlhttp.open('POST','upload.php');
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var JSONresponse = xmlhttp.responseText;
-            try {
-                var JSONdata = JSON.parse(JSONresponse);
-                if (JSONdata['status']['code'] === 200) {
-                    msgAlertUploadStructure(4, 'Complex file Uploaded!!!');
-                    resetPhaseOneComponents();
-                    updatePhaseOneComponents();
-                }
-                else{
-                    msgAlertUploadStructure(2,'Something has gone wrong. Complex file not uploaded');
-                    $("#btnUploadStructure").prop("disabled", false);
-                }
-            }catch (e){
-                msgAlertUploadStructure(2,'Something has gone wrong; JSON error on complex file transfer');
-                $("#btnUploadStructure").prop("disabled", false);
-            }
-        }
-    };
-    msgAlertUploadStructure(1,'Uploading complex file...');
-    xmlhttp.send(file_data);
-}
-
-
-function uploadUrl(){
-    if ( $('#inputurl').val() == null ||  $('#inputurl').val() == "") {
-        $("#btnUploadUrl").prop("disabled", true);
-        msgAlertUploadStructure(1,'You need to choose a complex file first');
-        return;
-    }
-    else
-        $("#btnUploadUrl").prop("disabled", true);
-
-    var xmlhttp;
-    var file_data = new FormData();
-    file_data.append("tab","url");
-
-    if (window.XMLHttpRequest)
-        xmlhttp = new XMLHttpRequest();
-    else
-        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-
-    xmlhttp.open('POST','upload.php');
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var JSONresponse = xmlhttp.responseText;
-            try {
-                var JSONdata = JSON.parse(JSONresponse);
-                if (JSONdata['status']['code'] === 200)
-                    msgAlertUploadUrl(4,'Video Uploaded!!!');
-                else
-                    msgAlertUploadUrl(2,'Something has gone wrong. Video not uploaded');
-            }catch (e){
-                msgAlertUploadUrl(2,'Something has gone wrong. JSON error on video transfer');
-            }
-            $("#btnUploadUrl").prop("disabled", false);
-        }
-    };
-    msgAlertUploadUrl(1,'Uploading Video...');
-    xmlhttp.send(file_data);
-}
-
-function resetPhaseOneComponents(){
-    document.getElementById('progress-upload-file').style.width = '0%';
-    document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
-}
-
-function updatePhaseOneComponents() {
-    // simulation of loading phaseOne
-    var width = document.getElementById("progress-upload-file").style.width;
-    width = width.substr(0, width.length-1);
-
-    if( parseInt(width) <= 100 ){
-        document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
-        //var rgb =  getGreenToRed(parseInt(width));
-        //document.getElementById('status-bagde-upload').style.backgroundColor = rgb;
-        document.getElementById('status-bagde-upload').innerHTML = width+'%';
-        setTimeout(updatePhaseOneComponents, 100);
-    }
-    else {
-        activePhaseTwo();
-        pingError();
-    }
-}
-
-function resetPhaseTwoComponents(){
-    document.getElementById('container_startstop').style.display = 'none';
-    document.getElementById("progress-training-file").style.width ='0%';
-    document.getElementById('status-bagde-training').innerHTML = '0%';
-    document.getElementById('containerMsgAlertProgressBar').style.display = 'none';
-    $('#trainingbar').prop('hidden', true);
-}
-
-function startStop() {
-    if (document.getElementById('startstop-button').getAttribute('value') == '_stop')
-        switchToStart();
-    else
-        switchToStop();
-}
-
-function switchToStart(){
-    var elem_icon = document.getElementById('startstop-icon');
-    var elem_btn = document.getElementById('startstop-button');
-    var elem_text = document.getElementById('text-startstop');
-
-    elem_btn.setAttribute('value','_play');
-    elem_btn.setAttribute('class', 'btn btn-app text-light-blue');
-    elem_icon.setAttribute('class', 'fa fa-play no-margin text-light-blue');
-    elem_text.innerText ='resume training';
-    console.log('call stop training');
-
-}
-
-function switchToStop(){
-    var elem_icon = document.getElementById('startstop-icon');
-    var elem_btn = document.getElementById('startstop-button');
-    var elem_text = document.getElementById('text-startstop');
-
-    elem_btn.setAttribute('value','_stop');
-    elem_btn.setAttribute('class', 'btn btn-app text-red');
-    elem_icon.setAttribute('class', 'fa fa-stop no-margin text-red');
-    elem_text.innerText ='stop training';
-    console.log('call resume training');
+function restartTraining(){
+    console.log('call restart training');
+    
 }
 
 function notifyError(){
@@ -347,58 +100,153 @@ function notifyError(){
 function pingError(){
     var width = document.getElementById("progress-training-file").style.width;
     width = width.substr(0, width.length-1);
-    if( (parseInt(width) <= 100) && !block_server_ping) {
-        pingErrorCall();
+
+    if( (parseInt(width) < 100) && !block_server_ping ) {
+        var error = trainingErrorCall();
+
+        if ( parseFloat(error) > parseFloat(max_error))
+            max_error = error;
+
+        updateTrainingBar(error,max_error);
         setTimeout(pingError, 5000);
+    }
+    jumpPhaseTwo();
+}
+
+function pingTrainingError(){
+    var pingErrorValue = trainingErrorCall();
+
+    if(  pingErrorValue == 'error' )
+        return 'error';
+
+    if(  pingErrorValue == -1 )
+        setTimeout(pingTrainingError, 6000);
+    else {
+        initialisingStatusTrainingBar(false);
+        pingError();
     }
 }
 
-function pingErrorCall(){
+function trainingErrorCall(){
     var xmlhttp;
     if (window.XMLHttpRequest)
         xmlhttp = new XMLHttpRequest();
     else
         xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-
-    xmlhttp.open('POST','./dynamic/pingError.php');
-
+    xmlhttp.open('GET','./dynamic/trainingError.php',false); // blocking response
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            // TODO json validation when API is ready
+            var JSONresponse = xmlhttp.responseText;
+            return JSONresponse;
+        }
+        else
+            return 'error';
+    };
+    xmlhttp.send();
+    return xmlhttp.onreadystatechange();
+}
 
-            // global page error variable
-            error = xmlhttp.responseText;
+function getAiStatusCall(){
+    var xmlhttp;
+    if (window.XMLHttpRequest)
+        xmlhttp = new XMLHttpRequest();
+    else
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+    xmlhttp.open('GET','./dynamic/trainingStatusAI.php',false); // wait response
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            // TODO json validation when API is ready
+            var JSONresponse = xmlhttp.responseText;
+            return JSONresponse;
+        }
+        else
+            return 'error';
+    };
+    xmlhttp.send();
+    return xmlhttp.onreadystatechange();
+}
 
+function existsAiTrainingFileCall(){
+    var xmlhttp;
+    if (window.XMLHttpRequest)
+        xmlhttp = new XMLHttpRequest();
+    else
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+    xmlhttp.open('GET','./dynamic/trainingFile.php',false); // wait response
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var JSONresponse = xmlhttp.responseText;
             try {
-                if( error != 'error' && !block_server_ping) {
-
-                    if( parseInt(error)!= 0) {
-                        document.getElementById('status-training-file').innerText ='phase 2';
-                        document.getElementById('status-training-file').setAttribute('class', 'text-center');
-                    }
-
-                    if ( parseFloat(error) > parseFloat(max_error))
-                        max_error = error;
-
-                    var new_width = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
-                    document.getElementById("progress-training-file").style.width = (parseInt(new_width)) + '%';
-                    document.getElementById('status-bagde-training').innerHTML = parseInt(new_width) + '%';
-                }
-                else {
-                    msgAlertUploadStructure(2,'Something has gone wrong. Update status training ERROR');
-                }
-            }catch (e){
-                msgAlertUploadStructure(2,'Something has gone wrong. Update status training ERROR');
+                var JSONdata = JSON.parse(JSONresponse);
+                // TODO json validation when API is ready
+                return JSONresponse
+            } catch (e) {
+                return 'error';
             }
+        }
+        else
+            return 'error';
+    };
+    xmlhttp.send();
+    return xmlhttp.onreadystatechange();
+}
+
+function trainingStartCall(){
+    var xmlhttp;
+    if (window.XMLHttpRequest)
+        xmlhttp = new XMLHttpRequest();
+    else
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+    xmlhttp.open('GET','./dynamic/trainingStart.php',false); // wait response
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var JSONresponse = xmlhttp.responseText;
+            try {
+                var JSONdata = JSON.parse(JSONresponse);
+                var statusCode = JSONdata['status']['code'];
+                if (statusCode === 200 || statusCode === 400 ) {
+                    msgAlertProgressBar(0,'Phase 2 training in progress... ');
+                    activeTrainingTextFilePhaseTwo();
+                    pingTrainingError();
+                } else {
+                    msgAlertProgressBar(2,'Training not started');
+                }
+            } catch (e) {
+                msgAlertProgressBar(2,'Training fatal error');
+            }
+        }else {
+
         }
     };
     xmlhttp.send();
 }
 
-function getGreenToRed(percent){
-    var rgb = new Array();
-    r = percent<50 ? 255 : Math.floor(255-(percent*2-100)*255/100);
-    g = percent>50 ? 255 : Math.floor((percent*2)*255/100);
-    return 'rgb('+r+','+g+',0)';
+
+function trainingStopCall(){
+    var xmlhttp;
+    if (window.XMLHttpRequest)
+        xmlhttp = new XMLHttpRequest();
+    else
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+    xmlhttp.open('GET','./dynamic/trainingStop.php',false); // wait response
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var JSONresponse = xmlhttp.responseText;
+            try {
+                var JSONdata = JSON.parse(JSONresponse);
+                var statusCode = JSONdata['status']['code'];
+                if (statusCode === 200) {
+                } else {
+                }
+            } catch (e) {
+                alert('error stop training');
+            }
+        }else {
+
+        }
+    };
+    xmlhttp.send();
 }
 
 
@@ -406,51 +254,28 @@ function learnRegExp(url){
     return /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/.test(url);
 }
 
-function checkFileSize(fileID,size) {
-    var input, file;
-    input = document.getElementById(fileID);
-    if (!window.FileReader) {
-        msgAlertUploadFile(2,'The file API isn\'t supported on this browser');
-        return false;
-    }
-    if (!input.files) {
-        msgAlertUploadFile(2,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
-        return false;
-    }
-    file = input.files[0];
-    if(file.size > size*1048476) {
-        msgAlertUploadFile(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
-        return false;
-    }
-    return true;
-}
+function createMessageWarningInfoAlert(){
+    var wHTML =''
 
-function checkStructureSize(fileID,size) {
-    var input, file;
-    input = document.getElementById(fileID);
-    if (!window.FileReader) {
-        msgAlertUploadStructure(2,'The file API isn\'t supported on this browser');
-        return false;
-    }
-    if (!input.files) {
-        msgAlertUploadStructure(2,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
-        return false;
-    }
-    file = input.files[0];
-    if(file.size > size*1048476) {
-        msgAlertUploadStructure(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
-        return false;
-    }
-    return true;
-}
+    wHTML +=('<div class="alert alert-dismissable flat alert-warning" id="containerMsgWarningAlertTrainingInfo">');
+    wHTML +=('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>');
+    wHTML +=('<span id="msgAlertWarningTrainingInfo">');
+    wHTML +=('<dt>Start info pre-trained neural Manipulation</dt>');
+    wHTML +=('<dd>');
+    wHTML +=('The goals of the training program should relate directly to the needs determined by the assessment process outlined above.');
+    wHTML +=('Course objectives should clearly state what behavior or skill will be changed as a result of the training and should relate');
+    wHTML +=('</dd>');
+    wHTML +=('<p></p>');
+    wHTML +=('<dt class="text-center">');
+    wHTML +=('<button class="btn btn-primary btn-md center-block flat" id="restart-button"> <b>Restart Trainig</b></button>');
+    wHTML +=('</dt>');
 
-/*
-$(document).ready(function(){
-    $('input').iCheck({
-        checkboxClass: 'icheckbox_minimal'
-    });
-});
-*/
+    wHTML +=('</span>');
+    wHTML +=('</div>');
+
+    var parent = document.getElementById('trainingBox');
+    parent.innerHTML = wHTML;
+}
 
 // VIDEO TUTORIAL TRAINING CHAT EXAMPLE
 $("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function(){

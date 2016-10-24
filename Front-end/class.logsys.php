@@ -1303,14 +1303,12 @@ class console
 
     // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
 
-    public static function getAiTrainingFile($aiid)
+    public static function existsAiTrainingFile($aiid)
     {
         if (self::$loggedIn) {
             try {
-                $sql = self::$dbh->prepare("CALL updateAI(?)");
-
+                $sql = self::$dbh->prepare("CALL existsAiTrainingFile(?)");
                 $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
-
                 $sql->execute();
             } catch (MySQLException $e) {
                 \hutoma\console::redirect('./error.php?err=306');
@@ -1318,9 +1316,48 @@ class console
             }
             $data = $sql->fetchAll();
             $sql->nextRowset();
-            return $data;
+            $value = ($data[0]['ai_trainingfile']);
+            return $value;
         }
     }
+
+
+    public static function getAiStatus($aiid)
+    {
+        if (self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL getAiStatus(?)");
+                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=307');
+                exit;
+            }
+            $data = $sql->fetchAll();
+            $sql->nextRowset();
+            $value = ($data[0]['ai_status']);
+            return $value;
+        }
+    }
+
+    public static function getAiDeepLearningError($aiid)
+    {
+        if (self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL getAiDeepLearningError(?)");
+                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=351');
+                exit;
+            }
+            $data = $sql->fetchAll();
+            $sql->nextRowset();
+            $value = ($data[0]['deep_learning_error']);
+            return $value;
+        }
+    }
+
 
     public static function updateAI($aiid, $description, $private, $language, $timezoneString, $personality, $voice, $confidence)
     {
@@ -1427,6 +1464,45 @@ class console
             return $json_response;
         }
     }
+
+    public static function trainingStart($aiid)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/' . $aiid . '/training/start';
+            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl->setOpt(CURLOPT_CUSTOMREQUEST, "PUT");
+
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=308');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+    public static function trainingStop($aiid)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/' . $aiid . '/training/stop';
+            $curl = new curlHelper(self::$api_request_url . $path, self::getDevToken());
+            $curl->setOpt(CURLOPT_CUSTOMREQUEST, "PUT");
+
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=309');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
 
     public static function getDomains()
     {
@@ -1595,6 +1671,23 @@ class console
         echo 'console.log(' . $data . ');';
     }
 
-}
 
+    public static function getDevToken()
+    {
+        $token = "";
+        if (self::$loggedIn) {
+            $query = "CALL getDevToken(:id)";
+            $sql = self::$dbh->prepare($query);
+            $sql->execute(array(
+                ":id" => self::$user
+            ));
+            if ($sql->rowCount() > 0) {
+                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+                $sql->nextRowset();
+                $token = $rows['dev_token'];
+            }
+        }
+        return $token;
+    }
+}
 ?>

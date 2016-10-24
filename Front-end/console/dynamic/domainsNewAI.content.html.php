@@ -10,7 +10,7 @@
 
     <div class="box-body" id="boxNewDomains">
         <?php include './dynamic/domainsNewAI.content.info.html.php'; ?>
-        <input class="form-control flat no-shadow" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
+        <input class="form-control flat no-shadow" value="" placeholder="Search for a pre-trained neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
         <!--
         <div class="form-group pull-right no-margin" style="padding-top: 5px;">
             <span style="padding-right:5px;">Show Free Neural Networks Only</span>
@@ -67,7 +67,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Details Domain</h4>
+                <h4 class="modal-title">AI Info</h4>
             </div>
             <div class="modal-body">
                 <div class="box-body">
@@ -83,9 +83,6 @@
                         <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
                     </dl>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary flat" data-dismiss="modal">Close</button>
             </div>
         </div>
 
