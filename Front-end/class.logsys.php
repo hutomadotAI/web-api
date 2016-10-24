@@ -1672,22 +1672,6 @@ class console
     }
 
 
-    public static function getDevToken()
-    {
-        $token = "";
-        if (self::$loggedIn) {
-            $query = "CALL getDevToken(:id)";
-            $sql = self::$dbh->prepare($query);
-            $sql->execute(array(
-                ":id" => self::$user
-            ));
-            if ($sql->rowCount() > 0) {
-                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-                $sql->nextRowset();
-                $token = $rows['dev_token'];
-            }
-        }
-        return $token;
-    }
+
 }
 ?>
