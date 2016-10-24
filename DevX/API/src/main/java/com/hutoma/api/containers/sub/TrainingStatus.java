@@ -16,7 +16,8 @@ public enum TrainingStatus {
     DELETED("training_deleted"),
     ERROR("internal_error"),
     MALFORMEDFILE("malformed_training_file"),
-    CANCELLED("training_cancelled");
+    CANCELLED("training_cancelled"),
+    NOTHING_TO_TRAIN("training_nothing_to_train");
 
 
     private final String value;
