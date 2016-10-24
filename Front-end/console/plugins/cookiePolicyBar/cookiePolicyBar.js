@@ -1,5 +1,4 @@
-
-(function($) {
+(function ($) {
     /* The coolie policy bar takes a map of
      * options (for further extensibility)
      */
@@ -16,6 +15,8 @@
             policyText: 'Privacy policy',
             // Policy link
             policyUrl: '/privacyPolicy.html',
+            // Policy link window target
+            policyUrlTarget: '_self',
             // How many days to keep the user chosen preference (both accept or decline)
             cookieExpirationInDays: 60,
             // Set the domain for invalidating the cookies
@@ -31,31 +32,33 @@
         var options = $.extend(defaultOptions, options);
 
         // Function to remove the bar
-        var removeBar = function(){
-            $('#cookiePolicyBar').hide(0, function() { $('#cookiePolicyBar').remove(); });
+        var removeBar = function () {
+            $('#cookiePolicyBar').hide(0, function () {
+                $('#cookiePolicyBar').remove();
+            });
         };
 
         // Function to acknowledge the user accepting cookie storage
-        var cookiePolicyAccept = function(expirationDate){
+        var cookiePolicyAccept = function (expirationDate) {
             setCookie(options.cookieName, 'accepted', expirationDate);
             removeBar();
         };
 
         // Function to acknowledge the user declining cookie storage
         // and removal of existing cookies for the domain
-        var cookiePolicyDecline = function(expirationDate) {
+        var cookiePolicyDecline = function (expirationDate) {
             // set the expiration date to be yesterday
             var yesterday = new Date();
-            yesterday.setTime(yesterday.getTime() - (1000*60*60*24));
+            yesterday.setTime(yesterday.getTime() - (1000 * 60 * 60 * 24));
             yesterday = yesterday.toUTCString();
             // Now invalidate all the cookies
             var allCookies = document.cookie.split('; ');
             for (var i = 0; i < allCookies.length; i++) {
                 var c = allCookies[i].split('=');
-                if(c[0].indexOf('_') >= 0){
-                    document.cookie = c[0]+'=0; expires=' + yesterday + '; domain=' + options.domain.replace('www','')+'; path=/';
-                }else{
-                    document.cookie = c[0]+'=0; expires=' + yesterday + '; path=/';
+                if (c[0].indexOf('_') >= 0) {
+                    document.cookie = c[0] + '=0; expires=' + yesterday + '; domain=' + options.domain.replace('www', '') + '; path=/';
+                } else {
+                    document.cookie = c[0] + '=0; expires=' + yesterday + '; path=/';
                 }
             }
             // Set the cookie to declined so we don't ask again
@@ -75,10 +78,10 @@
 
         //Retrieves current cookie preference
         var existingCookieValue = '';
-        var docCookies=document.cookie.split('; ');
+        var docCookies = document.cookie.split('; ');
         for (var i = 0; i < docCookies.length; i++) {
             var c = docCookies[i].split('=');
-            if(c[0] == options.cookieName) {
+            if (c[0] == options.cookieName) {
                 existingCookieValue = c[1];
             }
         }
@@ -90,7 +93,7 @@
 
         // Sets expiration date for cookie
         var cookieExpirationDate = new Date();
-        cookieExpirationDate.setTime(cookieExpirationDate.getTime() + (options.cookieExpirationInDays * 1000*60*60*24));
+        cookieExpirationDate.setTime(cookieExpirationDate.getTime() + (options.cookieExpirationInDays * 1000 * 60 * 60 * 24));
         cookieExpirationDate = cookieExpirationDate.toUTCString();
 
         // Create the bar
@@ -98,14 +101,15 @@
             + '<span class="cookiePolicyBar-message">' + options.message + '</span> '
             + '<a class="cookiePolicyBar-accept" href="">' + options.acceptButtonText + '</a> '
             + (options.declineButtonText != '' ? '<a class="cookiePolicyBar-decline" href="">' + options.declineButtonText + '</a> ' : '')
-            + (options.policyText != '' ? '<a class="cookiePolicyBar-policy" href="' + options.policyUrl + '">' + options.policyText + '</a> ' : '');
+            + (options.policyText != '' ? '<a class="cookiePolicyBar-policy" href="' + options.policyUrl + '" target="' + options.policyUrlTarget
+            + '">' + options.policyText + '</a> ' : '');
         $('body').append(barElement);
 
-        $('#cookiePolicyBar .cookiePolicyBar-accept').click(function() {
+        $('#cookiePolicyBar .cookiePolicyBar-accept').click(function () {
             cookiePolicyAccept(cookieExpirationDate);
             return true;
         });
-        $('#cookiePolicyBar .cookiePolicyBar-decline').click(function() {
+        $('#cookiePolicyBar .cookiePolicyBar-decline').click(function () {
             cookiePolicyDecline(cookieExpirationDate);
             return false;
         });
