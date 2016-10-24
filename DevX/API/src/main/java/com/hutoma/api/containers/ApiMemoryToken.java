@@ -7,20 +7,21 @@ import org.joda.time.DateTime;
  */
 public class ApiMemoryToken extends ApiResult {
 
-    String variable_name;
-    String variable_value;
-    String variable_type;
-    DateTime last_accessed;
-    int expires_seconds;
-    int n_prompts;
+    private final String variable_name;
+    private final String variable_value;
+    private final String variable_type;
+    private final DateTime last_accessed;
+    private final int expires_seconds;
+    private final int n_prompts;
 
-    public ApiMemoryToken(String variable_name, String variable_value, String variable_type, DateTime last_accessed, int expires_seconds, int n_prompts) {
-        this.variable_name = variable_name;
-        this.variable_value = variable_value;
-        this.variable_type = variable_type;
-        this.last_accessed = last_accessed;
-        this.expires_seconds = expires_seconds;
-        this.n_prompts = n_prompts;
+    public ApiMemoryToken(String variableName, String variableValue, String variableType, DateTime lastAccessed,
+                          int expiresSeconds, int numPrompts) {
+        this.variable_name = variableName;
+        this.variable_value = variableValue;
+        this.variable_type = variableType;
+        this.last_accessed = lastAccessed;
+        this.expires_seconds = expiresSeconds;
+        this.n_prompts = numPrompts;
     }
 
     public String getVariableName() {

@@ -3,9 +3,9 @@ package com.hutoma.api.common;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Singleton;
 
 /**
  * Created by pedrotei on 29/09/16.
@@ -29,38 +29,8 @@ public class TelemetryLogger extends Logger implements ITelemetry {
     /**
      * {@inheritDoc}
      */
-    public void initialize(Config config) {
-        String key = config.getTelemetryKey(APP_NAME);
-        if (key != null) {
-            TelemetryConfiguration telemetryConfig = TelemetryConfiguration.getActive();
-            telemetryConfig.setInstrumentationKey(key);
-            this.telemetryClient = new TelemetryClient(telemetryConfig);
-            this.isTelemetryEnabled = true;
-            this.logInfo("telemetrylogger", String.format("Initialized telemetry for key: [%s]", key));
-        } else {
-            this.isTelemetryEnabled = false;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void enableTelemetry() {
-        this.isTelemetryEnabled = true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void disableTelemetry() {
-        this.isTelemetryEnabled = false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isTelemetryEnabled() {
-        return this.isTelemetryEnabled;
+    public void addTelemetryEvent(String eventName) {
+        this.addTelemetryEvent(eventName, (Map<String, String>) null);
     }
 
     /**
@@ -97,21 +67,6 @@ public class TelemetryLogger extends Logger implements ITelemetry {
         }
     }
 
-    private String getStackTraceAsString(StackTraceElement[] stackTrace) {
-        StringBuilder sb = new StringBuilder();
-        for (StackTraceElement e : stackTrace) {
-            sb.append(e.toString()).append("\n");
-        }
-        return sb.toString();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void addTelemetryEvent(String eventName) {
-        this.addTelemetryEvent(eventName, (Map<String, String>) null);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -119,6 +74,27 @@ public class TelemetryLogger extends Logger implements ITelemetry {
         if (this.isTelemetryEnabled()) {
             this.telemetryClient.trackMetric(metricName, sampleCount);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void enableTelemetry() {
+        this.isTelemetryEnabled = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void disableTelemetry() {
+        this.isTelemetryEnabled = false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isTelemetryEnabled() {
+        return this.isTelemetryEnabled;
     }
 
     /**
@@ -133,5 +109,29 @@ public class TelemetryLogger extends Logger implements ITelemetry {
                 this.put("Comment", logComment);
             }});
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void initialize(Config config) {
+        String key = config.getTelemetryKey(APP_NAME);
+        if (key != null) {
+            TelemetryConfiguration telemetryConfig = TelemetryConfiguration.getActive();
+            telemetryConfig.setInstrumentationKey(key);
+            this.telemetryClient = new TelemetryClient(telemetryConfig);
+            this.isTelemetryEnabled = true;
+            this.logInfo("telemetrylogger", String.format("Initialized telemetry for key: [%s]", key));
+        } else {
+            this.isTelemetryEnabled = false;
+        }
+    }
+
+    private String getStackTraceAsString(StackTraceElement[] stackTrace) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement e : stackTrace) {
+            sb.append(e.toString()).append("\n");
+        }
+        return sb.toString();
     }
 }

@@ -1,6 +1,5 @@
 package com.hutoma.api.containers.sub;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,13 +8,13 @@ import java.util.UUID;
  */
 public class ChatResult {
 
+    private final String topic_in = "";
     private double score;
     private String query = "";
     private String answer = "";
     private double elapsed_time;
     private String action;
     private String context;
-    private String topic_in = "";
     private String topic_out = "";
     private UUID chatId;
     private List<MemoryIntent> intents;
@@ -53,16 +52,16 @@ public class ChatResult {
         return this.topic_out;
     }
 
-    public void setTopic_out(String topic_out) {
-        this.topic_out = topic_out;
+    public void setTopic_out(String topicOut) {
+        this.topic_out = topicOut;
     }
 
     public double getElapsedTime() {
         return this.elapsed_time;
     }
 
-    public void setElapsedTime(double elapsed_time) {
-        this.elapsed_time = elapsed_time;
+    public void setElapsedTime(double elapsedTime) {
+        this.elapsed_time = elapsedTime;
     }
 
     public UUID getChatId() {

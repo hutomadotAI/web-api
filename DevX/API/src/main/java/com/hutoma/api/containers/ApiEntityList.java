@@ -9,8 +9,8 @@ public class ApiEntityList extends ApiResult {
 
     List<String> entity_name;
 
-    public ApiEntityList(List<String> entity_name) {
-        this.entity_name = entity_name;
+    public ApiEntityList(List<String> entityName) {
+        this.entity_name = entityName;
     }
 
     public List<String> getEntities() {

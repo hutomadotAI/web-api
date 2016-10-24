@@ -10,13 +10,13 @@ public class ApiEntity extends ApiResult {
     private final String entity_name;
     private List<String> entity_values;
 
-    public ApiEntity(final String entity_name) {
-        this.entity_name = entity_name;
+    public ApiEntity(final String entityName) {
+        this.entity_name = entityName;
     }
 
-    public ApiEntity(final String entity_name, final List<String> entity_values) {
-        this.entity_name = entity_name;
-        this.entity_values = entity_values;
+    public ApiEntity(final String entityName, final List<String> entityValues) {
+        this.entity_name = entityName;
+        this.entity_values = entityValues;
     }
 
     public String getEntityName() {

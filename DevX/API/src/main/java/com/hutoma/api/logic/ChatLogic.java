@@ -31,14 +31,14 @@ import javax.ws.rs.core.SecurityContext;
 public class ChatLogic {
 
     private static final String LOGFROM = "chatlogic";
-    private Config config;
-    private JsonSerializer jsonSerializer;
-    private SemanticAnalysis semanticAnalysis;
-    private NeuralNet neuralNet;
-    private Tools tools;
-    private ILogger logger;
-    private IMemoryIntentHandler intentHandler;
-    private IEntityRecognizer entityRecognizer;
+    private final Config config;
+    private final JsonSerializer jsonSerializer;
+    private final SemanticAnalysis semanticAnalysis;
+    private final NeuralNet neuralNet;
+    private final Tools tools;
+    private final ILogger logger;
+    private final IMemoryIntentHandler intentHandler;
+    private final IEntityRecognizer entityRecognizer;
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis,
@@ -54,12 +54,8 @@ public class ChatLogic {
         this.entityRecognizer = entityRecognizer;
     }
 
-    private double toOneDecimalPlace(double input) {
-        return Math.round(input * 10.0d) / 10.0d;
-    }
-
-    public ApiResult chat(SecurityContext context, UUID aiid, String dev_id, String q, String chatId, String history,
-                          String topic, float min_p) {
+    public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
+                          String history, String topic, float minP) {
 
         long timestampNow = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
@@ -73,23 +69,23 @@ public class ChatLogic {
 
         // Add telemetry for the request
         Map<String, String> telemetryMap = new HashMap<String, String>() {{
-            put("DevId", dev_id);
+            put("DevId", devId);
             put("AIID", aiid.toString());
             put("Topic", topic);
             // TODO: potentially PII info, we may need to mask this later, but for
             // development purposes log this
             put("ChatId", chatUuid.toString());
             put("History", history);
-            put("Q", q);
+            put("Q", question);
         }};
 
         boolean noResponse = true;
         try {
-            this.logger.logDebug(LOGFROM, "chat request for dev " + dev_id + " on ai " + aiid.toString());
+            this.logger.logDebug(LOGFROM, "chat request for dev " + devId + " on ai " + aiid.toString());
 
             // async start both requests
-            this.semanticAnalysis.startAnswerRequest(dev_id, aiid, chatUuid, topic, history, q, min_p);
-            this.neuralNet.startAnswerRequest(dev_id, aiid, chatUuid, q);
+            this.semanticAnalysis.startAnswerRequest(devId, aiid, chatUuid, topic, history, question, minP);
+            this.neuralNet.startAnswerRequest(devId, aiid, chatUuid, question);
 
             // wait for semantic result to complete
             ChatResult semanticAnalysisResult = this.semanticAnalysis.getAnswerResult();
@@ -119,25 +115,25 @@ public class ChatLogic {
                 telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
 
                 // if semantic analysis is not confident enough, wait for and process result from neural network
-                if ((semanticScore < min_p) || (0.0d == semanticScore)) {
+                if ((semanticScore < minP) || (0.0d == semanticScore)) {
 
                     telemetryMap.put("WNETConfident", "false");
 
                     // wait for neural network to complete
-                    String RNN_answer = this.neuralNet.getAnswerResult(dev_id, aiid);
-                    if (!RNN_answer.isEmpty()) {
+                    String rnnAnswer = this.neuralNet.getAnswerResult(devId, aiid);
+                    if (!rnnAnswer.isEmpty()) {
                         noResponse = false;
                     }
                     long endRNNTime = this.tools.getTimestamp();
 
                     boolean validRNN = false;
-                    if (!RNN_answer.isEmpty()) {
+                    if (!rnnAnswer.isEmpty()) {
                         // rnn returns result in the form
                         // 0.157760821867|tell me then .
-                        int splitIndex = RNN_answer.indexOf('|');
+                        int splitIndex = rnnAnswer.indexOf('|');
                         if (splitIndex > 0) {
-                            double neuralNetConfidence = Double.valueOf(RNN_answer.substring(0, splitIndex));
-                            chatResult.setAnswer(RNN_answer.substring(splitIndex + 1));
+                            double neuralNetConfidence = Double.valueOf(rnnAnswer.substring(0, splitIndex));
+                            chatResult.setAnswer(rnnAnswer.substring(splitIndex + 1));
                             chatResult.setScore(toOneDecimalPlace(neuralNetConfidence));
                             chatResult.setElapsedTime((endRNNTime - startTime) / 1000.0d);
                             validRNN = true;
@@ -158,7 +154,7 @@ public class ChatLogic {
                     telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
                 }
 
-                this.handleIntents(chatResult, dev_id, aiid, chatUuid, q, telemetryMap);
+                this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
             }
         } catch (NeuralNet.NeuralNetNotRespondingException nr) {
             this.logger.logError(LOGFROM, "neural net did not respond in time");
@@ -185,12 +181,16 @@ public class ChatLogic {
         return apiChat.setSuccessStatus();
     }
 
+    private double toOneDecimalPlace(double input) {
+        return Math.round(input * 10.0d) / 10.0d;
+    }
+
     /**
      * Handle any intents.
-     * @param chatResult the current chat result
-     * @param aiid the AI ID
-     * @param chatUuid the Chat ID
-     * @param question the question
+     * @param chatResult   the current chat result
+     * @param aiid         the AI ID
+     * @param chatUuid     the Chat ID
+     * @param question     the question
      * @param telemetryMap the telemetry map
      */
     private void handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,

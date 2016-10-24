@@ -5,6 +5,14 @@ import com.hutoma.api.common.Logger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
+import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.IllegalFormatException;
+import java.util.List;
+import java.util.UUID;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -16,10 +24,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.*;
 
 @Secured
 @Provider
@@ -27,11 +31,10 @@ import java.util.*;
 public class AuthFilter implements ContainerRequestFilter {
 
     private static final String LOGFROM = "authfilter";
-
+    private final Logger logger;
+    private final Config config;
     @Context
     private ResourceInfo resourceInfo;
-    private Logger logger;
-    private Config config;
 
     @Inject
     public AuthFilter(Logger logger, Config config) {
@@ -63,10 +66,10 @@ public class AuthFilter implements ContainerRequestFilter {
             String token = authorizationHeader.substring("Bearer".length()).trim();
 
             // get the encoding key to decode the token
-            String encoding_key = this.config.getEncodingKey();
+            String encodingKey = this.config.getEncodingKey();
 
             // decode the token
-            Claims claims = Jwts.parser().setSigningKey(encoding_key).parseClaimsJws(token).getBody();
+            Claims claims = Jwts.parser().setSigningKey(encodingKey).parseClaimsJws(token).getBody();
 
             // get the owner devid
             String devID = claims.getSubject();
@@ -103,7 +106,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
             }
 
-            String _devrole = claims.get("ROLE").toString();
+            String devRole = claims.get("ROLE").toString();
 
             Class<?> resourceClass = this.resourceInfo.getResourceClass();
             List<Role> classRoles = extractRoles(resourceClass);
@@ -111,14 +114,14 @@ public class AuthFilter implements ContainerRequestFilter {
             List<Role> methodRoles = extractRoles(resourceMethod);
 
             try {
-                boolean is_valid;
+                boolean isValid;
                 if (methodRoles.isEmpty()) {
-                    is_valid = checkPermissions(_devrole, classRoles);
+                    isValid = checkPermissions(devRole, classRoles);
                 } else {
-                    is_valid = checkPermissions(_devrole, methodRoles);
+                    isValid = checkPermissions(devRole, methodRoles);
                 }
 
-                if (!is_valid) {
+                if (!isValid) {
                     this.logger.logInfo(LOGFROM, "access denied for devrole to endpoint");
                     requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
                     return;
@@ -129,7 +132,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 return;
             }
 
-            this.logger.logDebug(LOGFROM, "authorized request from dev " + devID + " in role " + _devrole);
+            this.logger.logDebug(LOGFROM, "authorized request from dev " + devID + " in role " + devRole);
 
         } catch (Exception e) {
             this.logger.logInfo(LOGFROM, "auth verification error: " + e.toString());
@@ -153,10 +156,10 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
-    private boolean checkPermissions(String dev_role, List<Role> allowedRoles) throws Exception {
+    private boolean checkPermissions(String ddevRole, List<Role> allowedRoles) throws Exception {
 
         for (int i = 0; i < allowedRoles.size(); i++) {
-            if (allowedRoles.get(i).toString().equals(dev_role)) {
+            if (allowedRoles.get(i).toString().equals(ddevRole)) {
                 return true;
             }
         }

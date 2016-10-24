@@ -17,10 +17,10 @@ public class ApiIntent extends ApiResult {
     private List<String> responses = new ArrayList<>();
     private List<String> user_says = new ArrayList<>();
 
-    public ApiIntent(String intent_name, String topic_in, String topic_out) {
-        this.intent_name = intent_name;
-        this.topic_in = topic_in;
-        this.topic_out = topic_out;
+    public ApiIntent(String intentName, String topicIn, String topicOut) {
+        this.intent_name = intentName;
+        this.topic_in = topicIn;
+        this.topic_out = topicOut;
     }
 
     public String getIntentName() {

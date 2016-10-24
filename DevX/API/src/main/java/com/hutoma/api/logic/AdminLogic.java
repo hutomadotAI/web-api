@@ -13,9 +13,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.UUID;
 
 /**
  * Created by mauriziocibelli on 27/04/16.
@@ -23,14 +23,15 @@ import java.util.UUID;
 public class AdminLogic {
 
     private static final String LOGFROM = "adminlogic";
-    private Config config;
-    private JsonSerializer jsonSerializer;
-    private Database database;
-    private MessageQueue messageQueue;
-    private Logger logger;
+    private final Config config;
+    private final JsonSerializer jsonSerializer;
+    private final Database database;
+    private final MessageQueue messageQueue;
+    private final Logger logger;
 
     @Inject
-    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue, Logger logger) {
+    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,
+                      Logger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
@@ -39,43 +40,44 @@ public class AdminLogic {
     }
 
     public ApiResult createDev(
-        SecurityContext securityContext,
-        String securityRole,
-        String username,
-        String email,
-        String password,
-        String passwordSalt,
-        String first_name,
-        String last_name,
-        int planId
+            SecurityContext securityContext,
+            String securityRole,
+            String username,
+            String email,
+            String password,
+            String passwordSalt,
+            String firstName,
+            String lastName,
+            int planId
     ) {
 
         try {
 
-            UUID dev_id = UUID.randomUUID();
-            String encoding_key = this.config.getEncodingKey();
-            this.logger.logInfo(LOGFROM, "request to create dev " + dev_id);
+            UUID devId = UUID.randomUUID();
+            String encodingKey = this.config.getEncodingKey();
+            this.logger.logInfo(LOGFROM, "request to create dev " + devId);
 
             String devToken = Jwts.builder()
-                .claim("ROLE", securityRole)
-                .setSubject(dev_id.toString())
-                .compressWith(CompressionCodecs.DEFLATE)
-                .signWith(SignatureAlgorithm.HS256, encoding_key)
-                .compact();
+                    .claim("ROLE", securityRole)
+                    .setSubject(devId.toString())
+                    .compressWith(CompressionCodecs.DEFLATE)
+                    .signWith(SignatureAlgorithm.HS256, encodingKey)
+                    .compact();
 
             String clientToken = Jwts.builder()
-                .claim("ROLE", Role.ROLE_CLIENTONLY)
-                .setSubject(dev_id.toString())
-                .compressWith(CompressionCodecs.DEFLATE)
-                .signWith(SignatureAlgorithm.HS256, encoding_key)
-                .compact();
+                    .claim("ROLE", Role.ROLE_CLIENTONLY)
+                    .setSubject(devId.toString())
+                    .compressWith(CompressionCodecs.DEFLATE)
+                    .signWith(SignatureAlgorithm.HS256, encodingKey)
+                    .compact();
 
-            if (!this.database.createDev(username, email, password, passwordSalt, first_name, last_name, devToken.toString(), planId, dev_id.toString(), clientToken.toString())) {
+            if (!this.database.createDev(username, email, password, passwordSalt, firstName, lastName,
+                    devToken, planId, devId.toString(), clientToken)) {
                 this.logger.logError(LOGFROM, "db failed to create dev");
                 return ApiError.getInternalServerError();
             }
 
-            return new ApiAdmin(devToken, dev_id.toString()).setSuccessStatus("created successfully");
+            return new ApiAdmin(devToken, devId.toString()).setSuccessStatus("created successfully");
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "failed to create dev: " + e.toString());
             return ApiError.getInternalServerError();
@@ -83,8 +85,8 @@ public class AdminLogic {
     }
 
     public ApiResult deleteDev(
-        SecurityContext securityContext,
-        String devid) {
+            SecurityContext securityContext,
+            String devid) {
 
         try {
             this.logger.logInfo(LOGFROM, "request to delete dev " + devid);

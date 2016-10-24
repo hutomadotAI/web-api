@@ -15,12 +15,15 @@ import javax.inject.Inject;
  */
 public class Validate {
 
-    static Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
-    static Pattern alphaNumericAndMoreDesc = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\@\\? ]+$");
-    static Pattern alphaNumericAndMoreNoAt = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
-    static Pattern uuidPattern = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-    static Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
-    static Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
+    private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
+    private static final Pattern alphaNumericAndMoreDesc =
+            Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\@\\? ]+$");
+    private static final Pattern alphaNumericAndMoreNoAt =
+            Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
+    private static final Pattern uuidPattern =
+            Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    private static final Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
+    private static final Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
 
     @Inject
     public Validate() {
@@ -42,19 +45,19 @@ public class Validate {
         final StringBuilder sb = new StringBuilder();
         final int n = input.length();
         boolean lastCharWasSpace = true;
-        char c;
+        char ch;
         for (int i = 0; i < n; i++) {
-            c = input.charAt(i);
+            ch = input.charAt(i);
             // all whitespaces
-            if (Character.isWhitespace(c)) {
+            if (Character.isWhitespace(ch)) {
                 if (!lastCharWasSpace) {
                     sb.append(' ');
                     lastCharWasSpace = true;
                 }
             } else {
                 // ignore out of range characters
-                if ((c >= 32) && (c < 127)) {
-                    switch (c) {
+                if ((ch >= 32) && (ch < 127)) {
+                    switch (ch) {
                         // characters to omit
                         case '[':
                         case ']':
@@ -64,7 +67,7 @@ public class Validate {
                             break;
                         // characters to retain unchanged
                         default:
-                            sb.append(c);
+                            sb.append(ch);
                             lastCharWasSpace = false;
                     }
                 }
@@ -85,7 +88,8 @@ public class Validate {
      * @return trimmed parameter
      * @throws ParameterValidationException if the parameter is empty, null or invalid
      */
-    private String validatePattern(final Pattern pattern, final String paramName, final String param) throws ParameterValidationException {
+    private String validatePattern(final Pattern pattern, final String paramName, final String param)
+            throws ParameterValidationException {
         if (null == param) {
             throw new ParameterValidationException("missing " + paramName);
         }
@@ -107,7 +111,8 @@ public class Validate {
      * @return trimmed parameter, or empty string if it was null or empty
      * @throws ParameterValidationException if the parameter invalid
      */
-    private String validatePatternOptionalField(final Pattern pattern, final String paramName, final String param) throws ParameterValidationException {
+    private String validatePatternOptionalField(final Pattern pattern, final String paramName, final String param)
+            throws ParameterValidationException {
         if (null == param) {
             return "";
         }
@@ -129,7 +134,8 @@ public class Validate {
      * @return list of trimmed parameters, or empty list if it was null or empty
      * @throws ParameterValidationException
      */
-    private List<String> validatePatternUniqueList(Pattern pattern, String paramName, List<String> paramList) throws ParameterValidationException {
+    private List<String> validatePatternUniqueList(Pattern pattern, String paramName, List<String> paramList)
+            throws ParameterValidationException {
         LinkedHashSet<String> results = new LinkedHashSet<>();
         if (null != paramList) {
             for (String param : paramList) {
@@ -140,6 +146,12 @@ public class Validate {
             }
         }
         return new ArrayList<>(results);
+    }
+
+    public static class ParameterValidationException extends Exception {
+        public ParameterValidationException(final String message) {
+            super(message);
+        }
     }
 
     /***
@@ -240,26 +252,24 @@ public class Validate {
         return textSanitizer(param);
     }
 
-    String validateOptionalDescription(final String paramName, final String param) throws ParameterValidationException {
+    String validateOptionalDescription(final String paramName, final String param)
+            throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
     }
 
-    List<String> validateOptionalDescriptionList(String paramName, List<String> paramList) throws ParameterValidationException {
+    List<String> validateOptionalDescriptionList(String paramName, List<String> paramList)
+            throws ParameterValidationException {
         return validatePatternUniqueList(alphaNumericAndMoreDesc, paramName, paramList);
     }
 
-    String validateOptionalSanitizeRemoveAt(final String paramName, final String param) throws ParameterValidationException {
+    String validateOptionalSanitizeRemoveAt(final String paramName, final String param)
+            throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
     }
 
-    List<String> validateOptionalObjectValues(String paramName, List<String> paramList) throws ParameterValidationException {
+    List<String> validateOptionalObjectValues(String paramName, List<String> paramList)
+            throws ParameterValidationException {
         return validatePatternUniqueList(alphaNumDashesSomePunctuationAndSpace, paramName, paramList);
-    }
-
-    public static class ParameterValidationException extends Exception {
-        public ParameterValidationException(final String message) {
-            super(message);
-        }
     }
 
 }

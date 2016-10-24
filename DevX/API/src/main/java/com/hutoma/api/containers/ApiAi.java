@@ -30,26 +30,26 @@ public class ApiAi extends ApiResult {
     private Locale language;
     private TimeZone timezone;
 
-    public ApiAi(String aiid, String client_token) {
+    public ApiAi(String aiid, String clientToken) {
         this.aiid = aiid;
-        this.client_token = client_token;
+        this.client_token = clientToken;
     }
 
-    public ApiAi(String aiid, String client_token, String name, String description, DateTime created_on,
-                 boolean is_private, double deep_learning_error, String training_debug_info, String training_status,
-                 TrainingStatus ai_status, String ai_training_file, int personality, double confidence,
+    public ApiAi(String aiid, String clientToken, String name, String description, DateTime createdOn,
+                 boolean isPrivate, double deepLearningError, String trainingDebugInfo, String trainingStatus,
+                 TrainingStatus aiStatus, String aiTrainingFile, int personality, double confidence,
                  int voice, Locale language, TimeZone timezone) {
         this.aiid = aiid;
-        this.client_token = client_token;
+        this.client_token = clientToken;
         this.name = name;
         this.description = description;
-        this.created_on = created_on;
-        this.is_private = is_private;
-        this.deep_learning_error = deep_learning_error;
-        this.training_debug_info = training_debug_info;
-        this.training_status = training_status;
-        this.ai_status = ai_status;
-        this.ai_training_file = ai_training_file;
+        this.created_on = createdOn;
+        this.is_private = isPrivate;
+        this.deep_learning_error = deepLearningError;
+        this.training_debug_info = trainingDebugInfo;
+        this.training_status = trainingStatus;
+        this.ai_status = aiStatus;
+        this.ai_training_file = aiTrainingFile;
         this.personality = personality;
         this.confidence = confidence;
         this.voice = voice;

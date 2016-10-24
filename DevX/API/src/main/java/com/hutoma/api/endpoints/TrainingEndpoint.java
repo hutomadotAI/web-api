@@ -11,9 +11,12 @@ import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
+
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -29,8 +32,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 
 /**
  * Created by David MG on 09/08/2016.
@@ -76,7 +77,8 @@ public class TrainingEndpoint {
     public Response trainingStart(@Context SecurityContext securityContext,
                                   @Context ContainerRequestContext requestContext,
                                   @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.trainingLogic.startTraining(securityContext, devid, ParameterFilter.getAiid(requestContext));
+        ApiResult result = this.trainingLogic.startTraining(securityContext, devid,
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
@@ -89,7 +91,8 @@ public class TrainingEndpoint {
     public Response trainingStop(@Context SecurityContext securityContext,
                                  @Context ContainerRequestContext requestContext,
                                  @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.trainingLogic.stopTraining(securityContext, devid, ParameterFilter.getAiid(requestContext));
+        ApiResult result = this.trainingLogic.stopTraining(securityContext, devid,
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 

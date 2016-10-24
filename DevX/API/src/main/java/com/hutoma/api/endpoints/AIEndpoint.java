@@ -52,7 +52,7 @@ public class AIEndpoint {
             @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext,
             @DefaultValue("") @HeaderParam("_developer_id") String devid,
-            @DefaultValue("false") @FormParam("is_private") boolean is_private,
+            @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice) {
         ApiResult result = this.aiLogic.createAI(
@@ -60,7 +60,7 @@ public class AIEndpoint {
                 devid,
                 ParameterFilter.getAiName(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
-                is_private,
+                isPrivate,
                 personality,
                 ParameterFilter.getAiConfidence(requestContext),
                 voice,
@@ -80,7 +80,7 @@ public class AIEndpoint {
             @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext,
             @DefaultValue("") @HeaderParam("_developer_id") String devid,
-            @DefaultValue("false") @FormParam("is_private") boolean is_private,
+            @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice) {
         ApiResult result = this.aiLogic.updateAI(
@@ -88,7 +88,7 @@ public class AIEndpoint {
                 devid,
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
-                is_private,
+                isPrivate,
                 personality,
                 ParameterFilter.getAiConfidence(requestContext),
                 voice,

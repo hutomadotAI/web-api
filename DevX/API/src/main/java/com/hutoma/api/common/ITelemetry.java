@@ -59,6 +59,28 @@ public interface ITelemetry {
     void addTelemetryEvent(String eventName);
 
     /**
+     * Add a telemetry event.
+     * @param eventName  the event name
+     * @param properties the property map for the event
+     */
+    void addTelemetryEvent(String eventName, Map<String, String> properties);
+
+    /**
+     * Add a telemetry event.
+     * @param eventName the event name
+     * @param exception the exception
+     */
+    void addTelemetryEvent(String eventName, Exception exception);
+
+    /**
+     * Add a telemetry event.
+     * @param eventName  the event name
+     * @param exception  the exception
+     * @param properties the property map for the event
+     */
+    void addTelemetryEvent(String eventName, Exception exception, Map<String, String> properties);
+
+    /**
      * Tracks a metric.
      * @param metricName  the metric name
      * @param sampleCount tehe sample count
@@ -81,26 +103,4 @@ public interface ITelemetry {
      * @return whether telemetry is currently enabled or not
      */
     boolean isTelemetryEnabled();
-
-    /**
-     * Add a telemetry event.
-     * @param eventName  the event name
-     * @param properties the property map for the event
-     */
-    void addTelemetryEvent(String eventName, Map<String, String> properties);
-
-    /**
-     * Add a telemetry event.
-     * @param eventName the event name
-     * @param exception the exception
-     */
-    void addTelemetryEvent(String eventName, Exception exception);
-
-    /**
-     * Add a telemetry event.
-     * @param eventName  the event name
-     * @param exception  the exception
-     * @param properties the property map for the event
-     */
-    void addTelemetryEvent(String eventName, Exception exception, Map<String, String> properties);
 }

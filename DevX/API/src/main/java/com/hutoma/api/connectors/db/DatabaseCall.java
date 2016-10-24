@@ -4,14 +4,15 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.joda.time.DateTime;
 
-import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
+import javax.inject.Inject;
 
 /**
  * Created by David MG on 30/08/2016.
@@ -56,7 +57,7 @@ public class DatabaseCall implements AutoCloseable {
     }
 
     @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-        justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
+            justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
     public DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws Database.DatabaseException {
 
         this.paramCount = numberOfParams;
@@ -129,7 +130,38 @@ public class DatabaseCall implements AutoCloseable {
         return this;
     }
 
+    public DatabaseCall add(long param) throws Database.DatabaseException {
+        checkPosition();
+        try {
+            this.statement.setLong(++this.paramSetIndex, param);
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+        return this;
+    }
+
+    public DatabaseCall add(DateTime param) throws Database.DatabaseException {
+        checkPosition();
+        try {
+            this.statement.setDate(++this.paramSetIndex, new java.sql.Date(param.getMillis()));
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+        return this;
+    }
+
+    public DatabaseCall add(int param) throws Database.DatabaseException {
+        checkPosition();
+        try {
+            this.statement.setInt(++this.paramSetIndex, param);
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+        return this;
+    }
+
     @Override
+    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     public void close() {
         try {
             if ((null != this.statement) && (!this.statement.isClosed())) {
@@ -157,40 +189,11 @@ public class DatabaseCall implements AutoCloseable {
         return this.pool.borrowConnection();
     }
 
-    DatabaseCall add(int param) throws Database.DatabaseException {
-        checkPosition();
-        try {
-            this.statement.setInt(++this.paramSetIndex, param);
-        } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
-        }
-        return this;
-    }
-
-    DatabaseCall add(long param) throws Database.DatabaseException {
-        checkPosition();
-        try {
-            this.statement.setLong(++this.paramSetIndex, param);
-        } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
-        }
-        return this;
-    }
-
     DatabaseCall addTimestamp() throws Database.DatabaseException {
         return add(DateTime.now());
     }
 
-    DatabaseCall add(DateTime param) throws Database.DatabaseException {
-        checkPosition();
-        try {
-            this.statement.setDate(++this.paramSetIndex, new java.sql.Date(param.getMillis()));
-        } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
-        }
-        return this;
-    }
-
+    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     protected void closeConnection() {
         if (null != this.connection) {
             try {

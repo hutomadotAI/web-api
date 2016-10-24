@@ -9,8 +9,8 @@ public class ApiAiList extends ApiResult {
 
     List<ApiAi> ai_list;
 
-    public ApiAiList(List<ApiAi> ai_list) {
-        this.ai_list = ai_list;
+    public ApiAiList(List<ApiAi> aiList) {
+        this.ai_list = aiList;
     }
 
     public List<ApiAi> getAiList() {

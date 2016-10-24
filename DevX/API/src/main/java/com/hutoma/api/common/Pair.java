@@ -7,19 +7,23 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * Created by pedrotei on 06/10/16.
  */
 public class Pair<A, B> {
-    /** The first part. */
+    /**
+     * The first part.
+     */
     private final A a;
-    /** The second part. */
+    /**
+     * The second part.
+     */
     private final B b;
 
     /**
      * Ctor.
-     * @param a the first part
-     * @param b the second part
+     * @param partA the first part
+     * @param partB the second part
      */
-    public Pair(A a, B b) {
-        this.a = a;
-        this.b = b;
+    public Pair(A partA, B partB) {
+        this.a = partA;
+        this.b = partB;
     }
 
     /**
@@ -32,16 +36,13 @@ public class Pair<A, B> {
     }
 
     /**
-     * Gets whether the pair are equal or not.
-     * @param other the other pair to compare to
-     * @return whether the pair are equal or not
+     * Checks for equality.
+     * @param o1 the first object
+     * @param o2 the second object
+     * @return whether the objects are equal or not
      */
-    public boolean equals(Object other) {
-        if (!(other instanceof Pair)) {
-            return false;
-        }
-        Pair<?,?> e = (Pair<?,?>)other;
-        return eq(a, e.getA()) && eq(b, e.getB());
+    private static boolean eq(Object o1, Object o2) {
+        return o1 == null ? o2 == null : o1.equals(o2);
     }
 
     /**
@@ -68,12 +69,15 @@ public class Pair<A, B> {
     }
 
     /**
-     * Checks for equality.
-     * @param o1 the first object
-     * @param o2 the second object
-     * @return whether the objects are equal or not
+     * Gets whether the pair are equal or not.
+     * @param other the other pair to compare to
+     * @return whether the pair are equal or not
      */
-    private static boolean eq(Object o1, Object o2) {
-        return o1 == null ? o2 == null : o1.equals(o2);
+    public boolean equals(Object other) {
+        if (!(other instanceof Pair)) {
+            return false;
+        }
+        Pair<?, ?> castedOther = (Pair<?, ?>) other;
+        return eq(this.a, castedOther.getA()) && eq(this.b, castedOther.getB());
     }
 }

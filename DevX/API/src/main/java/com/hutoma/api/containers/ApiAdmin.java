@@ -5,11 +5,11 @@ package com.hutoma.api.containers;
  */
 public class ApiAdmin extends ApiResult {
 
-    String dev_token;
-    String devid;
+    private final String dev_token;
+    private final String devid;
 
-    public ApiAdmin(String dev_token, String devid) {
-        this.dev_token = dev_token;
+    public ApiAdmin(String devToken, String devid) {
+        this.dev_token = devToken;
         this.devid = devid;
     }
 

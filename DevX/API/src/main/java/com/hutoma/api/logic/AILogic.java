@@ -55,7 +55,7 @@ public class AILogic {
             String devid,
             String name,
             String description,
-            boolean is_private,
+            boolean isPrivate,
             int personality,
             double confidence,
             int voice,
@@ -64,7 +64,7 @@ public class AILogic {
         try {
             this.logger.logDebug(LOGFROM, "request to create new ai from " + devid);
 
-            String encoding_key = this.config.getEncodingKey();
+            String encodingKey = this.config.getEncodingKey();
             UUID aiUUID = this.tools.createNewRandomUUID();
 
             String token = Jwts.builder()
@@ -72,7 +72,7 @@ public class AILogic {
                     .claim("AIID", aiUUID)
                     .setSubject(devid)
                     .compressWith(CompressionCodecs.DEFLATE)
-                    .signWith(SignatureAlgorithm.HS256, encoding_key)
+                    .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
             if (!this.database.createAI(
@@ -80,7 +80,7 @@ public class AILogic {
                     name,
                     description,
                     devid,
-                    is_private,
+                    isPrivate,
                     DEEP_LEARNING_ERROR,
                     DEEP_LEARNING_STATUS,
                     DEFAULT_WNET_ERROR,
@@ -107,7 +107,7 @@ public class AILogic {
             String devid,
             UUID aiid,
             String description,
-            boolean is_private,
+            boolean isPrivate,
             int personality,
             double confidence,
             int voice,
@@ -120,7 +120,7 @@ public class AILogic {
                     devid,
                     aiid,
                     description,
-                    is_private,
+                    isPrivate,
                     language,
                     timezone,
                     confidence,

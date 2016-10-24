@@ -8,11 +8,11 @@ import java.util.UUID;
  */
 public class ApiIntentList extends ApiResult {
 
-    private List<String> intent_name;
-    private UUID aiid;
+    private final List<String> intent_name;
+    private final UUID aiid;
 
-    public ApiIntentList(UUID aiid, List<String> intent_name) {
-        this.intent_name = intent_name;
+    public ApiIntentList(UUID aiid, List<String> intentName) {
+        this.intent_name = intentName;
         this.aiid = aiid;
     }
 

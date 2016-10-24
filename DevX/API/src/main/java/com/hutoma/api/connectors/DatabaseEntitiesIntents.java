@@ -23,7 +23,8 @@ import javax.inject.Provider;
 public class DatabaseEntitiesIntents extends Database {
 
     @Inject
-    public DatabaseEntitiesIntents(Logger logger, Provider<DatabaseCall> callProvider, Provider<DatabaseTransaction> transactionProvider) {
+    public DatabaseEntitiesIntents(Logger logger, Provider<DatabaseCall> callProvider,
+                                   Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
     }
 
@@ -101,7 +102,8 @@ public class DatabaseEntitiesIntents extends Database {
     public ApiIntent getIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
 
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 3).add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 3).add(devid).add(aiid).add(intentName)
+                    .executeQuery();
             if (!rs.next()) {
                 // the intent was not found at all
                 return null;
@@ -130,7 +132,8 @@ public class DatabaseEntitiesIntents extends Database {
             while (varRs.next()) {
                 int varID = varRs.getInt("id");
                 IntentVariable variable = new IntentVariable(
-                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"), varRs.getString("value"));
+                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"),
+                        varRs.getString("value"));
 
                 // for each variable get all its prompts
                 ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
@@ -214,7 +217,8 @@ public class DatabaseEntitiesIntents extends Database {
 
             // add or update the intent
             transaction.getDatabaseCall().initialise("addUpdateIntent", 6)
-                    .add(devid).add(aiid).add(intentName).add(intent.getIntentName()).add(intent.getTopicIn()).add(intent.getTopicOut())
+                    .add(devid).add(aiid).add(intentName).add(intent.getIntentName())
+                    .add(intent.getTopicIn()).add(intent.getTopicOut())
                     .executeUpdate();
 
             // synchronise user says (change as needed)
@@ -256,7 +260,8 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentUserSays(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction) throws DatabaseException, SQLException {
+    private void updateIntentUserSays(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
+            throws DatabaseException, SQLException {
 
         // read current
         ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
@@ -294,7 +299,8 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentResponses(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction) throws DatabaseException, SQLException {
+    private void updateIntentResponses(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
+            throws DatabaseException, SQLException {
         // read current
         ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
                 .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
@@ -331,7 +337,8 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentVariables(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction) throws DatabaseException, SQLException {
+    private void updateIntentVariables(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
+            throws DatabaseException, SQLException {
 
         // read the existing intent variables from the database
         ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
@@ -373,7 +380,9 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void intentVariableCreateOrUpdate(DatabaseTransaction transaction, String devid, UUID aiid, ApiIntent intent, IntentVariable intentVariable) throws DatabaseException, SQLException {
+    private void intentVariableCreateOrUpdate(DatabaseTransaction transaction, String devid, UUID aiid,
+                                              ApiIntent intent, IntentVariable intentVariable)
+            throws DatabaseException, SQLException {
 
         // generate the call params
         ResultSet updateVarRs = transaction.getDatabaseCall().initialise("addUpdateIntentVariable", 7)
@@ -428,7 +437,8 @@ public class DatabaseEntitiesIntents extends Database {
      * @param variable
      * @throws DatabaseException
      */
-    private void intentVariableDeleteOld(DatabaseTransaction transaction, String devid, UUID aiid, ApiIntent intent, IntentVariable variable) throws DatabaseException {
+    private void intentVariableDeleteOld(DatabaseTransaction transaction, String devid, UUID aiid,
+                                         ApiIntent intent, IntentVariable variable) throws DatabaseException {
         transaction.getDatabaseCall().initialise("deleteIntentVariable", 3)
                 .add(devid).add(aiid).add(variable.getId())
                 .executeUpdate();

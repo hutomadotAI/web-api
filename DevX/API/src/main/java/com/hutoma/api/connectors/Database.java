@@ -36,7 +36,8 @@ public class Database {
     protected Provider<DatabaseTransaction> transactionProvider;
 
     @Inject
-    public Database(Logger logger, Provider<DatabaseCall> callProvider, Provider<DatabaseTransaction> transactionProvider) {
+    public Database(Logger logger, Provider<DatabaseCall> callProvider,
+                    Provider<DatabaseTransaction> transactionProvider) {
         this.logger = logger;
         this.callProvider = callProvider;
         this.transactionProvider = transactionProvider;
@@ -64,9 +65,13 @@ public class Database {
         return trainingStatus;
     }
 
-    public boolean createDev(final String username, final String email, final String password, final String passwordSalt, final String first_name, final String last_name, final String dev_token, final int plan_id, final String dev_id, final String client_token) throws DatabaseException {
+    public boolean createDev(final String username, final String email, final String password,
+                             final String passwordSalt, final String firstName, final String lastName,
+                             final String devToken, final int planId, final String devId, final String clientToken)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt).add(first_name).add(last_name).add(dev_token).add(plan_id).add(dev_id).add(client_token);
+            call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt)
+                    .add(firstName).add(lastName).add(devToken).add(planId).add(devId).add(clientToken);
             return call.executeUpdate() > 0;
         }
     }
@@ -93,8 +98,8 @@ public class Database {
     }
 
     public boolean createAI(final UUID aiid, final String name, final String description, final String devid,
-                            final boolean is_private, final double deep_learning_error, final int deep_learning_status,
-                            final int shallow_learning_status, final TrainingStatus status, final String client_token,
+                            final boolean isPrivate, final double deepLearningError, final int deepLearningStatus,
+                            final int shallowLearningStatus, final TrainingStatus status, final String clientToken,
                             final String trainingFile, final Locale language, final String timezoneString,
                             final double confidence, final int personality, final int voice)
             throws DatabaseException {
@@ -104,12 +109,12 @@ public class Database {
                     .add(name)
                     .add(description)
                     .add(devid)
-                    .add(is_private)
-                    .add(deep_learning_error)
-                    .add(deep_learning_status)
-                    .add(shallow_learning_status)
+                    .add(isPrivate)
+                    .add(deepLearningError)
+                    .add(deepLearningStatus)
+                    .add(shallowLearningStatus)
                     .add(status.value())
-                    .add(client_token)
+                    .add(clientToken)
                     .add(trainingFile)
                     .add(language == null ? null : language.toLanguageTag())
                     .add(timezoneString)
@@ -120,7 +125,7 @@ public class Database {
         }
     }
 
-    public boolean updateAI(final String devId, final UUID aiid, final String description, final boolean is_private,
+    public boolean updateAI(final String devId, final UUID aiid, final String description, final boolean isPrivate,
                             final Locale language, final String timezoneString, final double confidence,
                             final int personality, final int voice)
             throws DatabaseException {
@@ -129,7 +134,7 @@ public class Database {
                     .add(aiid)
                     .add(description)
                     .add(devId)
-                    .add(is_private)
+                    .add(isPrivate)
                     .add(language == null ? null : language.toLanguageTag())
                     .add(timezoneString)
                     .add(confidence)
@@ -209,9 +214,9 @@ public class Database {
         }
     }
 
-    public boolean isNeuralNetworkServerActive(final String dev_id, final UUID aiid) throws DatabaseException {
+    public boolean isNeuralNetworkServerActive(final String devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAiActive", 2).add(aiid).add(dev_id);
+            call.initialise("getAiActive", 2).add(aiid).add(devId);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
@@ -224,10 +229,11 @@ public class Database {
         }
     }
 
-    public long insertNeuralNetworkQuestion(final String dev_id, final UUID chatId, final UUID aiid, final String q) throws DatabaseException {
+    public long insertNeuralNetworkQuestion(final String devId, final UUID chatId, final UUID aiid,
+                                            final String question) throws DatabaseException {
 
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("insertQuestion", 4).add(dev_id).add(chatId).add(aiid).add(q);
+            call.initialise("insertQuestion", 4).add(devId).add(chatId).add(aiid).add(question);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
@@ -262,15 +268,17 @@ public class Database {
         }
     }
 
-    public RateLimitStatus checkRateLimit(final String dev_id, final String rateKey, final double burst, final double frequency) throws DatabaseException {
+    public RateLimitStatus checkRateLimit(final String devId, final String rateKey, final double burst,
+                                          final double frequency) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("rate_limit_check", 4).add(dev_id).add(rateKey).add(burst).add(frequency);
+            call.initialise("rate_limit_check", 4).add(devId).add(rateKey).add(burst).add(frequency);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
                     return new RateLimitStatus(rs.getBoolean("rate_limit"), rs.getFloat("tokens"));
                 }
-                throw new DatabaseException(new Exception("stored proc should have returned a row but it returned none"));
+                throw new DatabaseException(
+                        new Exception("stored proc should have returned a row but it returned none"));
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
@@ -302,7 +310,8 @@ public class Database {
         }
     }
 
-    public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId, final JsonSerializer jsonSerializer)
+    public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId,
+                                                      final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);

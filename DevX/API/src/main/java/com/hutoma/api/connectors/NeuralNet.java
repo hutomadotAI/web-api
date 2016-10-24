@@ -4,8 +4,8 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 
-import javax.inject.Inject;
 import java.util.UUID;
+import javax.inject.Inject;
 
 /**
  * Created by David MG on 08/08/2016.
@@ -15,11 +15,11 @@ public class NeuralNet {
     private static final String LOGFROM = "neuralnetconnector";
     static long POLLEVERY = 1000;   // hard-coded to one second
     private final int RNNRESET = 0;
-    private Database database;
-    private MessageQueue messageQueue;
-    private Logger logger;
-    private Config config;
-    private Tools tools;
+    private final Database database;
+    private final MessageQueue messageQueue;
+    private final Logger logger;
+    private final Config config;
+    private final Tools tools;
     private long startTime;
     private long qid = 0;
 
@@ -33,14 +33,14 @@ public class NeuralNet {
     }
 
     // Neural Network Query
-    public void startAnswerRequest(String dev_id, UUID aiid, UUID chatId, String q) throws NeuralNetException {
+    public void startAnswerRequest(String devId, UUID aiid, UUID chatId, String question) throws NeuralNetException {
 
         this.startTime = this.tools.getTimestamp();
 
         // if the RNN network is not active, then push a message to get it activated
         try {
-            if (!this.database.isNeuralNetworkServerActive(dev_id, aiid)) {
-                this.messageQueue.pushMessageStartRNN(dev_id, aiid);
+            if (!this.database.isNeuralNetworkServerActive(devId, aiid)) {
+                this.messageQueue.pushMessageStartRNN(devId, aiid);
             }
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "failed to check/start server " + e.toString());
@@ -48,7 +48,7 @@ public class NeuralNet {
         }
 
         try {
-            this.qid = this.database.insertNeuralNetworkQuestion(dev_id, chatId, aiid, q);
+            this.qid = this.database.insertNeuralNetworkQuestion(devId, chatId, aiid, question);
         } catch (Database.DatabaseException e) {
             throw new NeuralNetException(e);
         }

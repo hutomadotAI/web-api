@@ -6,15 +6,18 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.MessageQueue;
-import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
+
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
@@ -62,7 +67,8 @@ public class TrainingLogic {
         this.memoryIntentHandler = memoryIntentHandler;
     }
 
-    public ApiResult uploadFile(SecurityContext securityContext, String devid, UUID aiid, int type, String url, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+    public ApiResult uploadFile(SecurityContext securityContext, String devid, UUID aiid, int type, String url,
+                                InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 
         ArrayList<String> source;
 
@@ -89,7 +95,7 @@ public class TrainingLogic {
                     }
 
                     return new ApiResult().setSuccessStatus("upload accepted",
-                        result.getEventCount() == 0 ? null : result.getEvents());
+                            result.getEventCount() == 0 ? null : result.getEvents());
 
                 // 1 = training file is a document
                 case 1:
@@ -139,6 +145,8 @@ public class TrainingLogic {
             try {
                 uploadedInputStream.close();
             } catch (Throwable ignore) {
+                // Log an error since this can cause excessive open handles
+                this.logger.logError(LOGFROM, "error closing file");
             }
         }
     }
@@ -157,7 +165,8 @@ public class TrainingLogic {
     }
 
     /**
-     * Submit a training request to SQS only if the training file is avaialable or a previous valid training session was stopped.
+     * Submit a training request to SQS only if the training file is avaialable or a previous
+     * valid training session was stopped.
      * In all other cases we return an error
      * @param securityContext
      * @param devid
@@ -183,7 +192,8 @@ public class TrainingLogic {
                 case QUEUED:
                     return ApiError.getBadRequest("A training session is already queued.");
                 case STOPPED_MAX_TIME:
-                    return ApiError.getBadRequest("You reached the maximum allocated time to train your AI. Please upgrade your subscription.");
+                    return ApiError.getBadRequest("You reached the maximum allocated time to train your AI. "
+                            + "Please upgrade your subscription.");
                 default:
                     return ApiError.getBadRequest("Malformed training file. Training could not be started.");
             }
@@ -220,7 +230,8 @@ public class TrainingLogic {
     }
 
     /**
-     * An update to an existing training session means we will have to delete any existing neural network and start from scratch.
+     * An update to an existing training session means we will have to delete any existing neural
+     * network and start from scratch.
      * @param securityContext
      * @param devid
      * @param aiid
@@ -243,7 +254,8 @@ public class TrainingLogic {
                     this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                     return new ApiResult().setSuccessStatus("Training session updated.");
                 default:
-                    this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:" + aiid.toString() + " devid:" + devid);
+                    this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:"
+                            + aiid.toString() + " devid:" + devid);
                     return ApiError.getInternalServerError("Impossible to update the current training session.");
 
             }
@@ -327,7 +339,11 @@ public class TrainingLogic {
         }
     }
 
-    void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize) throws UploadTooLargeException {
+    public static class UploadTooLargeException extends Exception {
+    }
+
+    void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize)
+            throws UploadTooLargeException {
         if (null != fileDetail) {
             if (fileDetail.getSize() > maxUploadFileSize) {
                 throw new UploadTooLargeException();
@@ -373,7 +389,7 @@ public class TrainingLogic {
             if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
                 lastHumanSentence = currentSentence;
                 validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
-                    lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
+                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
             } else {
                 // and we list the sentence
                 validConversation.add(currentSentence);
@@ -420,7 +436,8 @@ public class TrainingLogic {
      * @throws UploadTooLargeException
      * @throws IOException
      */
-    ArrayList<String> getFile(long maxUploadSize, InputStream uploadedInputStream) throws UploadTooLargeException, IOException {
+    ArrayList<String> getFile(long maxUploadSize, InputStream uploadedInputStream)
+            throws UploadTooLargeException, IOException {
 
         ArrayList<String> source = new ArrayList<>();
         long fileSize = 0;
@@ -446,8 +463,5 @@ public class TrainingLogic {
             }
         }
         return source;
-    }
-
-    public static class UploadTooLargeException extends Exception {
     }
 }

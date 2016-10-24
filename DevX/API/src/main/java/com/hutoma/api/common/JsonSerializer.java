@@ -1,7 +1,14 @@
 package com.hutoma.api.common;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -16,31 +23,31 @@ import java.util.List;
  */
 public class JsonSerializer {
 
-    private Gson gson;
+    private final Gson gson;
 
     public JsonSerializer() {
         this.gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeAdapter(DateTime.class, new com.google.gson.JsonSerializer<DateTime>() {
-                @Override
-                public JsonElement serialize(DateTime json, Type typeOfSrc, JsonSerializationContext context) {
-                    return new JsonPrimitive(ISODateTimeFormat.dateTime().print(json));
-                }
-            })
-            .create();
+                .setPrettyPrinting()
+                .registerTypeAdapter(DateTime.class, new com.google.gson.JsonSerializer<DateTime>() {
+                    @Override
+                    public JsonElement serialize(DateTime json, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(ISODateTimeFormat.dateTime().print(json));
+                    }
+                })
+                .create();
     }
 
-    public String serialize(Object o) {
-        return this.gson.toJson(o);
+    public String serialize(Object obj) {
+        return this.gson.toJson(obj);
     }
 
     public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
         try {
-            Object o = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
-            if (null == o) {
+            Object obj = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
+            if (null == obj) {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
-            return o;
+            return obj;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }
@@ -48,11 +55,11 @@ public class JsonSerializer {
 
     public Object deserialize(String content, Class resultClass) throws JsonParseException {
         try {
-            Object o = this.gson.fromJson(content, resultClass);
-            if (null == o) {
+            Object obj = this.gson.fromJson(content, resultClass);
+            if (null == obj) {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
-            return o;
+            return obj;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }

@@ -12,21 +12,6 @@ import javax.inject.Singleton;
 @Singleton
 public class Logger implements ILogger {
 
-    protected void logOutput(Level level, String fromLabel, String logComment) {
-        DateTimeFormatter dateFormat = DateTimeFormat.mediumDateTime();
-        DateTime dateTime = new DateTime();
-
-        if ((null == fromLabel) || fromLabel.isEmpty()) {
-            fromLabel = "none";
-        }
-
-        if ((null == logComment) || logComment.isEmpty()) {
-            logComment = "";
-        }
-
-        System.out.println(dateFormat.print(dateTime) + " HU:API " + level.toString() + " [" + fromLabel + "] " + logComment);
-    }
-
     public void logDebug(String fromLabel, String logComment) {
         logOutput(Level.DEBUG, fromLabel, logComment);
     }
@@ -51,5 +36,21 @@ public class Logger implements ILogger {
         INFO,
         WARNING,
         ERROR,
+    }
+
+    protected void logOutput(Level level, String fromLabel, String logComment) {
+        DateTimeFormatter dateFormat = DateTimeFormat.mediumDateTime();
+        DateTime dateTime = new DateTime();
+
+        if ((null == fromLabel) || fromLabel.isEmpty()) {
+            fromLabel = "none";
+        }
+
+        if ((null == logComment) || logComment.isEmpty()) {
+            logComment = "";
+        }
+
+        System.out.println(dateFormat.print(dateTime) + " HU:API " + level.toString() + " [" + fromLabel
+                + "] " + logComment);
     }
 }

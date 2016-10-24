@@ -8,6 +8,8 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.validation.ParameterFilter;
 
+import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -16,8 +18,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
 
 @RateLimit
 @Provider
@@ -56,11 +56,12 @@ public class RateLimitCheck implements ContainerRequestFilter {
             switch (rateKey) {
                 case Chat:
                     checkRateLimitReached(devid, rateKey,
-                        this.config.getRateLimit_Chat_BurstRequests(), this.config.getRateLimit_Chat_Frequency());
+                            this.config.getRateLimit_Chat_BurstRequests(), this.config.getRateLimit_Chat_Frequency());
                     break;
                 case QuickRead:
                     checkRateLimitReached(devid, rateKey,
-                        this.config.getRateLimit_QuickRead_BurstRequests(), this.config.getRateLimit_QuickRead_Frequency());
+                            this.config.getRateLimit_QuickRead_BurstRequests(),
+                            this.config.getRateLimit_QuickRead_Frequency());
                     break;
                 case None:
                 default:
@@ -97,13 +98,16 @@ public class RateLimitCheck implements ContainerRequestFilter {
      * @throws Database.DatabaseException if db call fails
      * @throws RateLimitedException if we should fail the call due to limiting
      */
-    private void checkRateLimitReached(String devid, RateKey rateKey, double burst, double frequency) throws Database.DatabaseException, RateLimitedException {
+    private void checkRateLimitReached(String devid, RateKey rateKey, double burst, double frequency)
+            throws Database.DatabaseException, RateLimitedException {
         RateLimitStatus rateLimitStatus = this.database.checkRateLimit(devid, rateKey.toString(), burst, frequency);
         if (rateLimitStatus.isRateLimited()) {
             long blockedFor = Math.round(1000.0d * (1.0d - rateLimitStatus.getTokens()) * frequency);
-            throw new RateLimitedException(devid + " hit limit on " + rateKey.toString() + ". BLOCKED for the next " + blockedFor + "ms.");
+            throw new RateLimitedException(devid + " hit limit on " + rateKey.toString() + ". BLOCKED for the next "
+                    + blockedFor + "ms.");
         }
-        this.logger.logDebug(LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens() + " tokens remaining.");
+        this.logger.logDebug(LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens()
+                + " tokens remaining.");
     }
 
     /***

@@ -20,6 +20,20 @@ public class MemoryIntent {
     private boolean isFulfilled;
 
     /**
+     * Ctor.
+     * @param name the intent name
+     * @param aiid the AI ID
+     * @param chatId the Chat ID
+     * @param variables the list of memory variables
+     */
+    public MemoryIntent(final String name, final UUID aiid, final UUID chatId, final List<MemoryVariable> variables) {
+        this.name = name;
+        this.aiid = aiid;
+        this.chatId = chatId;
+        this.variables = variables;
+    }
+
+    /**
      * Gets the AI ID.
      * @return the AI ID
      */
@@ -40,7 +54,8 @@ public class MemoryIntent {
      * @return the list of all unfulfilled mandatory variables
      */
     public List<MemoryVariable> getUnfulfilledVariables() {
-        return variables.stream().filter(v -> v.isMandatory() && v.getCurrentValue() == null).collect(Collectors.toList());
+        return variables.stream().filter(v -> v.isMandatory() && v.getCurrentValue() == null)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -64,20 +79,6 @@ public class MemoryIntent {
                 variable.setCurrentValue(entity.getB());
             }
         }
-    }
-
-    /**
-     * Ctor.
-     * @param name the intent name
-     * @param aiid the AI ID
-     * @param chatId the Chat ID
-     * @param variables the list of memory variables
-     */
-    public MemoryIntent(final String name, final UUID aiid, final UUID chatId, final List<MemoryVariable> variables) {
-        this.name = name;
-        this.aiid = aiid;
-        this.chatId = chatId;
-        this.variables = variables;
     }
 
     /**

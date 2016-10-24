@@ -28,38 +28,40 @@ public class DatabaseConnectionPool {
         this.logger = logger;
         this.maxActiveConnections = config.getDatabaseConnectionPoolMaximumSize();
 
-        PoolProperties p = new PoolProperties();
-        p.setUrl(config.getDatabaseConnectionString());
-        p.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        p.setJmxEnabled(true);
-        p.setTestWhileIdle(true);
-        p.setTestOnBorrow(false);
-        p.setValidationQuery("SELECT 1");
-        p.setTestOnReturn(true);
-        p.setValidationInterval(30000);
-        p.setTimeBetweenEvictionRunsMillis(30000);
-        p.setMaxActive(this.maxActiveConnections);
-        p.setMaxIdle(config.getDatabaseConnectionPoolMaximumSize());
-        p.setInitialSize(config.getDatabaseConnectionPoolMinimumSize());
-        p.setMinIdle(config.getDatabaseConnectionPoolMinimumSize());
-        p.setMaxWait(10000);
-        p.setRemoveAbandonedTimeout(60);
-        p.setMinEvictableIdleTimeMillis(30000);
-        p.setLogAbandoned(false);
-        p.setRemoveAbandoned(true);
-        p.setJdbcInterceptors(
-                "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
-                        "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
-        p.setDefaultAutoCommit(true);
+        PoolProperties poolProperties = new PoolProperties();
+        poolProperties.setUrl(config.getDatabaseConnectionString());
+        poolProperties.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        poolProperties.setJmxEnabled(true);
+        poolProperties.setTestWhileIdle(true);
+        poolProperties.setTestOnBorrow(false);
+        poolProperties.setValidationQuery("SELECT 1");
+        poolProperties.setTestOnReturn(true);
+        poolProperties.setValidationInterval(30000);
+        poolProperties.setTimeBetweenEvictionRunsMillis(30000);
+        poolProperties.setMaxActive(this.maxActiveConnections);
+        poolProperties.setMaxIdle(config.getDatabaseConnectionPoolMaximumSize());
+        poolProperties.setInitialSize(config.getDatabaseConnectionPoolMinimumSize());
+        poolProperties.setMinIdle(config.getDatabaseConnectionPoolMinimumSize());
+        poolProperties.setMaxWait(10000);
+        poolProperties.setRemoveAbandonedTimeout(60);
+        poolProperties.setMinEvictableIdleTimeMillis(30000);
+        poolProperties.setLogAbandoned(false);
+        poolProperties.setRemoveAbandoned(true);
+        poolProperties.setJdbcInterceptors(
+                "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
+                        + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+        poolProperties.setDefaultAutoCommit(true);
         this.dataSource = new DataSource();
-        this.dataSource.setPoolProperties(p);
+        this.dataSource.setPoolProperties(poolProperties);
     }
 
     public Connection borrowConnection() throws Database.DatabaseException {
         int activeConnections = this.dataSource.getActive();
-        this.logger.logDebug(LOGFROM, "idle/active/maxactive " + this.dataSource.getIdle() + "/" + activeConnections + "/" + this.maxActiveConnections);
+        this.logger.logDebug(LOGFROM, "idle/active/maxactive " + this.dataSource.getIdle() + "/"
+                + activeConnections + "/" + this.maxActiveConnections);
         if ((activeConnections + 1) >= this.maxActiveConnections) {
-            this.logger.logWarning(LOGFROM, "reached maximum number of active connections: " + this.maxActiveConnections);
+            this.logger.logWarning(LOGFROM, "reached maximum number of active connections: "
+                    + this.maxActiveConnections);
         }
         try {
             return this.dataSource.getConnection();

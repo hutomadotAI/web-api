@@ -9,15 +9,15 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 
-import javax.inject.Inject;
 import java.util.UUID;
+import javax.inject.Inject;
 
 
 public class MessageQueue {
 
     private static final String LOGFROM = "messagequeue";
-    private Config config;
-    private Logger logger;
+    private final Config config;
+    private final Logger logger;
 
     @Inject
     public MessageQueue(Config config, Logger logger) {
@@ -42,11 +42,14 @@ public class MessageQueue {
     }
 
     public void pushMessagePreprocessTrainingText(String devid, UUID aiid) throws MessageQueueException {
-        pushMessage(this.config.getQuestionGeneratorQueue(), AwsMessage.preprocess_training_text + "|" + devid + "|" + aiid.toString());
+        pushMessage(this.config.getQuestionGeneratorQueue(), AwsMessage.preprocess_training_text + "|" + devid + "|"
+                + aiid.toString());
     }
 
-    public void pushMessageClusterSplit(String devid, UUID aiid, double clusterMinProbability) throws MessageQueueException {
-        pushMessage(this.config.getCoreQueue(), AwsMessage.cluster_split + "|" + devid + "|" + aiid.toString() + "|" + clusterMinProbability);
+    public void pushMessageClusterSplit(String devid, UUID aiid, double clusterMinProbability)
+            throws MessageQueueException {
+        pushMessage(this.config.getCoreQueue(), AwsMessage.cluster_split + "|" + devid + "|" + aiid.toString() + "|"
+                + clusterMinProbability);
     }
 
     public void pushMessageDeleteTraining(String devid, UUID aiid) throws MessageQueueException {
@@ -54,31 +57,11 @@ public class MessageQueue {
     }
 
     public void pushMessageStopTraining(String devid, UUID aiid) throws MessageQueueException {
-        pushMessage(this.config.getCoreQueue(),AwsMessage.stop_training + "|" + devid + "|" + aiid.toString());
+        pushMessage(this.config.getCoreQueue(), AwsMessage.stop_training + "|" + devid + "|" + aiid.toString());
     }
 
     public void pushMessageUpdateTraining(String devid, UUID aiid) throws MessageQueueException {
-        pushMessage(this.config.getCoreQueue(),AwsMessage.update_training+ "|" + devid + "|" + aiid.toString());
-    }
-    protected void pushMessage(String queue, String message) throws MessageQueueException {
-        AWSCredentials credentials = null;
-        try {
-            credentials = new ProfileCredentialsProvider().getCredentials();
-        } catch (Exception e) {
-            this.logger.logError(LOGFROM, "getCredentials error " + e.toString());
-            throw new MessageQueueException(e);
-        }
-
-        AmazonSQS sqs = new AmazonSQSClient(credentials);
-        Region targetRegion = Region.getRegion(this.config.getMessageQueueRegion());
-        sqs.setRegion(targetRegion);
-
-        try {
-            sqs.sendMessage(new SendMessageRequest(queue, message));
-        } catch (Exception e) {
-            this.logger.logError(LOGFROM, "sendMessage error " + e.toString());
-            throw new MessageQueueException(e);
-        }
+        pushMessage(this.config.getCoreQueue(), AwsMessage.update_training + "|" + devid + "|" + aiid.toString());
     }
 
     public enum AwsMessage {
@@ -101,6 +84,27 @@ public class MessageQueue {
 
         public MessageQueueException(Throwable cause) {
             super(cause);
+        }
+    }
+
+    protected void pushMessage(String queue, String message) throws MessageQueueException {
+        AWSCredentials credentials = null;
+        try {
+            credentials = new ProfileCredentialsProvider().getCredentials();
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, "getCredentials error " + e.toString());
+            throw new MessageQueueException(e);
+        }
+
+        AmazonSQS sqs = new AmazonSQSClient(credentials);
+        Region targetRegion = Region.getRegion(this.config.getMessageQueueRegion());
+        sqs.setRegion(targetRegion);
+
+        try {
+            sqs.sendMessage(new SendMessageRequest(queue, message));
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, "sendMessage error " + e.toString());
+            throw new MessageQueueException(e);
         }
     }
 

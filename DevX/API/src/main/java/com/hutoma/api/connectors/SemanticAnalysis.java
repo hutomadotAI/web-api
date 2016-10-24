@@ -7,21 +7,21 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
 import io.mikael.urlbuilder.UrlBuilder;
 
+import java.util.UUID;
+import java.util.concurrent.Future;
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
-import java.util.UUID;
-import java.util.concurrent.Future;
 
 /**
  * Created by David MG on 08/08/2016.
  */
 public class SemanticAnalysis {
 
-    private Config config;
-    private Logger logger;
-    private JsonSerializer serializer;
-    private Tools tools;
+    private final Config config;
+    private final Logger logger;
+    private final JsonSerializer serializer;
+    private final Tools tools;
     private Future<Response> responseFuture;
 
     @Inject
@@ -32,18 +32,19 @@ public class SemanticAnalysis {
         this.tools = tools;
     }
 
-    public void startAnswerRequest(String devid, UUID aiid, UUID chatId, String topic, String history, String q, float min_p) throws SemanticAnalysisException {
+    public void startAnswerRequest(String devid, UUID aiid, UUID chatId, String topic, String history,
+                                   String question, float minP) throws SemanticAnalysisException {
         UrlBuilder url = UrlBuilder.fromString(this.config.getWNetServer())
-            .addParameter("q", q)
-            .addParameter("aiid", aiid.toString())
-            .addParameter("dev_id", devid)
-            .addParameter("uid", chatId.toString())
-            .addParameter("min_p", Float.toString(min_p))
-            .addParameter("multiprocess", "yes")
-            .addParameter("nproc", "8")
-            .addParameter("topic", topic)
-            .addParameter("nproc", this.config.getWnetNumberOfCPUS())
-            .addParameter("history", history);
+                .addParameter("q", question)
+                .addParameter("aiid", aiid.toString())
+                .addParameter("dev_id", devid)
+                .addParameter("uid", chatId.toString())
+                .addParameter("min_p", Float.toString(minP))
+                .addParameter("multiprocess", "yes")
+                .addParameter("nproc", "8")
+                .addParameter("topic", topic)
+                .addParameter("nproc", this.config.getWnetNumberOfCPUS())
+                .addParameter("history", history);
         this.responseFuture = ClientBuilder.newClient().target(url.toString()).request().async().get();
     }
 

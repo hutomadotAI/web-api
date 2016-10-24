@@ -32,7 +32,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
 
     @Inject
-    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents database, final ILogger logger) {
+    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents database,
+                               final ILogger logger) {
         this.logger = logger;
         this.database = database;
         this.jsonSerializer = jsonSerializer;
@@ -41,11 +42,12 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     /**
      * {@inheritDoc}
      */
-    public MemoryIntent parseAiResponseForIntent(final String devid, final UUID aiid, final UUID chatId, final String response) {
+    public MemoryIntent parseAiResponseForIntent(final String devid, final UUID aiid, final UUID chatId,
+                                                 final String response) {
         if (response.trim().startsWith(META_INTENT_TAG)) {
-            Matcher m = META_INTEG_PATTERN.matcher(response);
-            if (m.find()) {
-                String intentName = m.group(1);
+            Matcher matcher = META_INTEG_PATTERN.matcher(response);
+            if (matcher.find()) {
+                String intentName = matcher.group(1);
                 return this.loadIntentForAi(devid, aiid, chatId, intentName);
             }
         }
@@ -95,11 +97,12 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
                     ApiEntity apiEntity = this.database.getEntity(devid, intentVar.getEntityName());
-                    MemoryVariable v = new MemoryVariable(intentVar.getEntityName(), apiEntity.getEntityValueList());
-                    v.setPrompts(intentVar.getPrompts());
-                    v.setIsMandatory(intentVar.isRequired());
-                    v.setTimesPrompted(intentVar.getNumPrompts());
-                    variables.add(v);
+                    MemoryVariable variable = new MemoryVariable(intentVar.getEntityName(),
+                            apiEntity.getEntityValueList());
+                    variable.setPrompts(intentVar.getPrompts());
+                    variable.setIsMandatory(intentVar.isRequired());
+                    variable.setTimesPrompted(intentVar.getNumPrompts());
+                    variables.add(variable);
                 }
                 intent = new MemoryIntent(intentName, aiid, chatId, variables);
                 // write it to the db

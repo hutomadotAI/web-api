@@ -33,8 +33,8 @@ public class ApiResult {
     }
 
     public ApiResult setSuccessStatus(String message, Object additionalInfo) {
-        this.status = additionalInfo == null ?
-            Status.getSuccess(message) : Status.getSuccess(message, additionalInfo);
+        this.status = additionalInfo == null
+                ? Status.getSuccess(message) : Status.getSuccess(message, additionalInfo);
         return this;
     }
 

@@ -2,8 +2,6 @@ package com.hutoma.api.common;
 
 import com.amazonaws.regions.Regions;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Properties;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -19,9 +19,9 @@ import java.util.Properties;
 public class Config {
 
     private static final String LOGFROM = "config";
-    private Logger logger;
+    private final Logger logger;
+    private final HashSet<String> propertyLoaded;
     private Properties properties;
-    private HashSet<String> propertyLoaded;
 
     @Inject
     public Config(Logger logger) {
@@ -41,7 +41,8 @@ public class Config {
         if (startUserName >= 0) {
             String prefixUsername = value.substring(startUserName + ("user=".length())).toLowerCase();
             if ((prefixUsername.startsWith("admin")) || (prefixUsername.startsWith("root"))) {
-                throw new Exception("db connection string uses root/admin access. please update your config properties file.");
+                throw new Exception(
+                        "db connection string uses root/admin access. please update your config properties file.");
             }
         }
         return value;
@@ -55,7 +56,8 @@ public class Config {
             Properties loadProperties = new Properties();
             loadProperties.load(fileInputStream);
             this.properties = loadProperties;
-            this.logger.logInfo(LOGFROM, "loaded " + this.properties.size() + " properties file from " + configPath.toString());
+            this.logger.logInfo(LOGFROM, "loaded " + this.properties.size() + " properties file from "
+                    + configPath.toString());
         } catch (IOException e) {
             this.logger.logError(LOGFROM, "failed to load valid properties file: " + e.toString());
         }
@@ -139,17 +141,18 @@ public class Config {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }
 
-    private String getConfigFromProperties(String p, String defaultValue) {
+    private String getConfigFromProperties(String propertyName, String defaultValue) {
         if (null == this.properties) {
             this.logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
             return defaultValue;
         }
         // keep a list of used properties
         // if this is the first time we are accessing a property and we are using defaults then log a warning
-        if (this.propertyLoaded.add(p) && (!this.properties.containsKey(p))) {
-            this.logger.logWarning(LOGFROM, "no property set for " + p + ". using hard-coded default " + defaultValue);
+        if (this.propertyLoaded.add(propertyName) && (!this.properties.containsKey(propertyName))) {
+            this.logger.logWarning(LOGFROM, "no property set for " + propertyName + ". using hard-coded default "
+                    + defaultValue);
         }
-        return this.properties.getProperty(p, defaultValue);
+        return this.properties.getProperty(propertyName, defaultValue);
     }
 
 }

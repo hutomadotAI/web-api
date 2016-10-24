@@ -3,11 +3,11 @@ package com.hutoma.api.connectors.db;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -22,29 +22,11 @@ public class DatabaseTransaction implements AutoCloseable {
     private Logger logger;
 
     @Inject
-    public DatabaseTransaction(Logger logger, DatabaseConnectionPool pool, Provider<TransactionalDatabaseCall> callprovider) {
+    public DatabaseTransaction(Logger logger, DatabaseConnectionPool pool,
+                               Provider<TransactionalDatabaseCall> callprovider) {
         this.pool = pool;
         this.callprovider = callprovider;
         this.logger = logger;
-    }
-
-    /***
-     * Get the connection to be used for this transaction. If this is the first call then this method
-     * borrows the connection from a pool and sets it up for a transaction
-     * @return an open connection configured for a transaction
-     * @throws Database.DatabaseException
-     */
-    private Connection getTransactionConnection() throws Database.DatabaseException {
-        if (null == this.transactionConnection) {
-            this.transactionConnection = this.pool.borrowConnection();
-            // remove auto-commit so that we can commit explicitly
-            try {
-                this.transactionConnection.setAutoCommit(false);
-            } catch (SQLException e) {
-                throw new Database.DatabaseException(e);
-            }
-        }
-        return this.transactionConnection;
     }
 
     /***
@@ -107,5 +89,24 @@ public class DatabaseTransaction implements AutoCloseable {
         } catch (Database.DatabaseException e) {
             this.logger.logError(this.LOGFROM, "transaction rollback failed: " + e.toString());
         }
+    }
+
+    /***
+     * Get the connection to be used for this transaction. If this is the first call then this method
+     * borrows the connection from a pool and sets it up for a transaction
+     * @return an open connection configured for a transaction
+     * @throws Database.DatabaseException
+     */
+    private Connection getTransactionConnection() throws Database.DatabaseException {
+        if (null == this.transactionConnection) {
+            this.transactionConnection = this.pool.borrowConnection();
+            // remove auto-commit so that we can commit explicitly
+            try {
+                this.transactionConnection.setAutoCommit(false);
+            } catch (SQLException e) {
+                throw new Database.DatabaseException(e);
+            }
+        }
+        return this.transactionConnection;
     }
 }

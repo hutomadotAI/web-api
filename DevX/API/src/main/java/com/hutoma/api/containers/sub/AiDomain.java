@@ -5,15 +5,15 @@ package com.hutoma.api.containers.sub;
  */
 public class AiDomain {
 
-    String dom_id;
-    String name;
-    String description;
-    String icon;
-    String color;
-    boolean available;
+    private final String domainId;
+    private final String name;
+    private final String description;
+    private final String icon;
+    private final String color;
+    private final boolean available;
 
-    public AiDomain(String dom_id, String name, String description, String icon, String color, boolean available) {
-        this.dom_id = dom_id;
+    public AiDomain(String domainId, String name, String description, String icon, String color, boolean available) {
+        this.domainId = domainId;
         this.name = name;
         this.description = description;
         this.icon = icon;
@@ -22,7 +22,7 @@ public class AiDomain {
     }
 
     public String getDomID() {
-        return this.dom_id;
+        return this.domainId;
     }
 
     public String getName() {

@@ -8,24 +8,24 @@ import java.util.List;
  */
 public class IntentVariable {
 
-    private String entity_name;
-    private boolean required;
-    private int n_prompts;
+    private final String entity_name;
+    private final boolean required;
+    private final int n_prompts;
     private String value;
     private int id;
 
     private List<String> prompts;
 
-    public IntentVariable(String entity_name, boolean required, int n_prompts, String value) {
-        this.entity_name = entity_name;
+    public IntentVariable(String entityName, boolean required, int numPrompts, String value) {
+        this.entity_name = entityName;
         this.required = required;
-        this.n_prompts = n_prompts;
+        this.n_prompts = numPrompts;
         this.value = value;
         this.prompts = new ArrayList<>();
     }
 
-    public IntentVariable(String entity_name, boolean required, int n_prompts, String value, int id) {
-        this(entity_name, required, n_prompts, value);
+    public IntentVariable(String entityName, boolean required, int numPrompts, String value, int id) {
+        this(entityName, required, numPrompts, value);
         this.id = id;
     }
 

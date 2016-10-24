@@ -5,14 +5,14 @@ package com.hutoma.api.containers.sub;
  */
 public class AiIntegration {
 
-    String int_id;
-    String name;
-    String description;
-    String icon;
-    boolean available;
+    private final String integrationId;
+    private final String name;
+    private final String description;
+    private final String icon;
+    private final boolean available;
 
-    public AiIntegration(String int_id, String name, String description, String icon, boolean available) {
-        this.int_id = int_id;
+    public AiIntegration(String integrationId, String name, String description, String icon, boolean available) {
+        this.integrationId = integrationId;
         this.name = name;
         this.description = description;
         this.icon = icon;
@@ -20,7 +20,7 @@ public class AiIntegration {
     }
 
     public String getIntID() {
-        return this.int_id;
+        return this.integrationId;
     }
 
     public String getName() {

@@ -15,6 +15,7 @@ public class Tools {
         return System.currentTimeMillis();
     }
 
+    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     public void threadSleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
