@@ -1,18 +1,18 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    $entities = \hutoma\console::getEntities( \hutoma\console::getDevToken() );
+$entities = \hutoma\console::getEntities(\hutoma\console::getDevToken());
 
-    if ($entities['status']['code'] !== 200) {
-        unset($entities);
-        \hutoma\console::redirect('./error.php?err=210');
-        exit;
-    }
+if ($entities['status']['code'] !== 200) {
+    unset($entities);
+    \hutoma\console::redirect('./error.php?err=210');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -25,11 +25,11 @@
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini" onload="showEntities('')">
+<body class="hold-transition skin-blue fixed sidebar-mini" onload="showEntities('')">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -46,18 +46,18 @@
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-    <section class="content">
+        <section class="content">
             <div class="row">
                 <div class="col-md-7">
-                        <?php include './dynamic/entity.content.create.html.php'; ?>
-                        <?php include './dynamic/entity.content.list.html.php'; ?>
+                    <?php include './dynamic/entity.content.create.html.php'; ?>
+                    <?php include './dynamic/entity.content.list.html.php'; ?>
                 </div>
                 <div class="col-md-5">
-                        <?php include './dynamic/chat.html.php'; ?>
-                        <?php include './dynamic/training.content.json.html.php'; ?>
+                    <?php include './dynamic/chat.html.php'; ?>
+                    <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
-                </div>
-    </section>
+            </div>
+        </section>
     </div>
 
     <footer class="main-footer">
@@ -82,7 +82,7 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","entities",1,true,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "entities", 1, true, false]);
     </script>
 </form>
 
