@@ -157,13 +157,16 @@ function hideTrainingBar(state){
 
 
 function updateTrainingBar(error,max_error){
-    var new_width = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
+
+    var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
     // TODO re-define check error limit
-    if (new_width > 100 )
-        new_width = 100;
-    
-    document.getElementById("progress-training-file").style.width = (parseInt(new_width)) + '%';
-    document.getElementById('status-badge-training').innerHTML = parseInt(new_width) + '%';
+
+    if ( new_value > 100 )
+        new_value = 100;
+
+    document.getElementById("progress-training-file").setAttribute('value',new_value);
+    document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
+    document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
 }
 
 
@@ -174,7 +177,7 @@ function jumpPhaseOne(){
 }
 
 function jumpPhaseTwo(){
-    msgAlertProgressBar(0,'Training finished');
+    msgAlertProgressBar(4,'Training finished');
     removeProgressStripedPhaseTwo();
     setProgressPhaseTwoMaxValue();
     hideTrainingBar(false);
