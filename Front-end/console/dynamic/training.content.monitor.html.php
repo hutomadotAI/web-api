@@ -18,7 +18,7 @@
                 <th class="text-center no-border">Progress</th>
                 <th class="text-center no-border" style="width: 120px;">Completed</th>
             </tr>
-            <tr>
+            <tr id="pretrainingbar" hidden>
                 <!-- Phase1 is the "time" to wait for upload training file -->
                 <td class="text-center" id="status-upload-file">phase 1</td>
                 <td>
@@ -34,7 +34,7 @@
                 <td class="text-center" id="status-training-file">phase 2</td>
                 <td>
                     <div class="progress progress-xs progress-striped active" id="progress-training-file-action" style="margin-top:9px;">
-                        <div class="progress-bar progress-bar-success"  id="progress-training-file" value="0" style="width:0;"></div>
+                        <div class="progress-bar progress-bar-success" id="progress-training-file" value="0" style="width:0;"></div>
                     </div>
                 </td>
                 <td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">0%</span></td>

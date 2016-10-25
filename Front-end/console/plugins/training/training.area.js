@@ -98,6 +98,7 @@ function notifyError(){
 }
 
 function pingError(){
+    var time_ping = 7000; // milliseconds
     var value = document.getElementById("progress-training-file").getAttribute('value');
     var precision_limit = 0.009;
 
@@ -108,7 +109,7 @@ function pingError(){
             if (parseFloat(error) > parseFloat(max_error))
                 max_error = error;
             updateTrainingBar(error, max_error);
-            setTimeout(pingError, 5000);
+            setTimeout(pingError, time_ping);
         }else {
             jumpPhaseTwo();
         }

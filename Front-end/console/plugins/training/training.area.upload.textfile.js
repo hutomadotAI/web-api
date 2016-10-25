@@ -8,7 +8,7 @@ function uploadTextFile(){
         return;
 
     block_server_ping = true;
-    resetPhaseTwoComponents();
+    resetTrainingTextFilePhaseTwoComponents();
     disableButtonUploadTextFile(true);
 
     var xmlhttp;
@@ -110,6 +110,7 @@ function disableButtonUploadTextFile(state){
 function resetTrainingTextFilePhaseOneComponents(){
     document.getElementById('progress-upload-file').style.width = '0%';
     document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
+    hidePreTrainingBar(false);
 }
 
 function updateTrainingTextFilePhaseOneComponents() {
@@ -122,7 +123,7 @@ function updateTrainingTextFilePhaseOneComponents() {
     if( parseInt(width) <= 100 ){
         document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
         document.getElementById('status-badge-upload').innerHTML = width+'%';
-        setTimeout(updateTrainingTextFilePhaseOneComponents, 10);
+        setTimeout(updateTrainingTextFilePhaseOneComponents, 50);
     }
     else {
         removeProgressStripedPhaseOne();
@@ -155,6 +156,10 @@ function hideTrainingBar(state){
     $('#trainingbar').prop('hidden', state);
 }
 
+function hidePreTrainingBar(state){
+    $('#pretrainingbar').prop('hidden', state);
+}
+
 
 function updateTrainingBar(error,max_error){
 
@@ -174,6 +179,7 @@ function jumpPhaseOne(){
     msgAlertUploadFile(0, 'A file is already loaded');
     removeProgressStripedPhaseOne();
     setProgressPhaseOneMaxValue();
+    hidePreTrainingBar(false);
 }
 
 function jumpPhaseTwo(){
@@ -204,7 +210,7 @@ function removeProgressStripedPhaseTwo(){
 }
 
 
-function resetPhaseTwoComponents(){
+function resetTrainingTextFilePhaseTwoComponents(){
     //document.getElementById('container_startstop').style.display = 'none';
     document.getElementById("progress-training-file").style.width ='0%';
     document.getElementById('status-badge-training').innerHTML = '0%';
