@@ -86,11 +86,6 @@ function haNoContentError(info) {
 }
 
 
-function restartTraining(){
-    console.log('call restart training');
-    
-}
-
 function notifyError(){
     $('#progress-upload-file-action').removeClass('active');
     $('#progress-upload-file-action').removeClass('progress-striped');
@@ -198,6 +193,13 @@ function existsAiTrainingFileCall(){
     return xmlhttp.onreadystatechange();
 }
 
+function trainingRestart(){
+    console.log('call restart training');
+    resetTrainingTextFilePhaseOneComponents();
+    updateTrainingTextFilePhaseOneComponents();
+    hideMsgWarningAlertTrainingInfo();
+}
+
 function trainingStartCall(){
     var xmlhttp;
     if (window.XMLHttpRequest)
@@ -273,7 +275,7 @@ function createMessageWarningInfoAlert(){
     wHTML +=('</dd>');
     wHTML +=('<p></p>');
     wHTML +=('<dt class="text-center">');
-    wHTML +=('<button class="btn btn-primary btn-md center-block flat" id="restart-button"> <b>Restart Trainig</b></button>');
+    wHTML +=('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="trainingRestart();"> <b>Restart Trainig</b></button>');
     wHTML +=('</dt>');
 
     wHTML +=('</span>');
