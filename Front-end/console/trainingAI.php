@@ -72,8 +72,9 @@
     </header>
 
     <script>
-        var status          = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])); ?>;
+        var status          = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
         var training_file   = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+        var deep_error      = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
     </script>
 
     <!-- ================ MENU CONSOLE ================= -->
