@@ -97,7 +97,6 @@
         <div class="row">
             <div class="col-md-7">
                 <?php include './dynamic/training.content.upload.html.php'; ?>
-                <br/>
                 <?php include './dynamic/training.content.monitor.html.php'; ?>
                 <?php include './dynamic/training.content.keys.html.php'; ?>
             </div>
