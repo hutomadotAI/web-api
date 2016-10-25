@@ -993,7 +993,7 @@ a:focus {
  */
 /*Dropdowns in general*/
 .dropdown-menu {
-	 border-color: #353939;
+	 border-color: #000000;
 	 background-color: #353939;
 }
 .dropdown-menu > li > a {
@@ -1009,7 +1009,7 @@ a:focus {
 	color: #333;
 }
 .dropdown-menu > .divider {
-	background-color: #353939;
+	background-color: #000000;
 
 }
 .navbar-nav > .notifications-menu > .dropdown-menu,
