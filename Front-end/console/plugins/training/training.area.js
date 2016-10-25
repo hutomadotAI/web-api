@@ -34,8 +34,10 @@ function activeMonitors(){
                 break;
             case 'training_stopped' : // 'STOPPED' :
                 createMessageWarningInfoAlert();
+                msgAlertProgressBar(1,'Training stopped. Please restart training');
                 break;
-            case 'QUEUED' :
+            case 'training_queued' :  // 'QUEUED' :
+                msgAlertProgressBar(1,'Request training in queue');
                 break;
             case 'training_in_progress':  // 'IN_PROGRESS' :
                 activeTrainingTextFilePhaseTwo();
@@ -195,9 +197,19 @@ function existsAiTrainingFileCall(){
 
 function trainingRestart(){
     console.log('call restart training');
+
+    resetTrainingTextFilePhaseTwoComponents();
+    disableButtonUploadTextFile(true);
+
     resetTrainingTextFilePhaseOneComponents();
     updateTrainingTextFilePhaseOneComponents();
+    // if exits box-warning re-start - it needs disabled
     hideMsgWarningAlertTrainingInfo();
+    trainingStartCall();
+
+    disableButtonUploadTextFile(false);
+
+
 }
 
 function trainingStartCall(){
@@ -213,7 +225,7 @@ function trainingStartCall(){
             try {
                 var JSONdata = JSON.parse(JSONresponse);
                 var statusCode = JSONdata['status']['code'];
-                if (statusCode === 200 || statusCode === 400 ) {
+                if ( (statusCode === 200 ) || (statusCode === 400 ) ) {
                     msgAlertProgressBar(0,'Phase 2 training in progress... ');
                     activeTrainingTextFilePhaseTwo();
                     pingTrainingError();

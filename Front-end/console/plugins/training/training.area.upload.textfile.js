@@ -1,6 +1,9 @@
 function uploadTextFile(){
     var Mbyte = 2;
 
+    //if exists hide it
+    disableMsgWarningAlertTrainingInfoRestartButton(true);
+
     if (!isTextFileSelected())
         return;
 
@@ -8,6 +11,7 @@ function uploadTextFile(){
         return;
 
     block_server_ping = true;
+
     resetTrainingTextFilePhaseTwoComponents();
     disableButtonUploadTextFile(true);
 
@@ -42,9 +46,9 @@ function uploadTextFile(){
                     } else {
                         msgAlertUploadFile(4, 'File uploaded');
                     }
+
                     resetTrainingTextFilePhaseOneComponents();
                     updateTrainingTextFilePhaseOneComponents();
-
                     // if exits box-warning re-start - it needs disabled
                     hideMsgWarningAlertTrainingInfo();
                 } else {
@@ -54,10 +58,12 @@ function uploadTextFile(){
                         msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded');
                     }
                     disableButtonUploadTextFile(false);
+                    disableMsgWarningAlertTrainingInfoRestartButton(false);
                 }
             } catch (e) {
                 msgAlertUploadFile(2,'A generic error occurred');
                 disableButtonUploadTextFile(false);
+                disableMsgWarningAlertTrainingInfoRestartButton(false);
             }
         }
     };
@@ -111,10 +117,11 @@ function resetTrainingTextFilePhaseOneComponents(){
     document.getElementById('progress-upload-file').style.width = '0%';
     document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
     hidePreTrainingBar(false);
+    hideTrainingBar(true);
 }
 
 function updateTrainingTextFilePhaseOneComponents() {
-    // simulation of loading phaseOne
+    // simulation phaseOne -  pretraining
     var width = document.getElementById("progress-upload-file").style.width;
     width = width.substr(0, width.length-1);
 
@@ -123,9 +130,11 @@ function updateTrainingTextFilePhaseOneComponents() {
     if( parseInt(width) <= 100 ){
         document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
         document.getElementById('status-badge-upload').innerHTML = width+'%';
-        setTimeout(updateTrainingTextFilePhaseOneComponents, 50);
+        setTimeout(updateTrainingTextFilePhaseOneComponents, 80);
     }
     else {
+
+        // start training session
         removeProgressStripedPhaseOne();
         trainingStartCall();
     }
@@ -143,7 +152,7 @@ function initialisingStatusTrainingBar(state){
     if (state) {
         document.getElementById('status-training-file').innerText = 'initialising';
         document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-        msgAlertProgressBar(0,'Training initialization may take a few minutes. please wait.');
+        msgAlertProgressBar(1,'Training initialization may take a few minutes. please wait.');
 
     }else{
         document.getElementById('status-training-file').innerText = 'phase 2';
@@ -162,7 +171,6 @@ function hidePreTrainingBar(state){
 
 
 function updateTrainingBar(error,max_error){
-
     var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
     // TODO re-define check error limit
 
@@ -176,7 +184,7 @@ function updateTrainingBar(error,max_error){
 
 
 function jumpPhaseOne(){
-    msgAlertUploadFile(0, 'A file is already loaded');
+    msgAlertUploadFile(1, 'A file is already loaded');
     removeProgressStripedPhaseOne();
     setProgressPhaseOneMaxValue();
     hidePreTrainingBar(false);
@@ -212,22 +220,27 @@ function removeProgressStripedPhaseTwo(){
 
 function resetTrainingTextFilePhaseTwoComponents(){
     //document.getElementById('container_startstop').style.display = 'none';
+    hideTrainingBar(true);
     document.getElementById("progress-training-file").style.width ='0%';
     document.getElementById('status-badge-training').innerHTML = '0%';
-    hideTrainingBar(true);
+
 }
 
 
 function hideMsgWarningAlertTrainingInfo(){
     var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
     if (element !== null) {
-        //remove Warning BOX in re-strat training
-        //element.parentNode.removeChild(element);
-
-        // disable only restart button
-        document.getElementById('restart-button').disabled = true;
+        element.parentNode.removeChild(element);
     }
 }
+
+function disableMsgWarningAlertTrainingInfoRestartButton(state){
+    var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
+    if (element !== null) {
+        document.getElementById('restart-button').disabled = state;
+    }
+}
+
 
 
 

@@ -49,7 +49,7 @@ function msgAlertUploadFile(alarm,msg){
     document.getElementById('containerMsgAlertUploadFile').style.display = 'block';
     switch (alarm){
         case 0:
-            $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-warning');
+            $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-base');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
             break;
         case 1:
@@ -247,7 +247,7 @@ function containerMsgAlertIntentVariable(alarm,msg){
 function msgAlertIntentResponse(alarm,msg){
     switch (alarm){
         case 0:
-            $("#containerMsgAlertIntentResponse").attr('class','alert alert-dismissable flat alert-base');
+            $("#containerMsgAlertIntentResponse").attr('class','alert alert-dismisable flat alert-base');
             $("#iconAlertIntentResponse").attr('class', 'icon fa fa-check');
             document.getElementById('intent-response').style.borderColor = "#d2d6de";
             break;
