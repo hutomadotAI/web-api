@@ -56,7 +56,7 @@ function setConfidenceValueBeforePosting(){
 }
 
 function getValueFromConfidence(confidence){
-    var values = {"never":0.0, "rarely":0.25, "sometimes":0.5, "often":0.75, "always":1.0};
+    var values = {"never":0.0, "rarely":0.1, "sometimes":0.25, "often":0.4, "always":0.75};
     return values[confidence];
 }
 
