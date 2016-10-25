@@ -66,15 +66,17 @@
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
+
+<script>
+    var status          = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var training_file   = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var deep_error      = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+</script>
+
 <div class="wrapper">
     <header class="main-header" id="headerID">
       <?php include './dynamic/header.html.php'; ?>
     </header>
-
-    <script>
-        var status          = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])); ?>;
-        var training_file   = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
-    </script>
 
     <!-- ================ MENU CONSOLE ================= -->
     <aside class="main-sidebar ">
@@ -104,7 +106,7 @@
                 <?php include './dynamic/chat.html.php'; ?>
                 <?php include './dynamic/training.content.json.html.php'; ?>
             </div>
-
+        </div>
     </section>
     </div>
 

@@ -56,7 +56,7 @@ function setConfidenceValueBeforePosting(){
 }
 
 function getValueFromConfidence(confidence){
-    var values = {"never":0.2, "rarely":0.4, "sometimes":0.6, "often":0.8, "always":1.0};
+    var values = {"never":0.0, "rarely":0.25, "sometimes":0.5, "often":0.75, "always":1.0};
     return values[confidence];
 }
 
@@ -83,5 +83,5 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else
-        setSliderValue('ai_confidence',0.8); // default value "often"
+        setSliderValue('ai_confidence',0.75); // default value "often"
 });

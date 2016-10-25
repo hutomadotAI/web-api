@@ -98,19 +98,25 @@ function notifyError(){
 }
 
 function pingError(){
-    var width = document.getElementById("progress-training-file").style.width;
-    width = width.substr(0, width.length-1);
+    var time_ping = 7000; // milliseconds
+    var value = document.getElementById("progress-training-file").getAttribute('value');
+    var precision_limit = 0.009;
 
-    if( (parseInt(width) < 100) && !block_server_ping ) {
+    if( (parseInt(value) < 100) && !block_server_ping ) {
         var error = trainingErrorCall();
 
-        if ( parseFloat(error) > parseFloat(max_error))
-            max_error = error;
+        if ( error > precision_limit ) {
+            if (parseFloat(error) > parseFloat(max_error))
+                max_error = error;
+            updateTrainingBar(error, max_error);
+            setTimeout(pingError, time_ping);
+        }else {
+            jumpPhaseTwo();
+        }
 
-        updateTrainingBar(error,max_error);
-        setTimeout(pingError, 5000);
+    }else {
+        jumpPhaseTwo();
     }
-    jumpPhaseTwo();
 }
 
 function pingTrainingError(){
