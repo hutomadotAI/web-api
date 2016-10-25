@@ -19,7 +19,7 @@
                 <div class="col-md-12">
                     <div class="input-group">
                         <span class="input-group-addon text-white" style="width:90px; background-color: #2E3032;">AI ID</i></span>
-                        <input type="text" class="form-control flat text-white no-shadow"  id="aikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'];?>" disabled>
+                        <input type="text" class="form-control flat text-white no-shadow" id="aikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'];?>" disabled>
                         <span class="input-group-addon text-white" style="background-color: #2E3032;" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#aikey" id="aikeytooltip" title="copy to clipboard" onclick="copyToClipboard('aikey')" ><i class="fa fa-clipboard"></i></span>
                     </div>
                 </div>
