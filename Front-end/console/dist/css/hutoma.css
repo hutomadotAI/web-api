@@ -1488,7 +1488,7 @@ a:focus {
 }
 .progress-bar-green,
 .progress-bar-success {
-	background-color: #00a65a;
+	background-color: #497549;
 }
 .progress-striped .progress-bar-green,
 .progress-striped .progress-bar-success {
@@ -2382,7 +2382,7 @@ a:focus {
 	background-color: #367fa9;
 }
 .btn-success {
-	background-color: #57773D;
+	background-color: #497549;
 	border-color: #464747;
 }
 
