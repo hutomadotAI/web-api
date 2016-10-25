@@ -34,8 +34,10 @@ function activeMonitors(){
                 break;
             case 'training_stopped' : // 'STOPPED' :
                 createMessageWarningInfoAlert();
+                msgAlertProgressBar(1,'Training stopped. Please restart training');
                 break;
-            case 'QUEUED' :
+            case 'training_queued' :  // 'QUEUED' :
+                msgAlertProgressBar(1,'Request training in queue');
                 break;
             case 'training_in_progress':  // 'IN_PROGRESS' :
                 activeTrainingTextFilePhaseTwo();
@@ -86,11 +88,6 @@ function haNoContentError(info) {
 }
 
 
-function restartTraining(){
-    console.log('call restart training');
-    
-}
-
 function notifyError(){
     $('#progress-upload-file-action').removeClass('active');
     $('#progress-upload-file-action').removeClass('progress-striped');
@@ -98,26 +95,29 @@ function notifyError(){
 }
 
 function pingError(){
-    var time_ping = 7000; // milliseconds
-    var value = document.getElementById("progress-training-file").getAttribute('value');
+    var time_ping = 6000; // milliseconds
     var precision_limit = 0.009;
 
-    if( (parseInt(value) < 100) && !block_server_ping ) {
+    if( !block_server_ping ) {
         var error = trainingErrorCall();
+        if (parseFloat(error) > parseFloat(max_error))
+            max_error = error;
 
-        if ( error > precision_limit ) {
-            if (parseFloat(error) > parseFloat(max_error))
-                max_error = error;
-            updateTrainingBar(error, max_error);
-            setTimeout(pingError, time_ping);
-        }else {
-            jumpPhaseTwo();
+        updateTrainingBar(error, max_error);
+        if (error < precision_limit) {
+            var status = getAiStatusCall();
+            alert(status);
+            if (status != 'training_completed')
+                setTimeout(pingError, time_ping);
+            else
+                jumpPhaseTwo();
         }
-
-    }else {
-        jumpPhaseTwo();
+        else{
+            setTimeout(pingError, time_ping);
+        }
     }
 }
+
 
 function pingTrainingError(){
     var pingErrorValue = trainingErrorCall();
@@ -198,6 +198,23 @@ function existsAiTrainingFileCall(){
     return xmlhttp.onreadystatechange();
 }
 
+function trainingRestart(){
+    console.log('call restart training');
+
+    resetTrainingTextFilePhaseTwoComponents();
+    disableButtonUploadTextFile(true);
+
+    resetTrainingTextFilePhaseOneComponents();
+    updateTrainingTextFilePhaseOneComponents();
+    // if exits box-warning re-start - it needs disabled
+    hideMsgWarningAlertTrainingInfo();
+    trainingStartCall();
+
+    disableButtonUploadTextFile(false);
+
+
+}
+
 function trainingStartCall(){
     var xmlhttp;
     if (window.XMLHttpRequest)
@@ -211,7 +228,7 @@ function trainingStartCall(){
             try {
                 var JSONdata = JSON.parse(JSONresponse);
                 var statusCode = JSONdata['status']['code'];
-                if (statusCode === 200 || statusCode === 400 ) {
+                if ( (statusCode === 200 ) || (statusCode === 400 ) ) {
                     msgAlertProgressBar(0,'Phase 2 training in progress... ');
                     activeTrainingTextFilePhaseTwo();
                     pingTrainingError();
@@ -273,7 +290,7 @@ function createMessageWarningInfoAlert(){
     wHTML +=('</dd>');
     wHTML +=('<p></p>');
     wHTML +=('<dt class="text-center">');
-    wHTML +=('<button class="btn btn-primary btn-md center-block flat" id="restart-button"> <b>Restart Trainig</b></button>');
+    wHTML +=('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="trainingRestart();"> <b>Restart Trainig</b></button>');
     wHTML +=('</dt>');
 
     wHTML +=('</span>');

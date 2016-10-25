@@ -9,7 +9,7 @@
     <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
     <p></p>
 
-    <div class="alert alert-dismissable flat alert-warning" id="containerMsgAlertUploadFile">
+    <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadFile">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
         <span id="msgAlertUploadFile">Upload a text file with chat examples to begin training</span>

@@ -2654,11 +2654,11 @@ a:focus {
 }
 /* NAV TABS */
 .nav-tabs-custom {
-	margin-bottom: 5px;
+	margin-bottom: 20px;
 	background: #202020;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 	border-radius: 0px;
-	 border: 1px solid #202020;
+	border: 1px solid #202020;
 }
 .nav-tabs-custom > .nav-tabs {
 	margin: 0;

@@ -49,7 +49,7 @@ function msgAlertUploadFile(alarm,msg){
     document.getElementById('containerMsgAlertUploadFile').style.display = 'block';
     switch (alarm){
         case 0:
-            $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-warning');
+            $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-base');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
             break;
         case 1:
