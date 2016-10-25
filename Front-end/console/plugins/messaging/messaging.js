@@ -46,7 +46,6 @@ function msgAlertDescriptionAI(alarm,msg){
 }
 
 function msgAlertUploadFile(alarm,msg){
-function msgAlertUploadFile(alarm,msg){
     document.getElementById('containerMsgAlertUploadFile').style.display = 'block';
     switch (alarm){
         case 0:
