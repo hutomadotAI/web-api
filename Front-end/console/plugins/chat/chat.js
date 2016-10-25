@@ -154,7 +154,6 @@ function requestAnswerAI(ai_name, question, chatId) {
 function enableChat(){
     document.getElementById('bodyChat').style.cursor = 'auto';
     document.getElementById('message').disabled = false;
-    document.getElementById('message').style.backgroundColor = '#353939';
     document.getElementById('message').value = '';
 
     // release block for chatting
@@ -164,7 +163,6 @@ function enableChat(){
 function disableChat(){
     document.getElementById('bodyChat').style.cursor = 'progress';
     document.getElementById('message').disabled = true;
-    document.getElementById('message').style.backgroundColor = '#202020';
     document.getElementById('message').value = '';
 }
 

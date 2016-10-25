@@ -993,7 +993,7 @@ a:focus {
  */
 /*Dropdowns in general*/
 .dropdown-menu {
-	 border-color: #353939;
+	 border-color: #000000;
 	 background-color: #353939;
 }
 .dropdown-menu > li > a {
@@ -1009,7 +1009,7 @@ a:focus {
 	color: #333;
 }
 .dropdown-menu > .divider {
-	background-color: #353939;
+	background-color: #000000;
 
 }
 .navbar-nav > .notifications-menu > .dropdown-menu,
@@ -1488,7 +1488,7 @@ a:focus {
 }
 .progress-bar-green,
 .progress-bar-success {
-	background-color: #00a65a;
+	background-color: #497549;
 }
 .progress-striped .progress-bar-green,
 .progress-striped .progress-bar-success {
@@ -2382,7 +2382,7 @@ a:focus {
 	background-color: #367fa9;
 }
 .btn-success {
-	background-color: #57773D;
+	background-color: #497549;
 	border-color: #464747;
 }
 

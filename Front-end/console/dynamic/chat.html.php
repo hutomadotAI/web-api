@@ -14,10 +14,10 @@
 
             <div class="pull-right">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" >
-                    <i class="fa fa-gears text-white"></i>
+                    <i class="fa fa-gears text-gray"></i>
                 </a>
 
-                <ul class="dropdown-menu flat">
+                <ul class="dropdown-menu no-border flat">
                     <li id="speech-option">
                         <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn Off Speech</spam></a>
                     </li>

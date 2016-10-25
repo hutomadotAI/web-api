@@ -46,14 +46,36 @@
 
         <!-- Modal content-->
         <div class="modal-content bordered">
-            <div class="modal-header">
+            <div class="modal-header  ">
                 <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">   <i class="fa fa-file-text-o text-success" style="padding-right:2em"></i> Training file sample</h4>
             </div>
             <div class="modal-body">
                 <div class="box-body" id="example-training-file">
                     <span id="contentSampleFile"></span>
-                    <?php echo file_get_contents('./dist/file/sampleTrainingFile.txt');?>
+                    <dt>hello my phone is broken</dt>
+                    <dt>oh sorry what is the problem</dt>
+                    <dt>the screen does not turn on</dt>
+                    <dt>hmmm ok. have you tried charging</dt>
+                    <dt>it is charged i think</dt>
+                    <dt>ok what happens when you press the power button</dt>
+                    <dt>nothing happens</dt>
+                    <dt>ok let me send you someone to pick up your phone</dt>
+                    </br>
+                    <dt>hello</dt>
+                    <dt>hi, how are you</dt>
+                    <dt>i am fine thanks! and you?</dt>
+                    <dt>I am good</dt>
+                        </br>
+                    <dt>what is your name</dt>
+                    <dt>my name is AI1</dt>
+                        </br>
+                    <dt>what does your name mean?</dt>
+                    <dt>not sure. ask maurizio</dt>
+                        </br>
+                    <dt>waht is the meaning of life</dt>
+                    <dt>the meaning of life is 42</dt>
+                    <?php //echo file_get_contents('./dist/file/sampleTrainingFile.txt');?>
                 </div>
             </div>
             <div class="modal-footer">
