@@ -95,26 +95,29 @@ function notifyError(){
 }
 
 function pingError(){
-    var time_ping = 7000; // milliseconds
-    var value = document.getElementById("progress-training-file").getAttribute('value');
+    var time_ping = 6000; // milliseconds
     var precision_limit = 0.009;
 
-    if( (parseInt(value) < 100) && !block_server_ping ) {
+    if( !block_server_ping ) {
         var error = trainingErrorCall();
+        if (parseFloat(error) > parseFloat(max_error))
+            max_error = error;
 
-        if ( error > precision_limit ) {
-            if (parseFloat(error) > parseFloat(max_error))
-                max_error = error;
-            updateTrainingBar(error, max_error);
-            setTimeout(pingError, time_ping);
-        }else {
-            jumpPhaseTwo();
+        updateTrainingBar(error, max_error);
+        if (error < precision_limit) {
+            var status = getAiStatusCall();
+            alert(status);
+            if (status != 'training_completed')
+                setTimeout(pingError, time_ping);
+            else
+                jumpPhaseTwo();
         }
-
-    }else {
-        jumpPhaseTwo();
+        else{
+            setTimeout(pingError, time_ping);
+        }
     }
 }
+
 
 function pingTrainingError(){
     var pingErrorValue = trainingErrorCall();
