@@ -12,6 +12,7 @@ public class ChatResult {
     private double score;
     private String query = "";
     private String answer = "";
+    private String history = "";
     private double elapsed_time;
     private String action;
     private String context;
@@ -79,4 +80,9 @@ public class ChatResult {
     public void setIntents(List<MemoryIntent> intents) {
         this.intents = intents;
     }
+
+    public void setHistory(String history) {
+        this.history = history;
+    }
+
 }

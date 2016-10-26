@@ -47,7 +47,7 @@ require "../pages/config.php";
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'] = '';
 
     if (isset($response) && array_key_exists('result', $response)) {
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['history'] = $response['result']['answer'];
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['history'] = $response['result']['history'];
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'] = $response['result']['topic_out'];
     }
 

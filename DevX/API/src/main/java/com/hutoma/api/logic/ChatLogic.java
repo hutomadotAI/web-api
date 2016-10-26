@@ -31,6 +31,7 @@ import javax.ws.rs.core.SecurityContext;
 public class ChatLogic {
 
     private static final String LOGFROM = "chatlogic";
+    private static final String HISTORY_REST_DIRECTIVE = "@reset";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final SemanticAnalysis semanticAnalysis;
@@ -39,6 +40,7 @@ public class ChatLogic {
     private final ILogger logger;
     private final IMemoryIntentHandler intentHandler;
     private final IEntityRecognizer entityRecognizer;
+
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis,
@@ -94,6 +96,14 @@ public class ChatLogic {
             if (null != semanticAnalysisResult.getAnswer()) {
                 if (!semanticAnalysisResult.getAnswer().isEmpty()) {
                     noResponse = false;
+                }
+
+                // reset conversation history if instructe to do so
+                if (semanticAnalysisResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
+                    semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer().replace(HISTORY_REST_DIRECTIVE, ""));
+                    semanticAnalysisResult.setHistory("");
+                } else {
+                    semanticAnalysisResult.setHistory(semanticAnalysisResult.getAnswer());
                 }
 
                 double semanticScore = semanticAnalysisResult.getScore();
