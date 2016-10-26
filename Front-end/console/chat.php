@@ -43,11 +43,15 @@ require "../pages/config.php";
         exit;
     }
 
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['history'] = $response['result']['answer'];
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['topic'] = $response['result']['topic_out'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['history'] = '';
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'] = '';
+
+    if (isset($response) && array_key_exists('result', $response)) {
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['history'] = $response['result']['answer'];
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'] = $response['result']['topic_out'];
+    }
 
     echo json_encode($response,JSON_PRETTY_PRINT);
     unset($response);
-
-    ?>
+?>
 

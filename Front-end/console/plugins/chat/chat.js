@@ -58,7 +58,7 @@ function createLeftMsg(human_name,msg){
     wHTML +=('<span class="direct-chat-timestamp pull-right">'+date+'</span>');
     wHTML +=('</div>');
     wHTML +=('<img class="direct-chat-img" src="./dist/img/human.jpg" alt="User image">');
-    wHTML +=('<div class="direct-chat-text bg-white">');
+    wHTML +=('<div class="direct-chat-text">');
     wHTML += cleanChat(msg);
     wHTML +=('</div>');
     newLeftMsg.innerHTML = wHTML;
@@ -120,34 +120,28 @@ function createRightMsg(ai_name,msg,chatId,error) {
 
 
 function requestAnswerAI(ai_name, question, chatId) {
-    var xmlhttp;
+
     if (question == '') {
         return;
     } else {
-        if (window.XMLHttpRequest)
-            xmlhttp = new XMLHttpRequest();
-        else
-            xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                var JSONnode = document.getElementById('msgJSON');
-                var JSONresponse = xmlhttp.responseText;
-                var JSONdata = JSON.parse(JSONresponse);
-                JSONnode.innerHTML = JSONresponse;
-                if (JSONdata['chatId'] === '') {
-                    createRightMsg(ai_name, 'no chat id returned', '', true);
-                } else {
-                    var chatId = JSONdata['chatId'];
-                    if (JSONdata['status']['code'] === 200)
-                        createRightMsg(ai_name, JSONdata['result']['answer'], chatId, false);
-                    else
-                        createRightMsg(ai_name, JSONdata['status']['info'], chatId, true);
-                }
+        jQuery.ajax({
+            url: 'chat.php',
+            contentType: "application/json; charset=utf-8",
+            type: 'GET',
+            dataType: 'json',
+            data: {chatId: chatId, q: question},
+            success: function (response) {
+                var JSONdata = response;
+                if (JSONdata['status']['code'] === 200)
+                    createRightMsg(ai_name, JSONdata['result']['answer'], chatId, false);
+                else
+                    createRightMsg(ai_name, JSONdata['status']['info'], chatId, true);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                var JSONdata = JSON.stringify(xhr.responseText);
+                createRightMsg(ai_name, response['status']['info'], chatId, true);
             }
-        };
-        xmlhttp.open('GET','chat.php?chatId='+chatId+'&q='+question,true);
-        xmlhttp.send();
+        });
     }
 }
 

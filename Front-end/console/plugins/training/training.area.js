@@ -106,7 +106,6 @@ function pingError(){
         updateTrainingBar(error, max_error);
         if (error < precision_limit) {
             var status = getAiStatusCall();
-            alert(status);
             if (status != 'training_completed')
                 setTimeout(pingError, time_ping);
             else

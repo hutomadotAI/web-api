@@ -1426,7 +1426,6 @@ class console
             $path = '/ai/' . $aiid . '/chat';
             $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history,'confidence_threshold'=>$min_p,'current_topic'=>$topic);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-
             $curl = new curlHelper($service_url, $dev_token);
             $curl_response = $curl->exec();
             if ($curl_response === false) {
@@ -1436,7 +1435,6 @@ class console
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
-
             return $json_response;
         }
     }
