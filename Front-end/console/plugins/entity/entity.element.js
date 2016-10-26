@@ -1,32 +1,66 @@
 checkListEntityValuesSize();
 
-function  createNewValueEntityRow(value,parent){
+function saveEntity() {
+    if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
+        msgAlert(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
+        return;
+    }
+    var values = [];
+    var entityName = document.getElementById('entity-name').value;
+    var elements = document.getElementsByName('value-entity');
+    for (var i = 1; i < elements.length; i++) {
+        values.push(elements[i].getAttribute('placeholder'));
+    }
+    var prevCursor = document.body.style.cursor;
+    document.body.style.cursor = 'wait';
+    $("#btnSaveEntity").prop("disabled", true);
 
-    var wHTML ='';
+    $.ajax({
+        url: 'entityelement.php?entity=' + entityName,
+        data: {
+            entity_name: entityName, entity_values: values
+        },
+        type: 'POST',
+        /*error: function (xhr, ajaxOptions, thrownError) {
+         alert(xhr.status + ' ' + thrownError);
+         }*/
+        success: function (result) {
 
-    wHTML +=('<div class="box-body bg-white flat no-padding" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
-    wHTML +=('<div class="row">');
+        },
+        complete: function () {
+            $("#btnSaveEntity").prop("disabled", false);
+            document.body.style.cursor = prevCursor;
+        }
+    });
+}
 
-    wHTML +=('<div class="col-xs-9" id="obj-value-entity">');
-    wHTML +=('<div class="inner-addon left-addon">');
-    wHTML +=('<i class="fa fa-language text-gray"></i>');
+function createNewValueEntityRow(value, parent) {
 
-    wHTML +=('<input type="text" class="form-control flat no-shadow no-border" id="value-entity" name="value-entity" style="padding-left: 35px; " placeholder="'+value+'">');
-    wHTML +=('</div>');
-    wHTML +=('</div>');
+    var wHTML = '';
 
-    wHTML +=('<div class="col-xs-3" id="btnValueEntity" style="display:none;" >');
-    wHTML +=('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
+    wHTML += ('<div class="box-body bg-white flat no-padding" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
+    wHTML += ('<div class="row">');
 
-    wHTML +=('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px;" onClick="deleteValueEntity(this)">');
-    wHTML +=('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
-    wHTML +=('</a>');
+    wHTML += ('<div class="col-xs-9" id="obj-value-entity">');
+    wHTML += ('<div class="inner-addon left-addon">');
+    wHTML += ('<i class="fa fa-language text-gray"></i>');
 
-    wHTML +=('</div>');
-    wHTML +=('</div>');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity" name="value-entity" style="padding-left: 35px; " placeholder="' + value + '">');
+    wHTML += ('</div>');
+    wHTML += ('</div>');
 
-    wHTML +=('</div>');
-    wHTML +=('</div>');
+    wHTML += ('<div class="col-xs-3" id="btnValueEntity" style="display:none;" >');
+    wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
+
+    wHTML += ('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px;" onClick="deleteValueEntity(this)">');
+    wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
+    wHTML += ('</a>');
+
+    wHTML += ('</div>');
+    wHTML += ('</div>');
+
+    wHTML += ('</div>');
+    wHTML += ('</div>');
 
     var newNode = document.createElement('div');
     newNode.setAttribute('class', 'col-xs-12');
@@ -37,37 +71,37 @@ function  createNewValueEntityRow(value,parent){
     checkListEntityValuesSize();
 }
 
-function checkListEntityValuesSize(){
+function checkListEntityValuesSize() {
     if (document.getElementById('entityValues-list').childElementCount > 0)
-        $("#btnSaveEntity").prop("disabled",false);
+        $("#btnSaveEntity").prop("disabled", false);
     else
-        $("#btnSaveEntity").prop("disabled",true);
+        $("#btnSaveEntity").prop("disabled", true);
 }
 
-function OnMouseIn (elem) {
+function OnMouseIn(elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = '';
 }
 
-function OnMouseOut (elem) {
+function OnMouseOut(elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = 'none';
 }
 
-function checkValueCode(element,key){
-    if(key == 13) {
-        if (checkLimitValue()){
+function checkValueCode(element, key) {
+    if (key == 13) {
+        if (checkLimitValue()) {
             var value = $(element).val();
             var parent = document.getElementById('entityValues-list');
             document.getElementById('value-entity').value = '';
-            createNewValueEntityRow(value,parent);
+            createNewValueEntityRow(value, parent);
         }
     }
 }
 
 function checkLimitValue() {
     var limitTextInputSize = 50;
-    switch (limitText($("#value-entity"), limitTextInputSize)){
+    switch (limitText($("#value-entity"), limitTextInputSize)) {
         case -1:
             return false;
         case 0:
@@ -79,20 +113,20 @@ function checkLimitValue() {
 }
 
 
-function deleteValueEntity (element) {
+function deleteValueEntity(element) {
     // delete node from page - dipendence parentNode
-    var parent =  ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
+    var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent)
     checkListEntityValuesSize();
 
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     // loading stored entities values
     for (var x in entityValuesListFromServer) {
         var value = entityValuesListFromServer[x];
         var parent = document.getElementById('entityValues-list');
         document.getElementById('value-entity').value = '';
-        createNewValueEntityRow(value,parent);
+        createNewValueEntityRow(value, parent);
     }
 });

@@ -1,27 +1,38 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    if (!isPostInputAvailable() ) {
-        \hutoma\console::redirect('./error.php?err=119');
-        exit;
-    }
+if (!isPostInputAvailable()) {
+    \hutoma\console::redirect('./error.php?err=119');
+    exit;
+}
 
-    $entity_values_list = \hutoma\console::getEntityValues( \hutoma\console::getDevToken(),$_POST['entity']);
-    
-    if ($entity_values_list['status']['code'] !== 200) {
-        unset($entity_values_list);
-        \hutoma\console::redirect('./error.php?err=225');
-        exit;
-    }
+if (isset($_POST['entity_name'])) {
+    $entityName = $_POST['entity_name'];
+    \hutoma\console::updateEntity($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
+        $entityName, $_POST['entity_values']);
 
-    function isPostInputAvailable(){
-        return  ( isset($_POST['entity']) );
-    }
+} else {
+    $entityName = $_POST['entity'];
+}
+
+$entity_values_list = \hutoma\console::getEntityValues(\hutoma\console::getDevToken(), $entityName);
+
+if ($entity_values_list['status']['code'] !== 200) {
+    unset($entity_values_list);
+    \hutoma\console::redirect('./error.php?err=225');
+    exit;
+}
+
+function isPostInputAvailable()
+{
+    return (isset($_POST['entity']) || isset($_POST['entity_name']));
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -34,11 +45,11 @@
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -95,7 +106,7 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","entities",1,false,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "entities", 1, false, false]);
     </script>
 </form>
 

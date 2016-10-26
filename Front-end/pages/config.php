@@ -16,8 +16,8 @@ require __DIR__ . "/../class.logsys.php";
     "token_table" =>  "resetTokens"
   ),
     "api" => array(
-        "request_url" => "https://api.hutoma.com/v1"
-        //"request_url" => "http://localhost:8081/v1"
+        //"request_url" => "https://api.hutoma.com/v1"
+        "request_url" => "http://localhost:8081/v1"
     ),
   "features" => array(
     "auto_init" => true

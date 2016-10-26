@@ -21,6 +21,7 @@ if (isset($_POST['intent_name'])) {
     $intentName = $_POST['intent'];
 }
 $entityList = \hutoma\console::getEntities(\hutoma\console::getDevToken());
+
 $intent = \hutoma\console::getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 
 if ($entityList['status']['code'] !== 200) {
