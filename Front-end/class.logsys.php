@@ -1399,12 +1399,13 @@ class console
         }
     }
 
-    public static function chatAI($dev_token, $aiid, $chatId, $q, $history, $fs, $min_p, $topic)
+    public static function chatAI($dev_token, $aiid, $chatId, $q, $history, $fs, $min_p,$topic)
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/chat';
-            $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history, 'confidence_threshold' => $min_p, 'current_topic' => $topic);
+            $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history,'confidence_threshold'=>$min_p,'current_topic'=>$topic);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
+
             $curl = new curlHelper($service_url, $dev_token);
             $curl_response = $curl->exec();
             if ($curl_response === false) {
@@ -1414,41 +1415,13 @@ class console
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
-            return $json_response;
-        }
-    }
 
-    public static function updateEntity($dev_token, $entityName, $entityValues)
-    {
-        if (self::$loggedIn) {
-            $path = '/entity';
-            $params = array('entity_name' => $entityName);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
-
-            $args = array(
-                'entity_name' => $entityName,
-                'entity_values' => $entityValues
-            );
-
-            $curl = new curlHelper($service_url, $dev_token);
-            $curl->setOpt(CURLOPT_POST, true);
-            $curl->addHeader('Content-Type', 'application/json');
-            $curl->setOpt(CURLOPT_POSTFIELDS, json_encode($args));
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=310');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
             return $json_response;
         }
     }
 
 
-    public static function uploadFile($aiid, $file, $source_type, $url)
+    public static function uploadFile( $aiid, $file, $source_type, $url)
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/training';
@@ -1714,6 +1687,6 @@ class console
     }
 
 
-}
 
+}
 ?>

@@ -1,3 +1,5 @@
+var timeIsover = false;
+
 function uploadBookFile(){
     var Mbyte = 10;
 
@@ -12,12 +14,12 @@ function uploadBookFile(){
 
     block_server_ping = true;
 
-    resetTrainingFilePhaseTwoComponents();
+    resetComponentsPhaseTwo();
     disableButtonUploadBookFile(true);
 
     var xmlhttp;
     var file_data = new FormData();
-    file_data.append("inputfile", document.getElementById('inputfile').files[0]);
+    file_data.append("inputstructure", document.getElementById('inputstructure').files[0]);
     file_data.append("tab","structure");
 
     if (window.XMLHttpRequest)
@@ -26,14 +28,14 @@ function uploadBookFile(){
         xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
 
     xmlhttp.open('POST','./dynamic/upload.php');
-
+    
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var JSONresponse = xmlhttp.responseText;
             try {
                 var JSONdata = JSON.parse(JSONresponse);
                 var statusCode = JSONdata['status']['code'];
-
+                
                 if (statusCode === 200) {
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
@@ -47,10 +49,12 @@ function uploadBookFile(){
                         msgAlertUploadStructure(4, 'File uploaded');
                     }
 
-                    resetTrainingBookFilePhaseOneComponents();
-                    updateTrainingBookFilePhaseOneComponents();
+                    resetComponentsPhaseOne();
+                    launch_safe_timeout_controll();
+                    removeProgressStripedPhaseOne();
+                    updateComponentsPhaseOneComplexBook();
                     // if exits box-warning re-start - it needs disabled
-                    hideMsgWarningAlertTrainingBookInfo();
+                    hideMsgWarningAlertTrainingInfo();
                 } else {
                     if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
                         msgAlertUploadStructure(2, 'File not uploaded. No content was found.');
@@ -58,12 +62,12 @@ function uploadBookFile(){
                         msgAlertUploadStructure(2, 'Something has gone wrong. File not uploaded');
                     }
                     disableButtonUploadBookFile(false);
-                    disableMsgWarningAlertTrainingBookInfoRestartButton(false);
+                    disableMsgWarningAlertTrainingInfoRestartButton(false);
                 }
             } catch (e) {
-                msgAlertUploadFile(2,'A generic error occurred');
+                msgAlertUploadStructure(2,'A generic error occurred');
                 disableButtonUploadBookFile(false);
-                disableMsgWarningAlertTrainingBookInfoRestartButton(false);
+                disableMsgWarningAlertTrainingInfoRestartButton(false);
             }
         }
     };
@@ -106,133 +110,79 @@ function enableUploadBookFile() {
         disableButtonUploadBookFile(true);
     else
         disableButtonUploadBookFile(false);
-    msgAlertUploadStructure(0,'You can now upload your book');
+    msgAlertUploadStructure(0,'You can now upload your structured text');
 }
 
 function disableButtonUploadBookFile(state){
     document.getElementById("btnUploadStructure").disabled = state;
 }
 
-function resetTrainingBookFilePhaseOneComponents(){
-    document.getElementById('progress-upload-file').style.width = '0%';
-    document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
-    hidePreTrainingBar(false);
-    hideTrainingBar(true);
-}
-
-function updateTrainingBookFilePhaseOneComponents() {
-    // simulation phaseOne -  pretraining
+function updateComponentsPhaseOneComplexBook() {
+    // coded only for DEMO
     var width = document.getElementById("progress-upload-file").style.width;
     width = width.substr(0, width.length-1);
 
-    msgAlertUploadStructure(0,'Phase 1 processing... ');
+    msgAlertProgressBar(0,'Phase 1 pre processing file... ');
 
-    if( parseInt(width) <= 100 ){
-        document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
-        document.getElementById('status-badge-upload').innerHTML = width+'%';
-        setTimeout(updateTrainingBookFilePhaseOneComponents, 80);
+    if( parseFloat(width) <= 90 ){
+
+        var status = getAiStatusCall();
+
+        if ( status == 'malformed_training_file') {
+            msgAlertUploadStructure(2, 'The training file is malformed');
+            document.getElementById("progress-upload-file").style.width = 0 + '%';
+            document.getElementById('status-badge-upload').innerHTML = 0 + '%';
+            msgAlertProgressBar(0,'Training not started. Please upload training data.');
+            return;
+        }
+
+        if ( status != 'preprocessed') {
+            document.getElementById("progress-upload-file").style.width = ( (parseFloat(width) + 0.5).toFixed(1)).toString() + '%';
+            document.getElementById('status-badge-upload').innerHTML =    ( (parseFloat(width) + 0.5).toFixed(1)).toString() + '%';
+            setTimeout(updateComponentsPhaseOneComplexBook, 100);
+        }
+        else {
+            // finish
+            document.getElementById("progress-upload-file").style.width = 100 + '%';
+            document.getElementById('status-badge-upload').innerHTML = 100 + '%';
+            removeProgressStripedPhaseOne();
+            trainingStartCall();
+        }
     }
     else {
+        //wait more time
+        waitBook();
+    }
+}
 
-        // start training session
+
+function waitBook(){
+    var status = getAiStatusCall();
+    if ( status == 'malformed_training_file') {
+        msgAlertUploadStructure(2, 'The training file is malformed');
+        document.getElementById("progress-upload-file").style.width = 0 + '%';
+        document.getElementById('status-badge-upload').innerHTML = 0 + '%';
+        msgAlertProgressBar(0,'Training not started. Please upload training data.');
+        return;
+    }
+
+    if ( status != 'preprocessed' && !timeIsover) {
+        alert('poto tempo');
+        setTimeout(waitBook, 2000);
+    }else {
+        // finish
+        document.getElementById("progress-upload-file").style.width = 100 + '%';
+        document.getElementById('status-badge-upload').innerHTML = 100 + '%';
         removeProgressStripedPhaseOne();
         trainingStartCall();
     }
 }
 
-function activeTrainingBookFilePhaseTwo(){
-    disableButtonUploadBookFile(false);
-    hideTrainingBar(false);
-    initialisingStatusTrainingBar(true);
-    block_server_ping = false;
+function launch_safe_timeout_controll(){
+    // coded only temporary
+    setTimeout(expiredTime, 10000); //  4 minutes
 }
 
-
-function initialisingStatusTrainingBar(state){
-    if (state) {
-        document.getElementById('status-training-file').innerText = 'initialising';
-        document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-        msgAlertProgressBar(1,'Training initialization may take a few minutes. please wait.');
-
-    }else{
-        document.getElementById('status-training-file').innerText = 'phase 2';
-        document.getElementById('status-training-file').setAttribute('class', 'text-center');
-        msgAlertProgressBar(0,'Now you can talk with your AI');
-    }
-}
-
-function hideTrainingBar(state){
-    $('#trainingbar').prop('hidden', state);
-}
-
-function hidePreTrainingBar(state){
-    $('#pretrainingbar').prop('hidden', state);
-}
-
-
-function updateTrainingBar(error,max_error){
-    var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
-    // TODO re-define check error limit
-    document.getElementById("progress-training-file").setAttribute('value',new_value);
-    document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
-    document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
-}
-
-
-function jumpPhaseOneBook(){
-    msgAlertUploadFile(1, 'A file is already loaded');
-    removeProgressStripedPhaseOneBook();
-    setProgressPhaseOneMaxValueBook();
-    hidePreTrainingBar(false);
-}
-
-function jumpPhaseTwoBook(){
-    msgAlertProgressBar(4,'Training finished');
-    removeProgressStripedPhaseTwoBook();
-    setProgressPhaseTwoMaxValueBook();
-    hideTrainingBar(false);
-}
-
-function setProgressPhaseOneMaxValueBook(){
-    document.getElementById('progress-upload-file').style.width = '100%';
-    document.getElementById('status-badge-upload').innerHTML = '100%';
-}
-
-function removeProgressStripedPhaseOneBook(){
-    $('#progress-upload-file-action').removeClass('active');
-    $('#progress-upload-file-action').removeClass('progress-striped');
-}
-
-function setProgressPhaseTwoMaxValueBook(){
-    document.getElementById('progress-training-file').style.width = '100%';
-    document.getElementById('status-badge-training').innerHTML = '100%';
-}
-
-function removeProgressStripedPhaseTwoBook(){
-    $('#progress-training-file-action').removeClass('active');
-    $('#progress-training-file-action').removeClass('progress-striped');
-}
-
-
-function resetTrainingBookFilePhaseTwoComponents(){
-    //document.getElementById('container_startstop').style.display = 'none';
-    hideTrainingBar(true);
-    document.getElementById("progress-training-file").style.width ='0%';
-    document.getElementById('status-badge-training').innerHTML = '0%';
-
-}
-
-
-function hideMsgWarningAlertTrainingBookInfo(){
-    var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
-    if (element !== null) {
-        element.parentNode.removeChild(element);
-    }
-}
-
-function disableMsgWarningAlertTrainingBookInfoRestartButton(state){
-    var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
-    if (element !== null) {
-        document.getElementById('restart-button').disabled = state;
-    }
+function expiredTime(){
+    timeIsover = true;
 }
