@@ -69,6 +69,7 @@ function deleteUserExpression(element) {
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent)
     checkListExpressionIsEmpty();
+    $("#btnSaveIntent").prop("disabled", false);
 }
 
 function checkListExpressionIsEmpty() {

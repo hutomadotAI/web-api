@@ -24,16 +24,26 @@ $entityList = \hutoma\console::getEntities(\hutoma\console::getDevToken());
 
 $intent = \hutoma\console::getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 
-if ($entityList['status']['code'] !== 200) {
+if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 404) {
     unset($entityList);
     \hutoma\console::redirect('./error.php?err=210');
     exit;
+} else { ?>
+    <script>
+        var entityListFromServer = <?php echo json_encode($entityList['entity_name']); unset($entityList);?>;
+    </script>
+    <?php
 }
 
 if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
     unset($intent);
     \hutoma\console::redirect('./error.php?err=211');
     exit;
+} else { ?>
+    <script>
+        var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
+    </script>
+    <?php
 }
 
 function isPostInputAvailable()
@@ -131,9 +141,5 @@ function echoJsonIntentResponse($intent)
     </script>
 </form>
 
-<script>
-    var entityListFromServer = <?php echo json_encode($entityList['entity_name']); unset($entityList);?>;
-    var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
-</script>
 </body>
 </html>

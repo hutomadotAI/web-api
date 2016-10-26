@@ -54,7 +54,7 @@ function showIntents(str) {
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-black" type="submit" id="entity-label' + x + '" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">' + intents[x] + '</div>')
+            wHTML += ('<div class="text-gray" type="submit" id="intent-label' + x + '" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">' + intents[x] + '</div>')
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
@@ -133,7 +133,7 @@ $('#deleteIntent').on('show.bs.modal', function (e) {
     var elem = document.getElementById('delete-intent-label');
     var elemBtn = document.getElementById('modalDelete');
     var value = $('#intent-label' + esseyId).text();
-    elem.innerHTML = 'Are you sure you would like to delete <label>' + value + '</label> intent ? ';
+    elem.innerHTML = 'Are you sure you would like to delete the <label>' + value + '</label> intent ? ';
     elemBtn.setAttribute("value", esseyId);
 });
 

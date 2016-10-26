@@ -142,6 +142,7 @@ function deleteIntentResponse(element) {
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent)
     checkListIntentResponseIsEmpty();
+    $("#btnSaveIntent").prop("disabled", false);
 }
 
 function checkListIntentResponseIsEmpty() {

@@ -275,13 +275,15 @@ public class DatabaseEntitiesIntents extends Database {
             currentSet.add(readCurrentRs.getString("says"));
         }
 
-        // for each new bit of data
-        for (String newValue : intent.getUserSays()) {
-            // mark it if it already existed
-            if (!currentSet.remove(newValue)) {
-                // or add it if it didn't
-                transaction.getDatabaseCall().initialise("addIntentUserSays", 4)
-                        .add(devid).add(aiid).add(intent.getIntentName()).add(newValue).executeUpdate();
+        if (intent.getUserSays() != null) {
+            // for each new bit of data
+            for (String newValue : intent.getUserSays()) {
+                // mark it if it already existed
+                if (!currentSet.remove(newValue)) {
+                    // or add it if it didn't
+                    transaction.getDatabaseCall().initialise("addIntentUserSays", 4)
+                            .add(devid).add(aiid).add(intent.getIntentName()).add(newValue).executeUpdate();
+                }
             }
         }
 

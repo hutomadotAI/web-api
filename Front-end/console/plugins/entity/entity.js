@@ -172,7 +172,7 @@ $('#deleteEntity').on('show.bs.modal', function (e) {
     var elem = document.getElementById('delete-entity-label');
     var elemBtn = document.getElementById('modalDelete');
     var value = $('#entity-label' + esseyId).text();
-    elem.innerHTML = 'Are you sure you would like to delete <label>' + value + '</label> entity ? ';
+    elem.innerHTML = 'Are you sure you would like to delete the <label>' + value + '</label> entity ? ';
     elemBtn.setAttribute("value", esseyId);
 });
 
