@@ -35,14 +35,41 @@ function saveIntent() {
     var expressions = getMultipleElementValues('user-expression', 'placeholder', 1);
     var intentName = document.getElementById('intent-name').value;
     var entityNames = getMultipleElementValues('action-entity', 'placeholder', 0);
-    var numberPrompts = getMultipleTextElementValues('action-nprompt');
-    var prompts = getMultipleTextElementValues('action-prompts');
+
+
+    // TODO: we need to get a much better way of doing this - Bug460
+    var prompts1 = getMultipleTextElementValues('action-prompts');
+    var prompts2 = getMultipleElementValues('action-prompts', 'placeholder', 0);
+    var prompts = [];
+    for (var i = 0; i < prompts1.length; i++) {
+        var promptsArray = [];
+        if (prompts1[i] == '') {
+            promptsArray.push(prompts2[i] == 'click to enter' ? prompts1[i] : prompts2[i]);
+        } else {
+            promptsArray.push(prompts1[i]);
+        }
+        prompts[i] = promptsArray;
+    }
+
+    var numberPrompts1 = getMultipleTextElementValues('action-nprompt');
+    var numberPrompts2 = getMultipleElementValues('action-nprompt', 'placeholder', 0);
+    var numberPrompts = [];
+    for (i = 0; i < numberPrompts1.length; i++) {
+        numberPrompts[i] = numberPrompts2[i] == 'n° prompt' ? numberPrompts1[i] : numberPrompts2[i];
+    }
+
     var required = getMultipleCheckElementValues('action-required');
     var variables = [];
-    for (var i = 0; i < entityNames.length; i++) {
+    for (i = 0; i < entityNames.length; i++) {
+        if (prompts[i] == '' || numberPrompts[i] == '' || entityNames[i][0] != '@' || entityNames[i].length < 2) {
+            containerMsgAlertIntentVariable(2, 'Please enter all the fields for entity ' +
+                (entityNames[i][0] == '@' ? entityNames[i] : ('at row ' + (i + 1))));
+            return;
+        }
+
         var v = {};
         v['entity_name'] = entityNames[i][0] == '@' ? entityNames[i].substring(1, entityNames[0].length) : entityNames[i];
-        v['prompts'] = prompts;
+        v['prompts'] = prompts[i];
         v['n_prompts'] = numberPrompts[i] == '' ? 1 : numberPrompts[i];
         v['required'] = required[i];
         //v['value'] = '';
@@ -52,6 +79,7 @@ function saveIntent() {
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
+    resetMsgAlertIntentVariable();
 
     $.ajax({
         url: 'intentelement.php?intent=' + intentName,

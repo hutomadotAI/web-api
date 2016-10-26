@@ -81,8 +81,12 @@ function deleteIntentVariable(element) {
     var parent = (((element.parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent);
     checkListExpressionIsEmpty();
-    containerMsgAlertIntentVariable(0, 'Set Intens parameters bla bla bla bla.');
+    resetMsgAlertIntentVariable();
     releaseUsedEntities();
+}
+
+function resetMsgAlertIntentVariable() {
+    containerMsgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
 }
 
 function variableOnMouseIn(elem) {
