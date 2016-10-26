@@ -1205,7 +1205,7 @@ class console
             );
 
             $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setOpt(CURLOPT_POST, true);
+            $curl->setVerbPost();
             $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $curl->exec();
             if ($curl_response === false) {
@@ -1365,7 +1365,7 @@ class console
             );
 
             $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setOpt(CURLOPT_POST, true);
+            $curl->setVerbPost();
             $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $curl->exec();
             if ($curl_response === false) {
@@ -1431,7 +1431,7 @@ class console
             );
 
             $curl = new curlHelper($service_url, $dev_token);
-            $curl->setOpt(CURLOPT_POST, true);
+            $curl->setVerbPost();
             $curl->addHeader('Content-Type', 'application/json');
             $curl->setOpt(CURLOPT_POSTFIELDS, json_encode($args));
             $curl_response = $curl->exec();
@@ -1439,6 +1439,50 @@ class console
             if ($curl_response === false) {
                 $curl->close();
                 \hutoma\console::redirect('./error.php?err=310');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+    public static function deleteEntity($dev_token, $entityName)
+    {
+        if (self::$loggedIn) {
+            $path = '/entity';
+            $params = array('entity_name' => $entityName);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
+
+            $curl = new curlHelper($service_url, $dev_token);
+            $curl->setVerbDelete();
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=326');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+    public static function deleteIntent($dev_token, $aiid, $intentName)
+    {
+        if (self::$loggedIn) {
+            $path = '/intent/' . $aiid;
+            $params = array('intent_name' => $intentName);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
+
+            $curl = new curlHelper($service_url, $dev_token);
+            $curl->setVerbDelete();
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=317');
                 exit;
             }
             $json_response = json_decode($curl_response, true);
@@ -1459,7 +1503,7 @@ class console
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setOpt(CURLOPT_POST, true);
+            $curl->setVerbPost();
             $curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $curl->exec();
 
@@ -1592,7 +1636,7 @@ class console
             $json = json_encode($args);
 
             $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setOpt(CURLOPT_POST, true);
+            $curl->setVerbPost();
             $curl->addHeader('Content-Type', 'application/json');
             $curl->setOpt(CURLOPT_POSTFIELDS, $json);
             $curl_response = $curl->exec();

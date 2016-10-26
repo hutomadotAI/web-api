@@ -1,5 +1,5 @@
 document.getElementById("inputEntityName").addEventListener("keyup", activeButtonCreate);
-//document.getElementById("btnCreateEntity").addEventListener("click", PostingEntityName);
+document.getElementById("btnCreateEntity").addEventListener("click", PostingEntityName);
 
 if (limitText($("#inputEntityName")) == 0)
     $("#btnCreateEntity").prop("disabled", false);
@@ -127,8 +127,7 @@ function showEntities(str) {
 }
 
 function deleteEntity(elem) {
-    delete entities[elem];
-    showEntities('');
+    this.location.href = 'entity.php?deleteentity=' + entities[elem];
 }
 
 function OnMouseIn(elem) {

@@ -39,6 +39,11 @@ class curlHelper
         $this->setOpt(CURLOPT_SSL_VERIFYHOST, 2);
     }
 
+    /**
+     * Adds a header to the list of headers being sent with the request
+     * @param $headerName - the header name
+     * @param $headerValue - the header value
+     */
     public function addHeader($headerName, $headerValue)
     {
         array_push($this->headers, $headerName . ": " . $headerValue);
@@ -52,6 +57,22 @@ class curlHelper
     public function setOpt($opt, $value)
     {
         curl_setopt($this->curl, $opt, $value);
+    }
+
+    /**
+     * Sets the request verb to DELETE.
+     */
+    public function setVerbDelete()
+    {
+        $this->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
+    }
+
+    /**
+     * Sets the request verb to POST.
+     */
+    public function setVerbPost()
+    {
+        $this->setOpt(CURLOPT_POST, true);
     }
 
     /**

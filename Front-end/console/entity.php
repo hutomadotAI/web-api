@@ -6,6 +6,15 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
+if (isset($_REQUEST['deleteentity'])) {
+    $entityName = $_REQUEST['deleteentity'];
+    $result = \hutoma\console::deleteEntity(\hutoma\console::getDevToken(), $entityName);
+    if ($result['status']['code'] != 200) {
+        unset($result);
+        \hutoma\console::redirect('./error.php?err=326');
+    }
+}
+
 $entities = \hutoma\console::getEntities(\hutoma\console::getDevToken());
 
 if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) {

@@ -85,8 +85,7 @@ function showIntents(str) {
 }
 
 function deleteIntent(elem) {
-    delete intents[elem];
-    showIntents('');
+    this.location.href = 'intent.php?deleteintent=' + intents[elem];
 }
 
 function OnMouseIn(elem) {

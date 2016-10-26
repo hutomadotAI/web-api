@@ -35,8 +35,8 @@ function saveIntent() {
     var expressions = getMultipleElementValues('user-expression', 'placeholder', 1);
     var intentName = document.getElementById('intent-name').value;
     var entityNames = getMultipleElementValues('action-entity', 'placeholder', 0);
-    var numberPrompts = getMultipleElementValues('action-nprompt', 'placeholder', 0);
-    var prompts = getMultipleElementValues('action-prompts', 'placeholder', 0);
+    var numberPrompts = getMultipleTextElementValues('action-nprompt');
+    var prompts = getMultipleTextElementValues('action-prompts');
     var required = getMultipleCheckElementValues('action-required');
     var variables = [];
     for (var i = 0; i < entityNames.length; i++) {
