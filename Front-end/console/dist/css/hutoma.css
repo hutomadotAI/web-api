@@ -3405,6 +3405,7 @@ table.text-center th {
 .direct-chat-msg,
 .direct-chat-text {
     display: block;
+    color: #444444 ;
 }
 
 .direct-chat-msg {
@@ -3436,8 +3437,6 @@ table.text-center th {
     background: #d2d6de;
     border: 1px solid #d2d6de;
     margin: 5px 0 0 50px;
-    color: #ff892d;
-    font-weight: bold;
 }
 
 .direct-chat-text:after,
