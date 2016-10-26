@@ -1,14 +1,15 @@
 document.getElementById("inputIntentName").addEventListener("keyup", activeButtonCreateIntent);
 document.getElementById("btnCreateIntent").addEventListener("click", PostingIntentName);
 
+
 function activeButtonCreateIntent() {
     var limitTextInputSize = 50;
-    switch (limitText($("#inputIntentName"), limitTextInputSize)){
+    switch (limitText($("#inputIntentName"), limitTextInputSize)) {
         case -1:
-            $("#btnCreateIntent").prop("disabled",true);
+            $("#btnCreateIntent").prop("disabled", true);
             break;
         case 0:
-            msgAlertIntent(0,'Create an Intent to trigger your own business logic.');
+            msgAlertIntent(0, 'Create an Intent to trigger your own business logic.');
             $("#btnCreateIntent").prop("disabled", false);
             break;
         case 1:
@@ -16,19 +17,19 @@ function activeButtonCreateIntent() {
             $("#btnCreateIntent").prop("disabled", false);
             break;
         default:
-            $("#btnCreateIntent").prop("disabled",true);
+            $("#btnCreateIntent").prop("disabled", true);
     }
 }
 
-function PostingIntentName(){
-    $(this).prop("disabled",true);
+function PostingIntentName() {
+    $(this).prop("disabled", true);
 
-    if(inputValidation($("#inputIntentName").val(),'intent')) {
+    if (inputValidation($("#inputIntentName").val(), 'intent')) {
         msgAlertIntent(2, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
         return;
     }
 
-    if(document.intentCreateForm.onsubmit)
+    if (document.intentCreateForm.onsubmit)
         return;
 
     RecursiveUnbind($('#wrapper'));
@@ -36,24 +37,24 @@ function PostingIntentName(){
 
 }
 
-function showIntents(str){
+function showIntents(str) {
     var wHTML = "";
     if (intents.length < 1) {
         msgAlertIntent(0, 'No intents yet.');
         return;
     }
     else
-        msgAlertIntent(0,'Create an Intent to trigger your own business logic.');
+        msgAlertIntent(0, 'Create an Intent to trigger your own business logic.');
 
     for (var x in intents) {
-        if ( (str!=" ") && ( (str.length==0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
+        if ((str != " ") && ( (str.length == 0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
 
             wHTML += ('<div class="col-xs-12">');
             wHTML += ('<div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-black" type="submit" id="entity-label'+x+'" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">'+intents[x]+'</div>')
+            wHTML += ('<div class="text-black" type="submit" id="entity-label' + x + '" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">' + intents[x] + '</div>')
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
@@ -62,10 +63,10 @@ function showIntents(str){
             wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
             wHTML += ('</a>');
             wHTML += ('<ul class="dropdown-menu flat">');
-            wHTML += ('<li><a onClick="downloadIntent (\''+intents[x]+'\','+x+',0)">JSON format</a></li>');
-            wHTML += ('<li><a onClick="downloadIntent (\''+intents[x]+'\','+x+',1)">CSV table</a></li>');
+            wHTML += ('<li><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',0)">JSON format</a></li>');
+            wHTML += ('<li><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',1)">CSV table</a></li>');
             wHTML += ('</ul>');
-            wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="'+x+'" style="cursor: pointer;">');
+            wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
             wHTML += ('</div>');
@@ -83,61 +84,61 @@ function showIntents(str){
     document.getElementById('intentsearch').appendChild(newNode);
 }
 
-function deleteIntent (elem) {
+function deleteIntent(elem) {
     delete intents[elem];
     showIntents('');
 }
 
-function OnMouseIn (elem) {
+function OnMouseIn(elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = '';
 }
 
-function OnMouseOut (elem) {
+function OnMouseOut(elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = 'none';
 }
 
-function editIntent(intent){
+function editIntent(intent) {
     var form = document.createElement('form');
     var element = document.createElement('input');
 
     form.method = 'POST';
     form.action = './intentelement.php';
 
-    element.value=intent;
-    element.name='intent';
+    element.value = intent;
+    element.name = 'intent';
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
 }
 
-function downloadIntent (name,value,flag) {
+function downloadIntent(name, value, flag) {
     name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
-    if( flag === 0){
-        var blob = new Blob(["this file contains intent in JSON format"], { type: "text/plain;charset=utf-8;", });
-        saveAs(blob, name+".txt");
+    if (flag === 0) {
+        var blob = new Blob(["this file contains intent in JSON format"], {type: "text/plain;charset=utf-8;",});
+        saveAs(blob, name + ".txt");
     }
     else {
-        var blob = new Blob(["this file is a simulaion of CVS format file"], { type: "text/plain;charset=utf-8;", });
-        saveAs(blob, name+".csv");
+        var blob = new Blob(["this file is a simulaion of CVS format file"], {type: "text/plain;charset=utf-8;",});
+        saveAs(blob, name + ".csv");
     }
 }
 
-if (limitText($("#inputIntentName"))== 0)
+if (limitText($("#inputIntentName")) == 0)
     $("#btnCreateIntent").prop("disabled", false);
 
-$('#deleteIntent').on('show.bs.modal', function(e) {
+$('#deleteIntent').on('show.bs.modal', function (e) {
     var $modal = $(this), esseyId = e.relatedTarget.id;
     var elem = document.getElementById('delete-intent-label');
     var elemBtn = document.getElementById('modalDelete');
-    var value = $('#intent-label'+esseyId).text();
-    elem.innerHTML = 'Are you sure you would like to delete <label>' +  value +'</label> intent ? ';
+    var value = $('#intent-label' + esseyId).text();
+    elem.innerHTML = 'Are you sure you would like to delete <label>' + value + '</label> intent ? ';
     elemBtn.setAttribute("value", esseyId);
 });
 
 // VIDEO TUTORIAL
-$("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function(){
+$("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
-    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });

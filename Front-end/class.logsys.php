@@ -236,7 +236,7 @@ class console
         }
 
     }
-    
+
     public static function construct($called_from = "")
     {
 
@@ -1244,7 +1244,8 @@ class console
      * -------------------------
      */
 
-    private static function getApiRequestUrl() {
+    private static function getApiRequestUrl()
+    {
         return self::$config["api"]["request_url"];
     }
 
@@ -1555,6 +1556,39 @@ class console
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
             $curl = new curlHelper($service_url, self::getDevToken());
+            $curl_response = $curl->exec();
+
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=311');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+    public static function updateIntent($aiid, $intentName, $responses, $user_says, $variables)
+    {
+        if (self::$loggedIn) {
+            $path = '/intent/' . $aiid;
+            $parameters = array('aiid' => $aiid, 'intent_name' => $intentName);
+            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
+
+            $args = array(
+                'intent_name' => $intentName,
+                'user_says' => $user_says,
+                'responses' => $responses,
+                'variables' => $variables
+            );
+
+            $json = json_encode($args);
+
+            $curl = new curlHelper($service_url, self::getDevToken());
+            $curl->setOpt(CURLOPT_POST, true);
+            $curl->addHeader('Content-Type', 'application/json');
+            $curl->setOpt(CURLOPT_POSTFIELDS, $json);
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {

@@ -1,25 +1,27 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    $intents = \hutoma\console::getIntents($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+$intents = \hutoma\console::getIntents($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 
-    if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
-        unset($intents);
-        \hutoma\console::redirect('./error.php?err=210');
-        exit;
-    }
+if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
+    unset($intents);
+    \hutoma\console::redirect('./error.php?err=210');
+    exit;
+}
 
-    function echoJsonIntentsResponse($intents){
-        if ( $intents['status']['code'] !== 404)
-            echo json_encode($intents['intent_name']);
-        else
-            echo '""'; // return empty string
-    }
+function echoJsonIntentsResponse($intents)
+{
+    if ($intents['status']['code'] !== 404)
+        echo json_encode($intents['intent_name']);
+    else
+        echo '""'; // return empty string
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -91,7 +93,7 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","intents",1,true,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "intents", 1, true, false]);
     </script>
 </form>
 

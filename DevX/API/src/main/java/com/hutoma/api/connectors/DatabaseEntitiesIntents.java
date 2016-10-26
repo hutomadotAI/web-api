@@ -301,6 +301,8 @@ public class DatabaseEntitiesIntents extends Database {
      */
     private void updateIntentResponses(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
+
+
         // read current
         ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
                 .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
@@ -311,13 +313,16 @@ public class DatabaseEntitiesIntents extends Database {
             currentSet.add(readCurrentRs.getString("response"));
         }
 
-        // for each new bit of data
-        for (String newValue : intent.getResponses()) {
-            // mark it if it already existed
-            if (!currentSet.remove(newValue)) {
-                // or add it if it didn't
-                transaction.getDatabaseCall().initialise("addIntentResponse", 4)
-                        .add(devid).add(aiid).add(intent.getIntentName()).add(newValue).executeUpdate();
+
+        if (intent.getResponses() != null) {
+            // for each new bit of data
+            for (String newValue : intent.getResponses()) {
+                // mark it if it already existed
+                if (!currentSet.remove(newValue)) {
+                    // or add it if it didn't
+                    transaction.getDatabaseCall().initialise("addIntentResponse", 4)
+                            .add(devid).add(aiid).add(intent.getIntentName()).add(newValue).executeUpdate();
+                }
             }
         }
 
@@ -355,12 +360,14 @@ public class DatabaseEntitiesIntents extends Database {
             currentSet.put(old.getEntityName(), old);
         }
 
-        // for every variable in the new data ...
-        for (IntentVariable newValue : intent.getVariables()) {
-            // mark it as done if there was already one using that entity
-            currentSet.remove(newValue.getEntityName());
-            // and create or update it
-            intentVariableCreateOrUpdate(transaction, devid, aiid, intent, newValue);
+        if (intent.getVariables() != null) {
+            // for every variable in the new data ...
+            for (IntentVariable newValue : intent.getVariables()) {
+                // mark it as done if there was already one using that entity
+                currentSet.remove(newValue.getEntityName());
+                // and create or update it
+                intentVariableCreateOrUpdate(transaction, devid, aiid, intent, newValue);
+            }
         }
 
         // anything left over needs to be deleted
@@ -413,11 +420,13 @@ public class DatabaseEntitiesIntents extends Database {
             currentSet.add(readCurrentRs.getString("prompt"));
         }
 
-        // add any prompts that didn't exist before
-        for (String newValue : intentVariable.getPrompts()) {
-            if (!currentSet.remove(newValue)) {
-                transaction.getDatabaseCall().initialise("addIntentVariablePrompt", 4)
-                        .add(devid).add(aiid).add(varId).add(newValue).executeUpdate();
+        if (intentVariable.getPrompts() != null) {
+            // add any prompts that didn't exist before
+            for (String newValue : intentVariable.getPrompts()) {
+                if (!currentSet.remove(newValue)) {
+                    transaction.getDatabaseCall().initialise("addIntentVariablePrompt", 4)
+                            .add(devid).add(aiid).add(varId).add(newValue).executeUpdate();
+                }
             }
         }
 

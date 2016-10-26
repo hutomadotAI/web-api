@@ -162,7 +162,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (checkList.contains(APIParameter.EntityJson)) {
                 ApiEntity entity = (ApiEntity) this.serializer.deserialize(request.getEntityStream(), ApiEntity.class);
                 this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
-                this.validateOptionalObjectValues(this.ENTITYVALUE, entity.getEntityValueList());
+                this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
             }
 

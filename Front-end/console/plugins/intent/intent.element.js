@@ -1,6 +1,6 @@
 document.getElementById("addParameter").addEventListener("click", addEmptyVariableRow);
 
-function loadExpressionsFromIntent(){
+function loadExpressionsFromIntent() {
     if (typeof intent['user_says'] == "undefined" || !(intent['user_says'] instanceof Array))
         return;
 
@@ -10,11 +10,11 @@ function loadExpressionsFromIntent(){
         var value = list_expressions[i];
         var parent = document.getElementById('userexpression-list');
         document.getElementById('user-expression').value = '';
-        createNewUsersayRow(value,parent);
+        createNewUsersayRow(value, parent);
     }
 }
 
-function loadVariablesFromIntent(){
+function loadVariablesFromIntent() {
     if (typeof intent['variables'] == "undefined" || !(intent['variables'] instanceof Array))
         return;
 
@@ -23,35 +23,36 @@ function loadVariablesFromIntent(){
 
     for (var x in list_variables) {
 
-        var entity = '@'+list_variables[x].entity_name;
+        var entity = '@' + list_variables[x].entity_name;
         var n_prompts = list_variables[x].n_prompts;
         var value = list_variables[x].value;
         var required = list_variables[x].required;
+        var prompts = list_variables[x].prompts;
         var parent = document.getElementById('parameter-list');
         var len = list_variables[x].prompts.length;
-        createNewParameterRow(entity,intent_name,n_prompts,len,value,required,parent);
+        createNewParameterRow(entity, intent_name, n_prompts, prompts, len, value, required, parent);
     }
 }
 
-function loadResponsesFromIntent(){
-    if (typeof intent['response'] == "undefined" || !(intent['response'] instanceof Array))
+function loadResponsesFromIntent() {
+    if (typeof intent['responses'] == "undefined" || !(intent['responses'] instanceof Array))
         return;
 
-    var list_responses = intent['response'];
+    var list_responses = intent['responses'];
     for (var i in list_responses) {
 
         var value = list_responses[i];
         var parent = document.getElementById('intentresponse-list');
         document.getElementById('intent-response').value = '';
-        createNewIntentResponseRow(value,parent);
+        createNewIntentResponseRow(value, parent);
     }
 }
 
 
-function loadEntities(){
+function loadEntities() {
     var array = [];
     for (var x in entityListFromServer) {
-        array.push('@'+entityListFromServer[x]);
+        array.push('@' + entityListFromServer[x]);
     }
     var $input = $('#action-entity');
 
@@ -59,67 +60,67 @@ function loadEntities(){
         source: array,
         resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
         activeClass: 'active',
-        renderItem: function(label, id, index) {
+        renderItem: function (label, id, index) {
             return '<li><a href="#">' + label + '</a></li>';
         }
     });
 
-    $input.on('omniselect:select', function(event, value) {
+    $input.on('omniselect:select', function (event, value) {
         console.log('Selected: ' + value);
     });
 
 }
 
-function addEmptyVariableRow(){
+function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    createNewParameterRow('','','',0,'',false,node);
+    createNewParameterRow('', '', '', '', 0, '', false, node);
 }
 
-function deleteIntentVariable (element) {
+function deleteIntentVariable(element) {
     // delete node from page - dipendence parentNode
-    var parent =  (((element.parentNode).parentNode).parentNode).parentNode;
+    var parent = (((element.parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent);
     checkListExpressionIsEmpty();
     containerMsgAlertIntentVariable(0, 'Set Intens parameters bla bla bla bla.');
     releaseUsedEntities();
 }
 
-function variableOnMouseIn (elem) {
+function variableOnMouseIn(elem) {
     var btn = elem.children[3].children[0].children[1].children[0];
     btn.style.display = '';
 }
 
-function variableOnMouseOut (elem) {
+function variableOnMouseOut(elem) {
     var btn = elem.children[3].children[0].children[1].children[0];
     btn.style.display = 'none';
 }
 
-function createNewParameterRow(entity,intent_name,n_prompts,size,value,required,parent){
+function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, value, required, parent) {
 
     if (isJustAddedNewRow())
         return;
 
-    if (typeof(n_prompts)==='undefined' || (n_prompts)=='')
+    if (typeof(n_prompts) === 'undefined' || (n_prompts) == '')
         n_prompts = 'n° prompt';
-    if (typeof(value)==='undefined' || (value)=='')
+    if (typeof(value) === 'undefined' || (value) == '')
         value = 'insert value';
 
-    var wHTML='';
+    var wHTML = '';
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
 
-    if (typeof(entity)==='undefined' || (entity)=='')
+    if (typeof(entity) === 'undefined' || (entity) == '')
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="margin: 0" placeholder="add entity" autocomplete="off" >');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="margin: 0; background-color: transparent;" placeholder="'+entity+'" autocomplete="off" disabled="disabled">');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="margin: 0; background-color: transparent;" placeholder="' + entity + '" autocomplete="off" disabled="disabled">');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt"  placeholder="'+n_prompts+'" >');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt"  placeholder="' + n_prompts + '" >');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -127,18 +128,18 @@ function createNewParameterRow(entity,intent_name,n_prompts,size,value,required,
     wHTML += ('<div class="text-center" >');
 
 
-    if (size>0)
+    if (size > 0)
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" ' +
-        'placeholder="..." data-toggle="modal" data-target="#boxPrompts" ' +
-        'data-entity="'+entity+'" ' +
-        'data-intent="'+intent_name+'"' +
-        'data-nprompts="'+n_prompts+'" onMouseOver="this.style.cursor=\'pointer\'">');
+        'placeholder="' + prompts + '" data-toggle="modal" data-target="#boxPrompts" ' +
+        'data-entity="' + entity + '" ' +
+        'data-intent="' + intent_name + '"' +
+        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" ' +
         'placeholder="click to enter" data-toggle="modal" data-target="#boxPrompts" ' +
-        'data-entity="'+entity+'" ' +
-        'data-intent="'+intent_name+'"' +
-        'data-nprompts="'+n_prompts+'" onMouseOver="this.style.cursor=\'pointer\'">');
+        'data-entity="' + entity + '" ' +
+        'data-intent="' + intent_name + '"' +
+        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -147,10 +148,10 @@ function createNewParameterRow(entity,intent_name,n_prompts,size,value,required,
     wHTML += ('<div class="text-left" >');
     wHTML += ('<div class="col-xs-7 text-gray no-padding">');
 
-    if(required==0)
-        wHTML += ('<input class="pull-right" type="checkbox" id="required"> ');
+    if (required == 0)
+        wHTML += ('<input class="pull-right" type="checkbox" id="required" name="action-required"> ');
     else
-        wHTML += ('<input class="pull-right" type="checkbox" id="required" checked> ');
+        wHTML += ('<input class="pull-right" type="checkbox" id="required" name="action-required" checked> ');
 
     wHTML += ('</div>');
     wHTML += ('<div class="col-xs-5 text-gray no-padding">');
@@ -164,11 +165,11 @@ function createNewParameterRow(entity,intent_name,n_prompts,size,value,required,
 
     var newNode = document.createElement('div');
     newNode.setAttribute('class', 'box-body bg-white flat no-padding');
-    newNode.setAttribute('onmouseover','variableOnMouseIn (this)');
-    newNode.setAttribute('onmouseout','variableOnMouseOut (this)');
+    newNode.setAttribute('onmouseover', 'variableOnMouseIn (this)');
+    newNode.setAttribute('onmouseout', 'variableOnMouseOut (this)');
 
     newNode.style.border = '1px solid #d2d6de';
-    newNode.style.marginTop ='-1px';
+    newNode.style.marginTop = '-1px';
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
 
@@ -178,10 +179,10 @@ function createNewParameterRow(entity,intent_name,n_prompts,size,value,required,
 
     // loading stored entities
     for (var x in entityListFromServer) {
-        if (typeof(entity)==='undefined' || (entity)=='') {
+        if (typeof(entity) === 'undefined' || (entity) == '') {
             // if a Entity is just used , it mush remove from possible selection on dropdown menu
-            if ( ! isUsedEntities(entityListFromServer[x]) )
-                array.push('@'+entityListFromServer[x]);
+            if (!isUsedEntities(entityListFromServer[x]))
+                array.push('@' + entityListFromServer[x]);
         }
     }
 
@@ -189,35 +190,35 @@ function createNewParameterRow(entity,intent_name,n_prompts,size,value,required,
         source: array,
         resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
         activeClass: 'active',
-        renderItem: function(label, id, index) {
+        renderItem: function (label, id, index) {
             return '<li><a href="#">' + label + '</a></li>';
         }
     });
 
     // after selection remove value on input text and set placeholder
-    $(inputNode).on('omniselect:select', function(event, value) {
+    $(inputNode).on('omniselect:select', function (event, value) {
         $(inputNode).val('');
         $(inputNode).attr('placeholder', value);
     });
 }
 
-function isUsedEntities(entity_name){
+function isUsedEntities(entity_name) {
     var parent = document.getElementById('parameter-list');
     //  id NODE - relative at entities are in variables list under entity field
     var len = parent.childElementCount;
 
-    while(--len){
+    while (--len) {
         var node = parent.children[len].children[0].children[0].children[0];
-        if ( node.placeholder.replace(/[@]/g, "") == entity_name )
+        if (node.placeholder.replace(/[@]/g, "") == entity_name)
             return true;
     }
     return false;
 }
 
-function releaseUsedEntities(){
+function releaseUsedEntities() {
 
     var parent = document.getElementById('parameter-list');
-    if ( !parent.hasChildNodes() )
+    if (!parent.hasChildNodes())
         return;
     var node = parent.children[0].children[0].children[0].children[0];
     var array = [];
@@ -227,25 +228,25 @@ function releaseUsedEntities(){
 
     // loading stored entities
     for (var x in entityListFromServer) {
-        if ( ! isUsedEntities(entityListFromServer[x]) )
-            array.push('@'+entityListFromServer[x]);
+        if (!isUsedEntities(entityListFromServer[x]))
+            array.push('@' + entityListFromServer[x]);
     }
 
     $(node).omniselect({
         source: array,
         resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
         activeClass: 'active',
-        renderItem: function(label, id, index) {
+        renderItem: function (label, id, index) {
             return '<li><a href="#">' + label + '</a></li>';
         }
     });
 
 }
 
-function isJustAddedNewRow(){
+function isJustAddedNewRow() {
     var parent = document.getElementById('parameter-list');
     // if parameter list is empty then you can ADD new empty row
-    if ( !parent.hasChildNodes() )
+    if (!parent.hasChildNodes())
         return false;
 
     // if entity field value is default value it means you just add a new row
@@ -254,7 +255,7 @@ function isJustAddedNewRow(){
         return true;
 
     var len = parent.childElementCount;
-    if ( len==entityListFromServer.length){ // se hai raggiunto in numero massimo MSG ALERT
+    if (len == entityListFromServer.length) { // se hai raggiunto in numero massimo MSG ALERT
         containerMsgAlertIntentVariable(1, 'All entities are used!');
         return true;
     }
@@ -263,7 +264,7 @@ function isJustAddedNewRow(){
 }
 
 
-function loadPromptsForEntity(curr_entity){
+function loadPromptsForEntity(curr_entity) {
     if (typeof intent['variables'] == "undefined" || !(intent['variables'] instanceof Array))
         return;
 
@@ -282,14 +283,14 @@ function loadPromptsForEntity(curr_entity){
     }
 }
 
-function cleanupromptDialogbox(){
+function cleanupromptDialogbox() {
     var node = document.getElementById('prompts-list');
     while (node.firstChild) node.removeChild(node.firstChild);
 }
 
 
 // Pass values to Modal on show dialog modal
-$('#boxPrompts').on('show.bs.modal', function(e) {
+$('#boxPrompts').on('show.bs.modal', function (e) {
 
     var curr_entity = $(e.relatedTarget).data('entity');
     var curr_intent = $(e.relatedTarget).data('intent');
@@ -305,7 +306,7 @@ $('#boxPrompts').on('show.bs.modal', function(e) {
     loadPromptsForEntity(curr_entity)
 });
 
-$(document).ready(function() {
+$(document).ready(function () {
 
     loadExpressionsFromIntent();
     loadVariablesFromIntent();

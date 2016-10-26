@@ -1,40 +1,53 @@
 <?php
 require "../pages/config.php";
 
-if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
 
-if (! isPostInputAvailable() ) {
+if (!isPostInputAvailable()) {
     \hutoma\console::redirect('./error.php?err=118');
     exit;
 }
-$entityList = \hutoma\console::getEntities(\hutoma\console::getDevToken());
-$intent     = \hutoma\console::getIntent  ( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['intent']);
 
-if ($entityList['status']['code'] !== 200 ) {
+if (isset($_POST['intent_name'])) {
+    // This is an intent update
+
+    \hutoma\console::updateIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
+        $_POST['intent_name'], $_POST['intent_responses'], $_POST['intent_prompts'], $_POST['variables']);
+    $intentName = $_POST['intent_name'];
+} else {
+    $intentName = $_POST['intent'];
+}
+$entityList = \hutoma\console::getEntities(\hutoma\console::getDevToken());
+$intent = \hutoma\console::getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+
+if ($entityList['status']['code'] !== 200) {
     unset($entityList);
     \hutoma\console::redirect('./error.php?err=210');
     exit;
 }
 
-if ($intent['status']['code'] !== 200  && $intent['status']['code'] !== 404) {
+if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
     unset($intent);
     \hutoma\console::redirect('./error.php?err=211');
     exit;
 }
 
-function isPostInputAvailable(){
-    return  ( isset($_POST['intent']) );
+function isPostInputAvailable()
+{
+    return (isset($_POST['intent']) || isset($_POST['intent_name']));
 }
 
-function echoJsonIntentResponse($intent){
-    if ( $intent['status']['code'] !== 404)
+function echoJsonIntentResponse($intent)
+{
+    if ($intent['status']['code'] !== 404)
         echo json_encode($intent);
     else
         echo '""'; // return empty string
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -47,11 +60,11 @@ function echoJsonIntentResponse($intent){
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css">
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <div class="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -69,10 +82,12 @@ function echoJsonIntentResponse($intent){
         <section class="content">
             <div class="row">
                 <div class="col-md-8">
-                    <?php include './dynamic/intent.element.content.head.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.expression.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.variable.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.response.html.php'; ?>
+                    <form method="POST" name="intentCreateForm" onsubmit="return false;">
+                        <?php include './dynamic/intent.element.content.head.html.php'; ?>
+                        <?php include './dynamic/intent.element.content.expression.html.php'; ?>
+                        <?php include './dynamic/intent.element.content.variable.html.php'; ?>
+                        <?php include './dynamic/intent.element.content.response.html.php'; ?>
+                    </form>
                 </div>
                 <div class="col-md-4">
                     <?php include './dynamic/chat.html.php'; ?>
@@ -111,7 +126,7 @@ function echoJsonIntentResponse($intent){
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","intents",1,false,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "intents", 1, false, false]);
     </script>
 </form>
 

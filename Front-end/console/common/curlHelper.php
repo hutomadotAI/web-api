@@ -10,6 +10,7 @@ namespace hutoma;
 class curlHelper
 {
     private $curl;
+    private $headers = array();
 
     /**
      * curlHelper constructor.
@@ -31,11 +32,16 @@ class curlHelper
      */
     private function setCurlSecureOpt($devToken)
     {
-        $this->setOpt(CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $devToken));
+        $this->addHeader('Authorization', 'Bearer ' . $devToken);
         // Forces cURL to verify the peer's certificate - disabling this allows MITM attacks!
         $this->setOpt(CURLOPT_SSL_VERIFYPEER, true);
         // Check the existence of a common name and also verify that it matches the hostname provided
         $this->setOpt(CURLOPT_SSL_VERIFYHOST, 2);
+    }
+
+    public function addHeader($headerName, $headerValue)
+    {
+        array_push($this->headers, $headerName . ": " . $headerValue);
     }
 
     /**
@@ -82,6 +88,7 @@ class curlHelper
      */
     public function exec()
     {
+        $this->setOpt(CURLOPT_HTTPHEADER, $this->headers);
         return curl_exec($this->curl);
     }
 }
