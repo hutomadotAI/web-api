@@ -40,7 +40,7 @@ function activeMonitors(){
                 msgAlertProgressBar(1,'Request training in queue');
                 break;
             case 'training_in_progress':  // 'IN_PROGRESS' :
-                activeTrainingTextFilePhaseTwo();
+                activeComponentsPhaseTwo("file");
                 pingTrainingError();
                 break;
             case 'STOPPED_MAX_TIME' :
@@ -116,7 +116,6 @@ function pingError(){
         }
     }
 }
-
 
 function pingTrainingError(){
     var pingErrorValue = trainingErrorCall();
@@ -200,18 +199,19 @@ function existsAiTrainingFileCall(){
 function trainingRestart(){
     console.log('call restart training');
 
-    resetTrainingTextFilePhaseTwoComponents();
-    disableButtonUploadTextFile(true);
+    resetComponentsPhaseTwo();
 
-    resetTrainingTextFilePhaseOneComponents();
-    updateTrainingTextFilePhaseOneComponents();
+    disableButtonUploadTextFile(true);
+    disableButtonUploadBookFile(true);
+
+    resetComponentsPhaseOne();
+    updateComponentsPhaseOne();
     // if exits box-warning re-start - it needs disabled
     hideMsgWarningAlertTrainingInfo();
     trainingStartCall();
 
     disableButtonUploadTextFile(false);
-
-
+    disableButtonUploadBookFile(false);
 }
 
 function trainingStartCall(){
@@ -227,22 +227,21 @@ function trainingStartCall(){
             try {
                 var JSONdata = JSON.parse(JSONresponse);
                 var statusCode = JSONdata['status']['code'];
-                if ( (statusCode === 200 ) || (statusCode === 400 ) ) {
-                    msgAlertProgressBar(0,'Phase 2 training in progress... ');
-                    activeTrainingTextFilePhaseTwo();
+                if ((statusCode === 200 ) || (statusCode === 400 )) {
+                    msgAlertProgressBar(0, 'Phase 2 training in progress... ');
+                    activeComponentsPhaseTwo();
                     pingTrainingError();
                 } else {
-                    msgAlertProgressBar(2,'Training not started');
+                    msgAlertProgressBar(2, 'Training cannot start! code error '+statusCode);
                 }
             } catch (e) {
-                msgAlertProgressBar(2,'Training fatal error');
+                msgAlertProgressBar(2, 'Training fatal error');
             }
-        }else {
-
         }
     };
     xmlhttp.send();
 }
+
 
 function trainingStopCall(){
     var xmlhttp;

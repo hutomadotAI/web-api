@@ -43,15 +43,18 @@ function getSelectIndex(id){
     return options[selected].index;
 }
 
-function setSliderValue(id,confidence){
+function setSliderValue(id,value){
     var confidence_index;
-    switch(confidence){
-        case 0.0  : confidence_index = 0; break;
-        case 0.1  : confidence_index = 1; break;
-        case 0.25 : confidence_index = 2; break;
-        case 0.4  : confidence_index = 3; break;
-        case 0.75 : confidence_index = 4; break;
-    }
+    if (value < 0.1)
+        confidence_index = 0;
+    if (value >= 0.1 && value <0.25)
+        confidence_index = 1;
+    if (value >= 0.25 && value <0.4)
+        confidence_index = 2;
+    if (value >= 0.4 && value <0.75 )
+        confidence_index = 3;
+    if (value >= 0.75 )
+        confidence_index = 4;
     var slider = $('#'+id).data('ionRangeSlider');
     slider.update({
         from: confidence_index
