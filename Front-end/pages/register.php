@@ -160,6 +160,7 @@ if(isset($_POST['submit'])) {
                 if($createAccount === "exists"){
                     $msg= $userexists;
                 }elseif($createAccount === true){
+                    setcookie('logSyscuruser',$email);
                     $login = \hutoma\console::login($email, $password, false);
                     if($login === false){
                         $msg = array("Error", $loginerror);
