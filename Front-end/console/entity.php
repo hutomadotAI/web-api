@@ -8,9 +8,9 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 
 $entities = \hutoma\console::getEntities(\hutoma\console::getDevToken());
 
-if ($entities['status']['code'] !== 200) {
+if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) {
     unset($entities);
-    \hutoma\console::redirect('./error.php?err=210');
+    \hutoma\console::redirect('./error.php?err=225');
     exit;
 }
 ?>

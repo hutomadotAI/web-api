@@ -1418,7 +1418,7 @@ class console
         }
     }
 
-    public static function updateEntity($aiid, $entityName, $entityValues)
+    public static function updateEntity($dev_token, $entityName, $entityValues)
     {
         if (self::$loggedIn) {
             $path = '/entity';
@@ -1430,7 +1430,7 @@ class console
                 'entity_values' => $entityValues
             );
 
-            $curl = new curlHelper($service_url, self::getDevToken());
+            $curl = new curlHelper($service_url, $dev_token);
             $curl->setOpt(CURLOPT_POST, true);
             $curl->addHeader('Content-Type', 'application/json');
             $curl->setOpt(CURLOPT_POSTFIELDS, json_encode($args));

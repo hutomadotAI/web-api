@@ -78,7 +78,7 @@ function showEntities(str) {
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-black" type="submit" id="entity-label' + x + '" onClick="editEntity(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
+            wHTML += ('<div class="text-gray" type="submit" id="entity-label' + x + '" onClick="editEntity(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');

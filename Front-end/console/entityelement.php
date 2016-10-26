@@ -13,9 +13,12 @@ if (!isPostInputAvailable()) {
 
 if (isset($_POST['entity_name'])) {
     $entityName = $_POST['entity_name'];
-    \hutoma\console::updateEntity($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
-        $entityName, $_POST['entity_values']);
+    $retvalue = \hutoma\console::updateEntity(\hutoma\console::getDevToken(), $entityName, $_POST['entity_values']);
 
+    if (isset($retvalue) && $retvalue['status']['code'] != 200) {
+        \hutoma\console::redirect('./error.php?errObj=' . $retvalue['status']['info']);
+        exit;
+    }
 } else {
     $entityName = $_POST['entity'];
 }
