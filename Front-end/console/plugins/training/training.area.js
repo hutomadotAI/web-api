@@ -12,11 +12,11 @@ function freezeChat(){
 
 function initializedEventListeners(){
     document.getElementById('inputfile').addEventListener('change', enableUploadTextFile);
-    document.getElementById('inputstructure').addEventListener('change', enableUploadStructure);
+    document.getElementById('inputstructure').addEventListener('change', enableUploadBookFile);
     document.getElementById('inputurl').addEventListener('keyup', enableUploadUrl);
     
     document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
-    document.getElementById('btnUploadStructure').addEventListener('click', uploadStructure);
+    document.getElementById('btnUploadStructure').addEventListener('click', uploadBookFile);
     document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
 
     //document.getElementById('startstop-button').addEventListener('click', startStop);
@@ -243,7 +243,6 @@ function trainingStartCall(){
     };
     xmlhttp.send();
 }
-
 
 function trainingStopCall(){
     var xmlhttp;

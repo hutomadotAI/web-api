@@ -1187,27 +1187,9 @@ class console
             $service_url = self::getApiRequestUrl() . $path;
 
             // TODO: move this to a common internationalization class
-            $locales = array(
-                'Deutsch' => 'de-DE',
-                'Español' => 'es-ES',
-                'Français' => 'fr-FR',
-                'Italiano' => 'it-IT',
-                'Nederlands' => 'nl-NL',
-                'Português' => 'pt-PT',
-                'English' => 'en-US'
-            );
 
             // TODO: accept format from input list - example   GMT +00:00 Atlantic/St Helena (GMT)
 
-            //preg_match('/GMT\s[-|+][0-9]*:[0-9]*\s(.*)\s/', $timezoneString, $matches);
-            preg_match('/GMT\s[-|+][0-9]*:[0-9]*\s(.*)/', $timezoneString, $matches);
-            if (isset($matches)) {
-                $timezone = $matches[1];
-            } else {
-                $timezone = "UTC";
-            }
-
-            //hard coded
             $timezone = 'Europe/London';
             $locale = 'en-US';
 
@@ -1370,10 +1352,7 @@ class console
             //hard coded
             $timezone = 'Europe/London';
             $locale = 'en-US';
-            // Need to be removed once the parameters are being passed as numeric and not strings
-            $personality = 0;
-            $voice = 1;
-            $confidence = 1.0;
+
 
             $args = array(
                 'description' => $description,

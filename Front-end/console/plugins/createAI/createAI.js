@@ -51,13 +51,13 @@ function activeButtonCreate() {
 
 function setConfidenceValueBeforePosting(){
     var element = document.getElementById('ai_confidence');
-    var value = element.value;
-    element.value = getValueFromConfidence(value);
+    var confidence_text = element.value;
+    element.value = getValueFromConfidence(confidence_text);
 }
 
-function getValueFromConfidence(confidence){
+function getValueFromConfidence(confidence_text){
     var values = {"never":0.0, "rarely":0.1, "sometimes":0.25, "often":0.4, "always":0.75};
-    return values[confidence];
+    return values[confidence_text];
 }
 
 $(function () {
@@ -83,5 +83,5 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else
-        setSliderValue('ai_confidence',0.75); // default value "often"
+        setSliderValue('ai_confidence',0.75); // default value "always"
 });

@@ -45,6 +45,7 @@
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '0';
         else
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '1';
+
     }
 
 ?>

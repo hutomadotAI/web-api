@@ -37,15 +37,15 @@ function updateAI(){
         is_private = '0';
     else
         is_private = '1';
-    
+
     input_data.append("private", is_private);
     input_data.append('aiid', document.getElementById('aikey').value);
-    input_data.append('confidence', document.getElementById('ai_confidence').value);
+    input_data.append('confidence', getValueFromConfidence(document.getElementById('ai_confidence').value));
     input_data.append('description', document.getElementById('ai_description').value);
     input_data.append('language',document.getElementById('select2-' + 'ai_language' + '-container').innerHTML);
     input_data.append('timezone',document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML);
-    input_data.append('personality',document.getElementById('select2-' + 'ai_personality' + '-container').innerHTML);
-    input_data.append('voice',document.getElementById('select2-' + 'ai_voice' + '-container').innerHTML);
+    input_data.append('personality',getSelectIndex('ai_personality'));
+    input_data.append('voice',getSelectIndex('ai_voice'));
     
     if (window.XMLHttpRequest)
         xmlhttp = new XMLHttpRequest();
@@ -61,7 +61,7 @@ function updateAI(){
             try {
                 if (JSONdata['code'] === 200) {
                     msgAlertUpdateAI(4, 'Update AI successfull!');
-                    updatePreiousDataLoaded(JSONdata);
+                    updatePreviousDataLoaded(JSONdata);
                     activeButtons();
                 }
                 else {
@@ -90,10 +90,10 @@ function deactiveButtons(){
     document.getElementById('btnDelete').setAttribute('disabled','disabled');
 }
 
-function updatePreiousDataLoaded(JSONdata){
+function updatePreviousDataLoaded(JSONdata){
     previousField.description = JSONdata.description;
     previousField.language = JSONdata.language;
-    previousField.timezone = JSONdata.timezone;
+    previousField.timezone = 'Europe/London';//JSONdata.timezone;
     previousField.voice = JSONdata.voice;
     previousField.personality = JSONdata.personality;
     previousField.confidence = JSONdata.confidence;

@@ -21,6 +21,7 @@
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['price'] = 'skipped';
     }
 
+
     $response = hutoma\console::createAI(
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'],
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'],

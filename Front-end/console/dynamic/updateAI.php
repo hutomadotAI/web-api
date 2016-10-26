@@ -16,13 +16,6 @@ if (!isPostInputAvailable()) {
     \hutoma\console::redirect('./error.php?err=110');
     exit;
 }
-/*
- var_dump($_POST['private']);
- var_dump( $_POST['personality']);
- var_dump(  $_POST['confidence']);
- var_dump($_POST['voice']);
- exit;
-*/
 
 $response = hutoma\console::updateAI(
     $_POST['aiid'],
@@ -68,7 +61,6 @@ function updateSessionVariables()
 
 function prepareResponse()
 {
-
     $arr = array('code' => 200,
         'description' => $_POST['description'],
         'private' => $_POST['private'],
