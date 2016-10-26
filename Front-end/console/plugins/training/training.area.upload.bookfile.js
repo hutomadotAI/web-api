@@ -1,4 +1,4 @@
-var timeIsover = false;
+var timeIsOver = false;
 
 function uploadBookFile(){
     var Mbyte = 10;
@@ -166,7 +166,7 @@ function waitBook(){
         return;
     }
 
-    if ( status != 'preprocessed' && !timeIsover) {
+    if ( status != 'preprocessed' && !timeIsOver) {
         alert('poto tempo');
         setTimeout(waitBook, 2000);
     }else {
@@ -184,5 +184,5 @@ function launch_safe_timeout_controll(){
 }
 
 function expiredTime(){
-    timeIsover = true;
+    timeIsOver = true;
 }

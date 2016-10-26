@@ -83,6 +83,6 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else {
-        setSliderValue('ai_confidence', 0.75); // default value "always"
+        setSliderValue('ai_confidence', 0.0); // default value "never"
     }
 });
