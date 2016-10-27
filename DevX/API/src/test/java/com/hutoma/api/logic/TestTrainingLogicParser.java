@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,8 +21,9 @@ import static junitparams.JUnitParamsRunner.$;
  */
 @RunWith(JUnitParamsRunner.class)
 public class TestTrainingLogicParser {
+    private static final String RESET_TOKEN = "@reset";
 
-    TrainingLogic logic;
+    private TrainingLogic logic;
 
     private static Object[] noResponseDataProvider() {
         return $(
@@ -34,7 +36,7 @@ public class TestTrainingLogicParser {
 
     @Before
     public void setup() {
-        logic = new TrainingLogic(null, null, null, null, null, null, null, null);
+        this.logic = new TrainingLogic(null, null, null, null, null, null, null, null);
     }
 
     @Test
@@ -44,7 +46,7 @@ public class TestTrainingLogicParser {
 
     @Test
     public void testParse_noInputText() {
-        TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList("", "", ""));
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList("", "", ""));
         List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_NO_CONTENT);
         Assert.assertEquals(1, eventsForNoResponse.size());
         Assert.assertEquals("", result.getTrainingText());
@@ -52,7 +54,7 @@ public class TestTrainingLogicParser {
 
     @Test
     public void testParse_TwoPair() {
-        Assert.assertEquals("H^A^^H^A^^", parse(new String[]{"H", "A", "", "H", "A"}));
+        Assert.assertEquals(String.format("H^A%s^^H^A^^", RESET_TOKEN), parse(new String[]{"H", "A", "", "H", "A"}));
     }
 
     @Test
@@ -67,18 +69,23 @@ public class TestTrainingLogicParser {
 
     @Test
     public void testParse_Pair_After_EvenExchange() {
-        Assert.assertEquals("H1^A1^[A1] H2^A2^^H10^A11^^", parse(new String[]{"H1", "A1", "H2", "A2", "", "H10", "A11"}));
+        Assert.assertEquals(
+                String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", RESET_TOKEN),
+                parse(new String[]{"H1", "A1", "H2", "A2", "", "H10", "A11"}));
     }
 
     @Test
     public void testParse_Pair_After_OddExchange() {
         // H3 is ignored as there was no response
-        Assert.assertEquals("H1^A1^[A1] H2^A2^^H10^A11^^", parse(new String[]{"H1", "A1", "H2", "A2", "H3", "", "H10", "A11"}));
+        Assert.assertEquals(String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", RESET_TOKEN),
+                parse(new String[]{"H1", "A1", "H2", "A2", "H3", "", "H10", "A11"}));
     }
 
     @Test
     public void testParse_Exchange_After_Pair() {
-        Assert.assertEquals("H10^A11^^H1^A1^[A1] H2^A2^^", parse(new String[]{"H10", "A11", "", "H1", "A1", "H2", "A2"}));
+        Assert.assertEquals(
+                String.format("H10^A11%s^^H1^A1^[A1] H2^A2^^", RESET_TOKEN),
+                parse(new String[]{"H10", "A11", "", "H1", "A1", "H2", "A2"}));
     }
 
     @Test
@@ -94,7 +101,7 @@ public class TestTrainingLogicParser {
     @Test
     @Parameters(method = "noResponseDataProvider")
     public void testParse_NoResponse(final String[] textLines) {
-        TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList(textLines));
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList(textLines));
         List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
         Assert.assertEquals(1, eventsForNoResponse.size());
         Assert.assertEquals("Q", eventsForNoResponse.get(0));
@@ -103,14 +110,14 @@ public class TestTrainingLogicParser {
     @Test
     public void testParse_NoResponse_multiple() {
         // In separate conversations
-        TrainingFileParsingResult result = logic.parseTrainingFile(Arrays.asList("Q1", "", "Q2", "", "Q3", "R3"));
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList("Q1", "", "Q2", "", "Q3", "R3"));
         List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
         Assert.assertEquals(2, eventsForNoResponse.size());
         Assert.assertEquals("Q1", eventsForNoResponse.get(0));
         Assert.assertEquals("Q2", eventsForNoResponse.get(1));
 
         // Within a conversation and at the end
-        result = logic.parseTrainingFile(Arrays.asList("Q1", "R1", "Q2", "", "Q3", "R3", "Q4", "", "Q5"));
+        result = this.logic.parseTrainingFile(Arrays.asList("Q1", "R1", "Q2", "", "Q3", "R3", "Q4", "", "Q5"));
         eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
         Assert.assertEquals(3, eventsForNoResponse.size());
         Assert.assertEquals("Q2", eventsForNoResponse.get(0));
@@ -119,6 +126,6 @@ public class TestTrainingLogicParser {
     }
 
     private String parse(String[] input) {
-        return logic.parseTrainingFile(Arrays.asList(input)).getTrainingText().replace('\n', '^');
+        return this.logic.parseTrainingFile(Arrays.asList(input)).getTrainingText().replace('\n', '^');
     }
 }
