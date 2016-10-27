@@ -436,16 +436,20 @@ class console
                 $randomSalt = self::rand_string(20);
                 $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
                 $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-                $service_url = 'https://api.hutoma.com/v1/admin/?email=' . $id . '&username=' . $username . '&password=' . $saltedPass . '&password_salt=' . $randomSalt . '&first_name=' . $fullname;
-                $curl = curl_init($service_url);
-                $header = array();
-                $header[] = 'Content-type: application/json';
-                $header[] = 'Authorization: Bearer ' . $dev_token;
-                curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_POST, true);
-                $res = json_decode(curl_exec($curl), true)['status']['code'];
-                curl_close($curl);
+                $params = array(
+                    'email' => $id,
+                    'username' => $username,
+                    'password' => $saltedPass,
+                    'password_salt' => $randomSalt,
+                    'first_name=' => $fullname
+                );
+                $path = '/admin?' . http_build_query($params);
+                $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
+                $curl->setVerbPost();
+                $curl->addHeader('Content-type', 'application/json');
+                $curl_response = $curl->exec();
+                $res = json_decode($curl_response, true)['status']['code'];
+                $curl->close();
                 if ($res == '200') return true;
             } catch (Exception $e) {
             }
@@ -488,6 +492,17 @@ class console
             $random_str .= $chars[rand(0, $size)];
         }
         return $random_str;
+    }
+
+    /**
+     * -------------------------
+     * End Extra Tools/Functions
+     * -------------------------
+     */
+
+    private static function getApiRequestUrl()
+    {
+        return self::$config["api"]["request_url"];
     }
 
     /**
@@ -773,6 +788,12 @@ class console
     }
 
     /**
+     * ---------------------
+     * Extra Tools/Functions
+     * ---------------------
+     */
+
+    /**
      * 2 Step Verification Login Process
      * ---------------------------------
      * When user logs in, it checks whether there is a cookie named "logSysdevice" and if there is :
@@ -925,12 +946,6 @@ class console
          */
         return false;
     }
-
-    /**
-     * ---------------------
-     * Extra Tools/Functions
-     * ---------------------
-     */
 
     /**
      * A function to login the user with the username and password.
@@ -1218,17 +1233,6 @@ class console
 
             return $json_response;
         }
-    }
-
-    /**
-     * -------------------------
-     * End Extra Tools/Functions
-     * -------------------------
-     */
-
-    private static function getApiRequestUrl()
-    {
-        return self::$config["api"]["request_url"];
     }
 
     public static function getDevToken()
