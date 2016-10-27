@@ -11,7 +11,10 @@
       </a>
       
       <div id="collapseJSON" class="panel-collapse collapse">
-      <div class="box-body" id="msgJSON">
+      <div class="box-body">
+          <pre id="msgJSON" class="text-gray  no-border flat" style=" background-color: #515151;">
+              
+          </pre>
       </div>
       <div class="box-footer" id="footerJSON">
           <div class="btn btn-success btn-sm center-block flat" id="btnJSON" data-toggle="tooltip" title="copy to clipboard" onclick="copyJsonToClipboard('result')" style="width: 100px;" >
