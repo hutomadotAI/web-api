@@ -441,7 +441,7 @@ class console
                     'username' => $username,
                     'password' => $saltedPass,
                     'password_salt' => $randomSalt,
-                    'first_name=' => $fullname
+                    'first_name' => $fullname
                 );
                 $path = '/admin?' . http_build_query($params);
                 $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
