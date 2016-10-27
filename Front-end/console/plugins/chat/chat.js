@@ -131,6 +131,10 @@ function requestAnswerAI(ai_name, question, chatId) {
             dataType: 'json',
             data: {chatId: chatId, q: question},
             success: function (response) {
+                // Write response in JSON message box
+                var JSONnode = document.getElementById('msgJSON');
+                JSONnode.innerHTML = JSON.stringify(response,undefined, 2);
+                
                 var JSONdata = response;
                 if (JSONdata['status']['code'] === 200)
                     createRightMsg(ai_name, JSONdata['result']['answer'], chatId, false);
