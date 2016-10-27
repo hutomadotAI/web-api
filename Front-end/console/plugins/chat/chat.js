@@ -155,7 +155,7 @@ function enableChat(){
 }
 
 function disableChat(){
-    document.getElementById('bodyChat').style.cursor = 'progress';
+    //document.getElementById('bodyChat').style.cursor = 'progress';
     document.getElementById('message').disabled = true;
     document.getElementById('message').value = '';
 }

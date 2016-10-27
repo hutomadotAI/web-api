@@ -5,6 +5,8 @@ initializedEventListeners();
 
 freezeChat(true);
 activeMonitors();
+setInterval(function() {pingTrainingError();},5000);
+
 
 function freezeChat(){
  var text='hey you need to start training before you talk to me!';
@@ -94,40 +96,28 @@ function notifyError(){
     msgAlertProgressBar(2,'Internal error occured');
 }
 
-function pingError(){
-    var time_ping = 6000; // milliseconds
-    var precision_limit = 0.009;
-
-    if( !block_server_ping ) {
-        var error = trainingErrorCall();
-        if (parseFloat(error) > parseFloat(max_error))
-            max_error = error;
-
-        updateTrainingBar(error, max_error);
-        if (error < precision_limit) {
-            var status = getAiStatusCall();
-            if (status != 'training_completed')
-                setTimeout(pingError, time_ping);
-            else
-                jumpPhaseTwo();
-        }
-        else{
-            setTimeout(pingError, time_ping);
-        }
-    }
-}
-
 function pingTrainingError(){
-    var pingErrorValue = trainingErrorCall();
+    if (block_server_ping) return;
+    var precision_limit = 0.1;
+    var error = trainingErrorCall();
 
-    if(  pingErrorValue == 'error' )
+    if (error == 'error' ) {
         return 'error';
+    }
 
-    if(  pingErrorValue == -1 )
-        setTimeout(pingTrainingError, 6000);
-    else {
+    if(error != -1) {
         initialisingStatusTrainingBar(false);
-        pingError();
+        if (parseFloat(error) > parseFloat(max_error)) {
+            max_error = error;
+        }
+        updateTrainingBar(error, max_error);
+        if ((error < precision_limit) &&  (getAiStatusCall() == 'training_completed'))
+            {
+                    block_server_ping = true;
+                    jumpPhaseTwo();
+
+            }
+
     }
 }
 
@@ -230,7 +220,6 @@ function trainingStartCall(){
                 if ((statusCode === 200 ) || (statusCode === 400 )) {
                     msgAlertProgressBar(0, 'Phase 2 training in progress... ');
                     activeComponentsPhaseTwo();
-                    pingTrainingError();
                 } else {
                     msgAlertProgressBar(2, 'Training cannot start! code error '+statusCode);
                 }
