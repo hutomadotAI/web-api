@@ -1,5 +1,86 @@
 <?php
 include "config.php";
+
+if(isset($_POST['submit'])) {
+
+    if(isset($_POST['g-recaptcha-response'])) {
+        $captcha=$_POST['g-recaptcha-response'];
+        $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+        if($response['success'] == false)
+        {
+            $msg ='<div class="alert alert-warning">';
+            $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
+            $msg .='</div>';
+        }
+        else {
+            $email = $_POST['email'];
+            $password = $_POST['pass'];
+            $retyped_password = $_POST['retyped_password'];
+            $name = $_POST['username'];
+            $terms = isset($_POST['terms']);
+            $invite_code =$_POST['invite_code'];
+
+            $missingfields  ='<div class="alert alert-warning">';
+            $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
+            $missingfields .='</div>';
+
+            $passwordmismatch  ='<div class="alert alert-warning">';
+            $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
+            $passwordmismatch .='</div>';
+
+            $termsmsg  ='<div class="alert alert-warning">';
+            $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the Terms and Conditions and Privacy Policy';
+            $termsmsg .='</div>';
+
+            $userexists  ='<div class="alert alert-warning">';
+            $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
+            $userexists .='</div>';
+
+            $invalidcode  ='<div class="alert alert-warning">';
+            $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
+            $invalidcode .='</div>';
+
+
+            $msg= $missingfields;
+
+            if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
+            elseif($password != $retyped_password) $msg= $passwordmismatch;
+            elseif($terms != 'True') $msg= $termsmsg;
+            # TODO: Tech Previw Hack. Need to remove it
+            elseif($invite_code!='R4d1prGQl7wJXqgj') $msg=$invalidcode;
+            else{
+                $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
+
+                if($createAccount === "exists"){
+                    $msg= $userexists;
+                }elseif($createAccount === true){
+                    setcookie('logSyscuruser',$email);
+                    $login = \hutoma\console::login($email, $password, false);
+                    if($login === false){
+                        $msg = array("Error", $loginerror);
+                    }else if(is_array($login) && $login['status'] == "blocked"){
+                        $msg = array("Error", "Too many login attempts. You can try again after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
+                        exit();
+                    }
+
+
+                }
+                else  $msg= $userexists;
+
+            }
+
+        }
+    }
+    else
+    {
+        $msg  ='<div class="alert alert-warning">';
+        $msg.='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
+        $msg .='</div>';
+    }
+
+
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -104,89 +185,8 @@ include "config.php";
     </style>
 </head>
 <body class="hold-transition register-page">
+<?php include_once "../console/common/google_analytics.php"; ?>
 
-<?php
-include_once "../console/common/google_analytics.php";
-if(isset($_POST['submit'])) {
-
-    if(isset($_POST['g-recaptcha-response'])) {
-        $captcha=$_POST['g-recaptcha-response'];
-        $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
-        if($response['success'] == false)
-        {
-            $msg ='<div class="alert alert-warning">';
-            $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
-            $msg .='</div>';
-        }
-        else {
-            $email = $_POST['email'];
-            $password = $_POST['pass'];
-            $retyped_password = $_POST['retyped_password'];
-            $name = $_POST['username'];
-            $terms = isset($_POST['terms']);
-            $invite_code =$_POST['invite_code'];
-
-            $missingfields  ='<div class="alert alert-warning">';
-            $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
-            $missingfields .='</div>';
-
-            $passwordmismatch  ='<div class="alert alert-warning">';
-            $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
-            $passwordmismatch .='</div>';
-
-            $termsmsg  ='<div class="alert alert-warning">';
-            $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the Terms and Conditions and Privacy Policy';
-            $termsmsg .='</div>';
-
-            $userexists  ='<div class="alert alert-warning">';
-            $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
-            $userexists .='</div>';
-
-            $invalidcode  ='<div class="alert alert-warning">';
-            $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
-            $invalidcode .='</div>';
-
-
-            $msg= $missingfields;
-
-            if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
-            elseif($password != $retyped_password) $msg= $passwordmismatch;
-            elseif($terms != 'True') $msg= $termsmsg;
-            # TODO: Tech Previw Hack. Need to remove it
-            elseif($invite_code!='R4d1prGQl7wJXqgj') $msg=$invalidcode;
-            else{
-                $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
-
-                if($createAccount === "exists"){
-                    $msg= $userexists;
-                }elseif($createAccount === true){
-                    setcookie('logSyscuruser',$email);
-                    $login = \hutoma\console::login($email, $password, false);
-                    if($login === false){
-                        $msg = array("Error", $loginerror);
-                    }else if(is_array($login) && $login['status'] == "blocked"){
-                        $msg = array("Error", "Too many login attempts. You can try again after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
-                        exit();
-                    }
-
-
-                }
-                else  $msg= $userexists;
-
-            }
-
-        }
-    }
-    else
-    {
-        $msg  ='<div class="alert alert-warning">';
-        $msg.='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
-        $msg .='</div>';
-    }
-
-
-}
-?>
 
 <header id="navigation" class="navbar-fixed-top navbar">
     <div class="container" style="font-weight: bold">
