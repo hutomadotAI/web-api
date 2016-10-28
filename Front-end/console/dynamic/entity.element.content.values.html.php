@@ -11,7 +11,7 @@
     </div>
 
     <div id="collapseValuesInfo" class="panel-collapse collapse">
-        <div class="box-body">
+        <div class="box-body" style="padding-bottom:0;">
             <div class="overlay center-block">
                 <section class="content-info">
                     <div class="box-body">
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="box-body no-margin" id="boxValues">
+    <div class="box-body no-margin" id="boxValues" style="padding-top:0;">
 
         <div class="row">
             <div class="col-md-12">
@@ -42,7 +42,7 @@
             </div>
         </div>
 
-        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertEntityValues">
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertEntityValues" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertEntityValues"></i>
             <span id="msgAlertEntityValues">You can add additional values for this entity</span>

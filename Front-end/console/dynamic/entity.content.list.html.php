@@ -19,7 +19,7 @@
         <p></p>
 
         <div id="collapseEntitiesListInfo" class="panel-collapse collapse">
-            <div class="box-body">
+            <div class="box-body" style="padding-top:0;">
                 <div class="overlay center-block">
                     <section class="content-info" >
                         <div class="box-body">
