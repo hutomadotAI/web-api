@@ -21,7 +21,7 @@ function backPage(){
 function showDomains(str,size){
     var wHTML = "";
     for (var x in domains) {
-        var boxid = 'box' + domains[x].dom_id;
+        var boxid = 'rnn' + domains[x].domainId;
         if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
             if(size==0){
                 // slim box design
@@ -41,8 +41,8 @@ function showDomains(str,size){
                     wHTML += ('</div></div>');
                 }
                 else{
-                    var key = domains[x].dom_id;
-
+                    var key = domains[x].domainId;
+                 
                     if ( userActived[key] === false )
                         wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                     else
@@ -55,7 +55,7 @@ function showDomains(str,size){
                     wHTML += ('<h5 class="text-center text-muted" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
                     wHTML += ('<a data-toggle="modal" ' +
                     'data-target="#boxDomainInfo" ' +
-                    'data-id="'+domains[x].dom_id+'" ' +
+                    'data-id="'+domains[x].domainId+'" ' +
                     'data-name="'+domains[x].name+'" ' +
                     'data-icon="'+domains[x].icon+'" ' +
                     'data-color="'+domains[x].color+'" ' +
@@ -66,9 +66,9 @@ function showDomains(str,size){
                     wHTML += ('<div class="col-xs-3">');
 
                     if ( userActived[key] === false )
-                        wHTML += ('<div class="switch" box-checked="0" style="margin-top:33px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch" data-rnn="0" style="margin-top:33px;" onclick=switchClick(this,'+key+');></div>');
                     else
-                        wHTML += ('<div class="switch switchOn" box-checked="1" style="margin-top:33px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch switchOn" data-rnn="1" style="margin-top:33px;" onclick=switchClick(this,'+key+');></div>');
                     wHTML += ('</div>');
                     wHTML += ('</div></div>');
                 }
@@ -88,7 +88,7 @@ function showDomains(str,size){
                     wHTML += ('</div></div>');
                 }
                 else{
-                    var key = domains[x].dom_id;
+                    var key = domains[x].domainId;
 
                     if ( userActived[key] === false )
                         wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed" id="'+boxid+'">');
@@ -101,9 +101,9 @@ function showDomains(str,size){
                     wHTML += ('<div class="box-footer-flatdown"><h5 class="text-center text-light-blue">info and settings</h5>');
 
                     if ( userActived[key] === false )
-                        wHTML += ('<div class="switch" box-checked="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,'+key+');></div>');
                     else
-                        wHTML += ('<div class="switch switchOn" box-checked="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,'+key+');></div>');
                     wHTML += ('</div>');
                     wHTML += ('</div></div>');
                 }
@@ -115,15 +115,15 @@ function showDomains(str,size){
 }
 
 function switchClick(node,key){
-    var boxid = 'box' + key;
+    var boxid = 'rnn' + key;
     $(node).toggleClass('switchOn');
-    if( $(node).attr('box-checked') == 0) {
-        $(node).attr('box-checked', 1);
+    if( $(node).attr('data-rnn') == '0') {
+        $(node).attr('data-rnn', 1);
         $("#"+boxid).addClass("borderActive");
         userActived[key] = true;
     }
     else {
-        $(node).attr('box-checked', 0);
+        $(node).attr('data-rnn', 0);
         userActived[key] = false;
         $("#"+boxid).removeClass("borderActive");
     }

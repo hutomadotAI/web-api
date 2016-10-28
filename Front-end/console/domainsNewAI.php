@@ -11,7 +11,6 @@
         exit;
     }
 
-
     setSessionVariablesFromPost();
     $domains= \hutoma\console::getDomains();
    
@@ -45,9 +44,7 @@
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '0';
         else
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '1';
-
     }
-
 ?>
 
 <!DOCTYPE html>
@@ -114,7 +111,7 @@
 </form>
 
 <script>
-  var domains = <?php  echo json_encode($domains['_domainList']);  unset($domains); ?>;
+  var domains = <?php echo json_encode($domains['_domainList']);  unset($domains); ?>;
   var userActived ={};
   for (var x in domains){
       var key = domains[x].dom_id;
