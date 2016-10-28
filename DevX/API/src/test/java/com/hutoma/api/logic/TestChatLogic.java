@@ -141,6 +141,31 @@ public class TestChatLogic {
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
+    /***
+     * Check that whitespaces are removed from each end
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_Semantic_Trimmed() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getPaddedChat(0.2f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /***
+     * Check that whitespaces are removed from each end
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_Neural_Trimmed() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getPaddedChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(NEURALRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
 
     /***
      * The neural network can't be queried because the training status is bad (no training)
@@ -252,6 +277,15 @@ public class TestChatLogic {
     private ApiResult getValidChat(float min_p) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(RNN_NEURALRESULT);
+        return getChat(min_p);
+    }
+
+    private ApiResult getPaddedChat(float min_p) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ChatResult paddedSemantic = getSemanticResult();
+        paddedSemantic.setAnswer(" " + paddedSemantic.getAnswer() + "\n");
+        String paddedNeural = RNN_NEURALRESULT.replace("|", " | ").concat("\n");
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(paddedSemantic);
+        when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(paddedNeural);
         return getChat(min_p);
     }
 

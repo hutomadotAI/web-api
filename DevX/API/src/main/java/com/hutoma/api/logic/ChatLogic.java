@@ -94,6 +94,10 @@ public class ChatLogic {
 
             // process result from semantic analysis
             if (null != semanticAnalysisResult.getAnswer()) {
+
+                // remove trailing newline
+                semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer().trim());
+
                 if (!semanticAnalysisResult.getAnswer().isEmpty()) {
                     noResponse = false;
                 }
@@ -144,7 +148,7 @@ public class ChatLogic {
                         int splitIndex = rnnAnswer.indexOf('|');
                         if (splitIndex > 0) {
                             double neuralNetConfidence = Double.valueOf(rnnAnswer.substring(0, splitIndex));
-                            chatResult.setAnswer(rnnAnswer.substring(splitIndex + 1));
+                            chatResult.setAnswer(rnnAnswer.substring(splitIndex + 1).trim());
                             chatResult.setScore(toOneDecimalPlace(neuralNetConfidence));
                             chatResult.setElapsedTime((endRNNTime - startTime) / 1000.0d);
                             validRNN = true;
