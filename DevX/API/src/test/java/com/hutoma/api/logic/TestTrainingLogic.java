@@ -394,6 +394,9 @@ public class TestTrainingLogic {
         doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessageReadyForTraining(anyString(), any());
         doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), any());
         InputStream stream = createUpload(SOMETEXT);
+        ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, 0.5, "", "",
+                TrainingStatus.NOT_STARTED, null, 0, 0.5, 0, Locale.UK, TimeZone.getDefault());
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(ai);
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);
 
