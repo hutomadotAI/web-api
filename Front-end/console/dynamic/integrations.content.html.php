@@ -35,9 +35,13 @@
 
 </div>
 
+<div class="box box-solid box-clean flat no-shadow" id="newAiintegration">
+    <div class="box-body">
+        <div class="col-xs-12">
+         
 
-    <p></p>
-    <h2></h2>
-    <p id="intsearch"></p>
-  
+        <p id="intsearch"></p>
+        </div>
+    </div>
+</div>
 

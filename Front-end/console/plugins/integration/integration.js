@@ -1,11 +1,10 @@
 function showIntegrations(str){
     var wHTML = "";
-    wHTML += ('<div class="box-body">');
 
     for (var x in integrations) {
         if ( (str!=" ") && ( (str.length==0) || (integrations[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
        
-            wHTML += ('<div class="box-body bg-white" style=" border: 1px solid #d2d6de;">');
+            wHTML += ('<div class="box-body flat" style="background-color: #515151; border: 1px solid #202020;">');
             wHTML += ('<div class="row">');
             wHTML += ('<div class="col-xs-1">');
             wHTML += ('<img src="./dist/img/social/icons/'+integrations[x].icon+'" width="30" height="30" alt="'+integrations[x].name+'">');
@@ -16,18 +15,18 @@ function showIntegrations(str){
             else
                 wHTML += ('<label><span class="lead text-muted">'+integrations[x].name+'</span></label>')
             wHTML += ('</div>');
-            wHTML += ('<div class="col-xs-4">'); 
-            wHTML += ('<h5><span class="text-muted pull-left">'+integrations[x].description+'</span></h5>');
+            wHTML += ('<div class="col-xs-4">');
+            wHTML += ('<h5><span class="text pull-left">'+integrations[x].description+'</span></h5>');
             wHTML += ('</div>');
             wHTML += ('<div class="col-xs-4">');
             if ( integrations[x].available != '0' ){
                 wHTML += ('<a data-toggle="collapse" data-parent="#accordion" href="#collapse'+(integrations[x].name).replace(" ","")+'">');
-                wHTML += ('<button class="btn btn-success pull-right text-sm flat" style="margin-right: 5px; width:130px;"><i class="fa fa-download"></i> View more info</button>');
+                wHTML += ('<button class="btn btn-success pull-right text-sm flat" style="margin-right: 5px; margin-top: 3px; width:130px;"><i class="fa fa-download"></i> View more info</button>');
                 wHTML += ('</a>');
             }
             else
-                wHTML += ('<button class="btn btn-warning pull-right text-sm flat disabled" style="margin-right: 5px; width:130px;"><i class="fa fa-exclamation-triangle"></i> Coming soon</button>');
-           
+                wHTML += ('<button class="btn btn-warning pull-right text-sm flat disabled" style="margin-right: 5px; margin-top: 3px; width:130px;"><i class="fa fa-exclamation-triangle"></i> Coming soon</button>');
+
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('</a>');
@@ -43,7 +42,6 @@ function showIntegrations(str){
         
     }
   }
-  wHTML += ('</div>');
   newNode.innerHTML = wHTML;
   document.getElementById('intsearch').appendChild(newNode);
 }
