@@ -16,7 +16,7 @@ function inputValidation(txt,field) {
     var letters;
     switch(field){
 
-        case 'ai_name' :        letters = /^[a-zA-Z0-9\-_]+$/;                  break;
+        case 'ai_name' :        letters = /[a-zA-Z0-9_\.\,\- ]+$/;              break;
         case 'ai_description' : letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
 
         case 'entity_name' :    letters = /^[a-zA-Z0-9\-_]+$/;                  break;

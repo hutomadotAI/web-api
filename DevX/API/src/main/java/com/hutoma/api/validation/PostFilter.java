@@ -128,7 +128,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         if (checkList.contains(APIParameter.AIName)) {
             request.setProperty(APIParameter.AIName.toString(),
-                    this.validateAlphaNumPlusDashes(AINAME, getFirst(form.get(AINAME))));
+                    this.validateAiName(AINAME, getFirst(form.get(AINAME))));
         }
         if (checkList.contains(APIParameter.AIDescription)) {
             request.setProperty(APIParameter.AIDescription.toString(),

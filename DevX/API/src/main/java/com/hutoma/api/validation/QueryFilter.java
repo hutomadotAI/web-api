@@ -87,7 +87,7 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
-                        this.validateAlphaNumPlusDashes(AINAME, getFirst(queryParameters.get(AINAME))));
+                        this.validateAiName(AINAME, getFirst(queryParameters.get(AINAME))));
             }
             if (checkList.contains(APIParameter.AIDescription)) {
                 requestContext.setProperty(APIParameter.AIDescription.toString(),

@@ -252,6 +252,11 @@ public class Validate {
         return textSanitizer(param);
     }
 
+    String validateAiName(final String paramName, final String param)
+            throws ParameterValidationException {
+        return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
+    }
+
     String validateOptionalDescription(final String paramName, final String param)
             throws ParameterValidationException {
         return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
