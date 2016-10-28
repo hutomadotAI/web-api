@@ -82,13 +82,13 @@
         <section class="content">
 
             <!-- Custom Tabs -->
-            <div class="nav-tabs-custom flat no-shadow">
+            <div class="nav-tabs-custom flat no-shadow no-border">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_general" data-toggle="tab">General</a></li>
                     <li><a href="#tab_domains" data-toggle="tab">Pre-training Neural Networks</a></li>
                 </ul>
 
-                <div class="tab-content">
+                <div class="tab-content" style="padding-bottom:0px;">
                     <!-- GENERAL TAB -->
                     <div class="tab-pane active" id="tab_general">
                         <?php include './dynamic/settings.content.input.html.php'; ?>
@@ -96,12 +96,15 @@
                     <!-- DOMAINS TAB -->
                     <div class="tab-pane" id="tab_domains">
                         <?php include './dynamic/settings.content.domains.html.php'; ?>
+                        <div class="row" style="background-color: #434343">
+                        <?php include './dynamic/settings.content.domains.list.html.php'; ?>
+                        </div>
                     </div>
                 </div>
 
             </div>
 
-            <?php include './dynamic/settings.content.domains.list.html.php'; ?>
+
         </section>
     </div>
 
