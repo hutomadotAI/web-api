@@ -1964,6 +1964,7 @@ a:focus {
 
 .box.box-solid.box-default-fixed {
     border: 1px solid #202020;
+    background: #515151;
     height: 320px;
 }
 
@@ -2269,7 +2270,7 @@ a:focus {
     text-align: center;
     width: 100%;
     bottom: 15px;
-    background-color: #ffffff;
+    background-color: #515151;
 
 }
 
@@ -3369,16 +3370,6 @@ table.text-center th {
 .label-default {
     background-color: #d2d6de;
     color: #444;
-}
-.label-fixed{
-    position: absolute;
-    top: 9px;
-    right: 7px;
-    text-align: center;
-    font-size: 9px;
-    padding: 2px 3px;
-    line-height: .9;
-    width:100px;
 }
 
 /*
