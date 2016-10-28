@@ -45,13 +45,12 @@
     </div>
 
     <div id="collapseIntentsInfo" class="panel-collapse collapse">
-        <div class="box-body">
+        <div class="box-body" style="padding-top:0px;">
             <div class="overlay center-block">
                 <section class="content-info">
                     <div class="box-body">
                         Intents are useful when you want to add your own business logic during a conversation betwen an end user and an AI. Check our video tutorial for more info.
                 </section>
-
             </div>
         </div>
     </div>

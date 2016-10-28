@@ -13,14 +13,13 @@
     <div class="box-body">
 
         <div class="input-group-btn">
-            <input class="form-control flat no-shadow pull-right" onkeyup="searchIntents(this.value)" value=""
-                   placeholder="Search intents...">
+            <input class="form-control flat no-shadow pull-right" onkeyup="searchIntents(this.value)" value="" placeholder="Search intents...">
         </div>
 
         <p></p>
 
         <div id="collapseIntentsListInfo" class="panel-collapse collapse">
-            <div class="box-body">
+            <div class="box-body" style="padding-top:0px;padding-left:0;padding-right:0;">
                 <div class="overlay center-block">
                     <section class="content-info">
                         <div class="box-body">
