@@ -25,7 +25,8 @@ function showDomains(str,size){
         if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
             if(size==0){
                 // slim box design
-                if ( domains[x].available == '0' ){
+                if ( domains[x].available == '1' ){
+                    /* available equal to ZERO
                     wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                     wHTML += ('<div class="col-xs-2">');
                     wHTML += ('<div class="info-circle-icon-small text-ultragray"><i class="'+domains[x].icon+'"></i></div>');
@@ -39,8 +40,8 @@ function showDomains(str,size){
                     wHTML += ('<div class="switchOff" style="margin-top:33px;"></div>');
                     wHTML += ('</div>');
                     wHTML += ('</div></div>');
-                }
-                else{
+                    */
+
                     var key = domains[x].domainId;
 
                     if ( userActived[key] === false )
@@ -75,19 +76,19 @@ function showDomains(str,size){
             }
             else{
                 // big box design
-                if ( domains[x].available == '0' ){
 
-                    wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
-                    wHTML += ('<div class="info-circle-icon text-ultragray" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div>');
-                    wHTML += ('<h4 class="text-center text-gray">'+domains[x].name+'</h5>');
-                    wHTML += ('<h5 class="text-center text-gray" style="margin: 2px;">'+domains[x].description+'</h5>');
-                    wHTML += ('<h4 class="text-center text-red">COMING SOON</h4>');
-                    wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-ultralight-blue" >info and settings</h5><p></p>');
-                    wHTML += ('<div class="switchOff"></div>');
-                    wHTML += ('</div>');
-                    wHTML += ('</div></div>');
-                }
-                else{
+                /* available equal to ZERO
+                wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
+                wHTML += ('<div class="info-circle-icon text-ultragray" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div>');
+                wHTML += ('<h4 class="text-center text-gray">'+domains[x].name+'</h5>');
+                wHTML += ('<h5 class="text-center text-gray" style="margin: 2px;">'+domains[x].description+'</h5>');
+                wHTML += ('<h4 class="text-center text-red">COMING SOON</h4>');
+                wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-ultralight-blue" >info and settings</h5><p></p>');
+                wHTML += ('<div class="switchOff"></div>');
+                wHTML += ('</div>');
+                wHTML += ('</div></div>');
+                */
+                if ( domains[x].available == '1' ){
                     var key = domains[x].domainId;
 
                     if ( userActived[key] === false )
