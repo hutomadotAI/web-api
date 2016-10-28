@@ -51,22 +51,26 @@ if(isset($_POST['submit'])) {
             else{
                 $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
-                if($createAccount === "exists"){
+                if($createAccount === "exists") {
                     $msg= $userexists;
-                }elseif($createAccount === true){
-                    setcookie('logSyscuruser',$email);
-                    $login = \hutoma\console::login($email, $password, false);
-                    if($login === false){
-                        $msg = array("Error", $loginerror);
-                    }else if(is_array($login) && $login['status'] == "blocked"){
-                        $msg = array("Error", "Too many login attempts. You can try again after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
-                        exit();
+                } elseif ($createAccount === "unknown") {
+                    $msg = array("Error", "Unspecified error code");
+                } else {
+                    // Register succeeded
+                    if ($createAccount === 200) {
+                        setcookie('logSyscuruser', $email);
+                        $login = \hutoma\console::login($email, $password, false);
+                        if ($login === false) {
+                            $msg = array("Error", $loginerror);
+                        } elseif (is_array($login) && $login['status'] == "blocked") {
+                            $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
+                            exit();
+                        }
+                    } else {
+                        // Registration threw an error
+                        $msg = array("Error", "Error code:" . $createAccount);
                     }
-
-
                 }
-                else  $msg= $userexists;
-
             }
 
         }

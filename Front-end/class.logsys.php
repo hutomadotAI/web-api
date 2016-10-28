@@ -432,28 +432,30 @@ class console
         if (self::userExists($id) || (isset($other['email']) && self::userExists($other['email']))) {
             return "exists";
         } else {
-            try {
-                $randomSalt = self::rand_string(20);
-                $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
-                $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-                $params = array(
-                    'email' => $id,
-                    'username' => $username,
-                    'password' => $saltedPass,
-                    'password_salt' => $randomSalt,
-                    'first_name' => $fullname
-                );
-                $path = '/admin?' . http_build_query($params);
-                $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
-                $curl->setVerbPost();
-                $curl->addHeader('Content-type', 'application/json');
-                $curl_response = $curl->exec();
-                $res = json_decode($curl_response, true)['status']['code'];
-                $curl->close();
-                if ($res == '200') return true;
-            } catch (Exception $e) {
+            $randomSalt = self::rand_string(20);
+            $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
+            $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
+            $params = array(
+                'email' => $id,
+                'username' => $username,
+                'password' => $saltedPass,
+                'password_salt' => $randomSalt,
+                'first_name' => $fullname
+            );
+            $path = '/admin?' . http_build_query($params);
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
+            $curl->setVerbPost();
+            $curl->addHeader('Content-type', 'application/json');
+            $curl_response = $curl->exec();
+            if (isset($curl_response) && $curl_response !== false) {
+                $res = json_decode($curl_response, true);
+                if (array_key_exists('status', $res)) {
+                    $curl->close();
+                    return $res['status']['code'];
+                }
             }
-            return false;
+            $curl->close();
+            return "unknown";
         }
     }
 
