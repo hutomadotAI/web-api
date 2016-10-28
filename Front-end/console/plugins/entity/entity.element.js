@@ -1,15 +1,18 @@
-checkListEntityValuesSize();
+//checkListEntityValuesSize();
 
 function saveEntity() {
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
-        msgAlert(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
+        msgAlertEntityValues(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
         return;
     }
     var values = [];
     var entityName = document.getElementById('entity-name').value;
     var elements = document.getElementsByName('value-entity');
     for (var i = 1; i < elements.length; i++) {
-        values.push(elements[i].getAttribute('placeholder'));
+        if (elements[i].value =='')
+            values.push(elements[i].getAttribute('placeholder'));
+        else
+            values.push(elements[i].value);
     }
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
@@ -25,10 +28,13 @@ function saveEntity() {
          alert(xhr.status + ' ' + thrownError);
          }*/
         success: function (result) {
-
+            msgAlertEntityValues(4, 'Entity saved');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            msgAlertEntityValues(2, 'Entity not saved');
         },
         complete: function () {
-            $("#btnSaveEntity").prop("disabled", false);
+            checkListEntityValuesSize();
             document.body.style.cursor = prevCursor;
         }
     });
@@ -38,14 +44,14 @@ function createNewValueEntityRow(value, parent) {
 
     var wHTML = '';
 
-    wHTML += ('<div class="box-body bg-white flat no-padding" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
+    wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
     wHTML += ('<div class="row">');
 
-    wHTML += ('<div class="col-xs-9" id="obj-value-entity">');
-    wHTML += ('<div class="inner-addon left-addon">');
-    wHTML += ('<i class="fa fa-language text-gray"></i>');
+    wHTML += ('<div class="col-xs-9" id="obj-value-entity" >');
+    wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
+    wHTML += ('<i class="fa fa-sign-out text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity" name="value-entity" style="padding-left: 35px; " placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity" name="value-entity" style="padding-left: 35px;background-color: #404446; " placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -53,7 +59,7 @@ function createNewValueEntityRow(value, parent) {
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
 
     wHTML += ('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px;" onClick="deleteValueEntity(this)">');
-    wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
+    wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
     wHTML += ('</a>');
 
     wHTML += ('</div>');
@@ -95,6 +101,7 @@ function checkValueCode(element, key) {
             var parent = document.getElementById('entityValues-list');
             document.getElementById('value-entity').value = '';
             createNewValueEntityRow(value, parent);
+            msgAlertEntityValues(0,'You can add additional values for this entity');
         }
     }
 }
@@ -107,7 +114,7 @@ function checkLimitValue() {
         case 0:
             return true;
         case 1:
-            msgAlertEntityValue(1, 'The value is too long!');
+            msgAlertEntityValues(1, 'The value is too long!');
             return false;
     }
 }
@@ -117,7 +124,7 @@ function deleteValueEntity(element) {
     // delete node from page - dipendence parentNode
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent)
-    checkListEntityValuesSize();
+    //checkListEntityValuesSize();
 
 }
 
