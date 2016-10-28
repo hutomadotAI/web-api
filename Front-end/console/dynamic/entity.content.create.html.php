@@ -24,7 +24,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertEntity">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertEntity"></i>
-            <span id="msgAlertEntity"></span>
+            <span id="msgAlertEntity">In this section you can create different entities.</span>
         </div>
 
         <b>need help?</b> check our <a data-toggle="collapse"  href="#collapseVideoTutorialEntity">Entities tutorial</a> or email <a href='#'>support@hutoma.com</a>

@@ -74,7 +74,7 @@ function showEntities(str) {
         if ((str != " ") && ( (str.length == 0) || (entities[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
 
             wHTML += ('<div class="col-xs-12">');
-            wHTML += ('<div class="box-body bg-white flat" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
+            wHTML += ('<div class="box-body flat" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
@@ -86,18 +86,18 @@ function showEntities(str) {
 
             var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].replace(/\s/g, '') + x);
             wHTML += ('<a data-toggle="collapse" href="#' + unique_id + '">');
-            wHTML += ('<i class="fa fa-comments-o" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
+            wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
             wHTML += ('</a>');
 
             wHTML += ('<a data-toggle="dropdown">');
-            wHTML += ('<i class="fa fa-cloud-download" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
+            wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
             wHTML += ('</a>');
             wHTML += ('<ul class="dropdown-menu flat">');
             wHTML += ('<li><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',0)">JSON format</a></li>');
             wHTML += ('<li><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',1)">CSV table</a></li>');
             wHTML += ('</ul>');
             wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + x + '" style="cursor: pointer;">');
-            wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
+            wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
             wHTML += ('</div>');
 
@@ -109,7 +109,7 @@ function showEntities(str) {
             wHTML += ('<div class="col-xs-12">');
             wHTML += ('<div class="inner-addon left-addon">');
             wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
-            wHTML += ('<textarea class="form-control flat no-shadow bg-gray-ultralight" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px;" placeholder="value from server" readonly></textarea>');
+            wHTML += ('<textarea class="form-control flat no-shadow" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px; background-color: #515151; border: 1px solid #202020;" placeholder="value from server" readonly></textarea>');
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('</div>');

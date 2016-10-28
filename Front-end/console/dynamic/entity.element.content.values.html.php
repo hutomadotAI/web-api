@@ -20,19 +20,20 @@
                         </dl>
                     </div>
                 </section>
-                <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                <section class="content-info">
+                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                </section>
             </div>
         </div>
     </div>
 
-    <div class="box-body no-margin" id="boxValues" style="padding-top: 0;">
+    <div class="box-body no-margin" id="boxValues">
 
         <div class="row">
             <div class="col-md-12">
                 <h5 class="box-title">
                     <div class="inner-addon left-addon">
-                        <i class="fa fa-language text-red"></i>
+                        <i class="fa fa-sign-out text-yellow" style="padding-top:11px;"></i>
                         <input type="text" class="form-control flat no-shadow" id="value-entity" name="value-entity"
                                placeholder="add an entity value" onkeydown="checkValueCode(this,event.keyCode)"
                                style="padding-left: 35px;">

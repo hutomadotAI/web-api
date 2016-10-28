@@ -2069,10 +2069,10 @@ a:focus {
 
 .box.box-solid.box-success > .box-header a,
 .box.box-solid.box-success > .box-header .btn {
-    color: #ffffff;
+    
 }
 
-.box.box-solid > .box-header > .box-tools .btn {
+.box.box-solid > .box-header > .box-tools >.btn {
     border: 0;
     box-shadow: none;
 }

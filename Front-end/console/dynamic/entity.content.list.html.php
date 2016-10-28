@@ -36,8 +36,9 @@
                             </dl>
                         </div>
                     </section>
-                    <p></p>
-                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                    <section class="content-info" >
+                        <dd> need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a></dd>
+                    </section>
                 </div>
             </div>
         </div>
@@ -55,18 +56,18 @@
 <div class="modal fade" id="deleteEntity" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal content-->
-        <div class="modal-content">
+        <div class="modal-content padding" style="background-color: #202020">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">DELETE Entity</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="background-color: #515151" >
                 <div class="box-body" id="delete-entity-label">
 
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary flat" id="modalDelete" value="" onClick="deleteEntity(this.value)" data-dismiss="modal">Delete</button>
+                <button type="button" class="btn btn-danger flat" id="modalDelete" value="" onClick="deleteEntity(this.value)" data-dismiss="modal">Delete</button>
                 <button type="button" class="btn btn-primary flat" data-dismiss="modal">Cancel</button>
             </div>
         </div>

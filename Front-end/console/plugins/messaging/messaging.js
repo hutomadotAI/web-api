@@ -180,6 +180,31 @@ function msgAlertUpdateAI(alarm,msg){
     document.getElementById('msgAlertUpdateAI').innerText = msg;
 }
 
+
+function msgAlertEntityValues(alarm,msg){
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertEntityValues").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertEntityValues").attr('class', 'icon fa fa-check');
+            break;
+        case 1:
+            $("#containerMsgAlertEntityValues").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertEntityValues").attr('class', 'icon fa fa-check');
+            document.getElementById('value-entity').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertEntityValues").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertEntityValues").attr('class', 'icon fa fa-warning');
+            document.getElementById('value-entity').style.borderColor = "red";
+            break
+        case 4:
+            $("#containerMsgAlertEntityValues").attr('class','alert alert-dismissable flat alert-primary');
+            $("#iconAlertEntityValues").attr('class', 'icon fa fa-check');
+            break
+    }
+    document.getElementById('msgAlertEntityValues').innerText = msg;
+}
+
 function msgAlertUserExpression(alarm,msg){
     switch (alarm){
         case 0:
