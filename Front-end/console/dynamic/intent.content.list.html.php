@@ -44,12 +44,12 @@
 <div class="modal fade" id="deleteIntent" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal content-->
-        <div class="modal-content">
+        <div class="modal-content padding" style="background-color: #202020">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Delete Intent</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="background-color: #515151" >
                 <div class="box-body" id="delete-intent-label">
 
                 </div>
