@@ -103,4 +103,21 @@ public class AdminLogic {
         }
         return new ApiResult().setSuccessStatus("deleted successfully");
     }
+
+    public ApiResult getDevToken(SecurityContext securityContext, String devid) {
+        try {
+            this.logger.logInfo(LOGFROM, "request to get dev token " + devid);
+            String devtoken = this.database.getDevToken(devid);
+
+            if (devtoken.isEmpty()) {
+                this.logger.logError(LOGFROM, "could not get dev token");
+                return ApiError.getInternalServerError();
+            }
+            return new ApiAdmin(devtoken, devid.toString()).setSuccessStatus("token found");
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, "failed to get dev token: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
+
 }

@@ -191,6 +191,22 @@ public class Database {
         }
     }
 
+    public String getDevToken(final String devid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getDevTokenFromDevID", 1).add(devid);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getString("dev_token");
+                }
+                return "";
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+
     public boolean deleteAi(final String devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAI_v1", 2).add(devid).add(aiid);

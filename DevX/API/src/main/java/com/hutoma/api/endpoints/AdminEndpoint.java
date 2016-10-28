@@ -9,8 +9,10 @@ import com.hutoma.api.logic.AdminLogic;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -74,13 +76,14 @@ public class AdminEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
-
+    @GET
+    @Path("{devid}/DevToken")
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getToken(
             @Context SecurityContext securityContext,
-            @DefaultValue("") @QueryParam("devid") String devid) {
-        ApiResult result = this.adminLogic.deleteDev(securityContext, devid);
+            @DefaultValue("") @PathParam("devid") String devid) {
+        ApiResult result = this.adminLogic.getDevToken(securityContext, devid);
         return result.getResponse(this.serializer).build();
     }
 
