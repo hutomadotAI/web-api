@@ -15,30 +15,18 @@
         <div class="input-group-btn">
             <input class="form-control flat no-shadow pull-right" onkeyup="searchEntities(this.value)" value="" placeholder="Search entities...">
         </div>
-    
+
         <p></p>
 
         <div id="collapseEntitiesListInfo" class="panel-collapse collapse">
-            <div class="box-body" style="padding-top:0;">
+            <div class="box-body" style="padding-top:0px;padding-left:0;padding-right:0;">
                 <div class="overlay center-block">
                     <section class="content-info" >
                         <div class="box-body">
-                            <dl class="dl-horizontal">
-                                <dt>Description Entities Manipulation</dt>
-                                <dd>Before start training process, y.</dd>
-                                <dt>Euismod</dt>
-                                <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                                <dt>Malesuada porta</dt>
-                                <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                                <dt>Felis euismod semper eget lacinia</dt>
-                                <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                            </dl>
+                            bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla
                         </div>
                     </section>
-                    <section class="content-info" >
-                        <dd> need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a></dd>
-                    </section>
+
                 </div>
             </div>
         </div>

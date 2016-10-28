@@ -52,7 +52,6 @@
                        bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla
                     </div>
                 </section>
-
             </div>
         </div>
     </div>
