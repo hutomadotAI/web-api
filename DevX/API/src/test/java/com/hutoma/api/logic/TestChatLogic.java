@@ -1,6 +1,10 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeTimerTools;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
@@ -12,15 +16,17 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -75,14 +81,14 @@ public class TestChatLogic {
     @Test
     public void testChat_Valid_Semantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         ApiResult result = getValidChat(0.2f);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
     @Test
     public void testChat_Valid_Neural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         ApiResult result = getValidChat(0.5f);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(NEURALRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
@@ -93,7 +99,7 @@ public class TestChatLogic {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(res);
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(RNN_NEURALRESULT);
         ApiResult result = getChat(0.2f);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
@@ -102,7 +108,7 @@ public class TestChatLogic {
                 new SemanticAnalysis.SemanticAnalysisException(new Exception("test")));
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(RNN_NEURALRESULT);
         ApiResult result = getChat(0.2f);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
@@ -112,7 +118,7 @@ public class TestChatLogic {
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("");
 
         ApiResult result = getChat(0.5f);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
@@ -122,7 +128,7 @@ public class TestChatLogic {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("0.1231723SomeText");
         ApiResult result = getChat(0.5f);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
@@ -131,8 +137,40 @@ public class TestChatLogic {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(null);
         ApiResult result = getChat(0.5f);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+
+    /***
+     * The neural network can't be queried because the training status is bad (no training)
+     * but the semantic server is confident enough to reply.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_RejectedNeuralDueToAIStatus_SemanticOverride() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
+        when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenThrow(new NeuralNet.NeuralNetRejectedAiStatusException("badstatus"));
+        ApiResult result = getChat(0.1f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /***
+     * The neural network can't be queried because the training status is bad (no training).
+     * The semantic server has no confidence so we expect an error 400
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_RejectedNeuralDueToAIStatus() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
+        when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenThrow(new NeuralNet.NeuralNetRejectedAiStatusException("badstatus"));
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
@@ -201,7 +239,7 @@ public class TestChatLogic {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(res);
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("");
         ApiResult result = getChat(0.5f);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     private ChatResult getSemanticResult() {

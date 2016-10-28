@@ -7,6 +7,7 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.ChatRequestStatus;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
@@ -229,17 +230,19 @@ public class Database {
         }
     }
 
-    public long insertNeuralNetworkQuestion(final String devId, final UUID chatId, final UUID aiid,
-                                            final String question) throws DatabaseException {
+    public ChatRequestStatus insertNeuralNetworkQuestion(final String devId, final UUID chatId, final UUID aiid,
+                                                         final String question) throws DatabaseException {
 
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("insertQuestion", 4).add(devId).add(chatId).add(aiid).add(question);
+            call.initialise("insertQuestion_v1", 4).add(devId).add(chatId).add(aiid).add(question);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return rs.getLong(1);
+                    return new ChatRequestStatus(rs.getLong("id"),
+                            getTrainingStatusValue(rs.getString("ai_status")),
+                            rs.getBoolean("failed_status"));
                 }
-                return -1;
+                return new ChatRequestStatus();
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }

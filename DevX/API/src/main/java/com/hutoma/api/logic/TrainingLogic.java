@@ -97,7 +97,7 @@ public class TrainingLogic {
                     }
 
                     return new ApiResult().setSuccessStatus("upload accepted",
-                            result.getEventCount() == 0 ? null : result.getEvents());
+                        result.getEventCount() == 0 ? null : result.getEvents());
 
                 // 1 = training file is a document
                 case 1:
@@ -195,7 +195,7 @@ public class TrainingLogic {
                     return ApiError.getBadRequest("A training session is already queued.");
                 case STOPPED_MAX_TIME:
                     return ApiError.getBadRequest("You reached the maximum allocated time to train your AI. "
-                            + "Please upgrade your subscription.");
+                        + "Please upgrade your subscription.");
                 default:
                     return ApiError.getBadRequest("Malformed training file. Training could not be started.");
             }
@@ -257,7 +257,7 @@ public class TrainingLogic {
                     return new ApiResult().setSuccessStatus("Training session updated.");
                 default:
                     this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:"
-                            + aiid.toString() + " devid:" + devid);
+                        + aiid.toString() + " devid:" + devid);
                     return ApiError.getInternalServerError("Impossible to update the current training session.");
 
             }
@@ -345,7 +345,7 @@ public class TrainingLogic {
     }
 
     void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize)
-            throws UploadTooLargeException {
+        throws UploadTooLargeException {
         if (null != fileDetail) {
             if (fileDetail.getSize() > maxUploadFileSize) {
                 throw new UploadTooLargeException();
@@ -381,7 +381,8 @@ public class TrainingLogic {
                     // New conversation
                     // Check if the conversaton is completed and instruct the AI to reset the conversation history
                     if (validConversation.size() > 0) {
-                        validConversation.set(validConversation.size() - 1, validConversation.get(validConversation.size() - 1) + HISTORY_REST_DIRECTIVE);
+                        validConversation.set(validConversation.size() - 1,
+                            validConversation.get(validConversation.size() - 1) + HISTORY_REST_DIRECTIVE);
                     }
                     validConversation.add(EMPTY_STRING);
                 }
@@ -395,7 +396,7 @@ public class TrainingLogic {
             if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
                 lastHumanSentence = currentSentence;
                 validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
-                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
+                    lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
             } else {
                 // and we list the sentence
                 validConversation.add(currentSentence);
@@ -443,7 +444,7 @@ public class TrainingLogic {
      * @throws IOException
      */
     ArrayList<String> getFile(long maxUploadSize, InputStream uploadedInputStream)
-            throws UploadTooLargeException, IOException {
+        throws UploadTooLargeException, IOException {
 
         ArrayList<String> source = new ArrayList<>();
         long fileSize = 0;

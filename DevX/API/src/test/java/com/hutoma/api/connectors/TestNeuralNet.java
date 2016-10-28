@@ -4,6 +4,9 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.ChatRequestStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +52,8 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_HappyPath() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn(this.RESULT);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
         this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
         String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
         Assert.assertEquals(this.RESULT, result);
@@ -59,8 +62,8 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_Success() throws Database.DatabaseException, NeuralNet.NeuralNetException {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(false);
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn(this.RESULT);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
         this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
         String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
         Assert.assertEquals(this.RESULT, result);
@@ -69,8 +72,8 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_DBFail() throws Database.DatabaseException, NeuralNet.NeuralNetException {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn(this.RESULT);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
         try {
             this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
             String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
@@ -84,8 +87,8 @@ public class TestNeuralNet {
     public void testNeuralNet_NeedToStartServer_MessageFail() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(false);
         doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessageStartRNN(anyString(), any());
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn(this.RESULT);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
         try {
             this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
             String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
@@ -98,8 +101,8 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_Insert_DBFail() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(-1L);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn(this.RESULT);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Failed());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
         try {
             this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
             String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
@@ -111,10 +114,25 @@ public class TestNeuralNet {
     }
 
     @Test
+    public void testNeuralNet_Insert_AIStatusRejected() throws Exception {
+        when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Rejected());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
+        try {
+            this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
+            String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
+            Assert.fail("exception expected");
+        } catch (NeuralNet.NeuralNetRejectedAiStatusException rejected) {
+            // this is supposed to throw
+        }
+        Assert.assertTrue(this.fakeTools.getTimestamp() <= NeuralNet.POLLEVERY);
+    }
+
+    @Test
     public void testNeuralNet_CheckResult_DBFail() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenThrow(new Database.DatabaseException(new Exception("test")));
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenThrow(new Database.DatabaseException(new Exception("test")));
         try {
             this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
             String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
@@ -128,8 +146,8 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_Timeout_Fail() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn("");
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn("");
         try {
             this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
             String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
@@ -143,12 +161,24 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_TakesTime_Success() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(true);
-        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(this.QID);
-        when(this.fakeDatabase.getAnswer(this.QID)).thenReturn("").thenReturn("").thenReturn(this.RESULT);
+        when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
+        when(this.fakeDatabase.getAnswer(anyLong())).thenReturn("").thenReturn("").thenReturn(this.RESULT);
         this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
         String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
         Assert.assertEquals(this.RESULT, result);
         Assert.assertTrue(this.fakeTools.getTimestamp() >= (2 * NeuralNet.POLLEVERY));
+    }
+
+    private ChatRequestStatus getChatRequestStatus_Valid() {
+        return new ChatRequestStatus(this.QID, TrainingStatus.COMPLETED, false);
+    }
+
+    private ChatRequestStatus getChatRequestStatus_Failed() {
+        return new ChatRequestStatus(-1, TrainingStatus.COMPLETED, false);
+    }
+
+    private ChatRequestStatus getChatRequestStatus_Rejected() {
+        return new ChatRequestStatus(-11, TrainingStatus.CANCELLED, true);
     }
 
 }

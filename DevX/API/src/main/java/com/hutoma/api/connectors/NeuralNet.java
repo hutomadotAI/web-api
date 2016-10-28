@@ -3,6 +3,7 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.ChatRequestStatus;
 
 import java.util.UUID;
 import javax.inject.Inject;
@@ -21,7 +22,7 @@ public class NeuralNet {
     private final Config config;
     private final Tools tools;
     private long startTime;
-    private long qid = 0;
+    private ChatRequestStatus requestStatus;
 
     @Inject
     public NeuralNet(Database database, MessageQueue messageQueue, Logger logger, Config config, Tools tools) {
@@ -48,18 +49,21 @@ public class NeuralNet {
         }
 
         try {
-            this.qid = this.database.insertNeuralNetworkQuestion(devId, chatId, aiid, question);
+            this.requestStatus = this.database.insertNeuralNetworkQuestion(devId, chatId, aiid, question);
         } catch (Database.DatabaseException e) {
             throw new NeuralNetException(e);
-        }
-
-        // if less than zero then an error has occurred
-        if (this.qid < 0) {
-            throw new NeuralNetException(new Exception("negative qid"));
         }
     }
 
     public String getAnswerResult(String devid, UUID aiid) throws NeuralNetException, Database.DatabaseException {
+
+        // if less than zero then an error has occurred
+        if (this.requestStatus.getQuestionId() < 0) {
+            if (this.requestStatus.isQuestionRejectedDueToAiStatus()) {
+                throw new NeuralNetRejectedAiStatusException(this.requestStatus.getAiStatus().toString());
+            }
+            throw new NeuralNetException("question was not inserted");
+        }
 
         String answer = "";
 
@@ -73,7 +77,7 @@ public class NeuralNet {
         try {
             do {
                 // do we have an answer?
-                answer = this.database.getAnswer(this.qid);
+                answer = this.database.getAnswer(this.requestStatus.getQuestionId());
                 if ((null != answer) && (!answer.isEmpty())) {
                     // yes, end and return
                     return answer;
@@ -93,6 +97,10 @@ public class NeuralNet {
     }
 
     public static class NeuralNetException extends Exception {
+        public NeuralNetException(String cause) {
+            super(cause);
+        }
+
         public NeuralNetException(Throwable cause) {
             super(cause);
         }
@@ -100,8 +108,14 @@ public class NeuralNet {
 
     public static class NeuralNetNotRespondingException extends NeuralNetException {
         public NeuralNetNotRespondingException() {
-
             super(new Exception("not responding"));
         }
     }
+
+    public static class NeuralNetRejectedAiStatusException extends NeuralNetException {
+        public NeuralNetRejectedAiStatusException(String cause) {
+            super(cause);
+        }
+    }
+
 }

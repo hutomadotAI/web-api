@@ -98,9 +98,10 @@ public class ChatLogic {
                     noResponse = false;
                 }
 
-                // reset conversation history if instructe to do so
+                // reset conversation history if instructed to do so
                 if (semanticAnalysisResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
-                    semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer().replace(HISTORY_REST_DIRECTIVE, ""));
+                    semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer()
+                            .replace(HISTORY_REST_DIRECTIVE, ""));
                     semanticAnalysisResult.setHistory("");
                 } else {
                     semanticAnalysisResult.setHistory(semanticAnalysisResult.getAnswer());
@@ -170,6 +171,11 @@ public class ChatLogic {
             this.logger.logError(LOGFROM, "neural net did not respond in time");
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nr, telemetryMap);
             return ApiError.getNoResponse("unable to respond in time. try again");
+        } catch (NeuralNet.NeuralNetRejectedAiStatusException rejected) {
+            this.logger.logError(LOGFROM,
+                    "question rejected because AI is in the wrong state: " + rejected.getMessage());
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", rejected, telemetryMap);
+            return ApiError.getBadRequest("This AI is not trained. Check the status and try again.");
         } catch (NeuralNet.NeuralNetException nne) {
             this.logger.logError(LOGFROM, "neural net exception: " + nne.toString());
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nne, telemetryMap);
