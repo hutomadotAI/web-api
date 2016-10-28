@@ -45,7 +45,7 @@
     </div>
     
     <div id="collapseEntitiesInfo" class="panel-collapse collapse">
-        <div class="box-body">
+        <div class="box-body" style="padding-top:0px;">
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
