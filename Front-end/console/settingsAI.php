@@ -96,8 +96,10 @@
                     <!-- DOMAINS TAB -->
                     <div class="tab-pane" id="tab_domains">
                         <?php include './dynamic/settings.content.domains.html.php'; ?>
-                        <div class="row" style="background-color: #434343">
-                        <?php include './dynamic/settings.content.domains.list.html.php'; ?>
+                        <div class="row" style="background-color: #434343;">
+                            <div class="col-lg-12" style="background-color: #434343; padding:5px;">
+                                <?php include './dynamic/settings.content.domains.list.html.php'; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
