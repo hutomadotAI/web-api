@@ -109,10 +109,6 @@ function showEntities(str) {
             wHTML += ('<div class="col-xs-12">');
             wHTML += ('<div class="inner-addon left-addon">');
             wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
-            
-            var len = entities[x];
-            
-             
             wHTML += ('<textarea class="form-control flat no-shadow" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px; background-color: #515151; border: 1px solid #202020;" placeholder="value from server" readonly></textarea>');
             wHTML += ('</div>');
             wHTML += ('</div>');
