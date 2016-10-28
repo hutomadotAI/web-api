@@ -13,14 +13,13 @@
     <div class="box-body">
 
         <div class="input-group-btn">
-            <input class="form-control flat no-shadow pull-right" onkeyup="searchIntents(this.value)" value=""
-                   placeholder="Search intents...">
+            <input class="form-control flat no-shadow pull-right" onkeyup="searchIntents(this.value)" value="" placeholder="Search intents...">
         </div>
 
         <p></p>
 
         <div id="collapseIntentsListInfo" class="panel-collapse collapse">
-            <div class="box-body">
+            <div class="box-body" style="padding-top:0px;padding-left:0;padding-right:0;">
                 <div class="overlay center-block">
                     <section class="content-info">
                         <div class="box-body">
@@ -45,12 +44,12 @@
 <div class="modal fade" id="deleteIntent" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal content-->
-        <div class="modal-content">
+        <div class="modal-content padding" style="background-color: #202020">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Delete Intent</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="background-color: #515151" >
                 <div class="box-body" id="delete-intent-label">
 
                 </div>

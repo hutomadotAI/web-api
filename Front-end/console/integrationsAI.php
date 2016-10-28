@@ -6,7 +6,7 @@
         exit;
     }
 
-    $response = \hutoma\console::getIntegrations(\hutoma\console::getDevToken());
+    $response = \hutoma\console::getIntegrations();
 
     /* CHECK RESPONSE NEEDS API CALL
     if ($response['status']['code'] !== 200) {

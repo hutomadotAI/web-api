@@ -32,7 +32,7 @@
     </div>
 
     <div id="collapseVideoTutorialEntity" class="panel-collapse collapse">
-        <div class="box-body flat" >
+        <div class="box-body flat">
             <div class="overlay center-block">
                 <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
                     <iframe
@@ -45,14 +45,13 @@
     </div>
     
     <div id="collapseEntitiesInfo" class="panel-collapse collapse">
-        <div class="box-body">
+        <div class="box-body" style="padding-top:0px;">
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
                        bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla
                     </div>
                 </section>
-
             </div>
         </div>
     </div>

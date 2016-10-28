@@ -8,14 +8,14 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 
 if (isset($_REQUEST['deleteentity'])) {
     $entityName = $_REQUEST['deleteentity'];
-    $result = \hutoma\console::deleteEntity(\hutoma\console::getDevToken(), $entityName);
+    $result = \hutoma\console::deleteEntity($entityName);
     if ($result['status']['code'] != 200) {
         unset($result);
         \hutoma\console::redirect('./error.php?err=326');
     }
 }
 
-$entities = \hutoma\console::getEntities(\hutoma\console::getDevToken());
+$entities = \hutoma\console::getEntities();
 
 if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) {
     unset($entities);

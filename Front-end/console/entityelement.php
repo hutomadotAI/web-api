@@ -13,7 +13,7 @@ if (!isPostInputAvailable()) {
 
 if (isset($_POST['entity_name'])) {
     $entityName = $_POST['entity_name'];
-    $retvalue = \hutoma\console::updateEntity(\hutoma\console::getDevToken(), $entityName, $_POST['entity_values']);
+    $retvalue = \hutoma\console::updateEntity($entityName, $_POST['entity_values']);
 
     if (isset($retvalue) && $retvalue['status']['code'] != 200) {
         \hutoma\console::redirect('./error.php?errObj=' . $retvalue['status']['info']);
@@ -23,7 +23,7 @@ if (isset($_POST['entity_name'])) {
     $entityName = $_POST['entity'];
 }
 
-$entity_values_list = \hutoma\console::getEntityValues(\hutoma\console::getDevToken(), $entityName);
+$entity_values_list = \hutoma\console::getEntityValues($entityName);
 
 if ($entity_values_list['status']['code'] !== 200) {
     unset($entity_values_list);

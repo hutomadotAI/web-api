@@ -28,7 +28,6 @@ require "../pages/config.php";
     }
 
     $response = \hutoma\console::chatAI(
-        \hutoma\console::getDevToken(), // devId
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'], // aiid
         $_GET['chatId'], // chatId
         $_GET['q'], // question

@@ -9,7 +9,7 @@ function wizardNext() {
 
     RecursiveUnbind($('#wrapper'));
     var JsonStringActiveDomains = JSON.stringify(userActived);
-    document.getElementById('userActivedDomains').value = JsonStringActiveDomains
+    document.getElementById('userActivedDomains').value = JsonStringActiveDomains;
     document.domainsNewAIform.submit();
 }
 
@@ -52,8 +52,8 @@ function showDomains(str,size){
                     wHTML += ('<div class="info-circle-icon-small '+domains[x].color+'"><i class="'+domains[x].icon+'"></i></div>');
                     wHTML += ('</div>');
                     wHTML += ('<div class="col-xs-7">');
-                    wHTML += ('<h4 class="text-center" style="text-align: left;">&nbsp;'+domains[x].name+'</h4>');
-                    wHTML += ('<h5 class="text-center text-muted" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
+                    wHTML += ('<b><h4 class="text-center text-white" style="text-align: left;">&nbsp;'+domains[x].name+'</h4></b>');
+                    wHTML += ('<h5 class="text-center text-white" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
                     wHTML += ('<a data-toggle="modal" ' +
                     'data-target="#boxDomainInfo" ' +
                     'data-id="'+domains[x].domainId+'" ' +

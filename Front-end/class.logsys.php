@@ -1386,11 +1386,11 @@ class console
         }
     }
 
-    public static function deleteAI($dev_token, $aiid)
+    public static function deleteAI($aiid)
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid;
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
 
             $curl_response = $curl->exec();
@@ -1405,13 +1405,13 @@ class console
         }
     }
 
-    public static function chatAI($dev_token, $aiid, $chatId, $q, $history, $fs, $min_p, $topic)
+    public static function chatAI($aiid, $chatId, $q, $history, $fs, $min_p, $topic)
     {
         if (self::$loggedIn) {
             $path = '/ai/' . $aiid . '/chat';
             $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history, 'confidence_threshold' => $min_p, 'current_topic' => $topic);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl_response = $curl->exec();
             if ($curl_response === false) {
                 $curl->close();
@@ -1424,7 +1424,7 @@ class console
         }
     }
 
-    public static function updateEntity($dev_token, $entityName, $entityValues)
+    public static function updateEntity($entityName, $entityValues)
     {
         if (self::$loggedIn) {
             $path = '/entity';
@@ -1436,7 +1436,7 @@ class console
                 'entity_values' => $entityValues
             );
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setVerbPost();
             $curl->addHeader('Content-Type', 'application/json');
             $curl->setOpt(CURLOPT_POSTFIELDS, json_encode($args));
@@ -1453,14 +1453,14 @@ class console
         }
     }
 
-    public static function deleteEntity($dev_token, $entityName)
+    public static function deleteEntity($entityName)
     {
         if (self::$loggedIn) {
             $path = '/entity';
             $params = array('entity_name' => $entityName);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setVerbDelete();
             $curl_response = $curl->exec();
 
@@ -1475,14 +1475,14 @@ class console
         }
     }
 
-    public static function deleteIntent($dev_token, $aiid, $intentName)
+    public static function deleteIntent($aiid, $intentName)
     {
         if (self::$loggedIn) {
             $path = '/intent/' . $aiid;
             $params = array('intent_name' => $intentName);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setVerbDelete();
             $curl_response = $curl->exec();
 
@@ -1658,11 +1658,11 @@ class console
         }
     }
 
-    public static function getEntities($dev_token)
+    public static function getEntities()
     {
         if (self::$loggedIn) {
             $path = '/entities';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {
@@ -1677,16 +1677,14 @@ class console
     }
 
 
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-
-    public static function getEntityValues($dev_token, $name)
+    public static function getEntityValues($name)
     {
         if (self::$loggedIn) {
             $path = '/entity';
             $parameters = array('entity_name' => $name);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {

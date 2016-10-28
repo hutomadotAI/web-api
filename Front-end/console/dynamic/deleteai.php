@@ -9,7 +9,7 @@
 
   if (isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])) {
 
-    $response = \hutoma\console::deleteAI(\hutoma\console::getDevToken(), $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+    $response = \hutoma\console::deleteAI($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
 
     if ($response['status']['code'] === 200) {
 
