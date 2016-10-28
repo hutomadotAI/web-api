@@ -7,8 +7,7 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 }
 if (isset($_REQUEST['deleteintent'])) {
     $intentName = $_REQUEST['deleteintent'];
-    $result = \hutoma\console::deleteIntent(\hutoma\console::getDevToken(),
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+    $result = \hutoma\console::deleteIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
     if ($result['status']['code'] != 200) {
         unset($result);
         \hutoma\console::redirect('./error.php?err=317');

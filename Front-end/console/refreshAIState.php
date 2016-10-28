@@ -10,8 +10,7 @@
             $action = $_POST['action'];
             switch($action) {
                 case 'update' :
-                    $dev_token = \hutoma\console::getDevToken();
-                    $response = \hutoma\console::getSingleAI($dev_token,$_SESSION['aiid']);
+                    $response = \hutoma\console::getSingleAI($_SESSION['aiid']);
                     if ($response['status']['code']===200) {
                         $_SESSION['ai_status'] = $response['ai']['ai_status'];
                         $_SESSION['ai_deep_learning_error'] = $response['ai']['deep_learning_error'];

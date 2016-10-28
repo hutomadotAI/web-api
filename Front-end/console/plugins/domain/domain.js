@@ -9,7 +9,7 @@ function wizardNext() {
 
     RecursiveUnbind($('#wrapper'));
     var JsonStringActiveDomains = JSON.stringify(userActived);
-    document.getElementById('userActivedDomains').value = JsonStringActiveDomains
+    document.getElementById('userActivedDomains').value = JsonStringActiveDomains;
     document.domainsNewAIform.submit();
 }
 

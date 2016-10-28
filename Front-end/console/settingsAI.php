@@ -11,7 +11,7 @@
         exit;
     }
 
-    $response = \hutoma\console::getDomains(\hutoma\console::getDevToken());
+    $response = \hutoma\console::getDomains();
     if ($response['status']['code'] !== 200) {
         unset($response);
         header('Location: ./error.php?err=3');

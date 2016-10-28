@@ -37,11 +37,11 @@
     <p></p>
     <h2></h2>
     <p id="domsearch"></p>
-    <input type="hidden" name="userActivedDomains" id="userActivedDomains" val="">
+    <input type="hidden" name="userActivedDomains" id="userActivedDomains" val="" style="display:none;">
 </form>
 
 <form method="POST" name="domainsNewAIformGoBack">
-    <input type="hidden">
+    <input type="hidden" style="display:none;">
 </form>
 
 

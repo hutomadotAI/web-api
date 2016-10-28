@@ -20,7 +20,7 @@ if (isset($_POST['intent_name'])) {
 } else {
     $intentName = $_POST['intent'];
 }
-$entityList = \hutoma\console::getEntities(\hutoma\console::getDevToken());
+$entityList = \hutoma\console::getEntities();
 
 $intent = \hutoma\console::getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 

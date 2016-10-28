@@ -16,8 +16,7 @@ if (isset($_REQUEST['deleteentity'])) {
 }
 
 $entities = \hutoma\console::getEntities();
-var_dump($entities['entity_name']);
-exit;
+
 if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) {
     unset($entities);
     \hutoma\console::redirect('./error.php?err=225');
