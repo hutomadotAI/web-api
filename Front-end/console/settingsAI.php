@@ -98,7 +98,10 @@
                         <?php include './dynamic/settings.content.domains.html.php'; ?>
                     </div>
                 </div>
+
             </div>
+
+            <?php include './dynamic/settings.content.domains.list.html.php'; ?>
         </section>
     </div>
 

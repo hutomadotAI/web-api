@@ -1453,14 +1453,14 @@ class console
         }
     }
 
-    public static function deleteEntity($dev_token, $entityName)
+    public static function deleteEntity($entityName)
     {
         if (self::$loggedIn) {
             $path = '/entity';
             $params = array('entity_name' => $entityName);
             $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
 
-            $curl = new curlHelper($service_url, $dev_token);
+            $curl = new curlHelper($service_url, self::getDevToken());
             $curl->setVerbDelete();
             $curl_response = $curl->exec();
 
@@ -1658,11 +1658,11 @@ class console
         }
     }
 
-    public static function getEntities($dev_token)
+    public static function getEntities()
     {
         if (self::$loggedIn) {
             $path = '/entities';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
             $curl_response = $curl->exec();
 
             if ($curl_response === false) {
@@ -1676,8 +1676,6 @@ class console
         }
     }
 
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
 
     public static function getEntityValues($dev_token, $name)
     {

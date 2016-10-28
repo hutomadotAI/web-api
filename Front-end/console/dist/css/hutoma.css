@@ -1963,22 +1963,21 @@ a:focus {
 }
 
 .box.box-solid.box-default-fixed {
-    border: 1px solid #202020;
-    background: #515151;
+    border: 1px solid #515151;
     height: 320px;
 }
 
 .box.box-solid.box-default-fixed.borderActive {
-    border: 1px solid #3c8dbc;
+    border: 1px solid #ffffff;
 }
 
 .box.box-solid.box-default-small-fixed {
-    border: 1px solid #202020;
+    border: 1px solid #515151;
     height: 110px;
 }
 
 .box.box-solid.box-default-small-fixed.borderActive {
-    border: 1px solid #3c8dbc;
+    border: 1px solid #ffffff;
 }
 
 .box.box-solid.box-clean > .box-header {
@@ -2270,7 +2269,7 @@ a:focus {
     text-align: center;
     width: 100%;
     bottom: 15px;
-    background-color: #515151;
+    
 
 }
 

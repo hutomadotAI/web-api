@@ -11,22 +11,7 @@
     <div class="box-body" id="boxNewDomains">
         <?php include './dynamic/domainsNewAI.content.info.html.php'; ?>
         <input class="form-control flat no-shadow" value="" placeholder="Search for a pre-trained neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
-        <!--
-        <div class="form-group pull-right no-margin" style="padding-top: 5px;">
-            <span style="padding-right:5px;">Show Free Neural Networks Only</span>
-            <label>
-                <input type="checkbox" name="domains_free" id="domains_free" class="icheckbox_square-red" checked>
-            </label>
-        </div>
-        <br>
-        -->
         <p></p>
-
-        <!-- <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertNewDomains">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-            <i class="icon fa fa-check" id="icongAlertNewDomains"></i>
-            <span id="msgAlertNewDomains">Combine your AI with pre-trained neural networks made available by others.</span>
-        </div>-->
     </div>
 
     <div id="collapseInfoNewDomains" class="panel-collapse collapse">
