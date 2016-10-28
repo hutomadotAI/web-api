@@ -1,10 +1,10 @@
 <a data-toggle="collapse"  href="#collapseConfidence" tabindex="-1">
-    <div class=" pull-right">  <i class="fa fa-info-circle text-sm text-yellow"></i> more info
+    <div class="pull-right">  <i class="fa fa-info-circle text-sm text-yellow"></i> more info
     </div>
 </a>
 <label for="ai_confidence">Let the AI create new answers</label>
-<div class="box box-solid box-clean-fixed flat no-shadow">
-    <div class="box-body">
+<div class="box box-solid box-clean-fixed flat no-shadow" style=" background-color: #515151;">
+    <div class="box-body flat">
         <div class="row margin">
             <div class="col-sm-12">
                 <input type="hidden" name="ai_confidence" id="ai_confidence">
