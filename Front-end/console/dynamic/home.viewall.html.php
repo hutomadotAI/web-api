@@ -3,19 +3,19 @@
     function decodeAIState($state){
         switch ($state) {
             case 'STOPPED' :
-                return('<span class="label label-primary">Stopped</span>');
+                return('<span class="label label-warning">Stopped</span>');
                 break;
             case 'NOT_STARTED' :
-                return('<span class="label label-warning">Not started</span>');
+                return('<span class="label label-primary">Not Started</span>');
                 break;
             case 'QUEUED' :
                 return('<span class="label label-warning">Queued</span>');
                 break;
             case 'IN_PROGRESS' :
-                return('<span class="label label-primary">in progress</span>');
+                return('<span class="label label-primary">In Progress</span>');
                 break;
             case 'STOPPED_MAX_TIME' :
-                return('<span class="label label-warning" >Stopped Max Time</span>');
+                return('<span class="label label-danger" >Stopped Max Time</span>');
                 break;
             case 'COMPLETED' :
                 return('<span class="label label-success">Completed</span>');
@@ -26,8 +26,11 @@
             case 'MALFORMEDFILE' :
                 return('<span class="label label-danger">Malformed</span>');
                 break;
+            case 'NOTHING_TO_TRAIN' :
+                return('<span class="label label-danger">Void</span>');
+                break;
             default:
-                return('<span class="label label-danger">Undefined</span>');
+                return('<span class="label label-danger"></span>');
         }
     }
     if (!isset($response_getAIs) || !(array_key_exists("ai_list",$response_getAIs)))
@@ -44,7 +47,7 @@
         echo('<th class="text-center" style="border:0;width:35%">ID</th>');
         echo('<th class="text-left" style="border:0;width:20%">AI Name</th>');
         echo('<th class="text-left" style="border:0;width:25%">Description</th>');
-        echo('<th style="border:0;"width:15%>Training</th>');
+        echo('<th class="text-center" style="border:0;"width:15%>Training</th>');
         echo('<th style="border:0;"width:5%></th>');
         //echo('<th style="border:0;">Date</th>');
         echo('</tr>');
@@ -55,7 +58,7 @@
             echo('<td style="padding-top: 15px;">' . $bot['aiid'] . '</td>');
             echo('<td style="padding-top: 15px;">' . $bot['name'] . '</td>');
             echo('<td style="padding-top: 15px;">' . $bot['description'] . '</td>');
-            echo('<td style="padding-top: 15px;">' . decodeAIState($bot['ai_status']) . '</td>');
+            echo('<td class="text-center" style="padding-top: 15px;">' . decodeAIState($bot['ai_status']) . '</td>');
             // echo('<td style="padding-top: 15px;">' . $bot['created_on'] . '</td>');
             echo('<td style="padding-top: 8px;"><button type="button" id="btnSelectAI"  value="' . $bot['aiid'] . '"  onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 5px; width: 115px;"><b> <span class="fa fa-search"></span> View AI </b></button></td>');
             //echo('<td style="padding-top: 8px;"><button type="button" id="btnPublish" value="'.$bot['aiid'].'"  onClick="publishAI(this)" class="btn btn-info flat pull-right"    style="margin-right: 5px; width: 115px;"><i class="fa fa-globe"></i> Publish AI</button></td>');

@@ -3370,6 +3370,16 @@ table.text-center th {
     background-color: #d2d6de;
     color: #444;
 }
+.label-fixed{
+    position: absolute;
+    top: 9px;
+    right: 7px;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 3px;
+    line-height: .9;
+    width:100px;
+}
 
 /*
  * Component: Direct Chat
