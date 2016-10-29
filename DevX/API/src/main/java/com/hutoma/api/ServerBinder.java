@@ -1,18 +1,35 @@
 package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
-import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.TelemetryLogger;
+import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.connectors.NeuralNet;
+import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
-import com.hutoma.api.logic.*;
+import com.hutoma.api.logic.AIBotStoreLogic;
+import com.hutoma.api.logic.AILogic;
+import com.hutoma.api.logic.AdminLogic;
+import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.logic.EntityLogic;
+import com.hutoma.api.logic.IntentLogic;
+import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
+
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import javax.inject.Singleton;
@@ -33,7 +50,7 @@ public class ServerBinder extends AbstractBinder {
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(AILogic.class).to(AILogic.class);
-        bind(AIDomainLogic.class).to(AIDomainLogic.class);
+        bind(AIBotStoreLogic.class).to(AIBotStoreLogic.class);
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(MemoryIntentHandler.class).to(MemoryIntentHandler.class).to(IMemoryIntentHandler.class);
         bind(SimpleEntityRecognizer.class).to(SimpleEntityRecognizer.class).to(IEntityRecognizer.class);

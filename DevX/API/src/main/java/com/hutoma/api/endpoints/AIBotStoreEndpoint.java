@@ -6,7 +6,7 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.logic.AIDomainLogic;
+import com.hutoma.api.logic.AIBotStoreLogic;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -20,25 +20,25 @@ import javax.ws.rs.core.SecurityContext;
 /**
  * Created by David MG on 05/08/2016.
  */
-@Path("/ai/domain")
+@Path("/botStore")
 @RateLimit(RateKey.QuickRead)
-public class AIDomainEndpoint {
+public class AIBotStoreEndpoint {
 
-    AIDomainLogic aiDomainLogic;
+    AIBotStoreLogic aiBotStoreLogic;
     JsonSerializer serializer;
 
     @Inject
-    public AIDomainEndpoint(AIDomainLogic aiDomainLogic, JsonSerializer serializer) {
-        this.aiDomainLogic = aiDomainLogic;
+    public AIBotStoreEndpoint(AIBotStoreLogic aiBotStoreLogic, JsonSerializer serializer) {
+        this.aiBotStoreLogic = aiBotStoreLogic;
         this.serializer = serializer;
     }
 
     @GET
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDomains(
-        @Context SecurityContext securityContext) {
-        ApiResult result = this.aiDomainLogic.getDomains(securityContext);
+    public Response getBotInStore(
+            @Context SecurityContext securityContext) {
+        ApiResult result = this.aiBotStoreLogic.getBots(securityContext);
         return result.getResponse(this.serializer).build();
     }
 }

@@ -5,8 +5,8 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.AiDomain;
 import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.AiStore;
 import com.hutoma.api.containers.sub.ChatRequestStatus;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -214,15 +214,15 @@ public class Database {
         }
     }
 
-    public ArrayList<AiDomain> getAiDomainList() throws DatabaseException {
+    public ArrayList<AiStore> getBotStoreList() throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getDomains", 0);
+            call.initialise("getBotsInStore", 0);
             final ResultSet rs = call.executeQuery();
             try {
-                final ArrayList<AiDomain> res = new ArrayList<>();
+                final ArrayList<AiStore> res = new ArrayList<>();
                 while (rs.next()) {
-                    res.add(new AiDomain(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("available")));
+                    res.add(new AiStore(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
+                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("published")));
                 }
                 return res;
             } catch (final SQLException sqle) {

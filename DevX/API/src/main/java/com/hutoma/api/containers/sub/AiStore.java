@@ -3,7 +3,7 @@ package com.hutoma.api.containers.sub;
 /**
  * Created by David MG on 15/08/2016.
  */
-public class AiDomain {
+public class AiStore {
 
     private final String domainId;
     private final String name;
@@ -12,7 +12,7 @@ public class AiDomain {
     private final String color;
     private final boolean available;
 
-    public AiDomain(String domainId, String name, String description, String icon, String color, boolean available) {
+    public AiStore(String domainId, String name, String description, String icon, String color, boolean available) {
         this.domainId = domainId;
         this.name = name;
         this.description = description;

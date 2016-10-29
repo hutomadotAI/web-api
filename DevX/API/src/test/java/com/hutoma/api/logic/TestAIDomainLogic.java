@@ -4,15 +4,16 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.containers.sub.AiDomain;
-import com.hutoma.api.containers.ApiAiDomains;
+import com.hutoma.api.containers.ApiAiStore;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiStore;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
+import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,9 +30,9 @@ public class TestAIDomainLogic {
     Config fakeConfig;
     Logger fakeLogger;
 
-    ArrayList<AiDomain> listOfSingleResult;
-    ArrayList<AiDomain> listOfEmpty;
-    AIDomainLogic aiDomainLogic;
+    ArrayList<AiStore> listOfSingleResult;
+    ArrayList<AiStore> listOfEmpty;
+    AIBotStoreLogic aiDomainLogic;
 
     private String DEVID = "devid";
     private String DOMID = "domid";
@@ -44,42 +45,42 @@ public class TestAIDomainLogic {
         this.fakeContext = mock(SecurityContext.class);
         this.fakeLogger = mock(Logger.class);
 
-        AiDomain domain = new AiDomain(DOMID, "name", "desc", "icon", "colour", true);
-        listOfSingleResult = new ArrayList<>();
-        listOfSingleResult.add(domain);
-        listOfEmpty = new ArrayList<>();
+        AiStore domain = new AiStore(this.DOMID, "name", "desc", "icon", "colour", true);
+        this.listOfSingleResult = new ArrayList<>();
+        this.listOfSingleResult.add(domain);
+        this.listOfEmpty = new ArrayList<>();
 
-        aiDomainLogic = new AIDomainLogic(fakeConfig, fakeSerializer, fakeDatabase, fakeLogger);
+        this.aiDomainLogic = new AIBotStoreLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger);
     }
 
     @Test
     public void testGetAll_Valid() throws Database.DatabaseException {
-        when(fakeDatabase.getAiDomainList()).thenReturn(listOfSingleResult);
-        ApiResult result = aiDomainLogic.getDomains(fakeContext);
+        when(this.fakeDatabase.getBotStoreList()).thenReturn(this.listOfSingleResult);
+        ApiResult result = this.aiDomainLogic.getBots(this.fakeContext);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetAll_Valid_Result() throws Database.DatabaseException {
-        when(fakeDatabase.getAiDomainList()).thenReturn(listOfSingleResult);
-        aiDomainLogic.getDomains(fakeContext);
-        ApiAiDomains result = (ApiAiDomains)aiDomainLogic.getDomains(fakeContext);
+        when(this.fakeDatabase.getBotStoreList()).thenReturn(this.listOfSingleResult);
+        this.aiDomainLogic.getBots(this.fakeContext);
+        ApiAiStore result = (ApiAiStore) this.aiDomainLogic.getBots(this.fakeContext);
         Assert.assertNotNull(result.getDomainList());
         Assert.assertFalse(result.getDomainList().isEmpty());
-        Assert.assertEquals(DOMID, result.getDomainList().get(0).getDomID());
+        Assert.assertEquals(this.DOMID, result.getDomainList().get(0).getDomID());
     }
 
     @Test
     public void testGetAll_DBFail() throws Database.DatabaseException {
-        when(fakeDatabase.getAiDomainList()).thenThrow(new Database.DatabaseException(new Exception("test")));
-        ApiResult result = aiDomainLogic.getDomains(fakeContext);
+        when(this.fakeDatabase.getBotStoreList()).thenThrow(new Database.DatabaseException(new Exception("test")));
+        ApiResult result = this.aiDomainLogic.getBots(this.fakeContext);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetAll_NotFound() throws Database.DatabaseException {
-        when(fakeDatabase.getAiDomainList()).thenReturn(listOfEmpty);
-        ApiResult result = aiDomainLogic.getDomains(fakeContext);
+        when(this.fakeDatabase.getBotStoreList()).thenReturn(this.listOfEmpty);
+        ApiResult result = this.aiDomainLogic.getBots(this.fakeContext);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 }

@@ -1567,7 +1567,7 @@ class console
     {
 
         if (self::$loggedIn) {
-            $path = '/ai/domain';
+            $path = '/botStore';
             $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
 
             $curl_response = $curl->exec();
