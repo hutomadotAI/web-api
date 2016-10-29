@@ -71,7 +71,7 @@
         <div class="box-body flat no-padding" style="background-color: #404446; padding-top: 5px;"id="parameter-list"></div>
 
         <p></p>
-        <button type="button" class="btn btn-primary flat pull-left" id="addParameter" value="">Add parameter</button>
+        <button type="button" class="btn btn-primary flat pull-right" id="addParameter" value="">Add parameter</button>
 
     </div>
 
