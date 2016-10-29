@@ -3,22 +3,24 @@ document.getElementById("btnAddExpression").addEventListener("click", addUserExp
 function createNewUsersayRow(value, parent) {
     var wHTML = '';
 
-    wHTML += ('<div class="box-body bg-white flat no-padding" style=" border: 1px solid #d2d6de; margin-top: -1px;" onmouseover="expressionOnMouseIn (this)" onmouseout="expressionOnMouseOut (this)">');
+    wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="expressionOnMouseIn (this)" onmouseout="expressionOnMouseOut (this)">');
     wHTML += ('<div class="row">');
 
     wHTML += ('<div class="col-xs-9" id="obj-userexpression">');
-    wHTML += ('<div class="inner-addon left-addon">');
+    wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-commenting-o text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression" name="user-expression" style="padding-left: 35px; " placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression" name="user-expression" style="padding-left: 35px;background-color: #404446; " placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
     wHTML += ('<div class="col-xs-3" id="btnUserExpression" style="display:none;" >');
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
-    wHTML += ('<a data-toggle="modal" data-target="#deleteUserExpression" style="cursor: pointer;" onClick="deleteUserExpression(this)">');
+    
+    wHTML += ('<a data-toggle="modal" data-target="#deleteUserExpression" style="padding-right:3px; cursor: pointer;" onClick="deleteUserExpression(this)">');
     wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
     wHTML += ('</a>');
+    
     wHTML += ('</div>');
     wHTML += ('</div>');
 

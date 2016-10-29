@@ -41,7 +41,6 @@ function saveEntity() {
 }
 
 function createNewValueEntityRow(value, parent) {
-
     var wHTML = '';
 
     wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
@@ -58,7 +57,7 @@ function createNewValueEntityRow(value, parent) {
     wHTML += ('<div class="col-xs-3" id="btnValueEntity" style="display:none;" >');
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
 
-    wHTML += ('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px;" onClick="deleteValueEntity(this)">');
+    wHTML += ('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px; cursor: pointer;" onClick="deleteValueEntity(this)">');
     wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
     wHTML += ('</a>');
 
