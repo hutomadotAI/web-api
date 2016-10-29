@@ -1,11 +1,10 @@
 <div class="box box-solid box-clean flat no-shadow">
 
     <div class="box-header with-border ">
-        <h3 class="box-title"><?= $entityName ?><span class="text-sm text-gray" style="padding: 0 3px 0 3px;"> > </span>
-            Values</h3>
+        <div class="box-title"><span style="padding: 0 3px 0 3px;"><b><?= $entityName ?></b> > </span><b>Values</b></div>
         <a data-toggle="collapse" href="#collapseValuesInfo">
-            <div class=" pull-right">more info
-                <i class="fa fa-question-circle text-sx text-yellow"></i>
+            <div class="pull-right">more info
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
@@ -20,7 +19,7 @@
                         </dl>
                     </div>
                 </section>
-                <section class="content-info">
+                <section class="content-info" style="padding-left:15px;">
                     need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
                 </section>
             </div>
