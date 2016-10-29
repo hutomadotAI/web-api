@@ -18,9 +18,8 @@
             <span id="msgAlertIntentVariable">Set the variables used by the intent.</span>
         </div>
 
-
         <div id="collapseActionInfo" class="panel-collapse collapse">
-            <div class="box-body">
+            <div class="box-body" style="padding:0 0 10px 0;">
                 <div class="overlay center-block">
                     <section class="content-info">
                         <div class="box-body">
@@ -28,11 +27,12 @@
                                 Intent variables are entities that you will want the AI to know before it flags you that
                                 the intent is fulfilled.
                                 For example, when you order coffee you might be asked what kind of coffee you want.
-                                The type of coffee would be a variable you want to model here.
-                            </dl>
+                                The type of coffee would be a variable you want to model here.</dl>
                         </div>
                     </section>
-
+                    <section class="content-info" style="padding-left:15px;">
+                        need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                    </section>
                 </div>
             </div>
         </div>
