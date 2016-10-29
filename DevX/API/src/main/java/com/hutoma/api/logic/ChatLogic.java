@@ -82,6 +82,7 @@ public class ChatLogic {
         }};
 
         boolean noResponse = true;
+        boolean resetHistory = false;
         try {
             this.logger.logDebug(LOGFROM, "chat request for dev " + devId + " on ai " + aiid.toString());
 
@@ -95,20 +96,18 @@ public class ChatLogic {
             // process result from semantic analysis
             if (null != semanticAnalysisResult.getAnswer()) {
 
+                // if we receive a reset command then remove the command and flag the status
+                if (semanticAnalysisResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
+                    resetHistory = true;
+                    semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer()
+                            .replace(HISTORY_REST_DIRECTIVE, ""));
+                }
+
                 // remove trailing newline
                 semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer().trim());
 
                 if (!semanticAnalysisResult.getAnswer().isEmpty()) {
                     noResponse = false;
-                }
-
-                // reset conversation history if instructed to do so
-                if (semanticAnalysisResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
-                    semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer()
-                            .replace(HISTORY_REST_DIRECTIVE, ""));
-                    semanticAnalysisResult.setHistory("");
-                } else {
-                    semanticAnalysisResult.setHistory(semanticAnalysisResult.getAnswer());
                 }
 
                 double semanticScore = semanticAnalysisResult.getScore();
@@ -168,6 +167,9 @@ public class ChatLogic {
                     telemetryMap.put("RNNAnswer", chatResult.getAnswer());
                     telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
                 }
+
+                // set the history to the answer, unless we have received a reset command, in which case send an empty string
+                chatResult.setHistory(resetHistory ? "" : chatResult.getAnswer());
 
                 this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
             }

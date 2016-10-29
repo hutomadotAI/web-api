@@ -46,6 +46,8 @@ public class TestChatLogic {
     private static final String RNN_NEURALRESULT = "0.9|" + NEURALRESULT;
     private static final String QUESTION = "question";
     private static final String MEMORY_VARIABLE_PROMPT = "prompt1";
+    private static final String HISTORY_REST_DIRECTIVE = "@reset";
+
     //http://mockito.org/
     private JsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
@@ -198,6 +200,103 @@ public class TestChatLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
+    /***
+     * History is passed back to the user when semantic server wins
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_Semantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getValidChat(0.2f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getHistory());
+    }
+
+    /***
+     * History is passed back to the user when neuralnet server wins
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_Neural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getValidChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(NEURALRESULT, ((ApiChat) result).getResult().getHistory());
+    }
+
+    /***
+     * Reset command is processed and removed when text is at the beginning of the string
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_Semantic_Reset_Pre() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getCustomChat(0.2f, SEMANTICRESULT + HISTORY_REST_DIRECTIVE, NEURALRESULT);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /***
+     * Reset command is processed and removed when text is in the middle of the string
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_Semantic_Reset_Mid() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getCustomChat(0.2f, SEMANTICRESULT.substring(0, 3) + HISTORY_REST_DIRECTIVE + SEMANTICRESULT.substring(3), NEURALRESULT);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /***
+     * Reset command is processed and removed when text is at the end of the string
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_Semantic_Reset_Post() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getCustomChat(0.2f, HISTORY_REST_DIRECTIVE + SEMANTICRESULT, NEURALRESULT);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /***
+     * Semantic server sends reset command. History is cleared but if neuralnet wins the confidence contest then neuralnet response is returned unmodified.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_Semantic_Reset_NeuralNet_Wins() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ApiResult result = getCustomChat(0.5f, HISTORY_REST_DIRECTIVE + SEMANTICRESULT, NEURALRESULT);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
+        Assert.assertEquals(NEURALRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /***
+     * Semantic server sends reset command. History is cleared but if neuralnet wins the confidence contest then neuralnet response is returned unmodified.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_History_NeuralNet_Reset_Ignored() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        String neuralResetCommand = NEURALRESULT + HISTORY_REST_DIRECTIVE;
+        ApiResult result = getCustomChat(0.5f, SEMANTICRESULT, neuralResetCommand);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(neuralResetCommand, ((ApiChat) result).getResult().getHistory());
+        Assert.assertEquals(neuralResetCommand, ((ApiChat) result).getResult().getAnswer());
+    }
+
     @Test
     public void testChat_IntentRecognized() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         final String intentName = "intent1";
@@ -281,11 +380,15 @@ public class TestChatLogic {
     }
 
     private ApiResult getPaddedChat(float min_p) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
-        ChatResult paddedSemantic = getSemanticResult();
-        paddedSemantic.setAnswer(" " + paddedSemantic.getAnswer() + "\n");
-        String paddedNeural = RNN_NEURALRESULT.replace("|", " | ").concat("\n");
-        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(paddedSemantic);
-        when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(paddedNeural);
+        return getCustomChat(min_p, " " + SEMANTICRESULT + "\n", " " + NEURALRESULT + "\n");
+    }
+
+    private ApiResult getCustomChat(float min_p, String semanticResult, String neuralResult) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        ChatResult customSemantic = getSemanticResult();
+        customSemantic.setAnswer(semanticResult);
+        String customNeural = RNN_NEURALRESULT.replace(NEURALRESULT, neuralResult);
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(customSemantic);
+        when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn(customNeural);
         return getChat(min_p);
     }
 

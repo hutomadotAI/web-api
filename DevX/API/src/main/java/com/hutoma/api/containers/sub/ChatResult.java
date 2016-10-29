@@ -81,8 +81,11 @@ public class ChatResult {
         this.intents = intents;
     }
 
+    public String getHistory() {
+        return this.history;
+    }
+
     public void setHistory(String history) {
         this.history = history;
     }
-
 }
