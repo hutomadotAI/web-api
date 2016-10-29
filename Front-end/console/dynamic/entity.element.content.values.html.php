@@ -1,7 +1,7 @@
 <div class="box box-solid box-clean flat no-shadow">
 
     <div class="box-header with-border ">
-        <div class="box-title"><b><?= $entityName ?></b><span class="text-sm text-gray" style="padding: 0 3px 0 3px;"> > </span><b>Values</b></div>
+        <div class="box-title"><span style="padding: 0 3px 0 3px;"><b><?= $entityName ?></b> > </span><b>Values</b></div>
         <a data-toggle="collapse" href="#collapseValuesInfo">
             <div class="pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>

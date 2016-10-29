@@ -1,9 +1,9 @@
-<div class="box box-solid box-clean flat no-shadow" >
+<div class="box box-solid box-clean flat no-shadow">
 
     <div class="box-header with-border">
         <i class="fa fa-sitemap text-yellow"></i>
         <div class="box-title"><b>Entities List</b></div>
-        <a data-toggle="collapse"  href="#collapseEntitiesListInfo">
+        <a data-toggle="collapse" href="#collapseEntitiesListInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
@@ -26,7 +26,6 @@
                             bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla
                         </div>
                     </section>
-
                 </div>
             </div>
         </div>

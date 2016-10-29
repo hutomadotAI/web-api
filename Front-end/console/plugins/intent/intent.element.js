@@ -115,16 +115,16 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="margin: 0" placeholder="add entity" autocomplete="off" >');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off" >');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="margin: 0; background-color: transparent;" placeholder="' + entity + '" autocomplete="off" disabled="disabled">');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" autocomplete="off" disabled="disabled">');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt"  placeholder="' + n_prompts + '" >');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" >');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -133,13 +133,13 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
 
     if (size > 0)
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" ' +
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="' + prompts + '" data-toggle="modal" data-target="#boxPrompts" ' +
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
         'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" ' +
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" data-toggle="modal" data-target="#boxPrompts" ' +
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
@@ -159,7 +159,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     wHTML += ('</div>');
     wHTML += ('<div class="col-xs-5 text-gray no-padding">');
-    wHTML += ('<a class="pull-right"  data-toggle="modal" data-target="#deleteIntentVariable" style="display:none;" onClick="deleteIntentVariable(this)">');
+    wHTML += ('<a class="pull-right"  data-toggle="modal" data-target="#deleteIntentVariable" style="display:none; padding-top:2px;" onClick="deleteIntentVariable(this)">');
     wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
     wHTML += ('</a>');
     wHTML += ('</div>');
@@ -168,12 +168,11 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     wHTML += ('</div>');
 
     var newNode = document.createElement('div');
-    newNode.setAttribute('class', 'box-body bg-white flat no-padding');
+    newNode.setAttribute('class', 'box-body flat no-padding');
     newNode.setAttribute('onmouseover', 'variableOnMouseIn (this)');
     newNode.setAttribute('onmouseout', 'variableOnMouseOut (this)');
 
-    newNode.style.border = '1px solid #d2d6de';
-    newNode.style.marginTop = '-1px';
+    newNode.style.backgroundColor = '#404446;';
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
 

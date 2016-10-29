@@ -8,7 +8,7 @@ function createNewUsersayRow(value, parent) {
 
     wHTML += ('<div class="col-xs-9" id="obj-userexpression">');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
-    wHTML += ('<i class="fa fa-commenting-o text-gray"></i>');
+    wHTML += ('<i class="fa fa-comment-o text-gray"></i>');
 
     wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression" name="user-expression" style="padding-left: 35px;background-color: #404446; " placeholder="' + value + '">');
     wHTML += ('</div>');
@@ -18,7 +18,7 @@ function createNewUsersayRow(value, parent) {
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
     
     wHTML += ('<a data-toggle="modal" data-target="#deleteUserExpression" style="padding-right:3px; cursor: pointer;" onClick="deleteUserExpression(this)">');
-    wHTML += ('<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"></i>');
+    wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
     wHTML += ('</a>');
     
     wHTML += ('</div>');

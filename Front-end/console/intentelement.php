@@ -28,23 +28,13 @@ if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 4
     unset($entityList);
     \hutoma\console::redirect('./error.php?err=210');
     exit;
-} else { ?>
-    <script>
-        var entityListFromServer = <?php echo json_encode($entityList['entity_name']); unset($entityList);?>;
-    </script>
-    <?php
 }
 
 if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
     unset($intent);
     \hutoma\console::redirect('./error.php?err=211');
     exit;
-} else { ?>
-    <script>
-        var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
-    </script>
-    <?php
-}
+} 
 
 function isPostInputAvailable()
 {
@@ -133,13 +123,16 @@ function echoJsonIntentResponse($intent)
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
 <script src="./plugins/saveFile/FileSaver.js"></script>
+
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "intents", 1, false, false]);
     </script>
 </form>
-
+<script>
+    var entityListFromServer = <?php echo json_encode($entityList['entity_name']); unset($entityList);?>;
+    var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
+</script>
 </body>
 </html>
