@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.ResultEvent;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
@@ -123,6 +124,39 @@ public class TestTrainingLogicParser {
         Assert.assertEquals("Q2", eventsForNoResponse.get(0));
         Assert.assertEquals("Q4", eventsForNoResponse.get(1));
         Assert.assertEquals("Q5", eventsForNoResponse.get(2));
+    }
+
+    @Test
+    public void testTrainingFileParsingResult_events() {
+        ResultEvent[] events = {ResultEvent.UPLOAD_MISSING_RESPONSE, ResultEvent.UPLOAD_NO_CONTENT};
+        String[] eventText = {"event1", "event2"};
+        TrainingFileParsingResult pr = new TrainingFileParsingResult();
+        pr.addEvent(events[0], eventText[0]);
+        pr.addEvent(events[1], eventText[1]);
+        Assert.assertEquals(2, pr.getEvents().size());
+        Assert.assertEquals(events[0], pr.getEventType(0));
+        Assert.assertEquals(eventText[0], pr.getEventText(0));
+        Assert.assertEquals(events[1], pr.getEventType(1));
+        Assert.assertEquals(eventText[1], pr.getEventText(1));
+        Assert.assertTrue(pr.hasFatalEvents());
+    }
+
+    @Test
+    public void testTrainingFileParsingResult_fatalEvents() {
+        ResultEvent[] events = {ResultEvent.UPLOAD_MISSING_RESPONSE, ResultEvent.UPLOAD_NO_CONTENT};
+        TrainingFileParsingResult pr = new TrainingFileParsingResult();
+        pr.addEvent(events[0], "");
+        pr.addEvent(events[1], "");
+        Assert.assertTrue(pr.hasFatalEvents());
+    }
+
+    @Test
+    public void testTrainingFileParsingResult_noFatalEvents() {
+        ResultEvent[] events = {ResultEvent.UPLOAD_MISSING_RESPONSE, ResultEvent.UPLOAD_MISSING_RESPONSE};
+        TrainingFileParsingResult pr = new TrainingFileParsingResult();
+        pr.addEvent(events[0], "");
+        pr.addEvent(events[1], "");
+        Assert.assertFalse(pr.hasFatalEvents());
     }
 
     private String parse(String[] input) {

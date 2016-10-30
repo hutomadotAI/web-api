@@ -113,7 +113,7 @@ public class AdminLogic {
                 this.logger.logError(LOGFROM, "could not get dev token");
                 return ApiError.getInternalServerError();
             }
-            return new ApiAdmin(devtoken, devid.toString()).setSuccessStatus("token found");
+            return new ApiAdmin(devtoken, devid).setSuccessStatus("token found");
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "failed to get dev token: " + e.toString());
             return ApiError.getInternalServerError();

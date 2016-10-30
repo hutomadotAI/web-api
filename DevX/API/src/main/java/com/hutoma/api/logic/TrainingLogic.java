@@ -221,7 +221,11 @@ public class TrainingLogic {
     public ApiResult stopTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
             this.logger.logDebug(LOGFROM, "on demand training stop");
-            TrainingStatus trainingStatus = this.database.getAI(devid, aiid).getAiStatus();
+            ApiAi ai = this.database.getAI(devid, aiid);
+            if (ai == null) {
+                return ApiError.getNotFound("AI not found");
+            }
+            TrainingStatus trainingStatus = ai.getAiStatus();
 
             if (trainingStatus == TrainingStatus.IN_PROGRESS) {
                 this.messageQueue.pushMessageStopTraining(devid, aiid);
@@ -246,9 +250,11 @@ public class TrainingLogic {
 
     public ApiResult updateTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            TrainingStatus status = this.database.getAI(devid, aiid).getAiStatus();
-
-            switch (status) {
+            ApiAi ai = this.database.getAI(devid, aiid);
+            if (ai == null) {
+                return ApiError.getNotFound("AI not found");
+            }
+            switch (ai.getAiStatus()) {
                 case IN_PROGRESS:   // fallthrough
                 case NOT_STARTED:   // fallthrough
                 case STOPPED:       // fallthrough

@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -171,8 +172,35 @@ public class TestAILogic {
     }
 
     @Test
+    public void testUpdateAi() throws Database.DatabaseException {
+        when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
+                any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
+        ApiResult result = this.aiLogic.updateAI(this.fakeContext, this.DEVID, this.AIID, "desc", true, 0, 0.0, 0,
+                Locale.getDefault(), TimeZone.getDefault().toString());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAi_dbFail() throws Database.DatabaseException {
+        when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
+                any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(false);
+        ApiResult result = this.aiLogic.updateAI(this.fakeContext, this.DEVID, this.AIID, "desc", true, 0, 0.0, 0,
+                Locale.getDefault(), TimeZone.getDefault().toString());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAi_dbException() throws Database.DatabaseException {
+        when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
+                any(), anyString(), anyDouble(), anyInt(), anyInt())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiLogic.updateAI(this.fakeContext, this.DEVID, this.AIID, "desc", true, 0, 0.0, 0,
+                Locale.getDefault(), TimeZone.getDefault().toString());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
     public void testDelete_DBFail_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteAi(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        when(this.fakeDatabase.deleteAi(anyString(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.deleteAI(this.fakeContext, this.VALIDDEVID, this.AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }

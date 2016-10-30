@@ -191,6 +191,14 @@ public class TestEntityLogic {
     }
 
     @Test
+    public void testWriteEntity_dbError_doesNotStopTraining() throws Database.DatabaseException {
+        UUID aiid = UUID.randomUUID();
+        when(this.fakeDatabase.getAisForEntity(any(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
+        this.entityLogic.writeEntity(this.DEVID, this.ENTNAME, getEntity());
+        verify(this.trainingLogic, never()).stopTraining(any(), any(), any());
+    }
+
+    @Test
     public void testWriteEntity_entityNotInUse_doesNotStopTraining() throws Database.DatabaseException {
         when(this.fakeDatabase.getAisForEntity(this.DEVID, this.ENTNAME)).thenReturn(new ArrayList<>());
         this.entityLogic.writeEntity(this.DEVID, this.ENTNAME, getEntity());

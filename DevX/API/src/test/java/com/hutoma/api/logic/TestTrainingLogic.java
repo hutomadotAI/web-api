@@ -17,12 +17,15 @@ import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.TestParameterValidation;
 import com.hutoma.api.validation.Validate;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -36,14 +39,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.function.Supplier;
 import javax.ws.rs.core.SecurityContext;
 
+import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
  * Created by David MG on 12/08/2016.
  */
+@RunWith(JUnitParamsRunner.class)
 public class TestTrainingLogic {
 
     private static final String DEVID = "devid";
@@ -69,6 +75,69 @@ public class TestTrainingLogic {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, 0.5, "debuginfo",
                 "trainstatus", status, "", 0, 0.0, 1, Locale.getDefault(),
                 TimeZone.getDefault());
+    }
+
+    private static Object[] updateTraining_successStates() {
+        return $(
+                $(TrainingStatus.IN_PROGRESS),
+                $(TrainingStatus.NOT_STARTED),
+                $(TrainingStatus.STOPPED),
+                $(TrainingStatus.COMPLETED),
+                $(TrainingStatus.DELETED)
+        );
+    }
+
+    private static Object[] updateTraining_failureStates() {
+        return $(
+                $(TrainingStatus.CANCELLED),
+                $(TrainingStatus.ERROR),
+                $(TrainingStatus.MALFORMEDFILE),
+                $(TrainingStatus.NOTHING_TO_TRAIN),
+                $(TrainingStatus.QUEUED),
+                $(TrainingStatus.STOPPED_MAX_TIME)
+        );
+    }
+
+    private static Object[] startTraining_successStates() {
+        return $(
+                $(TrainingStatus.NOT_STARTED),
+                $(TrainingStatus.STOPPED)
+        );
+    }
+
+    private static Object[] startTraining_failureStates() {
+        return $(
+                $(TrainingStatus.IN_PROGRESS),
+                $(TrainingStatus.COMPLETED),
+                $(TrainingStatus.DELETED),
+                $(TrainingStatus.CANCELLED),
+                $(TrainingStatus.ERROR),
+                $(TrainingStatus.MALFORMEDFILE),
+                $(TrainingStatus.NOTHING_TO_TRAIN),
+                $(TrainingStatus.QUEUED),
+                $(TrainingStatus.STOPPED_MAX_TIME)
+        );
+    }
+
+    private static Object[] stopTraining_successStates() {
+        return $(
+                $(TrainingStatus.IN_PROGRESS)
+        );
+    }
+
+    private static Object[] stopTraining_failureStates() {
+        return $(
+                $(TrainingStatus.COMPLETED),
+                $(TrainingStatus.DELETED),
+                $(TrainingStatus.CANCELLED),
+                $(TrainingStatus.ERROR),
+                $(TrainingStatus.MALFORMEDFILE),
+                $(TrainingStatus.NOTHING_TO_TRAIN),
+                $(TrainingStatus.QUEUED),
+                $(TrainingStatus.STOPPED_MAX_TIME),
+                $(TrainingStatus.NOT_STARTED),
+                $(TrainingStatus.STOPPED)
+        );
     }
 
     @Before
@@ -125,11 +194,41 @@ public class TestTrainingLogic {
     }
 
     @Test
+    public void testTrain_Text_UploadNull() {
+        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, null, this.fakeContentDisposition);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
     public void testTrain_Doc_UploadTooLarge() {
         InputStream stream = createUpload(TEXTMULTILINE);
         when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_Doc_UploadNull() {
+        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, null, this.fakeContentDisposition);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_Doc_UploadTooLarge_checkUploadFileSizeIncorrect() {
+        InputStream stream = createUpload(TEXTMULTILINE);
+        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, this.fakeContentDisposition);
+        Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_Doc_Upload_nullFileDetail() {
+        InputStream stream = createUpload(TEXTMULTILINE);
+        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
@@ -202,58 +301,78 @@ public class TestTrainingLogic {
     }
 
     @Test
-    public void testStartTraining() throws Database.DatabaseException {
-        testStartTrainingCommon(TrainingStatus.NOT_STARTED, HttpURLConnection.HTTP_OK);
+    @Parameters(method = "startTraining_successStates")
+    public void testStartTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException {
+        testStartTrainingCommon(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
-    public void testStartTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
-        testStartTrainingCommon(TrainingStatus.COMPLETED, HttpURLConnection.HTTP_BAD_REQUEST);
+    @Parameters(method = "startTraining_failureStates")
+    public void testStartTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
+        testStartTrainingCommon(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
-    public void testStartTraining_BadRequest_TrainingIsInProgress() throws Database.DatabaseException {
-        testStartTrainingCommon(TrainingStatus.IN_PROGRESS, HttpURLConnection.HTTP_BAD_REQUEST);
+    public void testStartTraining_unknownAi() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
+        ApiResult result = this.logic.startTraining(this.fakeContext, DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+        verify(this.fakeMessageQueue, never()).pushMessageUpdateTraining(any(), any());
     }
 
     @Test
-    public void testStartTraining_TrainingWasStopped() throws Database.DatabaseException {
-        testStartTrainingCommon(TrainingStatus.STOPPED, HttpURLConnection.HTTP_OK);
+    public void testStartTraining_dbException() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+        testTraining_dbException(() -> this.logic.startTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testStartTraining_TrainingAlreadyQueued() throws Database.DatabaseException {
-        testStartTrainingCommon(TrainingStatus.QUEUED, HttpURLConnection.HTTP_BAD_REQUEST);
+    @Parameters(method = "stopTraining_successStates")
+    public void testStopTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException {
+        testStopTrainingCommon(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
-    public void testStartTraining_TrainigWasDeleted() throws Database.DatabaseException {
-        testStartTrainingCommon(TrainingStatus.DELETED, HttpURLConnection.HTTP_BAD_REQUEST);
+    @Parameters(method = "stopTraining_failureStates")
+    public void testStopTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
+        testStopTrainingCommon(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
-    public void testStopTraining() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.IN_PROGRESS, HttpURLConnection.HTTP_OK);
+    public void testStopTraining_unknownAi() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+        testTraining_invalidAi(() -> this.logic.stopTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testStopTraining_BadRequest_TrainingWasNotInProgress() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.NOT_STARTED, HttpURLConnection.HTTP_BAD_REQUEST);
+    public void testStopTraining_dbException() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+        testTraining_dbException(() -> this.logic.stopTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testStopTraining_BadRequest_TrainingWasCompleted() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.COMPLETED, HttpURLConnection.HTTP_BAD_REQUEST);
+    public void testStartTraining_invalidAi() throws Database.DatabaseException,
+            MessageQueue.MessageQueueException {
+        testTraining_invalidAi(() -> this.logic.startTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testStopTraining_BadRequest_TrainingIsOnlyQueued() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.QUEUED, HttpURLConnection.HTTP_BAD_REQUEST);
+    @Parameters(method = "updateTraining_successStates")
+    public void testUpdateTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException {
+        testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
-    public void testStopTraining_BadRequest_TrainingWasDeleted() throws Database.DatabaseException {
-        testStopTrainingCommon(TrainingStatus.DELETED, HttpURLConnection.HTTP_BAD_REQUEST);
+    @Parameters(method = "updateTraining_failureStates")
+    public void testUpdateTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
+        testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_INTERNAL_ERROR);
+    }
+
+    @Test
+    public void testUpdateTraining_invalidAi() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+        testTraining_invalidAi(() -> this.logic.updateTraining(this.fakeContext, DEVID, AIID));
+    }
+
+    @Test
+    public void testUpdateTraining_dbException() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+        testTraining_dbException(() -> this.logic.updateTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
@@ -340,11 +459,47 @@ public class TestTrainingLogic {
 
     @Test
     public void testGetTrainingMaterials_dbException() throws Database.DatabaseException {
-        Database.DatabaseException exception = new Database.DatabaseException(new Exception("dummy exception"));
-        when(this.fakeDatabase.getAI(DEVID, AIID)).thenThrow(exception);
+        when(this.fakeDatabase.getAI(DEVID, AIID)).thenThrow(Database.DatabaseException.class);
         ApiError error = (ApiError) this.logic.getTrainingMaterials(this.fakeContext, DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, error.getStatus().getCode());
         verify(this.fakeLogger).logError(anyString(), anyString());
+    }
+
+    @Test
+    public void testDeleteTraining() throws MessageQueue.MessageQueueException {
+        ApiResult result = this.logic.delete(this.fakeContext, DEVID, AIID);
+        verify(this.fakeMessageQueue).pushMessageDeleteTraining(any(), any());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteTraining_messageQueueException() throws MessageQueue.MessageQueueException {
+        doThrow(MessageQueue.MessageQueueException.class).when(this.fakeMessageQueue).pushMessageDeleteTraining(any(), any());
+        ApiResult result = this.logic.delete(this.fakeContext, DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    private void testTraining_invalidAi(Supplier<ApiResult> supplier) throws Database.DatabaseException,
+            MessageQueue.MessageQueueException {
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
+        ApiResult result = supplier.get();
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+        verify(this.fakeMessageQueue, never()).pushMessageUpdateTraining(any(), any());
+    }
+
+    private void testTraining_dbException(Supplier<ApiResult> supplier) throws Database.DatabaseException,
+            MessageQueue.MessageQueueException {
+        when(this.fakeDatabase.getAI(any(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = supplier.get();
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+        verify(this.fakeMessageQueue, never()).pushMessageUpdateTraining(any(), any());
+    }
+
+    private void testUpdateTraining_initialStates_common(TrainingStatus initialState, int expectedCode)
+            throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(initialState, false));
+        ApiResult result = this.logic.updateTraining(this.fakeContext, DEVID, AIID);
+        Assert.assertEquals(expectedCode, result.getStatus().getCode());
     }
 
     private void testStartTrainingCommon(final TrainingStatus trainingStatus, final int expectedStatus)
