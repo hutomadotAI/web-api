@@ -12,9 +12,12 @@
     }
 
     setSessionVariablesFromPost();
-    $domains= \hutoma\console::getDomains();
-   
-    if ($domains['status']['code'] !== 200) {
+    $domains= \hutoma\console::getBotsInStore();
+
+
+    //TODO replace me with API call once done
+    //if ($domains['status']['code'] !== 200) {
+    if ($domains === '') {
         unset($domains);
         \hutoma\console::redirect('./error.php?err=103');
         exit;
@@ -111,10 +114,10 @@
 </form>
 
 <script>
-  var domains = <?php echo json_encode($domains['_domainList']);  unset($domains); ?>;
+  var domains = <?php echo json_encode($domains);  unset($domains); ?>;
   var userActived ={};
   for (var x in domains){
-      var key = domains[x].dom_id;
+      var key = domains[x].domainId;
       userActived[key]=false;
   }
 

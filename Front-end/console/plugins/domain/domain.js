@@ -21,7 +21,7 @@ function backPage(){
 function showDomains(str,size){
     var wHTML = "";
     for (var x in domains) {
-        var boxid = 'rnn' + domains[x].domainId;
+        var boxid = domains[x].domainId;
         if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
             if(size==0){
                 // slim box design
@@ -67,9 +67,9 @@ function showDomains(str,size){
                     wHTML += ('<div class="col-xs-3">');
 
                     if ( userActived[key] === false )
-                        wHTML += ('<div class="switch" data-rnn="0" style="margin-top:33px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch" data-rnn="0" style="margin-top:33px;" onclick=switchClick(this,"'+key+'");></div>');
                     else
-                        wHTML += ('<div class="switch switchOn" data-rnn="1" style="margin-top:33px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch switchOn" data-rnn="1" style="margin-top:33px;" onclick=switchClick(this,"'+key+'");></div>');
                     wHTML += ('</div>');
                     wHTML += ('</div></div>');
                 }
@@ -116,7 +116,7 @@ function showDomains(str,size){
 }
 
 function switchClick(node,key){
-    var boxid = 'rnn' + key;
+    var boxid = key;
     $(node).toggleClass('switchOn');
     if( $(node).attr('data-rnn') == '0') {
         $(node).attr('data-rnn', 1);

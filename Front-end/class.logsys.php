@@ -1563,23 +1563,18 @@ class console
     }
 
 
-    public static function getDomains()
+    // TODO turn me into an API call
+    public static function getBotsInStore()
     {
-
         if (self::$loggedIn) {
-            $path = '/botStore';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=360');
+            try {
+                $sql = self::$dbh->prepare("CALL getBotsInStore()");
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=123');
                 exit;
             }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
+            return $sql->fetchAll();
         }
     }
 
