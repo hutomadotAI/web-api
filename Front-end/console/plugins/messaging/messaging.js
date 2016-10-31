@@ -15,15 +15,15 @@ function msgAlertNameAI(alarm,msg){
             $("#containerMsgAlertNameAI").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertNameAI").attr('class', 'icon fa fa-warning');
             document.getElementById('ai_name').style.borderColor = "red";
-            break
+            break;
         case 3:
             $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-success');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
-            break
+            break;
         case 4:
             $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertNameAI').innerText = msg;
 }
@@ -40,7 +40,7 @@ function msgAlertDescriptionAI(alarm,msg){
             $("#containerMsgAlertDescriptionAI").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertDescriptionAI").attr('class', 'icon fa fa-warning');
             document.getElementById('ai_description').style.borderColor = "red";
-            break
+            break;
     }
     document.getElementById('msgAlertDescriptionAI').innerText = msg;
 }
@@ -59,15 +59,15 @@ function msgAlertUploadFile(alarm,msg){
         case 2:
             $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-warning');
-            break
+            break;
         case 3:
             $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-success');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
-            break
+            break;
         case 4:
             $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertUploadFile").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertUploadFile').innerText = msg;
 }
@@ -86,15 +86,15 @@ function msgAlertUploadStructure(alarm,msg){
         case 2:
             $("#containerMsgAlertUploadStructure").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertUploadStructure").attr('class', 'icon fa fa-warning');
-            break
+            break;
         case 3:
             $("#containerMsgAlertUploadStructure").attr('class','alert alert-dismissable flat alert-success');
             $("#iconAlertUploadStructure").attr('class', 'icon fa fa-check');
-            break
+            break;
         case 4:
             $("#containerMsgAlertUploadStructure").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertUploadStructure").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertUploadStructure').innerText = msg;
 }
@@ -113,15 +113,15 @@ function msgAlertUploadUrl(alarm,msg){
         case 2:
             $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertUploadUrl").attr('class', 'icon fa fa-warning');
-            break
+            break;
         case 3:
             $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-success');
             $("#iconAlertUploadUrl").attr('class', 'icon fa fa-check');
-            break
+            break;
         case 4:
             $("#containerMsgAlertUploadUrl").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertUploadUrl").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertUploadUrl').innerText = msg;
 }
@@ -140,15 +140,15 @@ function msgAlertProgressBar(alarm,msg){
         case 2:
             $("#containerMsgAlertProgressBar").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertProgressBar").attr('class', 'icon fa fa-warning');
-            break
+            break;
         case 3:
             $("#containerMsgAlertProgressBar").attr('class','alert alert-dismissable flat alert-success');
             $("#iconAlertProgressBar").attr('class', 'icon fa fa-check');
-            break
+            break;
         case 4:
             $("#containerMsgAlertProgressBar").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertProgressBar").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertProgressBar').innerText = msg;
 }
@@ -167,17 +167,44 @@ function msgAlertUpdateAI(alarm,msg){
         case 2:
             $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertUpdateAI").attr('class', 'icon fa fa-warning');
-            break
+            break;
         case 3:
             $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-success');
             $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
-            break
+            break;
         case 4:
             $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertUpdateAI').innerText = msg;
+}
+
+function msgAlertAiSkill(alarm,msg){
+    document.getElementById('containerMsgAlertAiSkill').style.display = 'block';
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertAiSkill").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertAiSkill").attr('class', 'icon fa fa-check');
+            break;
+        case 1:
+            $("#containerMsgAlertAiSkill").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertAiSkill").attr('class', 'icon fa fa-check');
+            break;
+        case 2:
+            $("#containerMsgAlertAiSkill").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertAiSkill").attr('class', 'icon fa fa-warning');
+            break;
+        case 3:
+            $("#containerMsgAlertAiSkill").attr('class','alert alert-dismissable flat alert-success');
+            $("#iconAlertAiSkill").attr('class', 'icon fa fa-check');
+            break;
+        case 4:
+            $("#containerMsgAlertAiSkill").attr('class','alert alert-dismissable flat alert-primary');
+            $("#iconAlertAiSkill").attr('class', 'icon fa fa-check');
+            break;
+    }
+    document.getElementById('msgAlertAiSkill').innerHTML = msg;
 }
 
 
@@ -196,11 +223,11 @@ function msgAlertEntityValues(alarm,msg){
             $("#containerMsgAlertEntityValues").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertEntityValues").attr('class', 'icon fa fa-warning');
             document.getElementById('value-entity').style.borderColor = "red";
-            break
+            break;
         case 4:
             $("#containerMsgAlertEntityValues").attr('class','alert alert-dismissable flat alert-primary');
             $("#iconAlertEntityValues").attr('class', 'icon fa fa-check');
-            break
+            break;
     }
     document.getElementById('msgAlertEntityValues').innerText = msg;
 }
@@ -221,7 +248,7 @@ function msgAlertUserExpression(alarm,msg){
             $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertUserExpression").attr('class', 'icon fa fa-warning');
             document.getElementById('user-expression').style.borderColor = "red";
-            break
+            break;
     }
     document.getElementById('msgAlertUserExpression').innerText = msg;
 }
@@ -243,7 +270,7 @@ function msgAlertIntent(alarm,msg){
             $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertIntent").attr('class', 'icon fa fa-warning');
             document.getElementById('inputIntentName').style.borderColor = "red";
-            break
+            break;
     }
     document.getElementById('msgAlertIntent').innerText = msg;
 }
@@ -264,7 +291,7 @@ function containerMsgAlertIntentVariable(alarm,msg){
             $("#containerMsgAlertIntentVariable").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertIntentVariable").attr('class', 'icon fa fa-warning');
             document.getElementById('user-expression').style.borderColor = "red";
-            break
+            break;
     }
     document.getElementById('msgAlertIntentVariable').innerText = msg;
 }
@@ -285,7 +312,7 @@ function msgAlertIntentResponse(alarm,msg){
             $("#containerMsgAlertIntentResponse").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertIntentResponse").attr('class', 'icon fa fa-warning');
             document.getElementById('intent-response').style.borderColor = "red";
-            break
+            break;
     }
     document.getElementById('msgAlertIntentResponse').innerText = msg;
 }

@@ -84,35 +84,31 @@
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
             $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']  =  \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
             
-            return true;
-
-            // TODO send domain activeted by user
-            /*
-            if (updateUserActivedDomains($singleAI['dev_id'], $singleAI['aiid'])) {
+            
+            if (storeAIMesh($singleAI['aiid'])) {
                 unset($singleAI);
                 return true;
             } else {
                 unset($singleAI);
                 return false;
             }
-            */
+
         }
 
         unset($singleAI);
         return false;
     }
 
-    function updateUserActivedDomains($dev_id, $aiid){
-        $userActivedList = json_decode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['userActivedDomains'], true);
+    function storeAIMesh($aiid){
+        $mesh = json_decode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['userActivedDomains'], true);
         try {
-            foreach ($userActivedList as $key => $value)
-                \hutoma\console::insertUserActiveDomain($dev_id, $aiid, $key, $userActivedList[$key]);
-
+            foreach ($mesh as $key => $value)
+                if ($value)  \hutoma\console::addMesh($aiid,$key);
         } catch (Exception $e) {
-            unset($userActivedList);
+            unset($mesh);
             return false;
         }
-        unset($userActivedList);
+        unset($mesh);
         return true;
     }
 

@@ -72,6 +72,8 @@ function uploadTextFile(){
     xmlhttp.send(file_data);
 }
 
+
+
 function isTextFileSelected(){
     var elementValue = document.getElementById("inputfile").value;
     if ( elementValue == null ||  elementValue == "") {

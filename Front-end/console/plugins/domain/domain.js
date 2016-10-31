@@ -1,7 +1,5 @@
 function wizardNext() {
-    $(this).prop('disabled',true);
-    $('#btnBack').prop('disabled',true);
-    $('#domsearch').prop('disabled',true);
+    deactiveButtons();
 
     if(document.domainsNewAIform.onsubmit) {
         return;
@@ -9,6 +7,7 @@ function wizardNext() {
 
     RecursiveUnbind($('#wrapper'));
     var JsonStringActiveDomains = JSON.stringify(userActived);
+    //alert(JsonStringActiveDomains);
     document.getElementById('userActivedDomains').value = JsonStringActiveDomains;
     document.domainsNewAIform.submit();
 }
@@ -20,12 +19,13 @@ function backPage(){
 
 function showDomains(str,size){
     var wHTML = "";
+
     for (var x in domains) {
-        var boxid = domains[x].domainId;
+        var boxid = domains[x].aiid;
         if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
             if(size==0){
                 // slim box design
-                if ( domains[x].available == '1' ){
+               // if ( domains[x].published == '1' ){
                     /* available equal to ZERO
                     wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                     wHTML += ('<div class="col-xs-2">');
@@ -42,24 +42,24 @@ function showDomains(str,size){
                     wHTML += ('</div></div>');
                     */
 
-                    var key = domains[x].domainId;
+                    var key = domains[x].aiid;
 
                     if ( userActived[key] === false )
                         wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
                     else
                         wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow borderActive" id="'+boxid+'"><p></p>');
                     wHTML += ('<div class="col-xs-2">');
-                    wHTML += ('<div class="info-circle-icon-small '+domains[x].color+'"><i class="'+domains[x].icon+'"></i></div>');
+                    wHTML += ('<div class="info-circle-icon-small '+domains[x].widgetColor+'"><i class="'+domains[x].iconPath+'"></i></div>');
                     wHTML += ('</div>');
                     wHTML += ('<div class="col-xs-7">');
                     wHTML += ('<b><h4 class="text-center text-white" style="text-align: left;">&nbsp;'+domains[x].name+'</h4></b>');
                     wHTML += ('<h5 class="text-center text-white" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
                     wHTML += ('<a data-toggle="modal" ' +
                     'data-target="#boxDomainInfo" ' +
-                    'data-id="'+domains[x].domainId+'" ' +
+                    'data-id="'+domains[x].aiid+'" ' +
                     'data-name="'+domains[x].name+'" ' +
-                    'data-icon="'+domains[x].icon+'" ' +
-                    'data-color="'+domains[x].color+'" ' +
+                    'data-icon="'+domains[x].iconPath+'" ' +
+                    'data-color="'+domains[x].widgetColor+'" ' +
                     'style="cursor: pointer;">');
                     wHTML += ('<h5 class="text-center text-light-blue" style="text-align: left;">&nbsp;info and settings</h5>');
                     wHTML += ('</a>');
@@ -72,7 +72,7 @@ function showDomains(str,size){
                         wHTML += ('<div class="switch switchOn" data-rnn="1" style="margin-top:33px;" onclick=switchClick(this,"'+key+'");></div>');
                     wHTML += ('</div>');
                     wHTML += ('</div></div>');
-                }
+             //   }
             }
             else{
                 // big box design
@@ -88,26 +88,26 @@ function showDomains(str,size){
                 wHTML += ('</div>');
                 wHTML += ('</div></div>');
                 */
-                if ( domains[x].available == '1' ){
-                    var key = domains[x].domainId;
+                //if ( domains[x].published == '1' ){
+                    var key = domains[x].aiid;
 
                     if ( userActived[key] === false )
                         wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
                     else
                         wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow borderActive" id="'+boxid+'">');
 
-                    wHTML += ('<a><div class="info-circle-icon '+domains[x].color+'" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div></a>');
+                    wHTML += ('<a><div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 60px;"><i class="'+domains[x].iconPath+'"></i></div></a>');
                     wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
                     wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
                     wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
 
                     if ( userActived[key] === false )
-                        wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
                     else
-                        wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,'+key+');></div>');
+                        wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
                     wHTML += ('</div>');
                     wHTML += ('</div></div>');
-                }
+               // }
             }
         }
     }
@@ -129,6 +129,13 @@ function switchClick(node,key){
         $("#"+boxid).removeClass("borderActive");
     }
 }
+
+function deactiveButtons(){
+    document.getElementById('btnBack').setAttribute('disabled','disabled');
+    document.getElementById('btnNext').setAttribute('disabled','disabled');
+    document.getElementById('domsearch').setAttribute('disabled','disabled');
+}
+
 
 // Pass values to Modal on show dialog modal
 $('#boxDomainInfo').on('show.bs.modal', function(e) {

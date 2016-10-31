@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
-        <div class="box-title"><b>Select a pre-trained Neural Network</b></div>
+        <div class="box-title"><b>Add Skills to your AI</b></div>
         <a data-toggle="collapse"  href="#collapseInfoNewDomains">
             <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"> </i> more info
 
@@ -10,7 +10,7 @@
 
     <div class="box-body" id="boxNewDomains">
         <?php include './dynamic/domainsNewAI.content.info.html.php'; ?>
-        <input class="form-control flat no-shadow" value="" placeholder="Search for a pre-trained neural network..." tabindex="0" onkeyup="searchDomain(this.value)">
+        <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchDomain(this.value)">
         <p></p>
     </div>
 
@@ -19,7 +19,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                        Pre-trained neural networks are made available by our community and provide out of the box knowlege to your AI so you don't have to start from scratch.
+                        Pre-trained neural networks are made available by our community and provide out of the box knowledge to your AI so you don't have to start from scratch.
                     </div>
                 </section>
                 <p></p>
