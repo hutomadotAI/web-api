@@ -37,7 +37,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Supplier;
 import javax.ws.rs.core.SecurityContext;
@@ -74,7 +73,7 @@ public class TestTrainingLogic {
     private static ApiAi getCommonAi(TrainingStatus status, boolean isPrivate) {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, 0.5, "debuginfo",
                 "trainstatus", status, "", 0, 0.0, 1, Locale.getDefault(),
-                TimeZone.getDefault());
+                "UTC");
     }
 
     private static Object[] updateTraining_successStates() {
@@ -550,7 +549,7 @@ public class TestTrainingLogic {
         doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), any());
         InputStream stream = createUpload(SOMETEXT);
         ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, 0.5, "", "",
-                TrainingStatus.NOT_STARTED, null, 0, 0.5, 0, Locale.UK, TimeZone.getDefault());
+                TrainingStatus.NOT_STARTED, null, 0, 0.5, 0, Locale.UK, "UTC");
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(ai);
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);

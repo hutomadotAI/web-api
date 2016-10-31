@@ -18,7 +18,6 @@ import org.junit.Test;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 import javax.ws.rs.core.SecurityContext;
 
@@ -213,7 +212,7 @@ public class TestAILogic {
     private ApiAi getAI() {
         return new ApiAi(this.AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.5, "debuginfo",
                 "trainstatus", null, "", 0, 0.0, 1, Locale.getDefault(),
-                TimeZone.getDefault());
+                "UTC");
     }
 
     private ArrayList<ApiAi> getAIList() {

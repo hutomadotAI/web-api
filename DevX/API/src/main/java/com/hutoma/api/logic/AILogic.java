@@ -16,7 +16,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -142,7 +142,7 @@ public class AILogic {
 
         try {
             this.logger.logDebug(LOGFROM, "request to list all ais");
-            ArrayList<ApiAi> aiList = this.database.getAllAIs(devid);
+            List<ApiAi> aiList = this.database.getAllAIs(devid);
             if (aiList.isEmpty()) {
                 this.logger.logDebug(LOGFROM, "ai list is empty");
                 return ApiError.getNotFound();

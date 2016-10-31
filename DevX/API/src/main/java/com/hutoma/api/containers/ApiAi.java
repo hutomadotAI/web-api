@@ -5,7 +5,6 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import org.joda.time.DateTime;
 
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by David MG on 15/08/2016.
@@ -28,7 +27,7 @@ public class ApiAi extends ApiResult {
     private double confidence; // aka Create new answers
     private int voice;
     private Locale language;
-    private TimeZone timezone;
+    private String timezone;
 
     public ApiAi(String aiid, String clientToken) {
         this.aiid = aiid;
@@ -38,7 +37,7 @@ public class ApiAi extends ApiResult {
     public ApiAi(String aiid, String clientToken, String name, String description, DateTime createdOn,
                  boolean isPrivate, double deepLearningError, String trainingDebugInfo, String trainingStatus,
                  TrainingStatus aiStatus, String aiTrainingFile, int personality, double confidence,
-                 int voice, Locale language, TimeZone timezone) {
+                 int voice, Locale language, String timezone) {
         this.aiid = aiid;
         this.client_token = clientToken;
         this.name = name;

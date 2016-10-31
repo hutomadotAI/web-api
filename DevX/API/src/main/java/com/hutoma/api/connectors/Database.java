@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -145,7 +144,7 @@ public class Database {
         }
     }
 
-    public ArrayList<ApiAi> getAllAIs(final String devid) throws DatabaseException {
+    public List<ApiAi> getAllAIs(final String devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIs", 1).add(devid);
             final ResultSet rs = call.executeQuery();
@@ -393,7 +392,7 @@ public class Database {
                 rs.getInt("ai_voice"),
                 // Java, being funny, can't follow rfc5646 so we need to replace the separator
                 localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
-                timezoneString == null ? null : TimeZone.getTimeZone(timezoneString));
+                timezoneString);
     }
 
     /***
