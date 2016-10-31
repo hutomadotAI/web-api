@@ -1,5 +1,6 @@
 package com.hutoma.api.memory;
 
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.MemoryIntent;
 
 import java.util.List;
@@ -37,4 +38,13 @@ public interface IMemoryIntentHandler {
      * @param aiid the AI ID
      */
     void deleteAllIntentsForAi(UUID aiid);
+
+    /**
+     * Gets the original intent for this memory intent.
+     * @param devid      the dev id
+     * @param aiid       the AI ID
+     * @param intentName the intent name
+     * @return the intent
+     */
+    ApiIntent getIntent(String devid, UUID aiid, String intentName);
 }

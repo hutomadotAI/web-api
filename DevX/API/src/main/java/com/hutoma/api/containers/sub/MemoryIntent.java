@@ -13,17 +13,17 @@ import java.util.stream.Collectors;
  */
 public class MemoryIntent {
 
+    private final String name;
+    private final UUID chatId;
+    private final UUID aiid;
     private List<MemoryVariable> variables = new ArrayList<>();
-    private String name;
-    private UUID chatId;
-    private UUID aiid;
     private boolean isFulfilled;
 
     /**
      * Ctor.
-     * @param name the intent name
-     * @param aiid the AI ID
-     * @param chatId the Chat ID
+     * @param name      the intent name
+     * @param aiid      the AI ID
+     * @param chatId    the Chat ID
      * @param variables the list of memory variables
      */
     public MemoryIntent(final String name, final UUID aiid, final UUID chatId, final List<MemoryVariable> variables) {
@@ -38,7 +38,7 @@ public class MemoryIntent {
      * @return the AI ID
      */
     public UUID getAiid() {
-        return aiid;
+        return this.aiid;
     }
 
     /**
@@ -46,7 +46,7 @@ public class MemoryIntent {
      * @return the CharId
      */
     public UUID getChatId() {
-        return chatId;
+        return this.chatId;
     }
 
     /**
@@ -54,7 +54,7 @@ public class MemoryIntent {
      * @return the list of all unfulfilled mandatory variables
      */
     public List<MemoryVariable> getUnfulfilledVariables() {
-        return variables.stream().filter(v -> v.isMandatory() && v.getCurrentValue() == null)
+        return this.variables.stream().filter(v -> v.isMandatory() && v.getCurrentValue() == null)
                 .collect(Collectors.toList());
     }
 
@@ -71,8 +71,8 @@ public class MemoryIntent {
     }
 
     public void fulfillVariables(List<Pair<String, String>> entities) {
-        for (Pair<String, String> entity: entities) {
-            Optional<MemoryVariable> optVariable = variables.stream()
+        for (Pair<String, String> entity : entities) {
+            Optional<MemoryVariable> optVariable = this.variables.stream()
                     .filter(x -> x.getName().equalsIgnoreCase(entity.getA())).findFirst();
             if (optVariable.isPresent()) {
                 MemoryVariable variable = optVariable.get();
@@ -86,7 +86,7 @@ public class MemoryIntent {
      * @return all the memory variables for this intent
      */
     public List<MemoryVariable> getVariables() {
-        return variables;
+        return this.variables;
     }
 
     /**
@@ -94,6 +94,6 @@ public class MemoryIntent {
      * @return the name of this intent
      */
     public String getName() {
-        return name;
+        return this.name;
     }
 }

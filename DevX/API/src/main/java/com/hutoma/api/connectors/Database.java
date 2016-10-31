@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors;
 
+import com.google.gson.internal.LinkedTreeMap;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -46,8 +47,20 @@ public class Database {
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try {
-            List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"));
-            return new MemoryIntent(rs.getString("intentName"),
+            List<LinkedTreeMap<String, Object>> list = jsonSerializer.deserializeList(rs.getString("variables"));
+            List<MemoryVariable> variables = new ArrayList<>();
+            for (LinkedTreeMap<String, Object> e : list) {
+                @SuppressWarnings("unchecked")
+                MemoryVariable memoryVariable = new MemoryVariable(
+                        e.get("name").toString(),
+                        e.containsKey("currentValue") ? e.get("currentValue").toString() : null,
+                        (boolean) e.get("isMandatory"),
+                        (List<String>) e.get("entityKeys"),
+                        (List<String>) e.get("prompts"),
+                        (int) Math.round((double) e.get("timesPrompted")));
+                variables.add(memoryVariable);
+            }
+            return new MemoryIntent(rs.getString("name"),
                     UUID.fromString(rs.getString("aiid")),
                     UUID.fromString(rs.getString("chatId")),
                     variables);

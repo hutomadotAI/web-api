@@ -10,6 +10,7 @@ import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -168,10 +169,10 @@ public class ChatLogic {
                     telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
                 }
 
+                this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
+
                 // set the history to the answer, unless we have received a reset command, in which case send an empty string
                 chatResult.setHistory(resetHistory ? "" : chatResult.getAnswer());
-
-                this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
             }
         } catch (NeuralNet.NeuralNetNotRespondingException nr) {
             this.logger.logError(LOGFROM, "neural net did not respond in time");
@@ -223,8 +224,7 @@ public class ChatLogic {
         if (memoryIntent != null) { // Intent was recognized
             telemetryMap.put("IntentRecognized", memoryIntent.getName());
             if (memoryIntent.getUnfulfilledVariables().isEmpty()) {
-                memoryIntent.setIsFulfilled(true);
-                telemetryMap.put("IntentFulfilled", memoryIntent.getName());
+                notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
             } else {
                 // Attempt to retrieve entities from the question
                 List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
@@ -238,8 +238,7 @@ public class ChatLogic {
                 // and prompt for it
                 List<MemoryVariable> vars = memoryIntent.getUnfulfilledVariables();
                 if (vars.isEmpty()) {
-                    memoryIntent.setIsFulfilled(true);
-                    telemetryMap.put("IntentFulfilled", memoryIntent.getName());
+                    notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
                 } else {
                     // For now get the first unfulfilled variable with numPrompts>0
                     // or we could do random just to make it a 'surprise!' :)
@@ -276,6 +275,18 @@ public class ChatLogic {
 
         // Add the current intents state to the chat response
         chatResult.setIntents(this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
+    }
+
+    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid,
+                                       Map<String, String> telemetryMap) {
+        memoryIntent.setIsFulfilled(true);
+        ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
+        if (intent != null) {
+            List<String> responses = intent.getResponses();
+            chatResult.setAnswer(responses.get((int) (Math.random() * responses.size())));
+        }
+        telemetryMap.put("IntentFulfilled", memoryIntent.getName());
+
     }
 }
 

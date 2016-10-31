@@ -15,12 +15,21 @@ public class MemoryVariable {
 
     /**
      * Ctor.
-     * @param name the name
+     * @param name       the name
      * @param entityKeys the entity keys
      */
     public MemoryVariable(String name, List<String> entityKeys) {
         this.name = name;
         this.entityKeys = entityKeys;
+    }
+
+    public MemoryVariable(String name, String currentValue, boolean isMandatory, List<String> entityKeys,
+                          List<String> prompts, int timesPrompted) {
+        this(name, entityKeys);
+        this.currentValue = currentValue;
+        this.isMandatory = isMandatory;
+        this.prompts = prompts;
+        this.timesPrompted = timesPrompted;
     }
 
     /**
@@ -65,7 +74,7 @@ public class MemoryVariable {
 
     /**
      * Sets whether it's mandatory or not.
-     * @param isMandatory  whether it's mandatory or not
+     * @param isMandatory whether it's mandatory or not
      */
     public void setIsMandatory(boolean isMandatory) {
         this.isMandatory = isMandatory;

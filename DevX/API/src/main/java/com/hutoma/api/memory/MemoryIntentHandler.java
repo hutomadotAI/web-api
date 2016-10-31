@@ -29,14 +29,16 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     private final ILogger logger;
     private final DatabaseEntitiesIntents database;
     private final JsonSerializer jsonSerializer;
+    private final DatabaseEntitiesIntents databaseIntents;
 
 
     @Inject
     public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents database,
-                               final ILogger logger) {
+                               final ILogger logger, DatabaseEntitiesIntents databaseIntents) {
         this.logger = logger;
         this.database = database;
         this.jsonSerializer = jsonSerializer;
+        this.databaseIntents = databaseIntents;
     }
 
     /**
@@ -83,6 +85,18 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         } catch (Database.DatabaseException e) {
             this.logger.logError(LOGFROM, e.getMessage());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApiIntent getIntent(final String devid, final UUID aiid, final String intentName) {
+        try {
+            return this.databaseIntents.getIntent(devid, aiid, intentName);
+        } catch (Database.DatabaseException e) {
+            this.logger.logError(LOGFROM, e.getMessage());
+        }
+        return null;
     }
 
     private MemoryIntent loadIntentForAi(final String devid, final UUID aiid, final UUID chatId,
