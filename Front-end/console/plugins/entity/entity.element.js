@@ -1,4 +1,3 @@
-document.getElementById("btnAddEntityValue").addEventListener("click", addEntityValue);
 //checkListEntityValuesSize();
 
 function saveEntity() {
@@ -75,16 +74,6 @@ function createNewValueEntityRow(value, parent) {
     parent.insertBefore(newNode, parent.firstChild);
 
     checkListEntityValuesSize();
-}
-
-function addEntityValue() {
-    if (checkLimitValue()) {
-        var element = document.getElementById('value-entity');
-        var value = $(element).val();
-        var parent = document.getElementById('entityValues-list');
-        document.getElementById('value-entity').value = '';
-        createNewValueEntityRow(value, parent);
-    }
 }
 
 function checkListEntityValuesSize() {

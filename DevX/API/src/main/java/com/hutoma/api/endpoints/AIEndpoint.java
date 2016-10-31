@@ -17,7 +17,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -45,19 +44,19 @@ public class AIEndpoint {
 
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID})
     @ValidatePost({APIParameter.AIName, APIParameter.AIDescription, APIParameter.AiConfidence,
             APIParameter.Timezone, APIParameter.Locale})
     @Produces(MediaType.APPLICATION_JSON)
     public Response createAI(
             @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice) {
         ApiResult result = this.aiLogic.createAI(
                 securityContext,
-                devid,
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiName(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
                 isPrivate,
@@ -79,13 +78,12 @@ public class AIEndpoint {
     public Response updateAI(
             @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice) {
         ApiResult result = this.aiLogic.updateAI(
                 securityContext,
-                devid,
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
                 isPrivate,
@@ -99,11 +97,14 @@ public class AIEndpoint {
 
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID}) // Although this is always checked need to add it to trigger the filter
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAIs(
             @Context SecurityContext securityContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.aiLogic.getAIs(securityContext, devid);
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.aiLogic.getAIs(
+                securityContext,
+                ParameterFilter.getDevid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
@@ -114,9 +115,10 @@ public class AIEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSingleAI(
             @Context SecurityContext securityContext,
-            @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.aiLogic.getSingleAI(securityContext, devid,
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.aiLogic.getSingleAI(
+                securityContext,
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
@@ -128,9 +130,10 @@ public class AIEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAI(
             @Context SecurityContext securityContext,
-            @Context ContainerRequestContext requestContext,
-            @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.aiLogic.deleteAI(securityContext, devid,
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.aiLogic.deleteAI(
+                securityContext,
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }

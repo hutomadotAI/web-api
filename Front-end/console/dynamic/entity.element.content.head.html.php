@@ -2,8 +2,9 @@
 <div class="box box-solid box-clean flat no-shadow">
     <div class="box-header no-border ">
         <i class="fa fa-sitemap text-yellow"></i>
-        <div class="box-title"><b>Entity</b> > </span><b><?php echo $_POST['entity'] ?></b>
-        </div>
+        <h3 class="box-title">Entity <span class="text-sm text-gray"
+                                           style="padding: 0px 3px 0px 3px;"> > </span> <?php echo $_POST['entity'] ?>
+        </h3>
         <div class="box-tools pull-right" style="padding-top:2px;">
             <button class="btn btn-success flat pull-right" id="btnSaveEntity" style="width: 120px;"
                     alt="save entity" onclick="saveEntity(); RecursiveUnbind($('#wrapper'));">Save Entity

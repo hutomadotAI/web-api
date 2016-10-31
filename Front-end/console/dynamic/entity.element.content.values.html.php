@@ -31,13 +31,11 @@
         <div class="row">
             <div class="col-md-12">
                 <h5 class="box-title">
-                    <div class="input-group no-margin">
+                    <div class="inner-addon left-addon">
+                        <i class="fa fa-sign-out text-yellow" style="padding-top:11px;"></i>
                         <input type="text" class="form-control flat no-shadow" id="value-entity" name="value-entity"
-                               placeholder="Add a sample user expression" onkeyup="checkValueCode(this,event.keyCode)"
-                               style="width: 96%;">
-                        <span class="input-group-btn">
-                            <button class="btn btn-success flat" id="btnAddEntityValue" style="width: 130px;">Add Entity Value</button>
-                        </span>
+                               placeholder="add an entity value" onkeydown="checkValueCode(this,event.keyCode)"
+                               style="padding-left: 35px;">
                     </div>
                 </h5>
             </div>

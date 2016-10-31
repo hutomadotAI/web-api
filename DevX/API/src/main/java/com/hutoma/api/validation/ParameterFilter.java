@@ -14,9 +14,9 @@ import javax.ws.rs.container.ContainerRequestContext;
 
 public class ParameterFilter extends Validate {
 
-    // parameter names
-    protected static final String AIID = "aiid";
     protected static final String DEVID = "_developer_id";
+    protected static final String AINAME = "name";
+    protected static final String AIID = "aiid";
     protected static final String AICONFIDENCE = "confidence";
     protected static final String TIMEZONE = "timezone";
     protected static final String LOCALE = "locale";
@@ -24,7 +24,6 @@ public class ParameterFilter extends Validate {
     protected static final String CHATQUESTION = "q";
     protected static final String CHATHISTORY = "chat_history";
     protected static final String AIDESC = "description";
-    protected static final String AINAME = "name";
     protected static final String TOPIC = "current_topic";
     protected static final String MINP = "confidence_threshold";
     protected static final String ENTITYNAME = "entity_name";
@@ -106,7 +105,7 @@ public class ParameterFilter extends Validate {
     public static ApiIntent getIntent(final ContainerRequestContext requestContext) {
         return (ApiIntent) requestContext.getProperty(APIParameter.IntentJson.toString());
     }
-    
+
     public static Float getAiConfidence(final ContainerRequestContext requestContext) {
         return (Float) requestContext.getProperty(APIParameter.AiConfidence.toString());
     }
