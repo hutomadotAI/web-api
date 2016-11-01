@@ -5,6 +5,7 @@ import com.microsoft.applicationinsights.TelemetryConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Singleton;
 
 /**
@@ -27,6 +28,22 @@ public class TelemetryLogger extends Logger implements ITelemetry {
     private boolean isTelemetryEnabled;
 
     /**
+     * Sanitize the property map since AppInsights uses ConcurrentHashMap which doesn't
+     * support null values.
+     * @param map the map
+     */
+    private static Map<String, String> sanitizePropertiesMap(final Map<String, String> map) {
+        if (map.values().stream().anyMatch(x -> x == null)) {
+            final Map<String, String> otherMap = new HashMap<>();
+            for (Entry<String, String> entry : map.entrySet()) {
+                otherMap.put(entry.getValue(), entry.getValue() == null ? "" : entry.getValue());
+            }
+            return otherMap;
+        }
+        return map;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void addTelemetryEvent(String eventName) {
@@ -38,7 +55,7 @@ public class TelemetryLogger extends Logger implements ITelemetry {
      */
     public void addTelemetryEvent(String eventName, Map<String, String> properties) {
         if (this.isTelemetryEnabled()) {
-            this.telemetryClient.trackEvent(eventName, properties, null);
+            this.telemetryClient.trackEvent(eventName, sanitizePropertiesMap(properties), null);
         }
     }
 
@@ -57,13 +74,14 @@ public class TelemetryLogger extends Logger implements ITelemetry {
             Map<String, String> map = new HashMap<>();
             if (properties != null) {
                 map.putAll(properties);
+
             }
             // Add the exception properties
             map.put("ExceptionName", exception.getClass().getSimpleName());
             map.put("ExceptionMessage", exception.getMessage());
             map.put("ExceptionStackTrace", getStackTraceAsString(exception.getStackTrace()));
 
-            this.telemetryClient.trackEvent(eventName, map, null);
+            this.telemetryClient.trackEvent(eventName, sanitizePropertiesMap(map), null);
         }
     }
 
