@@ -12,6 +12,7 @@ public class MemoryVariable {
     private List<String> entityKeys;
     private List<String> prompts;
     private int timesPrompted;
+    private int timesToPrompt;
 
     /**
      * Ctor.
@@ -24,12 +25,13 @@ public class MemoryVariable {
     }
 
     public MemoryVariable(String name, String currentValue, boolean isMandatory, List<String> entityKeys,
-                          List<String> prompts, int timesPrompted) {
+                          List<String> prompts, int timesToPrompt, int timesPrompted) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
         this.prompts = prompts;
         this.timesPrompted = timesPrompted;
+        this.timesToPrompt = timesToPrompt;
     }
 
     /**
@@ -96,11 +98,7 @@ public class MemoryVariable {
         this.entityKeys = entityKeys;
     }
 
-    /**
-     * Gets how many times to prompt.
-     * @return how many times to prompt
-     */
-    public int getTimesToPrompt() {
+    public int getTimesPrompted() {
         return this.timesPrompted;
     }
 
@@ -110,6 +108,14 @@ public class MemoryVariable {
      */
     public void setTimesPrompted(int timesPrompted) {
         this.timesPrompted = timesPrompted;
+    }
+
+    /**
+     * Gets how many times to prompt.
+     * @return how many times to prompt
+     */
+    public int getTimesToPrompt() {
+        return this.timesToPrompt;
     }
 
     /**

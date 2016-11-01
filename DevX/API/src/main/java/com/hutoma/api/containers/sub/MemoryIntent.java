@@ -21,16 +21,30 @@ public class MemoryIntent {
 
     /**
      * Ctor.
+     * @param name        the intent name
+     * @param aiid        the AI ID
+     * @param chatId      the Chat ID
+     * @param variables   the list of memory variables
+     * @param isFulfilled whether it's fulfilled or not
+     */
+    public MemoryIntent(final String name, final UUID aiid, final UUID chatId, final List<MemoryVariable> variables,
+                        final boolean isFulfilled) {
+        this.name = name;
+        this.aiid = aiid;
+        this.chatId = chatId;
+        this.variables = variables;
+        this.isFulfilled = isFulfilled;
+    }
+
+    /**
+     * Ctor.
      * @param name      the intent name
      * @param aiid      the AI ID
      * @param chatId    the Chat ID
      * @param variables the list of memory variables
      */
     public MemoryIntent(final String name, final UUID aiid, final UUID chatId, final List<MemoryVariable> variables) {
-        this.name = name;
-        this.aiid = aiid;
-        this.chatId = chatId;
-        this.variables = variables;
+        this(name, aiid, chatId, variables, false);
     }
 
     /**

@@ -57,13 +57,15 @@ public class Database {
                         (boolean) e.get("isMandatory"),
                         (List<String>) e.get("entityKeys"),
                         (List<String>) e.get("prompts"),
+                        (int) Math.round((double) e.get("timesToPrompt")),
                         (int) Math.round((double) e.get("timesPrompted")));
                 variables.add(memoryVariable);
             }
             return new MemoryIntent(rs.getString("name"),
                     UUID.fromString(rs.getString("aiid")),
                     UUID.fromString(rs.getString("chatId")),
-                    variables);
+                    variables,
+                    rs.getBoolean("isFulfilled"));
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -363,11 +365,12 @@ public class Database {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String variables = jsonSerializer.serialize(intent.getVariables());
-            call.initialise("updateMemoryIntent", 4)
+            call.initialise("updateMemoryIntent", 5)
                     .add(intent.getName())
                     .add(intent.getAiid())
                     .add(intent.getChatId())
-                    .add(variables);
+                    .add(variables)
+                    .add(intent.isFulfilled());
             return call.executeUpdate() > 0;
         }
     }

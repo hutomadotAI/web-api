@@ -171,15 +171,19 @@ public class TestMemoryIntentHandler {
     @Test
     public void testMemoryVariableProperties() {
         List<String> values = Arrays.asList("a", "b", "c");
-        MemoryVariable mv = new MemoryVariable("name", values);
-        mv.setTimesPrompted(123);
-        mv.setIsMandatory(true);
-        mv.setPrompts(Collections.singletonList("prompt"));
-        mv.setCurrentValue("currentValue");
+        MemoryVariable mv = new MemoryVariable(
+                "name",
+                "currentValue",
+                true,
+                values,
+                Collections.singletonList("prompt"),
+                123,
+                5);
         Assert.assertEquals("name", mv.getName());
         Assert.assertEquals("currentValue", mv.getCurrentValue());
         Assert.assertEquals(values, mv.getEntityKeys());
         Assert.assertEquals(123, mv.getTimesToPrompt());
+        Assert.assertEquals(5, mv.getTimesPrompted());
         Assert.assertEquals(true, mv.isMandatory());
         Assert.assertEquals("prompt", mv.getPrompts().get(0));
 

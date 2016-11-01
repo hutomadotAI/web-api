@@ -329,8 +329,7 @@ public class TestChatLogic {
 
     @Test
     public void testChat_IntentPrompt() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
-        final int timesPrompted = 3;
-        MemoryIntent mi = getMemoryIntentForPrompt(timesPrompted);
+        MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
         // The answer is the prompt
@@ -338,22 +337,20 @@ public class TestChatLogic {
         // The intent status is updated to storage
         verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is decremented
-        Assert.assertEquals(timesPrompted - 1, mi.getVariables().get(0).getTimesToPrompt());
+        Assert.assertEquals(1, mi.getVariables().get(0).getTimesPrompted());
     }
 
     @Test
     public void testChat_IntentPrompt_NoPromptWhenZero() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
-        MemoryIntent mi = getMemoryIntentForPrompt(0);
+        MemoryIntent mi = getMemoryIntentForPrompt(1, "currentValue");
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
         // The answer is NOT the prompt
         Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
-        // But the expected one
-        Assert.assertEquals(SEMANTICRESULT, r.getAnswer());
         // The intent status is updated to storage
         verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is decremented
-        Assert.assertEquals(0, mi.getVariables().get(0).getTimesToPrompt());
+        Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
     }
 
     @Test
@@ -400,17 +397,24 @@ public class TestChatLogic {
         return this.chatLogic.chat(this.fakeContext, AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
-    private MemoryIntent getMemoryIntentForPrompt(int timesPrompted) throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+    private MemoryIntent getMemoryIntentForPrompt(int maxPrompts, String currentValue)
+            throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         final String intentName = "intent1";
         final String promptTrigger = "variableValue";
         final String prompt = "prompt1";
-        MemoryVariable mv = new MemoryVariable("var", Arrays.asList(promptTrigger, "b"));
-        mv.setPrompts(Collections.singletonList(prompt));
-        mv.setIsMandatory(true);
-        mv.setTimesPrompted(timesPrompted);
+        MemoryVariable mv = new MemoryVariable(
+                "var",
+                currentValue,
+                true,
+                Arrays.asList(promptTrigger, "b"),
+                Collections.singletonList(prompt),
+                maxPrompts,
+                0);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
-        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
-        when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("@meta.intent." + intentName);
+        ChatResult chatResult = new ChatResult();
+        chatResult.setAnswer("@meta.intent." + intentName);
+        chatResult.setScore(0.9d);
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(chatResult);
         when(this.fakeIntentHandler.parseAiResponseForIntent(anyString(), any(), any(), any())).thenReturn(mi);
         return mi;
     }

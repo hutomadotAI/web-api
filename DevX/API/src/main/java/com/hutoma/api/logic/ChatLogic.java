@@ -221,7 +221,8 @@ public class ChatLogic {
         // Now that have the chat result, we need to check if there's an intent being returned
         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
                 devId, aiid, chatUuid, chatResult.getAnswer());
-        if (memoryIntent != null) { // Intent was recognized
+        if (memoryIntent != null // Intent was recognized
+                && !memoryIntent.isFulfilled()) {
             telemetryMap.put("IntentRecognized", memoryIntent.getName());
             if (memoryIntent.getUnfulfilledVariables().isEmpty()) {
                 notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
@@ -240,25 +241,28 @@ public class ChatLogic {
                 if (vars.isEmpty()) {
                     notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
                 } else {
-                    // For now get the first unfulfilled variable with numPrompts>0
+                    // For now get the first unfulfilled variable with numPrompts < maxPrompts
                     // or we could do random just to make it a 'surprise!' :)
                     Optional<MemoryVariable> optVariable = vars.stream()
-                            .filter(x -> x.getTimesToPrompt() > 0).findFirst();
+                            .filter(x -> x.getTimesPrompted() < x.getTimesToPrompt()).findFirst();
                     if (optVariable.isPresent()) {
                         MemoryVariable variable = optVariable.get();
                         if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                             this.logger.logError(LOGFROM, "Variable with no prompts defined!");
                         } else {
+
                             // And prompt the user for the value for that variable
-                            int pos = variable.getPrompts().size() >= variable.getTimesToPrompt()
-                                    ? variable.getPrompts().size() - variable.getTimesToPrompt()
+                            int pos = variable.getTimesPrompted() < variable.getPrompts().size()
+                                    ? variable.getTimesPrompted()
                                     : 0;
                             chatResult.setAnswer(variable.getPrompts().get(pos));
                             // and decrement the number of prompts
-                            variable.setTimesPrompted(variable.getTimesToPrompt() - 1);
+                            variable.setTimesPrompted(variable.getTimesPrompted() + 1);
                             telemetryMap.put("IntentPrompt",
-                                    String.format("intent:'%s' variable:'%s' remainingPrompts:%d",
-                                            memoryIntent.getName(), variable.getName(), variable.getTimesToPrompt()));
+                                    String.format("intent:'%s' variable:'%s' currentPrompt:%d/%d",
+                                            memoryIntent.getName(), variable.getName(),
+                                            variable.getTimesPrompted(),
+                                            variable.getTimesToPrompt()));
 
                         }
                     } else { // intent not fulfilled but no variables left to handle

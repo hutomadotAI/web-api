@@ -111,14 +111,17 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
                     ApiEntity apiEntity = this.database.getEntity(devid, intentVar.getEntityName());
-                    MemoryVariable variable = new MemoryVariable(intentVar.getEntityName(),
-                            apiEntity.getEntityValueList());
-                    variable.setPrompts(intentVar.getPrompts());
-                    variable.setIsMandatory(intentVar.isRequired());
-                    variable.setTimesPrompted(intentVar.getNumPrompts());
+                    MemoryVariable variable = new MemoryVariable(
+                            intentVar.getEntityName(),
+                            null,
+                            intentVar.isRequired(),
+                            apiEntity.getEntityValueList(),
+                            intentVar.getPrompts(),
+                            intentVar.getNumPrompts(),
+                            0);
                     variables.add(variable);
                 }
-                intent = new MemoryIntent(intentName, aiid, chatId, variables);
+                intent = new MemoryIntent(intentName, aiid, chatId, variables, false);
                 // write it to the db
                 this.database.updateMemoryIntent(intent, this.jsonSerializer);
             }
