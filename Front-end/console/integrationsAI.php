@@ -81,7 +81,7 @@
                         echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'];
                 else
                     echo ''?>",
-            "integrations",2,true,false]);
+            "integrations",3,true,false]);
     </script>
 </form>
 
