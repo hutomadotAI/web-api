@@ -75,7 +75,7 @@ function showDomains(str,size){
              //   }
             }
             else{
-                // big box design
+                // TODO now whe are update the code only for big box design
 
                 /* available equal to ZERO
                 wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
@@ -156,9 +156,13 @@ function addHtmlStarRating(actived,boxid,rating){
             wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-' + i + '" title="'+i+' out of '+i+' stars"></label>');
         }
     }else {
+        // TODO if input is disable need add to input disabled="disabled" and in label icon __disabled - now the code is same
         for (var i = 5; i > 0; i--) {
-            wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" disabled="disabled">');
-            wHTML += ('<label class="star-rating__ico_disabled fa fa-star-o fa-lg" for="star-' + boxid + '-rating-' + i + '" title="' + i + ' out of ' + i + ' stars"></label>');
+            if (i==rating)
+                wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
+            else
+                wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');
+            wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-' + i + '" title="' + i + ' out of ' + i + ' stars"></label>');
         }
 
     }

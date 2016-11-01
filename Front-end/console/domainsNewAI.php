@@ -65,6 +65,7 @@
 
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
     <link rel="stylesheet" href="./plugins/switch/switch.css">
+    <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
