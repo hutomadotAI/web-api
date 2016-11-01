@@ -103,19 +103,34 @@ function showDomains(str,size){
                     wHTML += ('<div class="box-footer-stars flat">');
                     wHTML += ('<div class="star-rating text-center">');
                     wHTML += ('<div class="star-rating__wrap">');
-                    wHTML += ('<input class="star-rating__input" id="star-'+boxid+'-rating-5" type="radio" name="rating'+boxid+'" value="5">');
-                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-'+boxid+'-rating-5" title="5 out of 5 stars"></label>');
-                    wHTML += ('<input class="star-rating__input" id="star-'+boxid+'-rating-4" type="radio" name="rating'+boxid+'" value="4">');
-                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-'+boxid+'-rating-4" title="4 out of 5 stars"></label>');
-                    wHTML += ('<input class="star-rating__input" id="star-'+boxid+'-rating-3" type="radio" name="rating'+boxid+'" value="3">');
-                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-'+boxid+'-rating-3" title="3 out of 5 stars"></label>');
-                    wHTML += ('<input class="star-rating__input" id="star-'+boxid+'-rating-2" type="radio" name="rating'+boxid+'" value="2">');
-                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-'+boxid+'-rating-2" title="2 out of 5 stars"></label>');
-                    wHTML += ('<input class="star-rating__input" id="star-'+boxid+'-rating-1" type="radio" name="rating'+boxid+'" value="1">');
-                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-'+boxid+'-rating-1" title="1 out of 5 stars"></label>');
+
+                    if ( userActived[key] === true ) {
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-5" type="radio" name="rating' + boxid + '" value="5">');
+                        wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-5" title="5 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-4" type="radio" name="rating' + boxid + '" value="4">');
+                        wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-4" title="4 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-3" type="radio" name="rating' + boxid + '" value="3">');
+                        wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-3" title="3 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-2" type="radio" name="rating' + boxid + '" value="2">');
+                        wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-2" title="2 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-1" type="radio" name="rating' + boxid + '" value="1">');
+                        wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-1" title="1 out of 5 stars"></label>');
+                    }else{
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-5" type="radio" name="rating' + boxid + '" value="5" disabled="disabled">');
+                        wHTML += ('<label class="star-rating__ico_disabled fa fa-star-o fa-lg" for="star-' + boxid + '-rating-5" title="5 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-4" type="radio" name="rating' + boxid + '" value="4" disabled="disabled">');
+                        wHTML += ('<label class="star-rating__ico_disabled fa fa-star-o fa-lg" for="star-' + boxid + '-rating-4" title="4 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-3" type="radio" name="rating' + boxid + '" value="3" disabled="disabled">');
+                        wHTML += ('<label class="star-rating__ico_disabled fa fa-star-o fa-lg" for="star-' + boxid + '-rating-3" title="3 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-2" type="radio" name="rating' + boxid + '" value="2" disabled="disabled">');
+                        wHTML += ('<label class="star-rating__ico_disabled fa fa-star-o fa-lg" for="star-' + boxid + '-rating-2" title="2 out of 5 stars"></label>');
+                        wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-1" type="radio" name="rating' + boxid + '" value="1" disabled="disabled">');
+                        wHTML += ('<label class="star-rating__ico_disabled fa fa-star-o fa-lg" for="star-' + boxid + '-rating-1" title="1 out of 5 stars"></label>');
+
+                    }
                     wHTML += ('</div>');
                     wHTML += ('</div>');
-                wHTML += ('</div>');
+                    wHTML += ('</div>');
 
                     wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
 

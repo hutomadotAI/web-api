@@ -16,6 +16,13 @@
     cursor: pointer;
     color: #FFB300;
 }
+
+.star-rating__ico_disabled{
+    float: right;
+    padding-left: 2px;
+    cursor: pointer;
+    color: #515151;
+}
 .star-rating__ico:last-child{
     padding-left: 0;
 }
@@ -27,4 +34,9 @@
 .star-rating__input:checked ~ .star-rating__ico:before
 {
     content: "\f005";
+}
+
+.start-disable
+{
+    pointer-events: none;
 }
