@@ -99,6 +99,24 @@ function showDomains(str,size){
                     wHTML += ('<a><div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 60px;"><i class="'+domains[x].iconPath+'"></i></div></a>');
                     wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
                     wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
+
+                    wHTML += ('<div class="box-footer-stars flat">');
+                    wHTML += ('<div class="star-rating text-center">');
+                    wHTML += ('<div class="star-rating__wrap">');
+                    wHTML += ('<input class="star-rating__input" id="star-rating-5" type="radio" name="rating" value="5">');
+                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-rating-5" title="5 out of 5 stars"></label>');
+                    wHTML += ('<input class="star-rating__input" id="star-rating-4" type="radio" name="rating" value="4">');
+                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-rating-4" title="4 out of 5 stars"></label>');
+                    wHTML += ('<input class="star-rating__input" id="star-rating-3" type="radio" name="rating" value="3">');
+                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-rating-3" title="3 out of 5 stars"></label>');
+                    wHTML += ('<input class="star-rating__input" id="star-rating-2" type="radio" name="rating" value="2">');
+                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-rating-2" title="2 out of 5 stars"></label>');
+                    wHTML += ('<input class="star-rating__input" id="star-rating-1" type="radio" name="rating" value="1">');
+                    wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-rating-1" title="1 out of 5 stars"></label>');
+                    wHTML += ('</div>');
+                    wHTML += ('</div>');
+                wHTML += ('</div>');
+
                     wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
 
                     if ( userActived[key] === false )

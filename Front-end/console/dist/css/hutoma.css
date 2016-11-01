@@ -2269,8 +2269,17 @@ a:focus {
     text-align: center;
     width: 100%;
     bottom: 15px;
-    
+}
 
+.box-footer-stars {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    bottom: 70px;
 }
 
 .chart-legend {
