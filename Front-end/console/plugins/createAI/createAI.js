@@ -87,7 +87,7 @@ $(function () {
 
 $(document).ready(function(){
     if ( previousFilled == 1 ){
-        setInputFields();
+        resetGeneralInputFields();
         // active button next if are previous inserted data
         if ( document.getElementById('ai_name').value.length > 0 )
             document.getElementById('btnNext').removeAttribute('disabled');

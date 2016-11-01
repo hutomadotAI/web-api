@@ -13,7 +13,7 @@
         <?php include './dynamic/marketplace.content.info.html.php'; ?>
         <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchDomain(this.value)">
         <p></p>
-        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace" style="margin-bottom:10px;">
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace" style="margin-bottom:5px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertMarketplace"></i>
             <span id="msgAlertMarketplace">In this section bla bla bla bla bla bla bla bla bla bla bla.</span>
