@@ -1,15 +1,15 @@
 /**
  * Created by Hutoma on 06/10/16.
  */
-function setInputFields(){
-    setInputValue('ai_name',previousField.name);
-    setInputValue('ai_description',previousField.description);
-    setCheckValue('ai_public',previousField.private);
-    setSelectValue('ai_language',previousField.language);
-    setSelectValue('ai_timezone',previousField.timezone);
-    setSelectByIndex('ai_voice',previousField.voice);
-    setSelectByIndex('ai_personality',previousField.personality);
-    setSliderValue('ai_confidence',previousField.confidence);
+function resetGeneralInputFields(){
+    setInputValue('ai_name',previousGeneralInfo.name);
+    setInputValue('ai_description',previousGeneralInfo.description);
+    setCheckValue('ai_public',previousGeneralInfo.private);
+    setSelectValue('ai_language',previousGeneralInfo.language);
+    setSelectValue('ai_timezone',previousGeneralInfo.timezone);
+    setSelectByIndex('ai_voice',previousGeneralInfo.voice);
+    setSelectByIndex('ai_personality',previousGeneralInfo.personality);
+    setSliderValue('ai_confidence',previousGeneralInfo.confidence);
 }
 
 function setInputValue(id,value){

@@ -11,9 +11,9 @@
         exit;
     }
 
-    $response = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
-    if ($response['status']['code'] == 200) $response = $response['mesh'];
-    else $response ="";
+    $AisMesh = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+    if ($AisMesh['status']['code'] == 200) $AisMesh = $AisMesh['mesh'];
+    else $AisMesh ="";
 
     function isSessionVariablesAvailable(){
         return  (
@@ -136,17 +136,19 @@
 </form>
 
 <script>
-    var previousField = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
-    domains = <?php  echo json_encode($response);?>;
-    usr_domains = domains;
+    var previousGeneralInfo = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
+    var domains = <?php  echo json_encode($AisMesh); unset($AisMesh)?>;
+
     var userActived ={};
+    for (var x in domains) {
+        var key = domains[x].aiid;
+        userActived[key] = true;
+    }
+
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'domains_list';
-    for (var x in domains) {
-        var key = usr_domains[x].aiid;
-        userActived[key] = true;
-    }
+
     function searchDomain(str) { showDomains(str,1);}
 </script>
 </body>

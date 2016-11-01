@@ -1,4 +1,4 @@
-document.getElementById("btnAiSkillReset").addEventListener("click", resetDomainsData);
+document.getElementById("btnAiSkillReset").addEventListener("click", resetAISkill);
 document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkill);
 
 
@@ -38,7 +38,7 @@ function updateAISkill() {
     });
 }
 
-function resetDomainsData(){
+function resetAISkill(){
     var str='';
     document.getElementById('searchInputDomains').value = str;
     showDomains(str,1);

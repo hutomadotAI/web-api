@@ -1,4 +1,4 @@
-document.getElementById("btnReset").addEventListener("click", setInputFields);
+document.getElementById("btnReset").addEventListener("click", resetGeneralInputFields);
 document.getElementById("btnSave").addEventListener("click", updateAI);
 document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLength);
 
@@ -39,6 +39,7 @@ function updateAI() {
     formData.append('private', is_private);
     formData.append('aiid', document.getElementById('aikey').value);
     formData.append('confidence', getValueFromConfidence(document.getElementById('ai_confidence').value));
+    formData.append('name', document.getElementById('ai_name').value);
     formData.append('description', document.getElementById('ai_description').value);
     formData.append('language',document.getElementById('select2-' + 'ai_language' + '-container').innerHTML);
     formData.append('timezone',document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML);
@@ -64,7 +65,6 @@ function updateAI() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            alert('ERROR'+JSON.stringify(JSONdata));
             msgAlertUpdateAI(2,'Something went wrong. Your changes were not saved.');
             activeGeneralButtons();
         }
@@ -95,16 +95,17 @@ function deactiveGeneralButtons(){
 }
 
 function updatePreviousDataLoaded(JSONdata){
-    previousField.description = JSONdata.description;
-    previousField.language = JSONdata.language;
-    previousField.timezone = 'Europe/London';//JSONdata.timezone;
-    previousField.voice = JSONdata.voice;
-    previousField.personality = JSONdata.personality;
-    previousField.confidence = JSONdata.confidence;
+    previousGeneralInfo.name = JSONdata.name;
+    previousGeneralInfo.description = JSONdata.description;
+    previousGeneralInfo.language = JSONdata.language;
+    previousGeneralInfo.timezone = 'Europe/London';//JSONdata.timezone;
+    previousGeneralInfo.voice = JSONdata.voice;
+    previousGeneralInfo.personality = JSONdata.personality;
+    previousGeneralInfo.confidence = JSONdata.confidence;
 }
 
 $(document).ready(function(){
-    setInputFields();
+    resetGeneralInputFields();
     $("#ai_name").prop("disabled",true);
 });
 
