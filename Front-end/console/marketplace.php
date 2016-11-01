@@ -87,7 +87,6 @@
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./plugins/marketplace/marketplace.js"></script>
 <script src="./plugins/domain/domain.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
