@@ -11,22 +11,9 @@
         exit;
     }
 
-    $response = \hutoma\console::getDomains();
-    if ($response['status']['code'] !== 200) {
-        unset($response);
-        header('Location: ./error.php?err=3');
-        exit;
-    }
-
-
-    /*
-    $usr_domains = \hutoma\console::getDomains_and_UserActiveDomains(\hutoma\console::getDevToken(),$_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
-    if ($usr_domains['status']['code'] !== 200) {
-        unset($usr_domains);
-        header('Location: ./error.php?err=3');
-        exit;
-    }
-    */
+    $response = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+    if ($response['status']['code'] == 200) $response = $response['mesh'];
+    else $response ="";
 
     function isSessionVariablesAvailable(){
         return  (
@@ -49,7 +36,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | option AI</title>
+    <title>hu:toma | AI Settings </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="./plugins/select2/select2.css">
@@ -85,20 +72,20 @@
             <div class="nav-tabs-custom flat no-shadow no-border">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_general" data-toggle="tab">General</a></li>
-                    <li><a href="#tab_domains" data-toggle="tab">Pre-training Neural Networks</a></li>
+                    <li><a href="#tab_aiskill" data-toggle="tab">AI Skills</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-bottom:0px;">
                     <!-- GENERAL TAB -->
                     <div class="tab-pane active" id="tab_general">
-                        <?php include './dynamic/settings.content.input.html.php'; ?>
+                        <?php include './dynamic/settings.content.general.html.php'; ?>
                     </div>
                     <!-- DOMAINS TAB -->
-                    <div class="tab-pane" id="tab_domains">
-                        <?php include './dynamic/settings.content.domains.html.php'; ?>
+                    <div class="tab-pane" id="tab_aiskill">
+                        <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
                         <div class="row" style="background-color: #434343;">
                             <div class="col-lg-12" style="background-color: #434343; padding:5px;">
-                                <?php include './dynamic/settings.content.domains.list.html.php'; ?>
+                                <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                             </div>
                         </div>
                     </div>
@@ -134,8 +121,10 @@
 <script src="./plugins/clipboard/clipboard.min.js"></script>
 <script src="./plugins/deleteAI/deleteAI.js"></script>
 <script src="./plugins/domain/domain.js"></script>
+<script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/inputCommon/inputCommon.js"></script>
-<script src="./plugins/setting/setting.js"></script>
+<script src="./plugins/setting/setting.general.js"></script>
+<script src="./plugins/setting/setting.aiSkill.js"></script>
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
@@ -148,41 +137,16 @@
 
 <script>
     var previousField = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
-</script>
-
-<script>
-    // API JSON REQUEST DOMAIN RESPONSE
-
-    var domains = <?php  echo json_encode($response['_domainList']);  unset($response); ?>;
+    domains = <?php  echo json_encode($response);?>;
+    usr_domains = domains;
     var userActived ={};
-    for (var x in domains){
-        var key = domains[x].dom_id;
-        userActived[key]=false;
-    }
-
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'domains_list';
-
-    /* NEED BIND WITH API DATA STORED
-    var domains = <?php //echo json_encode($response['_domainList']); unset($response);?>;
-    var usr_domains =<?php //echo json_encode($usr_domains); unset($usr_domains);?>;
-
-    var userActived ={};
-    for (var x in domains){
-        var key = usr_domains[x].dom_id;
-        if(key!=null)
-            userActived[key] = usr_domains[x].active;
-        else
-            userActived[domains[x].dom_id] = false;
+    for (var x in domains) {
+        var key = usr_domains[x].aiid;
+        userActived[key] = true;
     }
-    var newNode = document.createElement('div');
-    newNode.className = 'row';
-    newNode.id = 'domains_list';
-    */
-</script>
-
-<script>
     function searchDomain(str) { showDomains(str,1);}
 </script>
 </body>

@@ -74,7 +74,7 @@
         <h3><p class="text-muted">API keys</p></h3>
         <div class="row">
             <div class="col-md-6">
-                <div class="input-group">
+                <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">AI ID</i></span>
                     <input type="text" class="form-control flat no-shadow" id="aikey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'];?>" disabled>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#aikey" id="aikeytooltip" title="copy to clipboard" onclick="copyToClipboard('aikey')" ><i class="fa fa-clipboard"></i></span>
@@ -82,14 +82,14 @@
             </div>
 
             <div class="col-md-6">
-                <div class="input-group">
+                <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">Dev key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="devkey" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['dev_token'];?>" disabled>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"  data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard" onclick="copyToClipboard('devkey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
         </div>
-        <p></p>
+
         <div class="row">
             <div class="col-md-12">
                 <div class="input-group">
@@ -112,7 +112,7 @@
 
 
 <div class="box-footer">
-    <button  name="btnCancel" id="btnCancel" value="_cancel"   class="btn btn-primary flat" >cancel</button>
+    <button  name="btnCancel" id="btnReset" value="_cancel"   class="btn btn-primary flat" >reset</button>
     <button  name="btnSave"   id="btnSave"   value="_save"   class="btn btn-success flat" >save</button>
     <button  name="btnDelete" id="btnDelete"  data-toggle="modal" data-target="#deleteAI" value="<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>" class="btn btn-danger flat pull-right" alt="delete">delete AI</button>
 </div>

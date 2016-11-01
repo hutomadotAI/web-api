@@ -1,7 +1,7 @@
 <div class="box box-solid box-clean flat no-shadow" >
 
     <div class="box-header with-border ">
-        <div class="box-title"><span class="text-sm text-gray" style="padding: 0 3px 0 3px;"></span><b>User Expressions</b></div>
+        <div class="box-title"><span style="padding: 0 3px 0 3px;"></span><b>User Expressions</b></div>
         <a data-toggle="collapse" href="#collapseExpressionInfo">
             <div class="pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>

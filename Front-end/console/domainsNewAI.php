@@ -67,7 +67,7 @@
     <link rel="stylesheet" href="./plugins/switch/switch.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',0)">
+<body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
 <div class="wrapper" id="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -117,7 +117,7 @@
   var domains = <?php echo json_encode($domains);  unset($domains); ?>;
   var userActived ={};
   for (var x in domains){
-      var key = domains[x].domainId;
+      var key = domains[x].aiid;
       userActived[key]=false;
   }
 
@@ -128,7 +128,7 @@
 
 <script>
   function searchDomain(str) {
-    showDomains(str,0);
+    showDomains(str,1);
   }
 </script>
 </body>

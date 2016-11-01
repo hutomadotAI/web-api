@@ -28,25 +28,11 @@ $response = hutoma\console::updateAI(
     $_POST['confidence']
 );
 
-if ($response) {
-    if ($response['status']['code'] === 200) {
-        unset($_response);
-    } else {
-        $arr = $response;
-        echo json_encode($arr);
-        exit;
-    }
-} else {
-    // probably add some fields
-    $arr = array('code' => 404);
-    echo json_encode($arr);
-    exit;
-}
-
 updateSessionVariables();
+
+echo json_encode($response);
 unset($response);
 
-echo json_encode(prepareResponse());
 
 function updateSessionVariables()
 {
@@ -57,19 +43,6 @@ function updateSessionVariables()
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $_POST['personality'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $_POST['voice'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $_POST['confidence'];
-}
-
-function prepareResponse()
-{
-    $arr = array('code' => 200,
-        'description' => $_POST['description'],
-        'private' => $_POST['private'],
-        'language' => $_POST['language'],
-        'timezone' => $_POST['timezone'],
-        'personality' => $_POST['personality'],
-        'voice' => $_POST['voice'],
-        'confidence' => $_POST['confidence']);
-    return $arr;
 }
 
 function isPostInputAvailable()
@@ -85,5 +58,4 @@ function isPostInputAvailable()
         isset($_POST['confidence'])
     );
 }
-
 ?>

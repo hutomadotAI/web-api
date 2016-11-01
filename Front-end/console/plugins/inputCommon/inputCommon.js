@@ -66,17 +66,6 @@ function getValueFromConfidence(confidence_text){
     return values[confidence_text];
 }
 
-function checkDescriptionLength() {
-    var limitTextInputSize = 100;
-    if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
-        msgAlertDescriptionAI(1, 'Limit AI description reached.');
-    else {
-        document.getElementById('btnNext').removeAttribute('disabled');
-        document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';
-        document.getElementById('ai_description').style.borderColor = "#d2d6de";
-    }
-}
-
 function inputsActiveDeactive(flag){
     $('#ai_description').prop('disabled',flag);
     $('#ai_confidence').prop('disabled',flag);

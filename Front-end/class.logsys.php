@@ -1561,22 +1561,7 @@ class console
             return $json_response;
         }
     }
-
-
-    // TODO turn me into an API call
-    public static function getBotsInStore()
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getBotsInStore()");
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=123');
-                exit;
-            }
-            return $sql->fetchAll();
-        }
-    }
+    
 
     public static function getIntents($aiid)
     {
@@ -1737,6 +1722,96 @@ class console
         }
         return $token;
     }
+
+    /**
+     * BotStore Functions
+     */
+
+    // TODO turn me into an API call
+    public static function getBotsInStore()
+    {
+        if (self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL getBotsInStore()");
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=123');
+                exit;
+            }
+            return $sql->fetchAll();
+        }
+    }
+
+
+    public static function addMesh($aiid,$aiid_mesh)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/'.$aiid.'/mesh/'.$aiid_mesh;
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
+            $curl->setVerbPost();
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=001');
+                exit;
+            }
+            $curl->close();
+            return true;
+        }
+    }
+
+    public static function getMesh($aiid)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/'.$aiid.'/mesh/';
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=001');
+                exit;
+            }
+            $json_response = json_decode($curl_response, true);
+            $curl->close();
+            return $json_response;
+        }
+    }
+
+
+    public static function deleteMesh($aiid,$aiid_mesh)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/'.$aiid.'/mesh/'.$aiid_mesh;
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
+            $curl->setVerbDelete();
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=001');
+                exit;
+            }
+            $curl->close();
+            return true;
+        }
+    }
+
+    public static function deleteAllMesh($aiid)
+    {
+        if (self::$loggedIn) {
+            $path = '/ai/'.$aiid.'/mesh/';
+            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
+            $curl->setVerbDelete();
+            $curl_response = $curl->exec();
+            if ($curl_response === false) {
+                $curl->close();
+                \hutoma\console::redirect('./error.php?err=001');
+                exit;
+            }
+            $curl->close();
+            return true;
+        }
+    }
+
 
 
     public static function isSessionActive()
