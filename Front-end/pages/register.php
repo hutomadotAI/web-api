@@ -118,6 +118,7 @@ if(isset($_POST['submit'])) {
     <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/icheck/1.0.2/icheck.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script src='../console/plugins/security/password.js'></script>
 
 
     <script type="text/javascript">
@@ -185,12 +186,26 @@ if(isset($_POST['submit'])) {
             margin: 20px 0;
         }
 
+        .progress {
+            height: 11px;
+        }
+
+        .progress-bar-text {
+            color: white;
+            text-align: right;
+            width: 100%;
+            position: relative;
+            top: -5px;
+        }
+
+        .form-control-error {
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(255, 100, 100, .6) !important;
+        }
 
     </style>
 </head>
 <body class="hold-transition register-page">
 <?php include_once "../console/common/google_analytics.php"; ?>
-
 
 <header id="navigation" class="navbar-fixed-top navbar">
     <div class="container" style="font-weight: bold">
@@ -234,11 +249,18 @@ if(isset($_POST['submit'])) {
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="pass"  type="password" class="form-control" placeholder="Password">
+                <input id="passwordField" name="pass"  type="password" class="form-control" placeholder="Password" onkeyup="passwordStrength(this.value)">
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                <div class="progress active">
+                    <div id="pstrength" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                        <span id="progress-bar-text" class="progress-bar-text"></span>
+                    </div>
+                </div>
+
             </div>
             <div class="form-group has-feedback">
-                <input name="retyped_password"  type="password" class="form-control" placeholder="Retype password">
+                <input id="passConfirmationField" name="retyped_password"  type="password" class="form-control" placeholder="Retype password"
+                       onkeyup="confirmPassword('passwordField','passConfirmationField');">
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
