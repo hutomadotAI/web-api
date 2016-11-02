@@ -123,9 +123,11 @@ public class TelemetryLogger extends Logger implements ITelemetry {
         logOutput(Level.ERROR, fromLabel, logComment);
         // Log to any errors to telemetry
         if (this.isTelemetryEnabled()) {
-            this.addTelemetryEvent("ApplicationError", new HashMap<String, String>() {{
-                this.put("Comment", logComment);
-            }});
+            this.addTelemetryEvent("ApplicationError", new HashMap<String, String>() {
+                {
+                    this.put("Comment", logComment);
+                }
+            });
         }
     }
 

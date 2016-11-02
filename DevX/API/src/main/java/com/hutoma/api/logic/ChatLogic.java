@@ -71,16 +71,18 @@ public class ChatLogic {
         long startTime = timestampNow;
 
         // Add telemetry for the request
-        Map<String, String> telemetryMap = new HashMap<String, String>() {{
-            put("DevId", devId);
-            put("AIID", aiid.toString());
-            put("Topic", topic);
-            // TODO: potentially PII info, we may need to mask this later, but for
-            // development purposes log this
-            put("ChatId", chatUuid.toString());
-            put("History", history);
-            put("Q", question);
-        }};
+        Map<String, String> telemetryMap = new HashMap<String, String>() {
+            {
+                put("DevId", devId);
+                put("AIID", aiid.toString());
+                put("Topic", topic);
+                // TODO: potentially PII info, we may need to mask this later, but for
+                // development purposes log this
+                put("ChatId", chatUuid.toString());
+                put("History", history);
+                put("Q", question);
+            }
+        };
 
         boolean noResponse = true;
         boolean resetHistory = false;
@@ -171,7 +173,8 @@ public class ChatLogic {
 
                 this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
 
-                // set the history to the answer, unless we have received a reset command, in which case send an empty string
+                // set the history to the answer, unless we have received a reset command,
+                // in which case send an empty string
                 chatResult.setHistory(resetHistory ? "" : chatResult.getAnswer());
             }
         } catch (NeuralNet.NeuralNetAiNotFoundException notFoundException) {

@@ -53,8 +53,8 @@ public class NeuralNet {
 
             // if we have no qid and weren't rejected because of ai status
             // then the ai has not been matched
-            if ((this.requestStatus.getQuestionId() < 0) &&
-                    (!this.requestStatus.isQuestionRejectedDueToAiStatus())) {
+            if (this.requestStatus.getQuestionId() < 0
+                    && !this.requestStatus.isQuestionRejectedDueToAiStatus()) {
                 // so throw the exception now
                 throw new NeuralNetAiNotFoundException(aiid.toString());
             }
