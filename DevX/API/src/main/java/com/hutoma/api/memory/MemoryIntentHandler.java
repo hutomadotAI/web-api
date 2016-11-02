@@ -27,18 +27,18 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
             Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";
     private final ILogger logger;
-    private final DatabaseEntitiesIntents database;
-    private final JsonSerializer jsonSerializer;
+    private final Database database;
     private final DatabaseEntitiesIntents databaseIntents;
+    private final JsonSerializer jsonSerializer;
 
 
     @Inject
-    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents database,
-                               final ILogger logger, DatabaseEntitiesIntents databaseIntents) {
+    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents databaseIntents,
+                               final ILogger logger, final Database database) {
         this.logger = logger;
+        this.databaseIntents = databaseIntents;
         this.database = database;
         this.jsonSerializer = jsonSerializer;
-        this.databaseIntents = databaseIntents;
     }
 
     /**
@@ -105,12 +105,12 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         try {
             intent = this.database.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
             if (intent == null) {
-                ApiIntent apiIntent = this.database.getIntent(devid, aiid, intentName);
+                ApiIntent apiIntent = this.databaseIntents.getIntent(devid, aiid, intentName);
                 List<MemoryVariable> variables = new ArrayList<>();
                 // This intent is not yet available in the db, so we need to initialize it from the existing
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
-                    ApiEntity apiEntity = this.database.getEntity(devid, intentVar.getEntityName());
+                    ApiEntity apiEntity = this.databaseIntents.getEntity(devid, intentVar.getEntityName());
                     MemoryVariable variable = new MemoryVariable(
                             intentVar.getEntityName(),
                             null,

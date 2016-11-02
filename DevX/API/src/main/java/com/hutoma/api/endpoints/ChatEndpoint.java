@@ -28,8 +28,8 @@ import javax.ws.rs.core.SecurityContext;
 @RateLimit(RateKey.Chat)
 public class ChatEndpoint {
 
-    ChatLogic chatLogic;
-    JsonSerializer serializer;
+    private final ChatLogic chatLogic;
+    private final JsonSerializer serializer;
 
     @Inject
     public ChatEndpoint(ChatLogic chatLogic, JsonSerializer serializer) {

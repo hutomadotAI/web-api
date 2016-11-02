@@ -41,7 +41,7 @@ public class TestMemoryIntentHandler {
 
     private MemoryIntentHandler memoryIntentHandler;
     private FakeJsonSerializer fakeSerializer;
-    private DatabaseEntitiesIntents fakeDatabase;
+    private Database fakeDatabase;
     private DatabaseEntitiesIntents fakeDatabaseEntities;
     private Logger fakeLogger;
     private IEntityRecognizer fakeRecognizer;
@@ -58,11 +58,26 @@ public class TestMemoryIntentHandler {
     @Before
     public void setup() {
         this.fakeSerializer = new FakeJsonSerializer();
-        this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
+        this.fakeDatabase = mock(Database.class);
         this.fakeLogger = mock(Logger.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
-        this.memoryIntentHandler = new MemoryIntentHandler(this.fakeSerializer, this.fakeDatabase, this.fakeLogger,
-                this.fakeDatabaseEntities);
+        this.fakeDatabaseEntities = mock(DatabaseEntitiesIntents.class);
+        this.memoryIntentHandler = new MemoryIntentHandler(this.fakeSerializer, this.fakeDatabaseEntities, this.fakeLogger,
+                this.fakeDatabase);
+    }
+
+    @Test
+    public void testGetIntent() throws Database.DatabaseException {
+        ApiIntent intent = new ApiIntent(INTENT_NAME, "", "");
+        when(this.fakeDatabaseEntities.getIntent(any(), any(), any())).thenReturn(intent);
+        ApiIntent result = this.memoryIntentHandler.getIntent(DEVID, AIID, INTENT_NAME);
+        Assert.assertEquals(intent.getIntentName(), result.getIntentName());
+    }
+
+    @Test
+    public void testGetIntent_dbException() throws Database.DatabaseException {
+        when(this.fakeDatabaseEntities.getIntent(any(), any(), any())).thenThrow(Database.DatabaseException.class);
+        Assert.assertNull(this.memoryIntentHandler.getIntent(DEVID, AIID, INTENT_NAME));
     }
 
     @Test
@@ -111,9 +126,9 @@ public class TestMemoryIntentHandler {
         IntentVariable iv = new IntentVariable(entityName, true, 1, null);
         ApiEntity apiEntity = new ApiEntity(entityName, Arrays.asList("a", "b"));
         apiIntent.addVariable(iv);
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(apiIntent);
+        when(this.fakeDatabaseEntities.getIntent(anyString(), any(), anyString())).thenReturn(apiIntent);
         when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
-        when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(apiEntity);
+        when(this.fakeDatabaseEntities.getEntity(anyString(), anyString())).thenReturn(apiEntity);
         MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, DEFAULT_INTENT);
         Assert.assertNotNull(mi.getVariables());
         Assert.assertEquals(1, mi.getVariables().size());

@@ -18,7 +18,6 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
-import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
@@ -31,6 +30,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
+import org.junit.Assert;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -80,6 +80,7 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected Config fakeConfig;
 
+
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
                 .claim("ROLE", role)
@@ -122,9 +123,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeMessageQueue)).to(MessageQueue.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeNeuralNet)).to(NeuralNet.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeSemanticAnalysis)).to(SemanticAnalysis.class);
-
-                // TODO: determine why can't we mock or just use ILogger
-                bind(TelemetryLogger.class).to(TelemetryLogger.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(TelemetryLogger.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -132,6 +131,8 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(HTMLExtractor.class).to(HTMLExtractor.class);
                 bind(Validate.class).to(Validate.class);
                 bind(RateLimitCheck.class).to(RateLimitCheck.class);
+
+                ServiceTestBase.this.addAdditionalBindings(this);
             }
         };
     }
@@ -164,11 +165,12 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
+        this.fakeLogger = mock(TelemetryLogger.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
 
-        ResourceConfig rc = new ResourceConfig(AIEndpoint.class);
-        AbstractBinder binder = addAdditionalBindings(this.getDefaultBindings());
+        ResourceConfig rc = new ResourceConfig(getClassUnderTest());
+        AbstractBinder binder = this.getDefaultBindings();
         rc.register(binder);
         // Add Auth filter
         rc.register(AuthFilter.class);
@@ -176,5 +178,10 @@ public abstract class ServiceTestBase extends JerseyTest {
         rc.register(QueryFilter.class);
         rc.register(PostFilter.class);
         return rc;
+    }
+
+    protected void assertNotNullNotEmpty(final String str) {
+        Assert.assertNotNull(str);
+        Assert.assertNotEquals("", str);
     }
 }

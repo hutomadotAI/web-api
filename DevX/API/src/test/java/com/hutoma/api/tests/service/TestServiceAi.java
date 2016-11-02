@@ -128,7 +128,7 @@ public class TestServiceAi extends ServiceTestBase {
     protected Class<?> getClassUnderTest() {
         return AIEndpoint.class;
     }
-
+    
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(AILogic.class).to(AILogic.class);
         return binder;
