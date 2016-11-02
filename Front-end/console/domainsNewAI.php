@@ -65,6 +65,7 @@
 
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
     <link rel="stylesheet" href="./plugins/switch/switch.css">
+    <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
@@ -84,7 +85,7 @@
     <div class="content-wrapper">
     <section class="content">
             <?php include './dynamic/domainsNewAI.content.html.php'; ?>
-            <?php include './dynamic/domainsNewAI.content.info.details.html.php'; ?>
+            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
     </section>
     </div>
 

@@ -1,4 +1,4 @@
-<form method="POST" name="aiSkill" ><!-- action="./dynamic/saveAI.php"><!-- across market page for demo -->
+<form method="POST" name="aiSkill" >
     <p></p>
     <h2></h2>
     <p id="domsearch"></p>

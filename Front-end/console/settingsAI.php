@@ -11,9 +11,9 @@
         exit;
     }
 
-    $response = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
-    if ($response['status']['code'] == 200) $response = $response['mesh'];
-    else $response ="";
+    $AisMesh = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+    if ($AisMesh['status']['code'] == 200) $AisMesh = $AisMesh['mesh'];
+    else $AisMesh ="";
 
     function isSessionVariablesAvailable(){
         return  (
@@ -47,6 +47,7 @@
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinNice.css">
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
     <link rel="stylesheet" href="./plugins/switch/switch.css">
+    <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
@@ -87,7 +88,7 @@
                             <div class="col-lg-12" style="background-color: #434343; padding:5px;">
                                 <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                             </div>
-                        </div>
+                            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
                     </div>
                 </div>
 
@@ -136,17 +137,19 @@
 </form>
 
 <script>
-    var previousField = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
-    domains = <?php  echo json_encode($response);?>;
-    usr_domains = domains;
+    var previousGeneralInfo = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
+    var domains = <?php  echo json_encode($AisMesh); unset($AisMesh)?>;
+
     var userActived ={};
+    for (var x in domains) {
+        var key = domains[x].aiid;
+        userActived[key] = true;
+    }
+
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'domains_list';
-    for (var x in domains) {
-        var key = usr_domains[x].aiid;
-        userActived[key] = true;
-    }
+
     function searchDomain(str) { showDomains(str,1);}
 </script>
 </body>

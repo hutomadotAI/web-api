@@ -20,21 +20,13 @@ if(isset($_POST['AiSkill'])) {
     echo json_encode(prepareResponse(400), true);
 }
 
-
-//$arr = array('status' => array('code' => 200));
-//echo( 'ok');
-
-//$mesh = json_decode($_POST);
-//storeAIMesh($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],$mesh);
-//unset($mesh);
-
 function prepareResponse($code)
 {
     $arr = array('status' => array('code' => $code),'AiSkill' => $_POST['AiSkill']);
     return $arr;
 }
 
-// I do not like remove Ai box when user deactives ones
+// TODO is better if we use update functionality
 function storeAIMesh($aiid,$mesh){
 
     // TODO need a check on api response on deleteAllMesh
