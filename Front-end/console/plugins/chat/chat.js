@@ -3,6 +3,7 @@ var continuousSpeech = '0';
 var speechResponse = 1; // voice activated true for default
 var jsonResponse = '1'; // voice activated true for default
 var chatSemaphore = 0;
+var activeElementOnMessageDisable = null;
 
 
 if (isChrome) {
@@ -159,6 +160,9 @@ function enableChat() {
     document.getElementById('bodyChat').style.cursor = 'auto';
     document.getElementById('message').disabled = false;
     document.getElementById('message').value = '';
+    if (activeElementOnMessageDisable === document.getElementById('message')) {
+        document.getElementById('message').focus();
+    }
 
     // release block for chatting
     chatSemaphore = (chatSemaphore + 1) % (2);
@@ -166,6 +170,7 @@ function enableChat() {
 
 function disableChat() {
     //document.getElementById('bodyChat').style.cursor = 'progress';
+    activeElementOnMessageDisable = document.activeElement;
     document.getElementById('message').disabled = true;
     document.getElementById('message').value = '';
 }
