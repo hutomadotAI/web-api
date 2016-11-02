@@ -1,34 +1,34 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    if (! isSessionVariablesAvailable() ) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
-    }
+if (! isSessionVariablesAvailable() ) {
+    \hutoma\console::redirect('./error.php?err=105');
+    exit;
+}
 
-    $AisMesh = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
-    if ($AisMesh['status']['code'] == 200) $AisMesh = $AisMesh['mesh'];
-    else $AisMesh ="";
+$AisMesh = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+if ($AisMesh['status']['code'] == 200) $AisMesh = $AisMesh['mesh'];
+else $AisMesh ="";
 
-    function isSessionVariablesAvailable(){
-        return  (
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'])
-        );
-    }
+function isSessionVariablesAvailable(){
+    return  (
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) &&
+        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'])
+    );
+}
 ?>
 
 <!DOCTYPE html>
@@ -89,10 +89,10 @@
                                 <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                             </div>
                             <?php include './dynamic/botstore.content.info.details.html.php'; ?>
+                        </div>
                     </div>
-                </div>
 
-            </div>
+                </div>
 
 
         </section>

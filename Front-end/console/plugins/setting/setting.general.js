@@ -108,4 +108,3 @@ $(document).ready(function(){
     resetGeneralInputFields();
     $("#ai_name").prop("disabled",true);
 });
-
