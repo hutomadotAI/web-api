@@ -4,36 +4,6 @@
  * Date: 20/10/16
  * Time: 14:16
 -->
-<script>
-    var formData = new FormData();
-    formData.append('aiid', document.getElementById('aikey').value);
-    $.ajax({
-        url : './dynamic/updateAI.php',
-        type : 'POST',
-        data : formData,
-        //dataType: 'json',
-        processData: false,  // tell jQuery not to process the data
-        contentType: false,  // tell jQuery not to set contentType
-        success: function (response) {
-            var JSONdata = JSON.parse(response);
-            var statusCode = JSONdata['status']['code'];
-            if (statusCode === 200) {
-                msgAlertUpdateAI(4, 'Your AI has been updated');
-                updatePreviousDataLoaded(JSONdata);
-                activeGeneralButtons();
-            }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertUpdateAI(2,'Something went wrong. Your changes were not saved.');
-            activeGeneralButtons();
-        }
-    });
-    
-</script>
-
-
-
 <!-- Modal PROMPT -->
 <div class="modal fade" id="boxBotStoreInfo" role="dialog">
     <div class="modal-dialog flat">
@@ -56,10 +26,9 @@
                             <div class="box-body">
                                 <dl>
                                     <dt>More details</dt>
-                                    <dd>This AI can help you to bla bla bla bla bla bla This AI can help you to bla bla bla bla bla bla This AI can help you to bla bla bla bla bla bla</dd>
+                                    <dd id="curr_bot_details"></dd>
                                     <dt>Uses case</dt>
-                                    <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                                    <dd>Donec id elit non mi porta gravida at eget metus.</dd>
+                                    <df id="curr_bot_usecase"></df>
                                 </dl>
                             </div>
                         </div>
