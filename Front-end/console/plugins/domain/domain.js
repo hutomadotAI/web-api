@@ -102,8 +102,16 @@ function showDomains(str,size){
 
                     wHTML += addHtmlStarRating(userActived[key],boxid,domains[x].rating);
 
+                    wHTML += ('<a data-toggle="modal" ' +
+                    'data-target="#boxBotStoreInfo" ' +
+                    'data-id="'+domains[x].aiid+'" ' +
+                    'data-name="'+domains[x].name+'" ' +
+                    'data-description="'+domains[x].description+'" ' +
+                    'data-icon="'+domains[x].iconPath+'" ' +
+                    'data-color="'+domains[x].widgetColor+'" ' +
+                    'style="cursor: pointer;">');
                     wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
-
+                    wHTML += ('</a>');
                     if ( userActived[key] === false )
                         wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
                     else
@@ -174,12 +182,21 @@ function addHtmlStarRating(actived,boxid,rating){
 
 
 // Pass values to Modal on show dialog modal
-$('#boxDomainInfo').on('show.bs.modal', function(e) {
-    var curr_domain_name = $(e.relatedTarget).data('name').toUpperCase();
-    var curr_domain_icon = $(e.relatedTarget).data('icon');
-    var curr_domain_color = $(e.relatedTarget).data('color');
+$('#boxBotStoreInfo').on('show.bs.modal', function(e) {
+    var curr_bot_name = $(e.relatedTarget).data('name').toUpperCase();
+    var curr_bot_description = $(e.relatedTarget).data('description');
 
-    $(e.currentTarget).find('span').text(curr_domain_name + ' - pre-trained Neural Network');
-    $(e.currentTarget).find('i').attr('class', curr_domain_icon +' text-md text-white');
-    $(e.currentTarget).find('.modal-header').attr('class', 'modal-header ' + curr_domain_color);
+    var curr_bot_icon ='fa fa-user';
+    var curr_bot_color = 'gray';
+
+    /*
+    if ( $(e.relatedTarget).data('iconPath') != '' )
+        curr_domain_icon = $(e.relatedTarget).data('iconPath');
+    if ( $(e.relatedTarget).data('widgetColor') !='')
+        curr_domain_color = $(e.relatedTarget).data('widgetColor');
+        */
+    $(e.currentTarget).find('span').text(curr_bot_name);
+    $(e.currentTarget).find('h3').text(curr_bot_description);
+    $(e.currentTarget).find('i').attr('class', curr_bot_icon +' text-md text-gray');
+    $(e.currentTarget).find('.modal-header').attr('class', 'modal-header ' + curr_bot_color);
 });

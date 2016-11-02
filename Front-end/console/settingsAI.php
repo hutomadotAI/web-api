@@ -88,7 +88,7 @@
                             <div class="col-lg-12" style="background-color: #434343; padding:5px;">
                                 <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                             </div>
-                        </div>
+                            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
                     </div>
                 </div>
 

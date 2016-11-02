@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
+<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;" onload="showDomains('',1)">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -71,7 +71,7 @@
     <div class="content-wrapper">
         <section class="content">
             <?php include './dynamic/marketplace.content.html.php'; ?>
-            <?php include './dynamic/domainsNewAI.content.info.details.html.php'; ?>
+            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
         </section>
     </div>
     </div>

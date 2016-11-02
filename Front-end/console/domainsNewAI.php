@@ -85,7 +85,7 @@
     <div class="content-wrapper">
     <section class="content">
             <?php include './dynamic/domainsNewAI.content.html.php'; ?>
-            <?php include './dynamic/domainsNewAI.content.info.details.html.php'; ?>
+            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
     </section>
     </div>
 
