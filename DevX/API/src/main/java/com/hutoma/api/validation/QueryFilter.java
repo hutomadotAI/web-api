@@ -61,6 +61,12 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                 requestContext.setProperty(APIParameter.AIID.toString(),
                         this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
             }
+
+            if (checkList.contains(APIParameter.AIID_MESH)) {
+                requestContext.setProperty(APIParameter.AIID_MESH.toString(),
+                        this.validateUuid(AIID_MESH, getFirst(pathParameters.get(AIID_MESH))));
+            }
+
             if (checkList.contains(APIParameter.ChatID)) {
                 final String chatId = getFirstOrDefault(queryParameters.get(CHATID), "");
                 requestContext.setProperty(APIParameter.ChatID.toString(),

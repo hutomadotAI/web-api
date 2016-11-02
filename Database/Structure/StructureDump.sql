@@ -48,9 +48,16 @@ CREATE TABLE `ai` (
   `ai_confidence` double DEFAULT NULL,
   `ai_personality` tinyint(4) DEFAULT '0',
   `ai_voice` int(11) DEFAULT '0',
+  `numberOfActivations` int(11) NOT NULL DEFAULT '0',
+  `rating` float DEFAULT NULL,
+  `isBanned` tinyint(4) DEFAULT NULL,
+  `licenceType` int(11) DEFAULT NULL,
+  `licenceFee` float DEFAULT NULL,
+  `iconPath` varchar(250) DEFAULT NULL,
+  `color` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1504 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1637 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -75,6 +82,22 @@ CREATE TABLE `ai_memory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ai_mesh`
+--
+
+DROP TABLE IF EXISTS `ai_mesh`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ai_mesh` (
+  `dev_id` varchar(50) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `aiid_mesh` varchar(50) NOT NULL,
+  PRIMARY KEY (`dev_id`,`aiid`,`aiid_mesh`),
+  UNIQUE KEY `aiid` (`aiid`,`aiid_mesh`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `api_rate_limit`
 --
 
@@ -89,6 +112,24 @@ CREATE TABLE `api_rate_limit` (
   `expires` datetime DEFAULT NULL,
   PRIMARY KEY (`dev_id`,`rate_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `botStore`
+--
+
+DROP TABLE IF EXISTS `botStore`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `botStore` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `aiid` varchar(50) NOT NULL,
+  `published` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`),
+  KEY `id_2` (`id`),
+  KEY `id_3` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -108,7 +149,7 @@ CREATE TABLE `chatlog` (
   `answer` varchar(2000) DEFAULT NULL,
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2846 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4064 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -122,7 +163,7 @@ CREATE TABLE `debug` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=402 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -195,7 +236,7 @@ CREATE TABLE `entity` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id` (`dev_id`,`name`),
   CONSTRAINT `entity_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=139 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,7 +254,7 @@ CREATE TABLE `entity_value` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `entity_id` (`entity_id`,`value`),
   CONSTRAINT `entity_value_ibfk_1` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -250,7 +291,7 @@ CREATE TABLE `intent` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid` (`aiid`,`name`),
   CONSTRAINT `intent_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=181 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -268,7 +309,7 @@ CREATE TABLE `intent_response` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_id` (`intent_id`,`response`),
   CONSTRAINT `intent_response_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -286,7 +327,7 @@ CREATE TABLE `intent_user_says` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_id` (`intent_id`,`says`),
   CONSTRAINT `intent_user_says_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -310,7 +351,7 @@ CREATE TABLE `intent_variable` (
   KEY `entity_id` (`entity_id`),
   CONSTRAINT `intent_variable_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE,
   CONSTRAINT `intent_variable_ibfk_2` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,7 +369,7 @@ CREATE TABLE `intent_variable_prompt` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_variable_id` (`intent_variable_id`,`prompt`),
   CONSTRAINT `intent_variable_prompt_ibfk_1` FOREIGN KEY (`intent_variable_id`) REFERENCES `intent_variable` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -446,7 +487,7 @@ CREATE TABLE `users` (
   `valid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id_UNIQUE` (`dev_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -630,6 +671,27 @@ BEGIN
     AND `intent`.`aiid` IN
     (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`);
 
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addMesh` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hutoma_caller`@`localhost` PROCEDURE `addMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50), IN `in_aiid_mesh` VARCHAR(50))
+    NO SQL
+BEGIN
+  INSERT INTO ai_mesh (dev_id,aiid,aiid_mesh)
+  VALUES (in_dev_id,in_aiid, in_aiid_mesh);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -856,6 +918,27 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteAllMesh` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`mesh_writer`@`localhost` PROCEDURE `deleteAllMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+DELETE FROM ai_mesh
+WHERE dev_id=in_dev_id AND aiid=in_aiid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `deleteEntity` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1044,6 +1127,27 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteMesh` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`mesh_writer`@`localhost` PROCEDURE `deleteMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50), IN `in_aiid_mesh` VARCHAR(50))
+    NO SQL
+BEGIN
+DELETE FROM ai_mesh
+WHERE dev_id=in_dev_id AND aiid=in_aiid AND aiid_mesh = in_aiid_mesh;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `deleteUser` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1200,7 +1304,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`localhost` PROCEDURE `getAIsForEntity`(IN `param_devid` VARCHAR(50), IN `param_entity_name` VARCHAR(50))
+CREATE DEFINER=`intentUser`@`localhost` PROCEDURE `getAIsForEntity`(IN `param_devid` VARCHAR(50), IN `param_entity_name` VARCHAR(50))
     READS SQL DATA
 BEGIN
 SELECT i.aiid FROM intent i
@@ -1311,6 +1415,27 @@ CREATE DEFINER=`chatlogReader`@`localhost` PROCEDURE `getAnswer`(IN `param_qid` 
 BEGIN
 	SELECT answer FROM chatlog WHERE id=param_qid;
 END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotsInStore` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`localhost` PROCEDURE `getBotsInStore`()
+    NO SQL
+SELECT ai.aiid as dom_id, ai_name as name, ai_description as description,iconPath as icon, color, published
+FROM ai
+INNER JOIN botStore
+on ai.aiid = botStore.aiid ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -1771,6 +1896,29 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getMesh` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`mesh_reader`@`localhost` PROCEDURE `getMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+SELECT ai_mesh.aiid_mesh, ai.*
+FROM ai
+INNER JOIN ai_mesh ON ai.aiid = ai_mesh.aiid
+WHERE ai.dev_id=in_dev_id AND ai.aiid = in_aiid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getUser` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1891,26 +2039,28 @@ CREATE DEFINER=`chatlogWriter`@`localhost` PROCEDURE `insertQuestion_v1`(
     IN `in_question` TEXT)
     MODIFIES SQL DATA
 BEGIN
+	DECLARE var_found INT;
 	DECLARE var_ai_status VARCHAR(50);
     DECLARE var_lastid LONG;
     DECLARE var_failed_status TINYINT;
 
-    SELECT ai.ai_status INTO var_ai_status FROM ai where ai.aiid = in_aiid AND ai.dev_id = in_devid LIMIT 1;
+    SELECT count(ai.aiid), ai.ai_status INTO var_found, var_ai_status FROM ai where ai.aiid = in_aiid AND ai.dev_id = in_devid LIMIT 1;
 
-    SET var_failed_status =
-		IF (var_ai_status = "training_completed"
-		OR var_ai_status = "training_in_progress"
-		OR var_ai_status = "training_stopped_maxtime"
-		OR var_ai_status = "training_stopped", 0, 1);
+	SET var_lastid = -1;
+    IF var_found>0 THEN
+		SET var_failed_status =
+			IF (var_ai_status="training_completed"
+			OR var_ai_status="training_in_progress"
+			OR var_ai_status="training_stopped_maxtime"
+			OR var_ai_status="training_stopped",
+			0, 1);
 
-	IF var_failed_status
-    THEN
-		SET var_failed_status = 0;
-		INSERT INTO chatlog (dev_id, message_from, message_to, question)
-		VALUES (in_devid, in_chatid, in_aiid, in_question);
-        SET var_lastid = last_insert_id();
-	ELSE
-		SET var_failed_status = 1;
+		IF NOT var_failed_status
+		THEN
+			INSERT INTO chatlog (dev_id, message_from, message_to, question)
+			VALUES (in_devid, in_chatid, in_aiid, in_question);
+			SET var_lastid = last_insert_id();
+		END IF;
 	END IF;
 
 	SELECT var_ai_status AS ai_status, var_lastid AS id, var_failed_status AS failed_status;
@@ -2191,4 +2341,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-27 17:21:46
+-- Dump completed on 2016-10-29 23:42:51

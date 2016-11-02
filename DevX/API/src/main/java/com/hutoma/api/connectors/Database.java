@@ -11,6 +11,7 @@ import com.hutoma.api.containers.sub.AiStore;
 import com.hutoma.api.containers.sub.ChatRequestStatus;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.MeshVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -35,6 +36,16 @@ public class Database {
     protected final Logger logger;
     protected final Provider<DatabaseCall> callProvider;
     protected Provider<DatabaseTransaction> transactionProvider;
+    private String aiid;
+    private String name;
+    private String description;
+    private String licenceType;
+    private Float licenceFee;
+    private Float rating;
+    private int numberOfActivations;
+    private boolean isBanned;
+    private String iconPath;
+    private String widgetColor;
 
     @Inject
     public Database(Logger logger, Provider<DatabaseCall> callProvider,
@@ -220,7 +231,6 @@ public class Database {
         }
     }
 
-
     public boolean deleteAi(final String devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAI_v1", 2).add(devid).add(aiid);
@@ -387,6 +397,64 @@ public class Database {
         try (DatabaseCall call = this.callProvider.get()) {
             int rowsChanged = call.initialise("setRnnStatus", 3).add(status).add(devid).add(aiid).executeUpdate();
             return rowsChanged > 0;
+        }
+    }
+
+    /***
+     * AI Mesh Calls
+     */
+
+    public List<MeshVariable> getMesh(final String dev_id, final String aiid)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getMesh", 2).add(dev_id).add(aiid);
+            ResultSet rs = call.executeQuery();
+            List<MeshVariable> mesh = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    mesh.add(new MeshVariable(
+                            rs.getString("aiid"),
+                            rs.getString("aiid_mesh"),
+                            rs.getString("ai_name"),
+                            rs.getString("ai_description"),
+                            rs.getString("licenceType"),
+                            rs.getFloat("licenceFee"),
+                            rs.getFloat("rating"),
+                            rs.getInt("numberOfActivations"),
+                            rs.getBoolean("isBanned"),
+                            rs.getString("iconPath"),
+                            rs.getString("color")
+                    ));
+                }
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+            return mesh;
+        }
+    }
+
+
+    public boolean addMesh(final String dev_id, final String aiid, final String aiid_mesh)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("addMesh", 3).add(dev_id).add(aiid).add(aiid_mesh);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteSingleMesh(final String dev_id, final String aiid, final String aiid_mesh)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteMesh", 3).add(dev_id).add(aiid).add(aiid_mesh);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteAllMesh(final String dev_id, final String aiid)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteAllMesh", 2).add(dev_id).add(aiid);
+            return call.executeUpdate() > 0;
         }
     }
 

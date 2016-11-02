@@ -20,7 +20,7 @@ import javax.ws.rs.core.SecurityContext;
 /**
  * Created by David MG on 05/08/2016.
  */
-@Path("/botStore")
+@Path("/botstore")
 @RateLimit(RateKey.QuickRead)
 public class AIBotStoreEndpoint {
 
