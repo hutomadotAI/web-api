@@ -268,8 +268,9 @@ public class Database {
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
+                    TrainingStatus trainingStatus = TrainingStatus.forValue(rs.getString("ai_status"));
                     return new ChatRequestStatus(rs.getLong("id"),
-                            getTrainingStatusValue(rs.getString("ai_status")),
+                            trainingStatus,
                             rs.getBoolean("failed_status"));
                 }
                 return new ChatRequestStatus();

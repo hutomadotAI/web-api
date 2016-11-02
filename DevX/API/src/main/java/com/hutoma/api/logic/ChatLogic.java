@@ -174,6 +174,10 @@ public class ChatLogic {
                 // set the history to the answer, unless we have received a reset command, in which case send an empty string
                 chatResult.setHistory(resetHistory ? "" : chatResult.getAnswer());
             }
+        } catch (NeuralNet.NeuralNetAiNotFoundException notFoundException) {
+            this.logger.logError(LOGFROM, "neural net not found");
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", notFoundException, telemetryMap);
+            return ApiError.getNotFound("ai not found");
         } catch (NeuralNet.NeuralNetNotRespondingException nr) {
             this.logger.logError(LOGFROM, "neural net did not respond in time");
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nr, telemetryMap);

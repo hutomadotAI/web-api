@@ -363,6 +363,14 @@ public class TestChatLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
+    @Test
+    public void testChat_AiNotFound() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
+        doThrow(new NeuralNet.NeuralNetAiNotFoundException("test")).when(this.fakeNeuralNet).startAnswerRequest(anyString(), any(), any(), any());
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
     private ChatResult getSemanticResult() {
         ChatResult res = new ChatResult();
         res.setAnswer(SEMANTICRESULT);

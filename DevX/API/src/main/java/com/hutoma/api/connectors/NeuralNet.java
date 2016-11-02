@@ -50,6 +50,14 @@ public class NeuralNet {
 
         try {
             this.requestStatus = this.database.insertNeuralNetworkQuestion(devId, chatId, aiid, question);
+
+            // if we have no qid and weren't rejected because of ai status
+            // then the ai has not been matched
+            if ((this.requestStatus.getQuestionId() < 0) &&
+                    (!this.requestStatus.isQuestionRejectedDueToAiStatus())) {
+                // so throw the exception now
+                throw new NeuralNetAiNotFoundException(aiid.toString());
+            }
         } catch (Database.DatabaseException e) {
             throw new NeuralNetException(e);
         }
@@ -62,6 +70,8 @@ public class NeuralNet {
             if (this.requestStatus.isQuestionRejectedDueToAiStatus()) {
                 throw new NeuralNetRejectedAiStatusException(this.requestStatus.getAiStatus().toString());
             }
+            // this should never happen
+            // because we've already checked for it in startAnswerRequest
             throw new NeuralNetException("question was not inserted");
         }
 
@@ -102,6 +112,12 @@ public class NeuralNet {
         }
 
         public NeuralNetException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    public static class NeuralNetAiNotFoundException extends NeuralNetException {
+        public NeuralNetAiNotFoundException(final String cause) {
             super(cause);
         }
     }
