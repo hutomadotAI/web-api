@@ -8,7 +8,7 @@ import java.util.UUID;
  */
 public class ChatResult {
 
-    private final String topic_in = "";
+    private String topic_in = "";
     private double score;
     private String query = "";
     private String answer = "";
@@ -20,6 +20,22 @@ public class ChatResult {
     private UUID chatId;
     private List<MemoryIntent> intents;
 
+    public ChatResult() {
+    }
+
+    /***
+     * Constructor that takes a ChatResult and copies only the fields
+     * that we want to pass to the API caller
+     * @param source
+     */
+    public ChatResult(final ChatResult source) {
+        this.score = source.score;
+        this.query = source.query;
+        this.answer = source.answer;
+        this.elapsed_time = source.elapsed_time;
+        this.topic_in = source.topic_in;
+        this.topic_out = source.topic_out;
+    }
 
     public String getAnswer() {
         return this.answer;

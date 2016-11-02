@@ -52,7 +52,7 @@ public class SemanticAnalysis {
         ChatResult result = null;
         try {
             String content = this.responseFuture.get().readEntity(String.class);
-            result = (ChatResult) this.serializer.deserialize(content, ChatResult.class);
+            result = new ChatResult((ChatResult) this.serializer.deserialize(content, ChatResult.class));
         } catch (Exception e) {
             throw new SemanticAnalysisException(e);
         }
