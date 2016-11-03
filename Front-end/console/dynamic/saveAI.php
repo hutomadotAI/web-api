@@ -21,7 +21,7 @@
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['price'] = 'skipped';
     }
 
-
+    // in this point the value of private is still boolean
     $response = hutoma\console::createAI(
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'],
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'],
@@ -36,6 +36,32 @@
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['price']
     );
 
+    switch($response['status']['code']){
+        case 200:
+            if (updateData($response['aiid'])) {
+                unset($_response);
+                \hutoma\console::redirect('../trainingAI.php');
+            } else {
+                unset($_response);
+                \hutoma\console::redirect('../error.php?err=15');
+                exit;
+            }
+            break;
+        case 400:
+            \hutoma\console::redirect('../newAI.php?err=400');
+            break;
+        default:
+            if (isset($response)) {
+                \hutoma\console::redirect('../error.php?errObj=' . json_encode($response));
+                unset($_response);
+            } else {
+                unset($_response);
+                \hutoma\console::redirect('../error.php?err=15');
+            }
+            exit;
+    }
+
+/*
     if ($response['status']['code'] === 200) {
         if (updateData($response['aiid'])) {
             unset($_response);
@@ -55,6 +81,7 @@
         }
         exit;
     }
+*/
 
     function isPostInputAvailable(){
         return (

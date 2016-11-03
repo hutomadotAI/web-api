@@ -17,6 +17,11 @@
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'])
         );
     }
+
+    function isErrorOccurred(){
+        return isset($_POST['err']);
+    }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -66,8 +71,9 @@
 </div>
 
 <script>
-    var previousFilled = '<?php if (isPreviousFieldsFilled()) echo '1'; else echo '0'; ?>';
+    var previousFilled = '<?php if (isPreviousFieldsFilled()) echo "1"; else echo "0"; ?>';
     var previousGeneralInfo  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
+    var err = '<?php if (isErrorOccurred()) echo $_POST['err']; else echo "0"; ?>';
 </script>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

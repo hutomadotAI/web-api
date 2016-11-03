@@ -18,16 +18,16 @@ function setInputValue(id,value){
 }
 
 function setCheckValue(id,value){
-    // private false -> public true then -> set check
-    if(value == false || value == 0)
-        $('#'+id).iCheck('check');
+    if( value )
+        $('#' + id).iCheck('uncheck');
     else
-        $('#'+id).iCheck('uncheck');
+        $('#' + id).iCheck('check');
 }
 
 function setSelectByIndex(id,i) {
     var element = document.getElementById(id);
-    element.id[i].selected = true;
+    element.selectedIndex = i;
+    document.getElementById('select2-' + id + '-container').innerHTML = element.options[element.selectedIndex].text;
 }
 
 function setSelectValue(id,valueToSelect) {
@@ -38,9 +38,7 @@ function setSelectValue(id,valueToSelect) {
 }
 
 function getSelectIndex(id){
-    var selected = document.getElementById(id).selectedIndex;
-    var options = document.getElementById(id).options;
-    return options[selected].index;
+    return document.getElementById(id).selectedIndex;
 }
 
 function setSliderValue(id,value){

@@ -32,9 +32,9 @@ function updateAI() {
     var is_private;
 
     if(document.getElementById('ai_public').value =='on')
-        is_private = '0';
+        is_private = false;
     else
-        is_private = '1';
+        is_private = true;
 
     formData.append('private', is_private);
     formData.append('aiid', document.getElementById('aikey').value);
@@ -94,18 +94,24 @@ function deactiveGeneralButtons(){
     document.getElementById('btnDelete').setAttribute('disabled','disabled');
 }
 
+
 function updatePreviousDataLoaded(JSONdata){
-    previousGeneralInfo.name = JSONdata.name;
-    previousGeneralInfo.description = JSONdata.description;
-    previousGeneralInfo.language = JSONdata.language;
-    previousGeneralInfo.timezone = 'Europe/London';//JSONdata.timezone;
-    previousGeneralInfo.voice = JSONdata.voice;
-    previousGeneralInfo.personality = JSONdata.personality;
-    previousGeneralInfo.confidence = JSONdata.confidence;
+    var is_private;
+
+    if(document.getElementById('ai_public').value =='on')
+        is_private = false;
+    else
+        is_private = true;
+    previousGeneralInfo.description =  document.getElementById('ai_description').value;
+    previousGeneralInfo.language = document.getElementById('select2-' + 'ai_language' + '-container').innerHTML;
+    previousGeneralInfo.timezone = 'Europe/London'; //document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML;
+    previousGeneralInfo.voice = document.getElementById('ai_voice').value;
+    previousGeneralInfo.personality = getSelectIndex('ai_personality')
+    previousGeneralInfo.confidence = getValueFromConfidence(document.getElementById('ai_confidence').value);
+    previousGeneralInfo.private = is_private;
 }
 
 $(document).ready(function(){
     resetGeneralInputFields();
     $("#ai_name").prop("disabled",true);
 });
-
