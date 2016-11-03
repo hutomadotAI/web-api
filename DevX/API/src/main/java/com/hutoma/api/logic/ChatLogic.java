@@ -224,7 +224,7 @@ public class ChatLogic {
      * @param telemetryMap the telemetry map
      */
     private void handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
-                               final String question, final Map<String, String> telemetryMap) {
+                               final String question, final Map<String, String> telemetryMap) throws Exception {
         // Now that have the chat result, we need to check if there's an intent being returned
         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
                 devId, aiid, chatUuid, chatResult.getAnswer());
@@ -255,7 +255,10 @@ public class ChatLogic {
                     if (optVariable.isPresent()) {
                         MemoryVariable variable = optVariable.get();
                         if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
+                            // Should not happen as this should be validated during creation
                             this.logger.logError(LOGFROM, "Variable with no prompts defined!");
+                            throw new Exception(String.format("Entity %s for intent %s does not specify any prompts",
+                                    memoryIntent.getName(), variable.getName()));
                         } else {
 
                             // And prompt the user for the value for that variable

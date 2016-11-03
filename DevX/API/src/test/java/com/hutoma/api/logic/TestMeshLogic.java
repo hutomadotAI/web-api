@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,13 +41,13 @@ public class TestMeshLogic {
     private final int NACTIVATIONS = 0;
     private final String ICONPATH = "iconPath";
     private final String WCOLOR = "widgetColor";
+    private final boolean ISBANNED = false;
     SecurityContext fakeContext;
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     Tools fakeTools;
     MeshLogic meshLogic;
     Logger fakeLogger;
-    private boolean ISBANNED = false;
 
     @Before
     public void setup() {
@@ -62,78 +63,84 @@ public class TestMeshLogic {
     public void testGetMesh_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getMesh(anyString(), anyString())).thenReturn(getMeshList());
         final ApiResult result = this.meshLogic.getMesh(this.fakeContext, this.DEVID, this.AIID);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testGetMesh_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getMesh(anyString(), anyString())).thenReturn(new ArrayList<MeshVariable>());
         final ApiResult result = this.meshLogic.getMesh(this.fakeContext, this.DEVID, this.AIID);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetMesh_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.getMesh(anyString(), anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
         final ApiResult result = this.meshLogic.getMesh(this.fakeContext, this.DEVID, this.AIID);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testAddMesh_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.addMesh(any(), any(), any())).thenReturn(true);
         final ApiResult result = this.meshLogic.addMesh(this.fakeContext, this.DEVID, this.AIID, this.AIID_MESH);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testAddMesh_NotFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.addMesh(any(), any(), any())).thenReturn(false);
+        final ApiResult result = this.meshLogic.addMesh(this.fakeContext, this.DEVID, this.AIID, this.AIID_MESH);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testAddMesh_Error() throws Database.DatabaseException {
         doThrow(new Database.DatabaseException(new Exception("test"))).when(this.fakeDatabase).addMesh(anyString(), anyString(), any());
         final ApiResult result = this.meshLogic.addMesh(this.fakeContext, this.DEVID, this.AIID, this.AIID_MESH);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteMesh_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteSingleMesh(anyString(), any(), any())).thenReturn(true);
         final ApiResult result = this.meshLogic.deleteSingleMesh(this.fakeContext, this.DEVID, this.AIID, this.AIID_MESH);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteMesh_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteSingleMesh(anyString(), any(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
         final ApiResult result = this.meshLogic.deleteSingleMesh(this.fakeContext, this.DEVID, this.AIID, this.AIID_MESH);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteMesh_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteSingleMesh(anyString(), any(), any())).thenReturn(false);
         final ApiResult result = this.meshLogic.deleteSingleMesh(this.fakeContext, this.DEVID, this.AIID, this.AIID_MESH);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
-
 
     @Test
     public void testDeleteAllMesh_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAllMesh(anyString(), any())).thenReturn(true);
         final ApiResult result = this.meshLogic.deleteAllMesh(this.fakeContext, this.DEVID, this.AIID);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteAllMesh_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAllMesh(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
         final ApiResult result = this.meshLogic.deleteAllMesh(this.fakeContext, this.DEVID, this.AIID);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteAllMesh_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAllMesh(anyString(), any())).thenReturn(false);
         final ApiResult result = this.meshLogic.deleteAllMesh(this.fakeContext, this.DEVID, this.AIID);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
 

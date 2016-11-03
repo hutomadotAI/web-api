@@ -4,12 +4,14 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -22,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +83,12 @@ public class TestChatLogic {
                 this.fakeLogger, this.fakeIntentHandler, this.fakeRecognizer);
     }
 
+    /***
+     * Valid semantic response.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_Valid_Semantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         ApiResult result = getValidChat(0.2f);
@@ -87,6 +96,12 @@ public class TestChatLogic {
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
+    /***
+     * Valid neural net response.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_Valid_Neural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         ApiResult result = getValidChat(0.5f);
@@ -94,6 +109,12 @@ public class TestChatLogic {
         Assert.assertEquals(NEURALRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
+    /***
+     * Empty semantic response, even with neural net response, sends error.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_EmptySemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         ChatResult res = getSemanticResult();
@@ -104,6 +125,12 @@ public class TestChatLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
+    /***
+     * Null semantic response, even with neural net response, sends error.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_NullSemantic() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenThrow(
@@ -113,20 +140,29 @@ public class TestChatLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
+    /***
+     * Empty neural net response, returns semantic response.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_EmptyNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
-
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("");
-
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
+    /***
+     * Invalid neural net response, returns semantic response.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_InvalidNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
-
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("0.1231723SomeText");
         ApiResult result = getChat(0.5f);
@@ -134,6 +170,12 @@ public class TestChatLogic {
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
+    /***
+     * Null neural net response, returns semantic response.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_NullNeural() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
@@ -297,6 +339,12 @@ public class TestChatLogic {
         Assert.assertEquals(neuralResetCommand, ((ApiChat) result).getResult().getAnswer());
     }
 
+    /***
+     * Tests an intent is recognized by the API when the backend sends it.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_IntentRecognized() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         final String intentName = "intent1";
@@ -313,6 +361,12 @@ public class TestChatLogic {
         Assert.assertEquals(intentName, ri.getName());
     }
 
+    /***
+     * Memory intent is fulfilled.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_IntentFulfilled() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         final String intentName = "intent1";
@@ -322,11 +376,23 @@ public class TestChatLogic {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         when(this.fakeNeuralNet.getAnswerResult(DEVID, AIID)).thenReturn("@meta.intent." + intentName);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
-        ApiResult result = getChat(0.5f);
-        ChatResult r = ((ApiChat) result).getResult();
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        Assert.assertFalse(mi.isFulfilled());
+        ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertTrue(mi.isFulfilled());
+        Assert.assertEquals(1, result.getResult().getIntents().size());
+        Assert.assertTrue(result.getResult().getIntents().get(0).isFulfilled());
     }
 
+    /***
+     * Memory intent updates prompt when intent is recognized but doesn't match any entity value.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_IntentPrompt() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
@@ -336,10 +402,73 @@ public class TestChatLogic {
         Assert.assertEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
         // The intent status is updated to storage
         verify(this.fakeIntentHandler).updateStatus(mi);
-        // And timesPrompted is decremented
+        // And timesPrompted is incremented
         Assert.assertEquals(1, mi.getVariables().get(0).getTimesPrompted());
     }
 
+    /***
+     * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_IntentPrompt_unfullfileldVar_exceededPrompts() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        MemoryIntent mi = getMemoryIntentForPrompt(0, null);
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        // The answer is NOT the prompt
+        Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
+        // The intent status is updated to storage
+        verify(this.fakeIntentHandler).updateStatus(mi);
+        // And timesPrompted is not incremented
+        Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
+    }
+
+    /***
+     * Memory intent is fulfilled based on variable value included in last question
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_IntentPrompt_unfullfileldVar_fulfillFromUserQuestion() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        MemoryIntent mi = getMemoryIntentForPrompt(3, null);
+        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
+            this.add(new Pair<>(mi.getVariables().get(0).getName(), "value"));
+        }};
+        when(this.fakeRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
+        Assert.assertFalse(mi.isFulfilled());
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertTrue(mi.isFulfilled());
+        verify(this.fakeIntentHandler).updateStatus(mi);
+    }
+
+    /***
+     * Memory intent is fulfilled based on variable value included in last question
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
+    @Test
+    public void testChat_IntentPrompt_unfullfileldVar_variableWithNoPrompt() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+        MemoryIntent mi = getMemoryIntentForPrompt(3, null);
+        mi.getVariables().get(0).setPrompts(new ArrayList<>());
+        when(this.fakeRecognizer.retrieveEntities(any(), any())).thenReturn(new ArrayList<>());
+        Assert.assertFalse(mi.isFulfilled());
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertFalse(mi.isFulfilled());
+        verify(this.fakeIntentHandler, never()).updateStatus(mi);
+    }
+
+    /***
+     * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_IntentPrompt_NoPromptWhenZero() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         MemoryIntent mi = getMemoryIntentForPrompt(1, "currentValue");
@@ -353,6 +482,12 @@ public class TestChatLogic {
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
     }
 
+    /***
+     * Both WNET and neeural net return empty responses.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     * @throws Database.DatabaseException
+     */
     @Test
     public void testChat_EmptyBoth() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
         ChatResult res = getSemanticResult();
@@ -363,12 +498,43 @@ public class TestChatLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
+    /***
+     * Semantic server sends response below required confidence threshold, neuralnet is not found.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     */
     @Test
-    public void testChat_AiNotFound() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException, Database.DatabaseException {
+    public void testChat_AiNotFound() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
         when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
         doThrow(new NeuralNet.NeuralNetAiNotFoundException("test")).when(this.fakeNeuralNet).startAnswerRequest(anyString(), any(), any(), any());
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    /***
+     * Semantic server sends response below required confidence threshold, neuralnet is not responding.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     */
+    @Test
+    public void testChat_AiNotResponding() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
+        doThrow(NeuralNet.NeuralNetNotRespondingException.class).when(this.fakeNeuralNet).startAnswerRequest(anyString(), any(), any(), any());
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_ACCEPTED, result.getStatus().getCode());
+    }
+
+    /***
+     * Semantic server sends response below required confidence threshold, neuralnet throws generic NeuralNetException exception.
+     * @throws SemanticAnalysis.SemanticAnalysisException
+     * @throws NeuralNet.NeuralNetException
+     */
+    @Test
+    public void testChat_AiException() throws SemanticAnalysis.SemanticAnalysisException, NeuralNet.NeuralNetException {
+        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(getSemanticResult());
+        doThrow(NeuralNet.NeuralNetException.class).when(this.fakeNeuralNet).startAnswerRequest(anyString(), any(), any(), any());
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     private ChatResult getSemanticResult() {
