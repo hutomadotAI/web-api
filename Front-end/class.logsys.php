@@ -1358,7 +1358,6 @@ class console
             $timezone = 'Europe/London';
             $locale = 'en-US';
 
-
             $args = array(
                 'description' => $description,
                 'is_private' => $private,
