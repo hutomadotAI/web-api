@@ -21,7 +21,7 @@
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['price'] = 'skipped';
     }
 
-
+    // in this point the value of private is still boolean
     $response = hutoma\console::createAI(
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'],
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'],

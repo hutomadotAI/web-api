@@ -1232,7 +1232,6 @@ class console
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
-
             return $json_response;
         }
     }
@@ -1381,7 +1380,6 @@ class console
             }
             $json_response = json_decode($curl_response, true);
             $curl->close();
-
             return $json_response;
         }
     }

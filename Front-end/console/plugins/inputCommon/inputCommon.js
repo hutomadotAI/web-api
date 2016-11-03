@@ -18,11 +18,10 @@ function setInputValue(id,value){
 }
 
 function setCheckValue(id,value){
-    // private false -> public true then -> set check
-    if(value == false || value == 0)
-        $('#'+id).iCheck('check');
+    if( value )
+        $('#' + id).iCheck('uncheck');
     else
-        $('#'+id).iCheck('uncheck');
+        $('#' + id).iCheck('check');
 }
 
 function setSelectByIndex(id,i) {

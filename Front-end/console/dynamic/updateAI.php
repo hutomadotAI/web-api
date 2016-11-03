@@ -33,7 +33,6 @@ updateSessionVariables();
 echo json_encode($response);
 unset($response);
 
-
 function updateSessionVariables()
 {
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $_POST['description'];

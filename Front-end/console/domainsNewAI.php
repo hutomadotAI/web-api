@@ -43,10 +43,12 @@
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality'] = $_POST['ai_personality'];
         $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = $_POST['ai_voice'];
-        if( isset($_POST['ai_public']) && $_POST['ai_public']=='on')
-            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '0';
-        else
-            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = '1';
+        if( isset($_POST['ai_public']) && $_POST['ai_public']=='on') {
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = false;
+        }
+        else {
+            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = true;
+        }
     }
 ?>
 
