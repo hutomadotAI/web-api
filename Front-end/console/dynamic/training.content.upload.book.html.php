@@ -104,6 +104,7 @@
             <div class="modal-body">
                 <div class="box-body" id="example-training-book">
                     <span id="contentSampleFile"></span>
+                    <dt>Example file to upload</dt>
                     <?php //echo file_get_contents('./dist/file/sampleTrainingBook.txt');?>
                 </div>
             </div>
