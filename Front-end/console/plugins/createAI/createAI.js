@@ -93,8 +93,8 @@ $(document).ready(function(){
             document.getElementById('btnNext').removeAttribute('disabled');
         else
             document.getElementById('btnNext').setAttribute('disabled','disabled');
-        if(err=='400')
-            msgAlertNameAI(2, 'Invalid name. The AI exists! Change the name please');
+        if(err!='400')
+            msgAlertNameAI(2, document.getElementById('ai_name').value+' AI exists with same name, please change the item name.');
     }
     else {
         setSliderValue('ai_confidence', 0.0); // default value "never"
