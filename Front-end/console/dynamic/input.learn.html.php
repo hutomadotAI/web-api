@@ -1,8 +1,7 @@
 <div class="form-group">
     <a data-toggle="collapse"  href="#collapseLearn" tabindex="-1">
-        <div class=" pull-right">
-            <i class="fa fa-info-circle text-sm text-yellow"></i> more info
-
+        <div class=" pull-right">more info
+            <i class="fa fa-question-circle text-sm text-yellow"></i>
         </div>
     </a>
     <label for="ai_personality">Learn from Users</label>

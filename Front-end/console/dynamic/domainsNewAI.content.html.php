@@ -2,8 +2,8 @@
     <div class="box-header with-border">
         <div class="box-title"><b>Add Skills to your AI</b></div>
         <a data-toggle="collapse"  href="#collapseInfoNewDomains">
-            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"> </i> more info
-
+            <div class=" pull-right">more info
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
