@@ -3,8 +3,9 @@
     <div class="box-header with-border">
         <div class="box-title"><b>Welcome to our Tech Preview</b></div><!-- to hu:toma -->
         <a data-toggle="collapse" href="#collapseStart" tabindex="-1">
-
-            <div class=" pull-right"><i class="fa fa-info-circle text-sm text-yellow"></i> more info</div>
+            <div class=" pull-right">more info
+                <i class="fa fa-question-circle text-sm text-yellow"></i>
+            </div>
         </a>
     </div>
 
