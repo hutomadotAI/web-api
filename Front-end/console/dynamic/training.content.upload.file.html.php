@@ -45,9 +45,9 @@
     <div class="modal-dialog flat">
 
         <!-- Modal content-->
-        <div class="modal-content bordered">
+        <div class="modal-content bordered" style="background-color: #212121">
             <div class="modal-header  ">
-                <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
+                <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">   <i class="fa fa-file-text-o text-success" style="padding-right:2em"></i> Training file sample</h4>
             </div>
             <div class="modal-body">

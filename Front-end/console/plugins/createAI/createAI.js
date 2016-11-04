@@ -1,6 +1,6 @@
 document.getElementById('btnNext').addEventListener('click', wizardNext);
-document.getElementById('ai_name').addEventListener('keyup', activeButtonCreate);
-document.getElementById('ai_description').addEventListener('keyup', checkDescriptionLength);
+document.getElementById('ai_name').addEventListener('keydown', activeButtonCreate);
+document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLength);
 
 function wizardNext() {
     document.getElementById('btnNext').setAttribute('disabled','disabled');

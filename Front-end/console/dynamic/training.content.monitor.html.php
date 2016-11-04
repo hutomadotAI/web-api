@@ -67,9 +67,9 @@
     </div>
 
     <div id="collapseMonitoring" class="panel-collapse collapse">
-        <div class="box-body">
+        <div class="box-body" style="padding-top:0;">
             <div class="overlay center-block">
-                <section class="content bg-gray-light" >
+                <section class="content-info">
                     <div class="box-body">
                         <dl class="dl-horizontal">
                             Training consists of two main phases:<br /><br/>
@@ -81,9 +81,9 @@
                         </dl>
                     </div>
                 </section>
-                <p></p>
-                need help? check out our <a href='#'>video tutorial</a> or email <a href='#'>support@hutoma.com</a>
-
+                <section class="content-info" style="padding-left:15px;">
+                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                </section>
             </div>
         </div>
     </div>
