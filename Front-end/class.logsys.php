@@ -1213,7 +1213,7 @@ class console
             $args = array(
                 'name' => $name,
                 'description' => $description,
-                'is_private' => $private,
+                'is_private' => $private == false ? 'false' : 'true',
                 'personality' => $personality,
                 'confidence' => $confidence,
                 'voice' => $voice,
