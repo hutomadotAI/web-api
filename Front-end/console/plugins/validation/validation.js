@@ -12,6 +12,14 @@ function limitText(limitField, limitNum) {
     return 0;
 }
 
+function isNameExists(name,list_name){
+    for (var x in list_name) {
+        if(name === list_name[x])
+            return true;
+    }
+    return false;
+}
+
 function inputValidation(txt,field) {
     var letters;
     switch(field){

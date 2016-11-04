@@ -207,6 +207,27 @@ function msgAlertAiSkill(alarm,msg){
     document.getElementById('msgAlertAiSkill').innerHTML = msg;
 }
 
+function msgAlertEntity(alarm, msg) {
+    switch (alarm) {
+        case 0:
+            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-base');
+            $("#icongAlertEntity").attr('class', 'icon fa fa-check');
+            document.getElementById('inputEntityName').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-warning');
+            $("#icongAlertEntity").attr('class', 'icon fa fa-check');
+            document.getElementById('inputEntityName').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-danger');
+            $("#icongAlertEntity").attr('class', 'icon fa fa-warning');
+            document.getElementById('inputEntityName').style.borderColor = "red";
+            break
+    }
+    document.getElementById('msgAlertEntity').innerText = msg;
+}
+
 
 function msgAlertEntityValues(alarm,msg){
     switch (alarm){
