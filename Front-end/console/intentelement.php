@@ -88,6 +88,7 @@ function echoJsonIntentResponse($intent)
                         <?php include './dynamic/intent.element.content.expression.html.php'; ?>
                         <?php include './dynamic/intent.element.content.variable.html.php'; ?>
                         <?php include './dynamic/intent.element.content.response.html.php'; ?>
+                        <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
                     </form>
                 </div>
                 <div class="col-md-4">

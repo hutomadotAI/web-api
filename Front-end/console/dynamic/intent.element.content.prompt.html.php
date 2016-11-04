@@ -2,9 +2,10 @@
 <div class="modal fade" id="boxPrompts" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal Prompt content-->
-        <div class="modal-content padding">
-            <div class="modal-header bg-primary">
-                <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
+        <div class="modal-content bordered" style="background-color: #202020">
+            
+            <div class="modal-header">
+                <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-tag text-md text-white" style="padding-right:2em"></i> INSERT PROMPTS</h4>
             </div>
 
@@ -31,13 +32,13 @@
                 </tr>
                 <tr style="padding-top: 5px;">
                     <td class="text-center" style="width:33.3333336%; padding-left:10px;" >
-                        <input type="text-center" class="form-control flat no-shadow " name="curr_intent" value="" style="text-align:center;" disabled/>
+                        <input type="text-center" class="form-control flat no-shadow no-border text-center" name="curr_intent" value="" style="text-align:center;  background-color: #515151;" disabled/>
                     </td>
                     <td class="text-center" style="width:33.3333336%;">
-                        <input type="text" class="form-control flat no-shadow" name="curr_entity" id="curr_entity" value="" style="text-align:center;" disabled/>
+                        <input type="text" class="form-control flat no-shadow" name="curr_entity" id="curr_entity" value="" style="text-align:center; background-color: #515151;" disabled/>
                     </td>
                     <td class="text-center" style="width:33.3333336%; padding-right:10px;">
-                        <input type="text" class="form-control flat no-shadow" name="curr_n_prompts" value=""  style="text-align:center;" disabled/>
+                        <input type="text" class="form-control flat no-shadow" name="curr_n_prompts" value=""  style="text-align:center; background-color: #515151;" disabled/>
                     </td>
 
                 </tr>

@@ -33,7 +33,7 @@
                 <h5 class="box-title">
                     <div class="input-group no-margin">
                         <input type="text" class="form-control flat no-shadow" id="value-entity" name="value-entity"
-                               placeholder="Add a sample user expression" onkeyup="checkValueCode(this,event.keyCode)"
+                               placeholder="Add value for entity" onkeyup="checkValueCode(this,event.keyCode)"
                                style="width: 96%;">
                         <span class="input-group-btn">
                             <button class="btn btn-success flat" id="btnAddEntityValue" style="width: 130px;">Add Entity Value</button>

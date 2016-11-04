@@ -1,13 +1,14 @@
 function createNewPromptRow(value, parent) {
     var wHTML = '';
 
-    wHTML += ('<div class="box-body bg-white flat no-padding" onmouseover="promptOnMouseInRow(this)" onmouseout="promptOnMouseOutRow(this)">');
-    wHTML += ('<div class="row padding" style="border: 1px solid #d2d6de; margin-top: -1px;">');
+    wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="promptOnMouseInRow(this)" onmouseout="promptOnMouseOutRow(this)">');
+    wHTML += ('<div class="row">');
 
     wHTML += ('<div class="col-xs-10" id="obj-prompt">');
-    wHTML += ('<div class="inner-addon left-addon">');
+    wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-tag text-gray"></i>');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="row-prompt" name="row-prompt" placeholder="' + value + '">');
+    
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="row-prompt" name="row-prompt"  style="background-color: #404446;" placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -22,7 +23,7 @@ function createNewPromptRow(value, parent) {
     wHTML += ('</div>');
 
     var newNode = document.createElement('div');
-    newNode.setAttribute('class', 'col-xs-12');
+    newNode.setAttribute('class', 'col-xs-12 no-padding');
     newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
