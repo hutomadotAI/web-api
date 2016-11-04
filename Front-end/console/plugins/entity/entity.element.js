@@ -2,10 +2,12 @@ document.getElementById("btnAddEntityValue").addEventListener("click", addEntity
 //checkListEntityValuesSize();
 
 function saveEntity() {
+    /*
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
         msgAlertEntityValues(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
         return;
     }
+    */
     var values = [];
     var entityName = document.getElementById('entity-name').value;
     var elements = document.getElementsByName('value-entity');
@@ -29,6 +31,7 @@ function saveEntity() {
          alert(xhr.status + ' ' + thrownError);
          }*/
         success: function (result) {
+            
             msgAlertEntityValues(4, 'Entity saved');
         },
         error: function (xhr, ajaxOptions, thrownError) {

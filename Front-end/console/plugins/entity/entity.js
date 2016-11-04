@@ -30,6 +30,8 @@ function PostingEntityName() {
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
         msgAlert(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
     }
+
+        
     else {
         if (!document.entityCreateForm.onsubmit)
             return;
