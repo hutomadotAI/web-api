@@ -1,21 +1,21 @@
-document.getElementById("inputEntityName").addEventListener("keyup", activeButtonCreate);
-document.getElementById("btnCreateEntity").addEventListener("click", PostingEntityName);
+document.getElementById("inputEntityName").addEventListener("keyup", activeButtonCreateEntity);
+document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
 
 if (limitText($("#inputEntityName")) == 0)
     $("#btnCreateEntity").prop("disabled", false);
 
-function activeButtonCreate() {
+function activeButtonCreateEntity() {
     var limitTextInputSize = 50;
     switch (limitText($("#inputEntityName"), limitTextInputSize)) {
         case -1:
             $("#btnCreateEntity").prop("disabled", true);
             break;
         case 0:
-            msgAlert(0, 'In this section you can create different entities.');
+            msgAlertEntity(0, 'In this section you can create different entities.');
             $("#btnCreateEntity").prop("disabled", false);
             break;
         case 1:
-            msgAlert(1, 'Limit entity name reached!');
+            msgAlertEntity(1, 'The entity name is too long!');
             $("#btnCreateEntity").prop("disabled", false);
             break;
         default:
@@ -23,54 +23,33 @@ function activeButtonCreate() {
     }
 }
 
-
-function PostingEntityName() {
+function postingEntityName() {
     $(this).prop("disabled", true);
 
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
-        msgAlert(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
+        msgAlertEntity(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
+        return;
+    }
+    
+    if(isNameExists($("#inputEntityName").val(),entities)){
+        msgAlertEntity(2, 'Two identical Entity names are not allowed. Please choose a different name.');
+        return;
     }
 
-        
-    else {
-        if (!document.entityCreateForm.onsubmit)
-            return;
+    if (!document.entityCreateForm.onsubmit)
+        return;
 
-        // disattivare tutti i bottoni
-        RecursiveUnbind($('#wrapper'));
-        document.entityCreateForm.submit();
-    }
+    RecursiveUnbind($('#wrapper'));
+    document.entityCreateForm.submit();
 }
-
-function msgAlert(alarm, msg) {
-    switch (alarm) {
-        case 0:
-            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-base');
-            $("#icongAlertEntity").attr('class', 'icon fa fa-check');
-            document.getElementById('inputEntityName').style.borderColor = "#d2d6de";
-            break;
-        case 1:
-            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-warning');
-            $("#icongAlertEntity").attr('class', 'icon fa fa-check');
-            document.getElementById('inputEntityName').style.borderColor = "orange";
-            break;
-        case 2:
-            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-danger');
-            $("#icongAlertEntity").attr('class', 'icon fa fa-warning');
-            document.getElementById('inputEntityName').style.borderColor = "red";
-            break
-    }
-    document.getElementById('msgAlertEntity').innerText = msg;
-}
-
 
 function showEntities(str) {
     var wHTML = "";
 
     if (entities.length < 1)
-        msgAlert(0, 'No entities yet. Create the first one.');
+        msgAlertEntity(0, 'No entities yet. Create the first one.');
     else
-        msgAlert(0, 'In this section you can create different entities.');
+        msgAlertEntity(0, 'In this section you can create different entities.');
 
     for (var x in entities) {
         if ((str != " ") && ( (str.length == 0) || (entities[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
