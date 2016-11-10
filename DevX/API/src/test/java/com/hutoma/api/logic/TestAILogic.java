@@ -4,11 +4,13 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -39,7 +41,7 @@ public class TestAILogic {
     FakeJsonSerializer fakeSerializer;
     SecurityContext fakeContext;
     Database fakeDatabase;
-    MessageQueue fakeMessageQueue;
+    AIServices fakeAiServices;
     Config fakeConfig;
     Tools fakeTools;
     AILogic aiLogic;
@@ -52,12 +54,13 @@ public class TestAILogic {
         when(this.fakeConfig.getEncodingKey()).thenReturn(this.VALIDKEY);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
+        this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(Logger.class);
 
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeMessageQueue, this.fakeLogger, this.fakeTools);
+        this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeAiServices,
+                this.fakeLogger, this.fakeTools);
     }
 
     @Test
@@ -203,6 +206,30 @@ public class TestAILogic {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.deleteAI(this.fakeContext, this.VALIDDEVID, this.AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenReturn(true);
+        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenReturn(false);
+        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     private void whenCreateAiReturn(boolean returnValue) throws Database.DatabaseException {

@@ -170,6 +170,17 @@ public class Database {
         }
     }
 
+    public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateAIstatus", 3)
+                    .add(aiid)
+                    .add(devId)
+                    .add(status.value());
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public List<ApiAi> getAllAIs(final String devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIs", 1).add(devid);
@@ -404,10 +415,10 @@ public class Database {
      * AI Mesh Calls
      */
 
-    public List<MeshVariable> getMesh(final String dev_id, final String aiid)
+    public List<MeshVariable> getMesh(final String devId, final String aiid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getMesh", 2).add(dev_id).add(aiid);
+            call.initialise("getMesh", 2).add(devId).add(aiid);
             ResultSet rs = call.executeQuery();
             List<MeshVariable> mesh = new ArrayList<>();
             try {
@@ -434,26 +445,26 @@ public class Database {
     }
 
 
-    public boolean addMesh(final String dev_id, final String aiid, final String aiid_mesh)
+    public boolean addMesh(final String devId, final String aiid, final String aiidMesh)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addMesh", 3).add(dev_id).add(aiid).add(aiid_mesh);
+            call.initialise("addMesh", 3).add(devId).add(aiid).add(aiidMesh);
             return call.executeUpdate() > 0;
         }
     }
 
-    public boolean deleteSingleMesh(final String dev_id, final String aiid, final String aiid_mesh)
+    public boolean deleteSingleMesh(final String devId, final String aiid, final String aiidMesh)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteMesh", 3).add(dev_id).add(aiid).add(aiid_mesh);
+            call.initialise("deleteMesh", 3).add(devId).add(aiid).add(aiidMesh);
             return call.executeUpdate() > 0;
         }
     }
 
-    public boolean deleteAllMesh(final String dev_id, final String aiid)
+    public boolean deleteAllMesh(final String devId, final String aiid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteAllMesh", 2).add(dev_id).add(aiid);
+            call.initialise("deleteAllMesh", 2).add(devId).add(aiid);
             return call.executeUpdate() > 0;
         }
     }

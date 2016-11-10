@@ -20,5 +20,7 @@ public enum APIParameter {
     IntentJson,
     AiConfidence,
     Timezone,
-    Locale
+    Locale,
+    // Backend
+    AiStatusJson
 }

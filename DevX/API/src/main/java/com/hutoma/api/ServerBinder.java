@@ -7,10 +7,11 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.TelemetryLogger;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.connectors.HttpClient;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -32,6 +33,7 @@ import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.client.JerseyClient;
 
 import javax.inject.Singleton;
 
@@ -67,7 +69,6 @@ public class ServerBinder extends AbstractBinder {
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
-        bind(MessageQueue.class).to(MessageQueue.class);
         bind(Tools.class).to(Tools.class);
         bind(NeuralNet.class).to(NeuralNet.class);
         bind(SemanticAnalysis.class).to(SemanticAnalysis.class);
@@ -75,5 +76,9 @@ public class ServerBinder extends AbstractBinder {
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
 
+        // backend facing related structures
+        bind(AIServices.class).to(AIServices.class);
+        // Jersey client
+        bind(HttpClient.class).to(JerseyClient.class);
     }
 }

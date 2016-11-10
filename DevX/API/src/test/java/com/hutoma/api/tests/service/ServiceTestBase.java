@@ -11,7 +11,6 @@ import com.hutoma.api.common.TelemetryLogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -27,10 +26,10 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
-import org.junit.Assert;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -72,13 +71,13 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected TelemetryLogger fakeLogger;
     @Mock
-    protected MessageQueue fakeMessageQueue;
-    @Mock
     protected NeuralNet fakeNeuralNet;
     @Mock
     protected SemanticAnalysis fakeSemanticAnalysis;
     @Mock
     protected Config fakeConfig;
+    @Mock
+    protected JerseyClient fakeJerseyClient;
 
 
     private static String getDevToken(final UUID devId, final Role role) {
@@ -120,10 +119,10 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction)).to(DatabaseTransaction.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseCall)).to(DatabaseCall.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTransactionalDatabaseCall)).to(TransactionalDatabaseCall.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeMessageQueue)).to(MessageQueue.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeNeuralNet)).to(NeuralNet.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeSemanticAnalysis)).to(SemanticAnalysis.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(TelemetryLogger.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -141,6 +140,11 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected <T> T deserializeResponse(Response response, Class<?> theClass) {
         JsonSvcSerializer serializer = new JsonSvcSerializer();
         return (T) serializer.deserialize((InputStream) response.getEntity(), theClass);
+    }
+
+    protected String serializeObject(Object obj) {
+        JsonSvcSerializer serializer = new JsonSvcSerializer();
+        return serializer.serialize(obj);
     }
 
     protected abstract Class<?> getClassUnderTest();
@@ -162,10 +166,10 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeDatabaseConnectionPool = mock(DatabaseConnectionPool.class);
         this.fakeDatabaseTransaction = mock(DatabaseTransaction.class);
         this.fakeTransactionalDatabaseCall = mock(TransactionalDatabaseCall.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
         this.fakeLogger = mock(TelemetryLogger.class);
+        this.fakeJerseyClient = mock(JerseyClient.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
 
@@ -178,10 +182,5 @@ public abstract class ServiceTestBase extends JerseyTest {
         rc.register(QueryFilter.class);
         rc.register(PostFilter.class);
         return rc;
-    }
-
-    protected void assertNotNullNotEmpty(final String str) {
-        Assert.assertNotNull(str);
-        Assert.assertNotEquals("", str);
     }
 }

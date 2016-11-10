@@ -7,7 +7,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
@@ -55,7 +54,6 @@ public class TestChatLogic {
     private JsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
     private Database fakeDatabase;
-    private MessageQueue fakeMessageQueue;
     private Config fakeConfig;
     private Tools fakeTools;
     private NeuralNet fakeNeuralNet;
@@ -72,7 +70,6 @@ public class TestChatLogic {
         when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(ILogger.class);
         this.fakeNeuralNet = mock(NeuralNet.class);

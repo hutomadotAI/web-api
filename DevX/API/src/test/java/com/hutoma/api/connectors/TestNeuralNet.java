@@ -21,32 +21,33 @@ import static org.mockito.Mockito.*;
  */
 public class TestNeuralNet {
 
+    private final String DEVID = "devid";
+    private final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
+    private final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
+    private final long QID = 42;
+    private final String RESULT = "result";
     //http://mockito.org/
     Database fakeDatabase;
-    MessageQueue fakeMessageQueue;
     Config fakeConfig;
     Tools fakeTools;
     NeuralNet fakeNeuralNet;
     SemanticAnalysis fakeSemanticAnalysis;
     Logger fakeLogger;
     NeuralNet neuralNet;
-    private String DEVID = "devid";
-    private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
-    private long QID = 42;
-    private String RESULT = "result";
+    AIServices fakeAiServices;
 
     @Before
     public void setup() {
         this.fakeConfig = mock(Config.class);
         when(this.fakeConfig.getNeuralNetworkTimeout()).thenReturn(4L);
         this.fakeDatabase = mock(Database.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
+        this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(Logger.class);
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
-        this.neuralNet = new NeuralNet(this.fakeDatabase, this.fakeMessageQueue, this.fakeLogger, this.fakeConfig, this.fakeTools);
+        this.fakeAiServices = mock(AIServices.class);
+        this.neuralNet = new NeuralNet(this.fakeDatabase, this.fakeAiServices, this.fakeLogger, this.fakeConfig, this.fakeTools);
     }
 
     @Test
@@ -86,14 +87,18 @@ public class TestNeuralNet {
     @Test
     public void testNeuralNet_NeedToStartServer_MessageFail() throws Exception {
         when(this.fakeDatabase.isNeuralNetworkServerActive(anyString(), any())).thenReturn(false);
-        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessageStartRNN(anyString(), any());
+        doThrow(AIServices.AiServicesException.class).when(this.fakeAiServices).wakeNeuralNet(anyString(), any());
         when(this.fakeDatabase.insertNeuralNetworkQuestion(anyString(), any(), any(), anyString())).thenReturn(getChatRequestStatus_Valid());
         when(this.fakeDatabase.getAnswer(anyLong())).thenReturn(this.RESULT);
         try {
             this.neuralNet.startAnswerRequest(this.DEVID, this.AIID, this.CHATID, "question");
-            String result = this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
-            Assert.fail("exception expected");
-        } catch (Exception e) {
+            Assert.fail("Failed to throw");
+        } catch (NeuralNet.NeuralNetException e) {
+        }
+        try {
+            this.neuralNet.getAnswerResult(this.DEVID, this.AIID);
+            Assert.fail("Failed to throw");
+        } catch (NeuralNet.NeuralNetException e) {
         }
         Assert.assertEquals(0, this.fakeTools.getTimestamp());
     }

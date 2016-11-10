@@ -33,7 +33,7 @@ public class TelemetryLogger extends Logger implements ITelemetry {
      * @param map the map
      */
     private static Map<String, String> sanitizePropertiesMap(final Map<String, String> map) {
-        if (map.values().stream().anyMatch(x -> x == null)) {
+        if (map != null && map.values().stream().anyMatch(x -> x == null)) {
             final Map<String, String> otherMap = new HashMap<>();
             for (Entry<String, String> entry : map.entrySet()) {
                 otherMap.put(entry.getValue(), entry.getValue() == null ? "" : entry.getValue());

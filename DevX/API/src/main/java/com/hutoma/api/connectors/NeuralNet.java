@@ -17,7 +17,7 @@ public class NeuralNet {
     static long POLLEVERY = 1000;   // hard-coded to one second
     private final int RNNRESET = 0;
     private final Database database;
-    private final MessageQueue messageQueue;
+    private final AIServices aiServices;
     private final Logger logger;
     private final Config config;
     private final Tools tools;
@@ -25,12 +25,12 @@ public class NeuralNet {
     private ChatRequestStatus requestStatus;
 
     @Inject
-    public NeuralNet(Database database, MessageQueue messageQueue, Logger logger, Config config, Tools tools) {
+    public NeuralNet(Database database, AIServices aiServices, Logger logger, Config config, Tools tools) {
         this.database = database;
-        this.messageQueue = messageQueue;
         this.logger = logger;
         this.config = config;
         this.tools = tools;
+        this.aiServices = aiServices;
     }
 
     // Neural Network Query
@@ -41,10 +41,15 @@ public class NeuralNet {
         // if the RNN network is not active, then push a message to get it activated
         try {
             if (!this.database.isNeuralNetworkServerActive(devId, aiid)) {
-                this.messageQueue.pushMessageStartRNN(devId, aiid);
+                try {
+                    this.aiServices.wakeNeuralNet(devId, aiid);
+                } catch (AIServices.AiServicesException ex) {
+                    this.logger.logError(LOGFROM, "failed to wake server: " + ex.getMessage());
+                    throw new NeuralNetException("Failed to wake server");
+                }
             }
-        } catch (Exception e) {
-            this.logger.logError(LOGFROM, "failed to check/start server " + e.toString());
+        } catch (Database.DatabaseException e) {
+            this.logger.logError(LOGFROM, "failed to start server " + e.toString());
             throw new NeuralNetException(e);
         }
 
@@ -65,6 +70,9 @@ public class NeuralNet {
 
     public String getAnswerResult(String devid, UUID aiid) throws NeuralNetException, Database.DatabaseException {
 
+        if (this.requestStatus == null) {
+            throw new NeuralNetException("last request was not completed");
+        }
         // if less than zero then an error has occurred
         if (this.requestStatus.getQuestionId() < 0) {
             if (this.requestStatus.isQuestionRejectedDueToAiStatus()) {

@@ -1,5 +1,6 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
@@ -128,8 +129,9 @@ public class TestServiceAi extends ServiceTestBase {
     protected Class<?> getClassUnderTest() {
         return AIEndpoint.class;
     }
-    
+
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
+        binder.bind(AIServices.class).to(AIServices.class);
         binder.bind(AILogic.class).to(AILogic.class);
         return binder;
     }

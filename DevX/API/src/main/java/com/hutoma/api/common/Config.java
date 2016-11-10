@@ -1,13 +1,13 @@
 package com.hutoma.api.common;
 
-import com.amazonaws.regions.Regions;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -71,18 +71,6 @@ public class Config {
         return getConfigFromProperties("encoding_key", "");
     }
 
-    public String getCoreQueue() {
-        return getConfigFromProperties("core_queue", "");
-    }
-
-    public String getQuestionGeneratorQueue() {
-        return getConfigFromProperties("sqs_QG", "");
-    }
-
-    public Regions getMessageQueueRegion() {
-        return Regions.US_EAST_1;
-    }
-
     public String getWNetServer() {
         return getConfigFromProperties("wnet_server", "");
     }
@@ -139,6 +127,22 @@ public class Config {
 
     public String getTelemetryKey(String appName) {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
+    }
+
+    public List<String> getWnetTrainingEndpoints() {
+        return getCSList("wnet_training_endpoint");
+    }
+
+    public List<String> getGpuTrainingEndpoints() {
+        return getCSList("gpu_training_endpoint");
+    }
+
+    private List<String> getCSList(final String propertyName) {
+        String instances = getConfigFromProperties(propertyName, null);
+        if (instances != null && instances.isEmpty()) {
+            return Arrays.asList(instances.split(","));
+        }
+        return null;
     }
 
     private String getConfigFromProperties(String propertyName, String defaultValue) {

@@ -5,24 +5,25 @@ package com.hutoma.api.containers.sub;
  */
 public class MeshVariable {
 
-    private String aiid;
-    private String aiid_mesh;
-    private String name;
-    private String description;
-    private String licenceType;
-    private Float licenceFee;
-    private Float rating;
-    private int numberOfActivations;
-    private boolean isBanned;
-    private String iconPath;
-    private String widgetColor;
+    private final String aiid;
+    private final String aiidMesh;
+    private final String name;
+    private final String description;
+    private final String licenceType;
+    private final Float licenceFee;
+    private final Float rating;
+    private final int numberOfActivations;
+    private final boolean isBanned;
+    private final String iconPath;
+    private final String widgetColor;
 
-    public MeshVariable(final String aiid, final String aiid_mesh, final String name, final String description, final String licenceType,
-                        final Float licenceFee, final Float rating, final int numberOfActivations, final boolean isBanned,
+    public MeshVariable(final String aiid, final String aiidMesh, final String name, final String description,
+                        final String licenceType, final Float licenceFee, final Float rating,
+                        final int numberOfActivations, final boolean isBanned,
                         final String iconPath, final String widgetColor) {
 
         this.aiid = aiid;
-        this.aiid_mesh = aiid_mesh;
+        this.aiidMesh = aiidMesh;
         this.name = name;
         this.description = description;
         this.licenceType = licenceType;
@@ -39,7 +40,7 @@ public class MeshVariable {
     }
 
     public String getAiidMesh() {
-        return this.aiid_mesh;
+        return this.aiidMesh;
     }
 
     public String getName() {
@@ -63,7 +64,7 @@ public class MeshVariable {
     }
 
     public int getNumberOfActivations() {
-        return this.getNumberOfActivations();
+        return this.numberOfActivations;
     }
 
     public boolean isBanned() {
