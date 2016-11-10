@@ -36,7 +36,7 @@ function postingEntityName() {
         return;
     }
 
-    if (!document.entityCreateForm.onsubmit)
+    if (document.entityCreateForm.onsubmit)
         return;
 
     RecursiveUnbind($('#wrapper'));
@@ -46,8 +46,10 @@ function postingEntityName() {
 function showEntities(str) {
     var wHTML = "";
 
-    if (entities.length < 1)
+    if (entities.length < 1) {
         msgAlertEntity(0, 'No entities yet. Create the first one.');
+        return;
+    }
     else
         msgAlertEntity(0, 'In this section you can create different entities.');
 

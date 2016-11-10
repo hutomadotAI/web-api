@@ -130,6 +130,7 @@ function echoJsonIntentResponse($intent)
 <script src="./plugins/intent/intent.element.expression.js"></script>
 <script src="./plugins/intent/intent.element.js"></script>
 <script src="./plugins/intent/intent.element.prompt.js"></script>
+<script src="./plugins/intent/intent.element.variable.js"></script>
 
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>

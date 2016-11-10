@@ -3,7 +3,7 @@
     <div class="modal-dialog flat">
         <!-- Modal Prompt content-->
         <div class="modal-content bordered" style="background-color: #202020">
-            
+
             <div class="modal-header">
                 <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-tag text-md text-white" style="padding-right:2em"></i> INSERT PROMPTS</h4>
@@ -46,20 +46,29 @@
             <br>
 
 
-            <div class="box-body no-margin" style="padding-top: 0;">
+            <div class="box-body no-margin" id="boxIntentPrompt" style="padding-top: 0;">
+
                 <div class="row">
                     <div class="col-md-12">
                         <h5 class="box-title">
-                            <div class="form-group has-info">
-                                <div class="inner-addon left-addon">
-                                    <i class="fa fa-tag text-md text-blue"></i>
-                                    <input type="text" class="form-control flat no-shadow" id="input-prompt" name="input-prompt" placeholder="add prompt text" onkeydown="checkInputPromptCode(this,event.keyCode)"  style="padding-left: 35px;">
-                                </div>
+                            <div class="input-group no-margin">
+                                <input type="text" class="form-control flat no-shadow" id="intent-prompt" name="input-prompt"
+                                       placeholder="Add prompt text" onkeyup="checkInputPromptCode(this,event.keyCode)"
+                                       style="width: 96%;">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success flat" id="btnAddIntentPrompt" style="width: 130px;" disabled>Add Prompt</button>
+                                </span>
                             </div>
-                            <span id="alertMsgPrompt"></span>
                         </h5>
                     </div>
                 </div>
+
+                <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentPrompt" style="margin-bottom:10px;">
+                    <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+                    <i class="icon fa fa-check" id="iconAlertIntentPrompt"></i>
+                    <span id="msgAlertIntentPrompt">Give the AI examples of prompt.</span>
+                </div>
+
             </div>
 
             <div class="box-body no-margin" id="prompts-list"  style="padding-top: 0;">

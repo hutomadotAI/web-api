@@ -253,28 +253,6 @@ function msgAlertEntityValues(alarm,msg){
     document.getElementById('msgAlertEntityValues').innerText = msg;
 }
 
-function msgAlertUserExpression(alarm,msg){
-    switch (alarm){
-        case 0:
-            $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-base');
-            $("#iconAlertUserExpression").attr('class', 'icon fa fa-check');
-            document.getElementById('user-expression').style.borderColor = "#d2d6de";
-            break;
-        case 1:
-            $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-warning');
-            $("#iconAlertUserExpression").attr('class', 'icon fa fa-check');
-            document.getElementById('user-expression').style.borderColor = "orange";
-            break;
-        case 2:
-            $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-danger');
-            $("#iconAlertUserExpression").attr('class', 'icon fa fa-warning');
-            document.getElementById('user-expression').style.borderColor = "red";
-            break;
-    }
-    document.getElementById('msgAlertUserExpression').innerText = msg;
-}
-
-
 function msgAlertIntent(alarm,msg){
     switch (alarm){
         case 0:
@@ -294,6 +272,28 @@ function msgAlertIntent(alarm,msg){
             break;
     }
     document.getElementById('msgAlertIntent').innerText = msg;
+}
+
+
+function msgAlertUserExpression(alarm,msg){
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertUserExpression").attr('class', 'icon fa fa-check');
+            document.getElementById('user-expression').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertUserExpression").attr('class', 'icon fa fa-check');
+            document.getElementById('user-expression').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertUserExpression").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertUserExpression").attr('class', 'icon fa fa-warning');
+            document.getElementById('user-expression').style.borderColor = "red";
+            break;
+    }
+    document.getElementById('msgAlertUserExpression').innerText = msg;
 }
 
 function containerMsgAlertIntentVariable(alarm,msg){
@@ -338,6 +338,27 @@ function msgAlertIntentResponse(alarm,msg){
     document.getElementById('msgAlertIntentResponse').innerText = msg;
 }
 
+
+function msgAlertIntentPrompt(alarm,msg){
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertIntentPrompt").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertIntentPrompt").attr('class', 'icon fa fa-check');
+            document.getElementById('intent-prompt').style.borderColor = "#d2d6de";
+            break;
+        case 1:
+            $("#containerMsgAlertIntentPrompt").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertIntentPrompt").attr('class', 'icon fa fa-check');
+            document.getElementById('intent-prompt').style.borderColor = "orange";
+            break;
+        case 2:
+            $("#containerMsgAlertIntentPrompt").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertIntentPrompt").attr('class', 'icon fa fa-warning');
+            document.getElementById('intent-prompt').style.borderColor = "red";
+            break;
+    }
+    document.getElementById('msgAlertIntentPrompt').innerText = msg;
+}
 
 function msgAlertMarketplace(alarm,msg){
     switch (alarm){
