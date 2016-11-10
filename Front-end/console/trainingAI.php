@@ -1,48 +1,54 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
+require_once "../console/api/apiBase.php";
+require_once "../console/api/aiApi.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
+
+// If is it set, it means the user has selected a existing AI from home list
+if (isset($_POST['ai']))
+    CallGetSingleAI($_POST['ai']);
+
+function CallGetSingleAI($aiid)
+{
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $singleAI = $aiApi->getSingleAI($aiid);
+    unset($aiApi);
+    if ($singleAI['status']['code'] === 200) {
+        setSessionVariables($singleAI);
+    } else {
+        unset($singleAI);
+        \hutoma\console::redirect('../error.php?err=200');
         exit;
     }
+    unset($singleAI);
+}
 
-    // If is it set, it means the user has selected a existing AI from home list
-    if (isset($_POST['ai']) )
-        CallGetSingleAI($_POST['ai']);
+function setSessionVariables($singleAI)
+{
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['created_on'] = $singleAI['created_on'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['training_status'] = $singleAI['training_status'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
 
-    function CallGetSingleAI($aiid){
-        $singleAI = \hutoma\console::getSingleAI($aiid);
-        if ($singleAI['status']['code'] === 200) {
-            setSessionVariables($singleAI);
-        }else{
-            unset($singleAI);
-            \hutoma\console::redirect('../error.php?err=200');
-            exit;
-        }
-        unset($singleAI);
-    }
+    // TO DO personality must be an integer value NOT boolean - for now is hard coded in false value
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $singleAI['language'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
 
-    function setSessionVariables($singleAI){
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']                   = $singleAI['aiid'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token']           = $singleAI['client_token'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']                   = $singleAI['name'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']            = $singleAI['description'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['created_on']             = $singleAI['created_on'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']                = $singleAI['is_private'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['deep_learning_error']    = $singleAI['deep_learning_error'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['training_status']        = $singleAI['training_status'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['status']                 = $singleAI['ai_status'];
-
-        // TO DO personality must be an integer value NOT boolean - for now is hard coded in false value
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']            = $singleAI['personality'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']             = $singleAI['confidence'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']                  = $singleAI['voice'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']               = $singleAI['language'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']               = $singleAI['timezone'];
-
-        // TO DO getAiTrainingFile needs API call with response check before assigh the value
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']  =  \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
-    }
+    // TO DO getAiTrainingFile needs API call with response check before assigh the value
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
+}
 
 
 ?>
@@ -51,10 +57,10 @@
 
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>hu:toma | training AI</title>
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>hu:toma | training AI</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="./plugins/select2/select2.css">
@@ -68,14 +74,14 @@
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
 
 <script>
-    var status          = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
-    var training_file   = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
-    var deep_error      = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var status = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var training_file = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var deep_error = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
 </script>
 
 <div class="wrapper">
     <header class="main-header" id="headerID">
-      <?php include './dynamic/header.html.php'; ?>
+        <?php include './dynamic/header.html.php'; ?>
     </header>
 
     <!-- ================ MENU CONSOLE ================= -->
@@ -87,30 +93,30 @@
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-    <section class="content">
-        <div class="row">
-            <div class="col-md-12" id="trainingBox">
-                <?php include './dynamic/training.content.info.html.php'; ?>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-7">
-                <?php include './dynamic/training.content.upload.html.php'; ?>
-                <?php include './dynamic/training.content.monitor.html.php'; ?>
-                <?php include './dynamic/training.content.keys.html.php'; ?>
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12" id="trainingBox">
+                    <?php include './dynamic/training.content.info.html.php'; ?>
+                </div>
             </div>
 
-            <div class="col-md-5" >
-                <?php include './dynamic/chat.html.php'; ?>
-                <?php include './dynamic/training.content.json.html.php'; ?>
+            <div class="row">
+                <div class="col-md-7">
+                    <?php include './dynamic/training.content.upload.html.php'; ?>
+                    <?php include './dynamic/training.content.monitor.html.php'; ?>
+                    <?php include './dynamic/training.content.keys.html.php'; ?>
+                </div>
+
+                <div class="col-md-5">
+                    <?php include './dynamic/chat.html.php'; ?>
+                    <?php include './dynamic/training.content.json.html.php'; ?>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
     </div>
 
     <footer class="main-footer">
-       <?php include './dynamic/footer.inc.html.php'; ?>
+        <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 
 </div>
@@ -138,13 +144,13 @@
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <script>
-    var lang  = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']); ?>;
-    var voice = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']); ?>;
+    var lang = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']); ?>;
+    var voice = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']); ?>;
 </script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","training",1,true,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "training", 1, true, false]);
     </script>
 </form>
 

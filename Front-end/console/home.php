@@ -1,13 +1,19 @@
 <?php
-    require '../pages/config.php';
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+require '../pages/config.php';
+require_once "../console/api/apiBase.php";
+require_once "../console/api/aiApi.php";
 
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details'] = \hutoma\console::getUser();
-    $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[ $_SESSION['navigation_id'] ]['user_details']);
-    $response_getAIs = \hutoma\console::getAIs();
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
+
+$_SESSION[$_SESSION['navigation_id']]['user_details'] = \hutoma\console::getUser();
+$_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[$_SESSION['navigation_id']]['user_details']);
+
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$response_getAIs = $aiApi->getAIs();
+unset($aiApi);
 ?>
 
 <!DOCTYPE html>
@@ -17,7 +23,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>hu:toma | API home</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    
+
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
@@ -29,7 +35,7 @@
 
 <div class="wrapper">
     <header class="main-header" style="border:1px solid black;">
-        <?php include './dynamic/header.html.php';?>
+        <?php include './dynamic/header.html.php'; ?>
     </header>
 
     <!-- ================ MENU CONSOLE ================= -->
@@ -42,8 +48,8 @@
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/home.content.start.html.php';?>
-            <?php include './dynamic/home.viewall.html.php';?>
+            <?php include './dynamic/home.content.start.html.php'; ?>
+            <?php include './dynamic/home.viewall.html.php'; ?>
         </section>
     </div>
 
@@ -64,7 +70,7 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "","home",0,true,true]);
+        MENU.init(["", "home", 0, true, true]);
     </script>
 </form>
 

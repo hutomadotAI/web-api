@@ -1,5 +1,7 @@
 <?php
 require "../pages/config.php";
+require_once "../console/api/apiBase.php";
+require_once "../console/api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -27,7 +29,8 @@ if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic']))
     $topic = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'];
 }
 
-$response = \hutoma\console::chatAI(
+$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$response = $aiApi->chatAI(
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], // aiid
     $_GET['chatId'], // chatId
     $_GET['q'], // question
@@ -35,6 +38,7 @@ $response = \hutoma\console::chatAI(
     false, // fs
     $confidence, // min_p
     $topic);
+unset($aiApi);
 
 if ($response['status']['code'] !== 200) {
     echo(json_encode($response, JSON_PRETTY_PRINT));

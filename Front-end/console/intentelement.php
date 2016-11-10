@@ -1,6 +1,10 @@
 <?php
 require "../pages/config.php";
 
+require_once "../console/api/apiBase.php";
+require_once "../console/api/intentsApi.php";
+require_once "../console/api/entityApi.php";
+
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
@@ -11,18 +15,27 @@ if (!isPostInputAvailable()) {
     exit;
 }
 
+$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+
 if (isset($_POST['intent_name'])) {
     // This is an intent update
 
-    \hutoma\console::updateIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
-        $_POST['intent_name'], $_POST['intent_responses'], $_POST['intent_prompts'], $_POST['variables']);
+    $intentsApi->updateIntent(
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
+        $_POST['intent_name'], $_POST['intent_responses'],
+        $_POST['intent_prompts'], $_POST['variables']);
     $intentName = $_POST['intent_name'];
 } else {
     $intentName = $_POST['intent'];
 }
-$entityList = \hutoma\console::getEntities();
 
-$intent = \hutoma\console::getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+$entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$entityList = $entityApi->getEntities();
+unset($entityApi);
+
+
+$intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+unset($intentsApi);
 
 if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 404) {
     unset($entityList);
@@ -34,7 +47,7 @@ if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
     unset($intent);
     \hutoma\console::redirect('./error.php?err=211');
     exit;
-} 
+}
 
 function isPostInputAvailable()
 {

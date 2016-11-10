@@ -1,32 +1,36 @@
 <?php
 require "../pages/config.php";
+require_once "../console/api/apiBase.php";
+require_once "../console/api/aiApi.php";
 
-if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
 
-if (! isSessionVariablesAvailable() ) {
+if (!isSessionVariablesAvailable()) {
     \hutoma\console::redirect('./error.php?err=105');
     exit;
 }
 
-$AisMesh = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
+$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$AisMesh = $aiApi->getMesh($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 if ($AisMesh['status']['code'] == 200) $AisMesh = $AisMesh['mesh'];
-else $AisMesh ="";
+else $AisMesh = "";
 
-function isSessionVariablesAvailable(){
-    return  (
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']) &&
-        isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['client_token'])
+function isSessionVariablesAvailable()
+{
+    return (
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
     );
 }
 ?>
@@ -132,15 +136,15 @@ function isSessionVariablesAvailable(){
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","settings",1,true,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, true, false]);
     </script>
 </form>
 
 <script>
-    var previousGeneralInfo = <?php echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); ?>;
+    var previousGeneralInfo = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']); ?>;
     var domains = <?php  echo json_encode($AisMesh); unset($AisMesh)?>;
 
-    var userActived ={};
+    var userActived = {};
     for (var x in domains) {
         var key = domains[x].aiid;
         userActived[key] = true;
@@ -150,7 +154,9 @@ function isSessionVariablesAvailable(){
     newNode.className = 'row';
     newNode.id = 'domains_list';
 
-    function searchDomain(str) { showDomains(str,1);}
+    function searchDomain(str) {
+        showDomains(str, 1);
+    }
 </script>
 </body>
 </html>

@@ -1,40 +1,45 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
+require_once "api/apiBase.php";
+require_once "api/aiApi.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    if (! isSessionVariablesAvailable() ) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
-    }
+if (!isSessionVariablesAvailable()) {
+    \hutoma\console::redirect('./error.php?err=105');
+    exit;
+}
 
-    $domains= \hutoma\console::getBotsInStore();
-    $AisMesh = \hutoma\console::getMesh($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid']);
-    
-    //TODO replace me with API call once done
-    //if ($domains['status']['code'] !== 200) {
-    if ($domains === '') {
-        unset($domains);
-        \hutoma\console::redirect('./error.php?err=103');
-        exit;
-    }
-    //TODO replace me with more detail on value response
-    if ($AisMesh['status']['code'] == 200){
-        $AisMesh = $AisMesh['mesh'];
-    }
-    else{
-        $AisMesh ="";
-    }
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$domains = \hutoma\console::getBotsInStore();
+$AisMesh = $aiApi->getMesh($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($aiApi);
+
+//TODO replace me with API call once done
+//if ($domains['status']['code'] !== 200) {
+if ($domains === '') {
+    unset($domains);
+    \hutoma\console::redirect('./error.php?err=103');
+    exit;
+}
+//TODO replace me with more detail on value response
+if ($AisMesh['status']['code'] == 200) {
+    $AisMesh = $AisMesh['mesh'];
+} else {
+    $AisMesh = "";
+}
 
 
-    function isSessionVariablesAvailable(){
-        return  (
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])
-        );
-    }
+function isSessionVariablesAvailable()
+{
+    return (
+    isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
+    );
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -74,11 +79,11 @@
             <?php include './dynamic/botstore.content.info.details.html.php'; ?>
         </section>
     </div>
-    </div>
+</div>
 
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+<footer class="main-footer">
+    <?php include './dynamic/footer.inc.html.php'; ?>
+</footer>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -97,41 +102,43 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "<?php echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name']; ?>","marketplace",2,true,false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "marketplace", 2, true, false]);
     </script>
 </form>
 
 <script>
     var domains = <?php  echo json_encode($domains); unset($domains)?>;
     var aismesh = <?php  echo json_encode($AisMesh); unset($AisMesh)?>;
-    var userActived ={};
+    var userActived = {};
 
     for (var x in domains) {
         var found = false;
         var key = domains[x].aiid;
 
-        for(var index in aismesh) {
+        for (var index in aismesh) {
             if (aismesh[index].aiid_mesh === domains[x].aiid) {
                 found = true;
                 break;
             }
         }
 
-        if(found)
-                userActived[key] = true;
-            else
-                userActived[key] = false;
+        if (found)
+            userActived[key] = true;
+        else
+            userActived[key] = false;
     }
 
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'domains_list';
 
-    function searchDomain(str) { showDomains(str,1);}
+    function searchDomain(str) {
+        showDomains(str, 1);
+    }
 
-    function getIndexOf(value){
-        for(var i=0; i<x.lenght; i++){
-            if(x[i].a == value)
+    function getIndexOf(value) {
+        for (var i = 0; i < x.lenght; i++) {
+            if (x[i].a == value)
                 return i;
         }
     }

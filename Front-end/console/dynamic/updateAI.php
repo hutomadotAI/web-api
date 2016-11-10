@@ -6,6 +6,8 @@
  * Time: 13:21
  */
 require '../../pages/config.php';
+require_once "../api/apiBase.php";
+require_once "../api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -16,8 +18,8 @@ if (!isPostInputAvailable()) {
     \hutoma\console::redirect('./error.php?err=110');
     exit;
 }
-
-$response = hutoma\console::updateAI(
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$response = $aiApi->updateAI(
     $_POST['aiid'],
     $_POST['description'],
     $_POST['private'],
@@ -27,6 +29,7 @@ $response = hutoma\console::updateAI(
     $_POST['voice'],
     $_POST['confidence']
 );
+unset($aiApi);
 
 updateSessionVariables();
 

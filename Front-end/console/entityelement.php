@@ -1,5 +1,8 @@
 <?php
 require "../pages/config.php";
+require_once "api/apiBase.php";
+require_once "api/entityApi.php";
+
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -11,9 +14,11 @@ if (!isPostInputAvailable()) {
     exit;
 }
 
+$entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+
 if (isset($_POST['entity_name'])) {
     $entityName = $_POST['entity_name'];
-    $retvalue = \hutoma\console::updateEntity($entityName, $_POST['entity_values']);
+    $retValue = $entityApi->updateEntity($entityName, $_POST['entity_values']);
 
     if (isset($retvalue) && $retvalue['status']['code'] != 200) {
         \hutoma\console::redirect('./error.php?errObj=' . $retvalue['status']['info']);
@@ -23,7 +28,8 @@ if (isset($_POST['entity_name'])) {
     $entityName = $_POST['entity'];
 }
 
-$entity_values_list = \hutoma\console::getEntityValues($entityName);
+$entity_values_list = $entityApi->getEntityValues($entityName);
+unset($entityApi);
 
 if ($entity_values_list['status']['code'] !== 200) {
     unset($entity_values_list);

@@ -1,21 +1,26 @@
 <?php
 require "../pages/config.php";
+require_once "../console/api/apiBase.php";
+require_once "../console/api/entityApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
 
+$entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+
 if (isset($_REQUEST['deleteentity'])) {
     $entityName = $_REQUEST['deleteentity'];
-    $result = \hutoma\console::deleteEntity($entityName);
+    $result = $entityApi->deleteEntity($entityName);
     if ($result['status']['code'] != 200) {
         unset($result);
         \hutoma\console::redirect('./error.php?err=326');
     }
 }
 
-$entities = \hutoma\console::getEntities();
+$entities = $entityApi->getEntities();
+unset($entityApi);
 
 if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) {
     unset($entities);

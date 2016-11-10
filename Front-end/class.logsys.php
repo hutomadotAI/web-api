@@ -502,7 +502,7 @@ class console
      * -------------------------
      */
 
-    private static function getApiRequestUrl()
+    public static function getApiRequestUrl()
     {
         return self::$config["api"]["request_url"];
     }
@@ -1188,53 +1188,13 @@ class console
         }
     }
 
+
     /**
      * ---------------------
      * NEW CONSOLE FUNCTIONS
      * ---------------------
      */
 
-
-    public static function createAI($name, $description, $private, $language, $timezoneString, $confidence,
-                                    $personality, $voice, $contract, $payment_type, $price)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai';
-
-            $service_url = self::getApiRequestUrl() . $path;
-
-            // TODO: move this to a common internationalization class
-
-            // TODO: accept format from input list - example   GMT +00:00 Atlantic/St Helena (GMT)
-
-            $timezone = 'Europe/London';
-            $locale = 'en-US';
-
-            $args = array(
-                'name' => $name,
-                'description' => $description,
-                'is_private' => $private == false ? 'false' : 'true',
-                'personality' => $personality,
-                'confidence' => $confidence,
-                'voice' => $voice,
-                'locale' => $locale,
-                'timezone' => $timezone
-            );
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbPost();
-            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=301');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
 
     public static function getDevToken()
     {
@@ -1252,40 +1212,6 @@ class console
             }
         }
         return $token;
-    }
-
-    public static function getAIs()
-    {
-        if (self::$loggedIn) {
-            $path = '/ai';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=302');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function getSingleAI($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid;
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=303');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
     }
 
 
@@ -1309,7 +1235,6 @@ class console
         }
     }
 
-
     public static function getAiStatus($aiid)
     {
         if (self::$loggedIn) {
@@ -1327,6 +1252,8 @@ class console
             return $value;
         }
     }
+
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
 
     public static function getAiDeepLearningError($aiid)
     {
@@ -1346,334 +1273,18 @@ class console
         }
     }
 
-
-    public static function updateAI($aiid, $description, $private, $language, $timezoneString, $personality, $voice, $confidence)
+    public static function isLoggedIn()
     {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid;
-
-            $service_url = self::getApiRequestUrl() . $path;
-
-            //hard coded
-            $timezone = 'Europe/London';
-            $locale = 'en-US';
-
-            $args = array(
-                'description' => $description,
-                'is_private' => $private,
-                'personality' => $personality,
-                'confidence' => $confidence,
-                'voice' => $voice,
-                'locale' => $locale,
-                'timezone' => $timezone
-            );
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbPost();
-            $curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=301');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
+        return self::$loggedIn;
     }
 
-    public static function deleteAI($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid;
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
+    /**
+     * -------------------------
+     * End Extra Tools/Functions
+     * -------------------------
+     */
 
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=305');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function chatAI($aiid, $chatId, $q, $history, $fs, $min_p, $topic)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid . '/chat';
-            $parameters = array('q' => $q, 'chatId' => $chatId, 'chat_history' => $history, 'confidence_threshold' => $min_p, 'current_topic' => $topic);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=330');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function updateEntity($entityName, $entityValues)
-    {
-        if (self::$loggedIn) {
-            $path = '/entity';
-            $params = array('entity_name' => $entityName);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
-
-            $args = array(
-                'entity_name' => $entityName,
-                'entity_values' => $entityValues
-            );
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbPost();
-            $curl->addHeader('Content-Type', 'application/json');
-            $curl->setOpt(CURLOPT_POSTFIELDS, json_encode($args));
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=310');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function deleteEntity($entityName)
-    {
-        if (self::$loggedIn) {
-            $path = '/entity';
-            $params = array('entity_name' => $entityName);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbDelete();
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=326');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function deleteIntent($aiid, $intentName)
-    {
-        if (self::$loggedIn) {
-            $path = '/intent/' . $aiid;
-            $params = array('intent_name' => $intentName);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($params);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbDelete();
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=317');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-
-    public static function uploadFile($aiid, $file, $source_type, $url)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid . '/training';
-            $filename = $file['tmp_name'];
-            $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
-
-            $parameters = array('source_type' => $source_type);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbPost();
-            $curl->setOpt(CURLOPT_POSTFIELDS, $args);
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=350');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function trainingStart($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid . '/training/start';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl->setOpt(CURLOPT_CUSTOMREQUEST, "PUT");
-
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=308');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function trainingStop($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/' . $aiid . '/training/stop';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl->setOpt(CURLOPT_CUSTOMREQUEST, "PUT");
-
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=309');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-    
-
-    public static function getIntents($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/intents/' . $aiid;
-            $parameters = array('aiid' => $aiid);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=310');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function getIntent($aiid, $name)
-    {
-        if (self::$loggedIn) {
-            $path = '/intent/' . $aiid;
-            $parameters = array('aiid' => $aiid, 'intent_name' => $name);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=311');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function updateIntent($aiid, $intentName, $responses, $user_says, $variables)
-    {
-        if (self::$loggedIn) {
-            $path = '/intent/' . $aiid;
-            $parameters = array('aiid' => $aiid, 'intent_name' => $intentName);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-
-            $args = array(
-                'intent_name' => $intentName,
-                'user_says' => $user_says,
-                'responses' => $responses,
-                'variables' => $variables
-            );
-
-            $json = json_encode($args);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl->setVerbPost();
-            $curl->addHeader('Content-Type', 'application/json');
-            $curl->setOpt(CURLOPT_POSTFIELDS, $json);
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=311');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-    public static function getEntities()
-    {
-        if (self::$loggedIn) {
-            $path = '/entities';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=320');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-
-    public static function getEntityValues($name)
-    {
-        if (self::$loggedIn) {
-            $path = '/entity';
-            $parameters = array('entity_name' => $name);
-            $service_url = self::getApiRequestUrl() . $path . '?' . http_build_query($parameters);
-
-            $curl = new curlHelper($service_url, self::getDevToken());
-            $curl_response = $curl->exec();
-
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=325');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
+    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
 
     public static function getIntegrations()
     {
@@ -1738,77 +1349,6 @@ class console
             return $sql->fetchAll();
         }
     }
-
-
-    public static function addMesh($aiid,$aiid_mesh)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/'.$aiid.'/mesh/'.$aiid_mesh;
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl->setVerbPost();
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=001');
-                exit;
-            }
-            $curl->close();
-            return true;
-        }
-    }
-
-    public static function getMesh($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/'.$aiid.'/mesh/';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=001');
-                exit;
-            }
-            $json_response = json_decode($curl_response, true);
-            $curl->close();
-            return $json_response;
-        }
-    }
-
-
-    public static function deleteMesh($aiid,$aiid_mesh)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/'.$aiid.'/mesh/'.$aiid_mesh;
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl->setVerbDelete();
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=001');
-                exit;
-            }
-            $curl->close();
-            return true;
-        }
-    }
-
-    public static function deleteAllMesh($aiid)
-    {
-        if (self::$loggedIn) {
-            $path = '/ai/'.$aiid.'/mesh/';
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, self::getDevToken());
-            $curl->setVerbDelete();
-            $curl_response = $curl->exec();
-            if ($curl_response === false) {
-                $curl->close();
-                \hutoma\console::redirect('./error.php?err=001');
-                exit;
-            }
-            $curl->close();
-            return true;
-        }
-    }
-
 
 
     public static function isSessionActive()

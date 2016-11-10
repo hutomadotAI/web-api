@@ -1,20 +1,23 @@
 <?php
 require "../pages/config.php";
 
+require_once "../console/api/apiBase.php";
+require_once "../console/api/intentsApi.php";
+
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
+
+$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+
 if (isset($_REQUEST['deleteintent'])) {
     $intentName = $_REQUEST['deleteintent'];
-    $result = \hutoma\console::deleteIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
-    if ($result['status']['code'] != 200) {
-        unset($result);
-        \hutoma\console::redirect('./error.php?err=317');
-    }
+    $result = $intentsApi->deleteIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 }
 
-$intents = \hutoma\console::getIntents($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$intents = $intentsApi->getIntents($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($intentsApi);
 
 if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
     unset($intents);

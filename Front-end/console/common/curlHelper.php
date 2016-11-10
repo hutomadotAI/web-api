@@ -17,12 +17,27 @@ class curlHelper
      * @param $url - the Url
      * @param $devToken - the dev token
      */
-    public function __construct($url, $devToken)
+    public function __construct($url = null, $devToken = null)
     {
         $this->curl = curl_init();
 
-        curl_setopt($this->curl, CURLOPT_URL, $url);
+        if (isset($url)) {
+            $this->setUrl($url);
+        }
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
+
+        if (isset($devToken)) {
+            $this->setDevToken($devToken);
+        }
+    }
+
+    public function setUrl($url)
+    {
+        curl_setopt($this->curl, CURLOPT_URL, $url);
+    }
+
+    public function setDevToken($devToken)
+    {
         $this->setCurlSecureOpt($devToken);
     }
 
@@ -68,6 +83,22 @@ class curlHelper
     }
 
     /**
+     * Sets the request verb to GET.
+     */
+    public function setVerbGet()
+    {
+        $this->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
+    }
+
+    /**
+     * Sets the request verb to PUT.
+     */
+    public function setVerbPut()
+    {
+        $this->setOpt(CURLOPT_CUSTOMREQUEST, 'PUT');
+    }
+
+    /**
      * Sets the request verb to POST.
      */
     public function setVerbPost()
@@ -92,6 +123,11 @@ class curlHelper
             curl_close($this->curl);
             unset($this->curl);
         }
+    }
+
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 
     /**

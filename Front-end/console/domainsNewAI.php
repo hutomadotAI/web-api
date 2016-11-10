@@ -1,55 +1,56 @@
 <?php
-    require '../pages/config.php';
+require '../pages/config.php';
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    if (! isPostInputAvailable() ) {
-        \hutoma\console::redirect('./error.php?err=100');
-        exit;
-    }
+if (!isPostInputAvailable()) {
+    \hutoma\console::redirect('./error.php?err=100');
+    exit;
+}
 
-    setSessionVariablesFromPost();
-    $domains= \hutoma\console::getBotsInStore();
+setSessionVariablesFromPost();
+$domains = \hutoma\console::getBotsInStore();
 
 
-    //TODO replace me with API call once done
-    //if ($domains['status']['code'] !== 200) {
-    if ($domains === '') {
-        unset($domains);
-        \hutoma\console::redirect('./error.php?err=103');
-        exit;
-    }
+//TODO replace me with API call once done
+//if ($domains['status']['code'] !== 200) {
+if ($domains === '') {
+    unset($domains);
+    \hutoma\console::redirect('./error.php?err=103');
+    exit;
+}
 
-    function isPostInputAvailable(){
-        return  (
-            isset($_POST['ai_name']) &&
-            isset($_POST['ai_description']) &&
-            isset($_POST['ai_language']) &&
-            isset($_POST['ai_timezone']) &&
-            isset($_POST['ai_confidence']) &&
-            isset($_POST['ai_personality']) &&
-            isset($_POST['ai_voice'])
-        );
-    }
+function isPostInputAvailable()
+{
+    return (
+        isset($_POST['ai_name']) &&
+        isset($_POST['ai_description']) &&
+        isset($_POST['ai_language']) &&
+        isset($_POST['ai_timezone']) &&
+        isset($_POST['ai_confidence']) &&
+        isset($_POST['ai_personality']) &&
+        isset($_POST['ai_voice'])
+    );
+}
 
-    function setSessionVariablesFromPost(){
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] = $_POST['ai_name'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['description'] = $_POST['ai_description'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['language'] = $_POST['ai_language'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone'] = $_POST['ai_timezone'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality'] = $_POST['ai_personality'];
-        $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'] = $_POST['ai_voice'];
-        if( isset($_POST['ai_public']) && $_POST['ai_public']=='on') {
-            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = false;
-        }
-        else {
-            $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = true;
-        }
-    }
+function setSessionVariablesFromPost()
+{
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $_POST['ai_name'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $_POST['ai_description'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $_POST['ai_language'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $_POST['ai_timezone'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $_POST['ai_personality'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $_POST['ai_voice'];
+    if (isset($_POST['ai_public']) && $_POST['ai_public'] == 'on')
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = 0;
+    else
+        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = 1;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -85,16 +86,16 @@
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-    <section class="content">
+        <section class="content">
             <?php include './dynamic/domainsNewAI.content.html.php'; ?>
             <?php include './dynamic/botstore.content.info.details.html.php'; ?>
-    </section>
+        </section>
     </div>
 
     <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
-    
+
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -112,27 +113,27 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "","home",0,true,true]);
+        MENU.init(["", "home", 0, true, true]);
     </script>
 </form>
 
 <script>
-  var domains = <?php echo json_encode($domains);  unset($domains); ?>;
-  var userActived ={};
-  for (var x in domains){
-      var key = domains[x].aiid;
-      userActived[key]=false;
-  }
+    var domains = <?php echo json_encode($domains);  unset($domains); ?>;
+    var userActived = {};
+    for (var x in domains) {
+        var key = domains[x].aiid;
+        userActived[key] = false;
+    }
 
-  var newNode = document.createElement('div');
-  newNode.className = 'row';
-  newNode.id = 'domains_list';
+    var newNode = document.createElement('div');
+    newNode.className = 'row';
+    newNode.id = 'domains_list';
 </script>
 
 <script>
-  function searchDomain(str) {
-    showDomains(str,1);
-  }
+    function searchDomain(str) {
+        showDomains(str, 1);
+    }
 </script>
 </body>
 </html>
