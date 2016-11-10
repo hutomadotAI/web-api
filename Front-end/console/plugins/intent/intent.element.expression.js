@@ -1,5 +1,65 @@
 document.getElementById("btnAddExpression").addEventListener("click", addUserExpression);
 
+if (limitText($("#user-expression")) == 0)
+    $("#btnAddExpression").prop("disabled", false);
+
+function checkExpressionCode(element, key) {
+    if (key == 13) {
+        if( activeButtonCreateUserExpression())
+            addUserExpression();
+    }
+    else {
+        activeButtonCreateUserExpression();
+    }
+}
+
+function activeButtonCreateUserExpression() {
+    var limitTextInputSize = 50;
+    switch (limitText($("#user-expression"), limitTextInputSize)) {
+        case -1:
+            $("#btnAddExpression").prop("disabled", true);
+            return false;
+        case 0:
+            msgAlertUserExpression(0, ' Give the AI examples of how a user would express this intent.');
+            $("#btnAddExpression").prop("disabled", false);
+            return true;
+        case 1:
+            msgAlertUserExpression(1, 'The value user expression is too long!');
+            $("#btnAddExpression").prop("disabled", true);
+            return false
+        default:
+            $("#btnAddExpression").prop("disabled", true);
+    }
+    return false;
+}
+
+function addUserExpression() {
+    $(this).prop("disabled", true);
+
+    if (inputValidation($("#user-expression").val(), 'user_expression')) {
+        msgAlertUserExpression(2, 'The user expression need contain only the following: BLA BLA BLA BLA character');
+        return;
+    }
+
+    var expressions = [];
+    var elements = document.getElementsByName('user-expression-row');
+    for (var i = 0; i < elements.length; i++) {
+        expressions.push(elements[i].value);
+    }
+
+    if(isNameExists($("#user-expression").val(),expressions)){
+        msgAlertUserExpression(2, 'Two identical user expressions are not allowed. Please choose a different name.');
+        return;
+    }
+
+    var element = document.getElementById('user-expression');
+    var value = $(element).val();
+    var parent = document.getElementById('userexpression-list');
+    document.getElementById('user-expression').value = '';
+    createNewUsersayRow(value, parent);
+    msgAlertUserExpression(0,' Give the AI examples of how a user would express this intent.');
+}
+
 function createNewUsersayRow(value, parent) {
     var wHTML = '';
 
@@ -10,7 +70,7 @@ function createNewUsersayRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comment-o text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression" name="user-expression" style="padding-left: 35px;background-color: #404446; " placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression-row" name="user-expression-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -33,71 +93,20 @@ function createNewUsersayRow(value, parent) {
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
 
-    checkListExpressionIsEmpty();
+    checkListExpressionSize();
 }
 
-function checkExpressionCode(element, key) {
-    var value = $(element).val();
-    document.getElementById('user-expression').style.borderColor = "#d2d6de";
-
-    if (value.length > 0) {
-        document.getElementById('btnAddExpression').disabled = false;
-        if (key == 13) {
-            if (checkLimitExpression()) {
-                document.getElementById('btnAddExpression').disabled = true;
-                var parent = document.getElementById('userexpression-list');
-                document.getElementById('user-expression').value = '';
-                createNewUsersayRow(value, parent);
-            }
-        }
-    }
-    else {
-        document.getElementById('btnAddExpression').disabled = true;
-    }
-}
-
-function addUserExpression() {
-    if (checkLimitExpression()) {
-        var element = document.getElementById('user-expression');
-        var value = $(element).val();
-        var parent = document.getElementById('userexpression-list');
-        document.getElementById('user-expression').value = '';
-        createNewUsersayRow(value, parent);
-    }
+function checkListExpressionSize() {
+    if (document.getElementById('userexpression-list').childElementCount > 0)
+        $("#btnAddExpression").prop("disabled", false);
+    else
+        $("#btnAddExpression").prop("disabled", true);
 }
 
 function deleteUserExpression(element) {
-    // delete node from page - dipendence parentNode
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
-    parent.parentNode.removeChild(parent)
-    checkListExpressionIsEmpty();
-    $("#btnSaveIntent").prop("disabled", false);
-}
-
-function checkListExpressionIsEmpty() {
-    if (document.getElementById('userexpression-list').childElementCount > 0) {
-        $("#btnSaveIntent").prop("disabled", false);
-        $("#btnAddExpression").prop("disabled", false);
-    }
-    else {
-        $("#btnSaveIntent").prop("disabled", true);
-        $("#btnAddExpression").prop("disabled", true);
-    }
-}
-
-
-function checkLimitExpression() {
-    var limitTextInputSize = 50;
-    switch (limitText($("#user-expression"), limitTextInputSize)) {
-        case -1:
-            return false;
-        case 0:
-            msgAlertUserExpression(0, 'You can add user expressions and save it!');
-            return true;
-        case 1:
-            msgAlertUserExpression(1, 'Limit \'user says\' reached!');
-            return false;
-    }
+    var elem =  $(parent.parentNode).find('input').attr('placeholder');
+    parent.parentNode.removeChild(parent);
 }
 
 function expressionOnMouseIn(elem) {
@@ -109,3 +118,16 @@ function expressionOnMouseOut(elem) {
     var btn = elem.children[0].children[1];
     btn.style.display = 'none';
 }
+
+$(document).ready(function () {
+    if (typeof intent['user_says'] == "undefined" || !(intent['user_says'] instanceof Array))
+        return;
+
+    var list_expressions = intent['user_says'];
+    for (var x in list_expressions) {
+        var value = list_expressions[x];
+        var parent = document.getElementById('userexpression-list');
+        document.getElementById('user-expression').value = '';
+        createNewUsersayRow(value, parent);
+    }
+});

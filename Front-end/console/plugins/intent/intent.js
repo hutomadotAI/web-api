@@ -1,6 +1,8 @@
 document.getElementById("inputIntentName").addEventListener("keyup", activeButtonCreateIntent);
-document.getElementById("btnCreateIntent").addEventListener("click", PostingIntentName);
+document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
+if (limitText($("#inputIntentName")) == 0)
+    $("#btnCreateEntity").prop("disabled", false);
 
 function activeButtonCreateIntent() {
     var limitTextInputSize = 50;
@@ -13,7 +15,7 @@ function activeButtonCreateIntent() {
             $("#btnCreateIntent").prop("disabled", false);
             break;
         case 1:
-            msgAlertIntent(1, 'Limit intent name reached!');
+            msgAlertIntent(1, 'The intent name is too long!');
             $("#btnCreateIntent").prop("disabled", false);
             break;
         default:
@@ -21,11 +23,16 @@ function activeButtonCreateIntent() {
     }
 }
 
-function PostingIntentName() {
+function postingIntentName() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#inputIntentName").val(), 'intent')) {
+    if (inputValidation($("#inputIntentName").val(), 'intent_name')) {
         msgAlertIntent(2, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
+        return;
+    }
+
+    if(isNameExists($("#inputIntentName").val(),intents)){
+        msgAlertIntent(2, 'Two identical Intent names are not allowed. Please choose a different name.');
         return;
     }
 
@@ -34,13 +41,13 @@ function PostingIntentName() {
 
     RecursiveUnbind($('#wrapper'));
     document.intentCreateForm.submit();
-
 }
 
 function showIntents(str) {
     var wHTML = "";
+
     if (intents.length < 1) {
-        msgAlertIntent(0, 'No intents yet.');
+        msgAlertIntent(0, 'No intents yet. Create the first one');
         return;
     }
     else
@@ -59,6 +66,7 @@ function showIntents(str) {
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
+
             wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="action" tabindex="-1" >');
             wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
             wHTML += ('</a>');
@@ -123,9 +131,6 @@ function downloadIntent(name, value, flag) {
         saveAs(blob, name + ".csv");
     }
 }
-
-if (limitText($("#inputIntentName")) == 0)
-    $("#btnCreateIntent").prop("disabled", false);
 
 $('#deleteIntent').on('show.bs.modal', function (e) {
     var $modal = $(this), esseyId = e.relatedTarget.id;

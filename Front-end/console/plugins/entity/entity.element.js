@@ -20,7 +20,7 @@ function activeButtonCreateEntityValue() {
             $("#btnAddEntityValue").prop("disabled", true);
             return false;
         case 0:
-            msgAlertEntityValues(0, 'You can add additional values for this entity.');
+            msgAlertEntityValues(0, 'You can add additional values for current entity.');
             $("#btnAddEntityValue").prop("disabled", false);
             return true;
         case 1:
@@ -41,14 +41,14 @@ function addEntityValue() {
         return;
     }
 
-    var values = [];;
-    var elements = document.getElementsByName('value-entity');
-    for (var i = 1; i < elements.length; i++) {
+    var values = [];
+    var elements = document.getElementsByName('value-entity-row');
+    for (var i = 0; i < elements.length; i++) {
         values.push(elements[i].value);
     }
 
     if(isNameExists($("#value-entity").val(),values)){
-        msgAlertEntityValues(2, 'Two identical Values names are not allowed. Please choose a different name.');
+        msgAlertEntityValues(2, 'Two identical values name are not allowed. Please choose a different expression.');
         return;
     }
 
@@ -70,7 +70,7 @@ function createNewValueEntityRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-sign-out text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity" name="value-entity" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity-row" name="value-entity-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
