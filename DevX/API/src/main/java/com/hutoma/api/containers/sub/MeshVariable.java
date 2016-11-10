@@ -5,17 +5,17 @@ package com.hutoma.api.containers.sub;
  */
 public class MeshVariable {
 
-    private String aiid;
-    private String aiid_mesh;
-    private String name;
-    private String description;
-    private String licenceType;
-    private Float licenceFee;
-    private Float rating;
-    private int numberOfActivations;
-    private boolean isBanned;
-    private String iconPath;
-    private String widgetColor;
+    private final String aiid;
+    private final String aiid_mesh;
+    private final String name;
+    private final String description;
+    private final String licenceType;
+    private final Float licenceFee;
+    private final Float rating;
+    private final int numberOfActivations;
+    private final boolean isBanned;
+    private final String iconPath;
+    private final String widgetColor;
 
     public MeshVariable(final String aiid, final String aiid_mesh, final String name, final String description, final String licenceType,
                         final Float licenceFee, final Float rating, final int numberOfActivations, final boolean isBanned,
@@ -63,7 +63,7 @@ public class MeshVariable {
     }
 
     public int getNumberOfActivations() {
-        return this.getNumberOfActivations();
+        return this.numberOfActivations;
     }
 
     public boolean isBanned() {
