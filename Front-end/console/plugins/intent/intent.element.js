@@ -5,7 +5,6 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     var curr_intent = $(e.relatedTarget).data('intent');
     var curr_n_prompts = $(e.relatedTarget).data('nprompts');
     alert(curr_entity);
-    alert(curr_intent);
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
     $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);

@@ -119,6 +119,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     // be carefull - this is the treepath for input entity list
     var inputNode = newNode.children[0].children[0].children[0];
+    var inputNodePrompt = newNode.children[2].children[0].children[0];
     var array = [];
 
     // loading stored entities
@@ -149,6 +150,8 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     $(inputNode).on('omniselect:select', function (event, value) {
         $(inputNode).val('');
         $(inputNode).attr('placeholder', value);
+        //pass data-prompt attribute to node prompt
+        $(inputNodePrompt).attr('data-entity', value);
     });
 }
 
@@ -165,7 +168,8 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    createNewParameterRow('', '', '', '', 0, '', false, node);
+    var intent_name = intent['intent_name'];
+    createNewParameterRow('', intent_name, '', '', 0, '', false, node);
 }
 
 function deleteIntentVariable(element) {
