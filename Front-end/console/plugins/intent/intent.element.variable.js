@@ -150,7 +150,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     $(inputNode).on('omniselect:select', function (event, value) {
         $(inputNode).val('');
         $(inputNode).attr('placeholder', value);
-        //pass data-prompt attribute to node prompt
+        //pass to node prompt on data-prompt attribute the value on current selected entity
         $(inputNodePrompt).attr('data-entity', value);
     });
 }
