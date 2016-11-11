@@ -6,6 +6,8 @@
  * Time: 13:21
  */
 require '../../pages/config.php';
+require_once "../api/apiBase.php";
+require_once "../api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -29,15 +31,15 @@ function prepareResponse($code)
 // TODO is better if we use update functionality
 function storeAIMesh($aiid,$mesh){
 
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     // TODO need a check on api response on deleteAllMesh
-    \hutoma\console::deleteAllMesh($aiid);
-
+    $aiApi->deleteAllMesh($aiid);
     if (is_array($mesh) || is_object($mesh)) {
         foreach ($mesh as $key => $value) {
             $boolean = json_decode($value);
             if ($boolean) {
                 // TODO need a check on api response on addMesh
-                $response = \hutoma\console::addMesh($aiid, $key);
+                $response = $aiApi->addMesh($aiid, $key);
             }
         }
         return true;
