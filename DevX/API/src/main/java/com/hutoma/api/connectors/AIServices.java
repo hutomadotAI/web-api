@@ -4,12 +4,12 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.ApiResult;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
@@ -23,14 +23,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 /**
  * Created by pedrotei on 07/11/16.
  */
-@Singleton
 public class AIServices {
 
     private static final String LOGFROM = "aiservices";
@@ -53,6 +51,7 @@ public class AIServices {
         this.tools = tools;
         this.config = config;
         this.jerseyClient = jerseyClient;
+        this.jerseyClient.register(MultiPartWriter.class);
     }
 
     public void startTraining(final String devId, final UUID aiid) throws AiServicesException {
@@ -105,7 +104,7 @@ public class AIServices {
             callables.add(() -> this.jerseyClient
                     .target(endpoint).path(devId).path(aiid.toString())
                     .request()
-                    .put(null));
+                    .put(Entity.json("")));
         }
         executeAndWait(callables);
     }
@@ -125,7 +124,7 @@ public class AIServices {
                     .field("aiid", aiid.toString())
                     .bodyPart(bodyPart);
             callables.add(() -> this.jerseyClient
-                    .target(endpoint).path(devId).path(aiid.toString())
+                    .target(endpoint)
                     .request()
                     .post(Entity.entity(multipart, multipart.getMediaType())));
         }
@@ -159,18 +158,12 @@ public class AIServices {
             List<String> errors = new ArrayList<>();
             for (Future<Response> future : futures) {
                 Response response = future.get();
-                if (response.hasEntity()) {
-                    response.bufferEntity();
-                    ApiResult result = (ApiResult) response.getEntity();
-                    //ApiResult result = (ApiResult) this.serializer.deserialize(content, ApiResult.class);
-                    if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
-                        errors.add(result.getStatus().getInfo());
-                        this.logger.logError(LOGFROM, String.format("Failure status (id=%d msg=%s) for %s",
-                                result.getStatus().getCode(), result.getStatus().getInfo(),
-                                this.tools.getCallerMethod()));
-                    }
-                } else {
-                    throw new AiServicesException("response without an entity");
+                if (response.getStatusInfo().getStatusCode() != HttpURLConnection.HTTP_OK) {
+                    errors.add(String.format("%d %s", response.getStatusInfo().getStatusCode(),
+                            response.getStatusInfo().getReasonPhrase()));
+                    this.logger.logError(LOGFROM, String.format("Failure status (id=%d msg=%s)",
+                            response.getStatusInfo().getStatusCode(),
+                            response.getStatusInfo().getReasonPhrase()));
                 }
             }
             if (!errors.isEmpty()) {

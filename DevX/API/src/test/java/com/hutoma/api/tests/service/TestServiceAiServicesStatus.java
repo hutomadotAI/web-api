@@ -45,7 +45,7 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
         String statusJson = getCommonAiStatusJson();
         statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), "NOT_A_REAL_STATUS");
         final Response response = sendRequest(statusJson);
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, response.getStatus());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     private Response sendRequest(final String statusJson) {

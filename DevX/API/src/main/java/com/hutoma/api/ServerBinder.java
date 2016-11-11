@@ -11,7 +11,6 @@ import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.HttpClient;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -32,8 +31,10 @@ import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
+import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 
 import javax.inject.Singleton;
 
@@ -41,6 +42,18 @@ import javax.inject.Singleton;
  * Created by David MG on 28/07/2016.
  */
 public class ServerBinder extends AbstractBinder {
+
+    private static class JerseyClientFactory implements Factory<JerseyClient> {
+        @Override
+        public JerseyClient provide() {
+            return JerseyClientBuilder.createClient();
+        }
+
+        @Override
+        public void dispose(JerseyClient foo) {
+            // meh
+        }
+    }
 
     @Override
     protected void configure() {
@@ -79,6 +92,6 @@ public class ServerBinder extends AbstractBinder {
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
         // Jersey client
-        bind(HttpClient.class).to(JerseyClient.class);
+        bindFactory(JerseyClientFactory.class).to(JerseyClient.class);
     }
 }
