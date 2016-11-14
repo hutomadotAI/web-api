@@ -67,8 +67,6 @@ function saveIntent() {
             document.body.style.cursor = prevCursor;
         }
     });
-
-
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
