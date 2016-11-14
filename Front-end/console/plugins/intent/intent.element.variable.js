@@ -252,26 +252,6 @@ function isJustAddedNewRow() {
     return false;
 }
 
-
-function loadPromptsForEntity(curr_entity) {
-    if (typeof intent['variables'] == "undefined" || !(intent['variables'] instanceof Array))
-        return;
-
-    var list_variables = intent['variables'];
-    var len = list_variables.length;
-
-    while (len--) {
-        if (list_variables[len].entity_name == curr_entity) {
-            for (var i in list_variables[len].prompts) {
-                var value = list_variables[len].prompts[i];
-                var parent = document.getElementById('prompts-list');
-                document.getElementById('input-prompt').value = '';
-                createNewPromptRow(value, parent);
-            }
-        }
-    }
-}
-
 function cleanupromptDialogbox() {
     var node = document.getElementById('prompts-list');
     while (node.firstChild) node.removeChild(node.firstChild);

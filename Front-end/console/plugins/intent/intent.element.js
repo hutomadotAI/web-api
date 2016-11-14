@@ -6,7 +6,6 @@ function getMultipleElementValues(elementName, attributeName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
-        alert(elements[i].getAttribute(attributeName));
         values.push(elements[i].getAttribute(attributeName));
     }
     return values;
@@ -25,7 +24,6 @@ function getMultipleCheckElementValues(elementName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
-        alert(elements[i].checked);
         values.push(elements[i].checked);
     }
     return values;
@@ -114,12 +112,11 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     var curr_entity = $(e.relatedTarget).data('entity');
     var curr_intent = $(e.relatedTarget).data('intent');
     var curr_n_prompts = $(e.relatedTarget).data('nprompts');
-    alert($(e.relatedTarget));
-    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
+
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
     $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
-
+    
     // remove character @
     curr_entity = curr_entity.replace(/[@]/g, "");
 

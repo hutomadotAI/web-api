@@ -70,7 +70,6 @@
                 </div>
 
             </div>
-
             <div class="box-body no-margin" id="prompts-list" style="padding-top: 0;">
                 <!-- filled by prompt list -->
             </div>

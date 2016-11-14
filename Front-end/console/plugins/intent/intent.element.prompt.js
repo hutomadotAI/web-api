@@ -1,9 +1,5 @@
 document.getElementById("btnAddIntentPrompt").addEventListener("click", addIntentPrompt);
-document.getElementById("btnModelPromptClose").addEventListener("click", saveListPrompts);
-
-function saveListPrompts(){
-    var intentPromptList = getMultipleElementValues('intent-prompt-row', 'placeholder');
-}
+document.getElementById("btnModelPromptClose").addEventListener("click", setNewListPrompts);
 
 function checkInputPromptCode(element, key) {
     if (key == 13) {
@@ -121,15 +117,52 @@ function promptOnMouseOutRow(elem) {
     btn.style.display = 'none';
 }
 
-$(document).ready(function () {
-    if (typeof intent['prompt'] == "undefined" || !(intent['prompt'] instanceof Array))
-        return;
+function addSepatator(arr,len,separator){
+    for (var i = 0; i < len; i++)
+        arr[i] += separator;
+}
 
-    var list_prompts = intent['prompt'];
-    for (var x in list_prompts) {
-        var value = list_prompts[x];
-        var parent = document.getElementById('prompts-list');
-        document.getElementById('intent-prompt').value = '';
-        createNewPromptRow(value, parent);
+function setNewListPrompts(){
+    var curr_entity = document.getElementById('curr_entity').value;
+    var intentNewPromptList = getMultipleElementValues('intent-prompt-row', 'placeholder');
+    var node = document.getElementById('parameter-list');
+    var len = node.childNodes.length;
+
+    for (var i = 0; i < len; i++) {
+        // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
+        var node_entity = node.children[i].children[0].children[0].children[0];
+        var node_prompt = node.children[i].children[2].children[0].children[0];
+        if (node_entity.getAttribute('placeholder') == curr_entity) {
+            node_prompt.setAttribute('data-prompts', intentNewPromptList);
+        }
     }
+}
+
+function loadPromptsForEntity(curr_entity) {
+    var node = document.getElementById('parameter-list');
+    var len = node.childNodes.length;
+
+    // for all variable rows
+    for (var i = 0; i < len; i++) {
+        // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
+        var node_entity = node.children[i].children[0].children[0].children[0];
+        var node_prompt = node.children[i].children[2].children[0].children[0];
+
+        // remove character @
+        if (node_entity.getAttribute('placeholder').replace(/[@]/g, "") == curr_entity) {
+            var parent = document.getElementById('prompts-list');
+            var values =  node_prompt.getAttribute('data-prompts');
+
+            var prompts_split = values.split(',');
+
+            for (var j=0; j < prompts_split.length; j++) {
+                createNewPromptRow(prompts_split[j], parent);
+            }
+        }
+    }
+}
+
+$(document).ready(function () {
+    loadPromptsForEntity( document.getElementById('curr_entity').value);
 });
+
