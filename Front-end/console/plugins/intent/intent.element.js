@@ -11,78 +11,42 @@ function getMultipleElementValues(elementName, attributeName) {
     return values;
 }
 
-function getMultipleTextElementValues(elementName) {
-    var values = [];
-    var elements = document.getElementsByName(elementName);
-    for (var i = 0; i < elements.length; i++) {
-        values.push(elements[i].value);
-    }
-    return values;
-}
-
-function getMultipleCheckElementValues(elementName) {
-    var values = [];
-    var elements = document.getElementsByName(elementName);
-    for (var i = 0; i < elements.length; i++) {
-        values.push(elements[i].checked);
-    }
-    return values;
-}
-
 function saveIntent() {
     $(this).prop("disabled", true);
 
     var intentName  = document.getElementById('intent-name').value;
     var expressions = getMultipleElementValues('user-expression-row', 'placeholder');
     var responses   = getMultipleElementValues('intent-response-row', 'placeholder');
-    var entityNames = getMultipleElementValues('action-entity', 'placeholder');
-    var nPrompts    = getMultipleElementValues('action-nprompt', 'placeholder');
-    var required    = getMultipleCheckElementValues('action-required');
-
-/*
-    // TODO: we need to get a much better way of doing this - Bug460
-    var prompts1 = getMultipleTextElementValues('action-prompts');
-    var prompts2 = getMultipleElementValues('action-prompts', 'placeholder', 0);
-    var prompts = [];
-    for (var i = 0; i < prompts1.length; i++) {
-        var promptsArray = [];
-        if (prompts1[i] == '') {
-            promptsArray.push(prompts2[i] == 'click to enter' ? prompts1[i] : prompts2[i]);
-        } else {
-            promptsArray.push(prompts1[i]);
-        }
-        prompts[i] = promptsArray;
-    }
-
-    var numberPrompts1 = getMultipleTextElementValues('action-nprompt');
-    var numberPrompts2 = getMultipleElementValues('action-nprompt', 'placeholder', 0);
-    var numberPrompts = [];
-    for (i = 0; i < numberPrompts1.length; i++) {
-        numberPrompts[i] = numberPrompts2[i] == 'n° prompt' ? numberPrompts1[i] : numberPrompts2[i];
-    }
-
-    var required = getMultipleCheckElementValues('action-required');
     var variables = [];
-    for (i = 0; i < entityNames.length; i++) {
-        if (prompts[i] == '' || numberPrompts[i] == '' || entityNames[i][0] != '@' || entityNames[i].length < 2) {
-            containerMsgAlertIntentVariable(2, 'Please enter all the fields for entity ' +
-                (entityNames[i][0] == '@' ? entityNames[i] : ('at row ' + (i + 1))));
-            return;
-        }
 
+    var node = document.getElementById('parameter-list');
+    var len = node.childNodes.length;
+
+    for (var i = 0; i < len; i++) {
         var v = {};
-        v['entity_name'] = entityNames[i][0] == '@' ? entityNames[i].substring(1, entityNames[0].length) : entityNames[i];
-        v['prompts'] = prompts[i ];
-        v['n_prompts'] = numberPrompts[i] == '' ? 1 : numberPrompts[i];
-        v['required'] = required[i];
-        //v['value'] = '';
+        var node_entity = node.children[i].children[0].children[0].children[0];
+        var node_nprompt = node.children[i].children[1].children[0].children[0];
+        var node_prompt = node.children[i].children[2].children[0].children[0];
+        var node_required = node.children[i].children[3].children[0].children[0];
+        var list_prompt =  node_prompt.getAttribute('data-prompts');
+        var prompts_split = list_prompt.split(',');
+
+        var promptsArray = [];
+        for (var j=0; j < prompts_split.length; j++)
+            promptsArray.push(prompts_split[j]);
+
+        v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
+        v['n_prompts'] = node_nprompt.getAttribute('placeholder');
+        v['required'] = node_required.checked;
+        v['prompts'] = promptsArray;
+
         variables.push(v);
     }
 
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
-    resetMsgAlertIntentVariable();
+    //resetMsgAlertIntentVariable();
 
     $.ajax({
         url: 'intentelement.php?intent=' + intentName,
@@ -90,11 +54,12 @@ function saveIntent() {
             intent_name: intentName, intent_prompts: expressions, intent_responses: responses,
             variables: variables
         },
-        type: 'POST',
+        type: 'POST',/*
         error: function (xhr, ajaxOptions, thrownError) {
          alert(xhr.status + ' ' + thrownError);
-         }
+         }*/
         success: function (result) {
+            alert('success');
 
         },
         complete: function () {
@@ -103,10 +68,9 @@ function saveIntent() {
         }
     });
 
-    */
+
 }
 
-// Pass values to Modal on show dialog modal
 $('#boxPrompts').on('show.bs.modal', function (e) {
 
     var curr_entity = $(e.relatedTarget).data('entity');
