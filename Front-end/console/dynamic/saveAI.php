@@ -138,12 +138,12 @@ function storeAIMesh($aiid)
         foreach ($mesh as $key => $value)
             if ($value) $aiApi->addMesh($aiid, $key);
     } catch (Exception $e) {
-        unset($$aiApi);
+        unset($aiApi);
         unset($mesh);
         return false;
     }
     unset($mesh);
-    unset($$aiApi);
+    unset($aiApi);
     return true;
 }
 

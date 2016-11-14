@@ -103,6 +103,7 @@ class curlHelper
      */
     public function setVerbPost()
     {
+        $this->setOpt(CURLOPT_CUSTOMREQUEST, NULL);
         $this->setOpt(CURLOPT_POST, true);
     }
 
