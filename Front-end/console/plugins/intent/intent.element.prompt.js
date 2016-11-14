@@ -1,4 +1,9 @@
 document.getElementById("btnAddIntentPrompt").addEventListener("click", addIntentPrompt);
+document.getElementById("btnModelPromptClose").addEventListener("click", saveListPrompts);
+
+function saveListPrompts(){
+    var intentPromptList = getMultipleElementValues('intent-prompt-row', 'placeholder');
+}
 
 function checkInputPromptCode(element, key) {
     if (key == 13) {

@@ -1,27 +1,12 @@
-// Pass values to Modal on show dialog modal
-$('#boxPrompts').on('show.bs.modal', function (e) {
+//document.getElementById("btnSaveEntity").addEventListener("click", saveIntent);
 
-    var curr_entity = $(e.relatedTarget).data('entity');
-    var curr_intent = $(e.relatedTarget).data('intent');
-    var curr_n_prompts = $(e.relatedTarget).data('nprompts');
-    alert(curr_entity);
-    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
-    $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
-    $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
+var variables = [];
 
-    // remove character @
-    curr_entity = curr_entity.replace(/[@]/g, "");
-
-    cleanupromptDialogbox();
-    loadPromptsForEntity(curr_entity)
-});
-
-
-
-function getMultipleElementValues(elementName, attributeName, startIndex) {
+function getMultipleElementValues(elementName, attributeName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
-    for (var i = startIndex; i < elements.length; i++) {
+    for (var i = 0; i < elements.length; i++) {
+        alert(elements[i].getAttribute(attributeName));
         values.push(elements[i].getAttribute(attributeName));
     }
     return values;
@@ -40,18 +25,23 @@ function getMultipleCheckElementValues(elementName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
+        alert(elements[i].checked);
         values.push(elements[i].checked);
     }
     return values;
 }
 
 function saveIntent() {
-    var responses = getMultipleElementValues('intent-response', 'placeholder', 1);
-    var expressions = getMultipleElementValues('user-expression', 'placeholder', 1);
-    var intentName = document.getElementById('intent-name').value;
-    var entityNames = getMultipleElementValues('action-entity', 'placeholder', 0);
+    $(this).prop("disabled", true);
 
+    var intentName  = document.getElementById('intent-name').value;
+    var expressions = getMultipleElementValues('user-expression-row', 'placeholder');
+    var responses   = getMultipleElementValues('intent-response-row', 'placeholder');
+    var entityNames = getMultipleElementValues('action-entity', 'placeholder');
+    var nPrompts    = getMultipleElementValues('action-nprompt', 'placeholder');
+    var required    = getMultipleCheckElementValues('action-required');
 
+/*
     // TODO: we need to get a much better way of doing this - Bug460
     var prompts1 = getMultipleTextElementValues('action-prompts');
     var prompts2 = getMultipleElementValues('action-prompts', 'placeholder', 0);
@@ -84,7 +74,7 @@ function saveIntent() {
 
         var v = {};
         v['entity_name'] = entityNames[i][0] == '@' ? entityNames[i].substring(1, entityNames[0].length) : entityNames[i];
-        v['prompts'] = prompts[i];
+        v['prompts'] = prompts[i ];
         v['n_prompts'] = numberPrompts[i] == '' ? 1 : numberPrompts[i];
         v['required'] = required[i];
         //v['value'] = '';
@@ -103,9 +93,9 @@ function saveIntent() {
             variables: variables
         },
         type: 'POST',
-        /*error: function (xhr, ajaxOptions, thrownError) {
+        error: function (xhr, ajaxOptions, thrownError) {
          alert(xhr.status + ' ' + thrownError);
-         }*/
+         }
         success: function (result) {
 
         },
@@ -114,4 +104,26 @@ function saveIntent() {
             document.body.style.cursor = prevCursor;
         }
     });
+
+    */
 }
+
+// Pass values to Modal on show dialog modal
+$('#boxPrompts').on('show.bs.modal', function (e) {
+
+    var curr_entity = $(e.relatedTarget).data('entity');
+    var curr_intent = $(e.relatedTarget).data('intent');
+    var curr_n_prompts = $(e.relatedTarget).data('nprompts');
+    alert($(e.relatedTarget));
+    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
+    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
+    $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
+    $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
+
+    // remove character @
+    curr_entity = curr_entity.replace(/[@]/g, "");
+
+    cleanupromptDialogbox();
+    loadPromptsForEntity(curr_entity)
+});
+

@@ -75,15 +75,21 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     if (size > 0)
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
-        'placeholder="' + prompts + '" data-toggle="modal" data-target="#boxPrompts" ' +
+        'placeholder=" ... " ' +
+        'data-toggle="modal" ' +
+        'data-target="#boxPrompts" ' +
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
+        'data-prompts="' + prompts + '"' +
         'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
-        'placeholder="click to enter" data-toggle="modal" data-target="#boxPrompts" ' +
+        'placeholder="click to enter" ' +
+        'data-toggle="modal" ' +
+        'data-target="#boxPrompts" ' +
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
+        'data-prompts=""' +
         'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
 
     wHTML += ('</div>');
