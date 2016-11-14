@@ -3,7 +3,7 @@ package com.hutoma.api.containers.sub;
 import java.util.UUID;
 
 /**
- * Created by pedrotei on 08/11/16.
+ * AI Status.
  */
 public class AiStatus {
 

@@ -404,7 +404,7 @@ public class TestChatLogic {
     }
 
     /***
-     * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
+     * Memory intent does not prompt after numPromps&gt;=MaxPrompts when intent is recognized but doesn't match any entity value.
      * @throws SemanticAnalysis.SemanticAnalysisException
      * @throws NeuralNet.NeuralNetException
      * @throws Database.DatabaseException
@@ -461,7 +461,7 @@ public class TestChatLogic {
     }
 
     /***
-     * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
+     * Memory intent does not prompt after numPromps&gt;=MaxPrompts when intent is recognized but doesn't match any entity value.
      * @throws SemanticAnalysis.SemanticAnalysisException
      * @throws NeuralNet.NeuralNetException
      * @throws Database.DatabaseException

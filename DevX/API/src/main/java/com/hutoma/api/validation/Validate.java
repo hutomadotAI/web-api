@@ -31,9 +31,9 @@ public class Validate {
 
     /**
      * Returns the same string with anything over char 127 or below char 32 removed
-     * Also, []<>& are removed altogther
+     * Also, []&lt;&gt;&amp; are removed altogether
      * Whitespaces are deduped and the string is trimmed of leading and trailing whitespaces.
-     * @param input abc[]<>&  abc
+     * @param input abc[]&lt;&gt;&amp;  abc
      * @return abc abc
      */
     public String textSanitizer(final String input) {

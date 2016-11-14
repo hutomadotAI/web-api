@@ -50,8 +50,7 @@ public class ServerBinder extends AbstractBinder {
         }
 
         @Override
-        public void dispose(JerseyClient foo) {
-            // meh
+        public void dispose(JerseyClient client) {
         }
     }
 

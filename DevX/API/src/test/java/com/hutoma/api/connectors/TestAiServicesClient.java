@@ -14,8 +14,9 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.net.URI;
@@ -50,7 +51,7 @@ public class TestAiServicesClient {
     private static final List<String> LOCAL_WEB_ENDPOINTS = Collections.singletonList(LOCAL_WEB_SERVER + "/" + LOCAL_ENDPOINT_PATH);
     private static final String TRAINING_MATERIALS = "question1\nanswer1\nquestion2\nanswer2\n\nintent expression\n@meta.intent.myintent";
 
-    private HttpServer httpServer;
+    private static HttpServer httpServer;
     private FakeJsonSerializer fakeSerializer;
     private Database fakeDatabase;
     private Config fakeConfig;
@@ -58,12 +59,20 @@ public class TestAiServicesClient {
     private Tools fakeTools;
     private AIServices aiServices;
 
-    @Before
-    public void setup() {
+    @BeforeClass
+    public static void initializeClass() {
         final ResourceConfig rc = new ResourceConfig(TestServer.class);
         rc.register(MultiPartFeature.class);
-        this.httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(LOCAL_WEB_SERVER), rc);
+        httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(LOCAL_WEB_SERVER), rc);
+    }
 
+    @AfterClass
+    public static void cleanupClass() {
+        httpServer.shutdownNow();
+    }
+
+    @Before
+    public void setup() {
         this.fakeSerializer = new FakeJsonSerializer();
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
@@ -109,11 +118,6 @@ public class TestAiServicesClient {
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException {
         this.aiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        this.httpServer.shutdownNow();
     }
 
     @Path("/training")
