@@ -149,8 +149,9 @@ function requestAnswerAI(ai_name, question, chatId) {
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                var JSONdata = JSON.stringify(xhr.responseText);
-                createRightMsg(ai_name, response['status']['info'], chatId, true);
+                alert(JSON.stringify(xhr.responseText));
+                //var JSONdata = JSON.stringify(xhr.responseText);
+                //createRightMsg(ai_name, JSONdata['status']['info'], chatId, true);
             }
         });
     }
