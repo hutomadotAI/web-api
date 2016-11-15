@@ -70,15 +70,12 @@
                 </div>
 
             </div>
-
-            <div class="box-body no-margin" id="prompts-list"  style="padding-top: 0;">
+            <div class="box-body no-margin" id="prompts-list" style="padding-top: 0;">
                 <!-- filled by prompt list -->
             </div>
 
             <div class="modal-footer">
-                <form method="POST" id="deleteForm" action="./dynamic/xxx.php">
                     <button type="button" class="btn btn-primary flat" id="btnModelPromptClose" data-dismiss="modal">Close</button>
-                </form>
             </div>
 
 

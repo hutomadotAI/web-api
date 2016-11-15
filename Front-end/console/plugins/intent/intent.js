@@ -1,4 +1,4 @@
-document.getElementById("inputIntentName").addEventListener("keyup", activeButtonCreateIntent);
+document.getElementById("inputIntentName").addEventListener("keydown", activeButtonCreateIntent);
 document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
 if (limitText($("#inputIntentName")) == 0)
@@ -28,16 +28,16 @@ function postingIntentName() {
 
     if (inputValidation($("#inputIntentName").val(), 'intent_name')) {
         msgAlertIntent(2, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
-        return;
+        return false;
     }
 
     if(isNameExists($("#inputIntentName").val(),intents)){
         msgAlertIntent(2, 'Two identical Intent names are not allowed. Please choose a different name.');
-        return;
+        return false;
     }
 
     if (document.intentCreateForm.onsubmit)
-        return;
+        return false;
 
     RecursiveUnbind($('#wrapper'));
     document.intentCreateForm.submit();
@@ -145,4 +145,13 @@ $('#deleteIntent').on('show.bs.modal', function (e) {
 $("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+});
+
+$(document).ready(function() {
+    $(window).keydown(function(event){
+        if( (event.keyCode == 13) && (postingIntentName() == false) ) {
+            event.preventDefault();
+            return false;
+        }
+    });
 });

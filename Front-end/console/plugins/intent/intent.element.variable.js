@@ -36,6 +36,7 @@ function loadEntities() {
     });
 
     $input.on('omniselect:select', function (event, value) {
+        resetMsgAlertIntentVariable();
         console.log('Selected: ' + value);
     });
 
@@ -66,7 +67,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" >');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetMsgAlertIntentVariable()">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -75,16 +76,22 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     if (size > 0)
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
-        'placeholder="' + prompts + '" data-toggle="modal" data-target="#boxPrompts" ' +
+        'placeholder=" ... " ' +
+        'data-toggle="modal" ' +
+        'data-target="#boxPrompts" ' +
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
+        'data-prompts="' + prompts + '"' +
+        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
-        'placeholder="click to enter" data-toggle="modal" data-target="#boxPrompts" ' +
+        'placeholder="click to enter" ' +
+        'data-toggle="modal" ' +
+        'data-target="#boxPrompts" ' +
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
+        'data-prompts=""' +
+        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -119,6 +126,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     // be carefull - this is the treepath for input entity list
     var inputNode = newNode.children[0].children[0].children[0];
+    var inputNodePrompt = newNode.children[2].children[0].children[0];
     var array = [];
 
     // loading stored entities
@@ -149,6 +157,8 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     $(inputNode).on('omniselect:select', function (event, value) {
         $(inputNode).val('');
         $(inputNode).attr('placeholder', value);
+        //pass to node prompt on data-prompt attribute the value on current selected entity
+        $(inputNodePrompt).attr('data-entity', value);
     });
 }
 
@@ -165,7 +175,8 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    createNewParameterRow('', '', '', '', 0, '', false, node);
+    var intent_name = intent['intent_name'];
+    createNewParameterRow('', intent_name, '', '', 0, '', false, node);
 }
 
 function deleteIntentVariable(element) {
@@ -230,8 +241,10 @@ function isJustAddedNewRow() {
 
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
-    if (node.placeholder == 'add entity')  // se hai raggiunto in numero massimo MSG ALERT
+    if (node.placeholder == 'add entity') {
+        containerMsgAlertIntentVariable(1, 'Complete field first before add a new line');
         return true;
+    }
 
     var len = parent.childElementCount;
     if (len == entityListFromServer.length) { // se hai raggiunto in numero massimo MSG ALERT
@@ -240,26 +253,6 @@ function isJustAddedNewRow() {
     }
 
     return false;
-}
-
-
-function loadPromptsForEntity(curr_entity) {
-    if (typeof intent['variables'] == "undefined" || !(intent['variables'] instanceof Array))
-        return;
-
-    var list_variables = intent['variables'];
-    var len = list_variables.length;
-
-    while (len--) {
-        if (list_variables[len].entity_name == curr_entity) {
-            for (var i in list_variables[len].prompts) {
-                var value = list_variables[len].prompts[i];
-                var parent = document.getElementById('prompts-list');
-                document.getElementById('input-prompt').value = '';
-                createNewPromptRow(value, parent);
-            }
-        }
-    }
 }
 
 function cleanupromptDialogbox() {

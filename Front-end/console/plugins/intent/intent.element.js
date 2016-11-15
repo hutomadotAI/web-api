@@ -1,94 +1,65 @@
-// Pass values to Modal on show dialog modal
-$('#boxPrompts').on('show.bs.modal', function (e) {
+//document.getElementById("btnSaveEntity").addEventListener("click", saveIntent);
 
-    var curr_entity = $(e.relatedTarget).data('entity');
-    var curr_intent = $(e.relatedTarget).data('intent');
-    var curr_n_prompts = $(e.relatedTarget).data('nprompts');
-    alert(curr_entity);
-    alert(curr_intent);
-    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
-    $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
-    $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
+var variables = [];
 
-    // remove character @
-    curr_entity = curr_entity.replace(/[@]/g, "");
-
-    cleanupromptDialogbox();
-    loadPromptsForEntity(curr_entity)
-});
-
-
-
-function getMultipleElementValues(elementName, attributeName, startIndex) {
+function getMultipleElementValues(elementName, attributeName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
-    for (var i = startIndex; i < elements.length; i++) {
+    for (var i = 0; i < elements.length; i++) {
         values.push(elements[i].getAttribute(attributeName));
     }
     return values;
 }
 
-function getMultipleTextElementValues(elementName) {
-    var values = [];
-    var elements = document.getElementsByName(elementName);
-    for (var i = 0; i < elements.length; i++) {
-        values.push(elements[i].value);
-    }
-    return values;
-}
-
-function getMultipleCheckElementValues(elementName) {
-    var values = [];
-    var elements = document.getElementsByName(elementName);
-    for (var i = 0; i < elements.length; i++) {
-        values.push(elements[i].checked);
-    }
-    return values;
-}
-
 function saveIntent() {
-    var responses = getMultipleElementValues('intent-response', 'placeholder', 1);
-    var expressions = getMultipleElementValues('user-expression', 'placeholder', 1);
-    var intentName = document.getElementById('intent-name').value;
-    var entityNames = getMultipleElementValues('action-entity', 'placeholder', 0);
+    $(this).prop("disabled", true);
 
-
-    // TODO: we need to get a much better way of doing this - Bug460
-    var prompts1 = getMultipleTextElementValues('action-prompts');
-    var prompts2 = getMultipleElementValues('action-prompts', 'placeholder', 0);
-    var prompts = [];
-    for (var i = 0; i < prompts1.length; i++) {
-        var promptsArray = [];
-        if (prompts1[i] == '') {
-            promptsArray.push(prompts2[i] == 'click to enter' ? prompts1[i] : prompts2[i]);
-        } else {
-            promptsArray.push(prompts1[i]);
-        }
-        prompts[i] = promptsArray;
-    }
-
-    var numberPrompts1 = getMultipleTextElementValues('action-nprompt');
-    var numberPrompts2 = getMultipleElementValues('action-nprompt', 'placeholder', 0);
-    var numberPrompts = [];
-    for (i = 0; i < numberPrompts1.length; i++) {
-        numberPrompts[i] = numberPrompts2[i] == 'n° prompt' ? numberPrompts1[i] : numberPrompts2[i];
-    }
-
-    var required = getMultipleCheckElementValues('action-required');
+    var intentName  = document.getElementById('intent-name').value;
+    var expressions = getMultipleElementValues('user-expression-row', 'placeholder');
+    var responses   = getMultipleElementValues('intent-response-row', 'placeholder');
     var variables = [];
-    for (i = 0; i < entityNames.length; i++) {
-        if (prompts[i] == '' || numberPrompts[i] == '' || entityNames[i][0] != '@' || entityNames[i].length < 2) {
-            containerMsgAlertIntentVariable(2, 'Please enter all the fields for entity ' +
-                (entityNames[i][0] == '@' ? entityNames[i] : ('at row ' + (i + 1))));
-            return;
+
+    var node = document.getElementById('parameter-list');
+    var len = node.childNodes.length;
+
+    for (var i = 0; i < len; i++) {
+        var v = {};
+
+        var node_entity = node.children[i].children[0].children[0].children[0];
+        if ( node_entity.getAttribute('placeholder') == 'add entity'){
+            containerMsgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
+            return false;
+        }
+        v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
+
+
+        var node_nprompt = node.children[i].children[1].children[0].children[0];
+        if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
+            containerMsgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+i+1);
+            return false;
         }
 
-        var v = {};
-        v['entity_name'] = entityNames[i][0] == '@' ? entityNames[i].substring(1, entityNames[0].length) : entityNames[i];
-        v['prompts'] = prompts[i];
-        v['n_prompts'] = numberPrompts[i] == '' ? 1 : numberPrompts[i];
-        v['required'] = required[i];
-        //v['value'] = '';
+        if (inputValidation(node_nprompt.getAttribute('placeholder'), 'intent_n_prompt')) {
+            msgAlertIntentPrompt(2, 'The n_prompt needs contain only number with max two digit');
+            return false;
+        }
+
+        v['n_prompts'] = node_nprompt.getAttribute('placeholder');
+
+
+        var node_prompt = node.children[i].children[2].children[0].children[0];
+        var list_prompt =  node_prompt.getAttribute('data-prompts');
+        var prompts_split = list_prompt.split(',');
+        var promptsArray = [];
+        for (var j=0; j < prompts_split.length; j++)
+            promptsArray.push(prompts_split[j]);
+        v['prompts'] = promptsArray;
+
+
+        var node_required = node.children[i].children[3].children[0].children[0];
+        v['required'] = node_required.checked;
+
+
         variables.push(v);
     }
 
@@ -97,6 +68,7 @@ function saveIntent() {
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
 
+    msgAlertIntentElement(1,'saving...');
     $.ajax({
         url: 'intentelement.php?intent=' + intentName,
         data: {
@@ -104,15 +76,34 @@ function saveIntent() {
             variables: variables
         },
         type: 'POST',
-        /*error: function (xhr, ajaxOptions, thrownError) {
-         alert(xhr.status + ' ' + thrownError);
-         }*/
         success: function (result) {
+            msgAlertIntentElement(4,'Saved!!');
 
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
             document.body.style.cursor = prevCursor;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            //alert(xhr.status + ' ' + thrownError);
+            msgAlertIntentElement(2,'Not saved!!');
         }
     });
 }
+
+$('#boxPrompts').on('show.bs.modal', function (e) {
+    var curr_entity = $(e.relatedTarget).data('entity');
+    var curr_intent = $(e.relatedTarget).data('intent');
+    var curr_n_prompts = $(e.relatedTarget).data('nprompts');
+
+    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
+    $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
+    $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
+   
+    // remove character @
+    curr_entity = curr_entity.replace(/[@]/g, "");
+
+    cleanupromptDialogbox();
+    loadPromptsForEntity(curr_entity)
+});
+
