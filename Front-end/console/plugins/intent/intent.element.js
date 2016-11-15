@@ -38,6 +38,12 @@ function saveIntent() {
             containerMsgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+i+1);
             return false;
         }
+
+        if (inputValidation(node_nprompt.getAttribute('placeholder'), 'intent_n_prompt')) {
+            msgAlertIntentPrompt(2, 'The n_prompt needs contain only number with max two digit');
+            return false;
+        }
+
         v['n_prompts'] = node_nprompt.getAttribute('placeholder');
 
 
@@ -84,7 +90,6 @@ function saveIntent() {
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
-
     var curr_entity = $(e.relatedTarget).data('entity');
     var curr_intent = $(e.relatedTarget).data('intent');
     var curr_n_prompts = $(e.relatedTarget).data('nprompts');
@@ -92,7 +97,7 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
     $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
-    
+   
     // remove character @
     curr_entity = curr_entity.replace(/[@]/g, "");
 

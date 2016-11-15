@@ -32,9 +32,9 @@ function inputValidation(txt,field) {
 
         case 'intent_name' :    letters = /^[a-zA-Z0-9\-_]+$/;                  break;
         case 'intent_response': letters = /^[a-zA-Z0-9\-_.,?!']+$/;             break;
-        case 'intent_prompt':   letters = /^[a-zA-Z0-9\-_.?!']+$/;             break;
+        case 'intent_prompt':   letters = /^[a-zA-Z0-9\-_.,?!']+$/;             break;
         case 'user_expression': letters = /^[a-zA-Z0-9\-_]+$/;                  break;
-        case 'n_prompt':        letters = /^\d{1,2}$/;                          break;
+        case 'intent_n_prompt': letters = /^\d{1,2}$/;                          break;
         case 'response' :       letters = /^[a-zA-Z0-9\-_.,?!']+$/;             break;
 
         default:

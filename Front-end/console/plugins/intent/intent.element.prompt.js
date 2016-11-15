@@ -123,10 +123,18 @@ function addSepatator(arr,len,separator){
 }
 
 function setNewListPrompts(){
+    var entity_selected = false;
     var curr_entity = document.getElementById('curr_entity').value;
     var intentNewPromptList = getMultipleElementValues('intent-prompt-row', 'placeholder');
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
+
+   if(curr_entity ==''){
+       var first_node_prompt = node.children[0].children[2].children[0].children[0];
+       first_node_prompt.setAttribute('data-prompts', intentNewPromptList);
+       first_node_prompt.setAttribute('placeholder',' ... ');
+       return;
+   }
 
     for (var i = 0; i < len; i++) {
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
@@ -134,6 +142,8 @@ function setNewListPrompts(){
         var node_prompt = node.children[i].children[2].children[0].children[0];
         if (node_entity.getAttribute('placeholder') == curr_entity) {
             node_prompt.setAttribute('data-prompts', intentNewPromptList);
+            node_prompt.setAttribute('placeholder',' ... ');
+            entity_selected = true;
         }
     }
 }
@@ -142,23 +152,28 @@ function loadPromptsForEntity(curr_entity) {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    // for all variable rows
+    if(curr_entity =='' && len>0){
+        var first_node_prompt = node.children[0].children[2].children[0].children[0];
+        spitCreate(first_node_prompt)
+        return;
+    }
+
     for (var i = 0; i < len; i++) {
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
         var node_entity = node.children[i].children[0].children[0].children[0];
-        var node_prompt = node.children[i].children[2].children[0].children[0];
-
-        // remove character @
-        if (node_entity.getAttribute('placeholder').replace(/[@]/g, "") == curr_entity) {
-            var parent = document.getElementById('prompts-list');
-            var values =  node_prompt.getAttribute('data-prompts');
-
-            var prompts_split = values.split(',');
-
-            for (var j=0; j < prompts_split.length; j++) {
-                createNewPromptRow(prompts_split[j], parent);
-            }
+        if (node_entity.getAttribute('placeholder').replace(/[@]/g, "") == curr_entity) {   // remove character @
+            var node_prompt = node.children[i].children[2].children[0].children[0];
+            spitCreate(node_prompt)
         }
+    }
+}
+
+function spitCreate(node){
+    var parent = document.getElementById('prompts-list');
+    var values =  node.getAttribute('data-prompts');
+    var prompts_split = values.split(',');
+    for (var j=0; j < prompts_split.length; j++) {
+        createNewPromptRow(prompts_split[j], parent);
     }
 }
 
