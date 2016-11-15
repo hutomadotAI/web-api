@@ -1,5 +1,5 @@
 <input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
-<div class="box box-solid box-clean flat no-shadow">
+<div class="box box-solid box-clean flat no-shadow" style="padding-bottom:0px;">
 
     <div class="box-header no-border">
         <i class="fa fa-commenting-o text-green"></i>
@@ -11,6 +11,14 @@
                     alt="save intent" onclick="saveIntent();RecursiveUnbind($('#wrapper'))">Save Intent
             </button>
         </div>
+    </div>
+
+    <div class="col-md-12" style="padding-top:5px; padding-left: 10px;padding-right: 10px;">
+    <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentElement" style="margin-bottom:10px;">
+        <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+        <i class="icon fa fa-check" id="iconAlertIntentElement"></i>
+        <span id="msgAlertIntentElement">Give the AI a list of BLA BLA BLA BLA BLA BLA BLA.</span>
+    </div>
     </div>
 
 </div>

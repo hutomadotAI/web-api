@@ -66,25 +66,27 @@ function saveIntent() {
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
-    //resetMsgAlertIntentVariable();
+    resetMsgAlertIntentVariable();
 
+    msgAlertIntentElement(1,'saving...');
     $.ajax({
         url: 'intentelement.php?intent=' + intentName,
         data: {
             intent_name: intentName, intent_prompts: expressions, intent_responses: responses,
             variables: variables
         },
-        type: 'POST',/*
-        error: function (xhr, ajaxOptions, thrownError) {
-         alert(xhr.status + ' ' + thrownError);
-         }*/
+        type: 'POST',
         success: function (result) {
-            alert('success');
+            msgAlertIntentElement(4,'Saved!!');
 
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
             document.body.style.cursor = prevCursor;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            //alert(xhr.status + ' ' + thrownError);
+            msgAlertIntentElement(2,'Not saved!!');
         }
     });
 }
