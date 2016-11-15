@@ -24,21 +24,35 @@ function saveIntent() {
 
     for (var i = 0; i < len; i++) {
         var v = {};
+
         var node_entity = node.children[i].children[0].children[0].children[0];
+        if ( node_entity.getAttribute('placeholder') == 'add entity'){
+            containerMsgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
+            return false;
+        }
+        v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
+
+
         var node_nprompt = node.children[i].children[1].children[0].children[0];
+        if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
+            containerMsgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+i+1);
+            return false;
+        }
+        v['n_prompts'] = node_nprompt.getAttribute('placeholder');
+
+
         var node_prompt = node.children[i].children[2].children[0].children[0];
-        var node_required = node.children[i].children[3].children[0].children[0];
         var list_prompt =  node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
-
         var promptsArray = [];
         for (var j=0; j < prompts_split.length; j++)
             promptsArray.push(prompts_split[j]);
-
-        v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
-        v['n_prompts'] = node_nprompt.getAttribute('placeholder');
-        v['required'] = node_required.checked;
         v['prompts'] = promptsArray;
+
+
+        var node_required = node.children[i].children[3].children[0].children[0];
+        v['required'] = node_required.checked;
+
 
         variables.push(v);
     }

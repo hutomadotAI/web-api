@@ -36,6 +36,7 @@ function loadEntities() {
     });
 
     $input.on('omniselect:select', function (event, value) {
+        resetMsgAlertIntentVariable();
         console.log('Selected: ' + value);
     });
 
@@ -66,7 +67,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" >');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetMsgAlertIntentVariable()">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -81,7 +82,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
         'data-prompts="' + prompts + '"' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
+        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
@@ -90,7 +91,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
         'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
         'data-prompts=""' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'">');
+        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -240,8 +241,10 @@ function isJustAddedNewRow() {
 
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
-    if (node.placeholder == 'add entity')  // se hai raggiunto in numero massimo MSG ALERT
+    if (node.placeholder == 'add entity') {
+        containerMsgAlertIntentVariable(1, 'Complete field first before add a new line');
         return true;
+    }
 
     var len = parent.childElementCount;
     if (len == entityListFromServer.length) { // se hai raggiunto in numero massimo MSG ALERT
