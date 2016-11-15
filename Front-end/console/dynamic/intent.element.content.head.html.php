@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div class="col-md-12" style="padding-top:5px; padding-left: 10px;padding-right: 10px;">
+    <div class="box-body no-margin" id="boxExpression" style="padding-top:5px;padding-bottom:5px;">
     <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentElement" style="margin-bottom:10px;">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertIntentElement"></i>
