@@ -317,7 +317,7 @@ function msgAlertUserExpression(alarm,msg){
     document.getElementById('msgAlertUserExpression').innerText = msg;
 }
 
-function containerMsgAlertIntentVariable(alarm,msg){
+function msgAlertIntentVariable(alarm,msg){
     switch (alarm){
         case 0:
             $("#containerMsgAlertIntentVariable").attr('class','alert alert-dismissable flat alert-base');

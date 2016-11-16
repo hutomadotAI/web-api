@@ -40,15 +40,7 @@ function addIntentPrompt() {
     }
 
     var prompts = getMultipleElementValues('intent-prompt-row','value');
-
-    /*
-    var prompts =[];
-    var elements = document.getElementsByName('intent-prompt-row');
-    for (var i = 0; i < elements.length; i++) {
-        prompts.push(elements[i].value);
-    }
-    */
-
+    
     if(isNameExists($("#intent-prompt").val(),prompts)){
         msgAlertIntentPrompt(2, 'Two identical intent prompts are not allowed. Please choose a different name.');
         return;
