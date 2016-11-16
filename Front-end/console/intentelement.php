@@ -96,13 +96,11 @@ function echoJsonIntentResponse($intent)
         <section class="content">
             <div class="row">
                 <div class="col-md-8">
-                    <form method="POST" name="intentCreateForm" onsubmit="return false;">
                         <?php include './dynamic/intent.element.content.head.html.php'; ?>
                         <?php include './dynamic/intent.element.content.expression.html.php'; ?>
                         <?php include './dynamic/intent.element.content.variable.html.php'; ?>
                         <?php include './dynamic/intent.element.content.response.html.php'; ?>
                         <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
-                    </form>
                 </div>
                 <div class="col-md-4">
                     <?php include './dynamic/chat.html.php'; ?>
@@ -130,6 +128,7 @@ function echoJsonIntentResponse($intent)
 <script src="./plugins/intent/intent.element.expression.js"></script>
 <script src="./plugins/intent/intent.element.js"></script>
 <script src="./plugins/intent/intent.element.prompt.js"></script>
+<script src="./plugins/intent/intent.element.variable.js"></script>
 
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>

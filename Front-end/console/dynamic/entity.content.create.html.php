@@ -12,7 +12,7 @@
     
     <div class="box-body" id="boxEntities">
         <div class="bootstrap-filestyle input-group" id="GrpEntityButton">
-            <form method="POST" name="entityCreateForm" action="./entityelement.php" onsubmit="RecursiveUnbind($('#wrapper'));">
+            <form method="POST" name="entityCreateForm"  id="entityCreateForm" action="./entityelement.php">
                 <input type="text" class="form-control flat no-shadow" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;">
             </form>
             <div class="input-group-btn" tabindex="0">

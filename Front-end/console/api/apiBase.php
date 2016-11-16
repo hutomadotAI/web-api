@@ -32,7 +32,8 @@ class apiBase
             \hutoma\console::redirect('./error.php?err=' . $errorCode);
         }
 
-        if (isset($response['status']) && $response['status']['code'] != 200) {
+        $responseJson = json_decode($response);
+        if (isset($responseJson) && $responseJson->status->code != 200 && $responseJson->status->code != 404 && $responseJson->status->code != 400) {
             $this->cleanup();
             \hutoma\console::redirect('./error.php?err=' . $errorCode);
         }

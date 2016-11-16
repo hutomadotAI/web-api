@@ -1,4 +1,4 @@
-document.getElementById("inputEntityName").addEventListener("keyup", activeButtonCreateEntity);
+document.getElementById("inputEntityName").addEventListener("keydown", activeButtonCreateEntity);
 document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
 
 if (limitText($("#inputEntityName")) == 0)
@@ -28,16 +28,16 @@ function postingEntityName() {
 
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
         msgAlertEntity(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
-        return;
+        return false;
     }
     
     if(isNameExists($("#inputEntityName").val(),entities)){
         msgAlertEntity(2, 'Two identical Entity names are not allowed. Please choose a different name.');
-        return;
+        return false;
     }
 
-    if (!document.entityCreateForm.onsubmit)
-        return;
+    if (document.entityCreateForm.onsubmit)
+        return false;
 
     RecursiveUnbind($('#wrapper'));
     document.entityCreateForm.submit();
@@ -46,8 +46,10 @@ function postingEntityName() {
 function showEntities(str) {
     var wHTML = "";
 
-    if (entities.length < 1)
+    if (entities.length < 1) {
         msgAlertEntity(0, 'No entities yet. Create the first one.');
+        return;
+    }
     else
         msgAlertEntity(0, 'In this section you can create different entities.');
 
@@ -160,4 +162,13 @@ $('#deleteEntity').on('show.bs.modal', function (e) {
 $("#collapseVideoTutorialEntity").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+});
+
+$(document).ready(function() {
+    $(window).keydown(function(event){
+        if( (event.keyCode == 13) && (postingEntityName() == false) ) {
+            event.preventDefault();
+            return false;
+        }
+    });
 });

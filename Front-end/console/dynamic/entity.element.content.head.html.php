@@ -6,7 +6,7 @@
         </div>
         <div class="box-tools pull-right" style="padding-top:2px;">
             <button class="btn btn-success flat pull-right" id="btnSaveEntity" style="width: 120px;"
-                    alt="save entity" onclick="saveEntity(); RecursiveUnbind($('#wrapper'));">Save Entity
+                    alt="save entity">Save Entity
             </button>
         </div>
     </div>
