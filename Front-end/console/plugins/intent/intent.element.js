@@ -6,10 +6,19 @@ function getMultipleElementValues(elementName, attributeName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
-        values.push(elements[i].getAttribute(attributeName));
+        values.push(addEscapeCharacter(elements[i].getAttribute(attributeName)));
     }
     return values;
 }
+
+function addEscapeCharacter(value){
+    return value.replace(/,/g , "||#44;");
+}
+
+function removeEscapeCharacter(value){
+    return value.replace(/\|\|#44;/g , ",");
+}
+
 
 function saveIntent() {
     $(this).prop("disabled", true);
@@ -46,19 +55,17 @@ function saveIntent() {
 
         v['n_prompts'] = node_nprompt.getAttribute('placeholder');
 
-
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt =  node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
+
         var promptsArray = [];
         for (var j=0; j < prompts_split.length; j++)
-            promptsArray.push(prompts_split[j]);
+            promptsArray.push(removeEscapeCharacter(prompts_split[j]));
         v['prompts'] = promptsArray;
-
 
         var node_required = node.children[i].children[3].children[0].children[0];
         v['required'] = node_required.checked;
-
 
         variables.push(v);
     }

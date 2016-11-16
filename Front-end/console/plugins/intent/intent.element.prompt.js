@@ -39,11 +39,15 @@ function addIntentPrompt() {
         return;
     }
 
-    var prompts = [];
+    var prompts = getMultipleElementValues('intent-prompt-row','value');
+
+    /*
+    var prompts =[];
     var elements = document.getElementsByName('intent-prompt-row');
     for (var i = 0; i < elements.length; i++) {
         prompts.push(elements[i].value);
     }
+    */
 
     if(isNameExists($("#intent-prompt").val(),prompts)){
         msgAlertIntentPrompt(2, 'Two identical intent prompts are not allowed. Please choose a different name.');
@@ -54,6 +58,7 @@ function addIntentPrompt() {
     var value = $(element).val();
     var parent = document.getElementById('prompts-list');
     document.getElementById('intent-prompt').value = '';
+
     createNewPromptRow(value, parent);
     msgAlertIntentPrompt(0,'You can add additional an user expression');
 }
@@ -152,9 +157,9 @@ function loadPromptsForEntity(curr_entity) {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    if(curr_entity =='' && len>0){
+    if(curr_entity ==''&& len>0){
         var first_node_prompt = node.children[0].children[2].children[0].children[0];
-        spitCreate(first_node_prompt)
+        splitPromptStringArray(first_node_prompt);
         return;
     }
 
@@ -163,17 +168,18 @@ function loadPromptsForEntity(curr_entity) {
         var node_entity = node.children[i].children[0].children[0].children[0];
         if (node_entity.getAttribute('placeholder').replace(/[@]/g, "") == curr_entity) {   // remove character @
             var node_prompt = node.children[i].children[2].children[0].children[0];
-            spitCreate(node_prompt)
+            splitPromptStringArray(node_prompt);
         }
     }
 }
 
-function spitCreate(node){
+function splitPromptStringArray(node){
     var parent = document.getElementById('prompts-list');
     var values =  node.getAttribute('data-prompts');
     var prompts_split = values.split(',');
     for (var j=0; j < prompts_split.length; j++) {
-        createNewPromptRow(prompts_split[j], parent);
+        var prompt = removeEscapeCharacter(prompts_split[j]);
+        createNewPromptRow(prompt, parent);
     }
 }
 

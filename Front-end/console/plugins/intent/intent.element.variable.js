@@ -12,12 +12,20 @@ function loadVariablesFromIntent() {
         var n_prompts = list_variables[x].n_prompts;
         var value = list_variables[x].value;
         var required = list_variables[x].required;
-        var prompts = list_variables[x].prompts;
+        var prompts = loadPrompts(list_variables[x].prompts);
         var parent = document.getElementById('parameter-list');
         var len = list_variables[x].prompts.length;
         createNewParameterRow(entity, intent_name, n_prompts, prompts, len, value, required, parent);
     }
 }
+
+function loadPrompts(elements){
+    var values = [];
+    for (var i = 0; i < elements.length; i++)
+        values.push(addEscapeCharacter(elements[i]));
+    return values;
+}
+
 
 function loadEntities() {
     var array = [];
@@ -73,7 +81,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     wHTML += ('<div class="col-xs-4">');
     wHTML += ('<div class="text-center" >');
-
+    
     if (size > 0)
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder=" ... " ' +
