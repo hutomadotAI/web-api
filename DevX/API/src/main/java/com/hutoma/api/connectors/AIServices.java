@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors;
 
+import com.google.common.base.Charsets;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -12,7 +13,6 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 
 import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -116,12 +117,12 @@ public class AIServices {
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
                     .fileName("training.txt")
-                    .size(trainingMaterials.getBytes(Charset.defaultCharset()).length)
+                    .size(trainingMaterials.getBytes(Charsets.UTF_8).length)
                     .build();
             FormDataBodyPart bodyPart = new FormDataBodyPart(dispo, trainingMaterials);
+            AiInfo info = new AiInfo(devId, aiid);
             FormDataMultiPart multipart = (FormDataMultiPart) new FormDataMultiPart()
-                    .field("devid", devId)
-                    .field("aiid", aiid.toString())
+                    .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
                     .bodyPart(bodyPart);
             callables.add(() -> this.jerseyClient
                     .target(endpoint)
@@ -173,6 +174,24 @@ public class AIServices {
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new AiServicesException(e.getMessage());
+        }
+    }
+
+    public static class AiInfo {
+        private final String ai_id;
+        private final String dev_id;
+
+        public AiInfo(final String devId, final UUID aiid) {
+            this.ai_id = aiid.toString();
+            this.dev_id = devId;
+        }
+
+        public String getAiid() {
+            return this.ai_id;
+        }
+
+        public String getDevId() {
+            return this.dev_id;
         }
     }
 

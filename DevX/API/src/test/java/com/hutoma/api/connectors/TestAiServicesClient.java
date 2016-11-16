@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ApiResult;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -117,7 +118,10 @@ public class TestAiServicesClient {
 
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException {
-        this.aiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
+        // Need to have a real serializer here to transform the ai info
+        AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient());
+        thisAiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
     }
 
     @Path("/training")
@@ -188,12 +192,13 @@ public class TestAiServicesClient {
         @Produces(MediaType.APPLICATION_JSON)
         @Consumes(MediaType.MULTIPART_FORM_DATA)
         public Response sendOkForUploadTraining(
-                @FormDataParam("devid") String devId,
-                @FormDataParam("aiid") String aiid,
+                @FormDataParam("info") FormDataBodyPart infoPart,
                 @FormDataParam("filename") String trainingMaterials) {
             try {
-                checkParameterValue(DEVID, devId);
-                checkParameterValue(AIID.toString(), aiid);
+                AIServices.AiInfo info = (AIServices.AiInfo) this.serializer.deserialize(
+                        infoPart.getValueAs(String.class), AIServices.AiInfo.class);
+                checkParameterValue(DEVID, info.getDevId());
+                checkParameterValue(AIID.toString(), info.getAiid());
                 checkParameterValue(TRAINING_MATERIALS, trainingMaterials);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
