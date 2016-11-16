@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -139,10 +140,10 @@ public class Config {
 
     private List<String> getCSList(final String propertyName) {
         String instances = getConfigFromProperties(propertyName, null);
-        if (instances != null && instances.isEmpty()) {
+        if (instances != null && !instances.isEmpty()) {
             return Arrays.asList(instances.split(","));
         }
-        return null;
+        return new ArrayList<>();
     }
 
     private String getConfigFromProperties(String propertyName, String defaultValue) {
