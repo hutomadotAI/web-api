@@ -48,7 +48,8 @@ function saveIntent() {
 
         if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
-                msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99');
+                msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99 at row '+(i+1));
+                msgAlertIntentElement(2,'Not saved!!');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
@@ -57,6 +58,7 @@ function saveIntent() {
 
         if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
             msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+(i+1));
+            msgAlertIntentElement(2,'Not saved!!');
             return false;
         }
 
@@ -109,12 +111,21 @@ function saveIntent() {
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
-    var curr_entity = $(e.relatedTarget).data('entity');
-    var curr_intent = $(e.relatedTarget).data('intent');
-    var curr_n_prompts = $(e.relatedTarget).data('nprompts');
+    var parent =$(e.relatedTarget).parent().parent().parent();
 
+    var node_entity  = parent.children().children().children();
+    var curr_entity = node_entity.attr('placeholder');
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
+
+    var curr_intent = $(e.relatedTarget).data('intent');
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
+
+    var node_n_prompts  = parent.children().eq(1).children().children();
+    var curr_n_prompts;
+    if ( node_n_prompts.val() == '' || node_n_prompts.val() == 'n° prompt')
+        curr_n_prompts = node_n_prompts.attr('placeholder');
+    else
+        curr_n_prompts = node_n_prompts.val();
     $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
    
     // remove character @
