@@ -48,7 +48,7 @@ function saveIntent() {
 
         if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
-                msgAlertIntentVariable(2, 'The n_prompt needs contain only number with max two digit');
+                msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
@@ -59,7 +59,7 @@ function saveIntent() {
             msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+(i+1));
             return false;
         }
-        
+
         v['n_prompts'] = node_nprompt.getAttribute('placeholder');
 
 
