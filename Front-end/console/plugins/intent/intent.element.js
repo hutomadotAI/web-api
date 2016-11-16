@@ -113,13 +113,16 @@ function saveIntent() {
 $('#boxPrompts').on('show.bs.modal', function (e) {
     var parent =$(e.relatedTarget).parent().parent().parent();
 
+    //send to modal current entity name selected from first node in the current variables row selected
     var node_entity  = parent.children().children().children();
     var curr_entity = node_entity.attr('placeholder');
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
 
+    //send to modal current intent store in data-intent html
     var curr_intent = $(e.relatedTarget).data('intent');
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
 
+    //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected
     var node_n_prompts  = parent.children().eq(1).children().children();
     var curr_n_prompts;
     if ( node_n_prompts.val() == '' || node_n_prompts.val() == 'n° prompt')
