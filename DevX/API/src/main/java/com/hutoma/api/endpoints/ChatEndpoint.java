@@ -25,7 +25,6 @@ import javax.ws.rs.core.SecurityContext;
  * Created by David MG on 08/08/2016.
  */
 @Path("/ai/")
-@RateLimit(RateKey.Chat)
 public class ChatEndpoint {
 
     private final ChatLogic chatLogic;
@@ -39,6 +38,7 @@ public class ChatEndpoint {
 
     @GET
     @Path("{aiid}/chat")
+    @RateLimit(RateKey.Chat)
     @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion, APIParameter.ChatHistory,
             APIParameter.ChatTopic, APIParameter.Min_P})
     @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
@@ -58,4 +58,24 @@ public class ChatEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @GET
+    @Path("load/{aiid}/chat")
+    @RateLimit(RateKey.LoadTest)
+    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion, APIParameter.ChatHistory,
+            APIParameter.ChatTopic, APIParameter.Min_P})
+    @Secured({Role.ROLE_TEST})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response chatLoadTest(
+            @Context SecurityContext securityContext,
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.chatLogic.chat(securityContext,
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getChatQuestion(requestContext),
+                ParameterFilter.getChatID(requestContext),
+                ParameterFilter.getChatHistory(requestContext),
+                ParameterFilter.getTopic(requestContext),
+                ParameterFilter.getMinP(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
 }

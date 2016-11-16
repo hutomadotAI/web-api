@@ -137,6 +137,14 @@ public class Config {
         return Double.parseDouble(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
     }
 
+    public double getRateLimit_LoadTest_BurstRequests() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_loadtest_burst", "32768.0"));
+    }
+
+    public double getRateLimit_LoadTest_Frequency() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_loadtest_frequency", "8192.5"));
+    }
+
     public String getTelemetryKey(String appName) {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }

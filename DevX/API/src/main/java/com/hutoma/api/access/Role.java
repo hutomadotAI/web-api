@@ -11,4 +11,5 @@ public enum Role {
     ROLE_PLAN_2,
     ROLE_PLAN_3,
     ROLE_PLAN_4,
+    ROLE_TEST
 }

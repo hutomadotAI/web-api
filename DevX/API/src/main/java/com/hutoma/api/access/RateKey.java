@@ -6,5 +6,6 @@ package com.hutoma.api.access;
 public enum RateKey {
     None,
     Chat,
+    LoadTest,
     QuickRead
 }

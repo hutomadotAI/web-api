@@ -63,6 +63,11 @@ public class RateLimitCheck implements ContainerRequestFilter {
                             this.config.getRateLimit_QuickRead_BurstRequests(),
                             this.config.getRateLimit_QuickRead_Frequency());
                     break;
+                case LoadTest:
+                    checkRateLimitReached(devid, rateKey,
+                            this.config.getRateLimit_LoadTest_BurstRequests(),
+                            this.config.getRateLimit_LoadTest_Frequency());
+                    break;
                 case None:
                 default:
                     break;
