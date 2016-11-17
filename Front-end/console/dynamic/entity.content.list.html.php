@@ -48,7 +48,7 @@
                 <button type="button" class="close text-gray" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">DELETE Entity</h4>
             </div>
-            <div class="modal-body" style="background-color: #414141" >
+            <div class="modal-body" style="background-color: #212121" >
                 <div class="box-body" id="delete-entity-label">
 
                 </div>
