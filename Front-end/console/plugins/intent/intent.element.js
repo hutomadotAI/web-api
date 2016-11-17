@@ -34,27 +34,38 @@ function saveIntent() {
     for (var i = 0; i < len; i++) {
         var v = {};
 
+        //*** check entity name
         var node_entity = node.children[i].children[0].children[0].children[0];
         if ( node_entity.getAttribute('placeholder') == 'add entity'){
-            containerMsgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
+            msgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
             return false;
         }
         v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
 
 
+        //*** check n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
-        if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
-            containerMsgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+i+1);
-            return false;
+
+        if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
+            if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
+                msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99 at row '+(i+1));
+                msgAlertIntentElement(2,'Not saved!!');
+                return false;
+            }
+            node_nprompt.setAttribute('placeholder', node_nprompt.value);
         }
 
-        if (inputValidation(node_nprompt.getAttribute('placeholder'), 'intent_n_prompt')) {
-            msgAlertIntentPrompt(2, 'The n_prompt needs contain only number with max two digit');
+
+        if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
+            msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+(i+1));
+            msgAlertIntentElement(2,'Not saved!!');
             return false;
         }
 
         v['n_prompts'] = node_nprompt.getAttribute('placeholder');
 
+
+        //*** check list prompts
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt =  node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
@@ -64,6 +75,7 @@ function saveIntent() {
             promptsArray.push(removeEscapeCharacter(prompts_split[j]));
         v['prompts'] = promptsArray;
 
+        //*** check required checkbox
         var node_required = node.children[i].children[3].children[0].children[0];
         v['required'] = node_required.checked;
 
@@ -99,12 +111,21 @@ function saveIntent() {
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
-    var curr_entity = $(e.relatedTarget).data('entity');
-    var curr_intent = $(e.relatedTarget).data('intent');
-    var curr_n_prompts = $(e.relatedTarget).data('nprompts');
+    var parent =$(e.relatedTarget).parent().parent().parent();
 
+    var node_entity  = parent.children().children().children();
+    var curr_entity = node_entity.attr('placeholder');
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
+
+    var curr_intent = $(e.relatedTarget).data('intent');
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
+
+    var node_n_prompts  = parent.children().eq(1).children().children();
+    var curr_n_prompts;
+    if ( node_n_prompts.val() == '' || node_n_prompts.val() == 'n° prompt')
+        curr_n_prompts = node_n_prompts.attr('placeholder');
+    else
+        curr_n_prompts = node_n_prompts.val();
     $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
    
     // remove character @

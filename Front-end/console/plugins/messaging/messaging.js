@@ -317,22 +317,19 @@ function msgAlertUserExpression(alarm,msg){
     document.getElementById('msgAlertUserExpression').innerText = msg;
 }
 
-function containerMsgAlertIntentVariable(alarm,msg){
+function msgAlertIntentVariable(alarm,msg){
     switch (alarm){
         case 0:
             $("#containerMsgAlertIntentVariable").attr('class','alert alert-dismissable flat alert-base');
             $("#iconAlertIntentVariable").attr('class', 'icon fa fa-check');
-            document.getElementById('user-expression').style.borderColor = "#d2d6de";
             break;
         case 1:
             $("#containerMsgAlertIntentVariable").attr('class','alert alert-dismissable flat alert-warning');
             $("#iconAlertIntentVariable").attr('class', 'icon fa fa-check');
-            document.getElementById('user-expression').style.borderColor = "orange";
             break;
         case 2:
             $("#containerMsgAlertIntentVariable").attr('class','alert alert-dismissable flat alert-danger');
             $("#iconAlertIntentVariable").attr('class', 'icon fa fa-warning');
-            document.getElementById('user-expression').style.borderColor = "red";
             break;
     }
     document.getElementById('msgAlertIntentVariable').innerText = msg;

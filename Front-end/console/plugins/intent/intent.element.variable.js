@@ -81,25 +81,21 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     wHTML += ('<div class="col-xs-4">');
     wHTML += ('<div class="text-center" >');
-    
+
     if (size > 0)
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder=" ... " ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
-        'data-prompts="' + prompts + '"' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
-        'data-prompts=""' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -184,7 +180,7 @@ function variableOnMouseOut(elem) {
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
     var intent_name = intent['intent_name'];
-    createNewParameterRow('', intent_name, '', '', 0, '', false, node);
+    createNewParameterRow('', intent_name, 3, '', 0, '', false, node);
 }
 
 function deleteIntentVariable(element) {
@@ -196,7 +192,7 @@ function deleteIntentVariable(element) {
 }
 
 function resetMsgAlertIntentVariable() {
-    containerMsgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
+    msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
 }
 
 function isUsedEntities(entity_name) {
