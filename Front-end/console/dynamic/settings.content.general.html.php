@@ -144,7 +144,7 @@
                 <h4 class="modal-title"><i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> DELETE AI
                 </h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="background-color: #212121" >
                 <div class="box-body" id="delete-ai-label">
 
                 </div>

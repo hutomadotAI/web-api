@@ -67,12 +67,12 @@ function showIntents(str) {
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
-            wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="action" tabindex="-1" >');
+            wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1" >');
             wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
             wHTML += ('</a>');
             wHTML += ('<ul class="dropdown-menu no-border flat">');
-            wHTML += ('<li><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',0)">JSON format</a></li>');
-            wHTML += ('<li><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',1)">CSV table</a></li>');
+            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',0)"><span class="text-white">JSON format</span></a></li>');
+            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',1)"><span class="text-white">CSV table</span></a></li>');
             wHTML += ('</ul>');
             wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');

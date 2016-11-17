@@ -72,12 +72,12 @@ function showEntities(str) {
             wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
             wHTML += ('</a>');
 
-            wHTML += ('<a data-toggle="dropdown">');
+            wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1">');
             wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
             wHTML += ('</a>');
-            wHTML += ('<ul class="dropdown-menu flat">');
-            wHTML += ('<li><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',0)">JSON format</a></li>');
-            wHTML += ('<li><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',1)">CSV table</a></li>');
+            wHTML += ('<ul class="dropdown-menu no-border flat"">');
+            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',0)"><span class="text-white">JSON format</span></a></li>');
+            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',1)"><span class="text-white">CSV table</span></a></li>');
             wHTML += ('</ul>');
             wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
