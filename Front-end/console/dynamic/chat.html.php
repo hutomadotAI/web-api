@@ -18,7 +18,7 @@
                 </a>
 
                 <ul class="dropdown-menu no-border flat">
-                    <li id="speech-option">
+                    <li id="speech-option" onMouseOver="this.style.cursor='pointer'">
                         <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn Off Speech</spam></a>
                     </li>
                     <!--<li class="footer" id="mute-option"><a href="#">  <i class="fa fa-microphone-slash"></i> Mute Microphone</a></li>-->
