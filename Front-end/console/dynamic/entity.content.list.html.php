@@ -43,12 +43,12 @@
 <div class="modal fade" id="deleteEntity" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal content-->
-        <div class="modal-content padding" style="background-color: #202020">
+        <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close text-gray" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">DELETE Entity</h4>
             </div>
-            <div class="modal-body" style="background-color: #515151" >
+            <div class="modal-body" style="background-color: #414141" >
                 <div class="box-body" id="delete-entity-label">
 
                 </div>
