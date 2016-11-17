@@ -54,8 +54,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger flat" id="modalDelete" value="" onClick="deleteEntity(this.value)" data-dismiss="modal">Delete</button>
                 <button type="button" class="btn btn-primary flat" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger flat" id="modalDelete" value="" onClick="deleteEntity(this.value)" data-dismiss="modal">Delete</button>
             </div>
         </div>
 
