@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
@@ -51,13 +51,13 @@ public class TrainingLogic {
     private final HTMLExtractor htmlExtractor;
     private final DatabaseEntitiesIntents database;
     private final Tools tools;
-    private final Logger logger;
+    private final ILogger logger;
     private final Validate validate;
     private final IMemoryIntentHandler memoryIntentHandler;
 
     @Inject
     public TrainingLogic(Config config, MessageQueue messageQueue, HTMLExtractor htmlExtractor,
-                         DatabaseEntitiesIntents database, Tools tools, Logger logger, Validate validate,
+                         DatabaseEntitiesIntents database, Tools tools, ILogger logger, Validate validate,
                          IMemoryIntentHandler memoryIntentHandler) {
         this.config = config;
         this.messageQueue = messageQueue;

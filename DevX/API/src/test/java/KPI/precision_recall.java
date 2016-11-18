@@ -3,18 +3,23 @@ package KPI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.sub.ChatResult;
 import io.mikael.urlbuilder.UrlBuilder;
+
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -23,33 +28,14 @@ import java.net.URL;
  */
 public class precision_recall  {
 
+    private final String LOGFROM = "wnetconnector";
+    ILogger logger;
+    JsonSerializer serializer = new JsonSerializer();
     private String q_path = System.getProperty("user.home") + "/ai/test_files/precision_recall.xls";
     // private String watson="curl -X POST -u \"2677e839-b392-45ff-97c9-07e99c2695ef\":\"Hr154xulLdJv\" -H \"Content-Type:application/json\" -d \"{\\\"input\\\": {\\\"text\\\": \\\"__QUERY__\\\"}}\" \"https://gateway.watsonplatform.net/conversation/api/v1/workspaces/444b2461-1cca-43fc-afaa-a820ffcd9b03/message?version=2016-07-11\"";
     private String DEVID = "DEMO24869e07-0d0f-4f37-b2fa-c8bf2b7130dd";
     private String AIID = "deck";
     private String UID = "uid";
-
-
-    Logger logger;
-    JsonSerializer serializer = new JsonSerializer();
-    private final String LOGFROM = "wnetconnector";
-
-
-    public class _metadata {
-        public String intentName;
-    }
-
-    public class _result {
-        String resolvedQuery;
-        _metadata metadata;
-
-    }
-
-    public class _apiai {
-        _result result;
-
-    }
-
 
     public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p) throws SemanticAnalysis.SemanticAnalysisException {
         try {
@@ -76,12 +62,6 @@ public class precision_recall  {
         }
     }
 
-
-    private ChatResult getChat(String q) throws SemanticAnalysis.SemanticAnalysisException {
-        ChatResult semanticAnalysisResult = getAnswer(DEVID, AIID, UID, "", q, 0);
-        return semanticAnalysisResult;
-    }
-
     public  String curl(String role, String method, String endpoint) throws IOException {
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -94,7 +74,6 @@ public class precision_recall  {
         in.close();
         return response.toString();
     }
-
 
     @Test
     public void RecallHutoma() throws IOException {
@@ -124,8 +103,6 @@ public class precision_recall  {
 
         }
     }
-
-
 
     @Test
     public void RecallApiAI() throws IOException {
@@ -174,6 +151,26 @@ public class precision_recall  {
 //            while ((lineRead = br.readLine()) != null) {
 //                // swallow the line, or print it out - System.out.println(lineRead);
 //            }
+    }
+
+    private ChatResult getChat(String q) throws SemanticAnalysis.SemanticAnalysisException {
+        ChatResult semanticAnalysisResult = getAnswer(DEVID, AIID, UID, "", q, 0);
+        return semanticAnalysisResult;
+    }
+
+    public class _metadata {
+        public String intentName;
+    }
+
+    public class _result {
+        String resolvedQuery;
+        _metadata metadata;
+
+    }
+
+    public class _apiai {
+        _result result;
+
     }
 
 

@@ -1,8 +1,8 @@
 package com.hutoma.api.connectors;
 
 import com.google.gson.internal.LinkedTreeMap;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
@@ -33,7 +33,7 @@ import javax.inject.Provider;
 public class Database {
 
     protected static final String LOGFROM = "database";
-    protected final Logger logger;
+    protected final ILogger logger;
     protected final Provider<DatabaseCall> callProvider;
     protected Provider<DatabaseTransaction> transactionProvider;
     private String aiid;
@@ -48,7 +48,7 @@ public class Database {
     private String widgetColor;
 
     @Inject
-    public Database(Logger logger, Provider<DatabaseCall> callProvider,
+    public Database(ILogger logger, Provider<DatabaseCall> callProvider,
                     Provider<DatabaseTransaction> transactionProvider) {
         this.logger = logger;
         this.callProvider = callProvider;

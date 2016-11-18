@@ -21,6 +21,11 @@ import static org.mockito.Mockito.*;
  */
 public class TestNeuralNet {
 
+    private final String DEVID = "devid";
+    private final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
+    private final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
+    private final long QID = 42;
+    private final String RESULT = "result";
     //http://mockito.org/
     Database fakeDatabase;
     MessageQueue fakeMessageQueue;
@@ -30,11 +35,6 @@ public class TestNeuralNet {
     SemanticAnalysis fakeSemanticAnalysis;
     Logger fakeLogger;
     NeuralNet neuralNet;
-    private String DEVID = "devid";
-    private UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
-    private long QID = 42;
-    private String RESULT = "result";
 
     @Before
     public void setup() {

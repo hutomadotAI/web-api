@@ -7,7 +7,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 
 import java.util.UUID;
 import javax.inject.Inject;
@@ -17,10 +17,10 @@ public class MessageQueue {
 
     private static final String LOGFROM = "messagequeue";
     private final Config config;
-    private final Logger logger;
+    private final ILogger logger;
 
     @Inject
-    public MessageQueue(Config config, Logger logger) {
+    public MessageQueue(final Config config, final ILogger logger) {
         this.config = config;
         this.logger = logger;
     }

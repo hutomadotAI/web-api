@@ -2,7 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAdmin;
@@ -34,7 +34,7 @@ public class TestAdminLogic {
     private Database fakeDatabase;
     private MessageQueue fakeMessageQueue;
     private Config fakeConfig;
-    private Logger fakeLogger;
+    private ILogger fakeLogger;
     private AdminLogic adminLogic;
 
     @Before
@@ -44,7 +44,7 @@ public class TestAdminLogic {
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
         this.fakeMessageQueue = mock(MessageQueue.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.adminLogic = new AdminLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeMessageQueue, this.fakeLogger);
     }
 

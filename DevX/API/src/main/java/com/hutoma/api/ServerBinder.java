@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.TelemetryLogger;
@@ -31,7 +32,10 @@ import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
+import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 
 import javax.inject.Singleton;
 
@@ -40,13 +44,25 @@ import javax.inject.Singleton;
  */
 public class ServerBinder extends AbstractBinder {
 
+    private static class JerseyClientFactory implements Factory<JerseyClient> {
+        @Override
+        public JerseyClient provide() {
+            return JerseyClientBuilder.createClient();
+        }
+
+        @Override
+        public void dispose(JerseyClient client) {
+        }
+    }
+
     @Override
     protected void configure() {
 
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
-        bind(TelemetryLogger.class).to(TelemetryLogger.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+        bind(TelemetryLogger.class).to(ITelemetry.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+        //bind(TelemetryCentralLogger.class).to(ITelemetry.class).to(CentralLogger.class).to(ILogger.class).in(Singleton.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
@@ -75,5 +91,7 @@ public class ServerBinder extends AbstractBinder {
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
 
+        // Jersey HTTP client
+        bindFactory(JerseyClientFactory.class).to(JerseyClient.class);
     }
 }

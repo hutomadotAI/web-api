@@ -1,7 +1,7 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatRequestStatus;
 
@@ -18,14 +18,14 @@ public class NeuralNet {
     private final int RNNRESET = 0;
     private final Database database;
     private final MessageQueue messageQueue;
-    private final Logger logger;
+    private final ILogger logger;
     private final Config config;
     private final Tools tools;
     private long startTime;
     private ChatRequestStatus requestStatus;
 
     @Inject
-    public NeuralNet(Database database, MessageQueue messageQueue, Logger logger, Config config, Tools tools) {
+    public NeuralNet(Database database, MessageQueue messageQueue, ILogger logger, Config config, Tools tools) {
         this.database = database;
         this.messageQueue = messageQueue;
         this.logger = logger;

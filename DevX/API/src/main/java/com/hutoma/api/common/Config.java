@@ -149,6 +149,22 @@ public class Config {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }
 
+    public String getAliceURI() {
+        return getConfigFromProperties(String.format("aliceBot"), "https://www.hutoma.com:8443/api/hutoma/demochat?aid=384");
+    }
+
+    public String getAliceID() {
+        return getConfigFromProperties(String.format("aliceAIID"), "6ea04c96-2ec3-4a5a-bd46-81742e38aab0");
+    }
+
+    public String getLoggingServiceUrl() {
+        return getConfigFromProperties("logging_url", null);
+    }
+
+    public int getLoggingUploadCadency() {
+        return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
+    }
+
     private String getConfigFromProperties(String propertyName, String defaultValue) {
         if (null == this.properties) {
             this.logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");

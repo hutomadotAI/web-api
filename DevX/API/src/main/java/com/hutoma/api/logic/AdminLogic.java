@@ -2,8 +2,8 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAdmin;
@@ -27,11 +27,11 @@ public class AdminLogic {
     private final JsonSerializer jsonSerializer;
     private final Database database;
     private final MessageQueue messageQueue;
-    private final Logger logger;
+    private final ILogger logger;
 
     @Inject
     public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,
-                      Logger logger) {
+                      ILogger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;

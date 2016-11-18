@@ -1,8 +1,8 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
 import io.mikael.urlbuilder.UrlBuilder;
@@ -19,13 +19,13 @@ import javax.ws.rs.core.Response;
 public class SemanticAnalysis {
 
     private final Config config;
-    private final Logger logger;
+    private final ILogger logger;
     private final JsonSerializer serializer;
     private final Tools tools;
     private Future<Response> responseFuture;
 
     @Inject
-    public SemanticAnalysis(Config config, Logger logger, JsonSerializer serializer, Tools tools) {
+    public SemanticAnalysis(Config config, ILogger logger, JsonSerializer serializer, Tools tools) {
         this.config = config;
         this.logger = logger;
         this.serializer = serializer;

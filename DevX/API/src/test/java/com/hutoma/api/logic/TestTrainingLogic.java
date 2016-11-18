@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
@@ -62,7 +62,7 @@ public class TestTrainingLogic {
     private MessageQueue fakeMessageQueue;
     private DatabaseEntitiesIntents fakeDatabase;
     private Tools fakeTools;
-    private Logger fakeLogger;
+    private ILogger fakeLogger;
     private SecurityContext fakeContext;
     private HTMLExtractor fakeExtractor;
     private FormDataContentDisposition fakeContentDisposition;
@@ -149,7 +149,7 @@ public class TestTrainingLogic {
         this.fakeContext = mock(SecurityContext.class);
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = mock(Tools.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.fakeValidation = TestParameterValidation.getFakeValidation();
         when(this.fakeValidation.textSanitizer(anyString())).thenCallRealMethod();
