@@ -1,0 +1,18 @@
+version: '2'
+services:
+   dev-console:
+      container_name: dev-console
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports: 
+      - "10080:80"
+      environment:
+      - HUTOMA_API_DB_CONNECTION_STRING=mysql:dbname=hutoma;host=api-db;port=3306;charset=utf8
+      - HUTOMA_API_DB_USERNAME=hutoma_caller
+      - HUTOMA_API_DB_PASSWORD=>YR"khuN*.gF)V4#
+      - HUTOMA_API_URL=http://api:8080/v1
+networks:
+  default:
+    external:
+      name: internal_net
