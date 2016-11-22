@@ -42,7 +42,7 @@ function buildConsoleMenu(ai_name,label_menu,level,block) {
     wHTML += ('</li>');
 
     wHTML += ('<li id="level2">');
-    wHTML += ('<li id="menu_marketplace"><a href="./marketplace.php" id="link_marketplace"><i class="fa fa-shopping-cart text-green"></i> <span>marketplace</span></a></li>');
+    wHTML += ('<li id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i> <span>botstore</span></a></li>');
     wHTML += ('</li>');
 
     wHTML += ('<li id="level3">');

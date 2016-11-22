@@ -4,7 +4,7 @@ document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkil
 
 $(function () {
     if(Object.keys(userActived).length==0) {
-        msgAlertAiSkill(1,'This list is empty. Please go to the <a href=\'#\'>marketplace</a>');
+        msgAlertAiSkill(1,'This list is empty. Please go to the <a href="./botstore.php">botstore</a>');
         deactiveAiSkillButtons();
     }
 });
