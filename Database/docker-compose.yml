@@ -1,0 +1,13 @@
+version: '2'
+services:
+   api-db:
+      container_name: api-db
+      build: 
+        context: .
+        dockerfile: Dockerfile
+      ports:
+      - "12306:3306"
+networks:
+  default:
+    external:
+      name: internal_net
