@@ -95,7 +95,7 @@ function buildAccountMenu() {
     newNode.style=" position: absolute; bottom:0; width: 230px; min-height: 135px;";
     var wHTML = "";
 
-    wHTML += ('<ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">');
+    wHTML += ('<ul class="sidebar-menu" style=" background: #2e3032; position: absolute; bottom:0; width: 230px; min-height: 85px;">');
     wHTML += ('<li class="header" style="color:#8A8A8A;text-align: center;"><b>MY ACCOUNT</b></li>');
     wHTML += ('<li id="menu_logout"><a href="./logout.php" id="link_logout"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>');
     wHTML += ('</ul>');
