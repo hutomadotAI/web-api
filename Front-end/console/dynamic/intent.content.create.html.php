@@ -12,9 +12,7 @@
 
     <div class="box-body" id="boxIntents">
         <div class="bootstrap-filestyle input-group" id="GrpIntentButton">
-            <form method="POST" name="intentCreateForm" id="intentCreateForm" action="./intentelement.php">
-                <input type="text" class="form-control flat no-shadow" id="inputIntentName" name="intent" placeholder="Intent name" style="width: 96%;">
-            </form>
+            <input type="text" class="form-control flat no-shadow" id="inputIntentName" name="intent" placeholder="Intent name" style="width: 96%;" onkeyup="checkIntentCode(this,event.keyCode)">
             <div class="input-group-btn" tabindex="0">
                 <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" disabled>Create Intent</button>
             </div>

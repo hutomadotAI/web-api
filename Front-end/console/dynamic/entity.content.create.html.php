@@ -12,9 +12,7 @@
     
     <div class="box-body" id="boxEntities">
         <div class="bootstrap-filestyle input-group" id="GrpEntityButton">
-            <form method="POST" name="entityCreateForm"  id="entityCreateForm" action="./entityelement.php">
-                <input type="text" class="form-control flat no-shadow" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;">
-            </form>
+            <input type="text" class="form-control flat no-shadow" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;" onkeyup="checkEntityCode(this,event.keyCode)">
             <div class="input-group-btn" tabindex="0">
                 <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" disabled> Create Entity</button>
             </div>

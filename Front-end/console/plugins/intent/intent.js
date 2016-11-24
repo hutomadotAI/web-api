@@ -1,26 +1,36 @@
-document.getElementById("inputIntentName").addEventListener("keydown", activeButtonCreateIntent);
 document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
 if (limitText($("#inputIntentName")) == 0)
     $("#btnCreateEntity").prop("disabled", false);
+
+function checkIntentCode(element, key) {
+    if (key == 13) {
+        if( activeButtonCreateIntent())
+            postingIntentName();
+    }
+    else {
+        activeButtonCreateIntent();
+    }
+}
 
 function activeButtonCreateIntent() {
     var limitTextInputSize = 50;
     switch (limitText($("#inputIntentName"), limitTextInputSize)) {
         case -1:
             $("#btnCreateIntent").prop("disabled", true);
-            break;
+            return false;
         case 0:
             msgAlertIntent(0, 'Create an Intent to trigger your own business logic.');
             $("#btnCreateIntent").prop("disabled", false);
-            break;
+            return true;
         case 1:
             msgAlertIntent(1, 'The intent name is too long!');
             $("#btnCreateIntent").prop("disabled", false);
-            break;
+            return false;
         default:
             $("#btnCreateIntent").prop("disabled", true);
     }
+    return false;
 }
 
 function postingIntentName() {
@@ -36,11 +46,19 @@ function postingIntentName() {
         return false;
     }
 
-    if (document.intentCreateForm.onsubmit)
-        return false;
+    var form = document.createElement('form');
+    var element = document.createElement('input');
+
+    form.method = 'POST';
+    form.action = './intentelement.php';
+
+    element.value = inputIntentName.value;
+    element.name = 'intent';
+    form.appendChild(element);
+    document.body.appendChild(form);
+    form.submit();
 
     RecursiveUnbind($('#wrapper'));
-    document.intentCreateForm.submit();
 }
 
 function showIntents(str) {
@@ -146,13 +164,4 @@ $('#deleteIntent').on('show.bs.modal', function (e) {
 $("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
-});
-
-$(document).ready(function() {
-    $(window).keydown(function(event){
-        if( (event.keyCode == 13) && (postingIntentName() == false) ) {
-            event.preventDefault();
-            return false;
-        }
-    });
 });
