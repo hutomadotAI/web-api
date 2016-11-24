@@ -1,0 +1,36 @@
+version: '2'
+services:
+   api:
+      container_name: api
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports: 
+      - "11080:8080"
+      environment:
+      - API_WNET_NUM_CPUS=8
+      - API_ENCODING_KEY=${API_ENCODING_KEY}
+      - API_CORE_QUEUE=https://sqs.us-east-1.amazonaws.com/622523181677/core
+      - API_SQS_QG=https://sqs.us-east-1.amazonaws.com/622523181677/QG
+      - API_WNET_SERVER=http://52.2.184.105/similarity?
+      - API_RNN_TIMEOUT=60
+      - API_MAX_UPLOAD_SIZE=65536
+      - API_MAX_CLUSTER_LINES=10000
+      - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull
+      - API_DBCONNECTIONPOOL_MIN_SIZE=8
+      - API_DBCONNECTIONPOOL_MAX_SIZE=64
+      - API_CLUSTER_MIN_PROBABILITY=0.7
+      - API_RATELIMIT_CHAT_BURST=3.0
+      - API_RATELIMIT_CHAT_FREQUENCY=2.0
+      - API_RATELIMIT_QUICKREAD_BURST=5.0
+      - API_RATELIMIT_QUICKREAD_FREQUENCY=0.5
+      - API_RATELIMIT_LOADTEST_BURST=32768.0
+      - API_RATELIMIT_LOADTEST_FREQUENCY=8192.5
+      - API_ALICEBOT=https://www.hutoma.com:8443/api/hutoma/demochat?aid=384
+      - API_ALICEAIID=6ea04c96-2ec3-4a5a-bd46-81742e38aab0
+      - API_LOGGING_URL=http://log-svc:8080/log
+      - API_LOGGING_CADENCY=5000
+networks:
+  default:
+    external:
+      name: internal_net

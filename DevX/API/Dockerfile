@@ -1,0 +1,37 @@
+FROM tomcat:7-jre8
+MAINTAINER  Pedro Teixeira pedrotei@hutoma.com
+
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
+COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
+
+
+# Expose the following environment variables
+ENV API_WNET_NUM_CPUS 8
+ENV API_ENCODING_KEY encodingKey
+ENV API_CORE_QUEUE https://sqs.us-east-1.amazonaws.com/622523181677/core
+ENV API_SQS_QG https://sqs.us-east-1.amazonaws.com/622523181677/QG
+ENV API_WNET_SERVER http://52.2.184.105/similarity?
+ENV API_RNN_TIMEOUT 60
+ENV API_MAX_UPLOAD_SIZE 65536
+ENV API_MAX_CLUSTER_LINES 10000
+ENV API_CONNECTION_STRING jdbc:mysql://server:3306/hutoma?user=user&password=password&zeroDateTimeBehavior=convertToNull
+ENV API_DBCONNECTIONPOOL_MIN_SIZE 8
+ENV API_DBCONNECTIONPOOL_MAX_SIZE 64
+ENV API_CLUSTER_MIN_PROBABILITY 0.7
+ENV API_RATELIMIT_CHAT_BURST 3.0
+ENV API_RATELIMIT_CHAT_FREQUENCY 2.0
+ENV API_RATELIMIT_QUICKREAD_BURST 5.0
+ENV API_RATELIMIT_QUICKREAD_FREQUENCY 0.5
+ENV API_RATELIMIT_LOADTEST_BURST 32768.0
+ENV API_RATELIMIT_LOADTEST_FREQUENCY 8192.5
+ENV API_ALICEBOT https://www.hutoma.com:8443/api/hutoma/demochat?aid=384
+ENV API_ALICEAIID 6ea04c96-2ec3-4a5a-bd46-81742e38aab0
+ENV API_LOGGING_URL http://log-svc:8080/log
+ENV API_LOGGING_CADENCY 5000
+
+EXPOSE 8080
+
+CMD ["catalina.sh", "run"]
+
+
+EXPOSE 80

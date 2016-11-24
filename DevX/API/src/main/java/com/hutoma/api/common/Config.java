@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 public class Config {
 
     private static final String LOGFROM = "config";
+    private static final String API_ENV_PREFIX = "API_";
     private final Logger logger;
     private final HashSet<String> propertyLoaded;
     private Properties properties;
@@ -165,7 +166,31 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
+    public void dumpApiEnvironmentVars() {
+        System.getenv().entrySet().stream().forEach(e -> {
+            if (e.getKey().startsWith(API_ENV_PREFIX)) {
+                this.logger.logInfo(LOGFROM, e.getKey() + "=" + e.getValue());
+            }
+        });
+    }
+
+    public void validateConfigPresent() throws Exception {
+        // Validate encoding key is present otherwise we can't sign
+        if (this.getEncodingKey() == null || this.getEncodingKey().isEmpty()) {
+            throw new Exception("Encoding key hasn't been defined");
+        }
+    }
+
+    private String getConfigFromEnvironment(String propertyName) {
+        return System.getenv(API_ENV_PREFIX + propertyName.toUpperCase());
+    }
+
     private String getConfigFromProperties(String propertyName, String defaultValue) {
+        String configFromEnv = getConfigFromEnvironment(propertyName);
+        if (configFromEnv != null && !configFromEnv.isEmpty()) {
+            return configFromEnv;
+        }
+
         if (null == this.properties) {
             this.logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
             return defaultValue;
