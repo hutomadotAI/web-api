@@ -43,21 +43,19 @@
 <div class="modal fade" id="deleteIntent" role="dialog">
     <div class="modal-dialog flat">
         <!-- Modal content-->
-        <div class="modal-content padding" style="background-color: #202020">
+        <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close text-gray" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Delete Intent</h4>
             </div>
-            <div class="modal-body" style="background-color: #515151" >
+            <div class="modal-body" style="background-color: #212121" >
                 <div class="box-body" id="delete-intent-label">
 
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary flat" id="modalDelete" value=""
-                        onClick="deleteIntent(this.value)" data-dismiss="modal">Delete
-                </button>
                 <button type="button" class="btn btn-primary flat" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger flat" id="modalDelete" value="" onClick="deleteIntent(this.value)" data-dismiss="modal">Delete</button>
             </div>
         </div>
 

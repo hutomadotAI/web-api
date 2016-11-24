@@ -2,7 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiStore;
 import com.hutoma.api.containers.ApiResult;
@@ -23,19 +23,17 @@ import static org.mockito.Mockito.when;
  */
 public class TestAIDomainLogic {
 
+    private final String DEVID = "devid";
+    private final String DOMID = "domid";
     //http://mockito.org/
     FakeJsonSerializer fakeSerializer;
     SecurityContext fakeContext;
     Database fakeDatabase;
     Config fakeConfig;
-    Logger fakeLogger;
-
+    ILogger fakeLogger;
     ArrayList<AiStore> listOfSingleResult;
     ArrayList<AiStore> listOfEmpty;
     AIBotStoreLogic aiDomainLogic;
-
-    private String DEVID = "devid";
-    private String DOMID = "domid";
 
     @Before
     public void setup() {
@@ -43,7 +41,7 @@ public class TestAIDomainLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
 
         AiStore domain = new AiStore(this.DOMID, "name", "desc", "icon", "colour", true);
         this.listOfSingleResult = new ArrayList<>();

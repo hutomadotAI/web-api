@@ -2,7 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
@@ -45,7 +45,7 @@ public class TestAILogic {
     Config fakeConfig;
     Tools fakeTools;
     AILogic aiLogic;
-    Logger fakeLogger;
+    ILogger fakeLogger;
 
     @Before
     public void setup() {
@@ -56,7 +56,7 @@ public class TestAILogic {
         this.fakeContext = mock(SecurityContext.class);
         this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = mock(Tools.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
 
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeAiServices,

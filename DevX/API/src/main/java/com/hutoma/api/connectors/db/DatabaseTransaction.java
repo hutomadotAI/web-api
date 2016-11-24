@@ -1,6 +1,6 @@
 package com.hutoma.api.connectors.db;
 
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 
 import java.sql.Connection;
@@ -15,14 +15,14 @@ import javax.inject.Provider;
 public class DatabaseTransaction implements AutoCloseable {
 
     private final String LOGFROM = "dbtransaction";
-    private DatabaseConnectionPool pool;
-    private Provider<TransactionalDatabaseCall> callprovider;
+    private final DatabaseConnectionPool pool;
+    private final Provider<TransactionalDatabaseCall> callprovider;
+    private final ArrayList<TransactionalDatabaseCall> openCalls = new ArrayList<>();
+    private final ILogger logger;
     private Connection transactionConnection;
-    private ArrayList<TransactionalDatabaseCall> openCalls = new ArrayList<>();
-    private Logger logger;
 
     @Inject
-    public DatabaseTransaction(Logger logger, DatabaseConnectionPool pool,
+    public DatabaseTransaction(ILogger logger, DatabaseConnectionPool pool,
                                Provider<TransactionalDatabaseCall> callprovider) {
         this.pool = pool;
         this.callprovider = callprovider;

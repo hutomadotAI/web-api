@@ -1,7 +1,7 @@
 package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -18,12 +18,12 @@ public class DatabaseConnectionPool {
 
     private static final String LOGFROM = "dbconnectionpool";
     private final Config config;
-    private final Logger logger;
+    private final ILogger logger;
     private final DataSource dataSource;
     private final int maxActiveConnections;
 
     @Inject
-    public DatabaseConnectionPool(Config config, Logger logger) {
+    public DatabaseConnectionPool(Config config, ILogger logger) {
         this.config = config;
         this.logger = logger;
         this.maxActiveConnections = config.getDatabaseConnectionPoolMaximumSize();

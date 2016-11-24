@@ -12,12 +12,20 @@ function loadVariablesFromIntent() {
         var n_prompts = list_variables[x].n_prompts;
         var value = list_variables[x].value;
         var required = list_variables[x].required;
-        var prompts = list_variables[x].prompts;
+        var prompts = loadPrompts(list_variables[x].prompts);
         var parent = document.getElementById('parameter-list');
         var len = list_variables[x].prompts.length;
         createNewParameterRow(entity, intent_name, n_prompts, prompts, len, value, required, parent);
     }
 }
+
+function loadPrompts(elements) {
+    var values = [];
+    for (var i = 0; i < elements.length; i++)
+        values.push(addEscapeCharacter(elements[i]));
+    return values;
+}
+
 
 function loadEntities() {
     var array = [];
@@ -79,19 +87,15 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
         'placeholder=" ... " ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
-        'data-prompts="' + prompts + '"' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-entity="' + entity + '" ' +
         'data-intent="' + intent_name + '"' +
-        'data-prompts=""' +
-        'data-nprompts="' + n_prompts + '" onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -149,7 +153,7 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
 
     // TODO need to dropdown menu on click on this event i do not
-    $(inputNode).on('click', function( event, ui ) {
+    $(inputNode).on('click', function (event, ui) {
         //$(this).trigger(jQuery.Event("keydown"));
     });
 
@@ -176,7 +180,7 @@ function variableOnMouseOut(elem) {
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
     var intent_name = intent['intent_name'];
-    createNewParameterRow('', intent_name, '', '', 0, '', false, node);
+    createNewParameterRow('', intent_name, 3, '', 0, '', false, node);
 }
 
 function deleteIntentVariable(element) {
@@ -188,7 +192,7 @@ function deleteIntentVariable(element) {
 }
 
 function resetMsgAlertIntentVariable() {
-    containerMsgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
+    msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
 }
 
 function isUsedEntities(entity_name) {

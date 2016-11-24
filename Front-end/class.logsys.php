@@ -255,7 +255,12 @@ class console
                  */
                 array_push(self::$config['pages']['no_login'], self::$config['pages']['login_page']);
 
-                self::$dbh = new \PDO("mysql:dbname=" . self::$config['db']['name'] . ";host=" . self::$config['db']['host'] . ";port=" . self::$config['db']['port'] . ";charset=utf8", self::$config['db']['username'], self::$config['db']['password']);
+                $connectionString = getenv("HUTOMA_API_DB_CONNECTION_STRING");
+                if (!isset($connectionString) || $connectionString == "") {
+                    self::$dbh = new \PDO("mysql:dbname=" . self::$config['db']['name'] . ";host=" . self::$config['db']['host'] . ";port=" . self::$config['db']['port'] . ";charset=utf8", self::$config['db']['username'], self::$config['db']['password']);
+                } else {
+                    self::$dbh = new \PDO($connectionString, getenv("HUTOMA_API_DB_USERNAME"), getenv("HUTOMA_API_DB_PASSWORD"));
+                }
 
                 self::$db = true;
                 self::$cookie = isset($_COOKIE['logSyslogin']) ? $_COOKIE['logSyslogin'] : false;
@@ -504,6 +509,10 @@ class console
 
     public static function getApiRequestUrl()
     {
+        $url = getenv("HUTOMA_API_URL");
+        if (isset($url) && $url != "") {
+            return $url;
+        }
         return self::$config["api"]["request_url"];
     }
 
@@ -1209,6 +1218,8 @@ class console
                 $rows = $sql->fetch(\PDO::FETCH_ASSOC);
                 $sql->nextRowset();
                 $token = $rows['dev_token'];
+            } else {
+                error_log("Could not obtain dev token!");
             }
         }
         return $token;

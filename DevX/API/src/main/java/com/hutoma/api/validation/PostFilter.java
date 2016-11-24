@@ -1,9 +1,9 @@
 package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
@@ -43,7 +43,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
     private ResourceInfo resourceInfo;
 
     @Inject
-    public PostFilter(Logger logger, Tools tools, JsonSerializer serializer) {
+    public PostFilter(ILogger logger, Tools tools, JsonSerializer serializer) {
         super(logger, tools, serializer);
     }
 

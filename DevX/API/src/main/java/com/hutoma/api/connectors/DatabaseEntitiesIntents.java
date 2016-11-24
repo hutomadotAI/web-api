@@ -1,6 +1,6 @@
 package com.hutoma.api.connectors;
 
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiEntity;
@@ -23,7 +23,7 @@ import javax.inject.Provider;
 public class DatabaseEntitiesIntents extends Database {
 
     @Inject
-    public DatabaseEntitiesIntents(Logger logger, Provider<DatabaseCall> callProvider,
+    public DatabaseEntitiesIntents(ILogger logger, Provider<DatabaseCall> callProvider,
                                    Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
     }

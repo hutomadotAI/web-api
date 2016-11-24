@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiMeshList;
@@ -20,11 +20,11 @@ public class MeshLogic {
 
     private static final String LOGFROM = "meshlogic";
     private final Config config;
-    private final Logger logger;
+    private final ILogger logger;
     private final DatabaseEntitiesIntents database;
 
     @Inject
-    public MeshLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database) {
+    public MeshLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents database) {
         this.config = config;
         this.logger = logger;
         this.database = database;

@@ -5,99 +5,65 @@ GRANT USAGE ON *.* TO 'admin'@'%' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555
 GRANT ALL PRIVILEGES ON `hutoma`.* TO 'admin'@'%' WITH GRANT OPTION;
 
 
-# Privileges for `admin`@`127.0.0.1`
+# Privileges for `aiDeleter`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'admin'@'127.0.0.1' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E';
+GRANT USAGE ON *.* TO 'aiDeleter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*7EFA4E71AB6B68DCF3EA4291B2151CCF516CDEAE';
 
-GRANT ALL PRIVILEGES ON `hutoma`.* TO 'admin'@'127.0.0.1' WITH GRANT OPTION;
+GRANT EXECUTE ON `hutoma`.* TO 'aiDeleter'@'127.0.0.1';
 
-
-# Privileges for `admin`@`localhost`
-
-GRANT USAGE ON *.* TO 'admin'@'localhost' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E';
-
-GRANT ALL PRIVILEGES ON `hutoma`.* TO 'admin'@'localhost' WITH GRANT OPTION;
+GRANT SELECT, DELETE ON `hutoma`.`ai` TO 'aiDeleter'@'127.0.0.1';
 
 
-# Privileges for `aiDeleter`@`localhost`
+# Privileges for `aiReader`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'aiDeleter'@'localhost' IDENTIFIED BY PASSWORD '*7EFA4E71AB6B68DCF3EA4291B2151CCF516CDEAE';
+GRANT USAGE ON *.* TO 'aiReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*07FCDB827FFB6CBC7971433EADA7B81E7F3E1328';
 
-GRANT EXECUTE ON `hutoma`.* TO 'aiDeleter'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'aiReader'@'127.0.0.1';
 
-GRANT SELECT, DELETE ON `hutoma`.`ai` TO 'aiDeleter'@'localhost';
-
-
-# Privileges for `aiReader`@`localhost`
-
-GRANT USAGE ON *.* TO 'aiReader'@'localhost' IDENTIFIED BY PASSWORD '*07FCDB827FFB6CBC7971433EADA7B81E7F3E1328';
-
-GRANT EXECUTE ON `hutoma`.* TO 'aiReader'@'localhost';
-
-GRANT SELECT ON `hutoma`.`ai` TO 'aiReader'@'localhost';
+GRANT SELECT ON `hutoma`.`ai` TO 'aiReader'@'127.0.0.1';
 
 
-# Privileges for `aiWriter`@`localhost`
+# Privileges for `aiWriter`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'aiWriter'@'localhost' IDENTIFIED BY PASSWORD '*EF8F1009CF338D6FE006551C74F80A24A5E59EB9';
+GRANT USAGE ON *.* TO 'aiWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*EF8F1009CF338D6FE006551C74F80A24A5E59EB9';
 
-GRANT EXECUTE ON `hutoma`.* TO 'aiWriter'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'aiWriter'@'127.0.0.1';
 
-GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai` TO 'aiWriter'@'localhost';
-
-
-# Privileges for `chatlogReader`@`localhost`
-
-GRANT USAGE ON *.* TO 'chatlogReader'@'localhost' IDENTIFIED BY PASSWORD '*57A6F03B1B99E90CB68F0572DC0DD96F2D7A913C';
-
-GRANT EXECUTE ON `hutoma`.* TO 'chatlogReader'@'localhost';
-
-GRANT SELECT ON `hutoma`.`chatlog` TO 'chatlogReader'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai` TO 'aiWriter'@'127.0.0.1';
 
 
-# Privileges for `chatlogWriter`@`localhost`
+# Privileges for `chatlogReader`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'chatlogWriter'@'localhost' IDENTIFIED BY PASSWORD '*CE7F2778A67D63A07FF11AE78559ADC96A612CFD';
+GRANT USAGE ON *.* TO 'chatlogReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*57A6F03B1B99E90CB68F0572DC0DD96F2D7A913C';
 
-GRANT EXECUTE ON `hutoma`.* TO 'chatlogWriter'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'chatlogReader'@'127.0.0.1';
 
-GRANT INSERT ON `hutoma`.`chatlog` TO 'chatlogWriter'@'localhost';
-
-
-# Privileges for `debian-sys-maint`@`localhost`
-
-GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY PASSWORD '*E0C3E92BFDAD93DD265D2D527A71F7DE26B211C3' WITH GRANT OPTION;
+GRANT SELECT ON `hutoma`.`chatlog` TO 'chatlogReader'@'127.0.0.1';
 
 
-# Privileges for `domainsReader`@`localhost`
+# Privileges for `chatlogWriter`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'domainsReader'@'localhost' IDENTIFIED BY PASSWORD '*D62B70835DDC6B34883C18DEC1CF0C5006DDA875';
+GRANT USAGE ON *.* TO 'chatlogWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*CE7F2778A67D63A07FF11AE78559ADC96A612CFD';
 
-GRANT EXECUTE ON `hutoma`.* TO 'domainsReader'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'chatlogWriter'@'127.0.0.1';
 
-GRANT SELECT ON `hutoma`.`domains` TO 'domainsReader'@'localhost';
-
-GRANT SELECT ON `hutoma`.`userAIDomains` TO 'domainsReader'@'localhost';
+GRANT INSERT ON `hutoma`.`chatlog` TO 'chatlogWriter'@'127.0.0.1';
 
 
-# Privileges for `domainsWriter`@`localhost`
+# Privileges for `debian-sys-maint`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'domainsWriter'@'localhost' IDENTIFIED BY PASSWORD '*79415A01A07F95E07C49BEDE6FD0113A707A3C67';
-
-GRANT EXECUTE ON `hutoma`.* TO 'domainsWriter'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE ON `hutoma`.`userAIDomains` TO 'domainsWriter'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'127.0.0.1' IDENTIFIED BY PASSWORD '*E0C3E92BFDAD93DD265D2D527A71F7DE26B211C3' WITH GRANT OPTION;
 
 
-# Privileges for `entityUser`@`localhost`
+# Privileges for `entityUser`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'entityUser'@'localhost' IDENTIFIED BY PASSWORD '*DC83C11DF8A0AA5DA890988DD0CF05804F300974';
+GRANT USAGE ON *.* TO 'entityUser'@'127.0.0.1' IDENTIFIED BY PASSWORD '*DC83C11DF8A0AA5DA890988DD0CF05804F300974';
 
-GRANT EXECUTE ON `hutoma`.* TO 'entityUser'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'entityUser'@'127.0.0.1';
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity_value` TO 'entityUser'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity_value` TO 'entityUser'@'127.0.0.1';
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity` TO 'entityUser'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity` TO 'entityUser'@'127.0.0.1';
 
 
 # Privileges for `hutoma_caller`@`%`
@@ -107,99 +73,94 @@ GRANT USAGE ON *.* TO 'hutoma_caller'@'%' IDENTIFIED BY PASSWORD '*EAF232196B73A
 GRANT EXECUTE ON `hutoma`.* TO 'hutoma_caller'@'%';
 
 
-# Privileges for `integrReader`@`localhost`
+# Privileges for `integrReader`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'integrReader'@'localhost' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';
+GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';
 
-GRANT EXECUTE ON `hutoma`.* TO 'integrReader'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'integrReader'@'127.0.0.1';
 
-GRANT SELECT ON `hutoma`.`integrations` TO 'integrReader'@'localhost';
-
-
-# Privileges for `intentUser`@`localhost`
-
-GRANT EXECUTE ON *.* TO 'intentUser'@'localhost' IDENTIFIED BY PASSWORD '*D79A180712799AD35A24608FFDDAEC055ECB7D94';
-
-GRANT EXECUTE ON `hutoma`.* TO 'intentUser'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_variable_prompt` TO 'intentUser'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_user_says` TO 'intentUser'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_variable` TO 'intentUser'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_response` TO 'intentUser'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent` TO 'intentUser'@'localhost';
+GRANT SELECT ON `hutoma`.`integrations` TO 'integrReader'@'127.0.0.1';
 
 
-# Privileges for `intentVarReader`@`localhost`
+# Privileges for `127.0.0.1r`@`127.0.0.1`
 
-GRANT EXECUTE ON *.* TO 'intentVarReader'@'localhost';
+GRANT EXECUTE ON *.* TO 'intentUser'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D79A180712799AD35A24608FFDDAEC055ECB7D94';
 
+GRANT EXECUTE ON `hutoma`.* TO 'intentUser'@'127.0.0.1';
 
-# Privileges for `phpmyadmin`@`localhost`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_variable_prompt` TO 'intentUser'@'127.0.0.1';
 
-GRANT USAGE ON *.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY PASSWORD '*C520DACC162F4BC391740E48C79814189D4780C7';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_user_says` TO 'intentUser'@'127.0.0.1';
 
-GRANT ALL PRIVILEGES ON `phpmyadmin`.* TO 'phpmyadmin'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_variable` TO 'intentUser'@'127.0.0.1';
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent_response` TO 'intentUser'@'127.0.0.1';
 
-# Privileges for `rateLimiter`@`localhost`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`intent` TO 'intentUser'@'127.0.0.1';
 
-GRANT USAGE ON *.* TO 'rateLimiter'@'localhost' IDENTIFIED BY PASSWORD '*57A6F03B1B99E90CB68F0572DC0DD96F2D7A913C';
+GRANT SELECT ON `hutoma`.`ai` TO 'intentUser'@'127.0.0.1';
 
-GRANT DELETE, EXECUTE ON `hutoma`.* TO 'rateLimiter'@'localhost';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`api_rate_limit` TO 'rateLimiter'@'localhost';
-
-
-# Privileges for `root`@`%`
-
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E';
-
-GRANT ALL PRIVILEGES ON `mysql`.* TO 'root'@'%';
+GRANT SELECT ON `hutoma`.`entity` TO 'intentUser'@'127.0.0.1';
 
 
-# Privileges for `root`@`127.0.0.1`
+# Privileges for `phpmyadmin`@`127.0.0.1`
 
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E' WITH GRANT OPTION;
+GRANT USAGE ON *.* TO 'phpmyadmin'@'127.0.0.1' IDENTIFIED BY PASSWORD '*C520DACC162F4BC391740E48C79814189D4780C7';
 
-
-# Privileges for `root`@`::1`
-
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'::1' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON `phpmyadmin`.* TO 'phpmyadmin'@'127.0.0.1';
 
 
-# Privileges for `root`@`localhost`
+# Privileges for `rateLimiter`@`127.0.0.1`
 
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY PASSWORD '*6BACDD7311879E6121555E6365B7B66D9763E49E' WITH GRANT OPTION;
+GRANT USAGE ON *.* TO 'rateLimiter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*57A6F03B1B99E90CB68F0572DC0DD96F2D7A913C';
 
-GRANT PROXY ON ''@'' TO 'root'@'localhost' WITH GRANT OPTION;
+GRANT DELETE, EXECUTE ON `hutoma`.* TO 'rateLimiter'@'127.0.0.1';
 
-
-# Privileges for `userDeleter`@`localhost`
-
-GRANT USAGE ON *.* TO 'userDeleter'@'localhost' IDENTIFIED BY PASSWORD '*DBD50A22424E1DD5EEECDE250B16BF27E5D77D45';
-
-GRANT EXECUTE ON `hutoma`.* TO 'userDeleter'@'localhost';
-
-GRANT SELECT, DELETE ON `hutoma`.`users` TO 'userDeleter'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`api_rate_limit` TO 'rateLimiter'@'127.0.0.1';
 
 
-# Privileges for `userTableReader`@`localhost`
+# Privileges for `userDeleter`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'userTableReader'@'localhost' IDENTIFIED BY PASSWORD '*772F1183F2BBB885AE09AAEDCEA59F5FA4137D0D';
+GRANT USAGE ON *.* TO 'userDeleter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*DBD50A22424E1DD5EEECDE250B16BF27E5D77D45';
 
-GRANT EXECUTE ON `hutoma`.* TO 'userTableReader'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'userDeleter'@'127.0.0.1';
 
-GRANT SELECT ON `hutoma`.`users` TO 'userTableReader'@'localhost';
+GRANT SELECT, DELETE ON `hutoma`.`users` TO 'userDeleter'@'127.0.0.1';
 
 
-# Privileges for `userTableWriter`@`localhost`
+# Privileges for `userTableReader`@`127.0.0.1`
 
-GRANT USAGE ON *.* TO 'userTableWriter'@'localhost' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
+GRANT USAGE ON *.* TO 'userTableReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*772F1183F2BBB885AE09AAEDCEA59F5FA4137D0D';
 
-GRANT EXECUTE ON `hutoma`.* TO 'userTableWriter'@'localhost';
+GRANT EXECUTE ON `hutoma`.* TO 'userTableReader'@'127.0.0.1';
 
-GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'userTableWriter'@'localhost';
+GRANT SELECT ON `hutoma`.`users` TO 'userTableReader'@'127.0.0.1';
+
+
+# Privileges for `userTableWriter`@`127.0.0.1`
+
+GRANT USAGE ON *.* TO 'userTableWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
+
+GRANT EXECUTE ON `hutoma`.* TO 'userTableWriter'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'userTableWriter'@'127.0.0.1';
+
+
+# Privileges for `mesh_reader`@`127.0.0.1`
+
+GRANT USAGE ON *.* TO 'mesh_reader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
+
+GRANT EXECUTE ON `hutoma`.* TO 'mesh_reader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`ai_mesh` TO 'mesh_reader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`ai` TO 'mesh_reader'@'127.0.0.1';
+
+
+# Privileges for `mesh_writer`@`127.0.0.1`
+
+GRANT USAGE ON *.* TO 'mesh_writer'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
+
+GRANT EXECUTE ON `hutoma`.* TO 'mesh_writer'@'127.0.0.1';
+
+GRANT INSERT, UPDATE, DELETE ON `hutoma`.`ai_mesh` TO 'mesh_writer'@'127.0.0.1';

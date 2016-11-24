@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiError;
@@ -21,12 +21,12 @@ public class IntentLogic {
 
     private static final String LOGFROM = "intentlogic";
     private final Config config;
-    private final Logger logger;
+    private final ILogger logger;
     private final DatabaseEntitiesIntents database;
     private final TrainingLogic trainingLogic;
 
     @Inject
-    public IntentLogic(final Config config, final Logger logger, final DatabaseEntitiesIntents database,
+    public IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents database,
                        final TrainingLogic trainingLogic) {
         this.config = config;
         this.logger = logger;

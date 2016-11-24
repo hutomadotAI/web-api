@@ -75,7 +75,7 @@ function isSessionVariablesAvailable()
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/marketplace.content.html.php'; ?>
+            <?php include './dynamic/botstore.content.html.php'; ?>
             <?php include './dynamic/botstore.content.info.details.html.php'; ?>
         </section>
     </div>
@@ -93,7 +93,7 @@ function isSessionVariablesAvailable()
 <script src="./dist/js/app.min.js"></script>
 
 <script src="./plugins/domain/domain.js"></script>
-<script src="./plugins/marketplace/marketplace.js"></script>
+<script src="./plugins/botstore/botstore.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
@@ -102,7 +102,7 @@ function isSessionVariablesAvailable()
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "marketplace", 2, true, false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botStore", 2, true, false]);
     </script>
 </form>
 

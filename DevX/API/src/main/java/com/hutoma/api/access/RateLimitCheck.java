@@ -1,8 +1,8 @@
 package com.hutoma.api.access;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.RateLimitStatus;
@@ -26,14 +26,14 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
     private static final String LOGFROM = "ratelimitcheck";
     Database database;
-    Logger logger;
+    ILogger logger;
     Config config;
     JsonSerializer serializer;
     @Context
     private ResourceInfo resourceInfo;
 
     @Inject
-    public RateLimitCheck(Database database, Logger logger, Config config, JsonSerializer serializer) {
+    public RateLimitCheck(Database database, ILogger logger, Config config, JsonSerializer serializer) {
         this.database = database;
         this.logger = logger;
         this.config = config;
@@ -62,6 +62,11 @@ public class RateLimitCheck implements ContainerRequestFilter {
                     checkRateLimitReached(devid, rateKey,
                             this.config.getRateLimit_QuickRead_BurstRequests(),
                             this.config.getRateLimit_QuickRead_Frequency());
+                    break;
+                case LoadTest:
+                    checkRateLimitReached(devid, rateKey,
+                            this.config.getRateLimit_LoadTest_BurstRequests(),
+                            this.config.getRateLimit_LoadTest_Frequency());
                     break;
                 case None:
                 default:

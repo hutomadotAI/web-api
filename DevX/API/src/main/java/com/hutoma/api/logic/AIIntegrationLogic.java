@@ -1,17 +1,17 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiIntegrations;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiIntegration;
 
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
-import java.util.List;
 
 /**
  * Created by Andrea on 30/09/16.
@@ -19,13 +19,13 @@ import java.util.List;
 public class AIIntegrationLogic {
 
     private static final String LOGFROM = "aiintegrationlogic";
-    private Config config;
-    private JsonSerializer jsonSerializer;
-    private Database database;
-    private Logger logger;
+    private final Config config;
+    private final JsonSerializer jsonSerializer;
+    private final Database database;
+    private final ILogger logger;
 
     @Inject
-    public AIIntegrationLogic(Config config, JsonSerializer jsonSerializer, Database database, Logger logger) {
+    public AIIntegrationLogic(Config config, JsonSerializer jsonSerializer, Database database, ILogger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
@@ -33,7 +33,7 @@ public class AIIntegrationLogic {
     }
 
     public ApiResult getIntegrations(
-        SecurityContext securityContext) {
+            SecurityContext securityContext) {
 
         try {
             this.logger.logDebug(LOGFROM, "request to get all integration ");

@@ -1,7 +1,7 @@
 package com.hutoma.api.access;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -31,13 +31,13 @@ import javax.ws.rs.ext.Provider;
 public class AuthFilter implements ContainerRequestFilter {
 
     private static final String LOGFROM = "authfilter";
-    private final Logger logger;
+    private final ILogger logger;
     private final Config config;
     @Context
     private ResourceInfo resourceInfo;
 
     @Inject
-    public AuthFilter(Logger logger, Config config) {
+    public AuthFilter(final ILogger logger, final Config config) {
         this.logger = logger;
         this.config = config;
     }

@@ -1,8 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiStore;
 import com.hutoma.api.containers.ApiError;
@@ -19,13 +19,13 @@ import javax.ws.rs.core.SecurityContext;
 public class AIBotStoreLogic {
 
     private static final String LOGFROM = "aidomainlogic";
-    private Config config;
-    private JsonSerializer jsonSerializer;
-    private Database database;
-    private Logger logger;
+    private final Config config;
+    private final JsonSerializer jsonSerializer;
+    private final Database database;
+    private final ILogger logger;
 
     @Inject
-    public AIBotStoreLogic(Config config, JsonSerializer jsonSerializer, Database database, Logger logger) {
+    public AIBotStoreLogic(Config config, JsonSerializer jsonSerializer, Database database, ILogger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;

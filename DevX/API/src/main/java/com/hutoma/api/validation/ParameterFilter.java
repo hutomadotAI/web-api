@@ -1,7 +1,7 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -37,12 +37,12 @@ public class ParameterFilter extends Validate {
     protected static final String INTENT_RESPONSES = "intent_responses";
     protected static final String INTENT_VAR_VALUE = "intent_variable_value";
 
-    protected final Logger logger;
+    protected final ILogger logger;
     protected final Tools tools;
     protected final JsonSerializer serializer;
 
     @Inject
-    public ParameterFilter(final Logger logger, final Tools tools, final JsonSerializer serializer) {
+    public ParameterFilter(final ILogger logger, final Tools tools, final JsonSerializer serializer) {
         this.logger = logger;
         this.tools = tools;
         this.serializer = serializer;

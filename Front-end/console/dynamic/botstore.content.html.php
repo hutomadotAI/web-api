@@ -1,7 +1,7 @@
-<div class="box box-solid box-clean flat no-shadow" id="marketplace">
+<div class="box box-solid box-clean flat no-shadow" id="botstore">
     <div class="box-header with-border">
         <i class="fa fa-shopping-cart text-green"></i>
-        <div class="box-title"><b>Marketplace</b></div>
+        <div class="box-title"><b>Bot Store</b></div>
         <a data-toggle="collapse"  href="#collapseInfoBotStore">
             <div class=" pull-right">more info
                 <i class="fa fa-info-circle text-sm text-yellow"></i>
@@ -10,7 +10,7 @@
     </div>
 
     <div class="box-body" id="botstore">
-        <?php include './dynamic/marketplace.content.info.html.php'; ?>
+        <?php include './dynamic/botstore.content.info.html.php'; ?>
         <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchDomain(this.value)">
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace" style="margin-bottom:5px;">

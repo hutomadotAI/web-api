@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
@@ -34,7 +35,7 @@ public class TestAdminLogic {
     private Database fakeDatabase;
     private AIServices fakeAiServices;
     private Config fakeConfig;
-    private Logger fakeLogger;
+    private ILogger fakeLogger;
     private AdminLogic adminLogic;
 
     @Before

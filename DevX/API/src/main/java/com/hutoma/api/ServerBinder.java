@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.TelemetryLogger;
@@ -60,7 +61,8 @@ public class ServerBinder extends AbstractBinder {
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
-        bind(TelemetryLogger.class).to(TelemetryLogger.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+        bind(TelemetryLogger.class).to(ITelemetry.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+        //bind(TelemetryCentralLogger.class).to(ITelemetry.class).to(CentralLogger.class).to(ILogger.class).in(Singleton.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
@@ -90,7 +92,7 @@ public class ServerBinder extends AbstractBinder {
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
-        // Jersey client
+        // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);
     }
 }

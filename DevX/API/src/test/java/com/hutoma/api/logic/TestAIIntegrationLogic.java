@@ -2,7 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiIntegrations;
 import com.hutoma.api.containers.ApiResult;
@@ -29,14 +29,14 @@ public class TestAIIntegrationLogic {
     private final Config fakeConfig;
     private final FakeJsonSerializer fakeSerializer;
     private final Database fakeDatabase;
-    private final Logger fakeLogger;
+    private final ILogger fakeLogger;
     private final SecurityContext fakeContext;
 
     public TestAIIntegrationLogic() {
         this.fakeConfig = mock(Config.class);
         this.fakeSerializer = new FakeJsonSerializer();
         this.fakeDatabase = mock(Database.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.fakeContext = mock(SecurityContext.class);
         this.integLogic = new AIIntegrationLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger);
     }
