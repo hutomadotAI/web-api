@@ -61,7 +61,7 @@ function showIntents(str) {
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-gray" type="submit" id="intent-label' + x + '" onClick="editIntent(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">' + intents[x] + '</div>')
+            wHTML += ('<div class="text-gray" type="submit" id="intent-label' + x + '" onClick="editIntent(this,this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">' + intents[x] + '</div>')
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
@@ -106,7 +106,8 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editIntent(intent) {
+function editIntent(elem,intent) {
+    elem.setAttribute('onclick','');
     var form = document.createElement('form');
     var element = document.createElement('input');
 
