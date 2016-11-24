@@ -25,14 +25,17 @@ function activeButtonCreateEntity() {
 
 function postingEntityName() {
     $(this).prop("disabled", true);
+    document.getElementById("btnCreateEntity").removeEventListener("click", postingEntityName);
 
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
         msgAlertEntity(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
+        document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
     
     if(isNameExists($("#inputEntityName").val(),entities)){
         msgAlertEntity(2, 'Two identical Entity names are not allowed. Please choose a different name.');
+        document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
 
@@ -61,7 +64,7 @@ function showEntities(str) {
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-gray" type="submit" id="entity-label' + x + '" onClick="editEntity(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
+            wHTML += ('<div class="text-gray" type="submit" id="entity-label' + x + '" onClick="editEntity(this,this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
@@ -127,7 +130,8 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editEntity(entity) {
+function editEntity(elem,entity) {
+    elem.setAttribute('onclick','');
     var form = document.createElement('form');
     var element = document.createElement('input');
 
