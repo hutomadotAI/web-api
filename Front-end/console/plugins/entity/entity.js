@@ -67,10 +67,12 @@ function showEntities(str) {
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
+            /*
             var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].replace(/\s/g, '') + x);
             wHTML += ('<a data-toggle="collapse" href="#' + unique_id + '">');
             wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
             wHTML += ('</a>');
+            */
 
             wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1">');
             wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
@@ -86,6 +88,7 @@ function showEntities(str) {
 
             wHTML += ('</div>');
             wHTML += ('</div>');
+            /*
             // push VALUES inside box internal
             wHTML += ('<div id="' + unique_id + '" class="panel-collapse collapse" >');
             wHTML += ('<div class="row" style="padding: 10px 0px 0px 0px;">');
@@ -97,6 +100,7 @@ function showEntities(str) {
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('</div>');
+            */
 
             wHTML += ('</div>');
             wHTML += ('</div>');
