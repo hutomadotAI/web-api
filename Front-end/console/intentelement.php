@@ -19,7 +19,6 @@ $intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\
 
 if (isset($_POST['intent_name'])) {
     // This is an intent update
-
     $intentsApi->updateIntent(
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
         $_POST['intent_name'], $_POST['intent_responses'],
