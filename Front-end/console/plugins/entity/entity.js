@@ -1,26 +1,36 @@
-document.getElementById("inputEntityName").addEventListener("keydown", activeButtonCreateEntity);
 document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
 
 if (limitText($("#inputEntityName")) == 0)
     $("#btnCreateEntity").prop("disabled", false);
+
+function checkEntityCode(element, key) {
+    if (key == 13) {
+        if( activeButtonCreateEntity())
+            postingEntityName();
+    }
+    else {
+        activeButtonCreateEntity();
+    }
+}
 
 function activeButtonCreateEntity() {
     var limitTextInputSize = 50;
     switch (limitText($("#inputEntityName"), limitTextInputSize)) {
         case -1:
             $("#btnCreateEntity").prop("disabled", true);
-            break;
+            return false;
         case 0:
             msgAlertEntity(0, 'In this section you can create different entities.');
             $("#btnCreateEntity").prop("disabled", false);
-            break;
+            return true;
         case 1:
             msgAlertEntity(1, 'The entity name is too long!');
             $("#btnCreateEntity").prop("disabled", false);
-            break;
+            return false;
         default:
             $("#btnCreateEntity").prop("disabled", true);
     }
+    return false;
 }
 
 function postingEntityName() {
@@ -39,11 +49,19 @@ function postingEntityName() {
         return false;
     }
 
-    if (document.entityCreateForm.onsubmit)
-        return false;
+    var form = document.createElement('form');
+    var element = document.createElement('input');
 
+    form.method = 'POST';
+    form.action = './entityelement.php';
+
+    element.value = inputEntityName.value;
+    element.name = 'entity';
+    form.appendChild(element);
+    document.body.appendChild(form);
+    form.submit();
+    
     RecursiveUnbind($('#wrapper'));
-    document.entityCreateForm.submit();
 }
 
 function showEntities(str) {
@@ -170,13 +188,4 @@ $('#deleteEntity').on('show.bs.modal', function (e) {
 $("#collapseVideoTutorialEntity").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
-});
-
-$(document).ready(function() {
-    $(window).keydown(function(event){
-        if( (event.keyCode == 13) && (postingEntityName() == false) ) {
-            event.preventDefault();
-            return false;
-        }
-    });
 });
