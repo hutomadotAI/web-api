@@ -15,7 +15,8 @@ if (function_exists('libxml_disable_entity_loader')) {
     libxml_disable_entity_loader(true);
 }
 
-require_once("console/common/curlHelper.php");
+require_once("console/common/apiConnector.php");
+require_once("console/common/telemetry.php");
 
 class console
 {
@@ -220,6 +221,7 @@ class console
     private static $constructed = false;
     private static $init_called = false;
     private static $cookie, $session, $remember_cookie, $dbh;
+    private static $telemetry;
 
     /**
      * Merge user config and default config
@@ -241,6 +243,7 @@ class console
     {
 
         if (self::$constructed === false) {
+            self::$telemetry = telemetry::getInstance();
             self::config(null, false);
             self::$constructed = true;
             if (self::$config['features']['start_session'] === true) {
@@ -373,6 +376,7 @@ class console
      */
     public static function logout()
     {
+        self::$telemetry->log(TelemetryEvent::INFO, "logout", $_SESSION['logSyscuruser'], null);
         self::construct("logout");
         session_destroy();
         setcookie("logSyslogin", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -425,6 +429,7 @@ class console
                 fclose($fh);
             }
         }
+        self::$telemetry->log(TelemetryEvent::INFO, "log", $msg, null);
     }
 
     /**
@@ -448,7 +453,7 @@ class console
                 'first_name' => $fullname
             );
             $path = '/admin?' . http_build_query($params);
-            $curl = new curlHelper(self::getApiRequestUrl() . $path, $dev_token);
+            $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
             $curl->setVerbPost();
             $curl->addHeader('Content-type', 'application/json');
             $curl_response = $curl->exec();
@@ -1023,6 +1028,7 @@ class console
                  * required to check whether the password fieldis left blank
                  */
                 if (!isset($blocked) && ($saltedPass == $us_pass || $password == "")) {
+                    self::$telemetry->log(TelemetryEvent::INFO, "login", $us_id, null);
                     if ($cookies === true) {
 
                         $_SESSION['logSyscuruser'] = $us_id;
@@ -1051,6 +1057,8 @@ class console
                         }
                         return true;
                     } else {
+
+                        self::$telemetry->log(TelemetryEvent::INFO, "no_cookies", $us_id, null);
                         /**
                          * If cookies shouldn't be set,
                          * it means login() was called
