@@ -25,14 +25,17 @@ function activeButtonCreateEntity() {
 
 function postingEntityName() {
     $(this).prop("disabled", true);
+    document.getElementById("btnCreateEntity").removeEventListener("click", postingEntityName);
 
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
         msgAlertEntity(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 character');
+        document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
     
     if(isNameExists($("#inputEntityName").val(),entities)){
         msgAlertEntity(2, 'Two identical Entity names are not allowed. Please choose a different name.');
+        document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
 
@@ -61,16 +64,18 @@ function showEntities(str) {
             wHTML += ('<div class="row">');
 
             wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-gray" type="submit" id="entity-label' + x + '" onClick="editEntity(this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
+            wHTML += ('<div class="text-gray" type="submit" id="entity-label' + x + '" onClick="editEntity(this,this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
+            /*
             var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].replace(/\s/g, '') + x);
             wHTML += ('<a data-toggle="collapse" href="#' + unique_id + '">');
             wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
             wHTML += ('</a>');
+            */
 
             wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1">');
             wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
@@ -86,6 +91,7 @@ function showEntities(str) {
 
             wHTML += ('</div>');
             wHTML += ('</div>');
+            /*
             // push VALUES inside box internal
             wHTML += ('<div id="' + unique_id + '" class="panel-collapse collapse" >');
             wHTML += ('<div class="row" style="padding: 10px 0px 0px 0px;">');
@@ -97,6 +103,7 @@ function showEntities(str) {
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('</div>');
+            */
 
             wHTML += ('</div>');
             wHTML += ('</div>');
@@ -123,7 +130,8 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editEntity(entity) {
+function editEntity(elem,entity) {
+    elem.setAttribute('onclick','');
     var form = document.createElement('form');
     var element = document.createElement('input');
 

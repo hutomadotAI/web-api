@@ -36,12 +36,12 @@ function buildConsoleMenu(ai_name,label_menu,level,block) {
     wHTML += ('<ul class="treeview-menu">');
     wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>');
     wHTML += ('<li id="menu_intents"><a href="./intent.php" id="link_intents"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>');
-    wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
     wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>settings</span></a></li>');
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
     wHTML += ('<li id="level2">');
+    wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
     wHTML += ('<li id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i> <span>botstore</span></a></li>');
     wHTML += ('</li>');
 
@@ -95,7 +95,7 @@ function buildAccountMenu() {
     newNode.style=" position: absolute; bottom:0; width: 230px; min-height: 135px;";
     var wHTML = "";
 
-    wHTML += ('<ul class="sidebar-menu" style=" position: absolute; bottom:0; width: 230px; min-height: 135px;">');
+    wHTML += ('<ul class="sidebar-menu" style=" background: #2e3032; position: absolute; bottom:0; width: 230px; min-height: 85px;">');
     wHTML += ('<li class="header" style="color:#8A8A8A;text-align: center;"><b>MY ACCOUNT</b></li>');
     wHTML += ('<li id="menu_logout"><a href="./logout.php" id="link_logout"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>');
     wHTML += ('</ul>');
