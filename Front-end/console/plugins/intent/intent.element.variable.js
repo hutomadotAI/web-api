@@ -26,30 +26,6 @@ function loadPrompts(elements) {
     return values;
 }
 
-
-function loadEntities() {
-    var array = [];
-    for (var x in entityListFromServer) {
-        array.push('@' + entityListFromServer[x]);
-    }
-    var $input = $('#action-entity');
-
-    $input.omniselect({
-        source: array,
-        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
-        activeClass: 'active',
-        renderItem: function (label, id, index) {
-            return '<li><a href="#">' + label + '</a></li>';
-        }
-    });
-
-    $input.on('omniselect:select', function (event, value) {
-        resetMsgAlertIntentVariable();
-        console.log('Selected: ' + value);
-    });
-
-}
-
 function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, value, required, parent) {
 
     if (isJustAddedNewRow())
@@ -66,9 +42,9 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off">');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off" onkeydown="resetMsgAlertIntentVariable()">');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" autocomplete="off" disabled="disabled">');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" value="' + entity + '" autocomplete="off" onkeydown="resetMsgAlertIntentVariable()">');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -124,7 +100,8 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     newNode.setAttribute('onmouseover', 'variableOnMouseIn (this)');
     newNode.setAttribute('onmouseout', 'variableOnMouseOut (this)');
 
-    newNode.style.backgroundColor = '#404446;';
+    newNode.style.backgroundColor = '#404446';
+    newNode.style.marginTop = '1px';
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
 
@@ -135,11 +112,11 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     // loading stored entities
     for (var x in entityListFromServer) {
-        if (typeof(entity) === 'undefined' || (entity) == '') {
-            // if a Entity is just used , it mush remove from possible selection on dropdown menu
-            if (!isUsedEntities(entityListFromServer[x]))
-                array.push('@' + entityListFromServer[x]);
-        }
+        //if (typeof(entity) === 'undefined' || (entity) == '') {
+        // if a Entity is just used , it mush remove from possible selection on dropdown menu
+        //  if (!isUsedEntities(entityListFromServer[x]))
+        array.push('@' + entityListFromServer[x]);
+
     }
 
     $(inputNode).omniselect({
@@ -151,15 +128,17 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
         }
     });
 
-
     // TODO need to dropdown menu on click on this event i do not
-    $(inputNode).on('click', function (event, ui) {
+    $(inputNode).on('omniselect:click', function (event, ui) {
+        resetMsgAlertIntentVariable();
+        $(inputNode).value = value;
+        console.log('Selected: ' + value);
         //$(this).trigger(jQuery.Event("keydown"));
     });
 
     // after selection remove value on input text and set placeholder
     $(inputNode).on('omniselect:select', function (event, value) {
-        $(inputNode).val('');
+        $(inputNode).value = value;
         $(inputNode).attr('placeholder', value);
         //pass to node prompt on data-prompt attribute the value on current selected entity
         $(inputNodePrompt).attr('data-entity', value);
@@ -193,6 +172,7 @@ function deleteIntentVariable(element) {
 
 function resetMsgAlertIntentVariable() {
     msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
+    msgAlertIntentElement(0, 'Set the variables used by the intent.');
 }
 
 function isUsedEntities(entity_name) {
@@ -200,41 +180,12 @@ function isUsedEntities(entity_name) {
     //  id NODE - relative at entities are in variables list under entity field
     var len = parent.childElementCount;
 
-    while (--len) {
+    while (len--) {
         var node = parent.children[len].children[0].children[0].children[0];
         if (node.placeholder.replace(/[@]/g, "") == entity_name)
             return true;
     }
     return false;
-}
-
-function releaseUsedEntities() {
-
-    var parent = document.getElementById('parameter-list');
-    if (!parent.hasChildNodes())
-        return;
-
-    var node = parent.children[0].children[0].children[0].children[0];
-    var array = [];
-
-    if (node.placeholder != 'add entity')
-        return;
-
-    // loading stored entities
-    for (var x in entityListFromServer) {
-        if (!isUsedEntities(entityListFromServer[x]))
-            array.push('@' + entityListFromServer[x]);
-    }
-
-    $(node).omniselect({
-        source: array,
-        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
-        activeClass: 'active',
-        renderItem: function (label, id, index) {
-            return '<li><a href="#">' + label + '</a></li>';
-        }
-    });
-
 }
 
 function isJustAddedNewRow() {
@@ -267,6 +218,5 @@ function cleanupromptDialogbox() {
 
 $(document).ready(function () {
     loadVariablesFromIntent();
-    loadEntities();
 });
 

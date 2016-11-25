@@ -34,22 +34,29 @@ function saveIntent() {
     for (var i = 0; i < len; i++) {
         var v = {};
 
-        //*** check entity name
+        //*** check validation entity name
         var node_entity = node.children[i].children[0].children[0].children[0];
         if (node_entity.getAttribute('placeholder') == 'add entity') {
             msgAlertIntentVariable(2, 'Cannot save. Missing entity on row ' + (i + 1));
+            msgAlertIntentElement(2, 'Not saved!!');
             return false;
         }
+
+        if (!isEntityExists(node_entity.getAttribute('placeholder').replace(/[@]/g, ""), node_entity.value)) {
+            msgAlertIntentVariable(2, 'Cannot save. Unexisting entity on row ' + (i + 1));
+            msgAlertIntentElement(2, 'Not saved!!');
+            return false;
+        }
+
         v['entity_name'] = node_entity.getAttribute('placeholder').replace(/[@]/g, "");
 
 
-        //*** check n prompt
+        //*** check validation n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
         if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
                 msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99 at row ' + (i + 1));
-                msgAlertIntentElement(2, 'Not saved!!');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
@@ -58,14 +65,13 @@ function saveIntent() {
 
         if (node_nprompt.getAttribute('placeholder') == 'n° prompt') {
             msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row ' + (i + 1));
-            msgAlertIntentElement(2, 'Not saved!!');
             return false;
         }
 
         v['n_prompts'] = node_nprompt.getAttribute('placeholder');
 
 
-        //*** check list prompts
+        //*** check validation list prompts
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt = node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
@@ -97,7 +103,6 @@ function saveIntent() {
         type: 'POST',
         success: function (result) {
             msgAlertIntentElement(4, 'Saved!!');
-
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
@@ -108,6 +113,17 @@ function saveIntent() {
             msgAlertIntentElement(2, 'Not saved!!');
         }
     });
+}
+
+function isEntityExists(placeholder, value) {
+    var len = entityListFromServer.length;
+
+    while (len--) {
+        if (entityListFromServer[len] == value.replace(/[@]/g, ""))
+            return true;
+    }
+    return false;
+
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {

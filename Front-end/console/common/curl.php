@@ -1,23 +1,24 @@
 <?php
+/**
+ * Created by IntelliJ IDEA.
+ * User: pedrotei
+ * Date: 24/11/16
+ * Time: 11:41
+ */
 
 namespace hutoma;
 
-/**
- * Class curlHelper
- * Provides a leven of abstraction on top of PHP_curl
- * @package hutoma
- */
-class curlHelper
+
+class curl
 {
-    private $curl;
+    protected $curl;
     private $headers = array();
 
     /**
-     * curlHelper constructor.
+     * Constructor.
      * @param $url - the Url
-     * @param $devToken - the dev token
      */
-    public function __construct($url = null, $devToken = null)
+    public function __construct($url = null)
     {
         $this->curl = curl_init();
 
@@ -25,33 +26,15 @@ class curlHelper
             $this->setUrl($url);
         }
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
-
-        if (isset($devToken)) {
-            $this->setDevToken($devToken);
-        }
-    }
-
-    public function setUrl($url)
-    {
-        curl_setopt($this->curl, CURLOPT_URL, $url);
-    }
-
-    public function setDevToken($devToken)
-    {
-        $this->setCurlSecureOpt($devToken);
     }
 
     /**
-     * Set the secure options for curl, including any custom security-related headers
-     * @param $devToken - the dev token
+     * Sets the url.
+     * @param $url - the url
      */
-    private function setCurlSecureOpt($devToken)
+    public function setUrl($url)
     {
-        $this->addHeader('Authorization', 'Bearer ' . $devToken);
-        // Forces cURL to verify the peer's certificate - disabling this allows MITM attacks!
-        $this->setOpt(CURLOPT_SSL_VERIFYPEER, true);
-        // Check the existence of a common name and also verify that it matches the hostname provided
-        $this->setOpt(CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($this->curl, CURLOPT_URL, $url);
     }
 
     /**
@@ -65,6 +48,14 @@ class curlHelper
     }
 
     /**
+     * Sets the request verb to DELETE.
+     */
+    public function setVerbDelete()
+    {
+        $this->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
+    }
+
+    /**
      * Sets a curl option.
      * @param $opt - the option name
      * @param $value - the option value
@@ -72,14 +63,6 @@ class curlHelper
     public function setOpt($opt, $value)
     {
         curl_setopt($this->curl, $opt, $value);
-    }
-
-    /**
-     * Sets the request verb to DELETE.
-     */
-    public function setVerbDelete()
-    {
-        $this->setOpt(CURLOPT_CUSTOMREQUEST, "DELETE");
     }
 
     /**
@@ -96,15 +79,6 @@ class curlHelper
     public function setVerbPut()
     {
         $this->setOpt(CURLOPT_CUSTOMREQUEST, 'PUT');
-    }
-
-    /**
-     * Sets the request verb to POST.
-     */
-    public function setVerbPost()
-    {
-        $this->setOpt(CURLOPT_CUSTOMREQUEST, NULL);
-        $this->setOpt(CURLOPT_POST, true);
     }
 
     /**
@@ -129,6 +103,26 @@ class curlHelper
     public function getHeaders()
     {
         return $this->headers;
+    }
+
+    public function post($args)
+    {
+        $this->setVerbPost();
+        $this->setOpt(CURLOPT_POSTFIELDS, $args);
+    }
+
+    /**
+     * Sets the request verb to POST.
+     */
+    public function setVerbPost()
+    {
+        $this->setOpt(CURLOPT_CUSTOMREQUEST, NULL);
+        $this->setOpt(CURLOPT_POST, true);
+    }
+
+    public function getResultCode()
+    {
+        return curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
     }
 
     /**

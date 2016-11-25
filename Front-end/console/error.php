@@ -1,9 +1,16 @@
 <?php
-    require "../pages/config.php";
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+require "../pages/config.php";
+
+\hutoma\telemetry::getInstance()->log(\hutoma\TelemetryEvent::ERROR, "errorpage", $_GET['err'],
+    array(
+        "referrer" => $_SERVER['HTTP_REFERER'],
+        "errorObject" => isset($_GET['errObj']) ? $_GET['errObj'] : ""
+    ));
+
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -52,7 +59,7 @@
     </footer>
 
     <aside class="control-sidebar control-sidebar-dark">
-    
+
     </aside>
 </div>
 

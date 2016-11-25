@@ -1949,6 +1949,10 @@ a:focus {
     background: rgba(0, 0, 0, 0.1);
 }
 
+.box.box-solid > .box-header .btn.btn-success:hover {
+    background: #449d44;
+}
+
 .box.box-solid.box-default {
     border: 1px solid #202020;
 }
@@ -2068,7 +2072,7 @@ a:focus {
 
 .box.box-solid.box-success > .box-header a,
 .box.box-solid.box-success > .box-header .btn {
-    
+
 }
 
 .box.box-solid > .box-header > .box-tools >.btn {

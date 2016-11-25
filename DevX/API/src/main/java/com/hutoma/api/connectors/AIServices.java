@@ -5,8 +5,11 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.DevPlan;
 
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyInvocation;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -14,7 +17,9 @@ import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -34,6 +39,7 @@ public class AIServices {
 
     private static final String LOGFROM = "aiservices";
     private static final String COMMAND_PARAM = "command";
+    private static final String TRAINING_TIME_ALLOWED_PARAM = "training_time_allowed";
 
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final JsonSerializer serializer;
@@ -56,7 +62,18 @@ public class AIServices {
     }
 
     public void startTraining(final String devId, final UUID aiid) throws AiServicesException {
-        List<Callable<Response>> callables = getTrainingCallablesForCommand(devId, aiid, "start");
+        DevPlan devPlan;
+        try {
+            devPlan = this.database.getDevPlan(devId);
+        } catch (Database.DatabaseException ex) {
+            throw new AiServicesException("Could not get plan for devId " + devId);
+        }
+        final int maxTrainingSecs = devPlan.getMaxTrainingSecs();
+        List<Callable<Response>> callables = getTrainingCallablesForCommand(devId, aiid,
+                new HashMap<String, String>() {{
+                    put(COMMAND_PARAM, "start");
+                    put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(maxTrainingSecs));
+                }});
         executeAndWait(callables);
     }
 
@@ -134,13 +151,23 @@ public class AIServices {
 
     private List<Callable<Response>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
                                                                     final String command) {
+        return getTrainingCallablesForCommand(devId, aiid, new HashMap<String, String>() {{
+            put(COMMAND_PARAM, command);
+        }});
+    }
+
+    private List<Callable<Response>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
+                                                                    Map<String, String> params) {
         List<Callable<Response>> callables = new ArrayList<>();
         for (String endpoint : this.getAllEndpoints()) {
-            callables.add(() -> this.jerseyClient
-                    .target(endpoint).path(devId).path(aiid.toString())
-                    .queryParam(COMMAND_PARAM, command)
-                    .request()
-                    .post(null));
+
+            JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString());
+            for (Map.Entry<String, String> param : params.entrySet()) {
+                target = target.queryParam(param.getKey(), param.getValue());
+            }
+
+            final JerseyInvocation.Builder builder = target.request();
+            callables.add(() -> builder.post(null));
         }
         return callables;
     }

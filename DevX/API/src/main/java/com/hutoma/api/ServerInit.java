@@ -17,12 +17,10 @@ import javax.inject.Inject;
  */
 public class ServerInit implements ApplicationEventListener {
 
-    private final String LOGFROM = "serverinit";
-
-    Config config;
-
+    private static final String LOGFROM = "serverinit";
     @Inject
     ServiceLocator serviceLocator;
+    private Config config;
 
     @Override
     public void onEvent(ApplicationEvent applicationEvent) {
@@ -50,13 +48,14 @@ public class ServerInit implements ApplicationEventListener {
     private void initialise(ApplicationEvent applicationEvent) {
         ILogger logger = this.serviceLocator.getService(ILogger.class);
         this.config = this.serviceLocator.getService(Config.class);
-        logger.initialize(this.config);
-        DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
         try {
+            this.config.validateConfigPresent();
+            logger.initialize(this.config);
+            DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
             connectionPool.borrowConnection().close();
-            logger.logInfo(this.LOGFROM, "initialisation finished");
+            logger.logInfo(LOGFROM, "initialisation finished");
         } catch (Exception e) {
-            logger.logError(this.LOGFROM, "initialisation error: " + e.toString());
+            logger.logError(LOGFROM, "initialisation error: " + e.toString());
         }
     }
 }

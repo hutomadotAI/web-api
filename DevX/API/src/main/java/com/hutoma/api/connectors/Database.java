@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.AiStore;
 import com.hutoma.api.containers.sub.ChatRequestStatus;
+import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.MeshVariable;
@@ -99,6 +100,28 @@ public class Database {
             call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt)
                     .add(firstName).add(lastName).add(devToken).add(planId).add(devId).add(clientToken);
             return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Gets the developer plan for the given developer Id.
+     * @param devId the developer id
+     * @return the plan, or null if there is no developer Id or not plan associated to it
+     * @throws DatabaseException database exception
+     */
+    public DevPlan getDevPlan(final String devId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getDevPlan", 1).add(devId);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return new DevPlan(rs.getInt("maxai"), rs.getInt("monthlycalls"), rs.getLong("maxmem"),
+                            rs.getInt("maxtraining"));
+                }
+                return null;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
         }
     }
 

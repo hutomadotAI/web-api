@@ -7,6 +7,7 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.DevPlan;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -51,6 +52,7 @@ public class TestAiServicesClient {
     private static final String LOCAL_ENDPOINT_PATH = "training";
     private static final List<String> LOCAL_WEB_ENDPOINTS = Collections.singletonList(LOCAL_WEB_SERVER + "/" + LOCAL_ENDPOINT_PATH);
     private static final String TRAINING_MATERIALS = "question1\nanswer1\nquestion2\nanswer2\n\nintent expression\n@meta.intent.myintent";
+    private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
     private static HttpServer httpServer;
     private FakeJsonSerializer fakeSerializer;
@@ -87,7 +89,8 @@ public class TestAiServicesClient {
     }
 
     @Test
-    public void testStartTraining() throws AIServices.AiServicesException {
+    public void testStartTraining() throws AIServices.AiServicesException, Database.DatabaseException {
+        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
         this.aiServices.startTraining(DEVID, AIID);
     }
 

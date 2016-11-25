@@ -6,6 +6,7 @@ import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.DevPlan;
 import junitparams.JUnitParamsRunner;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -38,6 +39,7 @@ public class TestAiServices {
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final List<String> WNET_ENDPOINTS = Collections.singletonList("http://wnet/endpoint1");
     private static final List<String> RNN_ENDPOINTS = Collections.singletonList("http://rnn/endpoint1");
+    private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
     private FakeJsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
@@ -66,17 +68,20 @@ public class TestAiServices {
     }
 
     @Test
-    public void testStartTraining() throws AIServices.AiServicesException {
+    public void testStartTraining() throws AIServices.AiServicesException, Database.DatabaseException {
+        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
         testCommand((a, b) -> this.aiServices.startTraining(DEVID, AIID), HttpMethod.POST);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testStartTraining_serverError() throws AIServices.AiServicesException {
+    public void testStartTraining_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
+        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
         testCommand_serverError((a, b) -> this.aiServices.startTraining(DEVID, AIID), HttpMethod.POST);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testStartTraining_response_noEntity() throws AIServices.AiServicesException {
+    public void testStartTraining_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
+        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
         testCommand_response_noEntity((a, b) -> this.aiServices.startTraining(DEVID, AIID), HttpMethod.POST);
     }
 
