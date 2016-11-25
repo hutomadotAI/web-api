@@ -57,6 +57,7 @@ function saveIntent() {
         if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
                 msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99 at row '+(i+1));
+                msgAlertIntentElement(2,'Not saved!!');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
@@ -64,7 +65,8 @@ function saveIntent() {
 
 
         if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
-            msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value on row '+(i+1));
+            msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value at row '+(i+1));
+            msgAlertIntentElement(2,'Not saved!!');
             return false;
         }
 
@@ -75,6 +77,12 @@ function saveIntent() {
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt =  node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
+        if (list_prompt == '' || prompts_split.length == 0){
+            msgAlertIntentVariable(2, 'Cannot save. The prompt list needs conttains at least one value at row '+(i+1));
+            msgAlertIntentElement(2,'Not saved!!');
+            return false;
+        }
+
 
         var promptsArray = [];
         for (var j=0; j < prompts_split.length; j++)
@@ -82,7 +90,8 @@ function saveIntent() {
         v['prompts'] = promptsArray;
 
         //*** check required checkbox
-        var node_required = node.children[i].children[3].children[0].children[0];
+        var node_required = node.children[i].children[3].children[0].children[0].children[0];
+        alert(node_required.id);
         v['required'] = node_required.checked;
 
         variables.push(v);

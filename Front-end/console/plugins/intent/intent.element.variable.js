@@ -167,7 +167,7 @@ function deleteIntentVariable(element) {
     var parent = (((element.parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent);
     resetMsgAlertIntentVariable();
-    releaseUsedEntities();
+    //releaseUsedEntities();
 }
 
 function resetMsgAlertIntentVariable() {
@@ -197,13 +197,13 @@ function isJustAddedNewRow() {
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
     if (node.placeholder == 'add entity') {
-        containerMsgAlertIntentVariable(1, 'Complete field first before add a new line');
+        msgAlertIntentVariable(1, 'Complete field first before add a new line');
         return true;
     }
 
     var len = parent.childElementCount;
     if (len == entityListFromServer.length) { // se hai raggiunto in numero massimo MSG ALERT
-        containerMsgAlertIntentVariable(1, 'All entities are used!');
+        msgAlertIntentVariable(1, 'All entities are used!');
         return true;
     }
 
