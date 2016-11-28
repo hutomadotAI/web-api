@@ -25,12 +25,14 @@ import java.util.ArrayList;
  */
 public class wnet extends recallBaseClass {
     static JsonSerializer serializer = new JsonSerializer();
-    private static ArrayList<wnetrecall> recall = new ArrayList<>();
+    private static ArrayList<crecall> recall = new ArrayList<>();
     private final String LOGFROM = "wnetconnector";
     private String DEVID = "5129a38c-735f-4608-a9ca-377d2b06c868";
     private String AIID = "34126944-f3b9-4a9a-9f38-eeae29800afa";
     private String UID = "1234";
     private String WNET_URI = "http://52.2.184.105/similarity";
+    private String WNET_URI2 = "http://54.209.201.97:8888/ai/d_for_wnet_recall_1/a_for_wnet_recall_1/chat";
+
 
     public wnet() throws IOException {
         super();
@@ -44,12 +46,11 @@ public class wnet extends recallBaseClass {
         HSSFRow row;
         int rows = sheet.getPhysicalNumberOfRows();
         int rowindex = 1;
-        double good = 0.0;
-        double not_good = 0.0;
         long startTime = System.currentTimeMillis();
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
         HttpClient httpClient = new HttpClient(connectionManager);
         ArrayList<CreateThread> threadsList = new ArrayList<>();
+        long start = System.nanoTime();
         while (rowindex < rows) {
             try {
                 row = sheet.getRow(rowindex++);
@@ -58,7 +59,7 @@ public class wnet extends recallBaseClass {
                     history = row.getCell(0).getStringCellValue().toLowerCase();
                 String q = row.getCell(1).getStringCellValue().toLowerCase();
                 String gt = row.getCell(2).getStringCellValue().toLowerCase();
-                UrlBuilder url = UrlBuilder.fromString(this.WNET_URI)
+                UrlBuilder url = UrlBuilder.fromString(this.WNET_URI2)
                         .addParameter("q", q)
                         .addParameter("aiid", this.AIID)
                         .addParameter("dev_id", this.DEVID)
@@ -71,6 +72,7 @@ public class wnet extends recallBaseClass {
                 CreateThread t = new CreateThread(httpClient, get, startTime, rows, rowindex, "" + rowindex, q, gt);
                 threadsList.add(t);
                 t.start();
+                // t.join();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -78,19 +80,7 @@ public class wnet extends recallBaseClass {
         for (int i = 0; i < threadsList.size(); i++) {
             threadsList.get(i).join();
         }
-
-        for (int i = 0; i < recall.size(); i++) {
-            if (recall.get(i).a.replace("\n", "").equals(recall.get(i).groundTruth)) good++;
-            else {
-                not_good++;
-                System.out.println("Q:" + recall.get(i).q + ", A:" + recall.get(i).a + ", GT:" + recall.get(i).groundTruth);
-            }
-        }
-
-        System.out.println("LINES TOTAL=" + good + not_good);
-        System.out.println("CORRECT    =" + good);
-        System.out.println("INCORRECT    =" + not_good);
-        System.out.println("RECALL @1  =" + (good / (good + not_good) * 100) + "%");
+        printRecall(start, recall);
 
     }
 
@@ -126,7 +116,7 @@ public class wnet extends recallBaseClass {
                 String response = this.method.getResponseBodyAsString();
                 result = new ChatResult((ChatResult) serializer.deserialize(response, ChatResult.class));
                 String a = result.getAnswer();
-                recall.add(new wnetrecall(this.q, a, this.groundTruth));
+                recall.add(new crecall(this.q, a, this.groundTruth));
                 printProgress(this.startTime, this.rows, this.rowindex);
             } catch (HttpException e) {
                 System.err.println("Fatal protocol violation: " + e.getMessage());
@@ -139,16 +129,6 @@ public class wnet extends recallBaseClass {
 
     }
 
-    public static class wnetrecall {
-        String q;
-        String a;
-        String groundTruth;
 
-        public wnetrecall(String q, String a, String groundTruth) {
-            this.q = q;
-            this.a = a;
-            this.groundTruth = groundTruth;
-        }
-    }
 
 }

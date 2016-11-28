@@ -11,11 +11,17 @@ import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by mauriziocibelli on 17/11/16.
  */
 public class apiai extends recallBaseClass {
+
+
+    private static ArrayList<crecall> recall = new ArrayList<>();
+    private String devkey = "2981eb7eb3324c8d9b4c1971ab152ebf";
+    private String baseUri = "https://api.api.ai/v1/query?v=20150910&timezone=Europe/London&lang=en&latitude=37.459157&longitude=-122.17926&sessionId=1234567890&query=";
 
 
     public apiai() throws IOException {
@@ -31,28 +37,26 @@ public class apiai extends recallBaseClass {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         int rows = sheet.getPhysicalNumberOfRows();
         int rowindex = 1;
-        double good = 0.0;
-        double not_good = 0.0;
         long startTime = System.currentTimeMillis();
-
+        long start = System.nanoTime();
+        String json = "";
         while (rowindex < rows) {
             try {
                 row = sheet.getRow(rowindex++);
-                String q = row.getCell(0).getStringCellValue().toLowerCase();
-                String a = row.getCell(1).getStringCellValue().toLowerCase();
-                String json = curl("0ebeef8c3eab47c0bf3d4eb0bdc337ab", "GET", "https://api.api.ai/api/query?v=20150910&lang=en&query=" + q.replace(" ", "%20"));
-                Apiai cr = new Apiai();
-                cr = gson.fromJson(json, Apiai.class);
-                if (cr.result.metadata.intentName.replace("\n", "").equals(a)) good++;
-                else not_good++;
+                String q = row.getCell(1).getStringCellValue().toLowerCase();
+                String gt = row.getCell(2).getStringCellValue().toLowerCase();
+                json = curl(this.devkey, "GET", this.baseUri + q.replace(" ", "%20"), "");
+                Apiai cr = gson.fromJson(json, Apiai.class);
+                if (cr.result.metadata.intentName != null)
+                    recall.add(new crecall(q, cr.result.metadata.intentName.replace("\n", ""), gt));
+                else recall.add(new crecall(q, "", gt));
                 super.printProgress(startTime, rows, rowindex);
             } catch (Exception e) {
+                System.out.println("json:" + json);
             }
         }
-        System.out.println("LINES TOTAL=" + good + not_good);
-        System.out.println("CORRECT    =" + good);
-        System.out.println("INCORRECT    =" + not_good);
-        System.out.println("RECALL @1  =" + (good / (good + not_good) * 100) + "%");
+        printRecall(start, recall);
+
     }
 
 

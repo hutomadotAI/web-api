@@ -3,9 +3,12 @@ package KPI;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -22,6 +25,28 @@ public class recallBaseClass {
     public recallBaseClass() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         this.ground_truth_file = classLoader.getResource("basic_recall_test.xls").getPath();
+    }
+
+    public static void printRecall(long start, ArrayList<crecall> recall) {
+        double good = 0;
+        double not_good = 0;
+        long diff = System.nanoTime() - start;
+        double secs = diff / 1000000000.0;
+        double min = secs / 60;
+        System.out.println("--- INCORRECT RESULTS ---\n");
+        for (int i = 0; i < recall.size(); i++) {
+            if (recall.get(i).a.toLowerCase().equals(recall.get(i).groundTruth)) good++;
+            else {
+                not_good++;
+                System.out.println(recall.get(i).q + "," + recall.get(i).a + "," + recall.get(i).groundTruth);
+            }
+        }
+        System.out.println("---------------------------------");
+        System.out.println("TOT MIN:" + min + "(" + secs + ")");
+        System.out.println("LINES TOTAL=" + (good + not_good));
+        System.out.println("CORRECT    =" + good);
+        System.out.println("INCORRECT  =" + not_good);
+        System.out.println("RECALL @1  =" + (good / (good + not_good) * 100) + "%");
     }
 
     public static void printProgress(long startTime, long total, long current) {
@@ -48,17 +73,42 @@ public class recallBaseClass {
         logger.info(string.toString().replace("\n", ""));
     }
 
-
-    public static String curl(String role, String method, String endpoint) throws IOException {
+    public static String curl(String role, String method, String endpoint, String body) throws IOException {
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", "Bearer " + role);
+        con.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        con.setRequestProperty("Accept", "application/json");
         con.setRequestMethod(method);
+        con.setDoOutput(true);
+
+        if (!body.isEmpty()) {
+            byte[] postData = body.getBytes(StandardCharsets.UTF_8);
+            int postDataLength = postData.length;
+            con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+            OutputStream os = con.getOutputStream();
+            os.write(postData);
+            os.flush();
+            os.close();
+        }
+
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuffer response = new StringBuffer();
         while ((inputLine = in.readLine()) != null) response.append(inputLine);
         in.close();
         return response.toString();
+    }
+
+    public static class crecall {
+        String q;
+        String a;
+        String groundTruth;
+
+        public crecall(String q, String a, String groundTruth) {
+            this.q = q;
+            this.a = a;
+            this.groundTruth = groundTruth;
+        }
     }
 }
