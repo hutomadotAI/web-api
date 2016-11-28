@@ -139,7 +139,12 @@ function setNewListPrompts(){
         var node_prompt = node.children[i].children[2].children[0].children[0];
         if (node_entity.getAttribute('placeholder') == curr_entity) {
             node_prompt.setAttribute('data-prompts', intentNewPromptList);
-            node_prompt.setAttribute('placeholder',' ... ');
+
+            var list_prompt =  node_prompt.getAttribute('data-prompts');
+            if( list_prompt != '')
+                node_prompt.setAttribute('placeholder',' ... ');
+            else
+                node_prompt.setAttribute('placeholder','click to enter');
             entity_selected = true;
         }
     }
@@ -149,12 +154,11 @@ function loadPromptsForEntity(curr_entity) {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    if(curr_entity ==''&& len>0){
+    if(curr_entity =='' && len>0){
         var first_node_prompt = node.children[0].children[2].children[0].children[0];
         splitPromptStringArray(first_node_prompt);
         return;
     }
-
     for (var i = 0; i < len; i++) {
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
         var node_entity = node.children[i].children[0].children[0].children[0];
@@ -167,11 +171,15 @@ function loadPromptsForEntity(curr_entity) {
 
 function splitPromptStringArray(node){
     var parent = document.getElementById('prompts-list');
-    var values =  node.getAttribute('data-prompts');
-    var prompts_split = values.split(',');
-    for (var j=0; j < prompts_split.length; j++) {
-        var prompt = removeEscapeCharacter(prompts_split[j]);
-        createNewPromptRow(prompt, parent);
+    var list_prompt =  node.getAttribute('data-prompts');
+    var prompts_split = list_prompt.split(',');
+    if( list_prompt != '') {
+        for (var j = 0; j < prompts_split.length; j++) {
+            var prompt = removeEscapeCharacter(prompts_split[j]);
+            createNewPromptRow(prompt, parent);
+        }
+    }else{
+        node.setAttribute('placeholder','click to enter');
     }
 }
 
