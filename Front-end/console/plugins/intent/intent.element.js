@@ -91,7 +91,6 @@ function saveIntent() {
 
         //*** check required checkbox
         var node_required = node.children[i].children[3].children[0].children[0].children[0];
-        alert(node_required.id);
         v['required'] = node_required.checked;
 
         variables.push(v);
