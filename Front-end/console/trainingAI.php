@@ -43,13 +43,31 @@ function setSessionVariables($singleAI)
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $singleAI['language'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = localeToLanguage($singleAI['language']);
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
 
     // TO DO getAiTrainingFile needs API call with response check before assigh the value
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
 }
 
+function localeToLanguage($locale)
+{
+    $locales = array(
+        'Deutsch' => 'de-DE',
+        'Español' => 'es-ES',
+        'Français' => 'fr-FR',
+        'Italiano' => 'it-IT',
+        'Nederlands' => 'nl-NL',
+        'Português' => 'pt-PT',
+        'English' => 'en-US'
+    );
+
+    if (array_key_exists($locale, $locales)) {
+        return $locales[$locale];
+    } else {
+        return $locales['English'];
+    }
+}
 
 ?>
 
