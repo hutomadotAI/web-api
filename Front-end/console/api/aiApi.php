@@ -57,13 +57,13 @@ class aiApi extends apiBase
         return null;
     }
 
-    public function updateAI($aiid, $description, $private, $language, $timezoneString, $personality, $voice, $confidence)
+    public function updateAI($aiid, $description, $private, $language, $timezone, $personality, $voice, $confidence)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
 
-            //hard coded
-            $timezone = 'Europe/London';
+
+            // TODO: remove hardcode
             $locale = 'en-US';
 
             $args = array(
@@ -86,19 +86,15 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function createAI($name, $description, $private, $language, $timezoneString, $confidence,
+    public function createAI($name, $description, $private, $language, $timezone, $confidence,
                              $personality, $voice, $contract, $payment_type, $price)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
 
-            // TODO: move this to a common internationalization class
+            // TODO: remove hardcode
 
-            // TODO: accept format from input list - example   GMT +00:00 Atlantic/St Helena (GMT)
-
-            $timezone = 'Europe/London';
             $locale = 'en-US';
-
             $args = array(
                 'name' => $name,
                 'description' => $description,
