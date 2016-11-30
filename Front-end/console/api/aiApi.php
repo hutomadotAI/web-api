@@ -92,6 +92,7 @@ class aiApi extends apiBase
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
 
+            
             // TODO: remove hardcode
 
             $locale = 'en-US';
