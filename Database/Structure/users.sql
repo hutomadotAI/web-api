@@ -49,6 +49,8 @@ GRANT EXECUTE ON `hutoma`.* TO 'chatlogWriter'@'127.0.0.1';
 
 GRANT INSERT ON `hutoma`.`chatlog` TO 'chatlogWriter'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`ai` TO `chatlogWriter`@`127.0.0.1`;
+
 
 # Privileges for `debian-sys-maint`@`127.0.0.1`
 

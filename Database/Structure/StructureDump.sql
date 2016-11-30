@@ -1493,7 +1493,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`hutoma_caller`@`127.0.0.1` PROCEDURE `getDevToken`(IN `uid` INT)
+CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDevToken`(IN `uid` INT)
     NO SQL
 BEGIN
 SELECT `dev_token` FROM `users` WHERE `id` = uid;
@@ -1513,7 +1513,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`hutoma_caller`@`127.0.0.1` PROCEDURE `getDevTokenFromDevID`(IN `devid` VARCHAR(50))
+CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDevTokenFromDevID`(IN `devid` VARCHAR(50))
     NO SQL
 BEGIN
 SELECT `dev_token` FROM `users` WHERE `dev_id` = devid;

@@ -23,13 +23,23 @@ class telemetry
         if (!isset($GLOBALS["devconsole_telemetry"])) {
             $GLOBALS["devconsole_telemetry"] = array();
         }
-        $loggingUrl = \hutoma\console::$config["logging"]["url"];
+
+        $envUrl = getenv("LOG_SERVICE_ANALYTICS_URL");
+        if (isset($envUrl) && $envUrl != "") {
+            $this->loggingUrl = $envUrl;
+        } else {
+            if (array_key_exists("logging", \hutoma\console::$config)) {
+                if (array_key_exists("url", \hutoma\console::$config["logging"])) {
+                    $this->loggingUrl = \hutoma\console::$config["logging"]["url"];
+                }
+            }
+        }
     }
 
     public static function getInstance()
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
+        if (!isset(self::$instance)) {
+            self::$instance = new telemetry();
         }
         return self::$instance;
     }

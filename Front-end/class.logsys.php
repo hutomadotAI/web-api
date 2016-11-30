@@ -221,7 +221,6 @@ class console
     private static $constructed = false;
     private static $init_called = false;
     private static $cookie, $session, $remember_cookie, $dbh;
-    private static $telemetry;
 
     /**
      * Merge user config and default config
@@ -243,7 +242,6 @@ class console
     {
 
         if (self::$constructed === false) {
-            self::$telemetry = telemetry::getInstance();
             self::config(null, false);
             self::$constructed = true;
             if (self::$config['features']['start_session'] === true) {
@@ -338,6 +336,7 @@ class console
                  * Couldn't connect to Database
                  */
                 self::log('Couldn\'t connect to database. Check \Fr\LS::$config["db"] credentials');
+                telemetry::getInstance()->log(TelemetryEvent::ERROR, "db", "Exception: " . $e->getMessage());
                 return false;
             }
         }
@@ -376,7 +375,7 @@ class console
      */
     public static function logout()
     {
-        self::$telemetry->log(TelemetryEvent::INFO, "logout", $_SESSION['logSyscuruser'], null);
+        telemetry::getInstance()->log(TelemetryEvent::INFO, "logout", "UserId: " . $_SESSION['logSyscuruser']);
         self::construct("logout");
         session_destroy();
         setcookie("logSyslogin", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -429,7 +428,7 @@ class console
                 fclose($fh);
             }
         }
-        self::$telemetry->log(TelemetryEvent::INFO, "log", $msg, null);
+        telemetry::getInstance()->log(TelemetryEvent::INFO, "log", $msg);
     }
 
     /**
@@ -1028,7 +1027,7 @@ class console
                  * required to check whether the password fieldis left blank
                  */
                 if (!isset($blocked) && ($saltedPass == $us_pass || $password == "")) {
-                    self::$telemetry->log(TelemetryEvent::INFO, "login", $us_id, null);
+                    telemetry::getInstance()->log(TelemetryEvent::INFO, "login", "UserId: " . $us_id);
                     if ($cookies === true) {
 
                         $_SESSION['logSyscuruser'] = $us_id;
@@ -1058,7 +1057,7 @@ class console
                         return true;
                     } else {
 
-                        self::$telemetry->log(TelemetryEvent::INFO, "no_cookies", $us_id, null);
+                        telemetry::getInstance()->log(TelemetryEvent::INFO, "no_cookies", "UserId: " . $us_id);
                         /**
                          * If cookies shouldn't be set,
                          * it means login() was called
@@ -1227,7 +1226,7 @@ class console
                 $sql->nextRowset();
                 $token = $rows['dev_token'];
             } else {
-                error_log("Could not obtain dev token!");
+                telemetry::getInstance()->log(TelemetryEvent::ERROR, "getDevToken", "Could not obtain dev token");
             }
         }
         return $token;

@@ -38,7 +38,7 @@ class apiBase
 
         $responseJson = json_decode($response);
         if (isset($responseJson) && $responseJson->status->code != 200 && $responseJson->status->code != 404 && $responseJson->status->code != 400) {
-            telemetry::getInstance()->log(TelemetryEvent::ERROR, "api", $responseJson->status);
+            telemetry::getInstance()->log(TelemetryEvent::ERROR, "api", json_encode($responseJson->status));
             $this->cleanup();
             \hutoma\console::redirect('./error.php?err=' . $errorCode);
         }
