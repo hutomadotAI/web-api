@@ -132,15 +132,17 @@ $(document).ready(function () {
 function saveEntity() {
     var values = [];
     var entityName = document.getElementById('entity-name').value;
-    var elements = document.getElementsByName('value-entity');
-    for (var i = 1; i < elements.length; i++) {
+    var elements = document.getElementsByName('value-entity-row');
+    for (var i = 0; i < elements.length; i++) {
          values.push(elements[i].value);
     }
+
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnSaveEntity").prop("disabled", true);
 
     msgAlertEntityValues(1, 'Saving...');
+
     $.ajax({
         url: 'entityelement.php?entity=' + entityName,
         data: {
