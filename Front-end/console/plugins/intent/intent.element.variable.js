@@ -42,9 +42,9 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off" onkeydown="resetMsgAlertIntentVariable()">');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off" onClick="pushEntitiesList(this)">');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" value="' + entity + '" autocomplete="off" onkeydown="resetMsgAlertIntentVariable()">');
+        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" value="' + entity + '" autocomplete="off" onClick="pushEntitiesList(this)">');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -108,43 +108,46 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     // be carefull - this is the treepath for input entity list
     var inputNode = newNode.children[0].children[0].children[0];
     var inputNodePrompt = newNode.children[2].children[0].children[0];
-    var array = [];
 
-    // loading stored entities
-    for (var x in entityListFromServer) {
-        //if (typeof(entity) === 'undefined' || (entity) == '') {
-            // if a Entity is just used , it mush remove from possible selection on dropdown menu
-          //  if (!isUsedEntities(entityListFromServer[x]))
-        array.push('@' + entityListFromServer[x]);
-
-    }
-
-    $(inputNode).omniselect({
-        source: array,
-        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
-        activeClass: 'active',
-        renderItem: function (label, id, index) {
-            return '<li><a href="#">' + label + '</a></li>';
-        }
-    });
-
-    // TODO need to dropdown menu on click on this event i do not
-    $(inputNode).on('omniselect:click', function( event, ui ) {
-        resetMsgAlertIntentVariable();
-        $(inputNode).value = value;
-        console.log('Selected: ' + value);
-        //$(this).trigger(jQuery.Event("keydown"));
-    });
-
-    // after selection remove value on input text and set placeholder
+    // after selection add value on input text and set placeholder
     $(inputNode).on('omniselect:select', function (event, value) {
-        $(inputNode).value = value;
+        $(inputNode).attr('value', value);
         $(inputNode).attr('placeholder', value);
         //pass to node prompt on data-prompt attribute the value on current selected entity
         $(inputNodePrompt).attr('data-entity', value);
     });
 }
 
+function isUsedEntities(entity_name) {
+    var parent = document.getElementById('parameter-list');
+    var len = parent.childElementCount;
+    while (len--) {
+        var node = parent.children[len].children[0].children[0].children[0];
+        if (node.placeholder.replace(/[@]/g, "") == entity_name)
+            return true;
+    }
+    return false;
+}
+
+function pushEntitiesList(node){
+    var new_array = [];
+    // loading stored entities
+    for (var x in entityListFromServer) {
+        // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
+        if (!isUsedEntities(entityListFromServer[x]) ||  node.placeholder.replace(/[@]/g, "") == entityListFromServer[x])
+            new_array.push('@' + entityListFromServer[x]);
+    }
+    // TODO: refresh dropdown menu showed
+    //$('<ol></ol>').selectmenu("refresh");
+    $(node).omniselect({
+        source: new_array,
+        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
+        activeClass: 'active',
+        renderItem: function (label, id, index) {
+            return '<li><a href="#">' +label + '</a></li>';
+        }
+    });
+}
 
 function variableOnMouseIn(elem) {
     var btn = elem.children[3].children[0].children[1].children[0];
@@ -167,25 +170,11 @@ function deleteIntentVariable(element) {
     var parent = (((element.parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent);
     resetMsgAlertIntentVariable();
-    //releaseUsedEntities();
 }
 
 function resetMsgAlertIntentVariable() {
     msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
     msgAlertIntentElement(0,'Set the variables used by the intent.');
-}
-
-function isUsedEntities(entity_name) {
-    var parent = document.getElementById('parameter-list');
-    //  id NODE - relative at entities are in variables list under entity field
-    var len = parent.childElementCount;
-
-    while (len--) {
-        var node = parent.children[len].children[0].children[0].children[0];
-        if (node.placeholder.replace(/[@]/g, "") == entity_name)
-            return true;
-    }
-    return false;
 }
 
 function isJustAddedNewRow() {
@@ -206,7 +195,6 @@ function isJustAddedNewRow() {
         msgAlertIntentVariable(1, 'All entities are used!');
         return true;
     }
-
     return false;
 }
 
@@ -214,7 +202,6 @@ function cleanupromptDialogbox() {
     var node = document.getElementById('prompts-list');
     while (node.firstChild) node.removeChild(node.firstChild);
 }
-
 
 $(document).ready(function () {
     loadVariablesFromIntent();
