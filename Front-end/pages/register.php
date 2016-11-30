@@ -241,11 +241,11 @@ if(isset($_POST['submit'])) {
         <form action="register.php" method="POST">
             <?php if(isset($msg)){echo $msg;}?>
             <div class="form-group has-feedback">
-                <input name="username" type="text" class="form-control" placeholder="Full name">
+                <input name="username" type="text" class="form-control" placeholder="Full name" value="<?php if (isset($_POST['username'])) echo $_POST['username']?>">
                 <span class="glyphicon glyphicon-user form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="email"  type="email" class="form-control" placeholder="Email">
+                <input name="email"  type="email" class="form-control" placeholder="Email" value="<?php if (isset($_POST['email'])) echo $_POST['email']?>">
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
@@ -264,14 +264,14 @@ if(isset($_POST['submit'])) {
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="invite_code"  type="invite_code" class="form-control" placeholder="Invitation Code">
+                <input name="invite_code"  type="invite_code" class="form-control" placeholder="Invitation Code" value="<?php if (isset($_POST['invite_code'])) echo $_POST['invite_code']?>">
                 <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
             </div>
             <div class="row">
                 <div class="col-xs-8">
                     <div class="checkbox icheck">
                         <label>
-                            <input name="terms" type="checkbox"> I agree to the <a class="newa" href="#">terms</a>
+                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the <a class="newa" href="#">terms</a>
                         </label>
                     </div>
                 </div><!-- /.col -->
