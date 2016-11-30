@@ -137,7 +137,7 @@ function pushEntitiesList(node){
         if (!isUsedEntities(entityListFromServer[x]) ||  node.placeholder.replace(/[@]/g, "") == entityListFromServer[x])
             new_array.push('@' + entityListFromServer[x]);
     }
-
+    $(node).trigger("chosen:updated");
     $(node).omniselect({
         source: new_array,
         resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
