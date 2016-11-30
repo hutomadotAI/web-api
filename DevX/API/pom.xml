@@ -314,14 +314,6 @@
             <version>2.24</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.microsoft.azure</groupId>
-            <artifactId>applicationinsights-web</artifactId>
-            <!-- or applicationinsights-core for bare API -->
-            <version>[1.0,)</version>
-        </dependency>
-
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>findbugs</artifactId>

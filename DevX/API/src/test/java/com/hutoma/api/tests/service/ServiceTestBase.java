@@ -6,8 +6,6 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
-import com.hutoma.api.common.TelemetryLogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
@@ -70,7 +68,7 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected DatabaseConnectionPool fakeDatabaseConnectionPool;
     @Mock
-    protected TelemetryLogger fakeLogger;
+    protected ILogger fakeLogger;
     @Mock
     protected MessageQueue fakeMessageQueue;
     @Mock
@@ -123,7 +121,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeMessageQueue)).to(MessageQueue.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeNeuralNet)).to(NeuralNet.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeSemanticAnalysis)).to(SemanticAnalysis.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(TelemetryLogger.class).to(Logger.class).to(ILogger.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -165,7 +163,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
-        this.fakeLogger = mock(TelemetryLogger.class);
+        this.fakeLogger = mock(ILogger.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
 

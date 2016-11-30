@@ -30,6 +30,7 @@ class CentralLogger implements ILogger {
     private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(1000);
     private Timer timer;
     private Config config;
+    private String loggingUrl;
 
 
     @Inject
@@ -57,13 +58,14 @@ class CentralLogger implements ILogger {
     public void initialize(Config config) {
         this.config = config;
         this.timer = new Timer();
-        int cadency = config.getLoggingUploadCadency();
+        int cadence = config.getLoggingUploadCadency();
         this.timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 CentralLogger.this.dumpToStorage();
             }
-        }, cadency, cadency);
+        }, cadence, cadence);
+        this.loggingUrl = this.config.getLoggingServiceUrl();
     }
 
     public void shutdown() {
@@ -71,8 +73,7 @@ class CentralLogger implements ILogger {
     }
 
     private void dumpToStorage() {
-        String loggingUrl = this.config.getLoggingServiceUrl();
-        if (this.logQueue.isEmpty() || loggingUrl == null) {
+        if (this.logQueue.isEmpty() || this.loggingUrl == null) {
             return;
         }
 
@@ -83,7 +84,7 @@ class CentralLogger implements ILogger {
         }
 
         String json = this.serializer.serialize(events);
-        Response response = this.jerseyClient.target(loggingUrl)
+        Response response = this.jerseyClient.target(this.loggingUrl)
                 .queryParam("appId", APP_ID)
                 .request()
                 .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));

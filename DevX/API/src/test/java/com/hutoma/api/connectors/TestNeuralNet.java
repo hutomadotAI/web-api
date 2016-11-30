@@ -2,7 +2,7 @@ package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatRequestStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -33,7 +33,7 @@ public class TestNeuralNet {
     Tools fakeTools;
     NeuralNet fakeNeuralNet;
     SemanticAnalysis fakeSemanticAnalysis;
-    Logger fakeLogger;
+    ILogger fakeLogger;
     NeuralNet neuralNet;
 
     @Before
@@ -43,7 +43,7 @@ public class TestNeuralNet {
         this.fakeDatabase = mock(Database.class);
         this.fakeMessageQueue = mock(MessageQueue.class);
         this.fakeTools = new FakeTimerTools();
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
         this.neuralNet = new NeuralNet(this.fakeDatabase, this.fakeMessageQueue, this.fakeLogger, this.fakeConfig, this.fakeTools);
