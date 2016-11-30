@@ -22,7 +22,10 @@ foreach ($zones as $zone) {
       $zone[0] == 'Pacific')
     if (isset($zone[1]) != '') {
       $locations[$zone[0]][$zone[0] . '/' . $zone[1]] = str_replace('_', ' ', $zone[1]); // Creates array(DateTimeZone => 'Friendly name')
-      $html .= '<option>'. $zone[0] . '/' . $zone[1] .'</option>';
+      if ($zone[0] . '/' . $zone[1] == 'Europe/London')
+        $html .= '<option selected="selected">'. $zone[0] . '/' . $zone[1] .'</option>';
+      else
+        $html .= '<option>'. $zone[0] . '/' . $zone[1] .'</option>';
     }
 }
 
