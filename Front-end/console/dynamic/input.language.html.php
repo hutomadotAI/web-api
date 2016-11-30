@@ -5,7 +5,7 @@
     <option selected="selected">English</option>
     <option disabled="disabled">Español</option>
     <option disabled="disabled">Français</option>
-    <option>Italiano</option>
+    <option disabled="disabled">Italiano</option>
     <option disabled="disabled">Nederlands</option>
     <option disabled="disabled">Português</option>
     <!--
