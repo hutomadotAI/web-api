@@ -1,4 +1,5 @@
-document.getElementById("btnAiSkillReset").addEventListener("click", resetAISkill);
+//document.getElementById("btnAiSkillReset").addEventListener("click", resetAISkill);
+document.getElementById("btnAiSkillCancel").addEventListener("click", cancelAISkill);
 document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkill);
 
 
@@ -42,6 +43,13 @@ function resetAISkill(){
     var str='';
     document.getElementById('searchInputDomains').value = str;
     showDomains(str,1);
+}
+
+function cancelAISkill(){
+    document.getElementById('tab_aiskill').className = "";
+    document.getElementById('tab_general').className = "active";
+    document.getElementById('page_aiskill').className = " tab-pane";
+    document.getElementById('page_general').className = "tab-pane active";
 }
 
 function activeAiSkillButtons(){
