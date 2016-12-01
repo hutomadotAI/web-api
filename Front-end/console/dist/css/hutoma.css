@@ -6094,4 +6094,18 @@ table.text-center th {
     margin-left: 90px;
 }
 
+.pagination {
+    display: inline-block;
+    padding-left: 0;
+    margin: 20px 0;
+    border-radius: 4px;
+    background:#212121 !Important;
+}
+.paginate_button{
+    background:#212121;
+    background-color:#212121;
+}
+.pagination > li > a, .pagination > li > span{
+    color:#212121 !Important;
+}
 
