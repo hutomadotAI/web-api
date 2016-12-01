@@ -26,6 +26,7 @@ unset($aiApi);
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./plugins/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 </head>
@@ -47,9 +48,15 @@ unset($aiApi);
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
+
         <section class="content">
-            <?php include './dynamic/home.content.start.html.php'; ?>
-            <?php include './dynamic/home.viewall.html.php'; ?>
+            <?php 
+                include './dynamic/home.content.start.html.php';
+                if (!isset($response_getAIs) || !(array_key_exists("ai_list",$response_getAIs)))
+                    include './dynamic/home.content.first.html.php';
+                else
+                    include './dynamic/home.viewall.html.php';
+            ?>
         </section>
     </div>
 
@@ -60,6 +67,8 @@ unset($aiApi);
 </div>
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
+<script src="./plugins/datatables/jquery.dataTables.js"></script>
+<script src="./plugins/datatables/dataTables.bootstrap.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
@@ -67,6 +76,10 @@ unset($aiApi);
 <script src="./plugins/home/home.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<script>
+    var aiList = <?php echo json_encode($response_getAIs['ai_list']); unset($response_getAIs);?>;
+</script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
