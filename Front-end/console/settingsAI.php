@@ -76,17 +76,17 @@ function isSessionVariablesAvailable()
             <!-- Custom Tabs -->
             <div class="nav-tabs-custom flat no-shadow no-border">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a href="#tab_general" data-toggle="tab">General</a></li>
-                    <li><a href="#tab_aiskill" data-toggle="tab">AI Skills</a></li>
+                    <li class="active" id="tab_general"><a href="#page_general" data-toggle="tab">General</a></li>
+                    <li id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">AI Skills</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-bottom:0px;">
                     <!-- GENERAL TAB -->
-                    <div class="tab-pane active" id="tab_general">
+                    <div class="tab-pane active" id="page_general">
                         <?php include './dynamic/settings.content.general.html.php'; ?>
                     </div>
                     <!-- DOMAINS TAB -->
-                    <div class="tab-pane" id="tab_aiskill">
+                    <div class="tab-pane" id="page_aiskill">
                         <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
                         <div class="row" style="background-color: #434343;">
                             <div class="col-lg-12" style="background-color: #434343; padding:5px;">

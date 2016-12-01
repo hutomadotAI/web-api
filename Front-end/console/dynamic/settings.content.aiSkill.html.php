@@ -33,6 +33,7 @@
 </div>
 
 <div class="box-footer no-border">
-    <button style="width:100px" type="submit" id="btnAiSkillReset" class="btn btn-primary flat pull-left">reset</button>
+    <!--<button style="width:100px" type="submit" id="btnAiSkillReset" class="btn btn-primary flat pull-left">reset</button>-->
+    <button style="width:100px" type="submit" id="btnAiSkillCancel" class="btn btn-primary flat pull-left">cancel</button>
     <button style="width:100px" type="submit" id="btnAiSkillSave" class="btn btn-success flat pull-right">save</button>
 </div>
