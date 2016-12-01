@@ -20,11 +20,13 @@ public class recallBaseClass {
 
     static Logger logger = Logger.getLogger("recall");
     private final PrintStream stdout = System.out;
-    public String ground_truth_file;
+    public String costa_ground_truth_file;
+    public String nhs_ground_truth_file;
 
     public recallBaseClass() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        this.ground_truth_file = classLoader.getResource("basic_recall_test.xls").getPath();
+        this.costa_ground_truth_file = classLoader.getResource("costa_bot_recall_test.xls").getPath();
+        this.nhs_ground_truth_file = classLoader.getResource("nhs_bot_recall_test.xls").getPath();
     }
 
     public static void printRecall(long start, ArrayList<crecall> recall) {
@@ -35,7 +37,16 @@ public class recallBaseClass {
         double min = secs / 60;
         System.out.println("--- INCORRECT RESULTS ---\n");
         for (int i = 0; i < recall.size(); i++) {
-            if (recall.get(i).a.toLowerCase().equals(recall.get(i).groundTruth)) good++;
+            String answer = "";
+            String ground_truth = "";
+
+            if (recall.get(i).a != null)
+                answer = recall.get(i).a.toLowerCase();
+
+            if (recall.get(i).groundTruth != null)
+                ground_truth = recall.get(i).groundTruth.toLowerCase();
+
+            if (answer.equals(ground_truth)) good++;
             else {
                 not_good++;
                 System.out.println(recall.get(i).q + "," + recall.get(i).a + "," + recall.get(i).groundTruth);

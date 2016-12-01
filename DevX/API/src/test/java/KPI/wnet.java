@@ -27,20 +27,19 @@ public class wnet extends recallBaseClass {
     static JsonSerializer serializer = new JsonSerializer();
     private static ArrayList<crecall> recall = new ArrayList<>();
     private final String LOGFROM = "wnetconnector";
-    private String DEVID = "5129a38c-735f-4608-a9ca-377d2b06c868";
-    private String AIID = "34126944-f3b9-4a9a-9f38-eeae29800afa";
-    private String UID = "1234";
-    private String WNET1_URI = "http://52.2.184.105/similarity";
-    private String WNET2_COSTA_CRUISE_DATASET = "http://54.209.201.97:8888/ai/d_for_wnet_recall_1/a_for_wnet_recall_1/chat";
+    private String costa_dev_id = "devid_costa";
+    private String costa_ai_id = "aiid_costa";
+    private String nhs_dev_id = "devid_nhs";
+    private String nhs_ai_id = "aiid_nhs";
+    private String WNET_URL = "http://54.209.201.97:8888/ai/%s/%s/chat";
 
 
     public wnet() throws IOException {
         super();
     }
 
-    @Test
-    public void RecallHutomaWNET2_COSTA_CRUISE_DATASET() throws IOException, InterruptedException {
-        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(super.ground_truth_file));
+    public void Recall(String ground_truth_file, String bot_url) throws IOException, InterruptedException {
+        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(ground_truth_file));
         HSSFWorkbook wb = new HSSFWorkbook(fs);
         HSSFSheet sheet = wb.getSheetAt(0);
         HSSFRow row;
@@ -53,12 +52,20 @@ public class wnet extends recallBaseClass {
         while (rowindex < rows) {
             try {
                 row = sheet.getRow(rowindex++);
+
                 String history = "";
                 if (row.getCell(0) != null)
                     history = row.getCell(0).getStringCellValue().toLowerCase();
-                String q = row.getCell(1).getStringCellValue().toLowerCase();
-                String gt = row.getCell(2).getStringCellValue().toLowerCase();
-                UrlBuilder url = UrlBuilder.fromString(this.WNET2_COSTA_CRUISE_DATASET)
+
+                String q = "";
+                if (row.getCell(1) != null)
+                    q = row.getCell(1).getStringCellValue().toLowerCase();
+
+                String gt = "";
+                if (row.getCell(2) != null)
+                    gt = row.getCell(2).getStringCellValue().toLowerCase();
+
+                UrlBuilder url = UrlBuilder.fromString(bot_url)
                         .addParameter("q", q)
                         .addParameter("min_p", "0")
                         .addParameter("history", history);
@@ -87,6 +94,16 @@ public class wnet extends recallBaseClass {
             }
         }
         printRecall(start, recall);
+    }
+
+    @Test
+    public void RecallCosta() throws IOException, InterruptedException {
+        Recall(super.costa_ground_truth_file, String.format(this.WNET_URL, this.costa_dev_id, this.costa_ai_id));
+    }
+
+    @Test
+    public void RecallNHS() throws IOException, InterruptedException {
+        Recall(super.nhs_ground_truth_file, String.format(this.WNET_URL, this.nhs_dev_id, this.nhs_ai_id));
     }
 
 }

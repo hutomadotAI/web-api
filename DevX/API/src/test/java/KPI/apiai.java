@@ -20,7 +20,8 @@ public class apiai extends recallBaseClass {
 
 
     private static ArrayList<crecall> recall = new ArrayList<>();
-    private String devkey = "2981eb7eb3324c8d9b4c1971ab152ebf";
+    private String costa_devkey = "2981eb7eb3324c8d9b4c1971ab152ebf";
+    private String nhs_devkey = "f43d2ec0a0d5423d9b0187b7a204e997";
     private String baseUri = "https://api.api.ai/v1/query?v=20150910&timezone=Europe/London&lang=en&latitude=37.459157&longitude=-122.17926&sessionId=1234567890&query=";
 
 
@@ -28,9 +29,8 @@ public class apiai extends recallBaseClass {
         super();
     }
 
-    @Test
-    public void RecallApiAI() throws IOException {
-        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(super.ground_truth_file));
+    public void Recall(String costa_ground_truth_file, String devkey) throws IOException {
+        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(costa_ground_truth_file));
         HSSFWorkbook wb = new HSSFWorkbook(fs);
         HSSFSheet sheet = wb.getSheetAt(0);
         HSSFRow row;
@@ -45,7 +45,7 @@ public class apiai extends recallBaseClass {
                 row = sheet.getRow(rowindex++);
                 String q = row.getCell(1).getStringCellValue().toLowerCase();
                 String gt = row.getCell(2).getStringCellValue().toLowerCase();
-                json = curl(this.devkey, "GET", this.baseUri + q.replace(" ", "%20"), "");
+                json = curl(devkey, "GET", this.baseUri + q.replace(" ", "%20"), "");
                 Apiai cr = gson.fromJson(json, Apiai.class);
                 if (cr.result.metadata.intentName != null)
                     recall.add(new crecall(q, cr.result.metadata.intentName.replace("\n", ""), gt));
@@ -57,6 +57,16 @@ public class apiai extends recallBaseClass {
         }
         printRecall(start, recall);
 
+    }
+
+    @Test
+    public void RecallCosta() throws IOException {
+        Recall(super.costa_ground_truth_file, this.costa_devkey);
+    }
+
+    @Test
+    public void RecallNHS() throws IOException {
+        Recall(super.nhs_ground_truth_file, this.nhs_devkey);
     }
 
 
