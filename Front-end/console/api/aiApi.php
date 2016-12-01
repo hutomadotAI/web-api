@@ -63,8 +63,22 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
 
 
-            // TODO: remove hardcode
-            $locale = 'en-US';
+            // TODO: remove hardcode depends how many language are supported
+            $locales = array(
+                'Deutsch' => 'de-DE',
+                'Español' => 'es-ES',
+                'Français' => 'fr-FR',
+                'Italiano' => 'it-IT',
+                'Nederlands' => 'nl-NL',
+                'Português' => 'pt-PT',
+                'English' => 'en-US'
+            );
+
+            if (array_key_exists($language, $locales)) {
+                $locale = $locales[$language];
+            } else {
+                $locale = $locales['English'];
+            }
 
             $args = array(
                 'description' => $description,
@@ -93,9 +107,23 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
 
             
-            // TODO: remove hardcode
+            // TODO: remove hardcode depends how many language are supported
+            $locales = array(
+                'Deutsch' => 'de-DE',
+                'Español' => 'es-ES',
+                'Français' => 'fr-FR',
+                'Italiano' => 'it-IT',
+                'Nederlands' => 'nl-NL',
+                'Português' => 'pt-PT',
+                'English' => 'en-US'
+            );
 
-            $locale = 'en-US';
+            if (array_key_exists($language, $locales)) {
+                $locale = $locales[$language];
+            } else {
+                $locale = $locales['English'];
+            }
+
             $args = array(
                 'name' => $name,
                 'description' => $description,
