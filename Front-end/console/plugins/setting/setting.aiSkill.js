@@ -54,10 +54,10 @@ function cancelAISkill(){
 
 function activeAiSkillButtons(){
     document.getElementById('btnAiSkillSave').removeAttribute('disabled');
-    document.getElementById('btnAiSkillReset').removeAttribute('disabled');
+    document.getElementById('btnAiSkillCancel').removeAttribute('disabled');
 }
 
 function deactiveAiSkillButtons(){
     document.getElementById('btnAiSkillSave').setAttribute('disabled','disabled');
-    document.getElementById('btnAiSkillReset').setAttribute('disabled','disabled');
+    document.getElementById('btnAiSkillCancel').setAttribute('disabled','disabled');
 }

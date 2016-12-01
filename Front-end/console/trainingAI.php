@@ -52,20 +52,20 @@ function setSessionVariables($singleAI)
 
 function localeToLanguage($locale)
 {
-    $locales = array(
-        'Deutsch' => 'de-DE',
-        'Español' => 'es-ES',
-        'Français' => 'fr-FR',
-        'Italiano' => 'it-IT',
-        'Nederlands' => 'nl-NL',
-        'Português' => 'pt-PT',
-        'English' => 'en-US'
+    $languages = array(
+        'de-DE' => 'Deutsch',
+        'es-ES' => 'Español',
+        'fr-FR' => 'Français',
+        'it-IT' => 'Italiano',
+        'nl-NL' => 'Nederlands',
+        'pt-PT' => 'Português',
+        'en-US' =>'English'
     );
 
-    if (array_key_exists($locale, $locales)) {
-        return $locales[$locale];
+    if (array_key_exists($locale, $languages)) {
+        return $languages[$locale];
     } else {
-        return $locales['English'];
+        return $languages['en-US'];
     }
 }
 
