@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ITelemetry;
@@ -41,12 +42,13 @@ public class ChatLogic {
     private final ILogger logger;
     private final IMemoryIntentHandler intentHandler;
     private final IEntityRecognizer entityRecognizer;
+    private final ChatTelemetryLogger chatTelemetryLogger;
 
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis,
                      NeuralNet neuralNet, Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
-                     IEntityRecognizer entityRecognizer) {
+                     IEntityRecognizer entityRecognizer, ChatTelemetryLogger chatTelemetryLogger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.semanticAnalysis = semanticAnalysis;
@@ -55,6 +57,7 @@ public class ChatLogic {
         this.logger = logger;
         this.intentHandler = intentHandler;
         this.entityRecognizer = entityRecognizer;
+        this.chatTelemetryLogger = chatTelemetryLogger;
     }
 
     public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
@@ -130,6 +133,7 @@ public class ChatLogic {
                 telemetryMap.put("WNETAnswer", chatResult.getAnswer());
                 telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
                 telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
+                telemetryMap.put("WNETScore", Double.toString(semanticScore));
 
                 // if semantic analysis is not confident enough, wait for and process result from neural network
                 if ((semanticScore < minP) || (0.0d == semanticScore)) {
@@ -166,9 +170,12 @@ public class ChatLogic {
 
                     telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
                     telemetryMap.put("RNNValid", Boolean.toString(validRNN));
+                    telemetryMap.put("AnsweredBy", "RNN");
                     // TODO: potentially PII info
                     telemetryMap.put("RNNAnswer", chatResult.getAnswer());
                     telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
+                } else {
+                    telemetryMap.put("AnsweredBy", "WNET");
                 }
 
                 this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
@@ -203,11 +210,11 @@ public class ChatLogic {
         if (noResponse) {
             this.logger.logError(LOGFROM, "chat server returned an empty response");
             telemetryMap.put("EventType", "No response");
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", telemetryMap);
+            ITelemetry.addTelemetryEvent(this.chatTelemetryLogger, "ApiChatError", telemetryMap);
             return ApiError.getInternalServerError();
         }
 
-        ITelemetry.addTelemetryEvent(this.logger, "ApiChat", telemetryMap);
+        ITelemetry.addTelemetryEvent(this.chatTelemetryLogger, "ApiChat", telemetryMap);
         return apiChat.setSuccessStatus();
     }
 

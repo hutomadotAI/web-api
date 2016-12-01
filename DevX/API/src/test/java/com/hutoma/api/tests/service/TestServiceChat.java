@@ -1,5 +1,6 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -35,6 +36,8 @@ public class TestServiceChat extends ServiceTestBase {
     protected IMemoryIntentHandler fakeMemoryIntentHandler;
     @Mock
     protected IEntityRecognizer fakeEntityRecognizer;
+    @Mock
+    protected ChatTelemetryLogger fakeChatTelemetryLogger;
 
     private static Object[] invalidMinPDataProvider() {
         return $(
@@ -108,11 +111,13 @@ public class TestServiceChat extends ServiceTestBase {
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeEntityRecognizer = mock(IEntityRecognizer.class);
+        this.fakeChatTelemetryLogger = mock(ChatTelemetryLogger.class);
 
         binder.bind(ChatLogic.class).to(ChatLogic.class);
 
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatTelemetryLogger)).to(ChatTelemetryLogger.class);
 
         return binder;
     }

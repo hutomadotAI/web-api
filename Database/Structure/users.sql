@@ -138,6 +138,8 @@ GRANT EXECUTE ON `hutoma`.* TO 'userTableReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`users` TO 'userTableReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`memoryIntent` TO 'userTableReader'@'127.0.0.1';
+
 
 # Privileges for `userTableWriter`@`127.0.0.1`
 

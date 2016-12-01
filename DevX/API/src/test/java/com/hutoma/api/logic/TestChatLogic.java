@@ -1,13 +1,12 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.connectors.NeuralNet;
 import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.containers.ApiChat;
@@ -51,36 +50,24 @@ public class TestChatLogic {
     private static final String MEMORY_VARIABLE_PROMPT = "prompt1";
     private static final String HISTORY_REST_DIRECTIVE = "@reset";
 
-    //http://mockito.org/
-    private JsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
-    private Database fakeDatabase;
-    private MessageQueue fakeMessageQueue;
-    private Config fakeConfig;
-    private Tools fakeTools;
     private NeuralNet fakeNeuralNet;
     private SemanticAnalysis fakeSemanticAnalysis;
     private ChatLogic chatLogic;
-    private ILogger fakeLogger;
     private IEntityRecognizer fakeRecognizer;
     private IMemoryIntentHandler fakeIntentHandler;
 
     @Before
     public void setup() {
-        this.fakeSerializer = mock(JsonSerializer.class);
-        this.fakeConfig = mock(Config.class);
-        when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
-        this.fakeDatabase = mock(Database.class);
+        Config fakeConfig = mock(Config.class);
+        when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
-        this.fakeTools = new FakeTimerTools();
-        this.fakeLogger = mock(ILogger.class);
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
-        this.chatLogic = new ChatLogic(this.fakeConfig, this.fakeSerializer, this.fakeSemanticAnalysis, this.fakeNeuralNet, this.fakeTools,
-                this.fakeLogger, this.fakeIntentHandler, this.fakeRecognizer);
+        this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeSemanticAnalysis, this.fakeNeuralNet, new FakeTimerTools(),
+                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, mock(ChatTelemetryLogger.class));
     }
 
     /***
