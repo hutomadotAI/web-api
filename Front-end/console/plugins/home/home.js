@@ -112,7 +112,8 @@ $(document).ready(function(){
             "searching": false,
             "ordering": false,
             "info": true,
-            "autoWidth": false
+            "autoWidth": false,
+            "pageLength": 5
         });
     });
 });
