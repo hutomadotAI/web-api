@@ -11,11 +11,19 @@ if(isset($_POST['action_login'])){
     if($identification == "" || $password == ""){
         $msg = array("Error", $loginerror);
     }else{
-        $login = \hutoma\console::login($identification, $password, isset($_POST['remember_me']));
-        if($login === false){
-            $msg = array("Error", $loginerror);
-        }else if(is_array($login) && $login['status'] == "blocked"){
-            $msg = array("Error", "Too many login attempts. You can try again after ". $login['minutes'] ." minutes (". $login['seconds'] ." seconds)");
+        try {
+            $login = \hutoma\console::login($identification, $password, isset($_POST['remember_me']));
+            if ($login === false) {
+                $msg = array("Error", $loginerror);
+            } else if (is_array($login) && $login['status'] == "blocked") {
+                $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
+            }
+        }
+        catch(Exception $e){
+            $servererror  ='<div class="alert alert-danger">';
+            $servererror .='<i class="icon fa fa-warning"></i> Server connection lost';
+            $servererror .='</div>';
+            $msg = array("Error", $servererror);
         }
     }
 }
