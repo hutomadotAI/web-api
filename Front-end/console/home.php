@@ -78,7 +78,20 @@ unset($aiApi);
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <script>
-    var aiList = <?php echo json_encode($response_getAIs['ai_list']); unset($response_getAIs);?>;
+    var aiList = <?php
+                $tmp_list='';
+                if (isset($response_getAIs) && (array_key_exists("ai_list",$response_getAIs))) {
+                    for ($i = 0, $l = count($response_getAIs['ai_list']); $i < $l; ++$i) {
+                        $tmp_list[$i]['aiid'] = $response_getAIs['ai_list'][$i]['aiid'];
+                        $tmp_list[$i]['name'] = $response_getAIs['ai_list'][$i]['name'];
+                        $tmp_list[$i]['description'] = $response_getAIs['ai_list'][$i]['description'];
+                        $tmp_list[$i]['ai_status'] = $response_getAIs['ai_list'][$i]['ai_status'];
+                    }
+                }
+                echo json_encode($tmp_list);
+                unset($response_getAIs);
+                unset($tmp_list);
+                ?>;
 </script>
 
 <form action="" method="post" enctype="multipart/form-data">
