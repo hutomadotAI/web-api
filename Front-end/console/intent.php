@@ -65,25 +65,25 @@ function echoJsonIntentsResponse($intents)
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper">
+    <div class="content-wrapper-chat">
         <section class="content">
             <div class="row">
-                <div class="col-md-7">
+                <div class="col-md-12">
                     <?php include './dynamic/intent.content.create.html.php'; ?>
                     <?php include './dynamic/intent.content.list.html.php'; ?>
                 </div>
-                <div class="col-md-5">
-                    <?php include './dynamic/chat.html.php'; ?>
-                    <?php include './dynamic/training.content.json.html.php'; ?>
-                </div>
             </div>
         </section>
+        <footer class="main-footer" style=" margin-left: 0px;">
+            <?php include './dynamic/footer.inc.html.php'; ?>
+        </footer>
     </div>
 
-
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <!-- ================ CHAT CONTENT ================= -->
+    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
+        <?php include './dynamic/chat.html.php'; ?>
+        <?php include './dynamic/training.content.json.html.php'; ?>
+    </aside>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
