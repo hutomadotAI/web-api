@@ -44,7 +44,7 @@ function setSessionVariables($singleAI)
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = localeToLanguage($singleAI['language']);
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone']['ID'];
 
     // TO DO getAiTrainingFile needs API call with response check before assigh the value
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
