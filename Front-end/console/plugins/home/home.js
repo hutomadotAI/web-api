@@ -58,6 +58,8 @@ function drawTableRows() {
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;"><button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '" onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;"><b> <span class="fa fa-search"></span> View AI </b></button></td>';
         newNode.innerHTML = wHTML;
         document.getElementById('tableAiList').appendChild(newNode);
+        var list = document.getElementById('tableAiList');
+        list.insertBefore(newNode, list.childNodes[0]);
 
     }
 
