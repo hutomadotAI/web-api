@@ -110,7 +110,7 @@ function localeToLanguage($locale)
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12" id="trainingBox">

@@ -4,6 +4,10 @@
     exit;
     }
 ?>
+<script>
+    var human =  'human';
+    var AI = <?php echo json_encode( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] ); ?>
+</script>
 <ul class="sidebar-menu" id="console-menu">
     <div class="box-header no-border text-gray text-center" style="background:#1e282c; color:#8A8A8A; height:35px; padding-top:10px;">
         <div class="box-title text-center text-gray" style="font-size: 12px;"> CHAT</div>

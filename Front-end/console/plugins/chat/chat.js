@@ -4,7 +4,6 @@ var speechResponse = 1; // voice activated true for default
 var jsonResponse   = '1'; // voice activated true for default
 var chatSemaphore = 0;
 
-
 if (isChrome) {
     unlockSpeechOption();
     document.getElementById('btnSpeech').addEventListener('click', start);
@@ -22,12 +21,12 @@ else{
 }
 
 function start(){
-    startDictation('human', 'AI');
+    startDictation(human, AI);
 }
 
 function keyboardChat(e){
     if(e.keyCode == 13 && document.getElementById("message").value )
-        createNodeChat('human','AI');
+        createNodeChat(human,AI);
 }
 
 function createNodeChat(human_name, ai_name) {
@@ -74,7 +73,6 @@ function createLeftMsg(human_name,msg){
         $('#chat').scrollTop( height );
     }
 }
-
 
 function createRightMsg(ai_name,msg,chatId,error) {
     // Update chatId if needed
