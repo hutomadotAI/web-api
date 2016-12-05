@@ -55,7 +55,7 @@ function createLeftMsg(human_name,msg){
     var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = '';
     wHTML +=('<div class="direct-chat-info clearfix">');
-    wHTML +=('<span class="direct-chat-name pull-left">');
+    wHTML +=('<span class="direct-chat-name pull-left" style="color:gray;">');
     wHTML +=(human_name);
     wHTML +=('</span>');
     wHTML +=('<span class="direct-chat-timestamp pull-right">'+date+'</span>');
@@ -90,7 +90,7 @@ function createRightMsg(ai_name,msg,chatId,error) {
     var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = "";
     wHTML += ('<div class="direct-chat-info clearfix">');
-    wHTML += ('<span class="direct-chat-name pull-right">');
+    wHTML += ('<span class="direct-chat-name pull-right" style="color:gray;">');
     wHTML += (ai_name);
     wHTML += ('</span>');
     wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
