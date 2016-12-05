@@ -72,7 +72,7 @@ function isPostInputAvailable()
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper-chat">
+    <div class="content-wrapper" style="margin-right:350px;">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
@@ -81,9 +81,6 @@ function isPostInputAvailable()
                 </div>
             </div>
         </section>
-        <footer class="main-footer" style=" margin-left: 0px;">
-            <?php include './dynamic/footer.inc.html.php'; ?>
-        </footer>
     </div>
 
     <!-- ================ CHAT CONTENT ================= -->
@@ -91,6 +88,10 @@ function isPostInputAvailable()
         <?php include './dynamic/chat.html.php'; ?>
         <?php include './dynamic/training.content.json.html.php'; ?>
     </aside>
+
+    <footer class="main-footer" style="margin-right:350px;">
+        <?php include './dynamic/footer.inc.html.php'; ?>
+    </footer>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

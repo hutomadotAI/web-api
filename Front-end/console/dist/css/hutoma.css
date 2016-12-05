@@ -89,6 +89,7 @@ body {
     -o-transition: -o-transform 0.3s ease-in-out, margin 0.3s ease-in-out;
     transition: transform 0.3s ease-in-out, margin 0.3s ease-in-out;
     margin-left: 230px; !important;
+    min-width:520px;
     z-index: 820;
 }
 
@@ -3540,7 +3541,7 @@ table.text-center th {
     position: absolute;
     top: 0;
     bottom: 0;
-    height: 250px;
+    height: 245px;
     width: 100%;
     background: #222d32;
     color: #fff;
@@ -6166,41 +6167,4 @@ ul.pagination li a {
 
 .container-fluid > .content {
     margin-right: 240px;
-}
-
-.content-wrapper-chat{
-    min-height: 100%;
-    background-color: #434343;
-    z-index: 800;
-}
-.content-wrapper-chat{
-    -webkit-transition: -webkit-transform 0.3s ease-in-out, margin 0.3s ease-in-out;
-    -moz-transition: -moz-transform 0.3s ease-in-out, margin 0.3s ease-in-out;
-    -o-transition: -o-transform 0.3s ease-in-out, margin 0.3s ease-in-out;
-    transition: transform 0.3s ease-in-out, margin 0.3s ease-in-out;
-    margin-left: 230px;
-    margin-right: 350px;
-    z-index: 820;
-}
-.layout-top-nav .content-wrapper-chat{
-    margin-left: 0;
-}
-
-@media (max-width: 767px) {
-    .fixed .content-wrapper-chat{
-        padding-top: 100px;
-    }
-}
-
-.fixed .content-wrapper-chat{
-    padding-top: 50px;
-}
-
-@media (max-width: 767px) {
-    .sidebar-open .content-wrapper-chat {
-        -webkit-transform: translate(350px, 0);
-        -ms-transform: translate(350px, 0);
-        -o-transform: translate(350px, 0);
-        transform: translate(350px, 0);
-    }
 }
