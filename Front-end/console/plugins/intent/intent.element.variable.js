@@ -42,9 +42,9 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off" onClick="pushEntitiesList(this)">');
+        wHTML += ('<select class="select form-control flat" name="action-entity" id="action-entity" style="background-color: transparent; margin:0;" onClick="pushEntitiesList(this)"><option value ="add entity">add entity</option></select>');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" value="' + entity + '" autocomplete="off" onClick="pushEntitiesList(this)">');
+        wHTML += ('<select class="select form-control flat" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" onClick="pushEntitiesList(this)"><option value="' + entity + '">' + entity + '</option></select></select>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -104,18 +104,6 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     newNode.style.marginTop ='1px';
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
-
-    // be carefull - this is the treepath for input entity list
-    var inputNode = newNode.children[0].children[0].children[0];
-    var inputNodePrompt = newNode.children[2].children[0].children[0];
-
-    // after selection add value on input text and set placeholder
-    $(inputNode).on('omniselect:select', function (event, value) {
-        $(inputNode).attr('value', value);
-        $(inputNode).attr('placeholder', value);
-        //pass to node prompt on data-prompt attribute the value on current selected entity
-        $(inputNodePrompt).attr('data-entity', value);
-    });
 }
 
 function isUsedEntities(entity_name) {
@@ -123,7 +111,11 @@ function isUsedEntities(entity_name) {
     var len = parent.childElementCount;
     while (len--) {
         var node = parent.children[len].children[0].children[0].children[0];
-        if (node.placeholder.replace(/[@]/g, "") == entity_name)
+
+        var value = node.options[node.selectedIndex].value;
+        var text = node.options[node.selectedIndex].text;
+
+        if (text.replace(/[@]/g, "") == entity_name)
             return true;
     }
     return false;
@@ -132,26 +124,22 @@ function isUsedEntities(entity_name) {
 function pushEntitiesList(node){
     var new_array = [];
     // loading stored entities
+    var options = [];
+
     for (var x in entityListFromServer) {
         // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
-        if (!isUsedEntities(entityListFromServer[x]) ||  node.placeholder.replace(/[@]/g, "") == entityListFromServer[x])
+        if (!isUsedEntities(entityListFromServer[x]) ||  node.value.replace(/[@]/g, "") == entityListFromServer[x]) {
+            var data = '<option value = "'+entityListFromServer[x]+'">'+entityListFromServer[x]+'</option>';
+            options.push(data);
+            node.innerHTML = options.join('\n');
             new_array.push('@' + entityListFromServer[x]);
-    }
-    // TODO: refresh dropdown menu showed
-    //$('<ol></ol>').selectmenu("refresh");
-    $(node).omniselect({
-        source: new_array,
-        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
-        activeClass: 'active',
-        renderItem: function (label, id, index) {
-            return '<li><a href="#">' +label + '</a></li>';
         }
-    });
+    }
 }
 
 function variableOnMouseIn(elem) {
-    var btn = elem.children[3].children[0].children[1].children[0];
-    btn.style.display = '';
+   var btn = elem.children[3].children[0].children[1].children[0];
+   btn.style.display = '';
 }
 
 function variableOnMouseOut(elem) {
@@ -206,4 +194,3 @@ function cleanupromptDialogbox() {
 $(document).ready(function () {
     loadVariablesFromIntent();
 });
-

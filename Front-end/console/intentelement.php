@@ -71,6 +71,7 @@ function echoJsonIntentResponse($intent)
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
@@ -125,6 +126,7 @@ function echoJsonIntentResponse($intent)
 <script src="./plugins/jQuery/jquery.omniselect.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/validation/validation.js"></script>
+<script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/intent/intent.element.response.js"></script>
 <script src="./plugins/intent/intent.element.expression.js"></script>
 <script src="./plugins/intent/intent.element.js"></script>
