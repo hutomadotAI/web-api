@@ -38,13 +38,14 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     var wHTML = '';
 
+
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML += ('<select class="select form-control flat" name="action-entity" id="action-entity" style="background-color: transparent; margin:0;" onClick="pushEntitiesList(this)"><option value ="add entity">add entity</option></select>');
+        wHTML +=drawObj('');
     else
-        wHTML += ('<select class="select form-control flat" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" onClick="pushEntitiesList(this)"><option value="' + entity + '">' + entity + '</option></select></select>');
+        wHTML +=drawObj(entity);
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -106,15 +107,30 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     parent.insertBefore(newNode, parent.firstChild);
 }
 
+function drawObj(value) {
+    var wHTML = '';
+    wHTML += ('<a class="btn btn-select btn-primary btn-select-light" onClick="pushEntitiesList(this)">');
+    wHTML += ('<input type="hidden" class="btn-select-input" id="" name="" value="" />');
+    if ( value!='')
+        wHTML += ('<span class="btn-select-value">'+value+'</span>');
+    else
+        wHTML += ('<span class="btn-select-value">add entity</span>');
+    wHTML += ('<span class="btn-select-arrow text-sm glyphicon glyphicon-chevron-down"></span>');
+    wHTML += ('<ul style="display: none;">');
+    wHTML += ('<li class="selected">'+value+'</li>');
+    wHTML += ('</ul>');
+    wHTML += ('</a>');
+    return wHTML;
+}
+
 function isUsedEntities(entity_name) {
     var parent = document.getElementById('parameter-list');
     var len = parent.childElementCount;
     while (len--) {
         var node = parent.children[len].children[0].children[0].children[0];
-
-        var value = node.options[node.selectedIndex].value;
-        var text = node.options[node.selectedIndex].text;
-
+        var container = $(node).find("ul");
+        var elem = container.find("li.selected");
+        var text = elem.text();
         if (text.replace(/[@]/g, "") == entity_name)
             return true;
     }
@@ -122,17 +138,34 @@ function isUsedEntities(entity_name) {
 }
 
 function pushEntitiesList(node){
-    var new_array = [];
-    // loading stored entities
-    var options = [];
+    resetMsgAlertIntentVariable();
+    
+    var container = $(node).find( "ul" );
+    var selected = container.find("li.selected");
+
+    var parent = node.parentElement;
+    var ul = parent.children[0].children[3];
+
+    // if dropdown is visible exit without refresh list
+    if ( ul.style.display =='block')
+        return;
+
+    // remove all list of child inside UL node
+    var fc = ul.firstChild;
+    while( fc ) {
+        ul.removeChild( fc );
+        fc = ul.firstChild;
+    }
 
     for (var x in entityListFromServer) {
         // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
-        if (!isUsedEntities(entityListFromServer[x]) ||  node.value.replace(/[@]/g, "") == entityListFromServer[x]) {
-            var data = '<option value = "'+entityListFromServer[x]+'">'+entityListFromServer[x]+'</option>';
-            options.push(data);
-            node.innerHTML = options.join('\n');
-            new_array.push('@' + entityListFromServer[x]);
+        if (!isUsedEntities(entityListFromServer[x]) ||  selected.text().replace(/[@]/g, "") == entityListFromServer[x]) {
+            var elem = document.createElement('li');
+            // if elem was selected, maintain this selection on new list
+            if (selected.text().replace(/[@]/g, "") == entityListFromServer[x])
+                elem.className = 'selected';
+            elem.innerHTML = '@'+entityListFromServer[x];
+            container.append(elem);
         }
     }
 }
@@ -173,7 +206,8 @@ function isJustAddedNewRow() {
 
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
-    if (node.placeholder == 'add entity') {
+    var elem = $(node).find("ul").find("li.selected");
+    if (elem.text()  == '') {
         msgAlertIntentVariable(1, 'Complete field first before add a new line');
         return true;
     }

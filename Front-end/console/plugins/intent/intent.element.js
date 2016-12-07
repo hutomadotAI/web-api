@@ -31,24 +31,25 @@ function saveIntent() {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
+    if ( len == 0 ){
+        msgAlertIntentVariable(2, 'Cannot save. The intents needs contains at least one variables row');
+        msgAlertIntentElement(2,'Not saved!!');
+        return false;
+    }
+
     for (var i = 0; i < len; i++) {
         var v = {};
 
         //*** check validation entity name
         var node_entity = node.children[i].children[0].children[0].children[0];
-        if ( node_entity.getAttribute('placeholder') == 'add entity'){
+        var elem = $(node_entity).find("ul").find("li.selected");
+        if ( elem.text() == ''){
             msgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
             msgAlertIntentElement(2,'Not saved!!');
             return false;
         }
 
-        if ( !isEntityExists(node_entity.getAttribute('placeholder').replace(/[@]/g, ""),node_entity.value)){
-            msgAlertIntentVariable(2, 'Cannot save. Unexisting entity on row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
-            return false;
-        }
-
-        v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
+        v['entity_name']= elem.text().replace(/[@]/g, "");
 
 
         //*** check validation n prompt
@@ -78,7 +79,7 @@ function saveIntent() {
         var list_prompt =  node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
         if (list_prompt == '' || prompts_split.length == 0){
-            msgAlertIntentVariable(2, 'Cannot save. The prompt list needs conttains at least one value at row '+(i+1));
+            msgAlertIntentVariable(2, 'Cannot save. The prompt list needs contains at least one value at row '+(i+1));
             msgAlertIntentElement(2,'Not saved!!');
             return false;
         }
@@ -123,23 +124,13 @@ function saveIntent() {
     });
 }
 
-function isEntityExists(placeholder,value) {
-    var len = entityListFromServer.length;
-
-    while (len--) {
-        if (entityListFromServer[len] == value.replace(/[@]/g, ""))
-            return true;
-    }
-    return false;
-
-}
-
 $('#boxPrompts').on('show.bs.modal', function (e) {
     var parent =$(e.relatedTarget).parent().parent().parent();
 
     //send to modal current entity name selected from first node in the current variables row selected
     var node_entity  = parent.children().children().children();
-    var curr_entity = node_entity.attr('placeholder');
+    var elem = $(node_entity).find("ul").find("li.selected");
+    var curr_entity = elem.text();
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
 
     //send to modal current intent store in data-intent html

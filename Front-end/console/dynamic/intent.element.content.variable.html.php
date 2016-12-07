@@ -74,4 +74,5 @@
         <button type="button" class="btn btn-primary flat pull-right" id="addParameter" value="">Add parameter</button>
 
     </div>
+
 </div>

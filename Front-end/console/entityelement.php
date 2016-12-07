@@ -52,6 +52,7 @@ function isPostInputAvailable()
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
@@ -103,6 +104,7 @@ function isPostInputAvailable()
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/entity/entity.element.js"></script>
+<script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 
