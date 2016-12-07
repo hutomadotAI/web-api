@@ -53,6 +53,7 @@ function addIntentPrompt() {
 
     createNewPromptRow(value, parent);
     msgAlertIntentPrompt(0,'You can add additional an user expression');
+    
     resetMsgAlertIntentVariable();
 }
 

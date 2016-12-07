@@ -51,7 +51,7 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetMsgAlertIntentVariable()">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetBorderHighlightError(this)">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -59,17 +59,17 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('<div class="text-center" >');
 
     if (size > 0)
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
+        wHTML += ('<input type="text" class="form-control flat no-shadow text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder=" ... " ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
+        wHTML += ('<input type="text" class="form-control flat no-shadow text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -135,7 +135,7 @@ function isUsedEntities(entity_name) {
 }
 
 function pushEntitiesList(node){
-    resetMsgAlertIntentVariable();
+    resetBorderHighlightError(node);
     
     var container = $(node).find( "ul" );
     var selected = container.find("li.selected");
@@ -189,7 +189,12 @@ function deleteIntentVariable(element) {
     resetMsgAlertIntentVariable();
 }
 
-function resetMsgAlertIntentVariable() {
+function resetBorderHighlightError(node){
+    node.style.border = "";
+    resetMsgAlertIntentVariable();
+}
+
+function resetMsgAlertIntentVariable(elem) {
     msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
     msgAlertIntentElement(0,'Set the variables used by the intent.');
 }
