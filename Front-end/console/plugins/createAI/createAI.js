@@ -17,7 +17,7 @@ function wizardNext() {
 
     for (var i=0; i<name_list.length; i++) {
         if (value_name.replace(/\s+$/, '') == name_list[i]) {
-            msgAlertNameAI(2, 'Ai name already exists. Please select another name.');
+            msgAlertNameAI(2, 'This name is already used for another AI. Please choose another name.');
             return;
         }
     }
