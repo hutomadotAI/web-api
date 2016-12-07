@@ -100,11 +100,6 @@ public class TestAiServicesClient {
     }
 
     @Test
-    public void testWakeTraining() throws AIServices.AiServicesException {
-        this.aiServices.wakeNeuralNet(DEVID, AIID);
-    }
-
-    @Test
     public void testUpdateTraining() throws AIServices.AiServicesException {
         this.aiServices.updateTraining(DEVID, AIID);
     }

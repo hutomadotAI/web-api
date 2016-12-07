@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.SemanticAnalysis;
+import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.sub.ChatResult;
 import io.mikael.urlbuilder.UrlBuilder;
 
@@ -26,7 +26,7 @@ import java.net.URL;
 /**
  * Created by mauriziocibelli on 29/08/16.
  */
-public class precision_recall  {
+public class precision_recall {
 
     private final String LOGFROM = "wnetconnector";
     ILogger logger;
@@ -37,7 +37,7 @@ public class precision_recall  {
     private String AIID = "deck";
     private String UID = "uid";
 
-    public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p) throws SemanticAnalysis.SemanticAnalysisException {
+    public ChatResult getAnswer(String devid, String aiid, String uid, String topic, String q, float min_p) throws ServerConnector.AiServicesException {
         try {
             UrlBuilder url = UrlBuilder.fromString("http://52.2.184.105/similarity")
                     .addParameter("q", q)
@@ -51,21 +51,21 @@ public class precision_recall  {
 
             URL finalUrl = new URL(url.toString());
             InputStream stream = finalUrl.openStream();
-            ChatResult result = (ChatResult) serializer.deserialize(stream, ChatResult.class);
+            ChatResult result = (ChatResult) this.serializer.deserialize(stream, ChatResult.class);
             return result;
         } catch (JsonParseException jp) {
-            logger.logError(LOGFROM, "failed to deserialize json result from SemanticAnalysis server: ");
-            throw new SemanticAnalysis.SemanticAnalysisException(jp);
+            this.logger.logError(this.LOGFROM, "failed to deserialize json result from SemanticAnalysis server: ");
+            throw new ServerConnector.AiServicesException(jp.toString());
         } catch (IOException e) {
-            logger.logError(LOGFROM, "failed to contact SemanticAnalysis server: " + e.toString());
-            throw new SemanticAnalysis.SemanticAnalysisException(e);
+            this.logger.logError(this.LOGFROM, "failed to contact SemanticAnalysis server: " + e.toString());
+            throw new ServerConnector.AiServicesException(e.toString());
         }
     }
 
-    public  String curl(String role, String method, String endpoint) throws IOException {
+    public String curl(String role, String method, String endpoint) throws IOException {
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("Authorization", "Bearer "+role);
+        con.setRequestProperty("Authorization", "Bearer " + role);
         con.setRequestMethod(method);
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -79,7 +79,7 @@ public class precision_recall  {
     public void RecallHutoma() throws IOException {
 
 
-        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(q_path));
+        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(this.q_path));
         HSSFWorkbook wb = new HSSFWorkbook(fs);
         HSSFSheet sheet = wb.getSheetAt(0);
         HSSFRow row;
@@ -99,14 +99,16 @@ public class precision_recall  {
                 if (apiResult.getAnswer().replace("\n", "").equals(a))
                     System.out.println("1\t" + (++good / (good + not_good) * 100) + "%");
                 else System.out.println("0\t" + (good / (good + ++not_good) * 100) + "%");
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                System.out.println(String.format("Error: %s", e.toString()));
+            }
 
         }
     }
 
     @Test
     public void RecallApiAI() throws IOException {
-        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(q_path));
+        POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(this.q_path));
         HSSFWorkbook wb = new HSSFWorkbook(fs);
         HSSFSheet sheet = wb.getSheetAt(0);
         HSSFRow row;
@@ -128,12 +130,13 @@ public class precision_recall  {
                     System.out.println("1\t" + (++good / (good + not_good) * 100) + "%");
                 else System.out.println("0\t" + (good / (good + ++not_good) * 100) + "%");
             } catch (Exception e) {
+                System.out.println(String.format("Error: %s", e.toString()));
             }
         }
     }
 
     @Test
-    public void recallWatson() throws IOException, InterruptedException, SemanticAnalysis.SemanticAnalysisException {
+    public void recallWatson() throws IOException, InterruptedException {
 
 //            // upload training file
 //            ProcessBuilder pb = new ProcessBuilder("curl", "-X","POST", "https://gateway.watsonplatform.net/conversation/api/v1/workspaces/444b2461-1cca-43fc-afaa-a820ffcd9b03/message?version=2016-07-11","-u","\"2677e839-b392-45ff-97c9-07e99c2695ef\":\"Hr154xulLdJv\"","-H","\"Content-Type:application/json\"","-d","\"{\\\"input\\\": {\\\"text\\\": \\\""+q.replace(" ","%20")+"\\\"}}\"");
@@ -153,8 +156,8 @@ public class precision_recall  {
 //            }
     }
 
-    private ChatResult getChat(String q) throws SemanticAnalysis.SemanticAnalysisException {
-        ChatResult semanticAnalysisResult = getAnswer(DEVID, AIID, UID, "", q, 0);
+    private ChatResult getChat(String q) throws ServerConnector.AiServicesException {
+        ChatResult semanticAnalysisResult = getAnswer(this.DEVID, this.AIID, this.UID, "", q, 0);
         return semanticAnalysisResult;
     }
 

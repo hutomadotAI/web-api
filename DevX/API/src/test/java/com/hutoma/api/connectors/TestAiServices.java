@@ -101,21 +101,6 @@ public class TestAiServices {
     }
 
     @Test
-    public void testWakeNeuralNet() throws AIServices.AiServicesException {
-        testCommand((a, b) -> this.aiServices.wakeNeuralNet(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testWakeNeuralNet_serverError() throws AIServices.AiServicesException {
-        testCommand_serverError((a, b) -> this.aiServices.wakeNeuralNet(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testWakeNeuralNet_response_noEntity() throws AIServices.AiServicesException {
-        testCommand_response_noEntity((a, b) -> this.aiServices.wakeNeuralNet(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test
     public void testDeleteAI() throws AIServices.AiServicesException {
         testCommand((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
     }

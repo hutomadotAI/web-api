@@ -19,6 +19,7 @@ public class ChatResult {
     private String topic_out = "";
     private UUID chatId;
     private List<MemoryIntent> intents;
+    private transient boolean resetConversation;
 
     public ChatResult() {
     }
@@ -30,10 +31,8 @@ public class ChatResult {
      */
     public ChatResult(final ChatResult source) {
         this.score = source.score;
-        this.query = source.query;
         this.answer = source.answer;
         this.elapsed_time = source.elapsed_time;
-        this.topic_in = source.topic_in;
         this.topic_out = source.topic_out;
     }
 
@@ -103,5 +102,13 @@ public class ChatResult {
 
     public void setHistory(String history) {
         this.history = history;
+    }
+
+    public boolean isResetConversation() {
+        return this.resetConversation;
+    }
+
+    public void setResetConversation(final boolean resetConversation) {
+        this.resetConversation = resetConversation;
     }
 }

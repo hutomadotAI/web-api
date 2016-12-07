@@ -6,8 +6,8 @@ import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.NeuralNet;
-import com.hutoma.api.connectors.SemanticAnalysis;
+import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -35,22 +35,21 @@ public class ChatLogic {
     private static final String HISTORY_REST_DIRECTIVE = "@reset";
     private final Config config;
     private final JsonSerializer jsonSerializer;
-    private final SemanticAnalysis semanticAnalysis;
-    private final NeuralNet neuralNet;
     private final Tools tools;
     private final ILogger logger;
     private final IMemoryIntentHandler intentHandler;
     private final IEntityRecognizer entityRecognizer;
+    private final AIChatServices chatServices;
 
+    private Map<String, String> telemetryMap;
 
     @Inject
-    public ChatLogic(Config config, JsonSerializer jsonSerializer, SemanticAnalysis semanticAnalysis,
-                     NeuralNet neuralNet, Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
+    public ChatLogic(Config config, JsonSerializer jsonSerializer, AIChatServices chatServices,
+                     Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
                      IEntityRecognizer entityRecognizer) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
-        this.semanticAnalysis = semanticAnalysis;
-        this.neuralNet = neuralNet;
+        this.chatServices = chatServices;
         this.tools = tools;
         this.logger = logger;
         this.intentHandler = intentHandler;
@@ -60,18 +59,16 @@ public class ChatLogic {
     public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
                           String history, String topic, float minP) {
 
-        long timestampNow = this.tools.getTimestamp();
+        // start timestamp
+        long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
-        ApiChat apiChat = new ApiChat(chatUuid, timestampNow);
-        ChatResult chatResult = new ChatResult();
-        apiChat.setResult(chatResult);
+        // prepare the result container
+        ApiChat apiChat = new ApiChat(chatUuid, startTime);
         apiChat.setID(chatUuid);
 
-        long startTime = timestampNow;
-
         // Add telemetry for the request
-        Map<String, String> telemetryMap = new HashMap<String, String>() {
+        this.telemetryMap = new HashMap<String, String>() {
             {
                 put("DevId", devId);
                 put("AIID", aiid.toString());
@@ -84,131 +81,147 @@ public class ChatLogic {
             }
         };
 
-        boolean noResponse = true;
-        boolean resetHistory = false;
         try {
             this.logger.logDebug(LOGFROM, "chat request for dev " + devId + " on ai " + aiid.toString());
 
-            // async start both requests
-            this.semanticAnalysis.startAnswerRequest(devId, aiid, chatUuid, topic, history, question, minP);
-            this.neuralNet.startAnswerRequest(devId, aiid, chatUuid, question);
+            // async start requests to all servers
+            this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history, topic);
 
-            // wait for semantic result to complete
-            ChatResult semanticAnalysisResult = this.semanticAnalysis.getAnswerResult();
+            // wait for WNET to return
+            ChatResult result = this.interpretSemanticResult(startTime);
 
-            // process result from semantic analysis
-            if (null != semanticAnalysisResult.getAnswer()) {
+            // are we confident enough with this reply?
+            boolean wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
+            this.telemetryMap.put("WNETConfident", Boolean.toString(wnetConfident));
 
-                // if we receive a reset command then remove the command and flag the status
-                if (semanticAnalysisResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
-                    resetHistory = true;
-                    semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer()
-                            .replace(HISTORY_REST_DIRECTIVE, ""));
+            if (wnetConfident) {
+                // if we are taking WNET's reply then process intents
+                this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap);
+            } else {
+                // otherwise,
+                // wait for the AIML server to respond
+                result = this.interpretAimlResult(startTime);
+
+                // are we confident enough with this reply?
+                boolean aimlConfident = (result.getScore() > 0.0d);
+                this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
+
+                if (!aimlConfident) {
+                    // get a response from the RNN
+                    result = this.interpretRnnResult(startTime);
                 }
-
-                // remove trailing newline
-                semanticAnalysisResult.setAnswer(semanticAnalysisResult.getAnswer().trim());
-
-                if (!semanticAnalysisResult.getAnswer().isEmpty()) {
-                    noResponse = false;
-                }
-
-                double semanticScore = semanticAnalysisResult.getScore();
-                chatResult.setChatId(chatUuid);
-                chatResult.setScore(toOneDecimalPlace(semanticScore));
-                chatResult.setTopic_out(semanticAnalysisResult.getTopic_out());
-                chatResult.setAnswer(semanticAnalysisResult.getAnswer());
-
-                long endWNetTime = this.tools.getTimestamp();
-                chatResult.setElapsedTime((endWNetTime - startTime) / 1000.0d);
-
-                apiChat.setTimestamp(endWNetTime);
-
-                this.logger.logDebug(LOGFROM, String.format("WNET response in %dms with confidence %f",
-                        (endWNetTime - startTime), chatResult.getScore()));
-
-                telemetryMap.put("WNETAnswer", chatResult.getAnswer());
-                telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
-                telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
-
-                // if semantic analysis is not confident enough, wait for and process result from neural network
-                if ((semanticScore < minP) || (0.0d == semanticScore)) {
-
-                    telemetryMap.put("WNETConfident", "false");
-
-                    // wait for neural network to complete
-                    String rnnAnswer = this.neuralNet.getAnswerResult(devId, aiid);
-                    if (!rnnAnswer.isEmpty()) {
-                        noResponse = false;
-                    }
-                    long endRNNTime = this.tools.getTimestamp();
-
-                    boolean validRNN = false;
-                    if (!rnnAnswer.isEmpty()) {
-                        // rnn returns result in the form
-                        // 0.157760821867|tell me then .
-                        int splitIndex = rnnAnswer.indexOf('|');
-                        if (splitIndex > 0) {
-                            double neuralNetConfidence = Double.valueOf(rnnAnswer.substring(0, splitIndex));
-                            chatResult.setAnswer(rnnAnswer.substring(splitIndex + 1).trim());
-                            chatResult.setScore(toOneDecimalPlace(neuralNetConfidence));
-                            chatResult.setElapsedTime((endRNNTime - startTime) / 1000.0d);
-                            validRNN = true;
-                        }
-                    }
-                    if (validRNN) {
-                        this.logger.logDebug(LOGFROM, String.format("RNN response in %dms with confidence %f",
-                                (endRNNTime - startTime), chatResult.getScore()));
-                    } else {
-                        this.logger.logDebug(LOGFROM, String.format("RNN invalid/empty response in %dms",
-                                (endRNNTime - startTime)));
-                    }
-
-                    telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
-                    telemetryMap.put("RNNValid", Boolean.toString(validRNN));
-                    // TODO: potentially PII info
-                    telemetryMap.put("RNNAnswer", chatResult.getAnswer());
-                    telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
-                }
-
-                this.handleIntents(chatResult, devId, aiid, chatUuid, question, telemetryMap);
-
-                // set the history to the answer, unless we have received a reset command,
-                // in which case send an empty string
-                chatResult.setHistory(resetHistory ? "" : chatResult.getAnswer());
             }
-        } catch (NeuralNet.NeuralNetAiNotFoundException notFoundException) {
-            this.logger.logError(LOGFROM, "neural net not found");
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", notFoundException, telemetryMap);
-            return ApiError.getNotFound("ai not found");
-        } catch (NeuralNet.NeuralNetNotRespondingException nr) {
-            this.logger.logError(LOGFROM, "neural net did not respond in time");
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nr, telemetryMap);
-            return ApiError.getNoResponse("unable to respond in time. try again");
-        } catch (NeuralNet.NeuralNetRejectedAiStatusException rejected) {
+
+            // set the history to the answer, unless we have received a reset command,
+            // in which case send an empty string
+            result.setHistory(result.isResetConversation() ? "" : result.getAnswer());
+
+            // prepare to send back a result
+            result.setScore(toOneDecimalPlace(result.getScore()));
+            apiChat.setResult(result);
+
+        } catch (AIChatServices.AiNotFoundException notFoundException) {
+            this.logger.logError(LOGFROM, String.format("%s did not find ai %s", notFoundException.getMessage(), aiid));
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", notFoundException, this.telemetryMap);
+            return ApiError.getNotFound("AI not found");
+
+        } catch (AIChatServices.AiRejectedStatusException rejected) {
             this.logger.logError(LOGFROM,
                     "question rejected because AI is in the wrong state: " + rejected.getMessage());
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", rejected, telemetryMap);
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", rejected, this.telemetryMap);
             return ApiError.getBadRequest("This AI is not trained. Check the status and try again.");
-        } catch (NeuralNet.NeuralNetException nne) {
-            this.logger.logError(LOGFROM, "neural net exception: " + nne.toString());
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", nne, telemetryMap);
+
+        } catch (ServerConnector.AiServicesException aiException) {
+            this.logger.logError(LOGFROM, "AI services exception: " + aiException.toString());
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", aiException, this.telemetryMap);
             return ApiError.getInternalServerError();
-        } catch (Exception ex) {
-            this.logger.logError(LOGFROM, "AI chat request exception: " + ex.toString());
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", ex, telemetryMap);
-            // log the error but don't return a 500
-            // because the error may have occurred on the second request and the first may have completed correctly
+
+        } catch (IntentException ex) {
+            this.logger.logError(LOGFROM, ex.toString());
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", ex, this.telemetryMap);
+            return ApiError.getInternalServerError();
+
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, "AI chat request exception: " + e.toString());
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", e, this.telemetryMap);
+            return ApiError.getInternalServerError();
+
+        } finally {
+            // once we've picked a result, abandon all the others to prevent hanging threads
+            this.chatServices.abandonCalls();
         }
-        if (noResponse) {
-            this.logger.logError(LOGFROM, "chat server returned an empty response");
-            telemetryMap.put("EventType", "No response");
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", telemetryMap);
-            return ApiError.getInternalServerError();
+        // log the results
+        ITelemetry.addTelemetryEvent(this.logger, "ApiChat", this.telemetryMap);
+        return apiChat.setSuccessStatus();
+    }
+
+    private ChatResult interpretSemanticResult(long startTime) throws ServerConnector.AiServicesException {
+
+        // wait for result to complete
+        ChatResult chatResult = this.chatServices.awaitWnet();
+
+        // if we receive a reset command then remove the command and flag the status
+        if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
+            chatResult.setResetConversation(true);
+            chatResult.setAnswer(chatResult.getAnswer()
+                    .replace(HISTORY_REST_DIRECTIVE, ""));
+        } else {
+            chatResult.setResetConversation(false);
         }
 
-        ITelemetry.addTelemetryEvent(this.logger, "ApiChat", telemetryMap);
-        return apiChat.setSuccessStatus();
+        // remove trailing newline
+        chatResult.setAnswer(chatResult.getAnswer().trim());
+        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
+
+        this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",
+                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
+
+        this.telemetryMap.put("WNETAnswer", chatResult.getAnswer());
+        this.telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
+        this.telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
+        return chatResult;
+    }
+
+    private ChatResult interpretAimlResult(long startTime) throws ServerConnector.AiServicesException {
+
+        // wait for result to complete
+        ChatResult chatResult = this.chatServices.awaitAiml();
+
+        // always reset the conversation if we have gone with a non-wnet result
+        chatResult.setResetConversation(true);
+
+        // remove trailing newline
+        chatResult.setAnswer(chatResult.getAnswer().trim());
+        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
+
+        this.logger.logDebug(LOGFROM, String.format("AIML response in time %f with confidence %f",
+                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
+
+        this.telemetryMap.put("AIMLAnswer", chatResult.getAnswer());
+        this.telemetryMap.put("AIMLElapsedTime", Double.toString(chatResult.getElapsedTime()));
+        return chatResult;
+    }
+
+    private ChatResult interpretRnnResult(long startTime) throws ServerConnector.AiServicesException {
+
+        // wait for result to complete
+        ChatResult chatResult = this.chatServices.awaitRnn();
+
+        // always reset the conversation if we have gone with a non-wnet result
+        chatResult.setResetConversation(true);
+
+        // remove trailing newline
+        chatResult.setAnswer(chatResult.getAnswer().trim());
+        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
+
+        this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
+                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
+
+        this.telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
+        this.telemetryMap.put("RNNAnswer", chatResult.getAnswer());
+        this.telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
+
+        return chatResult;
     }
 
     private double toOneDecimalPlace(double input) {
@@ -224,7 +237,7 @@ public class ChatLogic {
      * @param telemetryMap the telemetry map
      */
     private void handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
-                               final String question, final Map<String, String> telemetryMap) throws Exception {
+                               final String question, final Map<String, String> telemetryMap) throws IntentException {
         // Now that have the chat result, we need to check if there's an intent being returned
         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
                 devId, aiid, chatUuid, chatResult.getAnswer());
@@ -257,8 +270,9 @@ public class ChatLogic {
                         if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                             // Should not happen as this should be validated during creation
                             this.logger.logError(LOGFROM, "Variable with no prompts defined!");
-                            throw new Exception(String.format("Entity %s for intent %s does not specify any prompts",
-                                    memoryIntent.getName(), variable.getName()));
+                            throw new IntentException(
+                                    String.format("Entity %s for intent %s does not specify any prompts",
+                                            memoryIntent.getName(), variable.getName()));
                         } else {
 
                             // And prompt the user for the value for that variable
@@ -302,6 +316,13 @@ public class ChatLogic {
         telemetryMap.put("IntentFulfilled", memoryIntent.getName());
 
     }
+
+    static class IntentException extends Exception {
+        public IntentException(final String message) {
+            super(message);
+        }
+    }
+
 }
 
 

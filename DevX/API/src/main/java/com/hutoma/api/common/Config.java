@@ -147,12 +147,16 @@ public class Config {
         return getCSList("gpu_training_endpoint");
     }
 
-    public String getAliceURI() {
-        return getConfigFromProperties("aliceBot", "https://www.hutoma.com:8443/api/hutoma/demochat?aid=384");
+    public String getWnetChatEndpoint() {
+        return getConfigFromProperties("wnet_chat_endpoint", "");
     }
 
-    public String getAliceID() {
-        return getConfigFromProperties("aliceAIID", "6ea04c96-2ec3-4a5a-bd46-81742e38aab0");
+    public String getAimlChatEndpoint() {
+        return getConfigFromProperties("aiml_chat_endpoint", "");
+    }
+
+    public String getRnnChatEndpoint() {
+        return getConfigFromProperties("rnn_chat_endpoint", "");
     }
 
     public String getLoggingServiceUrl() {
@@ -163,13 +167,6 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
-    private List<String> getCSList(final String propertyName) {
-        String instances = getConfigFromProperties(propertyName, null);
-        if (instances != null && !instances.isEmpty()) {
-            return Arrays.asList(instances.split(","));
-        }
-        return new ArrayList<>();
-    }
     public void dumpApiEnvironmentVars() {
         System.getenv().entrySet().stream().forEach(e -> {
             if (e.getKey().startsWith(API_ENV_PREFIX)) {
@@ -183,6 +180,14 @@ public class Config {
         if (this.getEncodingKey() == null || this.getEncodingKey().isEmpty()) {
             throw new Exception("Encoding key hasn't been defined");
         }
+    }
+
+    private List<String> getCSList(final String propertyName) {
+        String instances = getConfigFromProperties(propertyName, null);
+        if (instances != null && !instances.isEmpty()) {
+            return Arrays.asList(instances.split(","));
+        }
+        return new ArrayList<>();
     }
 
     private String getConfigFromEnvironment(String propertyName) {
