@@ -31,12 +31,6 @@ function saveIntent() {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    if ( len == 0 ){
-        msgAlertIntentVariable(2, 'Cannot save. The intents needs contains at least one variables row');
-        msgAlertIntentElement(2,'Not saved!!');
-        return false;
-    }
-
     for (var i = 0; i < len; i++) {
         var v = {};
 
@@ -45,7 +39,7 @@ function saveIntent() {
         var elem = $(node_entity).find("ul").find("li.selected");
         if ( elem.text() == ''){
             msgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
+            msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
 
@@ -58,7 +52,7 @@ function saveIntent() {
         if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
                 msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99 at row '+(i+1));
-                msgAlertIntentElement(2,'Not saved!!');
+                msgAlertIntentElement(2,'Intent not saved!');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
@@ -67,7 +61,7 @@ function saveIntent() {
 
         if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
             msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value at row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
+            msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
 
@@ -79,8 +73,8 @@ function saveIntent() {
         var list_prompt =  node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
         if (list_prompt == '' || prompts_split.length == 0){
-            msgAlertIntentVariable(2, 'Cannot save. The prompt list needs contains at least one value at row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
+            msgAlertIntentVariable(2, 'Cannot save. Please add at least one prompt for the entity on row '+(i+1));
+            msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
 
@@ -111,7 +105,7 @@ function saveIntent() {
         },
         type: 'POST',
         success: function (result) {
-            msgAlertIntentElement(4,'Saved!!');
+            msgAlertIntentElement(4,'Intent saved!!');
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
@@ -119,7 +113,7 @@ function saveIntent() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
-            msgAlertIntentElement(2,'Not saved!!');
+            msgAlertIntentElement(2,'Intent not saved!');
         }
     });
 }
