@@ -128,7 +128,7 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
 
     //send to modal current intent store in data-intent html
-    var curr_intent = $(e.relatedTarget).data('intent');
+    var curr_intent = document.getElementById('intent-name').value;
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
 
     //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected

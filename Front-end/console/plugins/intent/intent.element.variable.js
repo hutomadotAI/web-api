@@ -5,7 +5,6 @@ function loadVariablesFromIntent() {
         return;
 
     var list_variables = intent['variables'];
-    var intent_name = intent['intent_name'];
 
     for (var x in list_variables) {
         var entity = '@' + list_variables[x].entity_name;
@@ -15,7 +14,7 @@ function loadVariablesFromIntent() {
         var prompts = loadPrompts(list_variables[x].prompts);
         var parent = document.getElementById('parameter-list');
         var len = list_variables[x].prompts.length;
-        createNewParameterRow(entity, intent_name, n_prompts, prompts, len, value, required, parent);
+        createNewParameterRow(entity, n_prompts, prompts, len, value, required, parent);
     }
 }
 
@@ -26,7 +25,7 @@ function loadPrompts(elements){
     return values;
 }
 
-function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, value, required, parent) {
+function createNewParameterRow(entity, n_prompts, prompts, size, value, required, parent) {
 
     if (isJustAddedNewRow())
         return;
@@ -64,14 +63,12 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
         'placeholder=" ... " ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-intent="' + intent_name + '"' +
         'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
     else
         wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-intent="' + intent_name + '"' +
         'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
 
     wHTML += ('</div>');
@@ -182,8 +179,7 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    var intent_name = intent['intent_name'];
-    createNewParameterRow('', intent_name, 3, '', 0, '', false, node);
+    createNewParameterRow('', 3, '', 0, '', false, node);
 }
 
 function deleteIntentVariable(element) {
