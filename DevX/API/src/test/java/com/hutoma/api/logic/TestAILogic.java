@@ -63,14 +63,16 @@ public class TestAILogic {
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
-                anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
+                anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(this.AIID);
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(this.AIID);
         ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_Valid_Token() throws Database.DatabaseException {
-        whenCreateAiReturn(true);
+        whenCreateAiReturn(this.AIID);
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(this.AIID);
         ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertTrue(result instanceof ApiAi);
         Assert.assertNotNull(((ApiAi) result).getClient_token());
@@ -86,10 +88,10 @@ public class TestAILogic {
     }
 
     @Test
-    public void testCreate_DB_NotFound() throws Database.DatabaseException {
-        whenCreateAiReturn(false);
+    public void testCreate_DB_NameClash() throws Database.DatabaseException {
+        whenCreateAiReturn(UUID.randomUUID());
         ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(400, result.getStatus().getCode());
     }
 
     @Test
@@ -205,7 +207,7 @@ public class TestAILogic {
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
-    private void whenCreateAiReturn(boolean returnValue) throws Database.DatabaseException {
+    private void whenCreateAiReturn(UUID returnValue) throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
                 anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(returnValue);
     }

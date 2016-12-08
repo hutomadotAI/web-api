@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -73,7 +74,7 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCreateAI() throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(),
                 anyInt(), anyInt(), any(), anyString(), any(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt())).thenReturn(true);
+                anyInt())).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         final Response response = target("/ai").request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -128,7 +129,7 @@ public class TestServiceAi extends ServiceTestBase {
     protected Class<?> getClassUnderTest() {
         return AIEndpoint.class;
     }
-    
+
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(AILogic.class).to(AILogic.class);
         return binder;

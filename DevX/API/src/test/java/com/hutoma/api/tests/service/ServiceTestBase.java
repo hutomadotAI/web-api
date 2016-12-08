@@ -4,6 +4,7 @@ import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -77,6 +78,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected SemanticAnalysis fakeSemanticAnalysis;
     @Mock
     protected Config fakeConfig;
+    @Mock
+    protected Tools fakeTools;
 
 
     private static String getDevToken(final UUID devId, final Role role) {
@@ -122,10 +125,10 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeNeuralNet)).to(NeuralNet.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeSemanticAnalysis)).to(SemanticAnalysis.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
-                bind(Tools.class).to(Tools.class);
                 bind(HTMLExtractor.class).to(HTMLExtractor.class);
                 bind(Validate.class).to(Validate.class);
                 bind(RateLimitCheck.class).to(RateLimitCheck.class);
@@ -164,6 +167,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeNeuralNet = mock(NeuralNet.class);
         this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
         this.fakeLogger = mock(ILogger.class);
+        this.fakeTools = new FakeTimerTools();
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
 
