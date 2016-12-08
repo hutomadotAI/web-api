@@ -46,10 +46,10 @@ function saveIntent() {
         //*** check validation n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
-        if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
+        if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
-                msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99.');
+                msgAlertIntentVariable(2, 'The number of prompts must be a number between 1 and 99.');
                 msgAlertIntentElement(2,'Intent not saved!');
                 return false;
             }
@@ -69,12 +69,14 @@ function saveIntent() {
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt = node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
+
         if (list_prompt == '' || prompts_split.length == 0){
             node.children[i].children[2].children[0].children[0].style.border = "thin dotted red";
-            msgAlertIntentVariable(2, 'Cannot save. Please add at least one prompt.');
+            msgAlertIntentVariable(2, 'Please add at least one prompt before saving.');
             msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
+
 
         var promptsArray = [];
         for (var j=0; j < prompts_split.length; j++)

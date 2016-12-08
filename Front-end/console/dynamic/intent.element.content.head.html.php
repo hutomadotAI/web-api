@@ -17,7 +17,7 @@
     <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentElement" style="margin-bottom:10px;">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertIntentElement"></i>
-        <span id="msgAlertIntentElement">Give the AI a list of BLA BLA BLA BLA BLA BLA BLA.</span>
+        <span id="msgAlertIntentElement">Use intents to map what a user says and what action should be taken by your business logic.</span>
     </div>
     </div>
 

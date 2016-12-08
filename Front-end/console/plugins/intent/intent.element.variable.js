@@ -194,9 +194,9 @@ function resetBorderHighlightError(node){
     resetMsgAlertIntentVariable();
 }
 
-function resetMsgAlertIntentVariable(elem) {
-    msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
-    msgAlertIntentElement(0,'Set the variables used by the intent.');
+function resetMsgAlertIntentVariable() {
+    msgAlertIntentElement(0,'Use intents to map what a user says and what action should be taken by your business logic.');
+    msgAlertIntentVariable(0,'Describe the intent using existing entities');
 }
 
 function isJustAddedNewRow() {
