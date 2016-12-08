@@ -196,7 +196,7 @@ function resetBorderHighlightError(node){
 
 function resetMsgAlertIntentVariable() {
     msgAlertIntentElement(0,'Use intents to map what a user says and what action should be taken by your business logic.');
-    msgAlertIntentVariable(0,'Describe the intent using existing entities');
+    msgAlertIntentVariable(0,'Describe what variables you want the AI to extract from a conversation');
 }
 
 function isJustAddedNewRow() {
