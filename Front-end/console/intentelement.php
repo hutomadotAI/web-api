@@ -125,6 +125,7 @@ function echoJsonIntentResponse($intent)
 <script src="./plugins/jQuery/jquery.omniselect.js"></script>
 <script src="./plugins/saveFile/FileSaver.js"></script>
 <script src="./plugins/validation/validation.js"></script>
+<script src="./plugins/button-select/buttonSelect.js">
 <script src="./plugins/intent/intent.element.response.js"></script>
 <script src="./plugins/intent/intent.element.expression.js"></script>
 <script src="./plugins/intent/intent.element.js"></script>

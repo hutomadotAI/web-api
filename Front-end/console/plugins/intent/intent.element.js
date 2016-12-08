@@ -1,5 +1,3 @@
-//document.getElementById("btnSaveEntity").addEventListener("click", saveIntent);
-
 var variables = [];
 
 function getMultipleElementValues(elementName, attributeName) {
@@ -19,7 +17,6 @@ function removeEscapeCharacter(value){
     return value.replace(/\|\|#44;/g , ",");
 }
 
-
 function saveIntent() {
     $(this).prop("disabled", true);
 
@@ -36,50 +33,47 @@ function saveIntent() {
 
         //*** check validation entity name
         var node_entity = node.children[i].children[0].children[0].children[0];
-        if ( node_entity.getAttribute('placeholder') == 'add entity'){
-            msgAlertIntentVariable(2, 'Cannot save. Missing entity on row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
+        var elem = $(node_entity).find("ul").find("li.selected");
+        if ( elem.text() == ''){
+            node.children[i].children[0].children[0].children[0].style.border = "thin dotted red";
+            msgAlertIntentVariable(2, 'Cannot save. Missing entity.');
+            msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
 
-        if ( !isEntityExists(node_entity.getAttribute('placeholder').replace(/[@]/g, ""),node_entity.value)){
-            msgAlertIntentVariable(2, 'Cannot save. Unexisting entity on row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
-            return false;
-        }
-
-        v['entity_name']= node_entity.getAttribute('placeholder').replace(/[@]/g, "");
-
+        v['entity_name']= elem.text().replace(/[@]/g, "");
 
         //*** check validation n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
-        if (node_nprompt.value != '' &&node_nprompt.value !== 'undefined') {
+        if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
-                msgAlertIntentVariable(2, 'Cannot save. The n_prompt must be a number between 1 to 99 at row '+(i+1));
-                msgAlertIntentElement(2,'Not saved!!');
+                node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
+                msgAlertIntentVariable(2, 'The number of prompts must be a number between 1 and 99.');
+                msgAlertIntentElement(2,'Intent not saved!');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
         }
 
-
         if ( node_nprompt.getAttribute('placeholder') == 'n° prompt'){
-            msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value at row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
+            node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
+            msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value.');
+            msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
 
         v['n_prompts'] = node_nprompt.getAttribute('placeholder');
 
-
         //*** check validation list prompts
         var node_prompt = node.children[i].children[2].children[0].children[0];
-        var list_prompt =  node_prompt.getAttribute('data-prompts');
+        var list_prompt = node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
+
         if (list_prompt == '' || prompts_split.length == 0){
-            msgAlertIntentVariable(2, 'Cannot save. The prompt list needs conttains at least one value at row '+(i+1));
-            msgAlertIntentElement(2,'Not saved!!');
+            node.children[i].children[2].children[0].children[0].style.border = "thin dotted red";
+            msgAlertIntentVariable(2, 'Please add at least one prompt before saving.');
+            msgAlertIntentElement(2,'Intent not saved!');
             return false;
         }
 
@@ -110,7 +104,7 @@ function saveIntent() {
         },
         type: 'POST',
         success: function (result) {
-            msgAlertIntentElement(4,'Saved!!');
+            msgAlertIntentElement(4,'Intent saved!!');
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
@@ -118,20 +112,9 @@ function saveIntent() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
-            msgAlertIntentElement(2,'Not saved!!');
+            msgAlertIntentElement(2,'Intent not saved!');
         }
     });
-}
-
-function isEntityExists(placeholder,value) {
-    var len = entityListFromServer.length;
-
-    while (len--) {
-        if (entityListFromServer[len] == value.replace(/[@]/g, ""))
-            return true;
-    }
-    return false;
-
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
@@ -139,11 +122,12 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
 
     //send to modal current entity name selected from first node in the current variables row selected
     var node_entity  = parent.children().children().children();
-    var curr_entity = node_entity.attr('placeholder');
+    var elem = $(node_entity).find("ul").find("li.selected");
+    var curr_entity = elem.text();
     $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
 
     //send to modal current intent store in data-intent html
-    var curr_intent = $(e.relatedTarget).data('intent');
+    var curr_intent = document.getElementById('intent-name').value;
     $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
 
     //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected
@@ -157,7 +141,7 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
    
     // remove character @
     curr_entity = curr_entity.replace(/[@]/g, "");
-
+    
     cleanupromptDialogbox();
     loadPromptsForEntity(curr_entity)
 });

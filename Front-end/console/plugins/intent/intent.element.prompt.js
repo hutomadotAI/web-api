@@ -53,7 +53,10 @@ function addIntentPrompt() {
 
     createNewPromptRow(value, parent);
     msgAlertIntentPrompt(0,'You can add additional an user expression');
+    
+    resetMsgAlertIntentVariable();
 }
+
 
 function createNewPromptRow(value, parent) {
     var wHTML = '';
@@ -137,7 +140,8 @@ function setNewListPrompts(){
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
         var node_entity = node.children[i].children[0].children[0].children[0];
         var node_prompt = node.children[i].children[2].children[0].children[0];
-        if (node_entity.getAttribute('placeholder') == curr_entity) {
+        var elem = $(node_entity).find("ul").find("li.selected");
+        if (elem.text() == curr_entity) {
             node_prompt.setAttribute('data-prompts', intentNewPromptList);
 
             var list_prompt =  node_prompt.getAttribute('data-prompts');
@@ -162,7 +166,8 @@ function loadPromptsForEntity(curr_entity) {
     for (var i = 0; i < len; i++) {
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
         var node_entity = node.children[i].children[0].children[0].children[0];
-        if (node_entity.getAttribute('placeholder').replace(/[@]/g, "") == curr_entity) {   // remove character @
+        var elem = $(node_entity).find("ul").find("li.selected");
+        if (elem.text().replace(/[@]/g, "") == curr_entity) {   // remove character @
             var node_prompt = node.children[i].children[2].children[0].children[0];
             splitPromptStringArray(node_prompt);
         }

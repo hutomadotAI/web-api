@@ -6168,3 +6168,97 @@ ul.pagination li a {
 .container-fluid > .content {
     margin-right: 240px;
 }
+
+
+/** botton select **/
+
+.btn-select {
+    position: relative;
+    padding: 0;
+    width: 100%;
+    border-radius: 0;
+    border-color: #404446;
+    background-color: #404446;
+}
+
+.btn-select .btn-select-value {
+    padding: 6px 12px;
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 34px;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+
+.btn-select .btn-select-arrow {
+    float: right;
+    line-height: 20px;
+    padding: 6px 10px;
+    color: lightgray;
+    top: 0;
+}
+
+.btn-select ul {
+    display: none;
+    background-color: #313131;
+    color: gray;
+    clear: both;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: none !important;
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    top: 33px;
+    z-index: 999;
+}
+
+.btn-select ul li {
+    padding: 3px 6px;
+    text-align: left;
+}
+
+.btn-select ul li:hover {
+    background-color: #434343;
+}
+
+.btn-select ul li.selected {
+    color: white;
+}
+
+/* Primary Start */
+.btn-select.btn-primary:hover, .btn-select.btn-primary:active, .btn-select.btn-primary.active {
+    border-color: #585858;
+}
+
+.btn-select.btn-primary ul li.selected {
+    background-color: #2e6da4;
+    color: white;
+}
+
+.btn-select.btn-primary ul {
+    border: #535353 1px solid;
+}
+
+.btn-select.btn-primary .btn-select-value {
+    background-color: #434343;
+    border: #535353 1px solid;
+}
+
+.btn-select.btn-primary:hover, .btn-select.btn-primary.active {
+    background-color: #535353;
+    color: white;
+}
+/* Primary End */
+
+.btn-select.btn-select-light .btn-select-value {
+    background-color: #404446;
+    color: gray;
+}
