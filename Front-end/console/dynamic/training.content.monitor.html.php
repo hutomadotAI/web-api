@@ -8,62 +8,14 @@
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
+
     </div>
 
     <div class="box-body table-responsive no-border">
-
-        <table class="table">
-            <tr>
-                <th class="text-center no-border" style="width: 20%;">Training Phase</th>
-                <th class="text-center no-border">Progress</th>
-                <th class="text-center no-border" style="width: 120px;">Completed</th>
-            </tr>
-            <tr id="pretrainingbar" hidden>
-                <!-- Phase1 is the "time" to wait for upload training file -->
-                <td class="text-center" id="status-upload-file">phase 1</td>
-                <td>
-                    <div class="progress progress-xs progress-striped active" id="progress-upload-file-action" style="margin-top:9px;">
-                       <div class="progress-bar progress-bar-primary" id="progress-upload-file" value="0" style="width:0;"></div>
-                    </div>
-                </td>
-                <td class="text-center"><span id="status-badge-upload" class="badge btn-primary">0%</span></td>
-            </tr>
-
-            <tr id="trainingbar" hidden>
-                <!-- Phase2 is the "time" to monitoring the training error progress -->
-                <td class="text-center" id="status-training-file">phase 2</td>
-                <td>
-                    <div class="progress progress-xs progress-striped active" id="progress-training-file-action" style="margin-top:9px;">
-                        <div class="progress-bar progress-bar-success" id="progress-training-file" value="0" style="width:0;"></div>
-                    </div>
-                </td>
-                <td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">0%</span></td>
-            </tr>
-        </table>
-
-        <!--
-        <div id="container_startstop" style="display: none;">
-            <table class="table no-margin">
-                <td class="text-left no-border" style="padding-bottom: 0;">
-                    <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
-                        <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
-                        <span id="msgAlertProgressBar">You can now talk to your AI.</span>
-                    </div>
-                </td>
-                <td class="text-center no-border" style="width: 120px;">
-                    <a type="submit" class="btn btn-app text-light-blue flat" id="startstop-button" value="_start" style="margin-left: 0;">
-                        <i class="fa fa-play no-margin text-light-blue" id="startstop-icon"></i>
-                        <span class="text-sm" id="text-startstop">start training</span>
-                    </a>
-                </td>
-            </table>
-        </div>
-        -->
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
             <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
             <span id="msgAlertProgressBar">Training not started. Please upload training data.</span>
         </div>
-
     </div>
 
     <div id="collapseMonitoring" class="panel-collapse collapse">
@@ -87,6 +39,26 @@
             </div>
         </div>
     </div>
+    <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
+        <a data-toggle="collapse"  href="#collapseChartTrainingError">
+            <div class=" pull-left">
+                <i class="fa fa-plus-circle text-sm text-yellow"></i>
+                See training chart details
+            </div>
+        </a>
+        <div class=" pull-right">
+            Precision : <span id="show-error"></span>
+        </div>
+    </div>
 
+    <div class="row no-padding">
+        <div class="col-xs-12">
+            <div class="box-body table-responsive no-border">
+                <div id="collapseChartTrainingError" class="panel-collapse collapse">
+                    <div id="interactive" style="width: 100%;height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 

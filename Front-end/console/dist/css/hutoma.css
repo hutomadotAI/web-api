@@ -3052,6 +3052,7 @@ a:focus {
 
 .alert-success {
     border-color: #008d4c;
+    color: white;
 }
 
 .alert-primary {
