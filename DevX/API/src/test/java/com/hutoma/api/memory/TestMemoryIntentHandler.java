@@ -1,7 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
@@ -43,7 +43,7 @@ public class TestMemoryIntentHandler {
     private FakeJsonSerializer fakeSerializer;
     private Database fakeDatabase;
     private DatabaseEntitiesIntents fakeDatabaseEntities;
-    private Logger fakeLogger;
+    private ILogger fakeLogger;
     private IEntityRecognizer fakeRecognizer;
 
     private static Object[] recognizeIntentDataProvider() {
@@ -59,7 +59,7 @@ public class TestMemoryIntentHandler {
     public void setup() {
         this.fakeSerializer = new FakeJsonSerializer();
         this.fakeDatabase = mock(Database.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeDatabaseEntities = mock(DatabaseEntitiesIntents.class);
         this.memoryIntentHandler = new MemoryIntentHandler(this.fakeSerializer, this.fakeDatabaseEntities, this.fakeLogger,

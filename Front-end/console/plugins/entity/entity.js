@@ -5,7 +5,7 @@ if (limitText($("#inputEntityName")) == 0)
 
 function checkEntityCode(element, key) {
     if (key == 13) {
-        if (activeButtonCreateEntity())
+        if( activeButtonCreateEntity())
             postingEntityName();
     }
     else {
@@ -42,8 +42,8 @@ function postingEntityName() {
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
-
-    if (isNameExists($("#inputEntityName").val(), entities)) {
+    
+    if(isNameExists($("#inputEntityName").val(),entities)){
         msgAlertEntity(2, 'Two identical Entity names are not allowed. Please choose a different name.');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
@@ -60,7 +60,7 @@ function postingEntityName() {
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
-
+    
     RecursiveUnbind($('#wrapper'));
 }
 
@@ -89,11 +89,11 @@ function showEntities(str) {
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
             /*
-             var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].replace(/\s/g, '') + x);
-             wHTML += ('<a data-toggle="collapse" href="#' + unique_id + '">');
-             wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
-             wHTML += ('</a>');
-             */
+            var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].replace(/\s/g, '') + x);
+            wHTML += ('<a data-toggle="collapse" href="#' + unique_id + '">');
+            wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
+            wHTML += ('</a>');
+            */
 
             wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1">');
             wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
@@ -110,18 +110,18 @@ function showEntities(str) {
             wHTML += ('</div>');
             wHTML += ('</div>');
             /*
-             // push VALUES inside box internal
-             wHTML += ('<div id="' + unique_id + '" class="panel-collapse collapse" >');
-             wHTML += ('<div class="row" style="padding: 10px 0px 0px 0px;">');
-             wHTML += ('<div class="col-xs-12">');
-             wHTML += ('<div class="inner-addon left-addon">');
-             wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
-             wHTML += ('<textarea class="form-control flat no-shadow" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px; background-color: #515151; border: 1px solid #202020;" placeholder="value from server" readonly></textarea>');
-             wHTML += ('</div>');
-             wHTML += ('</div>');
-             wHTML += ('</div>');
-             wHTML += ('</div>');
-             */
+            // push VALUES inside box internal
+            wHTML += ('<div id="' + unique_id + '" class="panel-collapse collapse" >');
+            wHTML += ('<div class="row" style="padding: 10px 0px 0px 0px;">');
+            wHTML += ('<div class="col-xs-12">');
+            wHTML += ('<div class="inner-addon left-addon">');
+            wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
+            wHTML += ('<textarea class="form-control flat no-shadow" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px; background-color: #515151; border: 1px solid #202020;" placeholder="value from server" readonly></textarea>');
+            wHTML += ('</div>');
+            wHTML += ('</div>');
+            wHTML += ('</div>');
+            wHTML += ('</div>');
+            */
 
             wHTML += ('</div>');
             wHTML += ('</div>');
@@ -148,8 +148,8 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editEntity(elem, entity) {
-    elem.setAttribute('onclick', '');
+function editEntity(elem,entity) {
+    elem.setAttribute('onclick','');
     var form = document.createElement('form');
     var element = document.createElement('input');
 

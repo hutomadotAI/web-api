@@ -289,12 +289,11 @@
         </dependency>
 
         <!-- ********************************* Logging-related ****************************************** -->
-
         <dependency>
-            <groupId>com.microsoft.azure</groupId>
-            <artifactId>applicationinsights-web</artifactId>
-            <!-- or applicationinsights-core for bare API -->
-            <version>[1.0,)</version>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <scope>runtime</scope>
+            <version>2.24</version>
         </dependency>
 
         <!-- ********************************* Test-related ****************************************** -->
@@ -333,6 +332,14 @@
             <version>2.24</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+
 
         <!-- ********************************* Documentation ****************************************** -->
         <dependency>

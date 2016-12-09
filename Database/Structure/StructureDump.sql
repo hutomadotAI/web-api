@@ -125,10 +125,10 @@ CREATE TABLE `botStore` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `aiid` varchar(50) NOT NULL,
   `published` tinyint(1) NOT NULL DEFAULT '1',
+  `publisher_id` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id` (`id`),
-  KEY `id_2` (`id`),
-  KEY `id_3` (`id`)
+  UNIQUE KEY `id_2` (`aiid`),
+  KEY `id_3` (`publisher_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -425,6 +425,7 @@ CREATE TABLE `memoryIntent` (
   `name` varchar(50) NOT NULL,
   `variables` text NOT NULL,
   `lastAccess` datetime NOT NULL,
+  `isFulfilled` tinyint(1) NOT NULL,
   PRIMARY KEY (`aiid`,`chatId`),
   UNIQUE KEY `idx_memoryIntent_aiid_chatId_name` (`aiid`,`chatId`,`name`),
   KEY `idx_memoryIntent_lastAccess` (`lastAccess`),

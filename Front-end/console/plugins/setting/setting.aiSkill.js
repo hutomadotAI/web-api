@@ -1,4 +1,5 @@
-document.getElementById("btnAiSkillReset").addEventListener("click", resetAISkill);
+//document.getElementById("btnAiSkillReset").addEventListener("click", resetAISkill);
+document.getElementById("btnAiSkillCancel").addEventListener("click", cancelAISkill);
 document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkill);
 
 
@@ -44,12 +45,19 @@ function resetAISkill(){
     showDomains(str,1);
 }
 
+function cancelAISkill(){
+    document.getElementById('tab_aiskill').className = "";
+    document.getElementById('tab_general').className = "active";
+    document.getElementById('page_aiskill').className = " tab-pane";
+    document.getElementById('page_general').className = "tab-pane active";
+}
+
 function activeAiSkillButtons(){
     document.getElementById('btnAiSkillSave').removeAttribute('disabled');
-    document.getElementById('btnAiSkillReset').removeAttribute('disabled');
+    document.getElementById('btnAiSkillCancel').removeAttribute('disabled');
 }
 
 function deactiveAiSkillButtons(){
     document.getElementById('btnAiSkillSave').setAttribute('disabled','disabled');
-    document.getElementById('btnAiSkillReset').setAttribute('disabled','disabled');
+    document.getElementById('btnAiSkillCancel').setAttribute('disabled','disabled');
 }

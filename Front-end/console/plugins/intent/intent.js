@@ -5,7 +5,7 @@ if (limitText($("#inputIntentName")) == 0)
 
 function checkIntentCode(element, key) {
     if (key == 13) {
-        if (activeButtonCreateIntent())
+        if( activeButtonCreateIntent())
             postingIntentName();
     }
     else {
@@ -41,7 +41,7 @@ function postingIntentName() {
         return false;
     }
 
-    if (isNameExists($("#inputIntentName").val(), intents)) {
+    if(isNameExists($("#inputIntentName").val(),intents)){
         msgAlertIntent(2, 'Two identical Intent names are not allowed. Please choose a different name.');
         return false;
     }
@@ -124,8 +124,8 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editIntent(elem, intent) {
-    elem.setAttribute('onclick', '');
+function editIntent(elem,intent) {
+    elem.setAttribute('onclick','');
     var form = document.createElement('form');
     var element = document.createElement('input');
 

@@ -15,29 +15,30 @@ import static io.restassured.RestAssured.given;
 
 public class base {
 
-    public String admin_token ="eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";
+    public String admin_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys";
 
-    public String POST_CREATE_AI ="http://localhost:8080/v1/ai";
-    public String GET_GET_ALLAIs ="http://localhost:8080/v1/ai";
-    public String GET_GET_SINGLEAI ="http://localhost:8080/v1/ai/__AIID__";
-    public String DELETE_DELETE_AI ="http://localhost:8080/v1/ai/__AIID__";
-    public String POST_UPLOAD_TRAINING ="http://localhost:8080/v1/ai/__AIID__/training";
-    public String GET_TRAINING ="http://localhost:8080/v1/ai/__AIID__";
+    public String POST_CREATE_AI = "http://localhost:8080/v1/ai";
+    public String GET_GET_ALLAIs = "http://localhost:8080/v1/ai";
+    public String GET_GET_SINGLEAI = "http://localhost:8080/v1/ai/__AIID__";
+    public String DELETE_DELETE_AI = "http://localhost:8080/v1/ai/__AIID__";
+    public String POST_UPLOAD_TRAINING = "http://localhost:8080/v1/ai/__AIID__/training";
+    public String GET_TRAINING = "http://localhost:8080/v1/ai/__AIID__";
 
-    public String GET_CHAT ="http://localhost:8080/v1/ai/__AIID__/chat";
-    public String ADMIN_PUT_CREATE_DEV ="http://localhost:8080/v1/ai/api/admin?role=__ROLE__&devid=__DEVID__";
-    public String ADMIN_DELET_DELET_DEV ="http://localhost:8080/v1/ai/admin?devid=__DEVID__";
-    public String ADMIN_POST_KICKOFF_TRAINING ="http://api.hutoma.com/api2/admin/dl/__DEVID__/__AIID__?action=start";
-
-
+    public String GET_CHAT = "http://localhost:8080/v1/ai/__AIID__/chat";
+    public String ADMIN_PUT_CREATE_DEV = "http://localhost:8080/v1/ai/api/admin?role=__ROLE__&devid=__DEVID__";
+    public String ADMIN_DELET_DELET_DEV = "http://localhost:8080/v1/ai/admin?devid=__DEVID__";
+    public String ADMIN_POST_KICKOFF_TRAINING = "http://api.hutoma.com/api2/admin/dl/__DEVID__/__AIID__?action=start";
 
 
-    public String escape(String q) {return q.replace(" ","%20");}
+    public String escape(String q) {
+        return q.replace(" ", "%20");
+    }
+
     public String createAI() {
         Response response = given().
-                header("Authorization", "Bearer "+admin_token).
+                header("Authorization", "Bearer " + this.admin_token).
                 when().
-                post(POST_CREATE_AI).
+                post(this.POST_CREATE_AI).
                 then().
                 extract().response();
 
@@ -49,11 +50,11 @@ public class base {
 
         System.out.print(System.getProperty("user.home") + "/ai/test_files/contextual.txt");
         Response response = given().
-                header("Authorization", "Bearer "+admin_token).
+                header("Authorization", "Bearer " + this.admin_token).
                 contentType("multipart/form-data").
                 multiPart("file", new File(System.getProperty("user.home") + "/ai/test_files/contextual.txt")).
                 when().
-                post(POST_UPLOAD_TRAINING.replace("__AIID__",aiid)).
+                post(this.POST_UPLOAD_TRAINING.replace("__AIID__", aiid)).
                 then().
                 extract().response();
         return response.path("status.code").toString();
@@ -62,12 +63,12 @@ public class base {
 
     public boolean testTrainingStatus(String aiid) throws InterruptedException {
 
-        for (int i =0;i <60;i ++){
+        for (int i = 0; i < 60; i++) {
             Response response =
                     given().
-                            header("Authorization", "Bearer " + admin_token).
+                            header("Authorization", "Bearer " + this.admin_token).
                             when().
-                            get(GET_TRAINING.replace("__AIID__", aiid)).
+                            get(this.GET_TRAINING.replace("__AIID__", aiid)).
                             then().
                             extract().response();
             String training_status = response.path("ai_status").toString();
@@ -78,32 +79,32 @@ public class base {
     }
 
     public boolean getRNNError(String aiid) throws InterruptedException {
-        for (int i =0;i <240;i ++){
+        for (int i = 0; i < 240; i++) {
             Response response =
                     given().
-                            header("Authorization", "Bearer " + admin_token).
+                            header("Authorization", "Bearer " + this.admin_token).
                             when().
-                            get(GET_TRAINING.replace("__AIID__", aiid)).
+                            get(this.GET_TRAINING.replace("__AIID__", aiid)).
                             then().
                             extract().response();
-           if(!response.path("deep_learning_error").toString().isEmpty()) return true;
+            if (!response.path("deep_learning_error").toString().isEmpty()) return true;
             Thread.sleep(1000);
         }
         return false;
     }
 
 
-    public String chat (String aiid, String q, String min_p,String history, String topic, boolean rnn_only) {
+    public String chat(String aiid, String q, String min_p, String history, String topic, boolean rnn_only) {
         Response response = given().
-                header("Authorization", "Bearer "+admin_token).
-                param(q,escape(q)).
-                param("confidence_threshold",min_p).
-                param("chat_history",history).
-                param("current_topic",topic).
-                param("rnn_only",rnn_only).
+                header("Authorization", "Bearer " + this.admin_token).
+                param(q, escape(q)).
+                param("confidence_threshold", min_p).
+                param("chat_history", history).
+                param("current_topic", topic).
+                param("rnn_only", rnn_only).
                 contentType(ContentType.JSON).
                 when().
-                get(GET_CHAT.replace("__AIID__", aiid)).
+                get(this.GET_CHAT.replace("__AIID__", aiid)).
                 then().
                 extract().response();
         return response.path("result.answer").toString();
@@ -209,7 +210,7 @@ public class base {
 //        test.clean_test_data("","");
 //
 //        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//        UUID guid = java.util.UUID.randomUUID();
+//        UUID guid = java.merge_QA_files.UUID.randomUUID();
 //        String json = curl(role_admin, "POST", "http://54.83.145.18:8080/api/admin?role=" + Role.ROLE_PLAN_1 + "&plan_id=2&devid=HUTOMA_TEST" + guid);
 //
 //        api_root._myAIs _ai = new api_root._myAIs();

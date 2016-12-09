@@ -17,13 +17,12 @@ public class MeshVariable {
     private final String iconPath;
     private final String widgetColor;
 
-    public MeshVariable(final String aiid, final String aiidMesh, final String name, final String description,
-                        final String licenceType, final Float licenceFee, final Float rating,
-                        final int numberOfActivations, final boolean isBanned, final String iconPath,
-                        final String widgetColor) {
+    public MeshVariable(final String aiid, final String aiid_mesh, final String name, final String description, final String licenceType,
+                        final Float licenceFee, final Float rating, final int numberOfActivations, final boolean isBanned,
+                        final String iconPath, final String widgetColor) {
 
         this.aiid = aiid;
-        this.aiid_mesh = aiidMesh;
+        this.aiid_mesh = aiid_mesh;
         this.name = name;
         this.description = description;
         this.licenceType = licenceType;

@@ -1,12 +1,12 @@
 package com.hutoma.api.connectors;
 
-import com.google.common.base.Charsets;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.DevPlan;
 
+import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;

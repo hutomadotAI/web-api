@@ -104,7 +104,7 @@ function updatePreviousDataLoaded(JSONdata){
         is_private = true;
     previousGeneralInfo.description =  document.getElementById('ai_description').value;
     previousGeneralInfo.language = document.getElementById('select2-' + 'ai_language' + '-container').innerHTML;
-    previousGeneralInfo.timezone = 'Europe/London'; //document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML;
+    previousGeneralInfo.timezone = document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML;
     previousGeneralInfo.voice = document.getElementById('ai_voice').value;
     previousGeneralInfo.personality = getSelectIndex('ai_personality')
     previousGeneralInfo.confidence = getValueFromConfidence(document.getElementById('ai_confidence').value);

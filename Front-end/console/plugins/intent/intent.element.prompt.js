@@ -3,7 +3,7 @@ document.getElementById("btnModelPromptClose").addEventListener("click", setNewL
 
 function checkInputPromptCode(element, key) {
     if (key == 13) {
-        if (activeButtonCreateIntentPrompt())
+        if( activeButtonCreateIntentPrompt())
             addIntentPrompt();
     }
     else {
@@ -39,9 +39,9 @@ function addIntentPrompt() {
         return;
     }
 
-    var prompts = getMultipleElementValues('intent-prompt-row', 'value');
-
-    if (isNameExists($("#intent-prompt").val(), prompts)) {
+    var prompts = getMultipleElementValues('intent-prompt-row','value');
+    
+    if(isNameExists($("#intent-prompt").val(),prompts)){
         msgAlertIntentPrompt(2, 'Two identical intent prompts are not allowed. Please choose a different name.');
         return;
     }
@@ -52,7 +52,7 @@ function addIntentPrompt() {
     document.getElementById('intent-prompt').value = '';
 
     createNewPromptRow(value, parent);
-    msgAlertIntentPrompt(0, 'You can add additional an user expression');
+    msgAlertIntentPrompt(0,'You can add additional an user expression');
 }
 
 function createNewPromptRow(value, parent) {
@@ -64,7 +64,7 @@ function createNewPromptRow(value, parent) {
     wHTML += ('<div class="col-xs-10" id="obj-prompt">');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-tag text-gray"></i>');
-
+    
     wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-prompt-row" name="intent-prompt-row"  style="background-color: #404446;" value="' + value + '" placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -100,7 +100,7 @@ function checkListPromptSize() {
 
 function deleteRowPrompt(element) {
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
-    var elem = $(parent.parentNode).find('input').attr('placeholder');
+    var elem =  $(parent.parentNode).find('input').attr('placeholder');
     parent.parentNode.removeChild(parent);
 }
 
@@ -114,24 +114,24 @@ function promptOnMouseOutRow(elem) {
     btn.style.display = 'none';
 }
 
-function addSepatator(arr, len, separator) {
+function addSepatator(arr,len,separator){
     for (var i = 0; i < len; i++)
         arr[i] += separator;
 }
 
-function setNewListPrompts() {
+function setNewListPrompts(){
     var entity_selected = false;
     var curr_entity = document.getElementById('curr_entity').value;
     var intentNewPromptList = getMultipleElementValues('intent-prompt-row', 'placeholder');
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    if (curr_entity == '') {
-        var first_node_prompt = node.children[0].children[2].children[0].children[0];
-        first_node_prompt.setAttribute('data-prompts', intentNewPromptList);
-        first_node_prompt.setAttribute('placeholder', ' ... ');
-        return;
-    }
+   if(curr_entity ==''){
+       var first_node_prompt = node.children[0].children[2].children[0].children[0];
+       first_node_prompt.setAttribute('data-prompts', intentNewPromptList);
+       first_node_prompt.setAttribute('placeholder',' ... ');
+       return;
+   }
 
     for (var i = 0; i < len; i++) {
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
@@ -139,7 +139,12 @@ function setNewListPrompts() {
         var node_prompt = node.children[i].children[2].children[0].children[0];
         if (node_entity.getAttribute('placeholder') == curr_entity) {
             node_prompt.setAttribute('data-prompts', intentNewPromptList);
-            node_prompt.setAttribute('placeholder', ' ... ');
+
+            var list_prompt =  node_prompt.getAttribute('data-prompts');
+            if( list_prompt != '')
+                node_prompt.setAttribute('placeholder',' ... ');
+            else
+                node_prompt.setAttribute('placeholder','click to enter');
             entity_selected = true;
         }
     }
@@ -149,12 +154,11 @@ function loadPromptsForEntity(curr_entity) {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    if (curr_entity == '' && len > 0) {
+    if(curr_entity =='' && len>0){
         var first_node_prompt = node.children[0].children[2].children[0].children[0];
         splitPromptStringArray(first_node_prompt);
         return;
     }
-
     for (var i = 0; i < len; i++) {
         // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
         var node_entity = node.children[i].children[0].children[0].children[0];
@@ -165,17 +169,21 @@ function loadPromptsForEntity(curr_entity) {
     }
 }
 
-function splitPromptStringArray(node) {
+function splitPromptStringArray(node){
     var parent = document.getElementById('prompts-list');
-    var values = node.getAttribute('data-prompts');
-    var prompts_split = values.split(',');
-    for (var j = 0; j < prompts_split.length; j++) {
-        var prompt = removeEscapeCharacter(prompts_split[j]);
-        createNewPromptRow(prompt, parent);
+    var list_prompt =  node.getAttribute('data-prompts');
+    var prompts_split = list_prompt.split(',');
+    if( list_prompt != '') {
+        for (var j = 0; j < prompts_split.length; j++) {
+            var prompt = removeEscapeCharacter(prompts_split[j]);
+            createNewPromptRow(prompt, parent);
+        }
+    }else{
+        node.setAttribute('placeholder','click to enter');
     }
 }
 
 $(document).ready(function () {
-    loadPromptsForEntity(document.getElementById('curr_entity').value);
+    loadPromptsForEntity( document.getElementById('curr_entity').value);
 });
 

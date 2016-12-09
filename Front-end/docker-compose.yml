@@ -12,6 +12,7 @@ services:
       - HUTOMA_API_DB_USERNAME=hutoma_caller
       - HUTOMA_API_DB_PASSWORD=>YR"khuN*.gF)V4#
       - HUTOMA_API_URL=http://api:8080/v1
+      - LOG_SERVICE_ANALYTICS_URL=http://log-svc:8080/log
 networks:
   default:
     external:

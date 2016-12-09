@@ -1,8 +1,9 @@
 package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.FakeProvider;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.*;
  */
 public class TestDatabaseTransaction {
 
-    Logger fakeLogger;
+    ILogger fakeLogger;
     DatabaseConnectionPool fakeConnectionPool;
     Connection fakeConnection;
     Connection fakeConnection2;
@@ -26,16 +27,9 @@ public class TestDatabaseTransaction {
     TransactionalDatabaseCall call2;
     TransactionalDatabaseCall call3;
 
-    TransactionalDatabaseCall mockDBCall() throws Database.DatabaseException {
-        TransactionalDatabaseCall call = mock(TransactionalDatabaseCall.class);
-        when(call.setTransactionConnection(any())).thenReturn(call);
-        when(call.initialise(anyString(), anyInt())).thenReturn(call);
-        return call;
-    }
-
     @Before
     public void setup() throws Database.DatabaseException {
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.fakeConnection = mock(Connection.class);
         this.fakeConnection2 = mock(Connection.class);
         this.fakeConnectionPool = mock(DatabaseConnectionPool.class);
@@ -145,5 +139,12 @@ public class TestDatabaseTransaction {
         verify(this.fakeConnection, times(0)).commit();
         verify(this.fakeConnection, times(1)).rollback();
         verifyZeroInteractions(this.fakeConnection2);
+    }
+
+    TransactionalDatabaseCall mockDBCall() throws Database.DatabaseException {
+        TransactionalDatabaseCall call = mock(TransactionalDatabaseCall.class);
+        when(call.setTransactionConnection(any())).thenReturn(call);
+        when(call.initialise(anyString(), anyInt())).thenReturn(call);
+        return call;
     }
 }

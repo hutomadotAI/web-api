@@ -57,14 +57,28 @@ class aiApi extends apiBase
         return null;
     }
 
-    public function updateAI($aiid, $description, $private, $language, $timezoneString, $personality, $voice, $confidence)
+    public function updateAI($aiid, $description, $private, $language, $timezone, $personality, $voice, $confidence)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
 
-            //hard coded
-            $timezone = 'Europe/London';
-            $locale = 'en-US';
+
+            // TODO: remove hardcode depends how many language are supported
+            $locales = array(
+                'Deutsch' => 'de-DE',
+                'Español' => 'es-ES',
+                'Français' => 'fr-FR',
+                'Italiano' => 'it-IT',
+                'Nederlands' => 'nl-NL',
+                'Português' => 'pt-PT',
+                'English' => 'en-US'
+            );
+
+            if (array_key_exists($language, $locales)) {
+                $locale = $locales[$language];
+            } else {
+                $locale = $locales['English'];
+            }
 
             $args = array(
                 'description' => $description,
@@ -86,18 +100,29 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function createAI($name, $description, $private, $language, $timezoneString, $confidence,
+    public function createAI($name, $description, $private, $language, $timezone, $confidence,
                              $personality, $voice, $contract, $payment_type, $price)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
 
-            // TODO: move this to a common internationalization class
+            
+            // TODO: remove hardcode depends how many language are supported
+            $locales = array(
+                'Deutsch' => 'de-DE',
+                'Español' => 'es-ES',
+                'Français' => 'fr-FR',
+                'Italiano' => 'it-IT',
+                'Nederlands' => 'nl-NL',
+                'Português' => 'pt-PT',
+                'English' => 'en-US'
+            );
 
-            // TODO: accept format from input list - example   GMT +00:00 Atlantic/St Helena (GMT)
-
-            $timezone = 'Europe/London';
-            $locale = 'en-US';
+            if (array_key_exists($language, $locales)) {
+                $locale = $locales[$language];
+            } else {
+                $locale = $locales['English'];
+            }
 
             $args = array(
                 'name' => $name,

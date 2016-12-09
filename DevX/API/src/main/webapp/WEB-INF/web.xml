@@ -1,30 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This web.xml file is not required when using Servlet 3.0 container,
      see implementation details http://jersey.java.net/nonav/documentation/latest/jax-rs.html -->
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-   <servlet>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <servlet>
         <servlet-name>HutomaAPI</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-       <init-param>
-           <param-name>javax.ws.rs.Application</param-name>
-           <param-value>com.hutoma.api.ServerApp</param-value>
-       </init-param>
-       <load-on-startup>1</load-on-startup>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.hutoma.api.ServerApp</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>HutomaAPI</servlet-name>
         <url-pattern>/v1/*</url-pattern>
     </servlet-mapping>
-
-
-    <filter>
-        <filter-name>ApplicationInsightsWebFilter</filter-name>
-        <filter-class>
-            com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter
-        </filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>ApplicationInsightsWebFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
 </web-app>

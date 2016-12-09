@@ -24,12 +24,11 @@ import javax.ws.rs.core.Response;
 @Singleton
 class CentralLogger implements ILogger {
 
-    private static final String APP_ID = "API-applog-v1";
     protected final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
     private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(1000);
     private Timer timer;
-    private Config config;
+    private String loggingUrl;
 
 
     @Inject
@@ -54,16 +53,8 @@ class CentralLogger implements ILogger {
         logOutput(EventType.ERROR, fromLabel, logComment);
     }
 
-    public void initialize(Config config) {
-        this.config = config;
-        this.timer = new Timer();
-        int cadency = config.getLoggingUploadCadency();
-        this.timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                CentralLogger.this.dumpToStorage();
-            }
-        }, cadency, cadency);
+    public void initialize(final Config config) {
+        this.startLoggingScheduler(config.getLoggingServiceUrl(), config.getLoggingUploadCadency());
     }
 
     public void shutdown() {
@@ -71,8 +62,7 @@ class CentralLogger implements ILogger {
     }
 
     private void dumpToStorage() {
-        String loggingUrl = this.config.getLoggingServiceUrl();
-        if (this.logQueue.isEmpty() || loggingUrl == null) {
+        if (this.logQueue.isEmpty() || this.loggingUrl == null) {
             return;
         }
 
@@ -83,8 +73,8 @@ class CentralLogger implements ILogger {
         }
 
         String json = this.serializer.serialize(events);
-        Response response = this.jerseyClient.target(loggingUrl)
-                .queryParam("appId", APP_ID)
+        Response response = this.jerseyClient.target(this.loggingUrl)
+                .queryParam("appId", this.getAppId())
                 .request()
                 .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
@@ -117,8 +107,26 @@ class CentralLogger implements ILogger {
         }
     }
 
+    protected void startLoggingScheduler(final String loggingServiceUrl, final int loggingCadence) {
+        if (this.timer != null) {
+            this.timer.cancel();
+        }
+        this.timer = new Timer();
+        this.timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                CentralLogger.this.dumpToStorage();
+            }
+        }, loggingCadence, loggingCadence);
+        this.loggingUrl = loggingServiceUrl;
+    }
+
     void logOutput(EventType level, String fromLabel, String logComment) {
         this.logOutput(level, fromLabel, logComment, null);
+    }
+
+    protected String getAppId() {
+        return "API-applog-v1";
     }
 
     void logOutput(EventType level, String fromLabel, String logComment, Map<String, String> params) {

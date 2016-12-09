@@ -21,12 +21,12 @@ public class Config {
 
     private static final String LOGFROM = "config";
     private static final String API_ENV_PREFIX = "API_";
-    private final Logger logger;
+    private final ILogger logger;
     private final HashSet<String> propertyLoaded;
     private Properties properties;
 
     @Inject
-    public Config(Logger logger) {
+    public Config(ILogger logger) {
         this.logger = logger;
         this.propertyLoaded = new HashSet<>();
         loadPropertiesFile();
@@ -61,7 +61,7 @@ public class Config {
             this.logger.logInfo(LOGFROM, "loaded " + this.properties.size() + " properties file from "
                     + configPath.toString());
         } catch (IOException e) {
-            this.logger.logError(LOGFROM, "failed to load valid properties file: " + e.toString());
+            this.logger.logWarning(LOGFROM, "failed to load valid properties file: " + e.toString());
         }
     }
 
@@ -200,17 +200,27 @@ public class Config {
             return configFromEnv;
         }
 
-        if (null == this.properties) {
-            this.logger.logWarning(LOGFROM, "no properties file loaded. using internal defaults where available");
+        if (this.properties == null) {
+            // if this is the first time we are accessing a property and we are using defaults then log a warning
+            if (this.propertyLoaded.add(propertyName)) {
+                if (defaultValue == null || defaultValue.isEmpty()) {
+                    this.logger.logWarning(LOGFROM, String.format("No value found for property \"%s\"!", propertyName));
+                } else {
+                    this.logger.logWarning(LOGFROM, String.format(
+                            "No value found for property \"%s\". Using default value \"%s\"",
+                            propertyName, defaultValue));
+                }
+                this.propertyLoaded.add(propertyName);
+
+            }
             return defaultValue;
+        } else {
+            if (!this.properties.containsKey(propertyName)) {
+                this.logger.logWarning(LOGFROM, "no property set for " + propertyName + ". using hard-coded default "
+                        + defaultValue);
+            }
+            return this.properties.getProperty(propertyName, defaultValue);
         }
-        // keep a list of used properties
-        // if this is the first time we are accessing a property and we are using defaults then log a warning
-        if (this.propertyLoaded.add(propertyName) && (!this.properties.containsKey(propertyName))) {
-            this.logger.logWarning(LOGFROM, "no property set for " + propertyName + ". using hard-coded default "
-                    + defaultValue);
-        }
-        return this.properties.getProperty(propertyName, defaultValue);
     }
 
 }

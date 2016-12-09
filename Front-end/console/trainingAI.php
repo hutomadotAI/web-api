@@ -43,13 +43,31 @@ function setSessionVariables($singleAI)
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $singleAI['language'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = localeToLanguage($singleAI['language']);
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone']['ID'];
 
     // TO DO getAiTrainingFile needs API call with response check before assigh the value
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
 }
 
+function localeToLanguage($locale)
+{
+    $languages = array(
+        'de-DE' => 'Deutsch',
+        'es-ES' => 'Español',
+        'fr-FR' => 'Français',
+        'it-IT' => 'Italiano',
+        'nl-NL' => 'Nederlands',
+        'pt-PT' => 'Português',
+        'en-US' =>'English'
+    );
+
+    if (array_key_exists($locale, $languages)) {
+        return $languages[$locale];
+    } else {
+        return $languages['en-US'];
+    }
+}
 
 ?>
 
@@ -92,7 +110,7 @@ function setSessionVariables($singleAI)
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="margin-right:350px;">
         <section class="content">
             <div class="row">
                 <div class="col-md-12" id="trainingBox">
@@ -101,26 +119,23 @@ function setSessionVariables($singleAI)
             </div>
 
             <div class="row">
-                <div class="col-md-7">
+                <div class="col-md-12">
                     <?php include './dynamic/training.content.upload.html.php'; ?>
                     <?php include './dynamic/training.content.monitor.html.php'; ?>
                     <?php include './dynamic/training.content.keys.html.php'; ?>
                 </div>
-
-                <div class="col-md-5">
-                    <?php include './dynamic/chat.html.php'; ?>
-                    <?php include './dynamic/training.content.json.html.php'; ?>
-                </div>
             </div>
         </section>
     </div>
-
-    <footer class="main-footer">
+    <!-- ================ CHAT CONTENT ================= -->
+    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
+        <?php include './dynamic/chat.html.php'; ?>
+        <?php include './dynamic/training.content.json.html.php'; ?>
+    </aside>
+    <footer class="main-footer" style="margin-right:350px;">
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
-
 </div>
-
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.js"></script>

@@ -1,8 +1,9 @@
 package com.hutoma.api.memory;
 
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.sub.MemoryVariable;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class TestEntityRecognizer {
 
     @Before
     public void setup() {
-        this.recognizer = new SimpleEntityRecognizer(mock(Logger.class));
+        this.recognizer = new SimpleEntityRecognizer(mock(ILogger.class));
     }
 
     @Test

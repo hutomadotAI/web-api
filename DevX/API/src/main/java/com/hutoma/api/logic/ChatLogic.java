@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ITelemetry;
@@ -40,13 +41,14 @@ public class ChatLogic {
     private final IMemoryIntentHandler intentHandler;
     private final IEntityRecognizer entityRecognizer;
     private final AIChatServices chatServices;
+    private final ChatTelemetryLogger chatTelemetryLogger;
 
     private Map<String, String> telemetryMap;
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, AIChatServices chatServices,
                      Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
-                     IEntityRecognizer entityRecognizer) {
+                     IEntityRecognizer entityRecognizer, ChatTelemetryLogger chatTelemetryLogger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.chatServices = chatServices;
@@ -54,6 +56,7 @@ public class ChatLogic {
         this.logger = logger;
         this.intentHandler = intentHandler;
         this.entityRecognizer = entityRecognizer;
+        this.chatTelemetryLogger = chatTelemetryLogger;
     }
 
     public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
@@ -97,6 +100,7 @@ public class ChatLogic {
             if (wnetConfident) {
                 // if we are taking WNET's reply then process intents
                 this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap);
+                this.telemetryMap.put("AnsweredBy", "WNET");
             } else {
                 // otherwise,
                 // wait for the AIML server to respond
@@ -106,9 +110,12 @@ public class ChatLogic {
                 boolean aimlConfident = (result.getScore() > 0.0d);
                 this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
 
-                if (!aimlConfident) {
+                if (aimlConfident) {
+                    this.telemetryMap.put("AnsweredBy", "AIML");
+                } else {
                     // get a response from the RNN
                     result = this.interpretRnnResult(startTime);
+                    this.telemetryMap.put("AnsweredBy", "RNN");
                 }
             }
 
@@ -151,7 +158,7 @@ public class ChatLogic {
             this.chatServices.abandonCalls();
         }
         // log the results
-        ITelemetry.addTelemetryEvent(this.logger, "ApiChat", this.telemetryMap);
+        ITelemetry.addTelemetryEvent(this.chatTelemetryLogger, "ApiChat", this.telemetryMap);
         return apiChat.setSuccessStatus();
     }
 
