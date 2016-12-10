@@ -5,7 +5,7 @@ initializeEventListeners();
 initializeConsole(status,training_file,deep_error);
 
 var async_status_UI  = setInterval(function(){ getUIStatusCall()}, 2000);
-var async_status_AI  = setInterval(function(){ trainingStatusCall()}, 4000);
+var async_status_AI  = setInterval(function(){ trainingStatusCall()}, 2000);
 var async_error_ping = setInterval(function(){ trainingErrorPing()}, 2000);
 
 function initializeEventListeners(){
@@ -53,7 +53,10 @@ function getUIStatusCall(){
             msgAlertProgressBar(4,'Phase one in progress.. ');
             break;
         case (state == 5): // start phase two
+            var error = getUICurrentError();
             phaseOneJump();
+            phaseTwoActive();
+            phaseTwoUpdate(error,100)
             document.getElementById('show-error').innerText = getUICurrentError();
             msgAlertProgressBar(4,'Phase two in progress.. ');
             break;
@@ -321,9 +324,9 @@ function startChart(max_error,zoom){
 
     var interactive_plot = $.plot("#interactive", [getData()], {
         grid: {
-            //borderColor: "#f3f3f3",
-            //borderWidth: 1,
-            //tickColor: "#f3f3f3"
+            borderColor: "#f3f3f3",
+            borderWidth: 1,
+            tickColor: "#f3f3f3"
         },
         series: {
             shadowSize: 0, // Drawing is faster without shadows

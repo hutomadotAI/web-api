@@ -30,16 +30,13 @@
                 <td class="text-center"><span id="status-badge-upload" class="badge btn-primary">0%</span></td>
             </tr>
 
-            <tr id="trainingbar">
+            <tr id="trainingbar" hidden>
                 <!-- Phase2 is the "time" to monitoring the training error progress -->
                 <td class="text-center" id="status-training-file">phase 2</td>
                 <td>
-                    <a data-toggle="collapse"  href="#collapseChartTrainingError">
-                        <div class="text-center">
-                            See training chart details
-                            <i class="fa fa-plus-circle text-sm text-yellow"></i>
-                        </div>
-                    </a>
+                    <div class="progress progress-xs progress-striped active" id="progress-training-file-action" style="margin-top:9px;">
+                        <div class="progress-bar progress-bar-success" id="progress-training-file" value="0" style="width:0;"></div>
+                    </div>
                 </td>
                 <td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">0%</span></td>
             </tr>
@@ -82,7 +79,7 @@
             </div>
         </a>
         <div class=" pull-right">
-            Precision : <span id="show-error"></span>
+            Error precision : <span id="show-error"></span>
         </div>
     </div>
 

@@ -144,7 +144,6 @@ function phaseOneJump(){
     hidePreTrainingBar(false);
 }
 
-
 function phaseOneMaxValue(){
     document.getElementById('progress-upload-file').style.width = '100%';
     document.getElementById('status-badge-upload').innerHTML = '100%';
@@ -155,9 +154,26 @@ function removeProgressStripedPhaseOne(){
     $('#progress-upload-file-action').removeClass('progress-striped');
 }
 
-
 function hidePreTrainingBar(state){
     $('#pretrainingbar').prop('hidden', state);
+}
+
+function hideTrainingBar(state){
+    $('#trainingbar').prop('hidden', state);
+}
+
+function phaseTwoActive(){
+    disableButtonUploadTextFile(false);
+    disableButtonUploadBookFile(false);
+    hideTrainingBar(false);
+}
+
+function phaseTwoUpdate(error,max_error){
+    var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
+    // TODO re-define check error limit
+    document.getElementById("progress-training-file").setAttribute('value',new_value);
+    document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
+    document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
 }
 
 function hideRestartBox(){
