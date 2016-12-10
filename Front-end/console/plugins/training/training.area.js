@@ -1,4 +1,6 @@
 var current_training_error = -1;
+var max_error = 1000;
+
 initializeEventListeners();
 initializeConsole(status,training_file,deep_error);
 
@@ -14,6 +16,8 @@ function initializeEventListeners(){
     document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
     document.getElementById('btnUploadStructure').addEventListener('click', uploadBookFile);
     document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
+
+    //document.getElementById('zoomIn').addEventListener('click', zoomIn);
 }
 
 function initializeConsole(status,file,error){
@@ -27,10 +31,34 @@ function getUIStatusCall(){
     switch (true) {
         case (state == 0):
             break;
-        case (state == 1):
+        case (state == 1): // file uploaded
+            phaseOneFlashing(true);
+            msgAlertProgressBar(1,'Initialising. please wait.');
             trainingStartCall();
             break;
-        case (state == 5):
+        case (state == 2): // initialising
+            //msgAlertProgressBar(1,'Initialising. please wait.');
+            break;
+        case (state == 3): // training queue
+            //msgAlertProgressBar(1,'Initialising. please wait.');
+            break;
+        case (state == 4):
+            // simulation phase one - waiting response state from API
+            if (document.getElementById('status-badge-upload').innerHTML == '0%'){
+                phaseOneFlashing(false);
+                phaseOneReset();
+                phaseOneUpdate();
+            }
+            document.getElementById('show-error').innerText = 'not yet available';
+            msgAlertProgressBar(4,'Phase one in progress.. ');
+            break;
+        case (state == 5): // start phase two
+            phaseOneJump();
+            document.getElementById('show-error').innerText = getUICurrentError();
+            msgAlertProgressBar(4,'Phase two in progress.. ');
+            break;
+        case (state == 6):
+            msgAlertProgressBar(1,'Training stopped. Please restart training');
             if (!justStopped())
                 createMessageWarningInfoAlert();
             break;
@@ -50,7 +78,7 @@ function trainingStartCall() {
             var statusCode = JSONdata['status']['code'];
             //TODO temporary coded - code 400 returned when you upload file on existing file
             if ((statusCode === 200 ) || (statusCode === 400 )) {
-                setStateWaitingMode();
+                setUICurrentStatus(2);
             } else {
                 msgAlertProgressBar(2, 'Training cannot start! code error '+statusCode);
                 setUICurrentStatus(-1);
@@ -104,50 +132,41 @@ function trainingErrorPing() {
 function setStateResponse(response){
     switch (response) {
         case ('error'):
-            msgAlertProgressBar(2, 'Training was stopped during reading AI status');
             setUICurrentStatus(-1); // code -1
+            msgAlertProgressBar(2, 'Training was stopped during reading AI status');
             break;
         case 'training_not_started':
             // code 0
             break;
         case 'training_queued' :
-            msgAlertProgressBar(1,'Initialising. please wait.');
             setUICurrentStatus(3);  // code 3
             break;
         case 'training_in_progress':
-            current_training_error = getUICurrentError();
-            if (current_training_error != -1) {
-                document.getElementById('show-error').innerText = getUICurrentError();
-                msgAlertProgressBar(4,'Phase two in progress.. ');
-            }
-            else {
-                document.getElementById('show-error').innerText = 'not yet available';
-                msgAlertProgressBar(4,'Phase one in progress.. ');
-            }
-
-            setUICurrentStatus(4); // code 4
+            if (getUICurrentError() != -1)
+                setUICurrentStatus(5); // code 5
+            else
+                setUICurrentStatus(4); // code 4
             break;
         case 'training_stopped' :
-            msgAlertProgressBar(1,'Training stopped. Please restart training');
-            setUICurrentStatus(5); // code 5
+            setUICurrentStatus(6); // code 6
             break;
         case 'STOPPED_MAX_TIME' :
             break;
         case 'training_completed' :
-            msgAlertProgressBar(3, 'Training completed.');
             setUICurrentStatus(10); // code 10
+            msgAlertProgressBar(3, 'Training completed.');
             break;
         case 'training_nothing_to_train' :
-            msgAlertProgressBar(2, 'Nothing to train');
             setUICurrentStatus(-1);
+            msgAlertProgressBar(2, 'Nothing to train');
             break;
         case 'internal_error' :
-            msgAlertProgressBar(2, 'Internal error');
             setUICurrentStatus(-1);
+            msgAlertProgressBar(2, 'Internal error');
             break;
         case 'malformed_training_file' :
-            msgAlertProgressBar(2, 'Malformed training file');
             setUICurrentStatus(-1);
+            msgAlertProgressBar(2, 'Malformed training file');
             break;
         case 'CANCELLED' :
             break;
@@ -181,9 +200,12 @@ function trainingRestart(){
     disableButtonUploadBookFile(false);
 }
 
+function getUICurrentStatusReadonly(){
+    return document.getElementById('training-status').value;
+}
 function getUICurrentStatus(){
     var result = document.getElementById('training-status').value;
-    setStateWaitingMode();
+    setStateListeningMode();
     return result;
 }
 
@@ -191,7 +213,7 @@ function setUICurrentStatus(status){
     document.getElementById('training-status').value = status;
 }
 
-function setStateWaitingMode(){
+function setStateListeningMode(){
     setUICurrentStatus(999);
 }
 
@@ -265,16 +287,23 @@ $("#collapseVideoTutorialTrainingBook").on('hidden.bs.collapse', function(){
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
 });
 
+function zoomIn(){
+    max_error = max_error/10;
+    startChart(max_error,1);
+}
 
-$(function () {
-    var max_error = 1000;
+function zoomOut(){
+    max_error = max_error*10;
+    startChart(max_error,-1);
+}
+
+
+function startChart(max_error,zoom){
     var data = [], totalPoints = 50;
 
-    function getRandomData() {
-
+    function getData() {
         if (data.length > 0)
             data = data.slice(1);
-
         // Do a random walk
         while (data.length < totalPoints) {
             if (current_training_error != -1)
@@ -285,18 +314,16 @@ $(function () {
 
         // Zip the generated y values with the x values
         var res = [];
-        for (var i = 0; i < data.length; ++i) {
+        for (var i = 0; i < data.length; ++i)
             res.push([i, data[i]]);
-        }
-
         return res;
     }
 
-    var interactive_plot = $.plot("#interactive", [getRandomData()], {
+    var interactive_plot = $.plot("#interactive", [getData()], {
         grid: {
-            borderColor: "#f3f3f3",
-            borderWidth: 1,
-            tickColor: "#f3f3f3"
+            //borderColor: "#f3f3f3",
+            //borderWidth: 1,
+            //tickColor: "#f3f3f3"
         },
         series: {
             shadowSize: 0, // Drawing is faster without shadows
@@ -318,10 +345,15 @@ $(function () {
 
     var updateInterval = 2000; //Fetch data ever x milliseconds
     function update() {
-        interactive_plot.setData([getRandomData()]);
+        interactive_plot.setData([getData()]);
         interactive_plot.draw();
         setTimeout(update, updateInterval);
     }
 
     update();
+}
+
+$(function () {
+    var zoom=0;
+    startChart(max_error,zoom)
 });

@@ -12,6 +12,41 @@
     </div>
 
     <div class="box-body table-responsive no-border">
+
+        <table class="table">
+            <tr>
+                <th class="text-center no-border" style="width: 20%;">Training Phase</th>
+                <th class="text-center no-border">Progress</th>
+                <th class="text-center no-border" style="width: 120px;">Completed</th>
+            </tr>
+            <tr id="pretrainingbar">
+                <!-- Phase1 is the "time" to wait for upload training file -->
+                <td class="text-center" id="status-upload-file">phase 1</td>
+                <td>
+                    <div class="progress progress-xs progress-striped active" id="progress-upload-file-action" style="margin-top:9px;">
+                        <div class="progress-bar progress-bar-primary" id="progress-upload-file" value="0" style="width:0;"></div>
+                    </div>
+                </td>
+                <td class="text-center"><span id="status-badge-upload" class="badge btn-primary">0%</span></td>
+            </tr>
+
+            <tr id="trainingbar">
+                <!-- Phase2 is the "time" to monitoring the training error progress -->
+                <td class="text-center" id="status-training-file">phase 2</td>
+                <td>
+                    <a data-toggle="collapse"  href="#collapseChartTrainingError">
+                        <div class="text-center">
+                            See training chart details
+                            <i class="fa fa-plus-circle text-sm text-yellow"></i>
+                        </div>
+                    </a>
+                </td>
+                <td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">0%</span></td>
+            </tr>
+        </table>
+
+
+
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
             <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
             <span id="msgAlertProgressBar">Training not started. Please upload training data.</span>
@@ -55,7 +90,8 @@
         <div class="col-xs-12">
             <div class="box-body table-responsive no-border">
                 <div id="collapseChartTrainingError" class="panel-collapse collapse">
-                    <div id="interactive" style="width: 100%;height: 300px;"></div>
+                 <!--   <button class="btn btn-success btn-sm center-block flat" id="zoomIn"><span class="fa fa-plus"></span></button> -->
+                    <div id="interactive" style="width: 100%;height: 150px;"></div>
                 </div>
             </div>
         </div>

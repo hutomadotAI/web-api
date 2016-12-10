@@ -37,8 +37,6 @@ function uploadTextFile() {
                     msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
                 else
                     msgAlertUploadFile(4, 'File uploaded');
-                
-                msgAlertProgressBar(1,'Initialising. please wait.');
                 setUICurrentStatus(1);
                 hideRestartBox();
             } else {
@@ -107,6 +105,59 @@ function justStopped(){
         return true;
     else 
         return false;
+}
+
+function phaseOneReset(){
+    document.getElementById('progress-upload-file').style.width = '0%';
+    document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
+    hidePreTrainingBar(false);
+}
+
+function phaseOneUpdate() {
+    // simulation phaseOne -  pretraining
+    var width = document.getElementById("progress-upload-file").style.width;
+    width = width.substr(0, width.length-1);
+
+    if( parseInt(width) <= 100 ){
+        document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
+        document.getElementById('status-badge-upload').innerHTML = width+'%';
+        setTimeout(phaseOneUpdate, 400);
+    }
+    else {
+        removeProgressStripedPhaseOne();
+    }
+}
+
+function phaseOneFlashing(flag){
+    if (flag) {
+        document.getElementById('status-upload-file').innerText = 'initialising';
+        document.getElementById('status-upload-file').setAttribute('class', 'text-center flashing');
+    }else{
+        document.getElementById('status-upload-file').innerText = 'phase 1';
+        document.getElementById('status-upload-file').setAttribute('class', 'text-center');
+    }
+}
+
+function phaseOneJump(){
+    removeProgressStripedPhaseOne();
+    phaseOneMaxValue();
+    hidePreTrainingBar(false);
+}
+
+
+function phaseOneMaxValue(){
+    document.getElementById('progress-upload-file').style.width = '100%';
+    document.getElementById('status-badge-upload').innerHTML = '100%';
+}
+
+function removeProgressStripedPhaseOne(){
+    $('#progress-upload-file-action').removeClass('active');
+    $('#progress-upload-file-action').removeClass('progress-striped');
+}
+
+
+function hidePreTrainingBar(state){
+    $('#pretrainingbar').prop('hidden', state);
 }
 
 function hideRestartBox(){
