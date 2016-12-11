@@ -42,8 +42,6 @@
             </tr>
         </table>
 
-
-
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
             <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
             <span id="msgAlertProgressBar">Training not started. Please upload training data.</span>
@@ -71,6 +69,7 @@
             </div>
         </div>
     </div>
+
     <div id="chart-details" hidden>
         <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
             <a data-toggle="collapse"  href="#collapseChartTrainingError">
@@ -86,7 +85,7 @@
 
         <div class="row no-padding">
             <div class="col-xs-12">
-                <div class="box-body table-responsive no-border">
+                <div class="box-body table-responsive no-border" style="padding-bottom:0px;">
                     <div id="collapseChartTrainingError" class="panel-collapse collapse">
                      <!--   <button class="btn btn-success btn-sm center-block flat" id="zoomIn"><span class="fa fa-plus"></span></button> -->
                         <div id="interactive" style="width: 100%;height: 150px;">
@@ -102,5 +101,6 @@
                 </div>
             </div>
         </div>
+    </div>
 </div>
 

@@ -225,7 +225,7 @@ function getUICurrentError(){
 }
 
 function setUICurrentError(error){
-    document.getElementById('training-error').value = error;
+    document.getElementById('training-error').value = error.toFixed(6);
 }
 
 function learnRegExp(url){
@@ -294,10 +294,14 @@ function zoomIn(){
     stopChart();
     if ( max_error > 0.0001) {
         max_error = max_error / 10;
-        document.getElementsByTagName('zoomout').disabled = false;
+        document.getElementById('zoomout').disabled = false;
+        document.getElementById('zoomout').className = 'fa fa-plus-circle text-sm text-yellow';
+        document.getElementById('zoomout').setAttribute('onClick','zoomOut()');
     }
     else {
-        document.getElementsByTagName('zoomin').disabled = true;
+        document.getElementById('zoomin').disabled = true;
+        document.getElementById('zoomin').className = 'fa fa-minus-circle text-sm text-gray';
+        document.getElementById('zoomin').setAttribute('onClick','');
     }
     startChart();
 }
@@ -306,10 +310,14 @@ function zoomOut(){
     stopChart();
     if ( max_error < 10000) {
         max_error = max_error * 10;
-        document.getElementsByTagName('zoomin').disabled = false;
+        document.getElementById('zoomin').disabled = false;
+        document.getElementById('zoomin').className = 'fa fa-minus-circle text-sm text-yellow';
+        document.getElementById('zoomin').setAttribute('onClick','zoomIn()');
     }
     else {
-        document.getElementsByTagName('zoomout').disabled = true;
+        document.getElementById('zoomout').disabled = true;
+        document.getElementById('zoomout').className = 'fa fa-plus-circle text-sm text-gray';
+        document.getElementById('zoomout').setAttribute('onClick','');
     }
     startChart();
 }
