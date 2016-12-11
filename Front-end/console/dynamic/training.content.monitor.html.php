@@ -71,27 +71,29 @@
             </div>
         </div>
     </div>
-    <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
-        <a data-toggle="collapse"  href="#collapseChartTrainingError">
-            <div class=" pull-left">
-                <i class="fa fa-plus-circle text-sm text-yellow"></i>
-                See training chart details
+    <span id="chart-details" hidden>
+        <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
+            <a data-toggle="collapse"  href="#collapseChartTrainingError">
+                <div class=" pull-left">
+                    <i class="fa fa-plus-circle text-sm text-yellow"></i>
+                    See training chart details
+                </div>
+            </a>
+            <div class=" pull-right">
+                Error precision : <span id="show-error"></span>
             </div>
-        </a>
-        <div class=" pull-right">
-            Error precision : <span id="show-error"></span>
         </div>
-    </div>
 
-    <div class="row no-padding">
-        <div class="col-xs-12">
-            <div class="box-body table-responsive no-border">
-                <div id="collapseChartTrainingError" class="panel-collapse collapse">
-                 <!--   <button class="btn btn-success btn-sm center-block flat" id="zoomIn"><span class="fa fa-plus"></span></button> -->
-                    <div id="interactive" style="width: 100%;height: 150px;"></div>
+        <div class="row no-padding">
+            <div class="col-xs-12">
+                <div class="box-body table-responsive no-border">
+                    <div id="collapseChartTrainingError" class="panel-collapse collapse">
+                     <!--   <button class="btn btn-success btn-sm center-block flat" id="zoomIn"><span class="fa fa-plus"></span></button> -->
+                        <div id="interactive" style="width: 100%;height: 150px;"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </span>
 </div>
 

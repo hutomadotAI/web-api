@@ -162,10 +162,14 @@ function hideTrainingBar(state){
     $('#trainingbar').prop('hidden', state);
 }
 
+function hideChart(state){
+    $('#chart-details').prop('hidden', state);
+}
 function phaseTwoActive(){
     disableButtonUploadTextFile(false);
     disableButtonUploadBookFile(false);
     hideTrainingBar(false);
+    hideChart(false);
 }
 
 function phaseTwoUpdate(error,max_error){
