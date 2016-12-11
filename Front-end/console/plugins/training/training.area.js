@@ -1,5 +1,5 @@
 var current_training_error = -1;
-var max_error = 1000;
+var max_error = 100;
 
 initializeEventListeners();
 initializeConsole(status,training_file,deep_error);
@@ -53,11 +53,11 @@ function getUIStatusCall(){
             msgAlertProgressBar(4,'Phase one in progress.. ');
             break;
         case (state == 5): // start phase two
-            var error = getUICurrentError();
+            current_training_error = getUICurrentError();
             phaseOneJump();
             phaseTwoActive();
-            phaseTwoUpdate(error,100)
-            document.getElementById('show-error').innerText = getUICurrentError();
+            phaseTwoUpdate(current_training_error,100)
+            document.getElementById('show-error').innerText = current_training_error;
             msgAlertProgressBar(4,'Phase two in progress.. ');
             break;
         case (state == 6):
@@ -291,37 +291,53 @@ $("#collapseVideoTutorialTrainingBook").on('hidden.bs.collapse', function(){
 });
 
 function zoomIn(){
-    max_error = max_error/10;
-    startChart(max_error,1);
+    stopChart();
+    if ( max_error > 0.0001) {
+        max_error = max_error / 10;
+        document.getElementsByTagName('zoomout').disabled = false;
+    }
+    else {
+        document.getElementsByTagName('zoomin').disabled = true;
+    }
+    startChart();
 }
 
 function zoomOut(){
-    max_error = max_error*10;
-    startChart(max_error,-1);
+    stopChart();
+    if ( max_error < 10000) {
+        max_error = max_error * 10;
+        document.getElementsByTagName('zoomin').disabled = false;
+    }
+    else {
+        document.getElementsByTagName('zoomout').disabled = true;
+    }
+    startChart();
 }
 
+var data = [];
+var async_chart_update;
 
-function startChart(max_error,zoom){
-    var data = [], totalPoints = 50;
+function getData() {
+    var totalPoints = 50;
 
-    function getData() {
-        if (data.length > 0)
-            data = data.slice(1);
-        // Do a random walk
-        while (data.length < totalPoints) {
-            if (current_training_error != -1)
-                data.push(current_training_error);
-            else
-                data.push(max_error);
-        }
+    if (data.length > 0)
+        data = data.slice(1);
 
-        // Zip the generated y values with the x values
-        var res = [];
-        for (var i = 0; i < data.length; ++i)
-            res.push([i, data[i]]);
-        return res;
+    while (data.length < totalPoints) {
+        if (current_training_error != -1)
+            data.push(current_training_error);
+        else
+            data.push(max_error);
     }
 
+    var res = [];
+    for (var i = 0; i < data.length; ++i) {
+        res.push([i, data[i]]);
+    }
+    return res;
+}
+
+function startChart(){
     var interactive_plot = $.plot("#interactive", [getData()], {
         grid: {
             borderColor: "#f3f3f3",
@@ -350,13 +366,14 @@ function startChart(max_error,zoom){
     function update() {
         interactive_plot.setData([getData()]);
         interactive_plot.draw();
-        setTimeout(update, updateInterval);
+        async_chart_update= setTimeout(update, updateInterval);
     }
-
     update();
 }
 
+function stopChart(){
+    clearTimeout(async_chart_update);
+}
 $(function () {
-    var zoom=0;
-    startChart(max_error,zoom)
+    startChart();
 });

@@ -71,15 +71,15 @@
             </div>
         </div>
     </div>
-    <span id="chart-details" hidden>
+    <div id="chart-details" hidden>
         <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
             <a data-toggle="collapse"  href="#collapseChartTrainingError">
                 <div class=" pull-left">
-                    <i class="fa fa-plus-circle text-sm text-yellow"></i>
-                    See training chart details
+                      See training chart details
+                    <i class="fa fa-info-circle text-sm text-yellow"></i>
                 </div>
             </a>
-            <div class=" pull-right">
+            <div class="text-gray pull-right">
                 Error precision : <span id="show-error"></span>
             </div>
         </div>
@@ -89,11 +89,18 @@
                 <div class="box-body table-responsive no-border">
                     <div id="collapseChartTrainingError" class="panel-collapse collapse">
                      <!--   <button class="btn btn-success btn-sm center-block flat" id="zoomIn"><span class="fa fa-plus"></span></button> -->
-                        <div id="interactive" style="width: 100%;height: 150px;"></div>
+                        <div id="interactive" style="width: 100%;height: 150px;">
+
+                        </div>
+                        <div class="unselectable text-center">
+                            <i class="fa fa-minus-circle text-sm text-yellow" id="zoomin" onClick="zoomOut();" onMouseOver="this.style.cursor='pointer'"></i>
+                                <span class="unselectable text-gray">zoom</span>
+                            <i class="fa fa-plus-circle text-sm text-yellow" id="zoomout" onClick="zoomIn();" onMouseOver="this.style.cursor='pointer'"></i>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
-    </span>
 </div>
 
