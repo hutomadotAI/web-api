@@ -296,13 +296,13 @@ function zoomIn(){
         document.getElementById('zoomout').disabled = false;
         document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-yellow';
         document.getElementById('zoomout').setAttribute('onClick','zoomOut()');
+        startChart();
     }
     else {
         document.getElementById('zoomin').disabled = true;
         document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-gray';
         document.getElementById('zoomin').setAttribute('onClick','');
     }
-    startChart();
 }
 
 function zoomOut(){
@@ -312,13 +312,13 @@ function zoomOut(){
         document.getElementById('zoomin').disabled = false;
         document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-yellow';
         document.getElementById('zoomin').setAttribute('onClick','zoomIn()');
+        startChart();
     }
     else {
         document.getElementById('zoomout').disabled = true;
         document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-gray';
         document.getElementById('zoomout').setAttribute('onClick','');
     }
-    startChart();
 }
 
 var data = [];
@@ -347,9 +347,9 @@ function getData() {
 function startChart(){
     var interactive_plot = $.plot("#interactive", [getData()], {
         grid: {
-            borderColor: "#f3f3f3",
-            borderWidth: 1,
-            tickColor: "#f3f3f3"
+            //borderColor: "#f3f3f3",
+            //borderWidth: 0,
+            //tickColor: "#f3f3f3"
         },
         series: {
             shadowSize: 0, // Drawing is faster without shadows
