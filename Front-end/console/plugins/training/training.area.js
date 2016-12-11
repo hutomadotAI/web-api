@@ -191,11 +191,14 @@ function setErrorResponse(response){
 }
 
 function trainingRestart(){
-    console.log('call restart training');
     disableButtonUploadTextFile(true);
     disableButtonUploadBookFile(true);
 
-    hideMsgWarningAlertTrainingInfo();
+    phaseOneReset();
+    hideTrainingBar(true);
+    hideChart(true);
+
+    disableRestartBoxButton();
     setUICurrentStatus(1);
 
     disableButtonUploadTextFile(false);

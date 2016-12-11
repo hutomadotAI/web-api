@@ -192,6 +192,14 @@ function hideRestartBox(){
 function disableRestartBoxButton(state){
     var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
     if (element !== null) {
-        document.getElementById('restart-button').disabled = state;
+        if (state){
+            document.getElementById('restart-button').setAttribute('onClick','');
+            document.getElementById('restart-button').setAttribute("disabled", "disabled");
+        }
+        else{
+            document.getElementById('restart-button').setAttribute('onClick','trainingRestart()');
+            document.getElementById('restart-button').setAttribute("disabled", "enabled");
+        }
+
     }
 }
