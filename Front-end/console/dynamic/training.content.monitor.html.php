@@ -92,9 +92,9 @@
 
                         </div>
                         <div class="unselectable text-center">
-                            <i class="fa fa-minus-circle text-sm text-yellow" id="zoomin" onClick="zoomOut();" onMouseOver="this.style.cursor='pointer'"></i>
+                            <i class="fa fa-minus-circle text-sm text-yellow" id="zoomout" onClick="zoomOut();" onMouseOver="this.style.cursor='pointer'"></i>
                                 <span class="unselectable text-gray">zoom</span>
-                            <i class="fa fa-plus-circle text-sm text-yellow" id="zoomout" onClick="zoomIn();" onMouseOver="this.style.cursor='pointer'"></i>
+                            <i class="fa fa-plus-circle text-sm text-yellow" id="zoomin" onClick="zoomIn();" onMouseOver="this.style.cursor='pointer'"></i>
                         </div>
                     </div>
 

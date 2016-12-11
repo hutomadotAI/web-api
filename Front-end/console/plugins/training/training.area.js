@@ -1,4 +1,3 @@
-var current_training_error = -1;
 var max_error = 100;
 
 initializeEventListeners();
@@ -53,11 +52,11 @@ function getUIStatusCall(){
             msgAlertProgressBar(4,'Phase one in progress.. ');
             break;
         case (state == 5): // start phase two
-            current_training_error = getUICurrentError();
+            deep_error = getUICurrentError();
             phaseOneJump();
             phaseTwoActive();
-            phaseTwoUpdate(current_training_error,100)
-            document.getElementById('show-error').innerText = current_training_error;
+            phaseTwoUpdate(deep_error,100)
+            document.getElementById('show-error').innerText = deep_error;
             msgAlertProgressBar(4,'Phase two in progress.. ');
             break;
         case (state == 6):
@@ -295,12 +294,12 @@ function zoomIn(){
     if ( max_error > 0.0001) {
         max_error = max_error / 10;
         document.getElementById('zoomout').disabled = false;
-        document.getElementById('zoomout').className = 'fa fa-plus-circle text-sm text-yellow';
+        document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-yellow';
         document.getElementById('zoomout').setAttribute('onClick','zoomOut()');
     }
     else {
         document.getElementById('zoomin').disabled = true;
-        document.getElementById('zoomin').className = 'fa fa-minus-circle text-sm text-gray';
+        document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-gray';
         document.getElementById('zoomin').setAttribute('onClick','');
     }
     startChart();
@@ -311,12 +310,12 @@ function zoomOut(){
     if ( max_error < 10000) {
         max_error = max_error * 10;
         document.getElementById('zoomin').disabled = false;
-        document.getElementById('zoomin').className = 'fa fa-minus-circle text-sm text-yellow';
+        document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-yellow';
         document.getElementById('zoomin').setAttribute('onClick','zoomIn()');
     }
     else {
         document.getElementById('zoomout').disabled = true;
-        document.getElementById('zoomout').className = 'fa fa-plus-circle text-sm text-gray';
+        document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-gray';
         document.getElementById('zoomout').setAttribute('onClick','');
     }
     startChart();
@@ -332,8 +331,8 @@ function getData() {
         data = data.slice(1);
 
     while (data.length < totalPoints) {
-        if (current_training_error != -1)
-            data.push(current_training_error);
+        if (deep_error != -1)
+            data.push(deep_error);
         else
             data.push(max_error);
     }
@@ -383,5 +382,26 @@ function stopChart(){
     clearTimeout(async_chart_update);
 }
 $(function () {
+
+
+    switch (true) {
+        case (deep_error<0.01):
+            max_error = 0.01;
+            break;
+        case (deep_error<0.1):
+            max_error = 0.1;
+            break;
+        case (deep_error<1):
+            max_error = 1;
+            break;
+        case (deep_error<10):
+            max_error = 10;
+            break;
+        case (deep_error<100):
+            max_error = 100;
+            break;
+        default:
+            max_error = 1000;
+    }
     startChart();
 });

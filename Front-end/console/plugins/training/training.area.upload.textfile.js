@@ -173,7 +173,8 @@ function phaseTwoActive(){
 }
 
 function phaseTwoUpdate(error,max_error){
-    error=99;
+    if ( error > 99)
+        error=99; // diplayed on 1% completed time
     var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
     // TODO re-define check error limit
     document.getElementById("progress-training-file").setAttribute('value',new_value);
