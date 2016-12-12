@@ -121,10 +121,11 @@ function phaseOneUpdate() {
     if( parseInt(width) <= 100 ){
         document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
         document.getElementById('status-badge-upload').innerHTML = width+'%';
-        setTimeout(phaseOneUpdate, 400);
+        setTimeout(phaseOneUpdate, 100);
     }
     else {
         removeProgressStripedPhaseOne();
+        setUICurrentStatus(5);
     }
 }
 
@@ -135,6 +136,16 @@ function phaseOneFlashing(flag){
     }else{
         document.getElementById('status-upload-file').innerText = 'phase 1';
         document.getElementById('status-upload-file').setAttribute('class', 'text-center');
+    }
+}
+
+function phaseTwoFlashing(flag){
+    if (flag) {
+        document.getElementById('status-training-file').innerText = 'initialising';
+        document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
+    }else{
+        document.getElementById('status-training-file').innerText = 'phase 2';
+        document.getElementById('status-training-file').setAttribute('class', 'text-center');
     }
 }
 
@@ -164,12 +175,12 @@ function hideTrainingBar(state){
 
 function hideChart(state){
     $('#chart-details').prop('hidden', state);
+    $('#chart-details-footer').prop('hidden', state);
 }
 function phaseTwoActive(){
     disableButtonUploadTextFile(false);
     disableButtonUploadBookFile(false);
     hideTrainingBar(false);
-    hideChart(false);
 }
 
 function phaseTwoUpdate(error,max_error){

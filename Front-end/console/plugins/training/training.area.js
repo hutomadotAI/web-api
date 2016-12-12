@@ -30,36 +30,43 @@ function getUIStatusCall(){
     switch (true) {
         case (state == 0):
             break;
-        case (state == 1): // file uploaded
-            phaseOneFlashing(true);
+        case (state == 1): // File uploaded
             msgAlertProgressBar(1,'Initialising. please wait.');
+            phaseOneFlashing(true);
             trainingStartCall();
             break;
-        case (state == 2): // initialising
+        case (state == 2): //  Initialising - Phase One
             //msgAlertProgressBar(1,'Initialising. please wait.');
             break;
-        case (state == 3): // training queue
+        case (state == 3): // Initialising - Phase One - queue
             //msgAlertProgressBar(1,'Initialising. please wait.');
             break;
-        case (state == 4):
-            // simulation phase one - waiting response state from API
+        case (state == 4): // Execute - Phase One ( simulation ) waiting API
             if (document.getElementById('status-badge-upload').innerHTML == '0%'){
                 phaseOneFlashing(false);
                 phaseOneReset();
                 phaseOneUpdate();
+                document.getElementById('show-error').innerText = 'not yet available';
+                msgAlertProgressBar(4,'Phase one in progress...');
             }
-            document.getElementById('show-error').innerText = 'not yet available';
-            msgAlertProgressBar(4,'Phase one in progress.. ');
             break;
-        case (state == 5): // start phase two
+        case (state == 5): // Initialising - Phase Two
+            phaseOneJump();
+            phaseTwoFlashing(true);
+            phaseTwoActive();
+            msgAlertProgressBar(1,'Phase two initialization may take a few minutes. please wait.');
+            break;
+        case (state == 6): // start phase two
             deep_error = getUICurrentError();
+            hideChart(false);
             phaseOneJump();
             phaseTwoActive();
+            phaseTwoFlashing(false);
             phaseTwoUpdate(deep_error,100)
             document.getElementById('show-error').innerText = deep_error;
-            msgAlertProgressBar(4,'Phase two in progress.. ');
+            msgAlertProgressBar(4,'Phase two in progress...');
             break;
-        case (state == 6):
+        case (state == 7):
             msgAlertProgressBar(1,'Training stopped. Please restart training');
             if (!justStopped())
                 createMessageWarningInfoAlert();
@@ -145,12 +152,14 @@ function setStateResponse(response){
             break;
         case 'training_in_progress':
             if (getUICurrentError() != -1)
-                setUICurrentStatus(5); // code 5
-            else
-                setUICurrentStatus(4); // code 4
+                setUICurrentStatus(6); // code 5
+            else {
+                if (document.getElementById('status-badge-upload').innerHTML == '0%')
+                    setUICurrentStatus(4); // code 4
+            }
             break;
         case 'training_stopped' :
-            setUICurrentStatus(6); // code 6
+            setUICurrentStatus(7); // code 6
             break;
         case 'STOPPED_MAX_TIME' :
             break;
