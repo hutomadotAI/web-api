@@ -393,6 +393,9 @@ $(function () {
 
 
     switch (true) {
+        case (deep_error==  -1):
+            scale_chart_max_error = 5000; // default scale value
+            break;
         case (deep_error<0.00005):
             scale_chart_max_error = 0.00005;
             break;
