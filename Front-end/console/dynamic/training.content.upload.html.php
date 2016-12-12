@@ -7,6 +7,7 @@
     </ul>
     <input type="hidden" id="training-status" name="training-status" value="0" />
     <input type="hidden" id="training-error" name="training-error" value="-1" />
+    <input type="hidden" id="training-max-error" name="training-max-error" value="-1" />
     <div class="tab-content">
             <?php include './dynamic/training.content.upload.file.html.php'; ?>
 

@@ -1,5 +1,4 @@
-var max_error = 100;
-
+var scale_chart_max_error = 10000;
 initializeEventListeners();
 initializeConsole(status,training_file,deep_error);
 
@@ -54,15 +53,16 @@ function getUIStatusCall(){
             phaseOneJump();
             phaseTwoFlashing(true);
             phaseTwoActive();
-            msgAlertProgressBar(1,'Phase two initialization may take a few minutes. please wait.');
+            msgAlertProgressBar(1,'Initialization may take few minutes. please wait.');
             break;
         case (state == 6): // start phase two
+            
             deep_error = getUICurrentError();
             hideChart(false);
             phaseOneJump();
             phaseTwoActive();
             phaseTwoFlashing(false);
-            phaseTwoUpdate(deep_error,100)
+            phaseTwoUpdate(deep_error, getUICurrentMaxError());
             document.getElementById('show-error').innerText = deep_error;
             msgAlertProgressBar(4,'Phase two in progress...');
             break;
@@ -214,9 +214,6 @@ function trainingRestart(){
     disableButtonUploadBookFile(false);
 }
 
-function getUICurrentStatusReadonly(){
-    return document.getElementById('training-status').value;
-}
 function getUICurrentStatus(){
     var result = document.getElementById('training-status').value;
     setStateListeningMode();
@@ -236,7 +233,15 @@ function getUICurrentError(){
 }
 
 function setUICurrentError(error){
-    document.getElementById('training-error').value = error.toFixed(6);
+    document.getElementById('training-error').value = error.toFixed(7);
+}
+
+function getUICurrentMaxError(){
+    return document.getElementById('training-max-error').value;
+}
+
+function setUICurrentMaxError(error){
+    document.getElementById('training-max-error').value = error;
 }
 
 function learnRegExp(url){
@@ -289,22 +294,11 @@ function haNoContentError(info) {
     }
     return false;
 }
-// VIDEO TUTORIAL TRAINING CHAT EXAMPLE
-$("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function(){
-    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
-    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
-});
-
-// VIDEO TUTORIAL TRAINING BOOK
-$("#collapseVideoTutorialTrainingBook").on('hidden.bs.collapse', function(){
-    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
-    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
-});
 
 function zoomIn(){
     stopChart();
-    if ( max_error > 0.0001) {
-        max_error = max_error / 10;
+    if ( scale_chart_max_error > 0.0001) {
+        scale_chart_max_error = scale_chart_max_error / 5;
         document.getElementById('zoomout').disabled = false;
         document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-yellow';
         document.getElementById('zoomout').setAttribute('onClick','zoomOut()');
@@ -319,8 +313,8 @@ function zoomIn(){
 
 function zoomOut(){
     stopChart();
-    if ( max_error < 10000) {
-        max_error = max_error * 10;
+    if ( scale_chart_max_error < 10000) {
+        scale_chart_max_error = scale_chart_max_error * 5;
         document.getElementById('zoomin').disabled = false;
         document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-yellow';
         document.getElementById('zoomin').setAttribute('onClick','zoomIn()');
@@ -332,6 +326,8 @@ function zoomOut(){
         document.getElementById('zoomout').setAttribute('onClick','');
     }
 }
+
+
 
 var data = [];
 var async_chart_update;
@@ -346,7 +342,7 @@ function getData() {
         if (deep_error != -1)
             data.push(deep_error);
         else
-            data.push(max_error);
+            data.push(scale_chart_max_error);
     }
 
     var res = [];
@@ -373,7 +369,7 @@ function startChart(){
         },
         yaxis: {
             min: 0,
-            max: max_error,
+            max: scale_chart_max_error,
             show: true
         },
         xaxis: {
@@ -397,23 +393,53 @@ $(function () {
 
 
     switch (true) {
+        case (deep_error<0.00005):
+            scale_chart_max_error = 0.00005;
+            break;
+        case (deep_error<0.0001):
+            scale_chart_max_error = 0.0001;
+            break;
+        case (deep_error<0.001):
+            scale_chart_max_error = 0.001;
+            break;
         case (deep_error<0.01):
-            max_error = 0.01;
+            scale_chart_max_error = 0.01;
             break;
         case (deep_error<0.1):
-            max_error = 0.1;
+            scale_chart_max_error = 0.1;
             break;
         case (deep_error<1):
-            max_error = 1;
+            scale_chart_max_error = 1;
             break;
         case (deep_error<10):
-            max_error = 10;
+            scale_chart_max_error = 10;
             break;
         case (deep_error<100):
-            max_error = 100;
+            scale_chart_max_error = 100;
+            break;
+        case (deep_error<500):
+            scale_chart_max_error = 100;
+            break;
+        case (deep_error<1000):
+            scale_chart_max_error = 1000;
+            break;
+        case (deep_error<5000):
+            scale_chart_max_error = 5000;
             break;
         default:
-            max_error = 1000;
+            scale_chart_max_error = 10000;
     }
     startChart();
+});
+
+// VIDEO TUTORIAL TRAINING CHAT EXAMPLE
+$("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function(){
+    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+});
+
+// VIDEO TUTORIAL TRAINING BOOK
+$("#collapseVideoTutorialTrainingBook").on('hidden.bs.collapse', function(){
+    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
 });

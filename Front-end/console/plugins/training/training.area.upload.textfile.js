@@ -184,13 +184,25 @@ function phaseTwoActive(){
 }
 
 function phaseTwoUpdate(error,max_error){
-    if ( error > 99)
-        error=99; // diplayed on 1% completed time
+
+    if (parseFloat(error) > parseFloat(max_error)) {
+        setUICurrentMaxError(error);
+        max_error = error;
+    }
     var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
-    // TODO re-define check error limit
-    document.getElementById("progress-training-file").setAttribute('value',new_value);
-    document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
-    document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
+    //alert('err:'+error+' max:'+max_error+' new:'+new_value);
+
+   if (parseFloat(error) > 0.01 ) {
+       document.getElementById("progress-training-file").setAttribute('value', new_value);
+       document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
+       document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
+   }
+    else{
+       // TODO re-define check error limit
+       document.getElementById("progress-training-file").setAttribute('value', 99);
+       document.getElementById("progress-training-file").style.width = (parseInt(99)) + '%';
+       document.getElementById('status-badge-training').innerHTML = parseInt(99) + '%';
+   }
 }
 
 function hideRestartBox(){
