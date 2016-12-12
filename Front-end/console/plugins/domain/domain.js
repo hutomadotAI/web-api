@@ -45,7 +45,7 @@ function showDomains(str,size){
                 'data-icon="'+domains[x].iconPath+'" ' +
                 'data-color="'+domains[x].widgetColor+'" ' +
                 'style="cursor: pointer;">');
-                wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
+                wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue unselectable">info and settings</h5>');
                 wHTML += ('</a>');
                 if ( userActived[key] === false )
                     wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
