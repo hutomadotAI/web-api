@@ -8,6 +8,7 @@
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
+
     </div>
 
     <div class="box-body table-responsive no-border">
@@ -18,12 +19,12 @@
                 <th class="text-center no-border">Progress</th>
                 <th class="text-center no-border" style="width: 120px;">Completed</th>
             </tr>
-            <tr id="pretrainingbar" hidden>
+            <tr id="pretrainingbar">
                 <!-- Phase1 is the "time" to wait for upload training file -->
                 <td class="text-center" id="status-upload-file">phase 1</td>
                 <td>
                     <div class="progress progress-xs progress-striped active" id="progress-upload-file-action" style="margin-top:9px;">
-                       <div class="progress-bar progress-bar-primary" id="progress-upload-file" value="0" style="width:0;"></div>
+                        <div class="progress-bar progress-bar-primary" id="progress-upload-file" value="0" style="width:0;"></div>
                     </div>
                 </td>
                 <td class="text-center"><span id="status-badge-upload" class="badge btn-primary">0%</span></td>
@@ -41,29 +42,10 @@
             </tr>
         </table>
 
-        <!--
-        <div id="container_startstop" style="display: none;">
-            <table class="table no-margin">
-                <td class="text-left no-border" style="padding-bottom: 0;">
-                    <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
-                        <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
-                        <span id="msgAlertProgressBar">You can now talk to your AI.</span>
-                    </div>
-                </td>
-                <td class="text-center no-border" style="width: 120px;">
-                    <a type="submit" class="btn btn-app text-light-blue flat" id="startstop-button" value="_start" style="margin-left: 0;">
-                        <i class="fa fa-play no-margin text-light-blue" id="startstop-icon"></i>
-                        <span class="text-sm" id="text-startstop">start training</span>
-                    </a>
-                </td>
-            </table>
-        </div>
-        -->
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">
             <i class="icon fa fa-check" id="iconAlertProgressBar"></i>
             <span id="msgAlertProgressBar">Training not started. Please upload training data.</span>
         </div>
-
     </div>
 
     <div id="collapseMonitoring" class="panel-collapse collapse">
@@ -88,5 +70,42 @@
         </div>
     </div>
 
+    <div id="chart-details" hidden>
+        <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
+            <a data-toggle="collapse"  href="#collapseChartTrainingError" aria-expanded="true" class="">
+                <div class=" pull-left">
+                      Show training chart
+                    <i class="fa fa-info-circle text-sm text-yellow"></i>
+                </div>
+            </a>
+            <div class="text-gray pull-right">
+                Learning error : <span id="show-error"></span>
+            </div>
+        </div>
+
+        <div class="row no-padding">
+            <div class="col-xs-12">
+                <div class="box-body table-responsive no-border" style="padding-bottom:0px;">
+                    <div id="collapseChartTrainingError" class="panel-collapse collapse in">
+                        <div id="interactive" style="width: 100%;height: 150px;">
+                        </div>
+                        <div class="unselectable text-center">
+                            <i class="fa fa-minus-circle text-sm text-yellow" id="zoomout" onClick="zoomOut();" onMouseOver="this.style.cursor='pointer'"></i>
+                                <span class="unselectable text-gray">zoom</span>
+                            <i class="fa fa-plus-circle text-sm text-yellow" id="zoomin" onClick="zoomIn();" onMouseOver="this.style.cursor='pointer'"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="box-footer" id="chart-details-footer" hidden>
+        <div class="alert alert-dismissable flat alert-warning no-margin no-padding">
+            <div class="text-muted text-center no-margin no-padding" >
+                Your AI is trained, when the learning error reaches a number that is close to 0
+            </div>
+        </div>
+    </div>
 </div>
 

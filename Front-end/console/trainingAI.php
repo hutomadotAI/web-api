@@ -92,6 +92,7 @@ function localeToLanguage($locale)
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
 
 <script>
+    //TODO validation status API value returned 
     var status = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
     var training_file = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
     var deep_error = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
@@ -153,6 +154,11 @@ function localeToLanguage($locale)
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
+
+<script src="./plugins/flot/jquery.flot.min.js"></script>
+<script src="./plugins/flot/jquery.flot.resize.min.js"></script>
+<script src="./plugins/flot/jquery.flot.pie.min.js"></script>
+<script src="./plugins/flot/jquery.flot.categories.min.js"></script>
 
 
 <script src="./plugins/shared/shared.js"></script>

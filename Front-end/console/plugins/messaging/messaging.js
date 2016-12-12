@@ -142,7 +142,7 @@ function msgAlertProgressBar(alarm,msg){
             $("#iconAlertProgressBar").attr('class', 'icon fa fa-warning');
             break;
         case 3:
-            $("#containerMsgAlertProgressBar").attr('class','alert alert-dismissable flat alert-success');
+            $("#containerMsgAlertProgressBar").attr('class','alert alert-dismissable flat alert-success text-white');
             $("#iconAlertProgressBar").attr('class', 'icon fa fa-check');
             break;
         case 4:

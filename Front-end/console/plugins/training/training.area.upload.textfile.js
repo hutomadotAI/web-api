@@ -1,78 +1,63 @@
-function uploadTextFile(){
+function uploadTextFile() {
     var Mbyte = 2;
 
-    //if exists hide it
-    disableMsgWarningAlertTrainingInfoRestartButton(true);
+    disableRestartBoxButton(true);
 
     if (!isTextFileSelected())
         return;
-
     if ( !checkTextFileSize('inputfile',Mbyte) )
         return;
-
-    block_server_ping = true;
-
-    resetComponentsPhaseTwo();
-    disableButtonUploadTextFile(true);
-
-    var xmlhttp;
-    var file_data = new FormData();
-    file_data.append("inputfile", document.getElementById('inputfile').files[0]);
-    file_data.append("tab","file");
-
-    if (window.XMLHttpRequest)
-        xmlhttp = new XMLHttpRequest();
-    else
-        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-
-    xmlhttp.open('POST','./dynamic/upload.php');
     
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var JSONresponse = xmlhttp.responseText;
-            try {
-                var JSONdata = JSON.parse(JSONresponse);
-                var statusCode = JSONdata['status']['code'];
-
-                if (statusCode === 200) {
-                    var uploadWarnings = null;
-                    var additionalInfo = JSONdata['status']['additionalInfo'];
-                    if (additionalInfo != null) {
-                        uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
-                    }
-
-                    if (uploadWarnings != null && uploadWarnings.length > 0) {
-                        msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
-                    } else {
-                        msgAlertUploadFile(4, 'File uploaded');
-                    }
-
-                    resetComponentsPhaseOne();
-                    updateComponentsPhaseOne();
-                    // if exits box-warning re-start - it needs disabled
-                    hideMsgWarningAlertTrainingInfo();
-                } else {
-                    if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
-                        msgAlertUploadFile(2, 'File not uploaded. No content was found.');
-                    } else {
-                        msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded');
-                    }
-                    disableButtonUploadTextFile(false);
-                    disableMsgWarningAlertTrainingInfoRestartButton(false);
-                }
-            } catch (e) {
-                msgAlertUploadFile(2,'A generic error occurred');
-                disableButtonUploadTextFile(false);
-                disableMsgWarningAlertTrainingInfoRestartButton(false);
-            }
-        }
-    };
+    disableButtonUploadTextFile(true);
+    
+    var formData = new FormData();
+    formData.append("inputfile", document.getElementById('inputfile').files[0]);
+    formData.append("tab","file");
 
     msgAlertUploadFile(1,'Uploading file...');
-    xmlhttp.send(file_data);
+    $.ajax({
+        url : './dynamic/upload.php',
+        type : 'POST',
+        data : formData,
+        dataType: 'json',
+        processData: false,  // tell jQuery not to process the data
+        contentType: false,  // tell jQuery not to set contentType
+        success: function (response) {
+            var JSONdata = response;
+            var statusCode = JSONdata['status']['code'];
+
+            if (statusCode === 200) {
+                var uploadWarnings = null;
+                var additionalInfo = JSONdata['status']['additionalInfo'];
+
+                if (additionalInfo != null)
+                    uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
+
+                if (uploadWarnings != null && uploadWarnings.length > 0)
+                    msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
+                else
+                    msgAlertUploadFile(4, 'File uploaded');
+                setUICurrentStatus(1);
+                hideRestartBox();
+            } else {
+                if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
+                    msgAlertUploadFile(2, 'File not uploaded. No right content was found.');
+                } else {
+                    msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded.');
+                }
+                setUICurrentStatus(-1);
+                disableButtonUploadTextFile(false);
+                disableRestartBoxButton(false);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            var JSONdata = JSON.stringify(xhr.responseText);
+            msgAlertUploadFile(2,'Unexpected error occurred during upload');
+            disableButtonUploadTextFile(false);
+            disableRestartBoxButton(false);
+        }
+    });
 }
-
-
 
 function isTextFileSelected(){
     var elementValue = document.getElementById("inputfile").value;
@@ -115,91 +100,62 @@ function disableButtonUploadTextFile(state){
     document.getElementById("btnUploadFile").disabled = state;
 }
 
-function updateComponentsPhaseOne() {
+function justStopped(){
+    if (document.getElementById('containerMsgWarningAlertTrainingInfo') !== null) 
+        return true;
+    else 
+        return false;
+}
+
+function phaseOneReset(){
+    document.getElementById('progress-upload-file').style.width = '0%';
+    document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
+    hidePreTrainingBar(false);
+}
+
+function phaseOneUpdate() {
     // simulation phaseOne -  pretraining
     var width = document.getElementById("progress-upload-file").style.width;
     width = width.substr(0, width.length-1);
 
-    msgAlertProgressBar(0,'Phase 1 processing... ');
-
     if( parseInt(width) <= 100 ){
         document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
         document.getElementById('status-badge-upload').innerHTML = width+'%';
-        setTimeout(updateComponentsPhaseOne, 100);
+        setTimeout(phaseOneUpdate, 100);
     }
     else {
-
-        // start training session
         removeProgressStripedPhaseOne();
-        trainingStartCall();
+        setUICurrentStatus(5);
     }
 }
 
-function resetComponentsPhaseOne(){
-    document.getElementById('progress-upload-file').style.width = '0%';
-    document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
-    hidePreTrainingBar(false);
-    hideTrainingBar(true);
+function phaseOneFlashing(flag){
+    if (flag) {
+        document.getElementById('status-upload-file').innerText = 'initialising';
+        document.getElementById('status-upload-file').setAttribute('class', 'text-center flashing');
+    }else{
+        document.getElementById('status-upload-file').innerText = 'phase 1';
+        document.getElementById('status-upload-file').setAttribute('class', 'text-center');
+    }
 }
 
-
-
-function activeComponentsPhaseTwo(type){
-    disableButtonUploadTextFile(false);
-    disableButtonUploadBookFile(false);
-
-    hideTrainingBar(false);
-    initialisingStatusTrainingBar(true);
-    block_server_ping = false;
-}
-
-
-function initialisingStatusTrainingBar(state){
-    if (state) {
+function phaseTwoFlashing(flag){
+    if (flag) {
         document.getElementById('status-training-file').innerText = 'initialising';
         document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-        msgAlertProgressBar(1,'Training initialization may take a few minutes. please wait.');
-
     }else{
         document.getElementById('status-training-file').innerText = 'phase 2';
         document.getElementById('status-training-file').setAttribute('class', 'text-center');
-        msgAlertProgressBar(0,'Now you can talk with your AI');
     }
 }
 
-function hideTrainingBar(state){
-    $('#trainingbar').prop('hidden', state);
-}
-
-function hidePreTrainingBar(state){
-    $('#pretrainingbar').prop('hidden', state);
-}
-
-
-function updateTrainingBar(error,max_error){
-    var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
-    // TODO re-define check error limit
-    document.getElementById("progress-training-file").setAttribute('value',new_value);
-    document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
-    document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
-}
-
-
-function jumpPhaseOne(){
-    msgAlertUploadFile(1, 'A file is already loaded');
+function phaseOneJump(){
     removeProgressStripedPhaseOne();
-    setProgressPhaseOneMaxValue();
+    phaseOneMaxValue();
     hidePreTrainingBar(false);
 }
 
-function jumpPhaseTwo(){
-    msgAlertProgressBar(4,'Training finished');
-    removeProgressStripedPhaseTwo();
-    setProgressPhaseTwoMaxValue();
-    hideTrainingBar(false);
-}
-
-function setProgressPhaseOneMaxValue(){
+function phaseOneMaxValue(){
     document.getElementById('progress-upload-file').style.width = '100%';
     document.getElementById('status-badge-upload').innerHTML = '100%';
 }
@@ -209,85 +165,64 @@ function removeProgressStripedPhaseOne(){
     $('#progress-upload-file-action').removeClass('progress-striped');
 }
 
-function setProgressPhaseTwoMaxValue(){
-    document.getElementById('progress-training-file').style.width = '100%';
-    document.getElementById('status-badge-training').innerHTML = '100%';
+function hidePreTrainingBar(state){
+    $('#pretrainingbar').prop('hidden', state);
 }
 
-function removeProgressStripedPhaseTwo(){
-    $('#progress-training-file-action').removeClass('active');
-    $('#progress-training-file-action').removeClass('progress-striped');
+function hideTrainingBar(state){
+    $('#trainingbar').prop('hidden', state);
 }
 
-
-function resetComponentsPhaseTwo(){
-    //document.getElementById('container_startstop').style.display = 'none';
-    hideTrainingBar(true);
-    document.getElementById("progress-training-file").style.width ='0%';
-    document.getElementById('status-badge-training').innerHTML = '0%';
+function hideChart(state){
+    $('#chart-details').prop('hidden', state);
+    $('#chart-details-footer').prop('hidden', state);
+}
+function phaseTwoActive(){
+    disableButtonUploadTextFile(false);
+    disableButtonUploadBookFile(false);
+    hideTrainingBar(false);
 }
 
+function phaseTwoUpdate(error,max_error){
 
-function hideMsgWarningAlertTrainingInfo(){
+    if (parseFloat(error) > parseFloat(max_error)) {
+        setUICurrentMaxError(error);
+        max_error = error;
+    }
+    var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
+    //alert('err:'+error+' max:'+max_error+' new:'+new_value);
+
+   if (parseFloat(error) > 0.01 ) {
+       document.getElementById("progress-training-file").setAttribute('value', new_value);
+       document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
+       document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
+   }
+    else{
+       // TODO re-define check error limit
+       document.getElementById("progress-training-file").setAttribute('value', 99);
+       document.getElementById("progress-training-file").style.width = (parseInt(99)) + '%';
+       document.getElementById('status-badge-training').innerHTML = parseInt(99) + '%';
+   }
+}
+
+function hideRestartBox(){
     var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
     if (element !== null) {
         element.parentNode.removeChild(element);
     }
 }
 
-function disableMsgWarningAlertTrainingInfoRestartButton(state){
+function disableRestartBoxButton(state){
     var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
     if (element !== null) {
-        document.getElementById('restart-button').disabled = state;
+        if (state){
+            document.getElementById('restart-button').setAttribute('onClick','');
+            document.getElementById('restart-button').setAttribute("disabled", "disabled");
+        }
+        else{
+            document.getElementById('restart-button').setAttribute('onClick','trainingRestart()');
+            document.getElementById('restart-button').setAttribute("disabled", "enabled");
+        }
+
     }
 }
-
-
-
-
-
-
-/* START and  STOP  functions
-
-function showStartStopButton(){
-    document.getElementById('container_startstop').style.display = 'block';
-}
-
-
-function startStop() {
-    if (document.getElementById('startstop-button').getAttribute('value') == '_start') {
-        msgAlertProgressBar(0,'Training process launched.');
-        switchToStop();
-    }
-    else {
-        msgAlertProgressBar(0,'Training process stopped.');
-        switchToStart();
-    }
-}
-
-function switchToStart(){
-    var elem_icon = document.getElementById('startstop-icon');
-    var elem_btn = document.getElementById('startstop-button');
-    var elem_text = document.getElementById('text-startstop');
-
-    elem_btn.setAttribute('value','_start');
-    elem_btn.setAttribute('class', 'btn btn-app text-light-blue');
-    elem_icon.setAttribute('class', 'fa fa-play no-margin text-light-blue');
-    elem_text.innerText ='resume training';
-    console.log('call stop training');
-
-}
-
-function switchToStop(){
-    var elem_icon = document.getElementById('startstop-icon');
-    var elem_btn = document.getElementById('startstop-button');
-    var elem_text = document.getElementById('text-startstop');
-
-    elem_btn.setAttribute('value','_stop');
-    elem_btn.setAttribute('class', 'btn btn-app text-red');
-    elem_icon.setAttribute('class', 'fa fa-stop no-margin text-red');
-    elem_text.innerText ='stop training';
-    console.log('call start/resume training');
-}
-
- */

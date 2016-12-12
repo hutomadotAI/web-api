@@ -3,12 +3,9 @@
     <button id="btnUploadFile" class="btn btn-success btn-sm pull-right flat" style="width: 120px;" disabled>
         <i class="fa fa-cloud-upload"></i> Upload
     </button>
-
     <p></p>
-
     <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
     <p></p>
-
     <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadFile">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
