@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -19,21 +20,24 @@ import javax.inject.Inject;
  */
 public class DatabaseCall implements AutoCloseable {
 
-    Config config;
+    private static final String LOGFROM = "databasecall";
 
-    Connection connection;
-    PreparedStatement statement;
-    int paramCount;
-    int paramSetIndex;
-    String callName;
-    DatabaseConnectionPool pool;
+    private final Config config;
+    private final DatabaseConnectionPool pool;
+    private final ILogger logger;
+    private Connection connection;
+    private PreparedStatement statement;
+    private int paramCount;
+    private int paramSetIndex;
+    private String callName;
 
     @Inject
-    public DatabaseCall(Config config, DatabaseConnectionPool pool) {
+    public DatabaseCall(ILogger logger, Config config, DatabaseConnectionPool pool) {
         this.config = config;
         this.pool = pool;
         this.statement = null;
         this.connection = null;
+        this.logger = logger;
     }
 
     public ResultSet executeQuery() throws Database.DatabaseException {
@@ -161,13 +165,13 @@ public class DatabaseCall implements AutoCloseable {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     public void close() {
         try {
             if ((null != this.statement) && (!this.statement.isClosed())) {
                 this.statement.close();
             }
         } catch (SQLException e) {
+            this.logger.logWarning(LOGFROM, "Could not close the statement");
         }
         this.statement = null;
         closeConnection();
@@ -193,12 +197,12 @@ public class DatabaseCall implements AutoCloseable {
         return add(DateTime.now());
     }
 
-    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     protected void closeConnection() {
         if (null != this.connection) {
             try {
                 this.connection.close();
             } catch (SQLException e) {
+                this.logger.logWarning(LOGFROM, "Could not close the connection");
             }
             this.connection = null;
         }

@@ -44,10 +44,12 @@ public class MeshLogic {
         }
     }
 
-    public ApiResult addMesh(final SecurityContext securityContext, final String devid, final UUID aiid, final UUID aiid_mesh) {
+    public ApiResult addMesh(final SecurityContext securityContext, final String devid, final UUID aiid,
+                             final UUID aiidMesh) {
         try {
-            this.logger.logDebug(LOGFROM, "request to add mesh:" + aiid_mesh.toString() + "from devid:" + devid + ", aiid:" + aiid);
-            if (!this.database.addMesh(devid, aiid.toString(), aiid_mesh.toString())) {
+            this.logger.logDebug(LOGFROM, "request to add mesh:" + aiidMesh.toString() + "from devid:"
+                    + devid + ", aiid:" + aiid);
+            if (!this.database.addMesh(devid, aiid.toString(), aiidMesh.toString())) {
                 return ApiError.getNotFound();
             }
             return new ApiResult().setSuccessStatus();
@@ -57,10 +59,12 @@ public class MeshLogic {
         }
     }
 
-    public ApiResult deleteSingleMesh(final SecurityContext securityContext, final String devid, final UUID aiid, final UUID aiid_mesh) {
+    public ApiResult deleteSingleMesh(final SecurityContext securityContext, final String devid, final UUID aiid,
+                                      final UUID aiidMesh) {
         try {
-            this.logger.logDebug(LOGFROM, "request to delete mesh:" + aiid_mesh.toString() + " from devid:" + devid + ", aiid:" + aiid);
-            if (!this.database.deleteSingleMesh(devid, aiid.toString(), aiid_mesh.toString())) {
+            this.logger.logDebug(LOGFROM, "request to delete mesh:" + aiidMesh.toString() + " from devid:"
+                    + devid + ", aiid:" + aiid);
+            if (!this.database.deleteSingleMesh(devid, aiid.toString(), aiidMesh.toString())) {
                 return ApiError.getNotFound();
             }
             return new ApiResult().setSuccessStatus();

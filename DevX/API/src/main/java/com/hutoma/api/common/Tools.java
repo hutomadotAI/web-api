@@ -15,11 +15,12 @@ public class Tools {
         return System.currentTimeMillis();
     }
 
-    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     public void threadSleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ex);
         }
     }
 

@@ -121,12 +121,12 @@ class CentralLogger implements ILogger {
         this.loggingUrl = loggingServiceUrl;
     }
 
-    void logOutput(EventType level, String fromLabel, String logComment) {
-        this.logOutput(level, fromLabel, logComment, null);
-    }
-
     protected String getAppId() {
         return "API-applog-v1";
+    }
+
+    void logOutput(EventType level, String fromLabel, String logComment) {
+        this.logOutput(level, fromLabel, logComment, null);
     }
 
     void logOutput(EventType level, String fromLabel, String logComment, Map<String, String> params) {
