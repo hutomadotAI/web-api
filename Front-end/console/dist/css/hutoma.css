@@ -6272,3 +6272,93 @@ ul.pagination li a {
     -o-user-select: none;
     user-select: none;
 }
+
+.bot-box{
+    max-width: 740px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bot-circle-icon {
+    border-top-left-radius: 85px;
+    border-top-right-radius: 85px;
+    border-bottom-right-radius: 85px;
+    border-bottom-left-radius: 85px;
+    display: block;
+    min-height: 170px;
+    width: 170px;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top:20px;
+    margin-bottom:20px;
+    text-align: center;
+    font-size: 85px;
+    line-height: 100px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.bot-padding{
+    padding:0px 0px 30px 0px;
+}
+
+.bot-info {
+    padding:0;
+    max-width: 550px;
+    min-height: 170px;
+}
+
+.bot-title {
+    padding:10px 10px 0px 10px;
+    text-align: left;
+    font-size: 22px;
+    height:40px;
+    padding-left:10px;
+}
+
+.bot-developer {
+    padding:10px 10px 0px 10px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 14px;
+    height:40px;
+}
+
+.bot-description {
+    padding:0px 10px 0px 10px;
+    text-align: left;
+    font-size: 14px;
+    padding-left:10px;
+}
+
+.bot-star{
+    padding:5px 10px 0px 20px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.bot-video {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.bot-detail {
+    text-align: justify;
+    font-size: 14px;
+}
+
+.bot-footer{
+    text-transform: uppercase;
+    font-size: 16px;
+    text-align: left;
+}
+
+.bot-more-details{
+    font-weight: bold;
+    text-align: left;
+}
+
+.bot-buy{
+    bottom:0px;
+}

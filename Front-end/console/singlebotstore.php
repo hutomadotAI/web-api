@@ -9,14 +9,20 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 }
 
 // If is it set, it means the user has selected a existing AI from botstore
-if (isPostInputAvailable()) {
-    CallGetSingleAI($_POST['aiid']);
+if (!isPostInputAvailable()) {
+    \hutoma\console::redirect('./error.php?err=100');
+    exit;
 }
 
-function CallGetSingleAI($aiid){
-    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $singleAI = $aiApi->getSingleAI($aiid);
-    unset($aiApi);
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$singleAI = $aiApi->getSingleAI($_POST['aiid']);
+unset($aiApi);
+
+// TODO it needs getSingleBotInStore 
+if ($singleAI['status']['code'] !== 200) {
+    unset($singleAI);
+    \hutoma\console::redirect('../error.php?err=200');
+    exit;
 }
 
 function isPostInputAvailable(){
@@ -24,6 +30,8 @@ function isPostInputAvailable(){
     isset($_POST['aiid'])
     );
 }
+
+
 ?>
 
 <!DOCTYPE html>

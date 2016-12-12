@@ -33,7 +33,7 @@ function showDomains(str,option){
             if ( option == 0)
                 wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;"><i class="'+domains[x].iconPath+'"></i></div>');
             else
-                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" onClick=openSingleBot(this,"'+domains[x].aiid+'"); style="margin-top: 40px;"><i class="'+domains[x].iconPath+'"></i></div>');
+                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;" onClick=openSingleBot(this,"'+domains[x].aiid+'"); ><i class="'+domains[x].iconPath+'"></i></div>');
 
             wHTML += ('<h4 class="text-center text-mute unselectable">'+domains[x].name+'</h4>');
             wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">'+domains[x].description+'</h5>');
@@ -93,7 +93,7 @@ function addHtmlStarRating(actived,boxid,rating){
 
     if ( actived ) {
         for (var i=5; i>0; i--) {
-            if (i==rating)
+            if (i==Math.round(rating))
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
             else
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');
@@ -102,7 +102,7 @@ function addHtmlStarRating(actived,boxid,rating){
     }else {
         // TODO if input is disable need add to input disabled="disabled" and in label icon __disabled - now the code is same
         for (var i = 5; i > 0; i--) {
-            if (i==rating)
+            if (i==Math.round(rating))
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
             else
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');
