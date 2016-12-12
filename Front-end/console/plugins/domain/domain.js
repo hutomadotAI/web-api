@@ -23,102 +23,36 @@ function showDomains(str,size){
     for (var x in domains) {
         var boxid = domains[x].aiid;
         if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
-            if(size==0){
-                // slim box design
-               // if ( domains[x].published == '1' ){
-                    /* available equal to ZERO
-                    wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
-                    wHTML += ('<div class="col-xs-2">');
-                    wHTML += ('<div class="info-circle-icon-small text-ultragray"><i class="'+domains[x].icon+'"></i></div>');
-                    wHTML += ('</div>');
-                    wHTML += ('<div class="col-xs-7">');
-                    wHTML += ('<h4 class="text-center text-center text-gray" style="text-align: left;">&nbsp;'+domains[x].name+'</h4>');
-                    wHTML += ('<h5 class="text-center text-center text-gray" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
-                    wHTML += ('<h5 class="text-center text-ultralight-blue" style="text-align: left;">&nbsp;COMING SOON</h5>');
-                    wHTML += ('</div>');
-                    wHTML += ('<div class="col-xs-3">');
-                    wHTML += ('<div class="switchOff" style="margin-top:33px;"></div>');
-                    wHTML += ('</div>');
-                    wHTML += ('</div></div>');
-                    */
+            if(size==1){
+                var key = domains[x].aiid;
 
-                    var key = domains[x].aiid;
+                if ( userActived[key] === false )
+                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
+                else
+                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat no-shadow borderActive" id="'+boxid+'">');
 
-                    if ( userActived[key] === false )
-                        wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow" id="'+boxid+'"><p></p>');
-                    else
-                        wHTML += ('<div class="col-xs-12"><div class="box box-solid box-default-small-fixed flat no-shadow borderActive" id="'+boxid+'"><p></p>');
-                    wHTML += ('<div class="col-xs-2">');
-                    wHTML += ('<div class="info-circle-icon-small '+domains[x].widgetColor+'"><i class="'+domains[x].iconPath+'"></i></div>');
-                    wHTML += ('</div>');
-                    wHTML += ('<div class="col-xs-7">');
-                    wHTML += ('<b><h4 class="text-center text-white" style="text-align: left;">&nbsp;'+domains[x].name+'</h4></b>');
-                    wHTML += ('<h5 class="text-center text-white" style="text-align: left;">&nbsp;'+domains[x].description+'</h5>');
-                    wHTML += ('<a data-toggle="modal" ' +
-                    'data-target="#boxDomainInfo" ' +
-                    'data-id="'+domains[x].aiid+'" ' +
-                    'data-name="'+domains[x].name+'" ' +
-                    'data-icon="'+domains[x].iconPath+'" ' +
-                    'data-color="'+domains[x].widgetColor+'" ' +
-                    'style="cursor: pointer;">');
-                    wHTML += ('<h5 class="text-center text-light-blue" style="text-align: left;">&nbsp;info and settings</h5>');
-                    wHTML += ('</a>');
-                    wHTML += ('</div>');
-                    wHTML += ('<div class="col-xs-3">');
+                wHTML += ('<a><div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;"><i class="'+domains[x].iconPath+'"></i></div></a>');
+                wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
+                wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
 
-                    if ( userActived[key] === false )
-                        wHTML += ('<div class="switch" data-rnn="0" style="margin-top:33px;" onclick=switchClick(this,"'+key+'");></div>');
-                    else
-                        wHTML += ('<div class="switch switchOn" data-rnn="1" style="margin-top:33px;" onclick=switchClick(this,"'+key+'");></div>');
-                    wHTML += ('</div>');
-                    wHTML += ('</div></div>');
-             //   }
-            }
-            else{
-                // TODO now whe are update the code only for big box design
+                wHTML += addHtmlStarRating(userActived[key],boxid,domains[x].rating);
 
-                /* available equal to ZERO
-                wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
-                wHTML += ('<div class="info-circle-icon text-ultragray" style="margin-top: 60px;"><i class="'+domains[x].icon+'"></i></div>');
-                wHTML += ('<h4 class="text-center text-gray">'+domains[x].name+'</h5>');
-                wHTML += ('<h5 class="text-center text-gray" style="margin: 2px;">'+domains[x].description+'</h5>');
-                wHTML += ('<h4 class="text-center text-red">COMING SOON</h4>');
-                wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-ultralight-blue" >info and settings</h5><p></p>');
-                wHTML += ('<div class="switchOff"></div>');
+                wHTML += ('<a data-toggle="modal" ' +
+                'data-target="#boxBotStoreInfo" ' +
+                'data-id="'+domains[x].aiid+'" ' +
+                'data-name="'+domains[x].name+'" ' +
+                'data-description="'+domains[x].description+'" ' +
+                'data-icon="'+domains[x].iconPath+'" ' +
+                'data-color="'+domains[x].widgetColor+'" ' +
+                'style="cursor: pointer;">');
+                wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
+                wHTML += ('</a>');
+                if ( userActived[key] === false )
+                    wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
+                else
+                    wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
                 wHTML += ('</div>');
                 wHTML += ('</div></div>');
-                */
-                //if ( domains[x].published == '1' ){
-                    var key = domains[x].aiid;
-
-                    if ( userActived[key] === false )
-                        wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
-                    else
-                        wHTML += ('<div class="col-md-3 col-sm-4 col-xs-6"><div class="box box-solid box-default-fixed flat no-shadow borderActive" id="'+boxid+'">');
-
-                    wHTML += ('<a><div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 60px;"><i class="'+domains[x].iconPath+'"></i></div></a>');
-                    wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
-                    wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
-
-                    wHTML += addHtmlStarRating(userActived[key],boxid,domains[x].rating);
-
-                    wHTML += ('<a data-toggle="modal" ' +
-                    'data-target="#boxBotStoreInfo" ' +
-                    'data-id="'+domains[x].aiid+'" ' +
-                    'data-name="'+domains[x].name+'" ' +
-                    'data-description="'+domains[x].description+'" ' +
-                    'data-icon="'+domains[x].iconPath+'" ' +
-                    'data-color="'+domains[x].widgetColor+'" ' +
-                    'style="cursor: pointer;">');
-                    wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue">info and settings</h5>');
-                    wHTML += ('</a>');
-                    if ( userActived[key] === false )
-                        wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
-                    else
-                        wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
-                    wHTML += ('</div>');
-                    wHTML += ('</div></div>');
-               // }
             }
         }
     }
@@ -193,8 +127,6 @@ $('#boxBotStoreInfo').on('show.bs.modal', function(e) {
     // TODO need to have from getAI more details
     var curr_bot_details= 'bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla ' +
         'bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla';
-
-
     /*
     if ( $(e.relatedTarget).data('iconPath') != '' )
         curr_domain_icon = $(e.relatedTarget).data('iconPath');
