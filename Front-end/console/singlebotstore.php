@@ -8,13 +8,15 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-if (!isPostInputAvailable()) {
-    \hutoma\console::redirect('./error.php?err=110');
-    exit;
+// If is it set, it means the user has selected a existing AI from botstore
+if (isPostInputAvailable()) {
+    CallGetSingleAI($_POST['aiid']);
 }
 
-if (isPostInputAvailable()) {
-    var_dump($_POST['aiid']);
+function CallGetSingleAI($aiid){
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $singleAI = $aiApi->getSingleAI($aiid);
+    unset($aiApi);
 }
 
 function isPostInputAvailable(){
@@ -57,14 +59,17 @@ function isPostInputAvailable(){
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/botstore.content.singleBot.html.php'; ?>
+            <div class="row">
+                <div class="col-md-12" id="trainingBox">
+                    <?php include './dynamic/botstore.content.singleBot.html.php'; ?>
+                </div>
+            </div>
         </section>
     </div>
-</div>
 
-<footer class="main-footer">
-    <?php include './dynamic/footer.inc.html.php'; ?>
-</footer>
+    <footer class="main-footer">
+        <?php include './dynamic/footer.inc.html.php'; ?>
+    </footer>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
@@ -76,7 +81,6 @@ function isPostInputAvailable(){
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
