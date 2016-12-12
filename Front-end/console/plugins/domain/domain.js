@@ -27,13 +27,13 @@ function showDomains(str,size){
                 var key = domains[x].aiid;
 
                 if ( userActived[key] === false )
-                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat no-shadow" id="'+boxid+'">');
+                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat" id="'+boxid+'">');
                 else
-                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat no-shadow borderActive" id="'+boxid+'">');
+                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat borderActive" id="'+boxid+'">');
 
                 wHTML += ('<a><div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;"><i class="'+domains[x].iconPath+'"></i></div></a>');
                 wHTML += ('<h4 class="text-center text-mute">'+domains[x].name+'</h4>');
-                wHTML += ('<h5 class="text-center text-gray">'+domains[x].description+'</h5>');
+                wHTML += ('<h5 class="text-center text-gray" style="padding-left:3px;padding-right:3px;">'+domains[x].description+'</h5>');
 
                 wHTML += addHtmlStarRating(userActived[key],boxid,domains[x].rating);
 
