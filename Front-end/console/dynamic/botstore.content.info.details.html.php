@@ -1,7 +1,6 @@
-<!-- Modal PROMPT -->
+<!-- Modal -->
 <div class="modal fade" id="boxBotStoreInfo" role="dialog">
     <div class="modal-dialog flat">
-        <!-- Modal Prompt content-->
         <div class="modal-content bordered" style="background-color: #202020">
 
             <div class="modal-header">
@@ -35,8 +34,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary flat" id="btnModelDomainInfo" data-dismiss="modal">Close</button>
             </div>
-
-
         </div>
-
     </div>
+</div>

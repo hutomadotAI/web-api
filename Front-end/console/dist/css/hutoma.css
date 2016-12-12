@@ -6072,18 +6072,18 @@ table.text-center th {
 }
 
 .info-circle-icon {
-    border-top-left-radius: 45px;
-    border-top-right-radius: 45px;
-    border-bottom-right-radius: 45px;
-    border-bottom-left-radius: 45px;
+    border-top-left-radius: 55px;
+    border-top-right-radius: 55px;
+    border-bottom-right-radius: 55px;
+    border-bottom-left-radius: 55px;
     display: block;
     margin: auto;
-    margin-top: 40px;
-    height: 90px;
-    width: 90px;
+    margin-top: 30px;
+    height: 100px;
+    width: 100px;
     text-align: center;
-    font-size: 45px;
-    line-height: 90px;
+    font-size: 55px;
+    line-height: 100px;
     background: rgba(0, 0, 0, 0.2);
 }
 

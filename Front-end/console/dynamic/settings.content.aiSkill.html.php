@@ -15,7 +15,7 @@
     <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertAiSkill" style="margin-bottom:0px;">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertAiSkill"></i>
-        <span id="msgAlertAiSkill">In this section bla bla bla bla bla bla bla bla bla bla bla.</span>
+        <span id="msgAlertAiSkill">You can power up your AI by combining and mixing existing AIs from out Bot Store.</span>
     </div>
 </div>
 
