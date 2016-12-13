@@ -64,14 +64,3 @@
 
     </div>
 </div>
-
-
-<div class="modal-body" >
-    <div class="col-xs-6 bot-icon" style="background:red;">
-        ciao
-    </div>
-    <div class="col-xs-6" style="background:yellow;">
-        ciao
-    </div>
-
-</div>
