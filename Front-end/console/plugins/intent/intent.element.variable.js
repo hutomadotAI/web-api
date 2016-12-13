@@ -5,7 +5,6 @@ function loadVariablesFromIntent() {
         return;
 
     var list_variables = intent['variables'];
-    var intent_name = intent['intent_name'];
 
     for (var x in list_variables) {
         var entity = '@' + list_variables[x].entity_name;
@@ -15,18 +14,18 @@ function loadVariablesFromIntent() {
         var prompts = loadPrompts(list_variables[x].prompts);
         var parent = document.getElementById('parameter-list');
         var len = list_variables[x].prompts.length;
-        createNewParameterRow(entity, intent_name, n_prompts, prompts, len, value, required, parent);
+        createNewParameterRow(entity, n_prompts, prompts, len, value, required, parent);
     }
 }
 
-function loadPrompts(elements){
+function loadPrompts(elements) {
     var values = [];
     for (var i = 0; i < elements.length; i++)
         values.push(addEscapeCharacter(elements[i]));
     return values;
 }
 
-function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, value, required, parent) {
+function createNewParameterRow(entity, n_prompts, prompts, size, value, required, parent) {
 
     if (isJustAddedNewRow())
         return;
@@ -38,20 +37,21 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
 
     var wHTML = '';
 
+
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="add entity" autocomplete="off" onClick="pushEntitiesList(this)">');
+        wHTML += drawObj('');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="action-entity"  id="action-entity" style="background-color: transparent; margin:0;" placeholder="' + entity + '" value="' + entity + '" autocomplete="off" onClick="pushEntitiesList(this)">');
+        wHTML += drawObj(entity);
 
     wHTML += ('</div>');
     wHTML += ('</div>');
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetMsgAlertIntentVariable()">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow text-center" id="action-nprompt" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetBorderHighlightError(this)">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -59,19 +59,17 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     wHTML += ('<div class="text-center" >');
 
     if (size > 0)
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
+        wHTML += ('<input type="text" class="form-control flat no-shadow text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder=" ... " ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-intent="' + intent_name + '"' +
-        'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts="' + prompts + '"' + 'onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
     else
-        wHTML += ('<input type="text" class="form-control flat no-shadow no-border text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
+        wHTML += ('<input type="text" class="form-control flat no-shadow text-center" id="action-prompts" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-intent="' + intent_name + '"' +
-        'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" readonly>');
+        'data-prompts=""' + 'onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -101,21 +99,25 @@ function createNewParameterRow(entity, intent_name, n_prompts, prompts, size, va
     newNode.setAttribute('onmouseout', 'variableOnMouseOut (this)');
 
     newNode.style.backgroundColor = '#404446';
-    newNode.style.marginTop ='1px';
+    newNode.style.marginTop = '1px';
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
+}
 
-    // be carefull - this is the treepath for input entity list
-    var inputNode = newNode.children[0].children[0].children[0];
-    var inputNodePrompt = newNode.children[2].children[0].children[0];
-
-    // after selection add value on input text and set placeholder
-    $(inputNode).on('omniselect:select', function (event, value) {
-        $(inputNode).attr('value', value);
-        $(inputNode).attr('placeholder', value);
-        //pass to node prompt on data-prompt attribute the value on current selected entity
-        $(inputNodePrompt).attr('data-entity', value);
-    });
+function drawObj(value) {
+    var wHTML = '';
+    wHTML += ('<a class="btn btn-select btn-primary btn-select-light" onClick="pushEntitiesList(this)">');
+    wHTML += ('<input type="hidden" class="btn-select-input" id="" name="" value="" />');
+    if (value != '')
+        wHTML += ('<span class="btn-select-value">' + value + '</span>');
+    else
+        wHTML += ('<span class="btn-select-value">add entity</span>');
+    wHTML += ('<span class="btn-select-arrow text-sm glyphicon glyphicon-chevron-down"></span>');
+    wHTML += ('<ul style="display: none;">');
+    wHTML += ('<li class="selected">' + value + '</li>');
+    wHTML += ('</ul>');
+    wHTML += ('</a>');
+    return wHTML;
 }
 
 function isUsedEntities(entity_name) {
@@ -123,30 +125,46 @@ function isUsedEntities(entity_name) {
     var len = parent.childElementCount;
     while (len--) {
         var node = parent.children[len].children[0].children[0].children[0];
-        if (node.placeholder.replace(/[@]/g, "") == entity_name)
+        var container = $(node).find("ul");
+        var elem = container.find("li.selected");
+        var text = elem.text();
+        if (text.replace(/[@]/g, "") == entity_name)
             return true;
     }
     return false;
 }
 
-function pushEntitiesList(node){
-    var new_array = [];
-    // loading stored entities
+function pushEntitiesList(node) {
+    resetBorderHighlightError(node);
+
+    var container = $(node).find("ul");
+    var selected = container.find("li.selected");
+
+    var parent = node.parentElement;
+    var ul = parent.children[0].children[3];
+
+    // if dropdown is visible exit without refresh list
+    if (ul.style.display == 'block')
+        return;
+
+    // remove all list of child inside UL node
+    var fc = ul.firstChild;
+    while (fc) {
+        ul.removeChild(fc);
+        fc = ul.firstChild;
+    }
+
     for (var x in entityListFromServer) {
         // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
-        if (!isUsedEntities(entityListFromServer[x]) ||  node.placeholder.replace(/[@]/g, "") == entityListFromServer[x])
-            new_array.push('@' + entityListFromServer[x]);
-    }
-    // TODO: refresh dropdown menu showed
-    //$('<ol></ol>').selectmenu("refresh");
-    $(node).omniselect({
-        source: new_array,
-        resultsClass: 'typeahead dropdown-menu flat no-padding no-border',
-        activeClass: 'active',
-        renderItem: function (label, id, index) {
-            return '<li><a href="#">' +label + '</a></li>';
+        if (!isUsedEntities(entityListFromServer[x]) || selected.text().replace(/[@]/g, "") == entityListFromServer[x]) {
+            var elem = document.createElement('li');
+            // if elem was selected, maintain this selection on new list
+            if (selected.text().replace(/[@]/g, "") == entityListFromServer[x])
+                elem.className = 'selected';
+            elem.innerHTML = '@' + entityListFromServer[x];
+            container.append(elem);
         }
-    });
+    }
 }
 
 function variableOnMouseIn(elem) {
@@ -161,8 +179,7 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    var intent_name = intent['intent_name'];
-    createNewParameterRow('', intent_name, 3, '', 0, '', false, node);
+    createNewParameterRow('', 3, '', 0, '', false, node);
 }
 
 function deleteIntentVariable(element) {
@@ -172,9 +189,14 @@ function deleteIntentVariable(element) {
     resetMsgAlertIntentVariable();
 }
 
+function resetBorderHighlightError(node) {
+    node.style.border = "";
+    resetMsgAlertIntentVariable();
+}
+
 function resetMsgAlertIntentVariable() {
-    msgAlertIntentVariable(0, 'Set the parameters for the intents using existing entities.');
-    msgAlertIntentElement(0,'Set the variables used by the intent.');
+    msgAlertIntentElement(0, 'Use intents to map what a user says and what action should be taken by your business logic.');
+    msgAlertIntentVariable(0, 'Describe what variables you want the AI to extract from a conversation');
 }
 
 function isJustAddedNewRow() {
@@ -185,7 +207,8 @@ function isJustAddedNewRow() {
 
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
-    if (node.placeholder == 'add entity') {
+    var elem = $(node).find("ul").find("li.selected");
+    if (elem.text() == '') {
         msgAlertIntentVariable(1, 'Complete field first before add a new line');
         return true;
     }
@@ -206,4 +229,3 @@ function cleanupromptDialogbox() {
 $(document).ready(function () {
     loadVariablesFromIntent();
 });
-

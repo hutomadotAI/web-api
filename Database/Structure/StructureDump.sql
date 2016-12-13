@@ -571,6 +571,60 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `addAI_v2` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`localhost` PROCEDURE `addAI_v2`(
+	IN `param_aiid` VARCHAR(50), 
+	IN `param_ai_name` VARCHAR(50), 
+	IN `param_ai_description` VARCHAR(250), 
+	IN `param_dev_id` VARCHAR(50), 
+	IN `param_is_private` TINYINT(1), 
+	IN `param_deep_learning_error` DOUBLE, 
+	IN `param_deep_learning_status` TINYINT(4), 
+	IN `param_shallow_learning_status` INT(11), 
+	IN `param_ai_status` VARCHAR(50), 
+	IN `param_client_token` VARCHAR(250), 
+	IN `param_ai_trainingfile` TEXT, 
+	IN `param_ai_language` VARCHAR(10), 
+	IN `param_ai_timezone` VARCHAR(50), 
+	IN `param_ai_confidence` DOUBLE, 
+	IN `param_ai_personality` BOOLEAN, 
+	IN `param_ai_voice` INT(11))
+    MODIFIES SQL DATA
+BEGIN
+
+	DECLARE var_exists_count INT;
+    DECLARE var_named_aiid VARCHAR(50);
+    
+	SELECT count(aiid), aiid INTO var_exists_count, var_named_aiid 
+    FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name`;
+
+	IF var_exists_count=0 THEN
+		INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private, deep_learning_error, deep_learning_status,
+						shallow_learning_status, ai_status, client_token, ai_trainingfile, ai_language,
+						ai_timezone, ai_confidence, ai_personality, ai_voice)
+		VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status, 
+				param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile, param_ai_language,
+				param_ai_timezone, param_ai_confidence, param_ai_personality, param_ai_voice);
+		SET var_named_aiid = `param_aiid`;
+	END IF;
+    
+    SELECT var_named_aiid AS aiid;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `addEntityValue` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -808,7 +862,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`127.0.0.1` PROCEDURE `addUser`(IN `username` VARCHAR(50), IN `email` TINYTEXT, IN `password` VARCHAR(64), IN `password_salt` VARCHAR(250), IN `first_name` VARCHAR(30), IN `last_name` VARCHAR(30), IN `dev_token` VARCHAR(250), IN `plan_id` INT, IN `dev_id` VARCHAR(50), IN `client_token` VARCHAR(250))
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `addUser`(IN `username` VARCHAR(50), IN `email` TINYTEXT, IN `password` VARCHAR(64), IN `password_salt` VARCHAR(250), IN `first_name` VARCHAR(30), IN `last_name` VARCHAR(30), IN `dev_token` VARCHAR(250), IN `plan_id` INT, IN `dev_id` VARCHAR(50), IN `client_token` VARCHAR(250))
     MODIFIES SQL DATA
 BEGIN
 INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`, `client_token`)
@@ -1244,7 +1298,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`127.0.0.1` PROCEDURE `getAiDeepLearningError`(IN `param_aiid` VARCHAR(50))
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiDeepLearningError`(IN `param_aiid` VARCHAR(50))
     READS SQL DATA
     COMMENT 'aiReader@127.0.0.1'
 BEGIN
@@ -2292,7 +2346,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `updateTrainingData` */;
+/*!50003 DROP PROCEDURE IF EXISTS `getDevPlan` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -2301,7 +2355,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDevPlan`(IN `in_dev_id` VARCHAR(50))
 BEGIN
 SELECT d.*
@@ -2322,7 +2375,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateTrainingData`(IN `param_aiid` varchar(50), IN `param_ai_trainingfile` text)
     MODIFIES SQL DATA
 BEGIN
@@ -2362,6 +2414,5 @@ DELIMITER ;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
 
 -- Dump completed on 2016-10-29 23:42:51

@@ -146,14 +146,35 @@ public class Database {
         return updateCount > 0;
     }
 
-    public boolean createAI(final UUID aiid, final String name, final String description, final String devid,
-                            final boolean isPrivate, final double deepLearningError, final int deepLearningStatus,
-                            final int shallowLearningStatus, final TrainingStatus status, final String clientToken,
-                            final String trainingFile, final Locale language, final String timezoneString,
-                            final double confidence, final int personality, final int voice)
+    /***
+     * Create a new AI but only if the devid doesn't already have an AI with that ai_name
+     * @param aiid the id for the new AI
+     * @param name ai_name
+     * @param description ai_description
+     * @param devid the owner dev
+     * @param isPrivate private ai
+     * @param deepLearningError
+     * @param deepLearningStatus
+     * @param shallowLearningStatus
+     * @param status
+     * @param clientToken
+     * @param trainingFile
+     * @param language
+     * @param timezoneString
+     * @param confidence
+     * @param personality
+     * @param voice
+     * @return
+     * @throws DatabaseException
+     */
+    public UUID createAI(final UUID aiid, final String name, final String description, final String devid,
+                         final boolean isPrivate, final double deepLearningError, final int deepLearningStatus,
+                         final int shallowLearningStatus, final TrainingStatus status, final String clientToken,
+                         final String trainingFile, final Locale language, final String timezoneString,
+                         final double confidence, final int personality, final int voice)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addAI_v1", 16)
+            call.initialise("addAI_v2", 16)
                     .add(aiid)
                     .add(name)
                     .add(description)
@@ -170,7 +191,16 @@ public class Database {
                     .add(confidence)
                     .add(personality)
                     .add(voice);
-            return call.executeUpdate() > 0;
+            ResultSet result = call.executeQuery();
+            if (result.next()) {
+                String namedAiid = result.getString("aiid");
+                return UUID.fromString((namedAiid == null) ? "" : namedAiid);
+            } else {
+                throw new DatabaseException("stored procedure returned nothing");
+            }
+        } catch (IllegalArgumentException | SQLException ex) {
+            // null or empty UUID means that there was a db fail of some sort
+            throw new DatabaseException(ex);
         }
     }
 

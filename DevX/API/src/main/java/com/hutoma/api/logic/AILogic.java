@@ -76,7 +76,7 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
-            if (!this.database.createAI(
+            UUID namedAiid = this.database.createAI(
                     aiUUID,
                     name,
                     description,
@@ -92,10 +92,15 @@ public class AILogic {
                     timezone,
                     confidence,
                     personality,
-                    voice)) {
-                this.logger.logInfo(LOGFROM, "db fail creating new ai");
-                return ApiError.getInternalServerError();
+                    voice);
+
+            // if the stored procedure returns a different aiid then it didn't
+            // create the one we requested because of a name clash
+            if (!namedAiid.equals(aiUUID)) {
+                this.logger.logInfo(LOGFROM, "ai nameclash. name " + name + " already belongs to ai " + namedAiid);
+                return ApiError.getBadRequest("an ai with that name already exists");
             }
+
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "error creating new ai: " + e.toString());

@@ -26,12 +26,4 @@ public class Tools {
     public long getTimestamp() {
         return System.currentTimeMillis();
     }
-
-    @SuppressWarnings("checkstyle:EmptyCatchBlock")
-    public void threadSleep(long milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-        }
-    }
 }

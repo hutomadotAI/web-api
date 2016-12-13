@@ -15,7 +15,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentVariable" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertIntentVariable"></i>
-            <span id="msgAlertIntentVariable">Set the variables used by the intent.</span>
+            <span id="msgAlertIntentVariable">Describe what variables you want the AI to extract from a conversation.</span>
         </div>
 
         <div id="collapseActionInfo" class="panel-collapse collapse">

@@ -45,11 +45,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.5.1</version>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.1</version>
@@ -289,6 +284,7 @@
         </dependency>
 
         <!-- ********************************* Logging-related ****************************************** -->
+
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
@@ -339,7 +335,6 @@
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
         </dependency>
-
 
         <!-- ********************************* Documentation ****************************************** -->
         <dependency>

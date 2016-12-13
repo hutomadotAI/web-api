@@ -15,6 +15,13 @@ function wizardNext() {
         return;
     }
 
+    for (var i=0; i<name_list.length; i++) {
+        if (value_name.replace(/\s+$/, '') == name_list[i]) {
+            msgAlertNameAI(2, 'This name is already used for another AI. Please choose another name.');
+            return;
+        }
+    }
+
     var value_desc = document.getElementById('ai_description').value;
     if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
         msgAlertDescriptionAI(2, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
@@ -23,6 +30,8 @@ function wizardNext() {
         inputsActiveDeactive(false);
         return;
     }
+
+
 
     if(document.createAIform.onsubmit)
         return;

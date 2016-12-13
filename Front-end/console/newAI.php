@@ -1,5 +1,8 @@
 <?php
     require '../pages/config.php';
+    require_once "../console/api/apiBase.php";
+    require_once "../console/api/aiApi.php";
+
     if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
         \hutoma\console::redirect('../pages/login.php');
         exit;
@@ -22,6 +25,17 @@
         return isset($_POST['err']);
     }
 
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $response_getAIs = $aiApi->getAIs();
+    unset($aiApi);
+
+    $name_list='';
+    if (isset($response_getAIs) && (array_key_exists("ai_list",$response_getAIs))) {
+        for ($i = 0, $l = count($response_getAIs['ai_list']); $i < $l; ++$i)
+            $name_list[$i] = $response_getAIs['ai_list'][$i]['name'];
+    }
+    
+    unset($response_getAIs);
 ?>
 <!DOCTYPE html>
 <html>
@@ -71,6 +85,7 @@
 </div>
 
 <script>
+    var name_list = <?php echo json_encode($name_list); unset($name_list);?>;
     var previousFilled = '<?php if (isPreviousFieldsFilled()) echo "1"; else echo "0"; ?>';
     var previousGeneralInfo  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
     var err = '<?php if (isErrorOccurred()) echo $_POST['err']; else echo "0"; ?>';

@@ -1,7 +1,7 @@
 package com.hutoma.api.tests.service;
 
-import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.common.ChatTelemetryLogger;
+import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.endpoints.ChatEndpoint;

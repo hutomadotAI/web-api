@@ -4,6 +4,7 @@ import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -120,12 +121,12 @@ public abstract class ServiceTestBase extends JerseyTest {
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
-                bind(Tools.class).to(Tools.class);
                 bind(HTMLExtractor.class).to(HTMLExtractor.class);
                 bind(Validate.class).to(Validate.class);
                 bind(RateLimitCheck.class).to(RateLimitCheck.class);
                 bind(AIChatServices.class).to(AIChatServices.class);
                 bind(JerseyClient.class).to(JerseyClient.class);
+                bind(FakeTimerTools.class).to(Tools.class);
 
                 ServiceTestBase.this.addAdditionalBindings(this);
             }
