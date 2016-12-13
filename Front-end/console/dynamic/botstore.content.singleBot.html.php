@@ -36,7 +36,6 @@ function licenceTypeToString($x){
     }
 }
 
-
 function rangeActivation($n){
      switch (true) {
          case ($n < 10):
@@ -136,13 +135,13 @@ function rangeActivation($n){
         </div>
     </div>
 
-    <div class="box-body no-padding flat">
+    <div class="box-body  flat">
         <div class="col-xs-12 no-padding bot-video flat" id="botVideo">
             <div class="box-body no-padding flat">
                 <div class="overlay center-block">
                     <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
                         <iframe
-                            src="https://www.youtube.com/embed/tKZdeDCXe_8?controls=1&hd=1&enablejsapi=1"
+                            src="//www.youtube.com/embed/N4IMIpgUVis?controls=1&hd=1&enablejsapi=1"
                             frameborder="0" allowfullscreen>
                         </iframe>
                     </div>
@@ -157,17 +156,17 @@ function rangeActivation($n){
                 Description
             </div>
         </div>
-        <div class="row no-margin">
+        <div class="row no-margin" style="padding-bottom:10px;">
             <div class="col-xs-12 bot-detail" id="botLongDescription">
                 <?php echo $bot['longDescription'];?>
             </div>
         </div>
-        <div class="row no-margin">
+        <div class="row no-margin" style="padding-top:10px; border-top: 1px solid #535353;">
             <div class="col-xs-12 bot-h2">
                 Sample Request
             </div>
         </div>
-        <div class="row no-margin">
+        <div class="row no-margin" style="padding-bottom:10px;">
             <div class="col-xs-12 text-gray bot-detail" id="botSampleRequest">
                 <div class="box-body flat" style="background: #343434; border: 1px solid #737373;">
                     <div class="text-gray"><?php echo $bot['sample'];?></div>
