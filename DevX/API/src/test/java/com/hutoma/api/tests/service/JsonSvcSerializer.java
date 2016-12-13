@@ -47,6 +47,10 @@ class JsonSvcSerializer {
                 .create();
     }
 
+    String serialize(Object obj) {
+        return this.gson.toJson(obj);
+    }
+
 
     Object deserialize(InputStream stream, Class resultClass) throws JsonSyntaxException {
         Object obj = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);

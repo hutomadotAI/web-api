@@ -3,8 +3,8 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiResult;
 
@@ -32,7 +32,7 @@ public class TestAdminLogic {
     private FakeJsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
     private Database fakeDatabase;
-    private MessageQueue fakeMessageQueue;
+    private AIServices fakeAiServices;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private AdminLogic adminLogic;
@@ -43,9 +43,10 @@ public class TestAdminLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
+        this.fakeAiServices = mock(AIServices.class);
         this.fakeLogger = mock(ILogger.class);
-        this.adminLogic = new AdminLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeMessageQueue, this.fakeLogger);
+        this.adminLogic = new AdminLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger,
+                this.fakeAiServices);
     }
 
     @Test

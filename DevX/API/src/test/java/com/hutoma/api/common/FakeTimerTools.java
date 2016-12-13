@@ -1,7 +1,5 @@
 package com.hutoma.api.common;
 
-import com.hutoma.api.common.Tools;
-
 import java.util.UUID;
 
 /**
@@ -12,7 +10,7 @@ public class FakeTimerTools extends Tools {
     long timer;
 
     public FakeTimerTools() {
-        timer = 0;
+        this.timer = 0;
     }
 
     @Override
@@ -22,11 +20,6 @@ public class FakeTimerTools extends Tools {
 
     @Override
     public long getTimestamp() {
-        return timer;
-    }
-
-    @Override
-    public void threadSleep(long milliseconds) {
-        timer += milliseconds;
+        return this.timer;
     }
 }
