@@ -8,11 +8,12 @@ import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TelemetryCentralLogger;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.connectors.NeuralNet;
+import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -83,14 +84,13 @@ public class ServerBinder extends AbstractBinder {
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
+        bind(MessageQueue.class).to(MessageQueue.class);
         bind(Tools.class).to(Tools.class);
+        bind(NeuralNet.class).to(NeuralNet.class);
+        bind(SemanticAnalysis.class).to(SemanticAnalysis.class);
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
-
-        // backend facing related structures
-        bind(AIServices.class).to(AIServices.class);
-        bind(AIChatServices.class).to(AIChatServices.class);
 
         // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);

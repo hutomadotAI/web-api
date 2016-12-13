@@ -1,14 +1,13 @@
 package com.hutoma.api.common;
 
+import com.amazonaws.regions.Regions;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -71,6 +70,18 @@ public class Config {
 
     public String getEncodingKey() {
         return getConfigFromProperties("encoding_key", "");
+    }
+
+    public String getCoreQueue() {
+        return getConfigFromProperties("core_queue", "");
+    }
+
+    public String getQuestionGeneratorQueue() {
+        return getConfigFromProperties("sqs_QG", "");
+    }
+
+    public Regions getMessageQueueRegion() {
+        return Regions.US_EAST_1;
     }
 
     public String getWNetServer() {
@@ -139,24 +150,12 @@ public class Config {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }
 
-    public List<String> getWnetTrainingEndpoints() {
-        return getCSList("wnet_training_endpoint");
+    public String getAliceURI() {
+        return getConfigFromProperties(String.format("aliceBot"), "https://www.hutoma.com:8443/api/hutoma/demochat?aid=384");
     }
 
-    public List<String> getGpuTrainingEndpoints() {
-        return getCSList("gpu_training_endpoint");
-    }
-
-    public String getWnetChatEndpoint() {
-        return getConfigFromProperties("wnet_chat_endpoint", "");
-    }
-
-    public String getAimlChatEndpoint() {
-        return getConfigFromProperties("aiml_chat_endpoint", "");
-    }
-
-    public String getRnnChatEndpoint() {
-        return getConfigFromProperties("rnn_chat_endpoint", "");
+    public String getAliceID() {
+        return getConfigFromProperties(String.format("aliceAIID"), "6ea04c96-2ec3-4a5a-bd46-81742e38aab0");
     }
 
     public String getLoggingServiceUrl() {
@@ -180,14 +179,6 @@ public class Config {
         if (this.getEncodingKey() == null || this.getEncodingKey().isEmpty()) {
             throw new Exception("Encoding key hasn't been defined");
         }
-    }
-
-    private List<String> getCSList(final String propertyName) {
-        String instances = getConfigFromProperties(propertyName, null);
-        if (instances != null && !instances.isEmpty()) {
-            return Arrays.asList(instances.split(","));
-        }
-        return new ArrayList<>();
     }
 
     private String getConfigFromEnvironment(String propertyName) {

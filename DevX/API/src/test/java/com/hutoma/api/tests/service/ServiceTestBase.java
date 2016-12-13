@@ -8,9 +8,11 @@ import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.MessageQueue;
+import com.hutoma.api.connectors.NeuralNet;
+import com.hutoma.api.connectors.SemanticAnalysis;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -24,10 +26,10 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
+import org.junit.Assert;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -49,7 +51,6 @@ public abstract class ServiceTestBase extends JerseyTest {
 
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    protected static final UUID CHATID = UUID.fromString("f9069b51-1d4b-4c17-83f8-b4538a85aed2");
     protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
     private static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     @SuppressWarnings("unchecked")
@@ -70,11 +71,16 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected ILogger fakeLogger;
     @Mock
+    protected MessageQueue fakeMessageQueue;
+    @Mock
+    protected NeuralNet fakeNeuralNet;
+    @Mock
+    protected SemanticAnalysis fakeSemanticAnalysis;
+    @Mock
     protected Config fakeConfig;
     @Mock
-    protected JerseyClient fakeJerseyClient;
-    @Mock
-    protected AIChatServices fakeAiChatServices;
+    protected Tools fakeTools;
+
 
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -115,18 +121,17 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction)).to(DatabaseTransaction.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseCall)).to(DatabaseCall.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTransactionalDatabaseCall)).to(TransactionalDatabaseCall.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeMessageQueue)).to(MessageQueue.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeNeuralNet)).to(NeuralNet.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeSemanticAnalysis)).to(SemanticAnalysis.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiChatServices)).to(AIChatServices.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
                 bind(HTMLExtractor.class).to(HTMLExtractor.class);
                 bind(Validate.class).to(Validate.class);
                 bind(RateLimitCheck.class).to(RateLimitCheck.class);
-                bind(AIChatServices.class).to(AIChatServices.class);
-                bind(JerseyClient.class).to(JerseyClient.class);
-                bind(FakeTimerTools.class).to(Tools.class);
 
                 ServiceTestBase.this.addAdditionalBindings(this);
             }
@@ -137,11 +142,6 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected <T> T deserializeResponse(Response response, Class<?> theClass) {
         JsonSvcSerializer serializer = new JsonSvcSerializer();
         return (T) serializer.deserialize((InputStream) response.getEntity(), theClass);
-    }
-
-    protected String serializeObject(Object obj) {
-        JsonSvcSerializer serializer = new JsonSvcSerializer();
-        return serializer.serialize(obj);
     }
 
     protected abstract Class<?> getClassUnderTest();
@@ -163,8 +163,11 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeDatabaseConnectionPool = mock(DatabaseConnectionPool.class);
         this.fakeDatabaseTransaction = mock(DatabaseTransaction.class);
         this.fakeTransactionalDatabaseCall = mock(TransactionalDatabaseCall.class);
+        this.fakeMessageQueue = mock(MessageQueue.class);
+        this.fakeNeuralNet = mock(NeuralNet.class);
+        this.fakeSemanticAnalysis = mock(SemanticAnalysis.class);
         this.fakeLogger = mock(ILogger.class);
-        this.fakeAiChatServices = mock(AIChatServices.class);
+        this.fakeTools = new FakeTimerTools();
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
 
@@ -177,5 +180,10 @@ public abstract class ServiceTestBase extends JerseyTest {
         rc.register(QueryFilter.class);
         rc.register(PostFilter.class);
         return rc;
+    }
+
+    protected void assertNotNullNotEmpty(final String str) {
+        Assert.assertNotNull(str);
+        Assert.assertNotEquals("", str);
     }
 }

@@ -9,7 +9,6 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.AiStore;
 import com.hutoma.api.containers.sub.ChatRequestStatus;
-import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.MeshVariable;
@@ -103,28 +102,6 @@ public class Database {
         }
     }
 
-    /**
-     * Gets the developer plan for the given developer Id.
-     * @param devId the developer id
-     * @return the plan, or null if there is no developer Id or not plan associated to it
-     * @throws DatabaseException database exception
-     */
-    public DevPlan getDevPlan(final String devId) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getDevPlan", 1).add(devId);
-            final ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    return new DevPlan(rs.getInt("maxai"), rs.getInt("monthlycalls"), rs.getLong("maxmem"),
-                            rs.getInt("maxtraining"));
-                }
-                return null;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
     /***
      * Delete a developer from the database and remove the developer's AIs
      * @param devid
@@ -198,9 +175,11 @@ public class Database {
             } else {
                 throw new DatabaseException("stored procedure returned nothing");
             }
-        } catch (IllegalArgumentException | SQLException ex) {
+        } catch (IllegalArgumentException iae) {
             // null or empty UUID means that there was a db fail of some sort
-            throw new DatabaseException(ex);
+            throw new DatabaseException(iae);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         }
     }
 
@@ -219,17 +198,6 @@ public class Database {
                     .add(confidence)
                     .add(personality)
                     .add(voice);
-            return call.executeUpdate() > 0;
-        }
-    }
-
-    public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAIstatus", 3)
-                    .add(aiid)
-                    .add(devId)
-                    .add(status.value());
             return call.executeUpdate() > 0;
         }
     }

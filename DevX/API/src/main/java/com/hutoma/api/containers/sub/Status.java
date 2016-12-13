@@ -1,4 +1,4 @@
-package com.hutoma.api.containers.sub;
+    package com.hutoma.api.containers.sub;
 
 import java.net.HttpURLConnection;
 
@@ -7,9 +7,9 @@ import java.net.HttpURLConnection;
  */
 public class Status {
 
-    private int code;
-    private String info;
-    private Object additionalInfo;
+    int code;
+    String info;
+    Object additionalInfo;
 
     public static Status getSuccess() {
         return Status.getSuccess("OK");
@@ -24,7 +24,7 @@ public class Status {
     }
 
     public int getCode() {
-        return this.code;
+        return code;
     }
 
     public Status setCode(int code) {
@@ -32,17 +32,13 @@ public class Status {
         return this;
     }
 
-    public String getInfo() {
-        return this.info;
+    public Status setAdditionalInfo(Object additionalInfo) {
+        this.additionalInfo = additionalInfo;
+        return this;
     }
 
     public Status setInfo(String info) {
         this.info = info;
-        return this;
-    }
-
-    public Status setAdditionalInfo(Object additionalInfo) {
-        this.additionalInfo = additionalInfo;
         return this;
     }
 }

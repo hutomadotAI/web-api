@@ -47,9 +47,8 @@ public class MeshLogic {
     public ApiResult addMesh(final SecurityContext securityContext, final String devid, final UUID aiid,
                              final UUID aiidMesh) {
         try {
-            this.logger.logDebug(LOGFROM, "request to add mesh:" + aiidMesh.toString()
-                    + "from devid:" + devid + ", aiid:" + aiid);
-
+            this.logger.logDebug(LOGFROM, "request to add mesh:" + aiidMesh.toString() + "from devid:"
+                    + devid + ", aiid:" + aiid);
             if (!this.database.addMesh(devid, aiid.toString(), aiidMesh.toString())) {
                 return ApiError.getNotFound();
             }

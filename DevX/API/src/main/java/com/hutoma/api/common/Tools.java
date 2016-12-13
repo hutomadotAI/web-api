@@ -7,18 +7,6 @@ import java.util.UUID;
  */
 public class Tools {
 
-    public String getCallerMethod(final int depth) {
-        StackTraceElement[] elements = new Throwable().fillInStackTrace().getStackTrace();
-        if (depth >= elements.length) {
-            return elements[elements.length - 1].getMethodName();
-        }
-        return elements[depth].getMethodName();
-    }
-
-    public String getCallerMethod() {
-        return getCallerMethod(2);
-    }
-
     public UUID createNewRandomUUID() {
         return java.util.UUID.randomUUID();
     }
@@ -26,4 +14,14 @@ public class Tools {
     public long getTimestamp() {
         return System.currentTimeMillis();
     }
+
+    public void threadSleep(long milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ex);
+        }
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.hutoma.api.containers;
+    package com.hutoma.api.containers;
 
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.Metadata;
@@ -25,7 +25,7 @@ public class ApiChat extends ApiResult {
     }
 
     public ChatResult getResult() {
-        return this.result;
+        return result;
     }
 
     public void setResult(ChatResult result) {
@@ -38,9 +38,5 @@ public class ApiChat extends ApiResult {
 
     public void setID(UUID chatId) {
         this.chatId = chatId;
-    }
-
-    public UUID getChatId() {
-        return chatId;
     }
 }

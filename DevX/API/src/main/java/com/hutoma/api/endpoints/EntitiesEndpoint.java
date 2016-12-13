@@ -38,14 +38,15 @@ public class EntitiesEndpoint {
     }
 
     @GET
-    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID})
+    @ValidateParameters( {APIParameter.DevID})
     public Response getEntities(
-            @Context final SecurityContext securityContext,
-            @Context final ContainerRequestContext requestContext) {
+        @Context final SecurityContext securityContext,
+        @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.entityLogic.getEntities(securityContext,
-                ParameterFilter.getDevid(requestContext));
+            ParameterFilter.getDevid(requestContext));
         return result.getResponse(this.serializer).build();
     }
+
 }

@@ -5,7 +5,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.AiStatus;
 
 import java.util.List;
 import java.util.Locale;
@@ -115,10 +114,6 @@ public class ParameterFilter extends Validate {
 
     public static Float getAiConfidence(final ContainerRequestContext requestContext) {
         return (Float) requestContext.getProperty(APIParameter.AiConfidence.toString());
-    }
-
-    public static AiStatus getAiStatus(final ContainerRequestContext requestContext) {
-        return (AiStatus) requestContext.getProperty(APIParameter.AiStatusJson.toString());
     }
 
     /***

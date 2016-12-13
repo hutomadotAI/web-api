@@ -5,13 +5,12 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,19 +35,19 @@ public class AILogic {
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
-    private final AIServices aiServices;
+    private final MessageQueue messageQueue;
     private final ILogger logger;
     private final Tools tools;
 
     @Inject
-    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, AIServices aiServices,
+    public AILogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,
                    ILogger logger, Tools tools) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
+        this.messageQueue = messageQueue;
         this.logger = logger;
         this.tools = tools;
-        this.aiServices = aiServices;
     }
 
     public ApiResult createAI(
@@ -105,20 +104,6 @@ public class AILogic {
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "error creating new ai: " + e.toString());
             return ApiError.getInternalServerError();
-        }
-    }
-
-    public ApiResult updateAIStatus(final SecurityContext securityContext, final AiStatus status) {
-        try {
-            if (!this.database.updateAIStatus(
-                    status.getDevId(),
-                    status.getAiid(),
-                    status.getTrainingStatus())) {
-                return ApiError.getInternalServerError("Could not update");
-            }
-            return new ApiResult().setSuccessStatus();
-        } catch (Database.DatabaseException ex) {
-            return ApiError.getInternalServerError(ex.getMessage());
         }
     }
 
@@ -204,7 +189,7 @@ public class AILogic {
             if (!this.database.deleteAi(devid, aiid)) {
                 return ApiError.getNotFound();
             }
-            this.aiServices.deleteAI(devid, aiid);
+            this.messageQueue.pushMessageDeleteAI(devid, aiid);
             return new ApiResult().setSuccessStatus("deleted successfully");
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "error deleting ai: " + e.toString());

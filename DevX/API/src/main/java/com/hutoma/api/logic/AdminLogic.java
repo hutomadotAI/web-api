@@ -4,8 +4,8 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -26,17 +26,17 @@ public class AdminLogic {
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
+    private final MessageQueue messageQueue;
     private final ILogger logger;
-    private final AIServices aiServices;
 
     @Inject
-    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database,
-                      ILogger logger, AIServices aiServices) {
+    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database, MessageQueue messageQueue,
+                      ILogger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
+        this.messageQueue = messageQueue;
         this.logger = logger;
-        this.aiServices = aiServices;
     }
 
     public ApiResult createDev(
@@ -96,7 +96,7 @@ public class AdminLogic {
                 this.logger.logInfo(LOGFROM, "db failed to delete dev");
                 return ApiError.getBadRequest("not found or unable to delete");
             }
-            this.aiServices.deleteDev(devid);
+            this.messageQueue.pushMessageDeleteDev(devid);
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "failed to create dev: " + e.toString());
             return ApiError.getInternalServerError();
