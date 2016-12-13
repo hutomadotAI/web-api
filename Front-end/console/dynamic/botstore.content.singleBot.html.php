@@ -15,8 +15,9 @@ $bot['address']='Carrer del Consell de Cent, 341';
 $bot['postcode']='08007';
 $bot['city']='Barcelona';
 $bot['nation']='Spain';
-$bot['permissionLink']='./botstore.php';
-$bot['privacyLink']='./botstore.php';
+$bot['siteLink']='http://www.hutoma.com';
+$bot['permissionLink']='https://www.google.com/permissions/';
+$bot['privacyLink']='https://www.google.it/intl/it/policies/privacy/';
 $bot['reportLink']='./botstore.php';
 
 $bot['longDescription']='A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, 
@@ -67,187 +68,15 @@ function rangeActivation($n){
 ?>
 
 <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
-    <div class="box-body bot-card" id="botcard">
 
-        <div class="col-xs-4 no-padding <?php echo $bot['widgetColor'];?> ">
-            <div class="bot-icon" id="botIcon">
-                <i class="<?php echo $bot['iconPath'];?>" style="padding-top:45px;"></i>
-            </div>
-        </div>
+    <?php include './dynamic/botstore.content.singleBot.card.html.php'; ?>
 
-        <div class="col-xs-8 bot-info">
-            <div class="row no-margin">
-                <div class="col-xs-6 bot-title text-white" id="botTitle">   <!--title-->
-                    <?php echo $bot['name'];?>
-                </div>
-                <div class="col-xs-6 bot-badge" id="botBagde">      <!--developer-->
-                    <i class="<?php echo $bot['badgeIcon'];?> text-aqua"></i> <?php echo $bot['badge'];?>
-                </div>
-            </div>
+    <?php include './dynamic/botstore.content.singleBot.video.html.php'; ?>
 
-            <div class="row no-margin">
-                <div class="col-xs-7 bot-description" id="botDescription">  <!--description-->
-                    <?php echo $bot['description'];?>
-                </div>
-                <div class="col-xs-5 bot-star"  id="botUsers">           <!--rating-->
-                    <?php echo $bot['users'];?> users
-                    <div class="star-rating text-right">
-                        <div class="star-rating__wrap">
-                            <?php
-                                for ($i=5; $i>0; $i--) {
-                                    if ($i==intval($bot['rating'])) {
-                                        echo '<input class="star-rating__input" id="star--rating-' . $i . '" type="radio" name="rating" value="' . $i . '" checked="checked" disabled="disabled">';
-                                        echo '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' . $i . '" title="' . $i . ' out of ' . $i . ' stars"></label>';
-                                    }
-                                    else {
-                                        echo '<input class="star-rating__input" id="star--rating-' . $i . '" type="radio" name="rating" value="' . $i . '" disabled="disabled">';
-                                        echo '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' . $i . '" title="' . $i . ' out of ' . $i . ' stars"></label>';
-                                    }
-                                }
-                            ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row no-margin">
-                <div class="col-xs-12 bot-msg" id="botTitle">
-                    <i class="fa fa-info-circle text-sm text-yellow"></i> <?php echo $bot['msg']?>
-                </div>
-            </div>
-            <div class="row no-margin">
-                <div class="col-xs-12 bot-other">
-                </div>
-            </div>
+    <?php include './dynamic/botstore.content.singleBot.description.html.php'; ?>
 
-            <div class="row no-margin">
-                <div class="col-xs-6 no-padding" id="botTitle">   <!--title-->
-                    <div class="row no-margin bot-licence">
-                        licence <?php echo strtoupper(licenceTypeToString($bot['licenceType']));?>
-                    </div >
-                    <div class="row no-margin bot-price">
-                        <div class="pull-left text-orange">price <span class="text-orange"><?php echo number_format($bot['licenceFee'], 2, '.', ''); ?></span> <span class="bot-badge no-padding text-orange">£</span></div>
-                    </div >
-                </div>
-                <div class="col-xs-6 bot-buy">
-                    <button class="btn btn-success pull-right flat" id="btnBuyBot"> <b>Buy new Bot</b> <span class="fa fa-arrow-circle-right"></span></button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="box-body  flat">
-        <div class="col-xs-12 no-padding bot-video flat" id="botVideo">
-            <div class="box-body no-padding flat">
-                <div class="overlay center-block">
-                    <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
-                        <iframe
-                            src="//www.youtube.com/embed/N4IMIpgUVis?controls=1&hd=1&enablejsapi=1"
-                            frameborder="0" allowfullscreen>
-                        </iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="box-body">
-        <div class="row no-margin">
-            <div class="col-xs-12 bot-h2">
-                Description
-            </div>
-        </div>
-        <div class="row no-margin" style="padding-bottom:10px;">
-            <div class="col-xs-12 bot-detail" id="botLongDescription">
-                <?php echo $bot['longDescription'];?>
-            </div>
-        </div>
-        <div class="row no-margin" style="padding-top:10px; border-top: 1px solid #535353;">
-            <div class="col-xs-12 bot-h2">
-                Sample Request
-            </div>
-        </div>
-        <div class="row no-margin" style="padding-bottom:10px;">
-            <div class="col-xs-12 text-gray bot-detail" id="botSampleRequest">
-                <div class="box-body flat" style="background: #343434; border: 1px solid #737373;">
-                    <div class="text-gray"><?php echo $bot['sample'];?></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="box-footer">
-        <div class="row no-margin">
-            <div class="col-xs-12 bot-h2">
-                More details
-            </div>
-        </div>
-        <div class="row no-margin">
-            <div class="col-xs-4">
-                <div class="bot-more-details">Last Update</div>
-                <div class="text-left" id="botUpdated">
-                    <?php echo $bot['lastUpdate'];?>
-                </div>
-            </div>
-            <div class="col-xs-4">
-                <div class="bot-more-details" id="botClassification">Classification</div>
-                <div class="text-left">
-                    <?php echo $bot['classification'];?>
-                </div>
-            </div>
-            <div class="col-xs-4">
-                <div class="bot-more-details">Version</div>
-                <div class="text-left" id="botVersion">
-                    <?php echo $bot['version'];?>
-                </div>
-            </div>
-        </div>
-
-        <div class="row no-margin">
-            <div class="col-xs-4">
-                <div class="bot-more-details">Offer by</div>
-                <div class="text-left" id="botCompany">
-                    <?php echo $bot['company'];?>
-                </div>
-            </div>
-            <div class="col-xs-4">
-                <div class="bot-more-details">Permissions</div>
-                <div class="text-left" id="botPermission">
-                    <a class="dev-link" href="<?php echo $bot['permissionLink'];?>" rel="nofollow" target="_blank">View details</a>
-                </div>
-            </div>
-            <div class="col-xs-4">
-                <div class="bot-more-details">Activations</div>
-                <div class="text-left" id="botActivations">
-                    <?php echo rangeActivation($bot['activations']);?>
-                </div>
-            </div>
-        </div>
-
-        <div class="row no-margin">
-            <div class="col-xs-4">
-                <div class="bot-more-details">Report</div>
-                <div class="text-left" id="botReport">
-                    <a class="dev-link" href="<?php echo $bot['reportLink'];?>" rel="nofollow" target="_blank">Report as inappropriate</a>
-                </div>
-            </div>
-            <div class="col-xs-4">
-                <div class="bot-more-details">Privacy</div>
-                <div class="text-left" id="botPrivacyPage">
-                    <a class="dev-link" href="<?php echo $bot['privacyLink'];?>" rel="nofollow" target="_blank">View Privacy Policy</a>
-                </div>
-            </div>
-            <div class="col-xs-4">
-                <div class="bot-more-details">Developer</div>
-                <div class="text-left">
-                    <div id="botDeveloper"><?php echo $bot['developer'];?></div>
-                    <div id="botEmail"><?php echo $bot['contact'];?></div>
-                    <div id="botAddress"><?php echo $bot['address'];?></div>
-                    <div id="botPostcode"><?php echo $bot['postcode'].' '. $bot['city'];?></div>
-                    <div id="botNation"><?php echo $bot['nation'];?></div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <?php include './dynamic/botstore.content.singleBot.footer.html.php'; ?>
     
 </div>
+
+
