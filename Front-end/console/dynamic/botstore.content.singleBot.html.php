@@ -25,6 +25,17 @@ I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranqu
 I should be incapable of drawing a single stroke at the present moment
 and yet I feel that I never was a greater artist than now.';
 
+function licenceTypeToString($x){
+    switch ($x) {
+        case 0:
+            return 'Trial';
+        case 1:
+            return 'Subscription';
+        case 2:
+            return 'Perpetual';
+    }
+}
+
 
 function rangeActivation($n){
      switch (true) {
@@ -105,8 +116,18 @@ function rangeActivation($n){
                 </div>
             </div>
             <div class="row no-margin">
-                <div class="col-xs-6 bot-price" id="botTitle">   <!--title-->
-                    <div class="pull-left">price <?php echo $bot['price'];?> <span class="bot-badge no-padding">£</span></div>
+                <div class="col-xs-12 bot-other">
+                </div>
+            </div>
+
+            <div class="row no-margin">
+                <div class="col-xs-6 no-padding" id="botTitle">   <!--title-->
+                    <div class="row no-margin bot-licence">
+                        licence <?php echo strtoupper(licenceTypeToString($bot['licenceType']));?>
+                    </div >
+                    <div class="row no-margin bot-price">
+                        <div class="pull-left text-orange">price <span class="text-orange"><?php echo number_format($bot['licenceFee'], 2, '.', ''); ?></span> <span class="bot-badge no-padding text-orange">£</span></div>
+                    </div >
                 </div>
                 <div class="col-xs-6 bot-buy">
                     <button class="btn btn-success pull-right flat" id="btnBuyBot"> <b>Buy new Bot</b> <span class="fa fa-arrow-circle-right"></span></button>

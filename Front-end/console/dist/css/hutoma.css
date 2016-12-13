@@ -6331,7 +6331,11 @@ ul.pagination li a {
     padding:10px 10px 0px 10px;
     text-align: justify;
     font-size: 12px;
-    height:60px;
+    height:50px;
+}
+
+.bot-other{
+    height:20px;
 }
 
 .bot-star{
@@ -6341,14 +6345,10 @@ ul.pagination li a {
     font-size: 18px;
     height:40px;
 }
-
-.bot-price{
-    padding:30px 0px 0px 10px;
-    font-weight: bold;
-    font-size: 16px;
-    height:50px;
+.bot-licence{
+    padding: 0px 0px 0px 10px;
+    font-size: 12px;
 }
-
 .bot-video {
     margin-left: auto;
     margin-right: auto;
@@ -6377,7 +6377,14 @@ ul.pagination li a {
     text-align: left;
 }
 
+.bot-price{
+    padding:0px 0px 0px 10px;
+    font-weight: bold;
+    font-size: 16px;
+    height:20px;
+}
+
 .bot-buy{
-    padding:15px 0px 0px 0px;
-    height:50px;
+    padding:5px 0px 0px 0px;
+    height:40px;
 }
