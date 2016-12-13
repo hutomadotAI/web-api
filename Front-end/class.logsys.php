@@ -1368,7 +1368,25 @@ class console
         }
     }
 
+    public static function getSingleBotInStore($aiid)
+    {
+        if (self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL getBotInStore(?)");
+                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=123');
+                exit;
+            }
 
+            $data = $sql->fetchAll();
+            $sql->nextRowset();
+            $value = ($data[0]);
+            return $value;
+        }
+    }
+    
     public static function isSessionActive()
     {
         if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {

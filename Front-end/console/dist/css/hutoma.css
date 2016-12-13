@@ -6279,26 +6279,23 @@ ul.pagination li a {
     margin-right: auto;
 }
 
-.bot-circle-icon {
-    border-top-left-radius: 85px;
-    border-top-right-radius: 85px;
-    border-bottom-right-radius: 85px;
-    border-bottom-left-radius: 85px;
-    display: block;
-    min-height: 170px;
-    width: 170px;
-    margin-left:auto;
-    margin-right:auto;
-    margin-top:20px;
-    margin-bottom:20px;
+.bot-card{
+    padding:10px 10px 10px 10px;
+}
+
+.bot-icon {
+    min-height: 180px;
+    max-height: 180px;
+    min-width: 130px;
+    max-width: 170px;
     text-align: center;
     font-size: 85px;
     line-height: 100px;
-    background: rgba(0, 0, 0, 0.2);
+    margin:auto;
 }
 
 .bot-padding{
-    padding:0px 0px 30px 0px;
+    padding:0px 0px 20px 0px;
 }
 
 .bot-info {
@@ -6308,57 +6305,79 @@ ul.pagination li a {
 }
 
 .bot-title {
-    padding:10px 10px 0px 10px;
+    padding: 0px 10px 0px 10px;
     text-align: left;
     font-size: 22px;
-    height:40px;
+    height:30px;
     padding-left:10px;
 }
 
-.bot-developer {
-    padding:10px 10px 0px 10px;
+.bot-badge {
+    padding: 0px 0px 0px 10px;
     text-align: right;
     font-weight: bold;
     font-size: 14px;
-    height:40px;
+    height:30px;
 }
 
 .bot-description {
-    padding:0px 10px 0px 10px;
+    padding:0px 0px 0px 10px;
     text-align: left;
     font-size: 14px;
-    padding-left:10px;
+    height:40px;
+}
+
+.bot-msg{
+    padding:10px 10px 0px 10px;
+    text-align: justify;
+    font-size: 12px;
+    height:60px;
 }
 
 .bot-star{
-    padding:5px 10px 0px 20px;
+    padding:0px 0px 0px 20px;
     text-align: right;
     font-weight: bold;
     font-size: 18px;
+    height:40px;
+}
+
+.bot-price{
+    padding:30px 0px 0px 10px;
+    font-weight: bold;
+    font-size: 16px;
+    height:50px;
 }
 
 .bot-video {
     margin-left: auto;
     margin-right: auto;
+    backgroud: #212121;
     display: block;
 }
 
 .bot-detail {
     text-align: justify;
     font-size: 14px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-.bot-footer{
+.bot-h2{
     text-transform: uppercase;
     font-size: 16px;
     text-align: left;
+    padding-top: 10px;
+    padding-bottom: 0px;
 }
 
 .bot-more-details{
+    padding-top:20px;
     font-weight: bold;
     text-align: left;
 }
 
 .bot-buy{
-    bottom:0px;
+    padding:15px 0px 0px 0px;
+    height:50px;
 }
