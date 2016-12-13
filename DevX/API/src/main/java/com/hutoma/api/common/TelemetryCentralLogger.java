@@ -50,7 +50,7 @@ public class TelemetryCentralLogger extends CentralLogger implements ITelemetry 
      * {@inheritDoc}
      */
     public void addTelemetryEvent(String eventName, Exception exception, Map<String, String> properties) {
-        Map<String, String> map = new HashMap<>(properties);
+        Map<String, String> map = properties == null ? new HashMap<>() : new HashMap<>(properties);
         map.put("message", exception.getMessage());
         map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
         this.logOutput(EventType.EXCEPTION, eventName, exception.getClass().getName(), map);

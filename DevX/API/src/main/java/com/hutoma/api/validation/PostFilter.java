@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.IntentVariable;
 
 import org.glassfish.jersey.message.internal.MediaTypes;
@@ -63,6 +64,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             switch (param) {
                 case IntentJson:
                 case EntityJson:
+                case AiStatusJson:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -191,8 +193,22 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 }
                 request.setProperty(APIParameter.IntentJson.toString(), intent);
             }
+
+            if (checkList.contains(APIParameter.AiStatusJson)) {
+                AiStatus aiStatus = (AiStatus) this.serializer.deserialize(request.getEntityStream(), AiStatus.class);
+                checkParameterNotNull(aiStatus.getAiid(), "AIID is null");
+                checkParameterNotNull(aiStatus.getDevId(), "DevID is null");
+                checkParameterNotNull(aiStatus.getTrainingStatus(), "TrainingStatus is null");
+                request.setProperty(APIParameter.AiStatusJson.toString(), aiStatus);
+            }
         } catch (JsonParseException jpe) {
             throw new ParameterValidationException("error in json format");
+        }
+    }
+
+    private void checkParameterNotNull(final Object obj, final String msg) throws ParameterValidationException {
+        if (obj == null) {
+            throw new ParameterValidationException(msg);
         }
     }
 

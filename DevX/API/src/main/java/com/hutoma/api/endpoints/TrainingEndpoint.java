@@ -11,18 +11,27 @@ import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
+
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 
 /**
  * Created by David MG on 09/08/2016.
@@ -98,21 +107,6 @@ public class TrainingEndpoint {
                                    @DefaultValue("") @HeaderParam("_developer_id") String devid) {
 
         ApiResult result = this.trainingLogic.updateTraining(securityContext, devid,
-                ParameterFilter.getAiid(requestContext));
-        return result.getResponse(this.serializer).build();
-    }
-
-    @PUT
-    @Path("/{aiid}/training/delete")
-    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response trainingDelete(@Context SecurityContext securityContext,
-                                   @Context ContainerRequestContext requestContext,
-                                   @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-
-        ApiResult result = this.trainingLogic.delete(securityContext, devid,
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
