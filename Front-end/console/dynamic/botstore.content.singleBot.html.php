@@ -79,4 +79,4 @@ function rangeActivation($n){
     
 </div>
 
-
+<?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
