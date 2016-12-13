@@ -7,7 +7,6 @@ $bot['msg']='Questi contenuti non sono disponibili in Italiano. Leggi ulteriori 
 $bot['sample']='User: I want to sleep.<p></p>Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.<p></p><p></p>User: You\'re so sweet.<p></p>Agent: I like you too. You\'re a lot of fun to talk to.';
 $bot['lastUpdate']='10 september 2016';
 $bot['classification']='entertainment';
-$bot['installations']='5000-10000';
 $bot['version']='2.1';
 $bot['developer']='hu:toma Ltd.';
 $bot['company']='HUTOMA';
@@ -25,6 +24,36 @@ and feel the charm of existence in this spot, which was created for the bliss of
 I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents.
 I should be incapable of drawing a single stroke at the present moment
 and yet I feel that I never was a greater artist than now.';
+
+
+function rangeActivation($n){
+     switch (true) {
+         case ($n < 10):
+             return '0-10';
+         case ($n < 100):
+             return '10-100';
+         case ($n < 1000):
+             return '100-1000';
+         case ($n < 5000):
+             return '1.000-5.000';
+         case ($n < 10000):
+             return '5.000-10.000';
+         case ($n < 20000):
+             return '10.000-20.000';
+         case ($n < 50000):
+             return '20.000-50.000';
+         case ($n < 100000):
+             return '50.000-100.000';
+         case ($n < 500000):
+             return '100.000-500.000';
+         case ($n < 1000000):
+             return '500.000-1.000.000';
+         case ($n < 5000000):
+             return '1.000.000-5.000.000';
+         case ($n < 10000000):
+             return '5.000.000-10.000.000';
+     }
+}
 ?>
 
 <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
@@ -167,9 +196,9 @@ and yet I feel that I never was a greater artist than now.';
                 </div>
             </div>
             <div class="col-xs-4">
-                <div class="bot-more-details">Installations</div>
-                <div class="text-left" id="botInstallation">
-                    <?php $bot['installations']='5000-10000'; echo $bot['installations'];?>
+                <div class="bot-more-details">Activations</div>
+                <div class="text-left" id="botActivations">
+                    <?php echo rangeActivation($bot['activations']);?>
                 </div>
             </div>
         </div>
