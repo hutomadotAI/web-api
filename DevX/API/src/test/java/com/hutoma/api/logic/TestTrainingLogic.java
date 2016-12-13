@@ -3,10 +3,10 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.MessageQueue;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -59,7 +59,7 @@ public class TestTrainingLogic {
     private static final String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
     private static final String EOL = "\n";
     private Config fakeConfig;
-    private MessageQueue fakeMessageQueue;
+    private AIServices fakeAiServices;
     private DatabaseEntitiesIntents fakeDatabase;
     private Tools fakeTools;
     private ILogger fakeLogger;
@@ -147,7 +147,7 @@ public class TestTrainingLogic {
         this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         when(this.fakeDatabase.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeMessageQueue = mock(MessageQueue.class);
+        this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(ILogger.class);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
@@ -156,16 +156,18 @@ public class TestTrainingLogic {
         this.fakeExtractor = mock(HTMLExtractor.class);
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
-        this.logic = new TrainingLogic(this.fakeConfig, this.fakeMessageQueue, this.fakeExtractor, this.fakeDatabase, this.fakeTools, this.fakeLogger,
-                this.fakeValidation, this.fakeIntentHandler);
+        this.logic = new TrainingLogic(this.fakeConfig, this.fakeAiServices, this.fakeExtractor, this.fakeDatabase,
+                this.fakeTools, this.fakeLogger, this.fakeValidation, this.fakeIntentHandler);
 
         when(this.fakeConfig.getMaxUploadSize()).thenReturn(65536L);
         when(this.fakeConfig.getMaxClusterLines()).thenReturn(65536);
     }
 
     @Test
-    public void testTrain_TextSimple() {
+    public void testTrain_TextSimple() throws Database.DatabaseException {
         InputStream stream = createUpload(SOMETEXT);
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(getCommonAi(TrainingStatus.NOT_STARTED, true));
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn("training file");
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -277,19 +279,19 @@ public class TestTrainingLogic {
     @Test
     public void testTrain_TextMessageFail() throws Exception {
         int trainingType = 0;
-        makeMessageQueueFail(trainingType);
+        makeAiServiceLogicFail(trainingType);
     }
 
     @Test
     public void testTrain_DocMessageFail() throws Exception {
         int trainingType = 1;
-        makeMessageQueueFail(trainingType);
+        makeAiServiceLogicFail(trainingType);
     }
 
     @Test
     public void testTrain_UrlMessageFail() throws Exception {
         int trainingType = 2;
-        makeMessageQueueFail(trainingType);
+        makeAiServiceLogicFail(trainingType);
     }
 
     @Test
@@ -301,27 +303,30 @@ public class TestTrainingLogic {
 
     @Test
     @Parameters(method = "startTraining_successStates")
-    public void testStartTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException {
+    public void testStartTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException,
+            AIServices.AiServicesException {
         testStartTrainingCommon(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
     @Parameters(method = "startTraining_failureStates")
-    public void testStartTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
+    public void testStartTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException,
+            AIServices.AiServicesException {
         testStartTrainingCommon(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
-    public void testStartTraining_unknownAi() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+    public void testStartTraining_unknownAi() throws Database.DatabaseException, AIServices.AiServicesException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
         ApiResult result = this.logic.startTraining(this.fakeContext, DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.fakeMessageQueue, never()).pushMessageUpdateTraining(any(), any());
+        verify(this.fakeAiServices, never()).updateTraining(any(), any());
     }
 
     @Test
-    public void testStartTraining_dbException() throws Database.DatabaseException, MessageQueue.MessageQueueException {
-        testTraining_dbException(() -> this.logic.startTraining(this.fakeContext, DEVID, AIID));
+    public void testStartTraining_dbException() throws Database.DatabaseException, AIServices.AiServicesException {
+        testTraining_dbException(() -> this.logic.startTraining(this.fakeContext, DEVID, AIID),
+                HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
@@ -337,18 +342,17 @@ public class TestTrainingLogic {
     }
 
     @Test
-    public void testStopTraining_unknownAi() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+    public void testStopTraining_unknownAi() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_invalidAi(() -> this.logic.stopTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testStopTraining_dbException() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+    public void testStopTraining_dbException() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_dbException(() -> this.logic.stopTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testStartTraining_invalidAi() throws Database.DatabaseException,
-            MessageQueue.MessageQueueException {
+    public void testStartTraining_invalidAi() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_invalidAi(() -> this.logic.startTraining(this.fakeContext, DEVID, AIID));
     }
 
@@ -365,12 +369,12 @@ public class TestTrainingLogic {
     }
 
     @Test
-    public void testUpdateTraining_invalidAi() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+    public void testUpdateTraining_invalidAi() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_invalidAi(() -> this.logic.updateTraining(this.fakeContext, DEVID, AIID));
     }
 
     @Test
-    public void testUpdateTraining_dbException() throws Database.DatabaseException, MessageQueue.MessageQueueException {
+    public void testUpdateTraining_dbException() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_dbException(() -> this.logic.updateTraining(this.fakeContext, DEVID, AIID));
     }
 
@@ -464,34 +468,25 @@ public class TestTrainingLogic {
         verify(this.fakeLogger).logError(anyString(), anyString());
     }
 
-    @Test
-    public void testDeleteTraining() throws MessageQueue.MessageQueueException {
-        ApiResult result = this.logic.delete(this.fakeContext, DEVID, AIID);
-        verify(this.fakeMessageQueue).pushMessageDeleteTraining(any(), any());
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testDeleteTraining_messageQueueException() throws MessageQueue.MessageQueueException {
-        doThrow(MessageQueue.MessageQueueException.class).when(this.fakeMessageQueue).pushMessageDeleteTraining(any(), any());
-        ApiResult result = this.logic.delete(this.fakeContext, DEVID, AIID);
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
-    }
-
     private void testTraining_invalidAi(Supplier<ApiResult> supplier) throws Database.DatabaseException,
-            MessageQueue.MessageQueueException {
+            AIServices.AiServicesException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
         ApiResult result = supplier.get();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.fakeMessageQueue, never()).pushMessageUpdateTraining(any(), any());
+        verify(this.fakeAiServices, never()).updateTraining(any(), any());
+    }
+
+    private void testTraining_dbException(Supplier<ApiResult> supplier, int expectedErrorCode)
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        when(this.fakeDatabase.getAI(any(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = supplier.get();
+        Assert.assertEquals(expectedErrorCode, result.getStatus().getCode());
+        verify(this.fakeAiServices, never()).updateTraining(any(), any());
     }
 
     private void testTraining_dbException(Supplier<ApiResult> supplier) throws Database.DatabaseException,
-            MessageQueue.MessageQueueException {
-        when(this.fakeDatabase.getAI(any(), any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = supplier.get();
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
-        verify(this.fakeMessageQueue, never()).pushMessageUpdateTraining(any(), any());
+            AIServices.AiServicesException {
+        testTraining_dbException(supplier, HttpURLConnection.HTTP_INTERNAL_ERROR);
     }
 
     private void testUpdateTraining_initialStates_common(TrainingStatus initialState, int expectedCode)
@@ -502,7 +497,7 @@ public class TestTrainingLogic {
     }
 
     private void testStartTrainingCommon(final TrainingStatus trainingStatus, final int expectedStatus)
-            throws Database.DatabaseException {
+            throws Database.DatabaseException, AIServices.AiServicesException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(trainingStatus, false));
         InputStream stream = createUpload(SOMETEXT);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
@@ -544,9 +539,8 @@ public class TestTrainingLogic {
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
-    private void makeMessageQueueFail(int trainingType) throws Exception {
-        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessageReadyForTraining(anyString(), any());
-        doThrow(new MessageQueue.MessageQueueException(new Exception("test"))).when(this.fakeMessageQueue).pushMessagePreprocessTrainingText(anyString(), any());
+    private void makeAiServiceLogicFail(int trainingType) throws Exception {
+        doThrow(AIServices.AiServicesException.class).when(this.fakeAiServices).startTraining(anyString(), any());
         InputStream stream = createUpload(SOMETEXT);
         ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, 0.5, "", "",
                 TrainingStatus.NOT_STARTED, null, 0, 0.5, 0, Locale.UK, "UTC");

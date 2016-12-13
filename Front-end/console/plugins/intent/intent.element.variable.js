@@ -18,7 +18,7 @@ function loadVariablesFromIntent() {
     }
 }
 
-function loadPrompts(elements){
+function loadPrompts(elements) {
     var values = [];
     for (var i = 0; i < elements.length; i++)
         values.push(addEscapeCharacter(elements[i]));
@@ -42,9 +42,9 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('<div class="text-center" >');
 
     if (typeof(entity) === 'undefined' || (entity) == '')
-        wHTML +=drawObj('');
+        wHTML += drawObj('');
     else
-        wHTML +=drawObj(entity);
+        wHTML += drawObj(entity);
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -99,7 +99,7 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     newNode.setAttribute('onmouseout', 'variableOnMouseOut (this)');
 
     newNode.style.backgroundColor = '#404446';
-    newNode.style.marginTop ='1px';
+    newNode.style.marginTop = '1px';
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
 }
@@ -108,13 +108,13 @@ function drawObj(value) {
     var wHTML = '';
     wHTML += ('<a class="btn btn-select btn-primary btn-select-light" onClick="pushEntitiesList(this)">');
     wHTML += ('<input type="hidden" class="btn-select-input" id="" name="" value="" />');
-    if ( value!='')
-        wHTML += ('<span class="btn-select-value">'+value+'</span>');
+    if (value != '')
+        wHTML += ('<span class="btn-select-value">' + value + '</span>');
     else
         wHTML += ('<span class="btn-select-value">add entity</span>');
     wHTML += ('<span class="btn-select-arrow text-sm glyphicon glyphicon-chevron-down"></span>');
     wHTML += ('<ul style="display: none;">');
-    wHTML += ('<li class="selected">'+value+'</li>');
+    wHTML += ('<li class="selected">' + value + '</li>');
     wHTML += ('</ul>');
     wHTML += ('</a>');
     return wHTML;
@@ -134,42 +134,42 @@ function isUsedEntities(entity_name) {
     return false;
 }
 
-function pushEntitiesList(node){
+function pushEntitiesList(node) {
     resetBorderHighlightError(node);
-    
-    var container = $(node).find( "ul" );
+
+    var container = $(node).find("ul");
     var selected = container.find("li.selected");
 
     var parent = node.parentElement;
     var ul = parent.children[0].children[3];
 
     // if dropdown is visible exit without refresh list
-    if ( ul.style.display =='block')
+    if (ul.style.display == 'block')
         return;
 
     // remove all list of child inside UL node
     var fc = ul.firstChild;
-    while( fc ) {
-        ul.removeChild( fc );
+    while (fc) {
+        ul.removeChild(fc);
         fc = ul.firstChild;
     }
 
     for (var x in entityListFromServer) {
         // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
-        if (!isUsedEntities(entityListFromServer[x]) ||  selected.text().replace(/[@]/g, "") == entityListFromServer[x]) {
+        if (!isUsedEntities(entityListFromServer[x]) || selected.text().replace(/[@]/g, "") == entityListFromServer[x]) {
             var elem = document.createElement('li');
             // if elem was selected, maintain this selection on new list
             if (selected.text().replace(/[@]/g, "") == entityListFromServer[x])
                 elem.className = 'selected';
-            elem.innerHTML = '@'+entityListFromServer[x];
+            elem.innerHTML = '@' + entityListFromServer[x];
             container.append(elem);
         }
     }
 }
 
 function variableOnMouseIn(elem) {
-   var btn = elem.children[3].children[0].children[1].children[0];
-   btn.style.display = '';
+    var btn = elem.children[3].children[0].children[1].children[0];
+    btn.style.display = '';
 }
 
 function variableOnMouseOut(elem) {
@@ -189,14 +189,14 @@ function deleteIntentVariable(element) {
     resetMsgAlertIntentVariable();
 }
 
-function resetBorderHighlightError(node){
+function resetBorderHighlightError(node) {
     node.style.border = "";
     resetMsgAlertIntentVariable();
 }
 
 function resetMsgAlertIntentVariable() {
-    msgAlertIntentElement(0,'Use intents to map what a user says and what action should be taken by your business logic.');
-    msgAlertIntentVariable(0,'Describe what variables you want the AI to extract from a conversation');
+    msgAlertIntentElement(0, 'Use intents to map what a user says and what action should be taken by your business logic.');
+    msgAlertIntentVariable(0, 'Describe what variables you want the AI to extract from a conversation');
 }
 
 function isJustAddedNewRow() {
@@ -208,7 +208,7 @@ function isJustAddedNewRow() {
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
     var elem = $(node).find("ul").find("li.selected");
-    if (elem.text()  == '') {
+    if (elem.text() == '') {
         msgAlertIntentVariable(1, 'Complete field first before add a new line');
         return true;
     }

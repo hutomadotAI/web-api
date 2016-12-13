@@ -1,7 +1,7 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.ChatTelemetryLogger;
-import com.hutoma.api.connectors.SemanticAnalysis;
+import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.endpoints.ChatEndpoint;
@@ -49,17 +49,18 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat() throws SemanticAnalysis.SemanticAnalysisException {
+    public void testChat() throws ServerConnector.AiServicesException {
         final String answer = "the answer";
         ChatResult semanticAnalysisResult = new ChatResult();
         semanticAnalysisResult.setAnswer(answer);
         semanticAnalysisResult.setScore(0.9);
-        when(this.fakeSemanticAnalysis.getAnswerResult()).thenReturn(semanticAnalysisResult);
+        when(this.fakeAiChatServices.awaitWnet()).thenReturn(semanticAnalysisResult);
+
         final Response response = buildChatDefaultParams(target(CHAT_PATH)).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiChat apiChat = deserializeResponse(response, ApiChat.class);
         Assert.assertEquals(answer, apiChat.getResult().getAnswer());
-        Assert.assertNotNull(apiChat.getResult().getChatId());
+        Assert.assertNotNull(apiChat.getChatId());
         Assert.assertNotNull(apiChat.getResult().getElapsedTime());
         Assert.assertNotNull(apiChat.getResult().getScore());
     }

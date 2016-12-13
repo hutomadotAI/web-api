@@ -76,7 +76,6 @@ GRANT EXECUTE ON `hutoma`.* TO 'hutoma_caller'@'%';
 
 
 # Privileges for `integrReader`@`127.0.0.1`
-
 GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';
 
 GRANT EXECUTE ON `hutoma`.* TO 'integrReader'@'127.0.0.1';
@@ -139,6 +138,9 @@ GRANT EXECUTE ON `hutoma`.* TO 'userTableReader'@'127.0.0.1';
 GRANT SELECT ON `hutoma`.`users` TO 'userTableReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`memoryIntent` TO 'userTableReader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`devplan` TO `userTableReader`@'127.0.0.1';
+
 
 
 # Privileges for `userTableWriter`@`127.0.0.1`
