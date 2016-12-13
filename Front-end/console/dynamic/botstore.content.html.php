@@ -5,9 +5,11 @@
     </div>
 
     <div class="box-body" id="botstore">
-        <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchDomain(this.value)">
+        <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0"
+               onkeyup="searchDomain(this.value)">
         <p></p>
-        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace" style="margin-bottom:5px;">
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace"
+             style="margin-bottom:5px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertMarketplace"></i>
             <span id="msgAlertMarketplace">You can power up your AI by combining and mixing existing AIs from out Bot Store.</span>
@@ -15,7 +17,8 @@
     </div>
 
     <div class="box-footer">
-        <button  style="width:100px" type="submit" id="btnMarketplaceSave" class="btn btn-success flat pull-right"><b>save</b></button>
+        <button style="width:100px" type="submit" id="btnMarketplaceSave" class="btn btn-success flat pull-right"><b>save</b>
+        </button>
     </div>
 </div>
 

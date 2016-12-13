@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<enunciate
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.7.0.xsd">
+
+    <description>
+        <![CDATA[
+      <h1>Hutoma API</h1>
+      <p>Hutoma API documentation. Please refer to the <a href="http://www.hutoma.com">link to more details</a></p>
+    ]]>
+    </description>
+
+    <modules>
+        <jackson1 disabled="true"/>
+    </modules>
+</enunciate>
