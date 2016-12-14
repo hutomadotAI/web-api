@@ -22,7 +22,7 @@
         <form method="POST" name="viewAllForm" action="./trainingAI.php">
             <input type="hidden" id="ai" name="ai" value="">
         </form>
-        <form method="POST" name="publishForm" action="./publishAI.php">
+        <form method="POST" name="publishForm" action="">
             <input type="hidden" id="aiid" name="aiid" value="">
         </form>
 </div>

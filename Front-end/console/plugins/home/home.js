@@ -33,7 +33,7 @@ function publishAIID(elem){
     RecursiveUnbind($('#listTable'));
 
     document.getElementById("aiid").value = value;
-    document.publishForm.submit();
+    //document.publishForm.submit();
 }
 
 function recursiveDisable($jElement){
