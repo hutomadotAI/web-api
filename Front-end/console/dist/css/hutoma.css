@@ -6390,7 +6390,7 @@ ul.pagination li a {
 }
 
 .bot-payment{
-    min-height:170px;
+    min-height:160px;
     min-width: 400px;
     background-color: #212121;
 }
@@ -6408,6 +6408,11 @@ ul.pagination li a {
 }
 
 .bot-icon-payment{
+    text-align: center;
+    font-size: 85px;
+    line-height: 100px;
+    margin-left:180px;
+    padding-top:25px;
     min-height: 150px;
     max-height: 150px;
     min-width: 150px;
@@ -6425,6 +6430,16 @@ ul.pagination li a {
     -webkit-transform: translateX(-100%);
     -o-transform: translateX(-100%);
     transform: translateX(-100%);
+}
+
+.bot-50{
+    min-height:50px;
+    max-height:50px;
+}
+
+.bot-70{
+    min-height:70px;
+    max-height:70px;
 }
 
 .bot-buy-title{
