@@ -6390,11 +6390,41 @@ ul.pagination li a {
 }
 
 .bot-payment{
-    height:400px;
+    min-height:170px;
+    min-width: 400px;
+    background-color: #212121;
 }
 
 .bot-trasparent{
     background-color: transparent;
+}
+
+.bot-shadow{
+    box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
+}
+
+.bot-shadow-light{
+    box-shadow: 0 0 14px rgba(0, 0, 0, 0.2);
+}
+
+.bot-icon-payment{
+    min-height: 150px;
+    max-height: 150px;
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.bot-absolute{
+    display: inline-block;
+    float: left;
+    position: relative;
+    margin-left: 180px;
+    margin-top: -30px;
+    -moz-transform: translateX(-100%);
+    -ms-transform: translateX(-100%);
+    -webkit-transform: translateX(-100%);
+    -o-transform: translateX(-100%);
+    transform: translateX(-100%);
 }
 
 .bot-20{
