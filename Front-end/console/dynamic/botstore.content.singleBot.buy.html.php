@@ -15,7 +15,7 @@
                             </div>
                         </div>
                         <div class="col-xs-8 no-padding">
-                            <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
+                            <button type="button" class="close text-white" id="btnModelClose" data-dismiss="modal">&times;</button>
                             <div class="row no-margin">
                                 <div class="col-xs-12 bot-30">
                                     <div class="col-xs-8 bot-buy-title">
