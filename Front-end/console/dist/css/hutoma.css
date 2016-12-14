@@ -6390,6 +6390,8 @@ ul.pagination li a {
 }
 
 .bot-payment{
+    padding-top:0px;
+    padding-bottom:0px;
     min-height:160px;
     min-width: 400px;
     background-color: #212121;
@@ -6432,6 +6434,11 @@ ul.pagination li a {
     transform: translateX(-100%);
 }
 
+.bot-30{
+    min-height:30px;
+    max-height:30px;
+}
+
 .bot-50{
     min-height:50px;
     max-height:50px;
@@ -6443,14 +6450,14 @@ ul.pagination li a {
 }
 
 .bot-buy-title{
-    padding: 10px 10px 0px 10px;
+    padding: 0px 10px 0px 10px;
     text-align: left;
     font-size: 22px;
     height:40px;
 }
 
 .bot-buy-price{
-    padding: 15px 10px 0px 10px;
+    padding: 5px 10px 0px 10px;
     font-weight: bold;
     font-size: 16px;
     height:40px;
