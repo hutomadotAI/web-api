@@ -6427,31 +6427,6 @@ ul.pagination li a {
     transform: translateX(-100%);
 }
 
-.bot-20{
-    min-height:20px;
-    max-height:20px;
-}
-
-.bot-50{
-    min-height:50px;
-    max-height:50px;
-}
-
-.bot-80{
-    min-height:80px;
-    max-height:80px;
-}
-
-.bot-130{
-    min-height:130px;
-    max-height:130px;
-}
-
-.bot-150{
-    min-height:150px;
-    max-height:150px;
-}
-
 .bot-buy-title{
     padding: 10px 10px 0px 10px;
     text-align: left;
