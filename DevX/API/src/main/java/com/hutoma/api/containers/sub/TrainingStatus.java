@@ -17,8 +17,14 @@ public enum TrainingStatus {
     ERROR("internal_error"),
     MALFORMEDFILE("malformed_training_file"),
     CANCELLED("training_cancelled"),
-    NOTHING_TO_TRAIN("training_nothing_to_train");
+    NOTHING_TO_TRAIN("training_nothing_to_train"),
 
+    NEW_AI_UNDEFINED("ai_undefined"),
+    NEW_AI_READY_TO_TRAIN("ai_ready_to_train"),
+    NEW_AI_TRAINING("ai_training"),
+    NEW_AI_TRAINING_WITH_CHAT("ai_training_with_chat"),
+    NEW_AI_READY_FOR_CHAT("ai_ready_for_chat"),
+    NEW_AI_ERROR("ai_error");
 
     private final String value;
 

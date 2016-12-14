@@ -15,8 +15,7 @@ import java.net.HttpURLConnection;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -46,6 +45,16 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
         statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), "NOT_A_REAL_STATUS");
         final Response response = sendRequest(statusJson);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateStatus_newStatus() throws Database.DatabaseException {
+        String statusJson = getCommonAiStatusJson();
+        statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), TrainingStatus.NEW_AI_TRAINING.value());
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), eq(TrainingStatus.QUEUED))).thenReturn(true);
+        final Response response = sendRequest(statusJson);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     private Response sendRequest(final String statusJson) {

@@ -17,6 +17,29 @@ public class AiStatus {
         this.trainingStatus = trainingStatus.value();
     }
 
+    public static TrainingStatus interpretNewStatus(TrainingStatus status) {
+        if (status == null) {
+            return null;
+        }
+        switch (status) {
+            case NEW_AI_UNDEFINED:
+                return TrainingStatus.NOTHING_TO_TRAIN;
+            case NEW_AI_READY_TO_TRAIN:
+                return TrainingStatus.NOT_STARTED;
+            case NEW_AI_TRAINING:
+                return TrainingStatus.QUEUED;
+            case NEW_AI_TRAINING_WITH_CHAT:
+                return TrainingStatus.IN_PROGRESS;
+            case NEW_AI_READY_FOR_CHAT:
+                return TrainingStatus.COMPLETED;
+            case NEW_AI_ERROR:
+                return TrainingStatus.MALFORMEDFILE;
+            default:
+                break;
+        }
+        return status;
+    }
+
     public UUID getAiid() {
         return this.aiid == null ? null : UUID.fromString(this.aiid);
     }
@@ -26,6 +49,6 @@ public class AiStatus {
     }
 
     public TrainingStatus getTrainingStatus() {
-        return TrainingStatus.forValue(this.trainingStatus);
+        return interpretNewStatus(TrainingStatus.forValue(this.trainingStatus));
     }
 }
