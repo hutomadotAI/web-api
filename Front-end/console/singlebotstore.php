@@ -14,18 +14,7 @@ if (!isPostInputAvailable()) {
     exit;
 }
 // TODO it needs getSingleBotInStore like API call
-/*
-$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$singleAI = $aiApi->getSingleAI($_POST['aiid']);
-unset($aiApi);
-
-if ($singleAI['status']['code'] !== 200) {
-    unset($singleAI);
-    \hutoma\console::redirect('../error.php?err=200');
-    exit;
-}
-*/
-$bot = \hutoma\console::getSingleBotInStore($_POST['aiid']);
+$tmp_bot = \hutoma\console::getSingleBotInStore($_POST['aiid']);
 
 function isPostInputAvailable(){
     return (
