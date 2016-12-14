@@ -581,7 +581,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`localhost` PROCEDURE `addAI_v2`(
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAI_v2`(
 	IN `param_aiid` VARCHAR(50),
 	IN `param_ai_name` VARCHAR(50),
 	IN `param_ai_description` VARCHAR(250),
@@ -2355,6 +2355,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDevPlan`(IN `in_dev_id` VARCHAR(50))
 BEGIN
 SELECT d.*
@@ -2375,6 +2376,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateTrainingData`(IN `param_aiid` varchar(50), IN `param_ai_trainingfile` text)
     MODIFIES SQL DATA
 BEGIN
