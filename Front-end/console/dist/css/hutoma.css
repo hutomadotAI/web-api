@@ -1601,6 +1601,7 @@ a:focus {
 /* Input group */
 .input-group .input-group-addon {
     border-radius: 0;
+    color:grey;
     border-color: #515151;
     background-color: #353939;
 }
@@ -6461,4 +6462,65 @@ ul.pagination li a {
     font-weight: bold;
     font-size: 16px;
     height:40px;
+}
+
+/* layout.css Style */
+.upload-drop-zone {
+    min-height: 185px;
+    max-height: 185px;
+    min-width: 185px;
+    max-width: 185px;
+    border-width: 2px;
+    padding: 10px;
+}
+
+/* skin.css Style*/
+.upload-drop-zone {
+    color: #ccc;
+    border-style: dashed;
+    border-color: #ccc;
+    text-align: center
+}
+.upload-drop-zone.drop {
+    color: #222;
+    border-color: #222;
+}
+
+
+.drag-icon {
+    min-height: 205px;
+    max-height: 205px;
+    min-width: 205px;
+    max-width: 205px;
+    text-align: center;
+    font-size: 65px;
+    background: #515181;
+    margin:auto;
+}
+
+.drop-zone{
+    min-width: 205px;
+    max-width: 205px;
+    margin:0px;
+    padding:0px;
+}
+
+.drop-zone2{
+    min-width: 205px;
+    max-width: 205px;
+    margin:0px;
+    padding:10px 0px 0px 0px;
+}
+
+.drop-zone-460{
+    min-height: 230px;
+    max-height: 230px;
+    min-width: 460px;
+    width: auto;
+    padding:0px 0px 0px 235px;
+    margin:0px;
+}
+
+.drop-zone-580{
+    min-width: 550px;
 }

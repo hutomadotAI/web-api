@@ -25,7 +25,7 @@ function sendAIID(elem){
 }
 
 function publishAIID(elem){
-    /*
+    
     var value = elem.value;
     elem.setAttribute('disabled','disabled');
     
@@ -35,7 +35,6 @@ function publishAIID(elem){
 
     document.getElementById("aiid").value = value;
     document.publishForm.submit();
-    */
 }
 
 function recursiveDisable($jElement){

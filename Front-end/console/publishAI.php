@@ -1,5 +1,6 @@
 <?php
     require '../pages/config.php';
+    require_once "../console/common/bot.php";
     require_once "../console/api/apiBase.php";
     require_once "../console/api/aiApi.php";
 
@@ -8,18 +9,32 @@
         exit;
     }
 
-    if (!isSessionVariablesAvailable()) {
+    if (!isPostInputAvailable()) {
         \hutoma\console::redirect('./error.php?err=105');
         exit;
     }
 
-    function isSessionVariablesAvailable() {
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $singleAI = $aiApi->getSingleAI($_POST['aiid']);
+    unset($aiApi);
+
+    $bot = new \hutoma\bot();
+
+    if ($singleAI['status']['code'] === 200) {
+        $bot->setName($singleAI['name']);
+        $bot->setDescription($singleAI['description']);
+    } else {
+            unset($singleAI);
+            \hutoma\console::redirect('../error.php?err=200');
+            exit;
+    }
+    unset($singleAI);
+
+    function isPostInputAvailable(){
         return (
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'])
+        isset($_POST['aiid'])
         );
     }
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -54,7 +69,11 @@
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/newAI.content.html.php'; ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <?php include './dynamic/publishAI.content.html.php'; ?>
+                </div>
+            </div>
         </section>
     </div>
 
@@ -66,6 +85,7 @@
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
+<script src="./bootstrap/js/bootstrap-filestyle.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
@@ -73,6 +93,8 @@
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="./plugins/dragdrop/dragdrop.js"></script>
+<script src="./plugins/publish/publish.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>

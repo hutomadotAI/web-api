@@ -1,31 +1,31 @@
 <?php
-require "../pages/config.php";
-require_once "../console/api/apiBase.php";
-require_once "../console/api/aiApi.php";
+    require "../pages/config.php";
+    require_once "../console/api/apiBase.php";
+    require_once "../console/api/aiApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
-}
-
-// If is it set, it means the user has selected a existing AI from home list
-if (isset($_POST['ai']))
-    CallGetSingleAI($_POST['ai']);
-
-function CallGetSingleAI($aiid)
-{
-    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $singleAI = $aiApi->getSingleAI($aiid);
-    unset($aiApi);
-    if ($singleAI['status']['code'] === 200) {
-        setSessionVariables($singleAI);
-    } else {
-        unset($singleAI);
-        \hutoma\console::redirect('../error.php?err=200');
+    if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
         exit;
     }
-    unset($singleAI);
-}
+
+    // If is it set, it means the user has selected a existing AI from home list
+    if (isset($_POST['ai']))
+        CallGetSingleAI($_POST['ai']);
+
+    function CallGetSingleAI($aiid)
+    {
+        $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+        $singleAI = $aiApi->getSingleAI($aiid);
+        unset($aiApi);
+        if ($singleAI['status']['code'] === 200) {
+            setSessionVariables($singleAI);
+        } else {
+            unset($singleAI);
+            \hutoma\console::redirect('../error.php?err=200');
+            exit;
+        }
+        unset($singleAI);
+    }
 
 function setSessionVariables($singleAI)
 {
