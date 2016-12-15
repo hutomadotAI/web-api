@@ -31,25 +31,16 @@ function showDomains(str,option){
                 wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat borderActive" id="'+boxid+'">');
             
             if ( option == 0)
-                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;"><i class="'+domains[x].iconPath+'"></i></div>');
+                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'"><i class="'+domains[x].iconPath+'"></i></div>');
             else
-                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" onClick=openSingleBot(this,"'+domains[x].aiid+'"); style="margin-top: 40px;"><i class="'+domains[x].iconPath+'"></i></div>');
+                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"'+domains[x].aiid+'"); ><i class="'+domains[x].iconPath+'"></i></div>');
 
             wHTML += ('<h4 class="text-center text-mute unselectable">'+domains[x].name+'</h4>');
             wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">'+domains[x].description+'</h5>');
 
             wHTML += addHtmlStarRating(userActived[key],boxid,domains[x].rating);
+            wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"'+domains[x].aiid+'"); >info and settings</h5>');
 
-            wHTML += ('<a data-toggle="modal" ' +
-            'data-target="#boxBotStoreInfo" ' +
-            'data-id="'+domains[x].aiid+'" ' +
-            'data-name="'+domains[x].name+'" ' +
-            'data-description="'+domains[x].description+'" ' +
-            'data-icon="'+domains[x].iconPath+'" ' +
-            'data-color="'+domains[x].widgetColor+'" ' +
-            'style="cursor: pointer;">');
-            wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue unselectable">info and settings</h5>');
-            wHTML += ('</a>');
             if ( userActived[key] === false )
                 wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
             else
@@ -93,7 +84,7 @@ function addHtmlStarRating(actived,boxid,rating){
 
     if ( actived ) {
         for (var i=5; i>0; i--) {
-            if (i==rating)
+            if (i==Math.round(rating))
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
             else
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');
@@ -102,7 +93,7 @@ function addHtmlStarRating(actived,boxid,rating){
     }else {
         // TODO if input is disable need add to input disabled="disabled" and in label icon __disabled - now the code is same
         for (var i = 5; i > 0; i--) {
-            if (i==rating)
+            if (i==Math.round(rating))
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
             else
                 wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');

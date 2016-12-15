@@ -24,6 +24,20 @@ function sendAIID(elem){
     document.viewAllForm.submit();
 }
 
+function publishAIID(elem){
+    /*
+    var value = elem.value;
+    elem.setAttribute('disabled','disabled');
+    
+    if(document.publishForm.onsubmit)
+        return;
+    RecursiveUnbind($('#listTable'));
+
+    document.getElementById("aiid").value = value;
+    document.publishForm.submit();
+    */
+}
+
 function recursiveDisable($jElement){
     $jElement.children().each(function () {
         recursiveDisable($(this));
@@ -55,12 +69,24 @@ function drawTableRows() {
         wHTML += '<td style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
         wHTML += '<td style="padding-top: 15px;">' + aiList[i]['description'] + '</td>';
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
-        wHTML += '<td style="padding-top: 8px;padding-right: 0px;"><button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '" onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;"><b> <span class="fa fa-search"></span> View AI </b></button></td>';
+
+        wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
+        wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"';
+        wHTML += 'onClick="publishAIID(this)" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
+        wHTML += '<b> <span class="fa fa-globe">';
+        wHTML += '</span> Publish AI </b></button></td>';
+
+        wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
+        wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
+        wHTML += 'onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;">';
+        wHTML += '<b> <span class="fa fa-search">';
+        wHTML += '</span> View AI </b></button></td>';
+
+
         newNode.innerHTML = wHTML;
         document.getElementById('tableAiList').appendChild(newNode);
         var list = document.getElementById('tableAiList');
         list.insertBefore(newNode, list.childNodes[0]);
-
     }
 
 }

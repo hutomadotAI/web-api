@@ -12,6 +12,7 @@
             <th class="text-left" style="border:0; width:25%">Description</th>
             <th class="text-center" style="border:0; width:15%">Training</th>
             <th style="border:0; width:5%"></th>
+            <th style="border:0; width:5%"></th>
             </tr>
             </thead>
             <tbody id="tableAiList">
@@ -21,7 +22,11 @@
         <form method="POST" name="viewAllForm" action="./trainingAI.php">
             <input type="hidden" id="ai" name="ai" value="">
         </form>
-    </div>
+        <!--
+        <form method="POST" name="publishForm" action="">
+            <input type="hidden" id="aiid" name="aiid" value="">
+        </form>
+        -->
 </div>
 
     

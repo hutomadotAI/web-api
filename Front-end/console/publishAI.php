@@ -1,48 +1,46 @@
 <?php
-require '../pages/config.php';
-require_once "./api/apiBase.php";
-require_once "./api/aiApi.php";
+    require '../pages/config.php';
+    require_once "../console/api/apiBase.php";
+    require_once "../console/api/aiApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
-}
+    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
-// If is it set, it means the user has selected a existing AI from botstore
-if (!isPostInputAvailable()) {
-    \hutoma\console::redirect('./error.php?err=100');
-    exit;
-}
-// TODO it needs getSingleBotInStore like API call
-$tmp_bot = \hutoma\console::getSingleBotInStore($_POST['aiid']);
+    if (!isSessionVariablesAvailable()) {
+        \hutoma\console::redirect('./error.php?err=105');
+        exit;
+    }
 
-function isPostInputAvailable(){
-    return (
-    isset($_POST['aiid'])
-    );
-}
+    function isSessionVariablesAvailable() {
+        return (
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'])
+        );
+    }
+
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Botstore - box</title>
+    <title>Hu:toma | Publish AI</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./plugins/switch/switch.css">
-    <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-    <header class="main-header">
+    <header class="main-header" style="border:1px solid black;">
         <?php include './dynamic/header.html.php'; ?>
     </header>
 
@@ -56,25 +54,25 @@ function isPostInputAvailable(){
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <div class="row">
-                <div class="col-md-12" id="trainingBox">
-                    <?php include './dynamic/botstore.content.singleBot.html.php'; ?>
-                </div>
-            </div>
+            <?php include './dynamic/newAI.content.html.php'; ?>
         </section>
     </div>
 
     <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
+    
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/botstore/singlebot.js"></script>
+
+<script src="./plugins/validation/validation.js"></script>
+<script src="./plugins/select2/select2.full.js"></script>
+<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
@@ -82,7 +80,7 @@ function isPostInputAvailable(){
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 2, false, false]);
+        MENU.init([ "","home",0,true,true]);
     </script>
 </form>
 

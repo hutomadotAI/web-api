@@ -30,7 +30,7 @@
     </div>
 
     <div id="collapseVideoTutorialEntity" class="panel-collapse collapse">
-        <div class="box-body flat">
+        <div class="box-body no-padding flat">
             <div class="overlay center-block">
                 <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
                     <iframe
