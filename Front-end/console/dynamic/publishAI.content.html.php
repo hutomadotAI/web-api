@@ -137,8 +137,8 @@
                 </div>
             </div>
             <div class="row no-margin">
-                <div class="col-xs-9" style="padding: 0px 15px 0px 0px">
-                    <div class="form-group" style="padding: 0px 15px 0px 0px">
+                <div class="col-xs-12 no-padding">
+                    <div class="form-group">
                         <label for="ai_developer_website">Website</label>
                         <div class="input-group">
                             <div class="input-group-addon">
@@ -148,19 +148,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-3" style="padding: 25px 0px 0px 0px; min-width: 140px;">
-                    <div class="btn-group">
-                        <button class="btn btn-success flat" data-dismiss="modal" id="btnPayment">
-                            <b>cancel</b>
-                        </button>
-                    <button class="btn btn-success pull-right flat" data-dismiss="modal" id="btnPayment">
-                        <b>Publish</b>
-                        <span class="fa fa-arrow-circle-right"></span>
-                    </button>
-                    </div>
-                </div>
             </div>
         </div>
         <!-- end row 3 -->
+        <div class="box-footer">
+            <a style="width:100px" class="btn btn-primary flat" id="btnCancel" onClick="window.location.href='./home.php';"><b>Cancel</b></a>
+            <button class="btn btn-success pull-right flat" data-dismiss="modal" id="btnPublish">
+                <b>Publish new Bot</b>
+                <span class="fa fa-arrow-circle-right"></span>
+            </button>
+        </div>
     </div>
 </div>
+
