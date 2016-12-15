@@ -18,10 +18,7 @@ import com.hutoma.api.validation.Validate;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -170,6 +167,7 @@ public class TrainingLogic {
      * Submit a training request to SQS only if the training file is avaialable or a previous
      * valid training session was stopped.
      * In all other cases we return an error
+     *
      * @param securityContext
      * @param devid
      * @param aiid
@@ -186,21 +184,23 @@ public class TrainingLogic {
             return ApiError.getBadRequest("Invalid AI.");
         }
         if (ai == null) {
+            this.logger.logInfo(LOGFROM, "Unknown AI" + aiid);
             return ApiError.getNotFound("Unknown AI");
         }
         TrainingStatus trainingStatus = ai.getAiStatus();
+        this.logger.logDebug(LOGFROM, "training start from state " + trainingStatus);
         if (trainingStatus == TrainingStatus.NOT_STARTED || trainingStatus == TrainingStatus.STOPPED) {
             try {
                 this.aiServices.startTraining(devid, aiid);
-            } catch (AIServices.AiServicesException ex) {
-                this.logger.logError(LOGFROM, "could not start training: " + ex.getMessage());
+            } catch (AIServices.AiServicesException | RuntimeException ex) {
+                this.logger.logError(LOGFROM, "Could not start training\n" + ex.toString());
                 return ApiError.getInternalServerError("Could not start training");
             }
             // Delete all memory variables for this AI
             this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
             return new ApiResult().setSuccessStatus("Training session started.");
         } else {
-
+            this.logger.logInfo(LOGFROM, "Training start in invalid state: " + trainingStatus);
             switch (trainingStatus) {
                 case COMPLETED:
                     return ApiError.getBadRequest("Training could not be started because it was already completed.");
@@ -220,6 +220,7 @@ public class TrainingLogic {
 
     /**
      * Send a stop msg to SQS only if a training session is currently ongoing
+     *
      * @param securityContext
      * @param devid
      * @param aiid
@@ -250,6 +251,7 @@ public class TrainingLogic {
     /**
      * An update to an existing training session means we will have to delete any existing neural
      * network and start from scratch.
+     *
      * @param securityContext
      * @param devid
      * @param aiid
@@ -288,6 +290,7 @@ public class TrainingLogic {
 
     /**
      * Gets the training materials for an AI.
+     *
      * @param securityContext
      * @param devId
      * @param aiid
@@ -310,6 +313,7 @@ public class TrainingLogic {
 
     /**
      * Adds context to conversational exchanges
+     *
      * @param training list of strings, one for each line of conversation
      * @return single string with processed training
      */
@@ -414,6 +418,7 @@ public class TrainingLogic {
 
     /**
      * Download from a web-resource, sanitize each line and rejoin string.
+     *
      * @param url web-resource
      * @return clean result
      * @throws Exception
@@ -439,6 +444,7 @@ public class TrainingLogic {
 
     /**
      * Remove the last conversation item.
+     *
      * @param conversation the conversation so far
      */
     private void removeLastConversationEntry(final List<String> conversation) {
@@ -461,6 +467,7 @@ public class TrainingLogic {
 
     /**
      * Reads from InputStream and returns a list of sanitised strings
+     *
      * @param maxUploadSize
      * @param uploadedInputStream
      * @return list of strings
