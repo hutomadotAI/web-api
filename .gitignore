@@ -49,9 +49,13 @@ modules.xml
 **/target/*
 
 .DS_Store
-
+
+
 # Prevent churn on API artifacts
 **/DevX/API/.idea/artifacts/*xml
 
 # Run config is local to a user
 **/.idea/runConfigurations/*
+
+#Python
+*.pyc
