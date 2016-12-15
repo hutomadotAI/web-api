@@ -1,14 +1,28 @@
 import argparse
+import os
 import urllib.parse
 import hu_api.api
 
 
-def main(args):
+def arg_error(parser, error_text):
+    print("\n**** ERROR: {}! ****\n".format(error_text))
+    parser.print_help()
+    exit(-1)
+
+
+def main(args, parser):
     url_raw = args.url
+    if url_raw is None or len(url_raw) == 0:
+        url_raw = os.environ.get('HUTOMA_API_CLI_URL')
+
+    if url_raw is None or len(url_raw) == 0:
+        arg_error(parser, "URL is not set")
+
     url_parsed = urllib.parse.urlparse(url_raw)
     if url_parsed.scheme != 'http':
         url_parsed = urllib.parse.urlparse('http://' + url_raw)
     url = url_parsed.geturl()
+    print("API URL is", url)
     command = args.command.lower()
     if command == "get-token":
         print("Getting auth token for a new user with random credentials")
@@ -16,7 +30,14 @@ def main(args):
         print(answer.text)
         print(answer.response)
     else:
-        requester = hu_api.api.ApiRequester(url, args.token, args.proxies)
+        token = args.token
+        if token is None or len(token) == 0:
+            token = os.environ.get('HUTOMA_API_CLI_TOKEN')
+
+        if token is None or len(token) == 0:
+            arg_error(parser, "TOKEN is not set")
+
+        requester = hu_api.api.ApiRequester(url, token, args.proxies)
         other_args = args.command_args
 
         if command == "create-ai":
@@ -42,6 +63,8 @@ def main(args):
             answer = hu_api.api.stop_training(requester, ai_id)
             print(answer.text)
             print(answer.response)
+        else:
+            arg_error(parser, "command '{}' is not recognized".format(command))
 
 
 if __name__ == "__main__":
@@ -52,11 +75,10 @@ if __name__ == "__main__":
     parser.add_argument('command_args', nargs="*",
                         help="""Other command args
 """)
-    parser.add_argument('--url', help='URL to API', default="localhost:11080/v1")
+    parser.add_argument('--url', help='URL to API. Can also be set using the HUTOMA_API_CLI_URL environment variable.')
     parser.add_argument(
-        '--token', help='Token to use for auth',
-        default='eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAkZQUS1ODlDQDXTPDtCRdExNDM91Ec8tEXeMkA2MDiyRDS8PEVKVaAAAAAP__.GzTtyLSrgy-muIoucnY2OLtM9kz0Q2I1gNFHOsA4SGA')
+        '--token', help='Token to use for auth. Can also be set using the HUTOMA_API_CLI_TOKEN environment variable.')
     parser.add_argument('--proxies', help='proxies')
 
     args = parser.parse_args()
-    main(args)
+    main(args, parser)
