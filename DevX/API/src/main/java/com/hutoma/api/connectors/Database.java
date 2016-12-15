@@ -8,7 +8,6 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.AiStore;
-import com.hutoma.api.containers.sub.ChatRequestStatus;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -37,16 +36,6 @@ public class Database {
     protected final ILogger logger;
     protected final Provider<DatabaseCall> callProvider;
     protected Provider<DatabaseTransaction> transactionProvider;
-    private String aiid;
-    private String name;
-    private String description;
-    private String licenceType;
-    private Float licenceFee;
-    private Float rating;
-    private int numberOfActivations;
-    private boolean isBanned;
-    private String iconPath;
-    private String widgetColor;
 
     @Inject
     public Database(ILogger logger, Provider<DatabaseCall> callProvider,
@@ -319,56 +308,6 @@ public class Database {
         }
     }
 
-    public boolean isNeuralNetworkServerActive(final String devId, final UUID aiid) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAiActive", 2).add(aiid).add(devId);
-            final ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    return (1 == rs.getInt("NNActive"));
-                }
-                return false;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
-    public ChatRequestStatus insertNeuralNetworkQuestion(final String devId, final UUID chatId, final UUID aiid,
-                                                         final String question) throws DatabaseException {
-
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("insertQuestion_v1", 4).add(devId).add(chatId).add(aiid).add(question);
-            final ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    TrainingStatus trainingStatus = TrainingStatus.forValue(rs.getString("ai_status"));
-                    return new ChatRequestStatus(rs.getLong("id"),
-                            trainingStatus,
-                            rs.getBoolean("failed_status"));
-                }
-                return new ChatRequestStatus();
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
-    public String getAnswer(final long qid) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAnswer", 1).add(qid);
-            final ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    return rs.getString("answer");
-                }
-                return "";
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
     public boolean updateAiTrainingFile(final UUID aiUUID, final String trainingData) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
@@ -457,17 +396,9 @@ public class Database {
         }
     }
 
-    public boolean setRnnStatus(String devid, UUID aiid, int status) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            int rowsChanged = call.initialise("setRnnStatus", 3).add(status).add(devid).add(aiid).executeUpdate();
-            return rowsChanged > 0;
-        }
-    }
-
     /***
      * AI Mesh Calls
      */
-
     public List<MeshVariable> getMesh(final String devId, final String aiid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
