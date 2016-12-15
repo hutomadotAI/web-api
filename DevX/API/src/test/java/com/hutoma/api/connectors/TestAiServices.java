@@ -37,8 +37,8 @@ public class TestAiServices {
 
     private static final String DEVID = "devid";
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private static final List<String> WNET_ENDPOINTS = Collections.singletonList("http://wnet/endpoint1");
-    private static final List<String> RNN_ENDPOINTS = Collections.singletonList("http://rnn/endpoint1");
+    private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
+    private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
     private FakeJsonSerializer fakeSerializer;
@@ -61,8 +61,8 @@ public class TestAiServices {
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
 
-        when(this.fakeConfig.getWnetTrainingEndpoints()).thenReturn(WNET_ENDPOINTS);
-        when(this.fakeConfig.getGpuTrainingEndpoints()).thenReturn(RNN_ENDPOINTS);
+        when(this.fakeConfig.getWnetTrainingEndpoint()).thenReturn(WNET_ENDPOINT);
+        when(this.fakeConfig.getRnnTrainingEndpoint()).thenReturn(RNN_ENDPOINT);
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, this.fakeClient);
     }

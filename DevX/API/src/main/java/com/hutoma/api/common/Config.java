@@ -139,24 +139,24 @@ public class Config {
         return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }
 
-    public List<String> getWnetTrainingEndpoints() {
-        return getCSList("wnet_training_endpoint");
+    public String getWnetTrainingEndpoint() {
+        return getConfigFromProperties("ai_wnet_endpoint", "");
     }
 
-    public List<String> getGpuTrainingEndpoints() {
-        return getCSList("gpu_training_endpoint");
+    public String getRnnTrainingEndpoint() {
+        return getConfigFromProperties("ai_rnn_endpoint", "");
     }
 
     public String getWnetChatEndpoint() {
-        return getConfigFromProperties("wnet_chat_endpoint", "");
+        return getConfigFromProperties("ai_wnet_endpoint", "");
     }
 
     public String getAimlChatEndpoint() {
-        return getConfigFromProperties("aiml_chat_endpoint", "");
+        return getConfigFromProperties("ai_aiml_endpoint", "");
     }
 
     public String getRnnChatEndpoint() {
-        return getConfigFromProperties("rnn_chat_endpoint", "");
+        return getConfigFromProperties("ai_rnn_endpoint", "");
     }
 
     public String getLoggingServiceUrl() {

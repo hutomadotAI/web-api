@@ -95,6 +95,7 @@ public class AIServices extends ServerConnector {
             throws AiServicesException {
         HashMap<String, Callable<Response>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
+            logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
                     .fileName("training.txt")
@@ -137,8 +138,15 @@ public class AIServices extends ServerConnector {
     }
 
     private List<String> getAllEndpoints() {
-        List<String> list = new ArrayList<>(this.config.getWnetTrainingEndpoints());
-        list.addAll(this.config.getGpuTrainingEndpoints());
+        List<String> list = new ArrayList<>();
+        String wnet = this.config.getWnetTrainingEndpoint();
+        if (wnet != null) {
+            list.add(wnet);
+        }
+        String rnn = this.config.getRnnTrainingEndpoint();
+        if (rnn != null) {
+            list.add(rnn);
+        }
         return list;
     }
 

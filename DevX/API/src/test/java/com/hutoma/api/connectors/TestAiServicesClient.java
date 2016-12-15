@@ -50,7 +50,7 @@ public class TestAiServicesClient {
     private static final String COMMAND_PARAM = "command";
     private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9090";
     private static final String LOCAL_ENDPOINT_PATH = "training";
-    private static final List<String> LOCAL_WEB_ENDPOINTS = Collections.singletonList(LOCAL_WEB_SERVER + "/" + LOCAL_ENDPOINT_PATH);
+    private static final String LOCAL_WEB_ENDPOINT = LOCAL_WEB_SERVER + "/" + LOCAL_ENDPOINT_PATH;
     private static final String TRAINING_MATERIALS = "question1\nanswer1\nquestion2\nanswer2\n\nintent expression\n@meta.intent.myintent";
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
@@ -84,8 +84,8 @@ public class TestAiServicesClient {
 
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient());
-        when(this.fakeConfig.getGpuTrainingEndpoints()).thenReturn(LOCAL_WEB_ENDPOINTS);
-        when(this.fakeConfig.getWnetTrainingEndpoints()).thenReturn(LOCAL_WEB_ENDPOINTS);
+        when(this.fakeConfig.getRnnTrainingEndpoint()).thenReturn(LOCAL_WEB_ENDPOINT);
+        when(this.fakeConfig.getWnetTrainingEndpoint()).thenReturn(LOCAL_WEB_ENDPOINT);
     }
 
     @Test

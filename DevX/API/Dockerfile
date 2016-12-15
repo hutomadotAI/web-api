@@ -6,12 +6,7 @@ COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
 
 
 # Expose the following environment variables
-ENV API_WNET_NUM_CPUS 8
 ENV API_ENCODING_KEY encodingKey
-ENV API_CORE_QUEUE https://sqs.us-east-1.amazonaws.com/622523181677/core
-ENV API_SQS_QG https://sqs.us-east-1.amazonaws.com/622523181677/QG
-ENV API_WNET_SERVER http://52.2.184.105/similarity?
-ENV API_RNN_TIMEOUT 60
 ENV API_MAX_UPLOAD_SIZE 65536
 ENV API_MAX_CLUSTER_LINES 10000
 ENV API_CONNECTION_STRING jdbc:mysql://server:3306/hutoma?user=user&password=password&zeroDateTimeBehavior=convertToNull
@@ -24,9 +19,9 @@ ENV API_RATELIMIT_QUICKREAD_BURST 5.0
 ENV API_RATELIMIT_QUICKREAD_FREQUENCY 0.5
 ENV API_RATELIMIT_LOADTEST_BURST 32768.0
 ENV API_RATELIMIT_LOADTEST_FREQUENCY 8192.5
-ENV API_WNET_CHAT_ENDPOINT http://wnet:9090/ai
-ENV API_RNN_CHAT_ENDPOINT http://rnn:10356/ai
-ENV API_AIML_CHAT_ENDPOINT http://aiml:8080/ai
+ENV API_AI_WNET_ENDPOINT http://ai-wnet:9090/ai
+ENV API_AI_RNN_ENDPOINT http://ai-rnn:10356/ai
+ENV API_AI_AIML_ENDPOINT http://ai-aiml:8080/ai
 ENV API_LOGGING_URL http://log-svc:8080/log
 ENV API_LOGGING_CADENCY 5000
 
