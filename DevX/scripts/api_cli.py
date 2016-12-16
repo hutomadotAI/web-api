@@ -82,6 +82,13 @@ def main(args, parser):
             answer = hu_api.api.stop_training(requester, ai_id)
             print(answer.text)
             print(answer.response)
+        elif command == "chat":
+            ai_id = other_args[0]
+            chat_in = other_args[1]
+            print("Chat with AI {} with input '{}'".format(ai_id, chat_in))
+            answer = hu_api.api.chat(requester, ai_id, chat_in)
+            print(answer.text)
+            print(answer.response)
         elif command == "delete-ai":
             ai_id = other_args[0]
             print("Delete AI '{}'".format(ai_id))
@@ -99,7 +106,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hutoma API test command-line')
     parser.add_argument('command',
                         help="Command to run on API. Valid values are: get-token, find-ais, get-ai, create-ai, " +
-                             "train-upload, train-start, train-stop, delete-ai, delete-all-ais")
+                             "train-upload, train-start, train-stop, delete-ai, delete-all-ais, chat")
     parser.add_argument('command_args', nargs="*",
                         help="""Other command args
 """)
