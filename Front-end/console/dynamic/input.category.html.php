@@ -1,5 +1,4 @@
-
-<div class="form-group" style="margin-bottom:14px;">
+<div class="form-group">
   <label for="ai_category">Select Category</label>
   <select class="form-control select2"  name="ai_category" id="ai_category" style="width: 100%;">
     <option value="0">Affair</option>

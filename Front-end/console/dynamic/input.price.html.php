@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="ai_price" style="margin-bottom:4px;">Price</label>
+    <label for="ai_price">Price</label>
     <div class="input-group">
         <div class="input-group-addon">
             <i class="fa fa-euro"></i>

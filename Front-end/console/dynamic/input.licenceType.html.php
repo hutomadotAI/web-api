@@ -1,4 +1,4 @@
-<div class="form-group" style="margin-bottom:14px;">
+<div class="form-group">
   <label for="ai_licenceType">Select Licence Type</label>
   <select class="form-control select2"  name="ai_licenceType" id="ai_licenceType" style="width: 100%;">
     <option selected="selected" value="0">Free</option>

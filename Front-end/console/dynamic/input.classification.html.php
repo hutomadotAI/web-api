@@ -1,4 +1,4 @@
-<div class="form-group" style="margin-bottom:14px;">
+<div class="form-group">
   <label for="ai_classification">Select Classification</label>
   <select class="form-control select2"  name="ai_classification" id="ai_classification" style="width: 100%;">
     <option selected="selected" value="0">EVERYONE</option>

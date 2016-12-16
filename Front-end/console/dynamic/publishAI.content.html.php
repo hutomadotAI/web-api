@@ -60,9 +60,18 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                 <div class="row no-margin" style="padding-top:10px;">
                     <div class="form-group no-margin">
                         <label for="ai_confidence">Show Example of Conversation</label>
-                        <textarea rows="12" class="form-control flat" value="" placeholder="Add sample of conversation..." id="usecase"></textarea>
+                        <textarea rows="8" class="form-control flat" value="" placeholder="Add sample of conversation..." id="usecase" style="height:182px;"></textarea>
                     </div>
                     <div class="form-group" style="padding-top:15px;">
+                        <label for="ai_alert_message">Alert message</label>
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                <i class="fa fa-info-circle"></i>
+                            </div>
+                            <input type="text" class="form-control flat no-shadow"  id="ai_alert_message" name="ai_alert_message" placeholder="Enter a message to show..">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="ai_link_privacy">Link Privacy Policy Page</label>
                         <div class="input-group">
                             <div class="input-group-addon">
