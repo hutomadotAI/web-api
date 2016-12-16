@@ -5,6 +5,7 @@ $(function () {
 });
 
 function checkInput(){
+    // TODO remove hardcode example for next step to validation input
     var message = 'error occured';
     var alarm = 2;
     var id = 'ai_developer_company';
