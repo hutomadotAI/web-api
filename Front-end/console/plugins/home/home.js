@@ -20,7 +20,7 @@ function sendAIID(elem,action){
     RecursiveUnbind($('#listTable'));
    // deactiveButtons();
 
-    document.viewAllForm.action = action;
+    document.viewAllForm.action = ""; //action;
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();
 }
