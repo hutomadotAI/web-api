@@ -20,7 +20,7 @@ function sendAIID(elem,action){
     RecursiveUnbind($('#listTable'));
    // deactiveButtons();
 
-    document.viewAllForm.action = ""; //action;
+    document.viewAllForm.action = action;
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();
 }
@@ -59,7 +59,7 @@ function drawTableRows() {
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"';
-        wHTML += 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
+        wHTML += 'onClick="sendAIID(this,\'\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
         wHTML += '<b> <span class="fa fa-globe">';
         wHTML += '</span> Publish AI </b></button></td>';
 
