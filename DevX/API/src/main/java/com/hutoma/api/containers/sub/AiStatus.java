@@ -1,5 +1,7 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.UUID;
 
 /**
@@ -7,14 +9,21 @@ import java.util.UUID;
  */
 public class AiStatus {
 
+    @SerializedName("ai_id")
     private final String aiid;
     private final String dev_id;
+
+    @SerializedName("training_status")
     private final String trainingStatus;
 
-    public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus) {
+    @SerializedName("ai_engine")
+    private final String aiEngine;
+
+    public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus, final String aiEngine) {
         this.dev_id = devId;
         this.aiid = aiid.toString();
         this.trainingStatus = trainingStatus.value();
+        this.aiEngine = aiEngine;
     }
 
     public static TrainingStatus interpretNewStatus(TrainingStatus status) {
@@ -50,5 +59,9 @@ public class AiStatus {
 
     public TrainingStatus getTrainingStatus() {
         return interpretNewStatus(TrainingStatus.forValue(this.trainingStatus));
+    }
+
+    public String getAiEngine() {
+        return this.aiEngine;
     }
 }

@@ -113,7 +113,8 @@ public class AILogic {
             if (!this.database.updateAIStatus(
                     status.getDevId(),
                     status.getAiid(),
-                    status.getTrainingStatus())) {
+                    status.getTrainingStatus(),
+                    status.getAiEngine())) {
                 return ApiError.getInternalServerError("Could not update");
             }
             return new ApiResult().setSuccessStatus();

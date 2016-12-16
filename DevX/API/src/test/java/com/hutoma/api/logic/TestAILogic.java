@@ -37,6 +37,7 @@ public class TestAILogic {
     private final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private final String VALIDDEVID = "DevidExists";
+    private final String AI_ENGINE = "MOCKENGINE";
     //http://mockito.org/
     FakeJsonSerializer fakeSerializer;
     SecurityContext fakeContext;
@@ -212,24 +213,24 @@ public class TestAILogic {
 
     @Test
     public void testUpdateAiStatus() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenReturn(true);
+        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED, this.AI_ENGINE);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any())).thenReturn(true);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenReturn(false);
+        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED, this.AI_ENGINE);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any())).thenReturn(false);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any())).thenThrow(Database.DatabaseException.class);
+        AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED, this.AI_ENGINE);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
