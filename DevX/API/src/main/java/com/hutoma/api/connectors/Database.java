@@ -214,14 +214,15 @@ public class Database {
     }
 
     public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status,
-                                  final String aiEngine)
+                                  final String aiEngine, final double trainingProgress, final double trainingError)
             throws DatabaseException {
         if (aiEngine.equalsIgnoreCase("rnn")) {
             try (DatabaseCall call = this.callProvider.get()) {
-                call.initialise("setRnnStatus", 3)
-                        .add(aiid)
+                call.initialise("setAiTrainingStatus", 4)
+                        .add(status.value())
                         .add(devId)
-                        .add(status.value());
+                        .add(aiid)
+                        .add(trainingError);
                 return call.executeUpdate() > 0;
             }
         }

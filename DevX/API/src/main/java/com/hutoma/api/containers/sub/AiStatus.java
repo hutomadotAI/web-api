@@ -19,11 +19,20 @@ public class AiStatus {
     @SerializedName("ai_engine")
     private final String aiEngine;
 
-    public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus, final String aiEngine) {
+    @SerializedName("training_error")
+    private final double trainingError;
+
+    @SerializedName("training_progress")
+    private final double trainingProgress;
+
+    public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus, final String aiEngine,
+                    final double trainingError, final double trainingProgress) {
         this.dev_id = devId;
         this.aiid = aiid.toString();
         this.trainingStatus = trainingStatus.value();
         this.aiEngine = aiEngine;
+        this.trainingError = trainingError;
+        this.trainingProgress = trainingProgress;
     }
 
     public static TrainingStatus interpretNewStatus(TrainingStatus status) {
@@ -64,4 +73,13 @@ public class AiStatus {
     public String getAiEngine() {
         return this.aiEngine;
     }
+
+    public double getTrainingError() {
+        return this.trainingError;
+    }
+
+    public double getTrainingProgress() {
+        return this.trainingProgress;
+    }
+
 }

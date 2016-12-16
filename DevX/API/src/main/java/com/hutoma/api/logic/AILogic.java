@@ -114,7 +114,9 @@ public class AILogic {
                     status.getDevId(),
                     status.getAiid(),
                     status.getTrainingStatus(),
-                    status.getAiEngine())) {
+                    status.getAiEngine(),
+                    status.getTrainingProgress(),
+                    status.getTrainingError())) {
                 return ApiError.getInternalServerError("Could not update");
             }
             return new ApiResult().setSuccessStatus();
