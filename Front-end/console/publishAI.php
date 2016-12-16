@@ -1,41 +1,7 @@
-<?php
-    require '../pages/config.php';
-    require_once "../console/common/bot.php";
-    require_once "../console/api/apiBase.php";
-    require_once "../console/api/aiApi.php";
-
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
-
-    if (!isPostInputAvailable()) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
-    }
-
-    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $singleAI = $aiApi->getSingleAI($_POST['aiid']);
-    unset($aiApi);
-
-    $bot = new \hutoma\bot();
-
-    if ($singleAI['status']['code'] === 200) {
-        $bot->setName($singleAI['name']);
-        $bot->setDescription($singleAI['description']);
-    } else {
-            unset($singleAI);
-            \hutoma\console::redirect('../error.php?err=200');
-            exit;
-    }
-    unset($singleAI);
-
-    function isPostInputAvailable(){
-        return (
-        isset($_POST['aiid'])
-        );
-    }
+<?php include './dynamic/fillSessionVariables.php';
 ?>
+
+
 <!DOCTYPE html>
 <html>
 <head>

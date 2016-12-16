@@ -1,3 +1,16 @@
+<?php
+require_once "./common/bot.php";
+
+// TODO remove hardcoded part
+$bot = new \hutoma\bot();
+
+
+$bot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
+$bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
+
+?>
+
+
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
         <!-- row 1 -->
@@ -12,7 +25,7 @@
                 <div class="row no-margin">
                     <div class="form-group">
                         <label for="ai_description">Short Description</label>
-                        <input type="text" class="form-control flat no-shadow"  id="ai_description" name="ai_description">
+                        <input type="text" class="form-control flat no-shadow"  id="ai_description" name="ai_description" value="<?php echo ($bot->getDescription());?>">
                     </div>
                     <div class="form-group">
                         <label for="ai_confidence">Long Description</label>
@@ -65,7 +78,7 @@
         <br>
         <!-- row 3 -->
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
-            <div class="row no-margin">
+            <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
                 <div class="col-xs-4 no-padding">
                     <div class="form-group">
                         <label for="ai_developer_name">Developer Name</label>
@@ -115,12 +128,12 @@
                 </div>
                 <div class="col-xs-5">
                     <div class="form-group">
-                        <label for="ai_developer_nation">Nation</label>
+                        <label for="ai_developer_country">Country</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-globe"></i>
                             </div>
-                            <input type="text" class="form-control flat no-shadow"  id="ai_developer_nation" name="ai_developer_nation" placeholder="Enter the nation...">
+                            <input type="text" class="form-control flat no-shadow"  id="ai_developer_country" name="ai_developer_country" placeholder="Enter the country...">
                         </div>
                     </div>
                 </div>

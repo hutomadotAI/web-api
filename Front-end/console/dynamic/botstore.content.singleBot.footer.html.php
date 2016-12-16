@@ -12,9 +12,9 @@
             </div>
         </div>
         <div class="col-xs-4">
-            <div class="bot-more-details" id="botClassification">Classification</div>
+            <div class="bot-more-details" id="botCategory">Category</div>
             <div class="text-left">
-                <?php echo $bot->getClassification();?>
+                <?php echo $bot->getCategory();?>
             </div>
         </div>
         <div class="col-xs-4">
@@ -33,9 +33,9 @@
             </div>
         </div>
         <div class="col-xs-4">
-            <div class="bot-more-details">Permissions</div>
-            <div class="text-left" id="botPermission">
-                <a class="dev-link" href="<?php echo $bot->getPermissionLink();?>" rel="nofollow" target="_blank">View details</a>
+            <div class="bot-more-details" id="botClassification">Classification</div>
+            <div class="text-left">
+                <?php echo $bot->getClassification();?>
             </div>
         </div>
         <div class="col-xs-4">
@@ -67,7 +67,7 @@
                 <div id="botEmail"><?php echo $bot->developer->getEmail();?></div>
                 <div id="botAddress"><?php echo $bot->developer->getAddress();?></div>
                 <div id="botPostcode"><?php echo $bot->developer->getPostcode().' '. $bot->developer->getCity();?></div>
-                <div id="botNation"><?php echo $bot->developer->getNation();?></div>
+                <div id="botCountry"><?php echo $bot->developer->getCountry();?></div>
             </div>
         </div>
     </div>

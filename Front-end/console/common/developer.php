@@ -16,7 +16,7 @@ class developer
     private $address;
     private $postcode;
     private $city;
-    private $nation;
+    private $country;
     private $website;
     private $company;
     
@@ -80,14 +80,14 @@ class developer
     }
 
 
-    public function setNation($devNation)
+    public function setCountry($devCountry)
     {
-        $this->nation = $devNation;
+        $this->country = $devCountry;
     }
 
-    public function getNation()
+    public function getCountry()
     {
-        return $this->nation;
+        return $this->country;
     }
 
 

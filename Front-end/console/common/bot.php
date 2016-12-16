@@ -24,6 +24,7 @@ class bot
     private $licenceType;
     private $licenceFee;
 
+    private $category;
     private $classification;
     private $activations;
     private $rating;
@@ -142,6 +143,17 @@ class bot
     public function getLicenceFee()
     {
         return $this->licenceFee;
+    }
+
+
+    public function setCategory($botCategory)
+    {
+        $this->category = $botCategory;
+    }
+
+    public function getCategory()
+    {
+        return $this->category;
     }
 
 
