@@ -66,19 +66,31 @@ def main(args, parser):
         elif command == "train-upload":
             ai_id = other_args[0]
             training_file = other_args[1]
+            print("Uploading training to '{}'".format(ai_id))
             answer = hu_api.api.upload_training(requester, ai_id, training_file)
             print(answer.text)
             print(answer.response)
         elif command == "train-start":
             ai_id = other_args[0]
+            print("Start training for '{}'".format(ai_id))
             answer = hu_api.api.start_training(requester, ai_id)
             print(answer.text)
             print(answer.response)
         elif command == "train-stop":
             ai_id = other_args[0]
+            print("Stop training for '{}'".format(ai_id))
             answer = hu_api.api.stop_training(requester, ai_id)
             print(answer.text)
             print(answer.response)
+        elif command == "delete-ai":
+            ai_id = other_args[0]
+            print("Delete AI '{}'".format(ai_id))
+            answer = hu_api.api.delete_ai(requester, ai_id)
+            print(answer.text)
+            print(answer.response)
+        elif command == "delete-all-ais":
+            print("Delete all AIs")
+            answer = hu_api.api.delete_all_ais(requester)
         else:
             arg_error(parser, "command '{}' is not recognized".format(command))
 
@@ -87,7 +99,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hutoma API test command-line')
     parser.add_argument('command',
                         help="Command to run on API. Valid values are: get-token, find-ais, get-ai, create-ai, " +
-                             "train-upload, train-start, train-stop")
+                             "train-upload, train-start, train-stop, delete-ai, delete-all-ais")
     parser.add_argument('command_args', nargs="*",
                         help="""Other command args
 """)
