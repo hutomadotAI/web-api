@@ -17,7 +17,7 @@ $bot->setBadge('Top Developer');
 $bot->setBadgeIcon('fa fa-rebel');
 $bot->setUsers('103');
 
-$bot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
+$bot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate. treyerhgwie rgnised fgnsdif gnsipd fgnsidfww');
 
 $bot->setUsecase('User: I want to sleep.<p></p>Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.<p></p><p></p>User: You\'re so sweet.<p></p>Agent: I like you too. You\'re a lot of fun to talk to.');
 $bot->setUpdate('10 september 2016');
