@@ -10,7 +10,6 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 
 ?>
 
-
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
         <!-- row 1 -->
