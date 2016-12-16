@@ -47,6 +47,22 @@ def main(args, parser):
             answer = hu_api.api.create_ai(requester, name, description)
             print(answer.text)
             print(answer.response)
+        elif command == "get-ai":
+            ai_id = ''
+            if len(other_args) > 0:
+                ai_id = other_args[0]
+            print("Get AI for ID {}".format(ai_id))
+            answer = hu_api.api.get_ai(requester, ai_id)
+            print(answer.text)
+            print(answer.response)
+        elif command == "find-ais":
+            ai_search = ''
+            if len(other_args) > 0:
+                ai_search = other_args[0]
+            print("Find AIs '{}'".format(ai_search))
+            matches = hu_api.api.find_ais(requester, ai_search)
+            for match in matches:
+                print(match)
         elif command == "train-upload":
             ai_id = other_args[0]
             training_file = other_args[1]
@@ -70,8 +86,8 @@ def main(args, parser):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hutoma API test command-line')
     parser.add_argument('command',
-                        help="Command to run on API. Valid values are: get-token, create-ai, train-upload, " +
-                             "train-start, train-stop")
+                        help="Command to run on API. Valid values are: get-token, find-ais, get-ai, create-ai, " +
+                             "train-upload, train-start, train-stop")
     parser.add_argument('command_args', nargs="*",
                         help="""Other command args
 """)
