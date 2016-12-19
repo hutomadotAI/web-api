@@ -28,7 +28,7 @@ Agent: I like you too. You\'re a lot of fun to talk to.');
     $infoBot->setLicenceFee('0.0');
     $infoBot->setCategory('entertainment');
     $infoBot->setClassification('EVERYONE');
-    $infoBot->setVersion('2.1');
+    $infoBot->setVersion('1.0.0');
     return $infoBot;
 }
 
