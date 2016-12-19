@@ -13,12 +13,13 @@ document.getElementById("bot_developer_email").addEventListener("keydown",functi
 function checkInput(){
     // BOT name input validation
     var bot_name = document.getElementById('bot_name');
-    if (bot_name.value != '' && bot_name.value !== 'undefined') {
+    if (bot_name.value !== 'undefined') {
         if (inputValidation(bot_name.value, 'bot_name')) {
             createAlertMessage(2, 'The name need contains only a-z characters.','bot_name');
             return false;
         }
     }
+    
 
     // BOT short description input validation
     var bot_description = document.getElementById('bot_description');
@@ -96,8 +97,18 @@ function checkInput(){
             return false;
         }
     }
-
     // BOT developer website input validation
+
+
+    // block submit request
+    $(this).prop("disabled", true);
+
+    requestPublish();
+}
+
+function requestPublish(){
+    // TODO API response to submit request Publish AI
+    createAlertMessage(1, 'Sending request...');
 }
 
 function removeAlert(node){
@@ -116,17 +127,20 @@ function createAlertMessage(alarm,message,id) {
         case 0:
             msg_class = 'alert alert-dismissable flat alert-base';
             ico_class = 'icon fa fa-check';
-            document.getElementById(id).style.border ="0px";
+            if (id!=null)
+                document.getElementById(id).style.border ="0px";
             break;
         case 1:
             msg_class = 'alert alert-dismissable flat alert-warning';
             ico_class = 'icon fa fa-check';
-            document.getElementById(id).style.border ="1px solid orange";
+            if (id!=null)
+                document.getElementById(id).style.border ="1px solid orange";
             break;
         case 2:
             msg_class = 'alert alert-dismissable flat alert-danger';
             ico_class = 'icon fa fa-warning';
-            document.getElementById(id).style.border ="1px solid red";
+            if (id!=null)
+                document.getElementById(id).style.border ="1px solid red";
             break;
         case 4:
             msg_class = 'alert alert-dismissable flat alert-primary';

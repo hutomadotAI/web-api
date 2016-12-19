@@ -53,7 +53,7 @@ function setBasicBotDefaultValues(){
     $infoBot->setClassification('EVERYONE');
     $infoBot->setCategory('No category');
     $infoBot->setLicenceFee('0.0');
-    $infoBot->setVersion('1.0');
+    $infoBot->setVersion('1.0.0');
     return $infoBot;
 }
 ?>
