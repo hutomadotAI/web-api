@@ -65,28 +65,12 @@ public class Config {
         }
     }
 
-    public String getWnetNumberOfCPUS() {
-        return getConfigFromProperties("wnet_num_CPUs", "8");
-    }
-
     public String getEncodingKey() {
         return getConfigFromProperties("encoding_key", "");
     }
 
-    public String getWNetServer() {
-        return getConfigFromProperties("wnet_server", "");
-    }
-
-    public long getNeuralNetworkTimeout() {
-        return Long.parseLong(getConfigFromProperties("rnn_timeout", "60"));
-    }
-
-    public long getMaxUploadSize() {
-        return Long.parseLong(getConfigFromProperties("max_upload_size", "65536"));
-    }
-
-    public int getMaxClusterLines() {
-        return Integer.parseInt(getConfigFromProperties("max_cluster_lines", "10000"));
+    public int getMaxUploadSizeKb() {
+        return Integer.parseInt(getConfigFromProperties("max_upload_size_kb", "4096"));
     }
 
     public String getDatabaseConnectionString() {
@@ -105,10 +89,6 @@ public class Config {
 
     public int getDatabaseConnectionPoolMaximumSize() {
         return Integer.parseInt(getConfigFromProperties("dbconnectionpool_max_size", "64"));
-    }
-
-    public double getClusterMinProbability() {
-        return Double.parseDouble(getConfigFromProperties("cluster_min_probability", "0.7"));
     }
 
     public double getRateLimit_Chat_BurstRequests() {
@@ -133,10 +113,6 @@ public class Config {
 
     public double getRateLimit_LoadTest_Frequency() {
         return Double.parseDouble(getConfigFromProperties("ratelimit_loadtest_frequency", "8192.5"));
-    }
-
-    public String getTelemetryKey(String appName) {
-        return getConfigFromProperties(String.format("telemetry_%s_key", appName), null);
     }
 
     public String getWnetTrainingEndpoint() {

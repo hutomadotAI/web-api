@@ -87,7 +87,6 @@ public class AILogic {
                     DEFAULT_WNET_ERROR,
                     TrainingStatus.NOT_STARTED,
                     token,
-                    null,
                     language,
                     timezone,
                     confidence,

@@ -18,7 +18,10 @@ import com.hutoma.api.validation.Validate;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +74,7 @@ public class TrainingLogic {
 
         ArrayList<String> source;
 
-        long maxUploadFileSize = this.config.getMaxUploadSize();
+        long maxUploadFileSize = 1024L * this.config.getMaxUploadSizeKb();
 
         try {
             switch (type) {
@@ -167,7 +170,6 @@ public class TrainingLogic {
      * Submit a training request to SQS only if the training file is avaialable or a previous
      * valid training session was stopped.
      * In all other cases we return an error
-     *
      * @param securityContext
      * @param devid
      * @param aiid
@@ -220,7 +222,6 @@ public class TrainingLogic {
 
     /**
      * Send a stop msg to SQS only if a training session is currently ongoing
-     *
      * @param securityContext
      * @param devid
      * @param aiid
@@ -251,7 +252,6 @@ public class TrainingLogic {
     /**
      * An update to an existing training session means we will have to delete any existing neural
      * network and start from scratch.
-     *
      * @param securityContext
      * @param devid
      * @param aiid
@@ -290,7 +290,6 @@ public class TrainingLogic {
 
     /**
      * Gets the training materials for an AI.
-     *
      * @param securityContext
      * @param devId
      * @param aiid
@@ -313,7 +312,6 @@ public class TrainingLogic {
 
     /**
      * Adds context to conversational exchanges
-     *
      * @param training list of strings, one for each line of conversation
      * @return single string with processed training
      */
@@ -418,7 +416,6 @@ public class TrainingLogic {
 
     /**
      * Download from a web-resource, sanitize each line and rejoin string.
-     *
      * @param url web-resource
      * @return clean result
      * @throws Exception
@@ -444,7 +441,6 @@ public class TrainingLogic {
 
     /**
      * Remove the last conversation item.
-     *
      * @param conversation the conversation so far
      */
     private void removeLastConversationEntry(final List<String> conversation) {
@@ -467,7 +463,6 @@ public class TrainingLogic {
 
     /**
      * Reads from InputStream and returns a list of sanitised strings
-     *
      * @param maxUploadSize
      * @param uploadedInputStream
      * @return list of strings

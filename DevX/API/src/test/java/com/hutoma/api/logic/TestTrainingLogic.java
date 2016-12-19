@@ -159,8 +159,7 @@ public class TestTrainingLogic {
         this.logic = new TrainingLogic(this.fakeConfig, this.fakeAiServices, this.fakeExtractor, this.fakeDatabase,
                 this.fakeTools, this.fakeLogger, this.fakeValidation, this.fakeIntentHandler);
 
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn(65536L);
-        when(this.fakeConfig.getMaxClusterLines()).thenReturn(65536);
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(4096);
     }
 
     @Test
@@ -188,15 +187,15 @@ public class TestTrainingLogic {
 
     @Test
     public void testTrain_Text_UploadTooLarge() {
-        InputStream stream = createUpload(TEXTMULTILINE);
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        InputStream stream = createUpload(moreThan1Kb());
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Text_UploadNull() {
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 0, UURL, null, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -204,38 +203,38 @@ public class TestTrainingLogic {
     @Test
     public void testTrain_Doc_UploadTooLarge() {
         InputStream stream = createUpload(TEXTMULTILINE);
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(0);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Doc_UploadNull() {
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, null, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Doc_UploadTooLarge_checkUploadFileSizeIncorrect() {
-        InputStream stream = createUpload(TEXTMULTILINE);
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        InputStream stream = createUpload(moreThan1Kb());
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Doc_Upload_nullFileDetail() {
-        InputStream stream = createUpload(TEXTMULTILINE);
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        InputStream stream = createUpload(moreThan1Kb());
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 1, UURL, stream, null);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testTrain_Url_ExtractTooLarge() throws HTMLExtractor.HtmlExtractionException {
-        when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(TEXTMULTILINE);
-        when(this.fakeConfig.getMaxUploadSize()).thenReturn((long) TEXTMULTILINE.length() - 1);
+        when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(moreThan1Kb());
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(this.fakeContext, DEVID, AIID, 2, UURL, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
     }
@@ -521,6 +520,15 @@ public class TestTrainingLogic {
             // ignore!
         }
         return stream;
+    }
+
+    private String moreThan1Kb() {
+        StringBuilder sb = new StringBuilder();
+        byte[] content = null;
+        do {
+            sb.append(TEXTMULTILINE);
+        } while (sb.toString().getBytes(StandardCharsets.UTF_8).length <= 1024);
+        return sb.toString();
     }
 
     private void makeDBFail(int trainingType) throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {

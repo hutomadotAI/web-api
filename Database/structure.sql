@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `hutoma` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `hutoma`;
--- MySQL dump 10.13  Distrib 5.7.12, for osx10.9 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
 --
--- Host: 52.44.215.190    Database: hutoma
+-- Host: 127.0.0.1    Database: hutoma
 -- ------------------------------------------------------
--- Server version	5.5.52-0ubuntu0.14.04.1
+-- Server version	5.7.16
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -37,7 +37,6 @@ CREATE TABLE `ai` (
   `shallow_learning_status` int(11) DEFAULT '0',
   `ai_status` varchar(50) DEFAULT 'training_not_started',
   `client_token` varchar(250) NOT NULL,
-  `ai_trainingfile` text,
   `internal_status` tinyint(4) NOT NULL DEFAULT '1',
   `shallow_learning_error` double DEFAULT '0',
   `NNActive` int(11) NOT NULL DEFAULT '0',
@@ -57,7 +56,7 @@ CREATE TABLE `ai` (
   `color` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1637 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,6 +97,22 @@ CREATE TABLE `ai_mesh` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ai_training`
+--
+
+DROP TABLE IF EXISTS `ai_training`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ai_training` (
+  `aiid` varchar(50) NOT NULL,
+  `ai_trainingfile` longtext,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`aiid`),
+  CONSTRAINT `aiid_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `api_rate_limit`
 --
 
@@ -129,7 +144,7 @@ CREATE TABLE `botStore` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_2` (`aiid`),
   KEY `id_3` (`publisher_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,7 +164,7 @@ CREATE TABLE `chatlog` (
   `answer` varchar(2000) DEFAULT NULL,
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4064 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,7 +178,7 @@ CREATE TABLE `debug` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=402 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -236,7 +251,7 @@ CREATE TABLE `entity` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id` (`dev_id`,`name`),
   CONSTRAINT `entity_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=139 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -254,7 +269,7 @@ CREATE TABLE `entity_value` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `entity_id` (`entity_id`,`value`),
   CONSTRAINT `entity_value_ibfk_1` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -291,7 +306,7 @@ CREATE TABLE `intent` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid` (`aiid`,`name`),
   CONSTRAINT `intent_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=181 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -309,7 +324,7 @@ CREATE TABLE `intent_response` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_id` (`intent_id`,`response`),
   CONSTRAINT `intent_response_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -327,7 +342,7 @@ CREATE TABLE `intent_user_says` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_id` (`intent_id`,`says`),
   CONSTRAINT `intent_user_says_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -351,7 +366,7 @@ CREATE TABLE `intent_variable` (
   KEY `entity_id` (`entity_id`),
   CONSTRAINT `intent_variable_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE,
   CONSTRAINT `intent_variable_ibfk_2` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -369,7 +384,7 @@ CREATE TABLE `intent_variable_prompt` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_variable_id` (`intent_variable_id`,`prompt`),
   CONSTRAINT `intent_variable_prompt_ibfk_1` FOREIGN KEY (`intent_variable_id`) REFERENCES `intent_variable` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -389,7 +404,7 @@ CREATE TABLE `intent_variables_TOBE_DELETED` (
   `required` tinyint(4) NOT NULL DEFAULT '0',
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -488,7 +503,7 @@ CREATE TABLE `users` (
   `valid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id_UNIQUE` (`dev_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -523,54 +538,6 @@ DELIMITER ;
 --
 -- Dumping routines for database 'hutoma'
 --
-/*!50003 DROP PROCEDURE IF EXISTS `addAI` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAI`(IN `param_aiid` varchar(50), IN `param_ai_name` varchar(50), IN `param_ai_description` varchar(250),IN `param_dev_id` varchar(50), IN `param_is_private` tinyint(1),IN `param_deep_learning_error` double,IN `param_deep_learning_status` tinyint(4),IN `param_shallow_learning_status` int(11),IN `param_ai_status` varchar(50),IN `param_client_token` varchar(250),IN `param_ai_trainingfile` text)
-    MODIFIES SQL DATA
-BEGIN
-	insert into ai (aiid, ai_name, ai_description,dev_id, is_private,deep_learning_error,deep_learning_status,shallow_learning_status,ai_status,client_token,ai_trainingfile)
-                                 values (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status, param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile);
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `addAI_v1` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAI_v1`(IN `param_aiid` VARCHAR(50), IN `param_ai_name` VARCHAR(50), IN `param_ai_description` VARCHAR(250), IN `param_dev_id` VARCHAR(50), IN `param_is_private` TINYINT(1), IN `param_deep_learning_error` DOUBLE, IN `param_deep_learning_status` TINYINT(4), IN `param_shallow_learning_status` INT(11), IN `param_ai_status` VARCHAR(50), IN `param_client_token` VARCHAR(250), IN `param_ai_trainingfile` TEXT, IN `param_ai_language` VARCHAR(10), IN `param_ai_timezone` VARCHAR(50), IN `param_ai_confidence` DOUBLE, IN `param_ai_personality` BOOLEAN, IN `param_ai_voice` INT(11))
-    MODIFIES SQL DATA
-BEGIN
-
-	insert into ai (aiid, ai_name, ai_description,dev_id, is_private,deep_learning_error,deep_learning_status,
-					shallow_learning_status,ai_status,client_token,ai_trainingfile,ai_language,
-                    ai_timezone,ai_confidence,ai_personality,ai_voice)
-	values (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status,
-			param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile,param_ai_language,
-            param_ai_timezone,param_ai_confidence,param_ai_personality,param_ai_voice);
-
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `addAI_v2` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -579,7 +546,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAI_v2`(
 	IN `param_aiid` VARCHAR(50),
@@ -592,7 +559,6 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAI_v2`(
 	IN `param_shallow_learning_status` INT(11),
 	IN `param_ai_status` VARCHAR(50),
 	IN `param_client_token` VARCHAR(250),
-	IN `param_ai_trainingfile` TEXT,
 	IN `param_ai_language` VARCHAR(10),
 	IN `param_ai_timezone` VARCHAR(50),
 	IN `param_ai_confidence` DOUBLE,
@@ -604,15 +570,15 @@ BEGIN
 	DECLARE var_exists_count INT;
     DECLARE var_named_aiid VARCHAR(50);
 
-	SELECT count(aiid), aiid INTO var_exists_count, var_named_aiid
+	SELECT count(aiid), min(aiid) INTO var_exists_count, var_named_aiid
     FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name`;
 
 	IF var_exists_count=0 THEN
 		INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private, deep_learning_error, deep_learning_status,
-						shallow_learning_status, ai_status, client_token, ai_trainingfile, ai_language,
+						shallow_learning_status, ai_status, client_token, ai_language,
 						ai_timezone, ai_confidence, ai_personality, ai_voice)
 		VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private, param_deep_learning_error, param_deep_learning_status,
-				param_shallow_learning_status, param_ai_status, param_client_token, param_ai_trainingfile, param_ai_language,
+				param_shallow_learning_status, param_ai_status, param_client_token, param_ai_language,
 				param_ai_timezone, param_ai_confidence, param_ai_personality, param_ai_voice);
 		SET var_named_aiid = `param_aiid`;
 	END IF;
@@ -1231,17 +1197,15 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `existsAiTrainingFile`(IN `param_aiid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-	   SELECT
-	CASE WHEN ai_trainingfile is null
-		 THEN false
-		 ELSE true END as ai_trainingfile
-		 FROM ai
-        WHERE aiid=param_aiid;
+
+    SELECT count(aiid) as `ai_trainingfile`
+    FROM ai_training WHERE `param_aiid`=`ai_training`.`aiid`;
+    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1402,13 +1366,13 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiTrainingFile`(IN `param_aiid` varchar(50))
     READS SQL DATA
 BEGIN
 
-	SELECT ai_trainingfile FROM ai WHERE aiid=param_aiid;
+	SELECT ai_trainingfile FROM ai_training WHERE aiid=param_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1533,6 +1497,27 @@ CREATE DEFINER=`root`@`127.0.0.1` PROCEDURE `getDebug`(IN `l1` INT UNSIGNED)
 SELECT *
 FROM `debug`
 LIMIT 0 , l1 ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getDevPlan` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDevPlan`(IN `in_dev_id` VARCHAR(50))
+BEGIN
+SELECT d.*
+FROM devplan d INNER JOIN users u ON u.plan_id = d.plan_id
+WHERE u.dev_id=in_dev_id;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2296,6 +2281,32 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `updateAiTrainingFile` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateAiTrainingFile`(IN `param_aiid` varchar(50), IN `param_ai_trainingfile` LONGTEXT)
+    MODIFIES SQL DATA
+BEGIN
+
+    INSERT INTO `ai_training` (ai_training.aiid, ai_training.ai_trainingfile, ai_training.updated) 
+    VALUES (`param_aiid`, `param_ai_trainingfile`, now())
+    ON DUPLICATE KEY UPDATE 
+		ai_training.ai_trainingfile = `param_ai_trainingfile`,
+        ai_training.updated = now();
+        
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `updateAI_v1` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2349,47 +2360,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getDevPlan` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDevPlan`(IN `in_dev_id` VARCHAR(50))
-BEGIN
-SELECT d.*
-FROM devplan d INNER JOIN users u ON u.plan_id = d.plan_id
-WHERE u.dev_id=in_dev_id;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `updateTrainingData` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateTrainingData`(IN `param_aiid` varchar(50), IN `param_ai_trainingfile` text)
-    MODIFIES SQL DATA
-BEGIN
-	update ai set ai_trainingfile=param_ai_trainingfile where aiid=param_aiid;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `updateUserLoginAttempts` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2420,4 +2390,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-29 23:42:51
+-- Dump completed on 2016-12-19 14:53:44

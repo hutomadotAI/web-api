@@ -22,6 +22,8 @@ GRANT EXECUTE ON `hutoma`.* TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`ai` TO 'aiReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`ai_training` TO 'aiReader'@'127.0.0.1';
+
 
 # Privileges for `aiWriter`@`127.0.0.1`
 
@@ -30,6 +32,8 @@ GRANT USAGE ON *.* TO 'aiWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*EF8F1009CF
 GRANT EXECUTE ON `hutoma`.* TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai` TO 'aiWriter'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai_training` TO 'aiWriter'@'127.0.0.1';
 
 
 # Privileges for `chatlogReader`@`127.0.0.1`

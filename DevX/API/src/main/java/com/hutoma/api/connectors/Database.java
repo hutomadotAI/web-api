@@ -160,11 +160,11 @@ public class Database {
     public UUID createAI(final UUID aiid, final String name, final String description, final String devid,
                          final boolean isPrivate, final double deepLearningError, final int deepLearningStatus,
                          final int shallowLearningStatus, final TrainingStatus status, final String clientToken,
-                         final String trainingFile, final Locale language, final String timezoneString,
+                         final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addAI_v2", 16)
+            call.initialise("addAI_v2", 15)
                     .add(aiid)
                     .add(name)
                     .add(description)
@@ -175,7 +175,6 @@ public class Database {
                     .add(shallowLearningStatus)
                     .add(status.value())
                     .add(clientToken)
-                    .add(trainingFile)
                     .add(language == null ? null : language.toLanguageTag())
                     .add(timezoneString)
                     .add(confidence)
@@ -317,7 +316,7 @@ public class Database {
 
     public boolean updateAiTrainingFile(final UUID aiUUID, final String trainingData) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateTrainingData", 2).add(aiUUID).add(trainingData);
+            call.initialise("updateAiTrainingFile", 2).add(aiUUID).add(trainingData);
             return call.executeUpdate() > 0;
         }
     }

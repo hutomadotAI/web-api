@@ -74,7 +74,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testCreateAI() throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(),
-                anyInt(), anyInt(), any(), anyString(), any(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyInt(), anyInt(), any(), anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt())).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         final Response response = target("/ai").request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));

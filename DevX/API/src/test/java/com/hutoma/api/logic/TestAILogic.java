@@ -66,7 +66,7 @@ public class TestAILogic {
 
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(),
                 anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(this.AIID);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(this.AIID);
         ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
@@ -85,7 +85,7 @@ public class TestAILogic {
 
     @Test
     public void testCreate_DBFail_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(),
                 anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenThrow(new Database.DatabaseException(new Exception("test")));
         ApiResult result = this.aiLogic.createAI(this.fakeContext, this.DEVID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(500, result.getStatus().getCode());
@@ -236,7 +236,7 @@ public class TestAILogic {
     }
 
     private void whenCreateAiReturn(UUID aiid) throws Database.DatabaseException {
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(), any(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(),
                 anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(aiid);
     }
 
