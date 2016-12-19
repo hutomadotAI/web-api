@@ -44,12 +44,14 @@ public class AiStatus {
                 return TrainingStatus.NOTHING_TO_TRAIN;
             case NEW_AI_READY_TO_TRAIN:
                 return TrainingStatus.NOT_STARTED;
-            case NEW_AI_TRAINING:
+            case NEW_AI_TRAINING_QUEUED:
                 return TrainingStatus.QUEUED;
-            case NEW_AI_TRAINING_WITH_CHAT:
+            case NEW_AI_TRAINING:
                 return TrainingStatus.IN_PROGRESS;
-            case NEW_AI_READY_FOR_CHAT:
+            case NEW_AI_TRAINING_COMPLETE:
                 return TrainingStatus.COMPLETED;
+            case NEW_AI_TRAINING_STOPPED:
+                return TrainingStatus.STOPPED;
             case NEW_AI_ERROR:
                 return TrainingStatus.MALFORMEDFILE;
             default:

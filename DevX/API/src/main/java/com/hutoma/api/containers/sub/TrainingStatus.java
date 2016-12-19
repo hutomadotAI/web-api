@@ -21,9 +21,10 @@ public enum TrainingStatus {
 
     NEW_AI_UNDEFINED("ai_undefined"),
     NEW_AI_READY_TO_TRAIN("ai_ready_to_train"),
+    NEW_AI_TRAINING_QUEUED("ai_training_queued"),
     NEW_AI_TRAINING("ai_training"),
-    NEW_AI_TRAINING_WITH_CHAT("ai_training_with_chat"),
-    NEW_AI_READY_FOR_CHAT("ai_ready_for_chat"),
+    NEW_AI_TRAINING_STOPPED("ai_training_stopped"),
+    NEW_AI_TRAINING_COMPLETE("ai_training_complete"),
     NEW_AI_ERROR("ai_error");
 
     private final String value;
