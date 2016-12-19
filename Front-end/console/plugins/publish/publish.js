@@ -19,7 +19,6 @@ function checkInput(){
             return false;
         }
     }
-    
 
     // BOT short description input validation
     var bot_description = document.getElementById('bot_description');
@@ -107,8 +106,31 @@ function checkInput(){
 }
 
 function requestPublish(){
-    // TODO API response to submit request Publish AI
+    var prevCursor = document.body.style.cursor;
+    document.body.style.cursor = 'wait';
+    $("#btnPublishRequest").prop("disabled", true);
+
     createAlertMessage(1, 'Sending request...');
+    fieldsToBotIstance();
+    $.ajax({
+        url: './dynamic/publish.php',
+        data: {
+            bot: bot
+        },
+        type: 'POST',
+        success: function (response) {
+            createAlertMessage(4, 'Request submitted!');
+        },
+        complete: function () {
+            document.body.style.cursor = prevCursor;
+            $("#btnPublishRequest").prop("disabled", false);
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            //alert(xhr.status + ' ' + thrownError);
+            $("#btnPublishRequest").prop("disabled", false);
+            createAlertMessage(2, 'Request not sended!');
+        }
+    });
 }
 
 function removeAlert(node){
@@ -162,10 +184,15 @@ function createAlertMessage(alarm,message,id) {
         newNode.innerHTML = wHTML;
         document.getElementById('alertPublishMessage').appendChild(newNode);
     }
+    else{
+        document.getElementById('containerMsgAlertPublish').setAttribute('class',msg_class);
+        document.getElementById('iconAlertPublish').setAttribute('class', ico_class);
+        document.getElementById('msgAlertPublish').innerText = message;
+    }
 
 }
 
-function populateBotFileds(){
+function populateBotFields(){
     document.getElementById('bot_name').value = bot['name'];
     document.getElementById('bot_description').value = bot['shortDescription'];
     document.getElementById('bot_long_description').innerText = bot['longDescription'];
@@ -177,7 +204,6 @@ function populateBotFileds(){
     document.getElementById('bot_usecase').innerText = bot['usecase'];
     document.getElementById('bot_alert_message').value = bot['alarmMsg'];
     document.getElementById('bot_link_privacy').value = bot['privacyLink'];
-
     document.getElementById('bot_developer_name').value = bot['developer']['name'];
     document.getElementById('bot_developer_email').value = bot['developer']['email'];
     document.getElementById('bot_developer_address').value = bot['developer']['address'];
@@ -186,6 +212,28 @@ function populateBotFileds(){
     document.getElementById('bot_developer_country').value = bot['developer']['country'];
     document.getElementById('bot_developer_website').value = bot['developer']['website'];
     document.getElementById('bot_developer_company').value = bot['developer']['company'];
+}
+
+function fieldsToBotIstance(){
+    bot['name'] = document.getElementById('bot_name').value;
+    bot['shortDescription'] = document.getElementById('bot_description').value;
+    bot['longDescription'] = document.getElementById('bot_long_description').innerText;
+    bot['licenceType'] = document.getElementById('bot_licence_type').value;
+    bot['category'] = document.getElementById('bot_category').value;
+    bot['classification'] =document.getElementById('bot_classification').value;
+    bot['licenceFee'] = document.getElementById('bot_licence_fee').value;
+    bot['version'] =  document.getElementById('bot_version').value;
+    bot['usecase'] = document.getElementById('bot_usecase').innerText;
+    bot['alarmMsg'] = document.getElementById('bot_alert_message').value;
+    bot['privacyLink'] = document.getElementById('bot_link_privacy').value;
+    bot['developer']['name'] = document.getElementById('bot_developer_name').value;
+    bot['developer']['email'] = document.getElementById('bot_developer_email').value;
+    bot['developer']['address'] = document.getElementById('bot_developer_address').value;
+    bot['developer']['postcode'] = document.getElementById('bot_developer_postcode').value;
+    bot['developer']['city'] = document.getElementById('bot_developer_city').value;
+    bot['developer']['country'] = document.getElementById('bot_developer_country').value;
+    bot['developer']['website'] = document.getElementById('bot_developer_website').value;
+    bot['developer']['company'] = document.getElementById('bot_developer_company').value;
 }
 
 function setSelectValue(id,valueToSelect) {
@@ -200,5 +248,5 @@ $(function () {
 });
 
 $( document ).ready(function() {
-    populateBotFileds();
+    populateBotFields();
 });
