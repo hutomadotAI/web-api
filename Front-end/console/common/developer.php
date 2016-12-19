@@ -113,6 +113,22 @@ class developer
     }
 
 
+    public function toJSON()
+    {
+        $json = array(
+            'name' => $this->getName(),
+            'email' => $this->getEmail(),
+            'address' => $this->getAddress(),
+            'postcode' => $this->getPostcode(),
+            'city' => $this->getCity(),
+            'country' => $this->getCountry(),
+            'website' => $this->getWebsite(),
+            'company' => $this->getCompany(),
+        );
+        return json_encode($json);
+    }
+
+
     public function __destruct()
     {
 

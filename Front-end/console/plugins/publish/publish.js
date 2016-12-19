@@ -68,10 +68,11 @@ function populateBotFileds(){
     document.getElementById('bot_usecase').innerText = bot['usecase'];
     document.getElementById('bot_alert_message').value = bot['alarmMsg'];
     document.getElementById('bot_link_privacy').value = bot['privacyLink'];
+
+    document.getElementById('bot_developer_name').value = bot['developer'];
 }
 
 function setSelectValue(id,valueToSelect) {
-    alert(id);
     var element = document.getElementById(id);
     element.value = valueToSelect;
     element.selected = true;

@@ -150,12 +150,12 @@ function setBasicBotDefaultValues(){
             <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
                 <div class="col-xs-4 no-padding">
                     <div class="form-group">
-                        <label for="ai_developer_name">Developer Name</label>
+                        <label for="bot_developer_name">Developer Name</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-university"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_name" name="ai_developer_name" value="<?php echo ($bot->developer->getName());?>" placeholder="Enter the name of developer...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_name" name="bot_developer_name" placeholder="Enter the name of developer...">
                         </div>
                     </div>
                 </div>

@@ -316,11 +316,10 @@ class bot
         }
     }
 
-    public function expose() {
-        return get_object_vars($this);
-    }
+    public function toJSON()
+    {
+        $dev = array($this->developer->toJSON());
 
-    public function toJSON(){
         $json = array(
             'name' => $this->getName(),
             'shortDescription' => $this->getDescription(),
@@ -342,10 +341,11 @@ class bot
             'iconBadge' => $this->getBadgeIcon(),
             'privacyLink' => $this->getPrivacyLink(),
             'report' => $this->getReport(),
+            'developer' => $dev,
         );
-
         return json_encode($json);
     }
+
     public function __destruct()
     {
 
