@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by mauriziocibelli on 17/11/16.
  */
-public class apiai extends recallBaseClass {
+public class google extends recallBaseClass {
 
 
     private static ArrayList<crecall> recall = new ArrayList<>();
@@ -25,7 +25,7 @@ public class apiai extends recallBaseClass {
     private String baseUri = "https://api.api.ai/v1/query?v=20150910&timezone=Europe/London&lang=en&latitude=37.459157&longitude=-122.17926&sessionId=1234567890&query=";
 
 
-    public apiai() throws IOException {
+    public google() throws IOException {
         super();
     }
 
