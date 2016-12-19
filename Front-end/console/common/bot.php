@@ -315,11 +315,13 @@ class bot
                 return '5.000.000-10.000.000';
         }
     }
+    
+    public function ciao(){
+        return $this->developer->getName();
+    }
 
     public function toJSON()
     {
-        $dev = array($this->developer->toJSON());
-
         $json = array(
             'name' => $this->getName(),
             'shortDescription' => $this->getDescription(),
@@ -341,10 +343,21 @@ class bot
             'iconBadge' => $this->getBadgeIcon(),
             'privacyLink' => $this->getPrivacyLink(),
             'report' => $this->getReport(),
-            'developer' => $dev,
+            'developer' => array(
+                'name' => $this->developer->getName(),
+                'email' => $this->developer->getEmail(),
+                'address' => $this->developer->getAddress(),
+                'postcode' => $this->developer->getPostcode(),
+                'city' => $this->developer->getCity(),
+                'country' => $this->developer->getCountry(),
+                'website' => $this->developer->getWebsite(),
+                'company' => $this->developer->getCompany()
+            )
         );
+        
         return json_encode($json);
     }
+
 
     public function __destruct()
     {

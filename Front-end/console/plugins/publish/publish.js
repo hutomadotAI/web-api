@@ -68,8 +68,15 @@ function populateBotFileds(){
     document.getElementById('bot_usecase').innerText = bot['usecase'];
     document.getElementById('bot_alert_message').value = bot['alarmMsg'];
     document.getElementById('bot_link_privacy').value = bot['privacyLink'];
-
-    document.getElementById('bot_developer_name').value = bot['developer'];
+    
+    document.getElementById('bot_developer_name').value = bot['developer']['name'];
+    document.getElementById('bot_developer_email').value = bot['developer']['email'];
+    document.getElementById('bot_developer_address').value = bot['developer']['address'];
+    document.getElementById('bot_developer_postcode').value = bot['developer']['postcode'];
+    document.getElementById('bot_developer_city').value = bot['developer']['city'];
+    document.getElementById('bot_developer_country').value = bot['developer']['country'];
+    document.getElementById('bot_developer_website').value = bot['developer']['website'];
+    document.getElementById('bot_developer_company').value = bot['developer']['company'];
 }
 
 function setSelectValue(id,valueToSelect) {

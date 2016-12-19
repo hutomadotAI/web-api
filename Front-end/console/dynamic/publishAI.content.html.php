@@ -9,6 +9,8 @@ if ( \hutoma\console::existsBotInStore($_SESSION[$_SESSION['navigation_id']]['us
 else
     $bot = setBasicBotDefaultValues();
 
+$bot->developer = getDeveloper();
+
 function getBot(){
     // TODO remove this fake hardcoded data
     $infoBot = new \hutoma\bot();
@@ -161,23 +163,23 @@ function setBasicBotDefaultValues(){
                 </div>
                 <div class="col-xs-5">
                     <div class="form-group">
-                        <label for="ai_developer_address">Address</label>
+                        <label for="bot_developer_address">Address</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-building-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_address" name="ai_developer_address" value="<?php echo ($bot->developer->getAddress());?>"placeholder="Enter the address...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_address" name="bot_developer_address" placeholder="Enter the address...">
                         </div>
                     </div>
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label for="ai_developer_postcode">Postcode</label>
+                        <label for="bot_developer_postcode">Postcode</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-map-signs"></i>
                             </div>
-                            <input type="text" maxlength="30" class="form-control flat no-shadow"  id="ai_developer_postcode" name="ai_developer_postcode" value="<?php echo ($bot->developer->getPostcode());?>"placeholder="Enter the postcode...">
+                            <input type="text" maxlength="30" class="form-control flat no-shadow"  id="bot_developer_postcode" name="bot_developer_postcode" placeholder="Enter the postcode...">
                         </div>
                     </div>
                 </div>
@@ -187,34 +189,34 @@ function setBasicBotDefaultValues(){
             <div class="row no-margin">
                 <div class="col-xs-4 no-padding">
                     <div class="form-group">
-                        <label for="ai_developer_city">City</label>
+                        <label for="bot_developer_city">City</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-map-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_city" name="ai_developer_city" value="<?php echo ($bot->developer->getCity());?>"placeholder="Enter the city...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_city" name="bot_developer_city" placeholder="Enter the city...">
                         </div>
                     </div>
                 </div>
                 <div class="col-xs-5">
                     <div class="form-group">
-                        <label for="ai_developer_country">Country</label>
+                        <label for="bot_developer_country">Country</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-globe"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow"  id="ai_developer_country" name="ai_developer_country" value="<?php echo ($bot->developer->getCountry());?>" placeholder="Enter the country...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow"  id="bot_developer_country" name="bot_developer_country" placeholder="Enter the country...">
                         </div>
                     </div>
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label for="ai_developer_email">Email</label>
+                        <label for="bot_developer_email">Email</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_email" name="ai_developer_email" value="<?php echo ($bot->developer->getEmail());?>" placeholder="Enter email...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_email" name="bot_developer_email" placeholder="Enter email...">
                         </div>
                     </div>
                 </div>
@@ -224,23 +226,23 @@ function setBasicBotDefaultValues(){
             <div class="row no-margin">
                 <div class="col-xs-9" style="padding:0px 15px 0px 0px;">
                     <div class="form-group">
-                        <label for="ai_developer_website">Website</label>
+                        <label for="bot_developer_website">Website</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="glyphicon glyphicon-link"></i>
                             </div>
-                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="ai_developer_website" name="ai_developer_website" value="<?php echo ($bot->developer->getWebsite());?>" placeholder="Enter the link of website...">
+                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="bot_developer_website" name="bot_developer_website" placeholder="Enter the link of website...">
                         </div>
                     </div>
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label for="ai_developer_company">Company</label>
+                        <label for="bot_developer_company">Company</label>
                         <div class="input-group" >
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow" id="ai_developer_company" name="ai_developer_company" value="<?php echo ($bot->developer->getCompany());?>" placeholder="Enter company...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow" id="bot_developer_company" name="bot_developer_company" placeholder="Enter company...">
                         </div>
                     </div>
                 </div>
