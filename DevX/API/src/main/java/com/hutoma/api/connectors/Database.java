@@ -216,7 +216,7 @@ public class Database {
     public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status,
                                   final String aiEngine, final double trainingProgress, final double trainingError)
             throws DatabaseException {
-        if (aiEngine.equalsIgnoreCase("rnn")) {
+        if (aiEngine != null && aiEngine.equalsIgnoreCase("rnn")) {
             try (DatabaseCall call = this.callProvider.get()) {
                 call.initialise("setAiTrainingStatus", 4)
                         .add(status.value())

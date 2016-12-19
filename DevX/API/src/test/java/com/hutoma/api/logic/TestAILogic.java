@@ -214,7 +214,7 @@ public class TestAILogic {
     @Test
     public void testUpdateAiStatus() throws Database.DatabaseException {
         AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED, this.AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(true);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -222,7 +222,7 @@ public class TestAILogic {
     @Test
     public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
         AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED, this.AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any(), any(), any())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(false);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -230,7 +230,7 @@ public class TestAILogic {
     @Test
     public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
         AiStatus status = new AiStatus(this.DEVID, this.AIID, TrainingStatus.NOT_STARTED, this.AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any(), any(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }

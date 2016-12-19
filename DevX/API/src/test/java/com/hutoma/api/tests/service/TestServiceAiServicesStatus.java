@@ -27,14 +27,14 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
 
     @Test
     public void testUpdateStatus() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(true);
         final Response response = sendRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testUpdateStatus_dbDidNotUpdate() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any(), any(), any())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(false);
         final Response response = sendRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, response.getStatus());
     }
@@ -50,9 +50,9 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
     @Test
     public void testUpdateStatus_newStatus() throws Database.DatabaseException {
         String statusJson = getCommonAiStatusJson();
-        statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), TrainingStatus.NEW_AI_TRAINING.value());
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), any(), any(), any())).thenReturn(false);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), eq(TrainingStatus.QUEUED), any(), any(), any())).thenReturn(true);
+        statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), TrainingStatus.NEW_AI_TRAINING_QUEUED.value());
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(anyString(), any(), eq(TrainingStatus.QUEUED), anyString(), anyDouble(), anyDouble())).thenReturn(true);
         final Response response = sendRequest(statusJson);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
