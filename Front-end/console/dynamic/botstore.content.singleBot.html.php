@@ -22,7 +22,7 @@ $bot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi 
 $bot->setUpdate('10 september 2016');
 $bot->setCategory('entertainment');
 $bot->setClassification('EVERYONE');
-$bot->setVersion('2.1');
+$bot->setVersion('2.1.0');
 $bot->developer->setName('hu:toma Ltd.');
 $bot->developer->setCompany('HUTOMA');
 $bot->developer->setEmail('support@hutoma.com');
@@ -35,6 +35,12 @@ $bot->developer->setWebsite('http://www.hutoma.com');
 $bot->setPermissionLink('https://www.google.com/permissions/');
 $bot->setPrivacyLink('https://www.google.it/intl/it/policies/privacy/');
 $bot->setReport('./botstore.php');
+
+$tmp = 'User: I want to sleep.
+Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
+User: You\'re so sweet.
+Agent: I like you too. You\'re a lot of fun to talk to.';
+$bot->setUsecase(str_replace("\n", "<p></p>", $tmp));
 
 $bot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, 
 and feel the charm of existence in this spot, which was created for the bliss of souls like mine.
