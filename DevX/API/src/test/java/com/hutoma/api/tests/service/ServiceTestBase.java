@@ -50,6 +50,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     protected static final UUID CHATID = UUID.fromString("f9069b51-1d4b-4c17-83f8-b4538a85aed2");
+    protected static final String AI_ENGINE = "MOCK_ENGINE";
+
     protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
     private static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     @SuppressWarnings("unchecked")

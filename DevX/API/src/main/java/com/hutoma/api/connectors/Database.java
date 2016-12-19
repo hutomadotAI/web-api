@@ -94,6 +94,7 @@ public class Database {
 
     /**
      * Gets the developer plan for the given developer Id.
+     *
      * @param devId the developer id
      * @return the plan, or null if there is no developer Id or not plan associated to it
      * @throws DatabaseException database exception
@@ -212,15 +213,21 @@ public class Database {
         }
     }
 
-    public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status)
+    public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status,
+                                  final String aiEngine, final double trainingProgress, final double trainingError)
             throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAIstatus", 3)
-                    .add(aiid)
-                    .add(devId)
-                    .add(status.value());
-            return call.executeUpdate() > 0;
+        if (aiEngine != null && aiEngine.equalsIgnoreCase("rnn")) {
+            try (DatabaseCall call = this.callProvider.get()) {
+                call.initialise("setAiTrainingStatus", 4)
+                        .add(status.value())
+                        .add(devId)
+                        .add(aiid)
+                        .add(trainingError);
+                return call.executeUpdate() > 0;
+            }
         }
+        // else TODO call a different DB call for other AI engines
+        return true;
     }
 
     public List<ApiAi> getAllAIs(final String devid) throws DatabaseException {

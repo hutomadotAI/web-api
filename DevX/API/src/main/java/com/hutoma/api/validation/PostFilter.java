@@ -199,6 +199,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 checkParameterNotNull(aiStatus.getAiid(), "AIID is null");
                 checkParameterNotNull(aiStatus.getDevId(), "DevID is null");
                 checkParameterNotNull(aiStatus.getTrainingStatus(), "TrainingStatus is null");
+                checkParameterNotNull(aiStatus.getAiEngine(), "AI Engine is null");
                 request.setProperty(APIParameter.AiStatusJson.toString(), aiStatus);
             }
         } catch (JsonParseException jpe) {
