@@ -4,14 +4,78 @@ require_once "./common/bot.php";
 // TODO remove hardcoded part
 $bot = new \hutoma\bot();
 
+if ( \hutoma\console::existsBotInStore($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']))
+    $bot = getBot();
+else
+    $bot = setBasicBotDefaultValues();
 
-$bot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
-$bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
+function getBot(){
+    // TODO remove this fake hardcoded data
+    $infoBot = new \hutoma\bot();
+    $infoBot->setName("Fake botName");
+    $infoBot->setDescription("Fake shortDescription");
+    $infoBot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment and yet I feel that I never was a greater artist than now.');
+    $infoBot->setUsecase('User: I want to sleep.
+Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
+User: You\'re so sweet.
+Agent: I like you too. You\'re a lot of fun to talk to.');
+    $infoBot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
+    $infoBot->setPrivacyLink('https://www.google.it/intl/it/policies/privacy/');
+    $infoBot->setUpdate('10 september 2016');  // setted when you send request publish bot
+    $infoBot->setLicenceType('Free');
+    $infoBot->setLicenceFee('0.0');
+    $infoBot->setCategory('entertainment');
+    $infoBot->setClassification('EVERYONE');
+    $infoBot->setVersion('2.1');
+    return $infoBot;
+}
 
+function getDeveloper(){
+    $infoDeveloper = new \hutoma\developer();
+    $infoDeveloper->setName('hu:toma Ltd.');
+    $infoDeveloper->setCompany('HUTOMA');
+    $infoDeveloper->setEmail('support@hutoma.com');
+    $infoDeveloper->setAddress('Carrer del Consell de Cent, 341');
+    $infoDeveloper->setPostcode('08007');
+    $infoDeveloper->setCity('Barcelona');
+    $infoDeveloper->setCountry('Spain');
+    $infoDeveloper->setWebsite('http://www.hutoma.com');
+    return $infoDeveloper;
+}
+
+function setBasicBotDefaultValues(){
+    $infoBot = new \hutoma\bot();
+    $infoBot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
+    $infoBot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
+    return $infoBot;
+}
 ?>
 
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
+        <!-- row 0 -->
+        <div class="row no-margin">
+            <div class="col-xs-4 drop-zone">
+                <div class="form-group">
+                    <label for="bot_name">Name</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-user"></i>
+                        </div>
+                        <input type="text" maxlength="30" class="form-control flat no-shadow"  id="bot_name" name="bot_name" placeholder="Enter name for publish">
+                    </div>
+                </div>
+            </div>
+            <div class="drop-zone1">
+                <div class="row no-margin">
+                    <div class="form-group">
+                        <label for="bot_description">Short Description</label>
+                        <input type="text" maxlength="50" class="form-control flat no-shadow"  id="bot_description" name="bot_description">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- row 1 -->
         <div class="row no-margin">
             <div class="col-xs-4 drop-zone">
@@ -23,12 +87,8 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
             <div class="drop-zone-460">
                 <div class="row no-margin">
                     <div class="form-group">
-                        <label for="ai_description">Short Description</label>
-                        <input type="text" maxlength="50" class="form-control flat no-shadow"  id="ai_description" name="ai_description" value="<?php echo ($bot->getDescription());?>">
-                    </div>
-                    <div class="form-group">
-                        <label for="ai_confidence">Long Description</label>
-                        <textarea rows="6" maxlength="5000"class="form-control flat" value="" placeholder="Enter long description..." id="longDescription"></textarea>
+                        <label for="bot_long_description">Long Description</label>
+                        <textarea rows="9" maxlength="5000" class="form-control flat textarea-justify" placeholder="Enter long description..." id="bot_long_description" style="height:204px;"></textarea>
                     </div>
                 </div>
             </div>
@@ -48,7 +108,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                     <?php include './dynamic/input.classification.html.php'; ?>
                 </div>
                 <div class="row no-margin">
-                    <?php include './dynamic/input.price.html.php'; ?>
+                    <?php include './dynamic/input.licenceFee.html.php'; ?>
                 </div>
                 <div class="row no-margin">
                     <?php include './dynamic/input.version.html.php'; ?>
@@ -58,25 +118,25 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
             <div class="drop-zone-460">
                 <div class="row no-margin" style="padding-top:10px;">
                     <div class="form-group no-margin">
-                        <label for="ai_confidence">Show Example of Conversation</label>
-                        <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="usecase" style="height:182px;"></textarea>
+                        <label for="bot_usecase">Show Example of Conversation</label>
+                        <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="bot_usecase" style="height:182px;"></textarea>
                     </div>
                     <div class="form-group" style="padding-top:15px;">
-                        <label for="ai_alert_message">Alert message</label>
+                        <label for="bot_alert_message">Alert message</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-info-circle"></i>
                             </div>
-                            <input type="text" maxlength="150" class="form-control flat no-shadow"  id="ai_alert_message" name="ai_alert_message" placeholder="Enter a message to show..">
+                            <input type="text" maxlength="150" class="form-control flat no-shadow"  id="bot_alert_message" name="bot_alert_message" placeholder="Enter a message to show..">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="ai_link_privacy">Link Privacy Policy Page</label>
+                        <label for="bot_link_privacy">Link Privacy Policy Page</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-eye"></i>
                             </div>
-                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="ai_link_privacy" name="ai_link_privacy" placeholder="Enter a link to privacy policy">
+                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="bot_link_privacy" name="bot_link_privacy" placeholder="Enter a link to privacy policy">
                         </div>
                     </div>
                 </div>
@@ -95,7 +155,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-university"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_name" name="ai_developer_name" placeholder="Enter the name of developer...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_name" name="ai_developer_name" value="<?php echo ($bot->developer->getName());?>" placeholder="Enter the name of developer...">
                         </div>
                     </div>
                 </div>
@@ -106,7 +166,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-building-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_address" name="ai_developer_address" placeholder="Enter the address...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_address" name="ai_developer_address" value="<?php echo ($bot->developer->getAddress());?>"placeholder="Enter the address...">
                         </div>
                     </div>
                 </div>
@@ -117,7 +177,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-map-signs"></i>
                             </div>
-                            <input type="text" maxlength="30" class="form-control flat no-shadow"  id="ai_developer_postcode" name="ai_developer_postcode" placeholder="Enter the postcode...">
+                            <input type="text" maxlength="30" class="form-control flat no-shadow"  id="ai_developer_postcode" name="ai_developer_postcode" value="<?php echo ($bot->developer->getPostcode());?>"placeholder="Enter the postcode...">
                         </div>
                     </div>
                 </div>
@@ -132,7 +192,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-map-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_city" name="ai_developer_city" placeholder="Enter the city...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_city" name="ai_developer_city" value="<?php echo ($bot->developer->getCity());?>"placeholder="Enter the city...">
                         </div>
                     </div>
                 </div>
@@ -143,7 +203,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-globe"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow"  id="ai_developer_country" name="ai_developer_country" placeholder="Enter the country...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow"  id="ai_developer_country" name="ai_developer_country" value="<?php echo ($bot->developer->getCountry());?>" placeholder="Enter the country...">
                         </div>
                     </div>
                 </div>
@@ -154,7 +214,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_email" name="ai_developer_email" placeholder="Enter email...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="ai_developer_email" name="ai_developer_email" value="<?php echo ($bot->developer->getEmail());?>" placeholder="Enter email...">
                         </div>
                     </div>
                 </div>
@@ -169,7 +229,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="glyphicon glyphicon-link"></i>
                             </div>
-                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="ai_developer_website" name="ai_developer_website" placeholder="Enter the link of website...">
+                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="ai_developer_website" name="ai_developer_website" value="<?php echo ($bot->developer->getWebsite());?>" placeholder="Enter the link of website...">
                         </div>
                     </div>
                 </div>
@@ -180,7 +240,7 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow" id="ai_developer_company" name="ai_developer_company" placeholder="Enter company...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow" id="ai_developer_company" name="ai_developer_company" value="<?php echo ($bot->developer->getCompany());?>" placeholder="Enter company...">
                         </div>
                     </div>
                 </div>
@@ -202,3 +262,6 @@ $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     </div>
 </div>
 
+<script>
+    var bot = <?php echo $bot->toJSON(); unset($bot);?>;
+</script>

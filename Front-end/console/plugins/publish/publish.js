@@ -55,3 +55,29 @@ function createAlertMessage(alarm,message,id) {
     }
 
 }
+
+function populateBotFileds(){
+    document.getElementById('bot_name').value = bot['name'];
+    document.getElementById('bot_description').value = bot['shortDescription'];
+    document.getElementById('bot_long_description').innerText = bot['longDescription'];
+    setSelectValue('bot_licence_type',bot['licenceType']);
+    setSelectValue('bot_category',bot['category']);
+    setSelectValue('bot_classification',bot['classification']);
+    document.getElementById('bot_licence_fee').value = bot['licenceFee'];
+    document.getElementById('bot_version').value = bot['version'];
+    document.getElementById('bot_usecase').innerText = bot['usecase'];
+    document.getElementById('bot_alert_message').value = bot['alarmMsg'];
+    document.getElementById('bot_link_privacy').value = bot['privacyLink'];
+}
+
+function setSelectValue(id,valueToSelect) {
+    alert(id);
+    var element = document.getElementById(id);
+    element.value = valueToSelect;
+    element.selected = true;
+    document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
+}
+
+$( document ).ready(function() {
+    populateBotFileds();
+});

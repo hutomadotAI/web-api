@@ -1354,6 +1354,26 @@ class console
      */
 
     // TODO turn me into an API call
+
+    public static function existsBotInStore($aiid)
+    {
+        if (self::$loggedIn) {
+            try {
+                $sql = self::$dbh->prepare("CALL existsBotInStore(?)");
+                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
+                $sql->execute();
+            } catch (MySQLException $e) {
+                \hutoma\console::redirect('./error.php?err=306');
+                exit;
+            }
+            $data = $sql->fetchAll();
+            $sql->nextRowset();
+            return $data;
+        }
+    }
+
+
+
     public static function getBotsInStore()
     {
         if (self::$loggedIn) {

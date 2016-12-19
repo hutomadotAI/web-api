@@ -1,6 +1,6 @@
 <div class="form-group">
-  <label for="ai_licenceType">Select Licence Type</label>
-  <select class="form-control select2"  name="ai_licenceType" id="ai_licenceType" style="width: 100%;">
+  <label for="bot_licence_type">Select Licence Type</label>
+  <select class="form-control select2"  name="bot_licence_type" id="bot_licence_type" style="width: 100%;">
     <option selected="selected" value="0">Free</option>
     <option disabled="disabled" value="1">Trial</option>
     <option disabled="disabled" value="2">Subscription</option>

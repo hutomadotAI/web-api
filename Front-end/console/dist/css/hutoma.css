@@ -6505,6 +6505,14 @@ ul.pagination li a {
     padding:0px;
 }
 
+.drop-zone1{
+
+    min-width: 460px;
+    width: auto;
+    padding:0px 0px 0px 235px;
+    margin:0px;
+}
+
 .drop-zone2{
     min-width: 205px;
     max-width: 205px;
@@ -6523,4 +6531,12 @@ ul.pagination li a {
 
 .drop-zone-580{
     min-width: 550px;
+}
+
+.textarea-justify{
+    resize: none;
+    text-align: justify;
+    white-space: pre-line;
+    -moz-text-align-last: left;
+    text-align-last: left;
 }

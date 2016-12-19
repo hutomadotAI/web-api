@@ -1,9 +1,9 @@
 <div class="form-group">
-    <label for="ai_version">Version</label>
+    <label for="bot_version">Version</label>
     <div class="input-group">
         <div class="input-group-addon">
             <i class="fa fa-history"></i>
         </div>
-        <input type="text" maxlength="15" class="form-control flat no-shadow"  id="ai_version" name="ai_version" placeholder="Enter version...">
+        <input type="text" maxlength="15" class="form-control text-left flat no-shadow"  id="bot_version" name="bot_version" placeholder="Enter version..." style=" text-align: right;">
     </div>
 </div>

@@ -1,12 +1,12 @@
 <div class="form-group">
-  <label for="ai_category">Select Category</label>
-  <select class="form-control select2"  name="ai_category" id="ai_category" style="width: 100%;">
+  <label for="bot_category">Select Category</label>
+  <select class="form-control select2"  name="bot_category" id="bot_category" style="width: 100%;">
     <option value="0">Affair</option>
-    <option value="0">Art</option>
-    <option value="1">Beauty</option>
-    <option value="2">Beverage</option>
-    <option value="3">Books</option>
-    <option value="4">Car & Veicles</option>
+    <option value="1">Art</option>
+    <option value="2">Beauty</option>
+    <option value="3">Beverage</option>
+    <option value="4">Books</option>
+    <option value="5">Car & Vehicles</option>
     <option value="6">Communication</option>
     <option value="7">Creativity</option>
     <option value="8">Design</option>

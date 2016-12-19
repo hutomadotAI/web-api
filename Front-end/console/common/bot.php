@@ -85,7 +85,7 @@ class bot
         $this->usecase = $botUsecase;
     }
 
-    public function getUsescase()
+    public function getUsecase()
     {
         return $this->usecase;
     }
@@ -316,6 +316,36 @@ class bot
         }
     }
 
+    public function expose() {
+        return get_object_vars($this);
+    }
+
+    public function toJSON(){
+        $json = array(
+            'name' => $this->getName(),
+            'shortDescription' => $this->getDescription(),
+            'longDescription' => $this->getLongDescription(),
+            'usecase' => $this->getUsecase(),
+            'alarmMsg' => $this->getAlarmMessage(),
+            'iconPath' => $this->getIconPath(),
+            'widgetColor' => $this->getWidgetColor(),
+            'licenceType' => $this->getLicenceType(),
+            'licenceFee' => $this->getLicenceFee(),
+            'category' => $this->getCategory(),
+            'classification' => $this->getClassification(),
+            'activations' => $this->getActivations(),
+            'rating' => $this->getRating(),
+            'users' => $this->getUsers(),
+            'version' => $this->getVersion(),
+            'update' => $this->getUpdate(),
+            'badge' => $this->getBadge(),
+            'iconBadge' => $this->getBadgeIcon(),
+            'privacyLink' => $this->getPrivacyLink(),
+            'report' => $this->getReport(),
+        );
+
+        return json_encode($json);
+    }
     public function __destruct()
     {
 

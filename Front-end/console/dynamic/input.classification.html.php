@@ -1,6 +1,6 @@
 <div class="form-group">
-  <label for="ai_classification">Select Classification</label>
-  <select class="form-control select2"  name="ai_classification" id="ai_classification" style="width: 100%;">
+  <label for="bot_classification">Select Classification</label>
+  <select class="form-control select2"  name="bot_classification" id="bot_classification" style="width: 100%;">
     <option selected="selected" value="0">EVERYONE</option>
     <option disabled="disabled" value="1">EVERYONE 10+ </option>
     <option disabled="disabled" value="2">TEEN</option>
