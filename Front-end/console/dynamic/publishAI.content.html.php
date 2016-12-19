@@ -49,6 +49,11 @@ function setBasicBotDefaultValues(){
     $infoBot = new \hutoma\bot();
     $infoBot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
     $infoBot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
+    $infoBot->setLicenceType('Free');
+    $infoBot->setClassification('EVERYONE');
+    $infoBot->setCategory('No category');
+    $infoBot->setLicenceFee('0.0');
+    $infoBot->setVersion('1.0');
     return $infoBot;
 }
 ?>

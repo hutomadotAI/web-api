@@ -1,7 +1,7 @@
 <div class="form-group">
   <label for="bot_category">Select Category</label>
   <select class="form-control select2"  name="bot_category" id="bot_category" style="width: 100%;">
-    <option value="0">Affair</option>
+    <option value="0">No category</option>
     <option value="1">Art</option>
     <option value="2">Beauty</option>
     <option value="3">Beverage</option>
