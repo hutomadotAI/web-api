@@ -6,12 +6,13 @@
     var dropZone = document.getElementById('drop-zone');
     var startUpload = function(files) {
 
+        console.log('start upload');
         document.getElementById('drag-info').innerText = 'uploading';
         var formData = new FormData();
         formData.append("imageFile", files);
 
         $.ajax({
-            url : './dynamic/uploadBot.php',
+            url : './dynamic/uploadImage.php',
             type : 'POST',
             data : formData,
             dataType: 'json',
@@ -59,7 +60,6 @@
     dropZone.ondrop = function(e) {
         e.preventDefault();
         this.className = 'upload-drop-zone';
-        alert('1');
         startUpload(e.dataTransfer.files)
     }
 
@@ -70,7 +70,6 @@
 
     dropZone.ondragleave = function() {
         this.className = 'upload-drop-zone';
-        alert('3');
         return false;
     }
 

@@ -4,12 +4,22 @@ require_once "./common/bot.php";
 // TODO remove hardcoded part
 $bot = new \hutoma\bot();
 
-if ( \hutoma\console::existsBotInStore($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']))
+if ( existsBotInStore($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']))
     $bot = getBot();
 else
     $bot = setBasicBotDefaultValues();
 
 $bot->developer = getDeveloper();
+
+
+function existsBotInStore($aiid){
+    $fakelist = array(1 => '6ea04c96-2ec3-4a5a-bd46-81742e38aab0', 2 => 'b9907c0b-3d7f-4919-a635-e964840fb8ab', 3 => '189c8ed5-0fe1-4bc0-ba07-d73bb02aa300',4 => '6214abb0-b9dd-4b5c-8194-2e1df15f89dd',5 => '5e643a75-04da-47e3-b920-546406068808');
+    foreach ($fakelist as $singlebot) {
+       if ($singlebot == $aiid)
+           return true;
+    }
+    return false;
+}
 
 function getBot(){
     // TODO remove this fake hardcoded data

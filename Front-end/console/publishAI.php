@@ -1,6 +1,44 @@
-<?php include './dynamic/fillSessionVariables.php';
-?>
+<?php
+require "../pages/config.php";
+require_once "../console/common/bot.php";
+require_once "../console/api/apiBase.php";
+require_once "../console/api/aiApi.php";
 
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
+
+// If is it set, it means the user has selected a existing AI from home list
+if (isset($_POST['ai']))
+    CallGetSingleAI($_POST['ai']);
+
+
+function CallGetSingleAI($aiid)
+{
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $singleAI = $aiApi->getSingleAI($aiid);
+    unset($aiApi);
+    if ($singleAI['status']['code'] === 200) {
+        setSessionVariables($singleAI);
+    } else {
+        unset($singleAI);
+        \hutoma\console::redirect('../error.php?err=200');
+        exit;
+    }
+    unset($singleAI);
+}
+
+function setSessionVariables($singleAI)
+{
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
+}
+
+?>
 
 <!DOCTYPE html>
 <html>

@@ -15,7 +15,7 @@ function checkInput(){
     var bot_name = document.getElementById('bot_name');
     if (bot_name.value !== 'undefined') {
         if (inputValidation(bot_name.value, 'bot_name')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_name');
+            createAlertMessage(2, 'The AI name can only contains letters and numbers.','bot_name');
             return false;
         }
     }
@@ -24,7 +24,7 @@ function checkInput(){
     var bot_description = document.getElementById('bot_description');
     if (bot_description.value != '' && bot_description.value !== 'undefined') {
         if (inputValidation(bot_description.value, 'bot_description')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_description');
+            createAlertMessage(2, 'Invalid description text. Please enter a string that contains alphanumeric characters.','bot_description');
             return false;
         }
     }
@@ -38,7 +38,7 @@ function checkInput(){
     var bot_licence_fee = document.getElementById('bot_licence_fee');
     if (bot_licence_fee.value != '' && bot_licence_fee.value !== 'undefined') {
         if (inputValidation(bot_licence_fee.value, 'bot_licence_fee')) {
-            createAlertMessage(2, 'The value of price needs bbe a number','bot_licence_fee');
+            createAlertMessage(2, 'Please enter a valid number.','bot_licence_fee');
             return false;
         }
     }
@@ -47,7 +47,7 @@ function checkInput(){
     var bot_version = document.getElementById('bot_version');
     if (bot_version.value != '' && bot_licence_fee.value !== 'undefined') {
         if (inputValidation(bot_version.value, 'bot_version')) {
-            createAlertMessage(2, 'The varsion value is incorrect','bot_version');
+            createAlertMessage(2, 'Incorrect Version.','bot_version');
             return false;
         }
     }
@@ -56,7 +56,7 @@ function checkInput(){
     var developer_name = document.getElementById('bot_developer_name');
     if (developer_name.value != '' && developer_name.value !== 'undefined') {
         if (inputValidation(developer_name.value, 'developer_name')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_developer_name');
+            createAlertMessage(2, 'Please enter a name that contains alphanumeric characters','bot_developer_name');
             return false;
         }
     }
@@ -84,18 +84,11 @@ function checkInput(){
     var developer_email = document.getElementById('bot_developer_email');
     if (developer_email.value != '' && developer_email.value !== 'undefined') {
         if (inputValidation(developer_email.value, 'developer_email')) {
-            createAlertMessage(2, 'The email format is incorrect.','bot_developer_email');
+            createAlertMessage(2, 'Please enter a valid email.','bot_developer_email');
             return false;
         }
     }
     // BOT developer company input validation
-    var developer_company = document.getElementById('bot_developer_company');
-    if (developer_company.value != '' && developer_company.value !== 'undefined') {
-        if (inputValidation(developer_company.value, 'developer_company')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_developer_company');
-            return false;
-        }
-    }
     // BOT developer website input validation
 
 

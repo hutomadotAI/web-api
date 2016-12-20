@@ -12,11 +12,11 @@ $response = '';
 $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 
 if (!isset($_FILES['imageFile'])) {
-    echo 'Upload file failed';
+    echo 'Sorry upload failed. Please try again. If the problem persists, contact our support team.';
     exit;
 }
 if ($_FILES['imageFile']['error'] != UPLOAD_ERR_OK) {
-    echo 'Something is gone wrong';
+    echo 'Sorry upload failed. Please try again. If the problem persists, contact our support team.';
     exit;
 }
 if (!is_uploaded_file($_FILES['imageFile']['tmp_name'])) {
