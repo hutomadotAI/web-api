@@ -17,6 +17,7 @@ import org.glassfish.jersey.server.ContainerRequest;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Priority;
@@ -93,12 +94,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
             // do we have a valid post body?
             if (!(requestContext instanceof ContainerRequest)) {
-                throw new ParameterValidationException("wrong request type");
+                throw new ParameterValidationException("wrong request type", "request context");
             }
             final ContainerRequest request = (ContainerRequest) requestContext;
             // if there is a body to decode
             if (!requestContext.hasEntity()) {
-                throw new ParameterValidationException("no form body found");
+                throw new ParameterValidationException("no form body found", "request context");
             }
 
             // of which type?
@@ -112,7 +113,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logDebug(LOGFROM, "parameter validation failed");
-            ITelemetry.addTelemetryEvent(this.logger, "ParamValidationFailed (POST)");
+            ITelemetry.addTelemetryEvent(this.logger, "ParamValidationFailed (POST)",
+                    new HashMap<String, String>() {{
+                        this.put("parameter name", pve.getParameterName());
+                        this.put("error", pve.getMessage());
+                    }});
         }
     }
 
@@ -121,7 +126,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         // if the body is of the right type
         if (!MediaTypes.typeEqual(MediaType.APPLICATION_FORM_URLENCODED_TYPE, request.getMediaType())
                 && !MediaTypes.typeEqual(MediaType.MULTIPART_FORM_DATA_TYPE, request.getMediaType())) {
-            throw new ParameterValidationException("expected form urlencoded type");
+            throw new ParameterValidationException("expected form urlencoded type", "content type");
         }
         // buffer it
         request.bufferEntity();
@@ -155,7 +160,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             throws ParameterValidationException {
         // if the body is of the right type
         if (!MediaTypes.typeEqual(MediaType.APPLICATION_JSON_TYPE, request.getMediaType())) {
-            throw new ParameterValidationException("expected json encoded body");
+            throw new ParameterValidationException("expected json encoded body", "content type");
         }
         // buffer it
         request.bufferEntity();
@@ -196,20 +201,21 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
             if (checkList.contains(APIParameter.AiStatusJson)) {
                 AiStatus aiStatus = (AiStatus) this.serializer.deserialize(request.getEntityStream(), AiStatus.class);
-                checkParameterNotNull(aiStatus.getAiid(), "AIID is null");
-                checkParameterNotNull(aiStatus.getDevId(), "DevID is null");
-                checkParameterNotNull(aiStatus.getTrainingStatus(), "TrainingStatus is null");
-                checkParameterNotNull(aiStatus.getAiEngine(), "AI Engine is null");
+                checkParameterNotNull(AIID, aiStatus.getAiid());
+                checkParameterNotNull(DEVID, aiStatus.getDevId());
+                checkParameterNotNull("training_status", aiStatus.getTrainingStatus());
+                checkParameterNotNull("ai_engine", aiStatus.getAiEngine());
                 request.setProperty(APIParameter.AiStatusJson.toString(), aiStatus);
             }
         } catch (JsonParseException jpe) {
-            throw new ParameterValidationException("error in json format");
+            throw new ParameterValidationException("error in json format", "request body");
         }
     }
 
-    private void checkParameterNotNull(final Object obj, final String msg) throws ParameterValidationException {
+    private void checkParameterNotNull(final String paramName, final Object obj)
+            throws ParameterValidationException {
         if (obj == null) {
-            throw new ParameterValidationException(msg);
+            throw new ParameterValidationException("parameter is null", paramName);
         }
     }
 

@@ -91,14 +91,14 @@ public class Validate {
     private String validatePattern(final Pattern pattern, final String paramName, final String param)
             throws ParameterValidationException {
         if (null == param) {
-            throw new ParameterValidationException("missing " + paramName);
+            throw new ParameterValidationException("parameter cannot be null", paramName);
         }
         final String result = param.trim();
         if (result.isEmpty()) {
-            throw new ParameterValidationException("empty " + paramName);
+            throw new ParameterValidationException("parameter cannot be empty", paramName);
         }
         if (!pattern.matcher(result).matches()) {
-            throw new ParameterValidationException("invalid characters in " + paramName);
+            throw new ParameterValidationException("invalid characters found", paramName);
         }
         return result;
     }
@@ -121,7 +121,7 @@ public class Validate {
             return "";
         }
         if (!pattern.matcher(result).matches()) {
-            throw new ParameterValidationException("invalid characters in " + paramName);
+            throw new ParameterValidationException("invalid characters found", paramName);
         }
         return result;
     }
@@ -141,7 +141,7 @@ public class Validate {
             for (String param : paramList) {
                 String validatedParam = validatePattern(pattern, paramName, param);
                 if (!results.add(validatedParam)) {
-                    throw new ParameterValidationException("duplicate items in " + paramName);
+                    throw new ParameterValidationException("duplicate items", paramName);
                 }
             }
         }
@@ -149,8 +149,15 @@ public class Validate {
     }
 
     public static class ParameterValidationException extends Exception {
-        public ParameterValidationException(final String message) {
+        private final String paramName;
+
+        public ParameterValidationException(final String message, final String paramName) {
             super(message);
+            this.paramName = paramName;
+        }
+
+        public String getParameterName() {
+            return this.paramName;
         }
     }
 
@@ -188,37 +195,37 @@ public class Validate {
         String newParam = param.trim().replace(',', '.');
         // check that it generally matches
         if (!floatPattern.matcher(newParam).matches()) {
-            throw new ParameterValidationException("invalid " + paramName);
+            throw new ParameterValidationException("invalid parameter", paramName);
         }
         // parse
         final float result = Float.parseFloat(newParam);
         // just in case it's still weirdly invalid
         if (Float.isNaN(result)) {
-            throw new ParameterValidationException("invalid " + paramName);
+            throw new ParameterValidationException("invalid float parameter", paramName);
         }
         // if it's out of range
         if ((result < min) || (result > max)) {
-            throw new ParameterValidationException(paramName + " out of range");
+            throw new ParameterValidationException("out of range", paramName);
         }
         return result;
     }
 
     String validateTimezoneString(final String paramName, final String param) throws ParameterValidationException {
         if (param == null || param.isEmpty()) {
-            throw new ParameterValidationException("invalid " + paramName);
+            throw new ParameterValidationException("parameter null or empty", paramName);
         }
         if (!Arrays.stream(TimeZone.getAvailableIDs()).anyMatch(x -> x.equals(param))) {
-            throw new ParameterValidationException("invalid timezone value " + param);
+            throw new ParameterValidationException("invalid timezone value: " + param, paramName);
         }
         return param;
     }
 
     Locale validateLocale(final String paramName, final String param) throws ParameterValidationException {
         if (param == null || param.isEmpty()) {
-            throw new ParameterValidationException("invalid " + paramName);
+            throw new ParameterValidationException("parameter null or empty", paramName);
         }
         if (!Arrays.stream(Locale.getAvailableLocales()).anyMatch(x -> x.toLanguageTag().equals(param))) {
-            throw new ParameterValidationException("invalid locale " + param);
+            throw new ParameterValidationException("invalid locale: " + param, paramName);
         }
         // At this moment we know the locale is correctly formatted
         return Locale.forLanguageTag(param);
@@ -229,7 +236,7 @@ public class Validate {
         try {
             return UUID.fromString(result);
         } catch (final IllegalArgumentException iae) {
-            throw new ParameterValidationException("invalid characters in " + paramName);
+            throw new ParameterValidationException("invalid characters found", paramName);
         }
     }
 
@@ -239,11 +246,11 @@ public class Validate {
 
     String validateRequiredSanitized(final String paramName, final String param) throws ParameterValidationException {
         if (null == param) {
-            throw new ParameterValidationException("missing " + paramName);
+            throw new ParameterValidationException("missing parameter", paramName);
         }
         final String result = textSanitizer(param);
         if (result.isEmpty()) {
-            throw new ParameterValidationException("empty " + paramName);
+            throw new ParameterValidationException("parameter cannot be empty", paramName);
         }
         return result;
     }
