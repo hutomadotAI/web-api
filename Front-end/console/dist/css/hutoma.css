@@ -6488,14 +6488,28 @@ ul.pagination li a {
 
 
 .drag-icon {
-    min-height: 205px;
-    max-height: 205px;
-    min-width: 205px;
-    max-width: 205px;
+     min-height: 205px;
+     max-height: 205px;
+     min-width: 205px;
+     max-width: 205px;
+     text-align: center;
+     font-size: 65px;
+     background: #515181;
+     margin:auto;
+ }
+
+.drag-area{
+    min-height: 305px;
+    max-height: 305px;
+    min-width: 305px;
+    max-width: 305px;
     text-align: center;
     font-size: 65px;
     background: #515181;
     margin:auto;
+}
+.drag-area img {
+    max-width: 100%;
 }
 
 .drop-zone{

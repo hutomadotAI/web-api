@@ -15,8 +15,8 @@ $bot->developer = getDeveloper();
 function existsBotInStore($aiid){
     $fakelist = array(1 => '6ea04c96-2ec3-4a5a-bd46-81742e38aab0', 2 => 'b9907c0b-3d7f-4919-a635-e964840fb8ab', 3 => '189c8ed5-0fe1-4bc0-ba07-d73bb02aa300',4 => '6214abb0-b9dd-4b5c-8194-2e1df15f89dd',5 => '5e643a75-04da-47e3-b920-546406068808');
     foreach ($fakelist as $singlebot) {
-       if ($singlebot == $aiid)
-           return true;
+        if ($singlebot == $aiid)
+            return true;
     }
     return false;
 }
@@ -36,7 +36,7 @@ Agent: I like you too. You\'re a lot of fun to talk to.');
     $infoBot->setUpdate('10 september 2016');  // setted when you send request publish bot
     $infoBot->setLicenceType('Free');
     $infoBot->setLicenceFee('0.0');
-    $infoBot->setCategory('entertainment');
+    $infoBot->setCategory('Other');
     $infoBot->setClassification('EVERYONE');
     $infoBot->setVersion('1.0.0');
     return $infoBot;
@@ -67,6 +67,7 @@ function setBasicBotDefaultValues(){
     return $infoBot;
 }
 ?>
+
 
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
@@ -271,7 +272,7 @@ function setBasicBotDefaultValues(){
         </div>
         <!-- end row 3 -->
         <div class="box-footer">
-            <a style="width:100px" class="btn btn-primary flat" id="btnCancel" onClick="window.location.href='./home.php';"><b>Cancel</b></a>
+            <a style="width:100px" class="btn btn-primary flat" id="btnBack" onClick="window.location.href='./home.php';"><b>Back</b></a>
             <button class="btn btn-success pull-right flat" id="btnPublishRequest"><b>Publish new Bot</b>
                 <span class="fa fa-arrow-circle-right"></span>
             </button>
@@ -279,6 +280,30 @@ function setBasicBotDefaultValues(){
     </div>
 </div>
 
+<div class="modal fade" id="image-modal" role="dialog">
+    <div class="modal-dialog flat">
+        <!-- Modal content-->
+        <div class="modal-content bordered" style="background-color: #202020">
+            <div class="modal-body" style="background-color: #535353" >
+                <div class="box-body" id="delete-ai-label">
+                    <div class="drag-area" id="imagePath">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" id="deleteForm" action="">
+                    <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger flat" id="modalCrop" data-dismiss="modal">Crop
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     var bot = <?php echo $bot->toJSON(); unset($bot);?>;
+    var cropper;
 </script>
+

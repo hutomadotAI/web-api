@@ -44,6 +44,7 @@ function checkInput(){
     }
 
     // BOT version input validation
+    /*
     var bot_version = document.getElementById('bot_version');
     if (bot_version.value != '' && bot_licence_fee.value !== 'undefined') {
         if (inputValidation(bot_version.value, 'bot_version')) {
@@ -51,6 +52,7 @@ function checkInput(){
             return false;
         }
     }
+    */
 
     // BOT developer name input validation
     var developer_name = document.getElementById('bot_developer_name');
