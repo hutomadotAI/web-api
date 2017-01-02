@@ -294,7 +294,7 @@ function setBasicBotDefaultValues(){
                 <form method="POST" id="deleteForm" action="">
                     <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
                     </button>
-                    <button type="submit" class="btn btn-danger flat" id="modalCrop" data-dismiss="modal">Crop
+                    <button type="submit" class="btn btn-danger flat" id="btnModalCrop" data-dismiss="modal">Crop
                     </button>
                 </form>
             </div>

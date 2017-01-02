@@ -1,8 +1,14 @@
+document.getElementById("btnModalCrop").addEventListener("click", cropImage);
+document.getElementById("btnModelCancel").addEventListener("click", cropCancel);
+
 function addImage(e) {
     var fd = new FormData();
     fd.append('file', e.dataTransfer.files[0]);
     var img = document.createElement('img');
+    img.setAttribute('id','avatar');
     img.file = e.dataTransfer.files[0];
+
+    document.getElementById('drop-zone-icon').className='fa fa-file-image-o';
 
     document.getElementById('drag-info').innerText = 'uploading '+ e.dataTransfer.files[0].name;
 
@@ -13,6 +19,18 @@ function addImage(e) {
     var item =  document.getElementById('imagePath');
     item.removeChild( item.firstChild );
     item.appendChild(img);
+}
+
+function cropImage(){
+    document.getElementById('drag-square').style.backgroundImage =  "url('"+document.getElementById('avatar').getAttribute('src')+"')";
+    document.getElementById('drop-zone').style.borderStyle = 'none';
+    document.getElementById('drop-zone-icon').className='';
+    document.getElementById('drag-info').innerText = '';
+
+}
+
+function cropCancel(){
+    document.getElementById('drag-info').innerText = 'Just drag and drop an image file showing you AI here';
 }
 
 + function($) {
@@ -70,7 +88,7 @@ function addImage(e) {
 
     }
 
-
+/*
     dropZone.addEventListener('click', function(e) {
         document.getElementById('uploadfile').click();
         e.preventDefault()
@@ -78,10 +96,15 @@ function addImage(e) {
         startUpload(uploadFiles)
     })
 
+    */
+
 
     dropZone.ondrop = function(e) {
         e.preventDefault();
         this.className = 'upload-drop-zone';
+
+        document.getElementById('drag-square').style.backgroundImage = '';
+        document.getElementById('drop-zone').style.borderStyle = 'dashed';
 
         addImage(e);
 
@@ -102,30 +125,6 @@ function addImage(e) {
 
 }(jQuery);
 
-
-function handleFileUpload(files, obj) {
-    for (var i = 0; i < files.length; i++) {
-        var fd = new FormData();
-        fd.append('file', files[i]);
-        var status = new createStatusbar(obj); //Using this we can set progress.
-        //status.setFileNameSize(files[i].name, files[i].size);
-        //sendFileToServer(fd, status);
-
-        var list = document.getElementById("image-list");
-        var cell = document.createElement("td");
-        var img = document.createElement("img");
-        img.classList.add("obj");
-        img.file = files[i];
-        cell.setAttribute("align", "center");
-        cell.setAttribute("valign", "bottom");
-        cell.appendChild(img);
-        list.appendChild(cell);
-
-        var reader = new FileReader();
-        reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result; }; })(img);
-        reader.readAsDataURL(files[i]);
-    }
-}
 
 
 $('#image-modal').on('show.bs.modal', function (e) {
