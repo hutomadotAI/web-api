@@ -245,6 +245,28 @@ function setSelectValue(id,valueToSelect) {
     document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
 }
 
+function licenceTypeShow(){
+    var myselect = document.getElementById('bot_licence_type');
+    var val = parseInt(myselect.options[myselect.selectedIndex].value);
+
+    switch(val){
+        case 0:
+            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse';
+            break;
+        case 1:
+            document.getElementById('collapseLicenceDetailsSubscription').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse in';
+            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse';
+            break;
+        case 2:
+            document.getElementById('collapseLicenceDetailsPerpetual').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse in';
+            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse';
+            break;
+    }
+}
+
 $(function () {
     $('.select2').select2();
 });

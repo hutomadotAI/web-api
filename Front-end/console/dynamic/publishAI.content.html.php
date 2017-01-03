@@ -112,8 +112,8 @@ function setBasicBotDefaultValues(){
             </div>
         </div>
         <!-- end row 1 -->
-        <br>
-        <!-- row 2 -->
+        <p></p>
+        <!-- row 2 TOP -->
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
             <div class="col-xs-4 drop-zone2">
                 <div class="row no-margin">
@@ -125,6 +125,99 @@ function setBasicBotDefaultValues(){
                 <div class="row no-margin">
                     <?php include './dynamic/input.classification.html.php'; ?>
                 </div>
+            </div>
+
+            <div class="drop-zone-460">
+                <div class="row no-margin" style="padding-top:10px;">
+                    <div class="form-group no-margin">
+                        <label for="bot_usecase">Show Example of Conversation</label>
+                        <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="bot_usecase" style="height:182px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end row 2 TOP -->
+
+
+
+        <!-- row 2 MIDDLE-->
+        <!-- showed only for licence subscription  -->
+        <div id="collapseLicenceDetailsSubscription" class="panel-collapse collapse">
+            <div class="row no-margin" style="border-top: 1px solid #434343; border-bottom: 1px solid #434343;">
+                <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
+                    <div class="col-xs-4 no-padding">
+                        <div class="form-group">
+                            <label for="bot_add_field_1">Added field 1</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-info"></i>
+                                </div>
+                                <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_add_field_1" name="bot_add_field_1" placeholder="Enter info...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-5">
+                        <div class="form-group">
+                            <label for="bot_add_field_2">Added field 2</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-info"></i>
+                                </div>
+                                <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_add_field_2" name="bot_add_field_2" placeholder="Enter info...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3 no-padding">
+                        <div class="form-group">
+                            <label for="bot_add_field_3">Added field 3</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-info"></i>
+                                </div>
+                                <input type="text" maxlength="30" class="form-control flat no-shadow"  id="bot_add_field_3" name="bot_add_field_3" placeholder="Enter info...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end row 2 MIDDLE-->
+
+        <!-- row 2 MIDDLE-->
+        <!-- showed only for licence perpetual  -->
+        <div id="collapseLicenceDetailsPerpetual" class="panel-collapse collapse">
+            <div class="row no-margin" style="border-top: 1px solid #434343; border-bottom: 1px solid #434343;">
+                <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
+                    <div class="col-xs-6 no-padding">
+                        <div class="form-group">
+                            <label for="bot_add_field_1">Added field 1</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-info"></i>
+                                </div>
+                                <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_add_field_1" name="bot_add_field_1" placeholder="Enter info...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6" style="padding-right:0px;">
+                        <div class="form-group">
+                            <label for="bot_add_field_2">Added field 2</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-info"></i>
+                                </div>
+                                <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_add_field_2" name="bot_add_field_2" placeholder="Enter info...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end row 2 MIDDLE-->
+
+        <!-- row 2 BOTTOM-->
+        <div class="row no-margin">
+            <div class="col-xs-4 drop-zone2">
                 <div class="row no-margin">
                     <?php include './dynamic/input.licenceFee.html.php'; ?>
                 </div>
@@ -135,11 +228,7 @@ function setBasicBotDefaultValues(){
 
             <div class="drop-zone-460">
                 <div class="row no-margin" style="padding-top:10px;">
-                    <div class="form-group no-margin">
-                        <label for="bot_usecase">Show Example of Conversation</label>
-                        <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="bot_usecase" style="height:182px;"></textarea>
-                    </div>
-                    <div class="form-group" style="padding-top:15px;">
+                    <div class="form-group">
                         <label for="bot_alert_message">Alert message</label>
                         <div class="input-group">
                             <div class="input-group-addon">
@@ -160,8 +249,28 @@ function setBasicBotDefaultValues(){
                 </div>
             </div>
         </div>
-        <!-- end row 2 -->
+        <!-- end row 2 BOTTOM-->
         <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
         <!-- row 3 -->
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
             <!-- row 3A -->

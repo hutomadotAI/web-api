@@ -7,7 +7,7 @@
         <div class="text-sm unselectable" id="drag-info">Just drag and drop an image file showing you AI here</div>
     </div>
 
-    <input type="range" class="cropit-image-zoom-input">
+    <input type="range" class="cropit-image-zoom-input" style="margin-top:10px;">
     <!--<button class="export">Export</button>-->
 
 </div>
