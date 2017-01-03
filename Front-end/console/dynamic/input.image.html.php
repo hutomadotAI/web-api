@@ -4,7 +4,7 @@
 
     <div class="cropit-preview">
         <i class="fa fa-file-image-o" id="drop-zone-icon" style="padding-top:50px;"></i>
-        <div class="text-sm unselectable" id="drag-info">Just drag and drop an image file showing you AI here</div>
+        <div class="text-sm unselectable" id="drag-info">Drag and drop a picture</div>
     </div>
 
     <input type="range" class="cropit-image-zoom-input" style="margin-top:10px;">
