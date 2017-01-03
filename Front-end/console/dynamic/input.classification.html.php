@@ -5,7 +5,6 @@
     <option disabled="disabled" value="1">EVERYONE 10+ </option>
     <option disabled="disabled" value="2">TEEN</option>
     <option disabled="disabled" value="3">MATURE</option>
-    <option disabled="disabled" value="4">ADULTS ONLY</option>
   </select>
 </div>
 
