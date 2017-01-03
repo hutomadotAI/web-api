@@ -55,6 +55,7 @@ function checkInput(){
     */
 
     // BOT developer name input validation
+    /*
     var developer_name = document.getElementById('bot_developer_name');
     if (developer_name.value != '' && developer_name.value !== 'undefined') {
         if (inputValidation(developer_name.value, 'developer_name')) {
@@ -62,10 +63,12 @@ function checkInput(){
             return false;
         }
     }
+    */
     
     // BOT developer address input validation
 
     // BOT developer city input validation
+    /*
     var developer_city = document.getElementById('bot_developer_city');
     if (developer_city.value != '' && developer_city.value !== 'undefined') {
         if (inputValidation(developer_city.value, 'developer_city')) {
@@ -73,8 +76,10 @@ function checkInput(){
             return false;
         }
     }
+    */
 
     // BOT developer country input validation
+    /*
     var developer_country = document.getElementById('bot_developer_country');
     if (developer_country.value != '' && developer_country.value !== 'undefined') {
         if (inputValidation(developer_country.value, 'developer_country')) {
@@ -82,6 +87,8 @@ function checkInput(){
             return false;
         }
     }
+    */
+
     // BOT developer email input validation
     var developer_email = document.getElementById('bot_developer_email');
     if (developer_email.value != '' && developer_email.value !== 'undefined') {
