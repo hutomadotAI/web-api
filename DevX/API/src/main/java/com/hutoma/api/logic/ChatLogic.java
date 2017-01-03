@@ -167,17 +167,23 @@ public class ChatLogic {
         // wait for result to complete
         ChatResult chatResult = this.chatServices.awaitWnet();
 
-        // if we receive a reset command then remove the command and flag the status
-        if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
-            chatResult.setResetConversation(true);
-            chatResult.setAnswer(chatResult.getAnswer()
-                    .replace(HISTORY_REST_DIRECTIVE, ""));
+        if (chatResult.getAnswer() != null) {
+            // if we receive a reset command then remove the command and flag the status
+            if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
+                chatResult.setResetConversation(true);
+                chatResult.setAnswer(chatResult.getAnswer()
+                        .replace(HISTORY_REST_DIRECTIVE, ""));
+            } else {
+                chatResult.setResetConversation(false);
+            }
+
+            // remove trailing newline
+            chatResult.setAnswer(chatResult.getAnswer().trim());
         } else {
-            chatResult.setResetConversation(false);
+            chatResult.setAnswer("");
+            this.telemetryMap.put("WNETResponseNULL", "");
         }
 
-        // remove trailing newline
-        chatResult.setAnswer(chatResult.getAnswer().trim());
         chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
 
         this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",

@@ -17,16 +17,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by pedrotei on 07/11/16.
+ * Server connector.
  */
 public class ServerConnector {
 
     private static final String LOGFROM = "serverconnector";
+    private static final int TIMEOUT_SECONDS = 10;
+
     protected final JsonSerializer serializer;
     protected final Database database;
     protected final Config config;
@@ -48,7 +52,7 @@ public class ServerConnector {
     }
 
     public void abandonCalls() {
-        executor.shutdownNow();
+        this.executor.shutdownNow();
     }
 
     public static class AiServicesException extends Exception {
@@ -57,16 +61,17 @@ public class ServerConnector {
         }
     }
 
-    protected Response waitFor(String callName, HashMap<String, Future<Response>> futures) throws AiServicesException, ExecutionException, InterruptedException {
+    protected Response waitFor(String callName, HashMap<String, Future<Response>> futures)
+            throws AiServicesException, ExecutionException, InterruptedException, TimeoutException {
         if (!futures.containsKey(callName)) {
             throw new AiServicesException(String.format("Call %s not found", callName));
         }
-        return futures.get(callName).get();
+        return futures.get(callName).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
 
     protected HashMap<String, Future<Response>> execute(final HashMap<String, Callable<Response>> callables) {
         this.logger.logDebug(LOGFROM, String.format("Issuing %d requests for %s",
-                callables.size(), this.tools.getCallerMethod()));
+                callables.size(), this.tools.getCallerMethod(3)));
         HashMap<String, Future<Response>> futures = new HashMap<>();
 
         // get a named future for a named callable response
@@ -103,8 +108,9 @@ public class ServerConnector {
                         .map(Object::toString)
                         .collect(Collectors.joining(";")));
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AiServicesException(e.getMessage());
         }
+        this.logger.logDebug(LOGFROM, String.format("All %d calls executed successfully", callables.size()));
     }
 }

@@ -44,6 +44,7 @@ public class AIServices extends ServerConnector {
         } catch (Database.DatabaseException ex) {
             throw new AiServicesException("Could not get plan for devId " + devId);
         }
+        this.logger.logDebug(LOGFROM, "Issuing \"start training\" command to backends for AI " + aiid.toString());
         final int maxTrainingSecs = devPlan.getMaxTrainingSecs();
         HashMap<String, Callable<Response>> callables = getTrainingCallablesForCommand(devId, aiid,
                 new HashMap<String, String>() {{
@@ -60,6 +61,7 @@ public class AIServices extends ServerConnector {
 
     public void deleteAI(final String devId, final UUID aiid) throws AiServicesException {
         HashMap<String, Callable<Response>> callables = new HashMap<>();
+        this.logger.logDebug(LOGFROM, "Issuing \"delete AI\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getAllEndpoints()) {
             callables.put(endpoint, () -> this.jerseyClient
                     .target(endpoint).path(devId).path(aiid.toString())
@@ -70,6 +72,7 @@ public class AIServices extends ServerConnector {
     }
 
     public void deleteDev(final String devId) throws AiServicesException {
+        this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
         HashMap<String, Callable<Response>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
             callables.put(endpoint, () -> this.jerseyClient
@@ -81,6 +84,7 @@ public class AIServices extends ServerConnector {
     }
 
     public void updateTraining(final String devId, final UUID aiid) throws AiServicesException {
+        this.logger.logDebug(LOGFROM, "Issuing \"update training\" command to backends for AI " + aiid.toString());
         HashMap<String, Callable<Response>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
             callables.put(endpoint, () -> this.jerseyClient
@@ -94,8 +98,9 @@ public class AIServices extends ServerConnector {
     public void uploadTraining(final String devId, final UUID aiid, final String trainingMaterials)
             throws AiServicesException {
         HashMap<String, Callable<Response>> callables = new HashMap<>();
+        this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getAllEndpoints()) {
-            logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
+            this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
                     .fileName("training.txt")

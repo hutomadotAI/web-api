@@ -3,6 +3,7 @@ package com.hutoma.api.connectors;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
@@ -109,10 +111,12 @@ public class AIChatServices extends ServerConnector {
         // get and wait for the call to complete
         Response response = null;
         try {
-            response = this.waitFor(label, this.requestMap);
-        } catch (ExecutionException e) {
-            throw new AiServicesException(String.format("%s: %s", label, e.getMessage()));
-        } catch (InterruptedException e) {
+            if (!this.requestMap.get(label).isDone()) {
+                response = this.waitFor(label, this.requestMap);
+            } else {
+                response = this.requestMap.get(label).get();
+            }
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new AiServicesException(String.format("%s: %s", label, e.getMessage()));
         }
 
@@ -134,8 +138,10 @@ public class AIChatServices extends ServerConnector {
         // otherwise attempt to deserialize the chat result
         try {
             String content = response.readEntity(String.class);
-            ChatResult result = new ChatResult((ChatResult) this.serializer.deserialize(content, ChatResult.class));
-            return result;
+            ITelemetry.addTelemetryEvent(this.logger, "chat response", new HashMap<String, String>() {{
+                this.put("From", label);
+            }});
+            return new ChatResult((ChatResult) this.serializer.deserialize(content, ChatResult.class));
         } catch (JsonParseException jpe) {
             throw new AiServicesException(jpe.getMessage());
         }
