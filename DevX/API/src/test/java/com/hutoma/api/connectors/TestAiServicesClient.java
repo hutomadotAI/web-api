@@ -2,8 +2,8 @@ package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Logger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.Consumes;
@@ -58,7 +57,7 @@ public class TestAiServicesClient {
     private FakeJsonSerializer fakeSerializer;
     private Database fakeDatabase;
     private Config fakeConfig;
-    private Logger fakeLogger;
+    private ILogger fakeLogger;
     private Tools fakeTools;
     private AIServices aiServices;
 
@@ -79,7 +78,7 @@ public class TestAiServicesClient {
         this.fakeSerializer = new FakeJsonSerializer();
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
 
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,

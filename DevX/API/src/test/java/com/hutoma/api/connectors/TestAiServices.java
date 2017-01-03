@@ -2,7 +2,7 @@ package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeJsonSerializer;
-import com.hutoma.api.common.Logger;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -17,8 +17,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
@@ -45,7 +43,7 @@ public class TestAiServices {
     private SecurityContext fakeContext;
     private Database fakeDatabase;
     private Config fakeConfig;
-    private Logger fakeLogger;
+    private ILogger fakeLogger;
     private Tools fakeTools;
     private JerseyClient fakeClient;
 
@@ -57,7 +55,7 @@ public class TestAiServices {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeLogger = mock(Logger.class);
+        this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
 

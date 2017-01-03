@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Created by pedrotei on 29/09/16.
+ * Central logger with telemetry enabled.
  */
 @Singleton
 public class TelemetryCentralLogger extends CentralLogger implements ITelemetry {
@@ -50,7 +50,7 @@ public class TelemetryCentralLogger extends CentralLogger implements ITelemetry 
      * {@inheritDoc}
      */
     public void addTelemetryEvent(String eventName, Exception exception, Map<String, String> properties) {
-        Map<String, String> map = new HashMap<>(properties);
+        Map<String, String> map = properties == null ? new HashMap<>() : new HashMap<>(properties);
         map.put("message", exception.getMessage());
         map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
         this.logOutput(EventType.EXCEPTION, eventName, exception.getClass().getName(), map);
@@ -82,6 +82,14 @@ public class TelemetryCentralLogger extends CentralLogger implements ITelemetry 
      */
     public boolean isTelemetryEnabled() {
         return this.isTelemetryEnabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void logException(String fromLabel, final Exception ex) {
+        this.addTelemetryEvent(fromLabel, ex);
     }
 
     private String getStackTraceAsString(StackTraceElement[] stackTrace) {

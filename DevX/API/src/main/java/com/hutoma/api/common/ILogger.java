@@ -1,7 +1,7 @@
 package com.hutoma.api.common;
 
 /**
- * Created by pedrotei on 03/10/16.
+ * Logger interface.
  */
 public interface ILogger {
 
@@ -18,6 +18,13 @@ public interface ILogger {
      * @param logComment the comment
      */
     void logInfo(String fromLabel, String logComment);
+
+    /**
+     * Logs an exception.
+     * @param fromLabel the origin of the log
+     * @param ex        the exception
+     */
+    void logException(String fromLabel, Exception ex);
 
     /**
      * Adds a WARNING log.
