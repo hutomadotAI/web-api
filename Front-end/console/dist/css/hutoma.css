@@ -6554,3 +6554,18 @@ ul.pagination li a {
     -moz-text-align-last: left;
     text-align-last: left;
 }
+
+.cropit-preview {
+    min-height: 205px;
+    max-height: 205px;
+    min-width: 205px;
+    max-width: 205px;
+    text-align: center;
+    font-size: 65px;
+    background: #515181;
+    margin:auto;
+}
+
+.cropit-preview-image-container {
+    cursor: move;
+}

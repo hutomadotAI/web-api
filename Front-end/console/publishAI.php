@@ -53,8 +53,6 @@ function setSessionVariables($singleAI)
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./plugins/cropper/cropper.css">
-
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -100,12 +98,26 @@ function setSessionVariables($singleAI)
 <script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/publish/publish.js"></script>
-<script src="./plugins/dragdrop/dragdrop.js"></script>
-<script src="./plugins/cropper/cropper.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<script src="./plugins/cropper/jquery.cropit.js"></script>
+<script>
+    $(function() {
+        $('.image-editor').cropit({
+            imageState: {
+                src: '',
+            },
+        });
+
+        $('.export').click(function() {
+            var imageData = $('.image-editor').cropit('export');
+            window.open(imageData);
+        });
+    });
+</script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">

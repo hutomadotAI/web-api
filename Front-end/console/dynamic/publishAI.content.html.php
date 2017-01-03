@@ -280,30 +280,8 @@ function setBasicBotDefaultValues(){
     </div>
 </div>
 
-<div class="modal fade" id="image-modal" role="dialog">
-    <div class="modal-dialog flat">
-        <!-- Modal content-->
-        <div class="modal-content bordered" style="background-color: #202020">
-            <div class="modal-body" style="background-color: #535353" >
-                <div class="box-body" id="delete-ai-label">
-                    <div class="drag-area" id="imagePath">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <form method="POST" id="deleteForm" action="">
-                    <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
-                    </button>
-                    <button type="submit" class="btn btn-danger flat" id="btnModalCrop" data-dismiss="modal">Crop
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     var bot = <?php echo $bot->toJSON(); unset($bot);?>;
     var cropper;
 </script>
-
