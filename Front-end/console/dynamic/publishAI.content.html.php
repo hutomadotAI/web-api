@@ -145,6 +145,7 @@ function setBasicBotDefaultValues(){
         <div id="collapseLicenceDetailsSubscription" class="panel-collapse collapse">
             <div class="row no-margin" style="border-top: 1px solid #434343; border-bottom: 1px solid #434343;">
                 <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
+                    <!--
                     <div class="col-xs-4 no-padding">
                         <div class="form-group">
                             <label for="bot_add_field_1">Added field 1</label>
@@ -178,6 +179,7 @@ function setBasicBotDefaultValues(){
                             </div>
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
         </div>
@@ -188,6 +190,7 @@ function setBasicBotDefaultValues(){
         <div id="collapseLicenceDetailsPerpetual" class="panel-collapse collapse">
             <div class="row no-margin" style="border-top: 1px solid #434343; border-bottom: 1px solid #434343;">
                 <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
+                   <!--
                     <div class="col-xs-6 no-padding">
                         <div class="form-group">
                             <label for="bot_add_field_1">Added field 1</label>
@@ -210,6 +213,7 @@ function setBasicBotDefaultValues(){
                             </div>
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
         </div>
