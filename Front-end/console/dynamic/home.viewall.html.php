@@ -19,14 +19,9 @@
             </tbody>
         </table>
        
-        <form method="POST" name="viewAllForm" action="./trainingAI.php">
+        <form method="POST" name="viewAllForm" action="">
             <input type="hidden" id="ai" name="ai" value="">
         </form>
-        <!--
-        <form method="POST" name="publishForm" action="">
-            <input type="hidden" id="aiid" name="aiid" value="">
-        </form>
-        -->
 </div>
 
     

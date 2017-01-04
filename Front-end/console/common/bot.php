@@ -24,6 +24,7 @@ class bot
     private $licenceType;
     private $licenceFee;
 
+    private $category;
     private $classification;
     private $activations;
     private $rating;
@@ -84,7 +85,7 @@ class bot
         $this->usecase = $botUsecase;
     }
 
-    public function getUsescase()
+    public function getUsecase()
     {
         return $this->usecase;
     }
@@ -142,6 +143,17 @@ class bot
     public function getLicenceFee()
     {
         return $this->licenceFee;
+    }
+
+
+    public function setCategory($botCategory)
+    {
+        $this->category = $botCategory;
+    }
+
+    public function getCategory()
+    {
+        return $this->category;
     }
 
 
@@ -303,6 +315,49 @@ class bot
                 return '5.000.000-10.000.000';
         }
     }
+    
+    public function ciao(){
+        return $this->developer->getName();
+    }
+
+    public function toJSON()
+    {
+        $json = array(
+            'name' => $this->getName(),
+            'shortDescription' => $this->getDescription(),
+            'longDescription' => $this->getLongDescription(),
+            'usecase' => $this->getUsecase(),
+            'alarmMsg' => $this->getAlarmMessage(),
+            'iconPath' => $this->getIconPath(),
+            'widgetColor' => $this->getWidgetColor(),
+            'licenceType' => $this->getLicenceType(),
+            'licenceFee' => $this->getLicenceFee(),
+            'category' => $this->getCategory(),
+            'classification' => $this->getClassification(),
+            'activations' => $this->getActivations(),
+            'rating' => $this->getRating(),
+            'users' => $this->getUsers(),
+            'version' => $this->getVersion(),
+            'update' => $this->getUpdate(),
+            'badge' => $this->getBadge(),
+            'iconBadge' => $this->getBadgeIcon(),
+            'privacyLink' => $this->getPrivacyLink(),
+            'report' => $this->getReport(),
+            'developer' => array(
+                'name' => $this->developer->getName(),
+                'email' => $this->developer->getEmail(),
+                'address' => $this->developer->getAddress(),
+                'postcode' => $this->developer->getPostcode(),
+                'city' => $this->developer->getCity(),
+                'country' => $this->developer->getCountry(),
+                'website' => $this->developer->getWebsite(),
+                'company' => $this->developer->getCompany()
+            )
+        );
+        
+        return json_encode($json);
+    }
+
 
     public function __destruct()
     {

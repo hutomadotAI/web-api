@@ -16,7 +16,7 @@ class developer
     private $address;
     private $postcode;
     private $city;
-    private $nation;
+    private $country;
     private $website;
     private $company;
     
@@ -80,14 +80,14 @@ class developer
     }
 
 
-    public function setNation($devNation)
+    public function setCountry($devCountry)
     {
-        $this->nation = $devNation;
+        $this->country = $devCountry;
     }
 
-    public function getNation()
+    public function getCountry()
     {
-        return $this->nation;
+        return $this->country;
     }
 
 
@@ -110,6 +110,22 @@ class developer
     public function getCompany()
     {
         return $this->company;
+    }
+
+
+    public function toJSON()
+    {
+        $json = array(
+            'name' => $this->getName(),
+            'email' => $this->getEmail(),
+            'address' => $this->getAddress(),
+            'postcode' => $this->getPostcode(),
+            'city' => $this->getCity(),
+            'country' => $this->getCountry(),
+            'website' => $this->getWebsite(),
+            'company' => $this->getCompany(),
+        );
+        return json_encode($json);
     }
 
 

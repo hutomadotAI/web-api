@@ -8,7 +8,7 @@ function wizardNext() {
     document.startForm.submit();
 }
 
-function sendAIID(elem){
+function sendAIID(elem,action){
     var value = elem.value;
     elem.setAttribute('disabled','disabled');
 
@@ -20,22 +20,9 @@ function sendAIID(elem){
     RecursiveUnbind($('#listTable'));
    // deactiveButtons();
 
+    document.viewAllForm.action = action;
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();
-}
-
-function publishAIID(elem){
-    /*
-    var value = elem.value;
-    elem.setAttribute('disabled','disabled');
-    
-    if(document.publishForm.onsubmit)
-        return;
-    RecursiveUnbind($('#listTable'));
-
-    document.getElementById("aiid").value = value;
-    document.publishForm.submit();
-    */
 }
 
 function recursiveDisable($jElement){
@@ -72,16 +59,16 @@ function drawTableRows() {
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"';
-        wHTML += 'onClick="publishAIID(this)" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
+        //wHTML += 'onClick="sendAIID(this,\'\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
+        wHTML += 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
         wHTML += '<b> <span class="fa fa-globe">';
         wHTML += '</span> Publish AI </b></button></td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
-        wHTML += 'onClick="sendAIID(this)" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;">';
+        wHTML += 'onClick="sendAIID(this,\'./trainingAI.php\')" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;">';
         wHTML += '<b> <span class="fa fa-search">';
         wHTML += '</span> View AI </b></button></td>';
-
 
         newNode.innerHTML = wHTML;
         document.getElementById('tableAiList').appendChild(newNode);

@@ -217,6 +217,7 @@ class aiApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
+            
             $this->handleApiCallError($curl_response, 350);
             $json_response = json_decode($curl_response, true);
             return $json_response;

@@ -400,6 +400,28 @@ function msgAlertMarketplace(alarm,msg){
     document.getElementById('msgAlertMarketplace').innerText = msg;
 }
 
+function msgAlertPublish(alarm,msg){
+    switch (alarm){
+        case 0:
+            $("#containerMsgAlertPublish").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertPublish").attr('class', 'icon fa fa-check');
+            break;
+        case 1:
+            $("#containerMsgAlertPublish").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertPublish").attr('class', 'icon fa fa-check');
+            break;
+        case 2:
+            $("#containerMsgAlertPublish").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertPublish").attr('class', 'icon fa fa-warning');
+            break;
+        case 4:
+            $("#containerMsgAlertPublish").attr('class','alert alert-dismissable flat alert-primary');
+            $("#iconAlertPublish").attr('class', 'icon fa fa-check');
+            break;
+    }
+    document.getElementById('msgAlertPublish').innerText = msg;
+}
+
 function closingMsgAlertProgressBarTemporized() {
     setTimeout(function(){ document.getElementById('containerMsgAlertProgressBar').style.display = 'none'; }, 6000);
 }

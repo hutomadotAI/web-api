@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="ai_desciption">Description</label>
+    <label for="ai_description">Description</label>
     <div class="input-group">
         <div class="input-group-addon">
             <i class="glyphicon glyphicon-pencil"></i>

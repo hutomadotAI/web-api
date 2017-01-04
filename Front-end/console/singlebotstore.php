@@ -57,7 +57,7 @@ function isPostInputAvailable(){
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
-                <div class="col-md-12" id="trainingBox">
+                <div class="col-md-12">
                     <?php include './dynamic/botstore.content.singleBot.html.php'; ?>
                 </div>
             </div>

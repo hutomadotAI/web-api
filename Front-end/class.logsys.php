@@ -1354,6 +1354,7 @@ class console
      */
 
     // TODO turn me into an API call
+
     public static function getBotsInStore()
     {
         if (self::$loggedIn) {

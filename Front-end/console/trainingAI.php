@@ -12,6 +12,7 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 if (isset($_POST['ai']))
     CallGetSingleAI($_POST['ai']);
 
+
 function CallGetSingleAI($aiid)
 {
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
@@ -72,12 +73,11 @@ function localeToLanguage($locale)
 ?>
 
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | training AI</title>
+    <title>hu:toma | Training AI</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
@@ -86,10 +86,10 @@ function localeToLanguage($locale)
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
-
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
+<?php include_once "../console/common/google_analytics.php"; ?>
 
 <script>
     //TODO validation status API value returned 

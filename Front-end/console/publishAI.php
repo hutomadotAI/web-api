@@ -1,26 +1,45 @@
 <?php
-    require '../pages/config.php';
-    require_once "../console/api/apiBase.php";
-    require_once "../console/api/aiApi.php";
+require "../pages/config.php";
+require_once "../console/common/bot.php";
+require_once "../console/api/apiBase.php";
+require_once "../console/api/aiApi.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
+
+// If is it set, it means the user has selected a existing AI from home list
+if (isset($_POST['ai']))
+    CallGetSingleAI($_POST['ai']);
+
+
+function CallGetSingleAI($aiid)
+{
+    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $singleAI = $aiApi->getSingleAI($aiid);
+    unset($aiApi);
+    if ($singleAI['status']['code'] === 200) {
+        setSessionVariables($singleAI);
+    } else {
+        unset($singleAI);
+        \hutoma\console::redirect('../error.php?err=200');
         exit;
     }
+    unset($singleAI);
+}
 
-    if (!isSessionVariablesAvailable()) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
-    }
-
-    function isSessionVariablesAvailable() {
-        return (
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'])
-        );
-    }
+function setSessionVariables($singleAI)
+{
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
+}
 
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,7 +73,11 @@
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/newAI.content.html.php'; ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <?php include './dynamic/publishAI.content.html.php'; ?>
+                </div>
+            </div>
         </section>
     </div>
 
@@ -66,6 +89,7 @@
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
+<script src="./bootstrap/js/bootstrap-filestyle.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
@@ -73,10 +97,27 @@
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="./plugins/publish/publish.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+
+<script src="./plugins/cropper/jquery.cropit.js"></script>
+<script>
+    $(function() {
+        $('.image-editor').cropit({
+            imageState: {
+                src: '',
+            },
+        });
+
+        $('.export').click(function() {
+            var imageData = $('.image-editor').cropit('export');
+            window.open(imageData);
+        });
+    });
+</script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
