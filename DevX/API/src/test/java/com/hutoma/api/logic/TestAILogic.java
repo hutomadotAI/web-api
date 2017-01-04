@@ -310,6 +310,27 @@ public class TestAILogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
+    @Test
+    public void testGetPublishedBotForAI_hasBot() throws Database.DatabaseException {
+        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(SAMPLEBOT);
+        ApiResult result = this.aiLogic.getPublishedBotForAI(DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetPublishedBotForAI_hasNoPublishedBot() throws Database.DatabaseException {
+        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(null);
+        ApiResult result = this.aiLogic.getPublishedBotForAI(DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetPublishedBotForAI_DBException() throws Database.DatabaseException {
+        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiLogic.getPublishedBotForAI(DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
     private void whenCreateAiReturn(UUID aiid) throws Database.DatabaseException {
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(), anyInt(), anyInt(), any(), anyString(),
                 anyObject(), anyObject(), anyDouble(), anyInt(), anyInt())).thenReturn(aiid);

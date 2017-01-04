@@ -11,7 +11,12 @@ import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ValidatePost;
+import com.webcohesion.enunciate.metadata.rs.RequestHeader;
+import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
+import com.webcohesion.enunciate.metadata.rs.ResponseCode;
+import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 
+import java.net.HttpURLConnection;
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -144,6 +149,13 @@ public class AIEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
     public Response getLinkedBots(
             @Context ContainerRequestContext requestContext
     ) {
@@ -159,6 +171,14 @@ public class AIEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI or Bot not found."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
     public Response linkBotToAI(
             @Context ContainerRequestContext requestContext,
             @PathParam("botId") int botId
@@ -176,6 +196,14 @@ public class AIEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI or Bot not found, or not currently linked."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
     public Response unlinkBotFromAI(
             @Context ContainerRequestContext requestContext,
             @PathParam("botId") int botId
@@ -184,6 +212,29 @@ public class AIEndpoint {
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
                 botId
+        );
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("{aiid}/bot/{botId}")
+    @GET
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "No published bot for AI."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public Response getPublishedBotForAI(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiLogic.getPublishedBotForAI(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext)
         );
         return result.getResponse(this.serializer).build();
     }

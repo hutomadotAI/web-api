@@ -183,6 +183,19 @@ public class TestServiceAi extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
+    @Test
+    public void testGetPublishedBotForAI() throws Database.DatabaseException {
+        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(SAMPLEBOT);
+        final Response response = target(BOT_PATH).request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testGetPublishedBotForAI_devId_invalid() throws Database.DatabaseException {
+        final Response response = target(BOT_PATH).request().headers(noDevIdHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
     private ApiAi getAI() {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.5, "debuginfo",
                 "trainstatus", null, "", 0, 0.0, 1, Locale.UK, "Europe/London");

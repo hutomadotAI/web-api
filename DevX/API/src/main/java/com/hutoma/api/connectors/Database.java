@@ -386,6 +386,18 @@ public class Database {
         }
     }
 
+    public AiBot getPublishedBotForAI(final String devId, final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getPublishedBotForAi", 2).add(devId).add(aiid);
+            final ResultSet rs = call.executeQuery();
+            try {
+                return rs.next() ? getAiBotFromResultset(rs) : null;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
     public boolean updateAiTrainingFile(final UUID aiUUID, final String trainingData) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("updateAiTrainingFile", 2).add(aiUUID).add(trainingData);

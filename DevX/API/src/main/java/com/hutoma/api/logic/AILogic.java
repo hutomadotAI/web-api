@@ -8,10 +8,12 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import io.jsonwebtoken.Jwts;
@@ -253,4 +255,14 @@ public class AILogic {
         }
     }
 
+    public ApiResult getPublishedBotForAI(final String devId, final UUID aiid) {
+        try {
+            this.logger.logDebug(LOGFROM, "request for the published bot for AI " + aiid);
+            AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
+            return bot != null ? new ApiAiBot(bot).setSuccessStatus() : ApiError.getNotFound();
+        } catch (Database.DatabaseException ex) {
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
 }

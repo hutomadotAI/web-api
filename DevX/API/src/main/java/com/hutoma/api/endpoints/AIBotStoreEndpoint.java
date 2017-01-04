@@ -34,7 +34,7 @@ public class AIBotStoreEndpoint {
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getBotInStore() {
+    public Response getPublishedBots() {
         ApiResult result = this.aiBotStoreLogic.getPublishedBots();
         return result.getResponse(this.serializer).build();
     }
