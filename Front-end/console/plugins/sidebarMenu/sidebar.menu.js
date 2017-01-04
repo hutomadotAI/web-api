@@ -55,7 +55,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
         wHTML += ('<li id="level3">');
         wHTML += ('<a href="#"><span><i class="fa fa-shopping-cart text-green"></i><span onClick="window.location.href ='+loc+'"> botstore</span></span></a>');
         wHTML += ('<ul class="treeview-menu">');
-        wHTML += ('<li id="menu_bot"><a href="#" id="link_bot"><i class="glyphicon glyphicon-list-alt text-default"></i>'+deep_level_name+'</a></li>');
+        wHTML += ('<li id="menu_bot"><a href="#" id="link_bot"><i class="fa fa-arrow-circle-o-right text-sm text-white"></i>'+deep_level_name+'</a></li>');
         wHTML += ('</ul>');
         wHTML += ('</li>');
         label_menu = 'bot';

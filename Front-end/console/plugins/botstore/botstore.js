@@ -28,3 +28,18 @@ function saveMarketplace() {
         }
     });
 }
+
+
+
+$(function () {
+    $('.select2').select2();
+
+    // add category ALL for visulaize all bots in botstore
+    var option = document.createElement("option");
+    option.text = "All";
+    option.value = "0";
+    option.selected="selected";
+    var select = document.getElementById("bot_category");
+    select.prepend(option);
+    document.getElementById('select2-bot_category-container').innerHTML = option.text;
+});

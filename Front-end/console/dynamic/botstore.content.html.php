@@ -23,6 +23,10 @@
     </div>
 </div>
 
+<div class="box-body no-padding" id="filter">
+    <?php include './dynamic/input.category.html.php'; ?>
+</div>
+
 <form method="POST" name="domainsNewAIform">
     <p></p>
     <h2></h2>
