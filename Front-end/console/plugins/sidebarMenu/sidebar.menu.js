@@ -11,7 +11,7 @@ var MENU = MENU || (function () {
                 // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
 
                 if (!(_args[0] === ''))
-                    buildConsoleMenu(_args[0], _args[1], _args[2], _args[3]);
+                    buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[5]);
                 else
                     buildLimitedConsoleMenu(_args[1]);
 
@@ -20,7 +20,7 @@ var MENU = MENU || (function () {
         };
     }());
 
-function buildConsoleMenu(ai_name, label_menu, level, block) {
+function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
     var newNode = document.createElement('ul');
     newNode.className = 'sidebar-menu';
     newNode.id = 'console-menu';
@@ -42,10 +42,27 @@ function buildConsoleMenu(ai_name, label_menu, level, block) {
 
     wHTML += ('<li id="level2">');
     wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-    wHTML += ('<li id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i> <span>botstore</span></a></li>');
     wHTML += ('</li>');
 
-    wHTML += ('<li id="level3">');
+    if ((deep_level_name === '' || deep_level_name === undefined)) {
+        wHTML += ('<li id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i> <span>botstore</span></a></li>');
+        wHTML += ('</li>');
+    }
+    else {
+
+        var loc = "'./botstore.php'";
+
+        wHTML += ('<li id="level3">');
+        wHTML += ('<a href="#"><span><i class="fa fa-shopping-cart text-green"></i><span onClick="window.location.href ='+loc+'"> botstore</span></span></a>');
+        wHTML += ('<ul class="treeview-menu">');
+        wHTML += ('<li id="menu_bot"><a href="#" id="link_bot"><i class="glyphicon glyphicon-list-alt text-default"></i>'+deep_level_name+'</a></li>');
+        wHTML += ('</ul>');
+        wHTML += ('</li>');
+        label_menu = 'bot';
+    }
+
+
+    wHTML += ('<li id="level4">');
     wHTML += ('<a href="#">');
     wHTML += ('<i class="fa fa-book text-purple"></i><span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
     wHTML += ('</a>');
