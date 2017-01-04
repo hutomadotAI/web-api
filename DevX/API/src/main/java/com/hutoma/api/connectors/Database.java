@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.AiStore;
 import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.MeshVariable;
@@ -94,7 +95,6 @@ public class Database {
 
     /**
      * Gets the developer plan for the given developer Id.
-     *
      * @param devId the developer id
      * @return the plan, or null if there is no developer Id or not plan associated to it
      * @throws DatabaseException database exception
@@ -136,6 +136,58 @@ public class Database {
         return updateCount > 0;
     }
 
+    /**
+     * Gets the developer info.
+     * @param devId the developer id
+     * @return the developer info
+     * @throws DatabaseException
+     */
+    public DeveloperInfo getDeveloperInfo(final String devId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getDeveloperInfo", 1).add(devId);
+            ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return new DeveloperInfo(
+                        rs.getString("dev_id"),
+                        rs.getString("name"),
+                        rs.getString("company"),
+                        rs.getString("email"),
+                        rs.getString("address"),
+                        rs.getString("post_code"),
+                        rs.getString("city"),
+                        rs.getString("country"),
+                        rs.getString("website")
+                );
+            } else {
+                throw new DatabaseException("stored procedure returned nothing");
+            }
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
+    /**
+     * Sets the developer info.
+     * @param info the developer info
+     * @return whether it performed the update or not
+     * @throws DatabaseException
+     */
+    public boolean setDeveloperInfo(final DeveloperInfo info) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setDeveloperInfo", 9)
+                    .add(info.getDevId())
+                    .add(info.getName())
+                    .add(info.getCompany())
+                    .add(info.getEmail())
+                    .add(info.getAddress())
+                    .add(info.getPostCode())
+                    .add(info.getCity())
+                    .add(info.getCountry())
+                    .add(info.getWebsite());
+            return call.executeUpdate() > 0;
+        }
+    }
+
     /***
      * Create a new AI but only if the devid doesn't already have an AI with that ai_name
      * @param aiid the id for the new AI
@@ -148,7 +200,6 @@ public class Database {
      * @param shallowLearningStatus
      * @param status
      * @param clientToken
-     * @param trainingFile
      * @param language
      * @param timezoneString
      * @param confidence

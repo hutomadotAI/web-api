@@ -60,6 +60,30 @@ CREATE TABLE `ai` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `developerInfo`
+--
+
+DROP TABLE IF EXISTS `developerInfo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `developerInfo` (
+  `dev_id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `company` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `address` varchar(200) NOT NULL,
+  `post_code` varchar(100) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `website` varchar(1024) NOT NULL,
+  PRIMARY KEY (`dev_id`),
+  FOREIGN KEY (`dev_id`)
+		REFERENCES users(dev_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ai_memory`
 --
 
@@ -1936,6 +1960,64 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getDeveloperInfo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDeveloperInfo`(IN `param_devid` VARCHAR(50))
+BEGIN
+	SELECT * FROM developerInfo WHERE dev_id = param_devid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `setDeveloperInfo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `setDeveloperInfo`(
+  IN `param_devid` VARCHAR(50),
+  IN `param_name` varchar(100),
+  IN `param_company` varchar(100),
+  IN `param_email` varchar(100),
+  IN `param_address` varchar(200),
+  IN `param_postCode` varchar(100),
+  IN `param_city` varchar(100),
+  IN `param_country` varchar(100),
+  IN `param_website` varchar(1024))
+BEGIN
+  UPDATE developerInfo
+    SET
+      `name` = param_name,
+      `company` = param_company,
+      `email` = param_email,
+      `address` = param_address,
+      `post_code` = param_postCode,
+      `city` = param_city,
+      `country` = param_country,
+      `website` = param_website
+    WHERE dev_id = param_devid;
+/*!40101 SET character_set_client = @saved_cs_client */;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getMesh` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2192,7 +2274,6 @@ DELIMITER ;;
 CREATE DEFINER=`rateLimiter`@`127.0.0.1` PROCEDURE `rate_limit_check`(IN `in_dev_id` VARCHAR(50) CHARSET utf8, IN `in_rate_key` VARCHAR(50) CHARSET utf8, IN `token_ceiling` FLOAT, IN `token_increment_delay_seconds` FLOAT)
     MODIFIES SQL DATA
 BEGIN
-
 DECLARE time_now BIGINT;
 
 DECLARE var_uuid VARCHAR(32);
@@ -2202,29 +2283,19 @@ SET var_uuid = uuid();
 SET time_now = CONV(CONCAT(SUBSTR(var_uuid, 16, 3),SUBSTR(var_uuid, 10, 4),SUBSTR(var_uuid, 1, 8)), 16, 10) / 10000 - (141427 * 24 * 60 * 60);
 
 INSERT INTO api_rate_limit (dev_id, rate_key, tokens, token_update_time)
-
 VALUES (in_dev_id, in_rate_key, token_ceiling, time_now)
-
-ON DUPLICATE KEY UPDATE
-
-tokens = LEAST(tokens + (time_now - token_update_time)/(1000.0 * token_increment_delay_seconds), token_ceiling),
-
-token_update_time = time_now;
+  ON DUPLICATE KEY UPDATE
+    tokens = LEAST(tokens + (time_now - token_update_time)/(1000.0 * token_increment_delay_seconds), token_ceiling),
+    token_update_time = time_now;
 
 UPDATE api_rate_limit SET
-
-tokens = tokens-1.0,
-
-expires = now() + INTERVAL (token_ceiling * token_increment_delay_seconds) SECOND
-
-WHERE
-
-dev_id = in_dev_id AND rate_key = in_rate_key AND
-
-tokens >= 1.0;
+  tokens = tokens-1.0,
+  expires = now() + INTERVAL (token_ceiling * token_increment_delay_seconds) SECOND
+  WHERE
+    dev_id = in_dev_id AND rate_key = in_rate_key AND
+    tokens >= 1.0;
 
 SELECT IF(ROW_COUNT()>0, 0, 1) AS rate_limit, tokens FROM api_rate_limit WHERE
-
 dev_id = in_dev_id AND rate_key = in_rate_key;
 
 END ;;

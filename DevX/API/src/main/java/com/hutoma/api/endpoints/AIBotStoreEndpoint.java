@@ -24,8 +24,8 @@ import javax.ws.rs.core.SecurityContext;
 @RateLimit(RateKey.QuickRead)
 public class AIBotStoreEndpoint {
 
-    AIBotStoreLogic aiBotStoreLogic;
-    JsonSerializer serializer;
+    private final AIBotStoreLogic aiBotStoreLogic;
+    private final JsonSerializer serializer;
 
     @Inject
     public AIBotStoreEndpoint(AIBotStoreLogic aiBotStoreLogic, JsonSerializer serializer) {

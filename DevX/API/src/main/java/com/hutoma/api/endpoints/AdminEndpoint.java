@@ -69,10 +69,10 @@ public class AdminEndpoint {
     @DELETE
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response delete_dev(
+    public Response deleteDeveloper(
             @Context SecurityContext securityContext,
-            @DefaultValue("") @QueryParam("devid") String devid) {
-        ApiResult result = this.adminLogic.deleteDev(securityContext, devid);
+            @DefaultValue("") @QueryParam("devid") String devId) {
+        ApiResult result = this.adminLogic.deleteDev(securityContext, devId);
         return result.getResponse(this.serializer).build();
     }
 
@@ -82,9 +82,8 @@ public class AdminEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getToken(
             @Context SecurityContext securityContext,
-            @DefaultValue("") @PathParam("devid") String devid) {
-        ApiResult result = this.adminLogic.getDevToken(securityContext, devid);
+            @DefaultValue("") @PathParam("devid") String devId) {
+        ApiResult result = this.adminLogic.getDevToken(securityContext, devId);
         return result.getResponse(this.serializer).build();
     }
-
 }

@@ -1,23 +1,28 @@
 package com.hutoma.api.containers;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
- * Created by David MG on 15/08/2016.
+ * API Administration result message.
  */
 public class ApiAdmin extends ApiResult {
 
-    private final String dev_token;
-    private final String devid;
+    @SerializedName("dev_token")
+    private final String devToken;
 
-    public ApiAdmin(String devToken, String devid) {
-        this.dev_token = devToken;
-        this.devid = devid;
+    @SerializedName("devid")
+    private final String devId;
+
+    public ApiAdmin(String devToken, String devId) {
+        this.devToken = devToken;
+        this.devId = devId;
     }
 
     public String getDev_token() {
-        return this.dev_token;
+        return this.devToken;
     }
 
     public String getDevid() {
-        return this.devid;
+        return this.devId;
     }
 }

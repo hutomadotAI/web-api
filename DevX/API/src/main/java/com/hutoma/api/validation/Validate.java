@@ -29,6 +29,10 @@ public class Validate {
     public Validate() {
     }
 
+    public static boolean isAnyNullOrEmpty(final String... params) {
+        return Arrays.stream(params).anyMatch(s -> s == null || s.isEmpty());
+    }
+
     /**
      * Returns the same string with anything over char 127 or below char 32 removed
      * Also, []&lt;&gt;&amp; are removed altogether
@@ -283,5 +287,4 @@ public class Validate {
             throws ParameterValidationException {
         return validatePatternUniqueList(alphaNumDashesSomePunctuationAndSpace, paramName, paramList);
     }
-
 }
