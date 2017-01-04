@@ -6280,8 +6280,8 @@ ul.pagination li a {
 }
 
 .bot-box{
-    max-width: 840px;
-    min-width: 540px;
+    max-width: 640px;
+    min-width: 640px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -6291,6 +6291,10 @@ ul.pagination li a {
 }
 
 .bot-image{
+    max-width: 205px;
+    min-width: 205px;
+    max-height: 205px;
+    min-height: 205px;
     margin:0px;
     padding:0px;
 }

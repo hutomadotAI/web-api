@@ -1,8 +1,9 @@
 <div class="box-body bot-card" id="botcard">
-
-        <div class="col-xs-4 bot-image <?php echo $bot->getWidgetColor();?> ">
-            <div class="bot-icon" id="botIcon">
-                <i class="<?php echo $bot->getIconPath();?>" style="padding-top:45px;"></i>
+        <div class="col-xs-4 no-padding">
+            <div class="bot-image <?php echo $bot->getWidgetColor();?> ">
+                <div class="bot-icon" id="botIcon">
+                    <i class="<?php echo $bot->getIconPath();?>" style="padding-top:45px;"></i>
+                </div>
             </div>
         </div>
 
