@@ -17,6 +17,7 @@
     </div>
 
     <div class="box-footer">
+        <a style="width:100px" class="btn btn-primary flat" id="btnBack" onClick="window.history.back();"><b>Back</b></a>
         <button style="width:100px" type="submit" id="btnMarketplaceSave" class="btn btn-success flat pull-right"><b>save</b>
         </button>
     </div>
