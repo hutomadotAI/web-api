@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public class AiBot {
 
-    private final int botId;
     @SerializedName("dev_id")
     private final String devId;
     private final UUID aiid;
@@ -30,6 +29,7 @@ public class AiBot {
     private final String version;
     private final String videoLink;
     private final boolean isPublished;
+    private int botId;
 
     public AiBot(final String devId, final UUID aiid, final int botId, final String name, final String description,
                  final String longDescription, final String alertMessage, final String badge, final BigDecimal price,
@@ -56,6 +56,10 @@ public class AiBot {
 
     public int getBotId() {
         return this.botId;
+    }
+
+    public void setBotId(final int botId) {
+        this.botId = botId;
     }
 
     public String getDevId() {

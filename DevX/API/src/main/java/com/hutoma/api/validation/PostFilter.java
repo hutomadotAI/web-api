@@ -70,6 +70,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                     break;
                 case AIName:
                 case AIDescription:
+                case AIID:
                     expectingForm = true;
                     break;
                 default:
@@ -136,6 +137,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         if (checkList.contains(APIParameter.AIName)) {
             request.setProperty(APIParameter.AIName.toString(),
                     this.validateAiName(AINAME, getFirst(form.get(AINAME))));
+        }
+
+        if (checkList.contains(APIParameter.AIID)) {
+            request.setProperty(APIParameter.AIID.toString(),
+                    this.validateUuid(AIID, getFirst(form.get(AIID))));
         }
 
         if (checkList.contains(APIParameter.AIDescription)) {

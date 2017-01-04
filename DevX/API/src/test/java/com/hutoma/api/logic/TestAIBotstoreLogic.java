@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
@@ -16,8 +17,7 @@ import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.UUID;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -121,5 +121,59 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(false);
         ApiResult result = this.aiBotStoreLogic.purchaseBot(DEVID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetBotDetails() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        ApiAiBot result = (ApiAiBot) this.aiBotStoreLogic.getBotDetails(BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(SAMPLEBOT.getBotId(), result.getBot().getBotId());
+    }
+
+    @Test
+    public void testGetBotDetails_botNotFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(null);
+        ApiResult result = this.aiBotStoreLogic.getBotDetails(BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testPublishBot() throws Database.DatabaseException {
+        final int newBotId = 987654;
+        when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
+        ApiAiBot result = (ApiAiBot) publishSampleBot();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertNotNull(result.getBot());
+        Assert.assertEquals(newBotId, result.getBot().getBotId());
+        Assert.assertEquals(SAMPLEBOT.getDevId(), result.getBot().getDevId());
+    }
+
+    @Test
+    public void testPublishBot_errorInsert() throws Database.DatabaseException {
+        when(this.fakeDatabase.publishBot(any())).thenReturn(-1);
+        ApiResult result = publishSampleBot();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testPublishBot_DBException() throws Database.DatabaseException {
+        when(this.fakeDatabase.publishBot(any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = publishSampleBot();
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetBotDetails_DBException() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiBotStoreLogic.getBotDetails(BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    private ApiResult publishSampleBot() {
+        return this.aiBotStoreLogic.publishBot(SAMPLEBOT.getDevId(), SAMPLEBOT.getAiid(), SAMPLEBOT.getName(),
+                SAMPLEBOT.getDescription(), SAMPLEBOT.getLongDescription(), SAMPLEBOT.getAlertMessage(), SAMPLEBOT.getBadge(),
+                SAMPLEBOT.getPrice(), SAMPLEBOT.getSample(), SAMPLEBOT.getCategory(), SAMPLEBOT.getPrivacyPolicy(),
+                SAMPLEBOT.getClassification(), SAMPLEBOT.getVersion(), SAMPLEBOT.getVideoLink());
     }
 }

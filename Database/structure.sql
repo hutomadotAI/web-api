@@ -1548,6 +1548,56 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `publishBot` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
+  IN `param_devId` VARCHAR(50),
+  IN `param_aiid` VARCHAR(50),
+  IN `param_name` VARCHAR(50),
+  IN `param_description` VARCHAR(1024),
+  IN `param_longDescription` TEXT,
+  IN `param_alertMessage` VARCHAR(150),
+  IN `param_badge` VARCHAR(20),
+  IN `param_price` DECIMAL,
+  IN `param_sample` TEXT,
+  IN `param_lastUpdate` DATETIME,
+  IN `param_category` VARCHAR(50),
+  IN `param_privacyPolicy` TEXT,
+  IN `param_classification` VARCHAR(50),
+  IN `param_version` VARCHAR(25),
+  IN `param_videoLink` VARCHAR(1800)
+)
+    NO SQL
+BEGIN
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+	ROLLBACK;
+    SELECT -1;
+  END;
+
+  INSERT INTO botStore
+    (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
+    privacy_policy, classification, version, video_link)
+    VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
+    param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
+    param_version, param_videoLink);
+
+    SELECT LAST_INSERT_ID();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getBotsLinkedToAi` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;

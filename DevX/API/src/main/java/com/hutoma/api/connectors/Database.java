@@ -405,6 +405,46 @@ public class Database {
         }
     }
 
+    public AiBot getBotDetails(final int botId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotDetails", 1).add(botId);
+            final ResultSet rs = call.executeQuery();
+            return getAiBotFromResultset(rs);
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public int publishBot(final AiBot bot) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("publishBot", 16)
+                    .add(bot.getDevId())
+                    .add(bot.getAiid())
+                    .add(bot.getName())
+                    .add(bot.getDescription())
+                    .add(bot.getLongDescription())
+                    .add(bot.getAlertMessage())
+                    .add(bot.getBadge())
+                    .add(bot.getPrice())
+                    .add(bot.getSample())
+                    .add(bot.getLastUpdate())
+                    .add(bot.getCategory())
+                    .add(bot.getPrivacyPolicy())
+                    .add(bot.getClassification())
+                    .add(bot.getVersion())
+                    .add(bot.getVideoLink())
+                    .add(true);
+            ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                throw new DatabaseException("Stored procedure publishBot did not return any value!");
+            }
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     public List<AiBot> getPurchasedBots(final String devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPurchasedBots", 1).add(devId);
@@ -570,25 +610,29 @@ public class Database {
     }
 
     private AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
-        return new AiBot(
-                rs.getString("dev_id"),
-                UUID.fromString(rs.getString("aiid")),
-                rs.getInt("id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getString("long_description"),
-                rs.getString("alert_message"),
-                rs.getString("badge"),
-                rs.getBigDecimal("price"),
-                rs.getString("sample"),
-                rs.getString("category"),
-                new DateTime(rs.getTimestamp("last_update")),
-                rs.getString("privacy_policy"),
-                rs.getString("classification"),
-                rs.getString("version"),
-                rs.getString("video_link"),
-                rs.getBoolean("is_published")
-        );
+        if (rs.next()) {
+            return new AiBot(
+                    rs.getString("dev_id"),
+                    UUID.fromString(rs.getString("aiid")),
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getString("long_description"),
+                    rs.getString("alert_message"),
+                    rs.getString("badge"),
+                    rs.getBigDecimal("price"),
+                    rs.getString("sample"),
+                    rs.getString("category"),
+                    new DateTime(rs.getTimestamp("last_update")),
+                    rs.getString("privacy_policy"),
+                    rs.getString("classification"),
+                    rs.getString("version"),
+                    rs.getString("video_link"),
+                    rs.getBoolean("is_published")
+            );
+        } else {
+            return null;
+        }
     }
 
     private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {

@@ -198,7 +198,8 @@ public class AIEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
-            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI or Bot not found, or not currently linked."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND,
+                    condition = "AI or Bot not found, or not currently linked."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({

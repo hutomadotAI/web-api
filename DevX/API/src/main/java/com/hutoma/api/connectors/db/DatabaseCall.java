@@ -8,6 +8,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.joda.time.DateTime;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -158,6 +159,16 @@ public class DatabaseCall implements AutoCloseable {
         checkPosition();
         try {
             this.statement.setInt(++this.paramSetIndex, param);
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+        return this;
+    }
+
+    public DatabaseCall add(final BigDecimal param) throws Database.DatabaseException {
+        checkPosition();
+        try {
+            this.statement.setBigDecimal(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }

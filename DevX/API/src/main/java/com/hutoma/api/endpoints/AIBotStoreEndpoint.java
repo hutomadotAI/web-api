@@ -6,6 +6,7 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.logic.AIBotStoreLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
@@ -14,9 +15,15 @@ import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.util.UUID;
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -56,6 +63,28 @@ public class AIBotStoreEndpoint {
     })
     public Response getPublishedBots() {
         ApiResult result = this.aiBotStoreLogic.getPublishedBots();
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("{botId}")
+    @GET
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public
+    @TypeHint(AiBot.class)
+    Response getBotDetails(
+            @PathParam("botId") int botId
+    ) {
+        ApiResult result = this.aiBotStoreLogic.getBotDetails(botId);
         return result.getResponse(this.serializer).build();
     }
 
@@ -102,6 +131,59 @@ public class AIBotStoreEndpoint {
                 ParameterFilter.getDevid(requestContext),
                 botId
         );
+        return result.getResponse(this.serializer).build();
+    }
+
+
+    @POST
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
+                    condition = "Request does not contain all valid data."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Bot already purchased."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    // TODO: need to validate the bot data
+    public
+    @TypeHint(AiBot.class)
+    Response publishBot(
+            @Context ContainerRequestContext requestContext,
+            @NotNull final @FormParam("aiid") String aiid,
+            @NotNull final @FormParam("name") String name,
+            @NotNull final @FormParam("description") String description,
+            @NotNull final @FormParam("longDescription") String longDescription,
+            @NotNull final @FormParam("alertMessage") String alertMessage,
+            @NotNull final @FormParam("badge") String badge,
+            @NotNull final @FormParam("price") BigDecimal price,
+            @NotNull final @FormParam("sample") String sample,
+            @NotNull final @FormParam("category") String category,
+            @NotNull final @FormParam("privacyPolicy") String privacyPolicy,
+            @NotNull final @FormParam("classification") String classification,
+            @NotNull final @FormParam("version") String version,
+            @DefaultValue("") final @FormParam("videoLink") String videoLink
+    ) {
+        ApiResult result = this.aiBotStoreLogic.publishBot(
+                ParameterFilter.getDevid(requestContext),
+                UUID.fromString(aiid),
+                name,
+                description,
+                longDescription,
+                alertMessage,
+                badge,
+                price,
+                sample,
+                category,
+                privacyPolicy,
+                classification,
+                version,
+                videoLink);
         return result.getResponse(this.serializer).build();
     }
 }
