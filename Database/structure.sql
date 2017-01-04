@@ -162,12 +162,54 @@ DROP TABLE IF EXISTS `botStore`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `botStore` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `dev_id` varchar(50) NOT NULL,
   `aiid` varchar(50) NOT NULL,
-  `published` tinyint(1) NOT NULL DEFAULT '1',
-  `publisher_id` varchar(50) NOT NULL,
+  `name` VARCHAR(50) NOT NULL,
+  `description` VARCHAR(1024) NOT NULL,
+  `long_description` TEXT,
+  `alert_message` VARCHAR(150),
+  `badge` VARCHAR(20),
+  `price` DECIMAL NOT NULL,
+  `sample` TEXT,
+  `last_update` TIMESTAMP NOT NULL,
+  `category` VARCHAR(50) NOT NULL,
+  `privacy_policy` TEXT,
+  `classification` VARCHAR(50) NOT NULL,
+  `version` VARCHAR(25) NOT NULL,
+  `video_link` VARCHAR(1800),
+  `is_published` TINYINT(1) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_2` (`aiid`),
-  KEY `id_3` (`publisher_id`)
+  FOREIGN KEY (`dev_id`)
+        REFERENCES users(`dev_id`)
+        ON DELETE CASCADE,
+  FOREIGN KEY (`aiid`)
+        REFERENCES ai(`aiid`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `bot_ai`
+--
+
+DROP TABLE IF EXISTS `bot_ai`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `bot_ai` (
+  `botId` int(11) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `dev_id` varchar(50) NOT NULL,
+  PRIMARY KEY (`botId`, `aiid`, `dev_id`),
+  FOREIGN KEY (botId)
+        REFERENCES botStore(id)
+        ON DELETE CASCADE,
+  FOREIGN KEY (aiid)
+        REFERENCES ai(aiid)
+        ON DELETE CASCADE,
+  FOREIGN KEY (dev_id)
+        REFERENCES users(dev_id)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1463,7 +1505,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getBotsInStore` */;
+/*!50003 DROP PROCEDURE IF EXISTS `getPublishedBots` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -1473,12 +1515,72 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotsInStore`()
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`()
     NO SQL
-SELECT ai.aiid as dom_id, ai_name as name, ai_description as description,iconPath as icon, color, published
-FROM ai
-INNER JOIN botStore
-on ai.aiid = botStore.aiid ;;
+BEGIN
+  SELECT * FROM botStore WHERE is_published = TRUE;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotsLinkedToAi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotsLinkedToAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+  SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai WHERE bai.aiid = param_aiid AND bs.dev_id = param_devId;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `linkBotToAi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `linkBotToAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_botId` INT(11))
+    NO SQL
+BEGIN
+  INSERT INTO bot_ai (botId, dev_id, aiid) VALUES(param_botId, param_devId, param_aiid);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `unlinkBotFromAi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `unlinkBotFromAi(`IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_botId` INT(11))
+    NO SQL
+BEGIN
+  DELETE FROM bot_ai
+  WHERE botId = param_botId AND aiid = param_aiid AND dev_id = param_devId;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

@@ -19,6 +19,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -138,5 +139,52 @@ public class AIEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @Path("{aiid}/bot")
+    @GET
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLinkedBots(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiLogic.getLinkedBots(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext)
+        );
+        return result.getResponse(this.serializer).build();
+    }
 
+    @Path("{aiid}/bot/{botId}")
+    @POST
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response linkBotToAI(
+            @Context ContainerRequestContext requestContext,
+            @PathParam("botId") int botId
+    ) {
+        ApiResult result = this.aiLogic.linkBotToAI(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                botId
+        );
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("{aiid}/bot/{botId}")
+    @DELETE
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response unlinkBotFromAI(
+            @Context ContainerRequestContext requestContext,
+            @PathParam("botId") int botId
+    ) {
+        ApiResult result = this.aiLogic.unlinkBotFromAI(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                botId
+        );
+        return result.getResponse(this.serializer).build();
+    }
 }

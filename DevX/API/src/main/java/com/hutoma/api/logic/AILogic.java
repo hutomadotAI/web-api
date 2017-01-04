@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -210,6 +211,44 @@ public class AILogic {
             return new ApiResult().setSuccessStatus("deleted successfully");
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "error deleting ai: " + e.toString());
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getLinkedBots(final String devId, final UUID aiid) {
+        try {
+            this.logger.logDebug(LOGFROM, "request to list linked bots for AI " + aiid);
+            return new ApiAiBotList(this.database.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
+        } catch (Database.DatabaseException ex) {
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult linkBotToAI(final String devId, final UUID aiid, final int botId) {
+        try {
+            this.logger.logDebug(LOGFROM, String.format("request to link bot %d to AI %s", botId, aiid));
+            if (this.database.linkBotToAi(devId, aiid, botId)) {
+                return new ApiResult().setSuccessStatus();
+            } else {
+                return ApiError.getNotFound("AI or Bot not found");
+            }
+        } catch (Database.DatabaseException ex) {
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult unlinkBotFromAI(final String devId, final UUID aiid, final int botId) {
+        try {
+            this.logger.logDebug(LOGFROM, String.format("request to unlink bot %d from AI %s", botId, aiid));
+            if (this.database.unlinkBotFromAi(devId, aiid, botId)) {
+                return new ApiResult().setSuccessStatus();
+            } else {
+                return ApiError.getNotFound("AI or Bot not found, or not currently linked");
+            }
+        } catch (Database.DatabaseException ex) {
+            this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
     }

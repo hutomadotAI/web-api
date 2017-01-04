@@ -6,8 +6,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiIntegration;
-import com.hutoma.api.containers.sub.AiStore;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -348,20 +348,41 @@ public class Database {
         }
     }
 
-    public ArrayList<AiStore> getBotStoreList() throws DatabaseException {
+    public List<AiBot> getBotsLinkedToAi(final String devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getBotsInStore", 0);
+            call.initialise("getBotsLinkedToAi", 2).add(devId).add(aiid);
             final ResultSet rs = call.executeQuery();
             try {
-                final ArrayList<AiStore> res = new ArrayList<>();
-                while (rs.next()) {
-                    res.add(new AiStore(rs.getString("dom_id"), rs.getString("name"), rs.getString("description"),
-                            rs.getString("icon"), rs.getString("color"), rs.getBoolean("published")));
-                }
-                return res;
+                return getBotListFromResultset(rs);
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        }
+    }
+
+    public List<AiBot> getPublishedBots() throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getPublishedBots", 0);
+            final ResultSet rs = call.executeQuery();
+            try {
+                return getBotListFromResultset(rs);
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean linkBotToAi(final String devId, final UUID aiid, final int botId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("linkBotToAi", 3).add(devId).add(aiid).add(botId);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean unlinkBotFromAi(final String devId, final UUID aiid, final int botId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("unlinkBotFromAi", 3).add(devId).add(aiid).add(botId);
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -485,7 +506,6 @@ public class Database {
         }
     }
 
-
     public boolean addMesh(final String devId, final String aiid, final String aiidMesh)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
@@ -508,6 +528,36 @@ public class Database {
             call.initialise("deleteAllMesh", 2).add(devId).add(aiid);
             return call.executeUpdate() > 0;
         }
+    }
+
+    private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
+        final ArrayList<AiBot> bots = new ArrayList<>();
+        while (rs.next()) {
+            bots.add(this.getAiBotFromResultset(rs));
+        }
+        return bots;
+    }
+
+    private AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
+        return new AiBot(
+                rs.getString("dev_id"),
+                UUID.fromString(rs.getString("aiid")),
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("long_description"),
+                rs.getString("alert_message"),
+                rs.getString("badge"),
+                rs.getBigDecimal("price"),
+                rs.getString("sample"),
+                rs.getString("category"),
+                new DateTime(rs.getTimestamp("last_update")),
+                rs.getString("privacy_policy"),
+                rs.getString("classification"),
+                rs.getString("version"),
+                rs.getString("video_link"),
+                rs.getBoolean("is_published")
+        );
     }
 
     private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {
