@@ -5,7 +5,7 @@
     </div>
 
     <div class="box-body" id="botstore">
-        <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0"
+        <input class="form-control flat no-shadow" id="search-bot" value="" placeholder="Search the Bot Store..." tabindex="0"
                onkeyup="searchDomain(this.value)">
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace"
@@ -24,7 +24,11 @@
 </div>
 
 <div class="box-body no-padding" id="filter">
-    <?php include './dynamic/input.category.html.php'; ?>
+    <div class="row no-margin">
+        <div class="col-xs-12 no-padding">
+            <?php include './dynamic/input.category.html.php'; ?>
+        </div>
+    </div>
 </div>
 
 <form method="POST" name="domainsNewAIform">

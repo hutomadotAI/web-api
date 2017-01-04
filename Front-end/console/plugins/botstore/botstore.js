@@ -30,16 +30,45 @@ function saveMarketplace() {
 }
 
 
+function showCategory(){
+    var myselect = document.getElementById('bot_category');
+    var val = parseInt(myselect.options[myselect.selectedIndex].value);
+
+    var str = document.getElementById('search-bot').value;
+
+    // relative values about list of categories
+    switch(val){
+        case 0:
+            showDomains(str, 1,'All');
+            break;
+        case 1:
+            showDomains(str, 1,'Other');
+            break;
+
+        //TODO add the list of categories
+        default:
+            showDomains(str, 1,'');
+    }
+}
 
 $(function () {
+    // disable all possible category in selection before trasfomring in select2
+    // it will removed after API passing categories
+    var op = document.getElementById('bot_category').getElementsByTagName("option");
+    for (var i = 0; i < op.length; i++) {
+        op[i].disabled = true;;
+    }
+
+    // trasform in select2
     $('.select2').select2();
 
-    // add category ALL for visulaize all bots in botstore
+
+    // add category 'ALL' for visualize all bots in botstore
+    var select = document.getElementById("bot_category");
     var option = document.createElement("option");
     option.text = "All";
     option.value = "0";
     option.selected="selected";
-    var select = document.getElementById("bot_category");
     select.prepend(option);
     document.getElementById('select2-bot_category-container').innerHTML = option.text;
 });

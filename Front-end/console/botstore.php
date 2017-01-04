@@ -58,7 +58,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;" onload="showDomains('',1)">
+<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;" onload="showDomains('',1,'')">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -135,7 +135,10 @@ function isSessionVariablesAvailable()
     newNode.id = 'domains_list';
 
     function searchDomain(str) {
-        showDomains(str, 1);
+        var id_category = document.getElementById('bot_category');
+        var category = parseInt(id_category.options[id_category.selectedIndex].value);
+
+        showDomains(str, 1,category);
     }
 
     function getIndexOf(value) {
