@@ -7,11 +7,20 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.endpoints.AIBotStoreEndpoint;
 import com.hutoma.api.logic.AIBotStoreLogic;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -33,12 +42,15 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     private static final String BOTSTORE_BASEPATH = "/botstore";
     private static final String BOTSTORE_BOTPATH = BOTSTORE_BASEPATH + "/" + BOTID;
     private static final String BOTSTORE_PURCHASEDPATH = BOTSTORE_BASEPATH + "/purchased";
+    private static final String BOTSTORE_BOTICONPATH = BOTSTORE_BOTPATH + "/icon";
     private static final String BOTSTORE_PURCHASEBOTPATH = BOTSTORE_BASEPATH + "/purchase/" + BOTID;
 
     private static final AiBot SAMPLEBOT =
             new AiBot(DEVID.toString(), AIID, BOTID, "name", "description", "long description", "alert message", "badge",
                     BigDecimal.valueOf(1.123), "sample", "category", DateTime.now(), "privacy policy",
                     "classification", "version", "http://video", true);
+    private static final byte[] BOTICON_CONTENT = "this is an image!".getBytes();
+    private static final InputStream BOTICON_STREAM = new ByteArrayInputStream(BOTICON_CONTENT);
 
 
     private static final MultivaluedMap<String, String> BOT_PUBLISH_POST = new MultivaluedHashMap<String, String>() {{
@@ -131,6 +143,58 @@ public class TestServiceAiBotstore extends ServiceTestBase {
                 .headers(noDevIdHeaders)
                 .post(Entity.form(BOT_PUBLISH_POST));
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testGetBotIcon() throws Database.DatabaseException, IOException {
+        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(BOTICON_STREAM);
+        final Response response = target(BOTSTORE_BOTICONPATH).request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        InputStream inputStream = (InputStream) response.getEntity();
+        Assert.assertNotNull(inputStream);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        IOUtils.copy(inputStream, outputStream);
+        Assert.assertEquals(BOTICON_CONTENT.length, outputStream.size());
+    }
+
+    @Test
+    public void testGetBotIcon_invalid_devId() throws Database.DatabaseException, IOException {
+        final Response response = target(BOTSTORE_BOTICONPATH).request().headers(noDevIdHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testUploadBotIcon() throws Database.DatabaseException, IOException {
+        when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
+        when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(true);
+        FormDataMultiPart multipart = generateIconMultipartEntity();
+        final Response response = target(BOTSTORE_BOTICONPATH)
+                .register(MultiPartFeature.class)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.entity(multipart, multipart.getMediaType()));
+        multipart.close();
+
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testUploadBotIcon_invalid_devId() throws Database.DatabaseException, IOException {
+        FormDataMultiPart multipart = generateIconMultipartEntity();
+        final Response response = target(BOTSTORE_BOTICONPATH)
+                .register(MultiPartFeature.class)
+                .request()
+                .headers(noDevIdHeaders)
+                .post(Entity.entity(multipart, multipart.getMediaType()));
+        multipart.close();
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    private FormDataMultiPart generateIconMultipartEntity() {
+        final FileDataBodyPart filePart = new FileDataBodyPart("file",
+                new File(getTestsBaseLocation(), "test-images/hutoma_icon.png"));
+        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        return (FormDataMultiPart) formDataMultiPart.field("foo", "bar").bodyPart(filePart);
     }
 
     protected Class<?> getClassUnderTest() {

@@ -19,6 +19,7 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -460,6 +461,27 @@ public class Database {
     public boolean purchaseBot(final String devId, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("purchaseBot", 2).add(devId).add(botId);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public InputStream getBotIcon(final int botId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotIcon", 1).add(botId);
+            final ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return rs.getBinaryStream(1);
+            }
+            return null;
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public boolean saveBotIcon(final String devId, final int botId, final InputStream inputStream)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("saveBotIcon", 3).add(devId).add(botId).add(inputStream);
             return call.executeUpdate() > 0;
         }
     }

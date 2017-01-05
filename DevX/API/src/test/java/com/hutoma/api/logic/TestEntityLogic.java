@@ -1,9 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
@@ -37,7 +35,6 @@ public class TestEntityLogic {
     SecurityContext fakeContext;
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
-    Tools fakeTools;
     EntityLogic entityLogic;
     ILogger fakeLogger;
     TrainingLogic trainingLogic;
@@ -47,7 +44,6 @@ public class TestEntityLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
         this.entityLogic = new EntityLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);

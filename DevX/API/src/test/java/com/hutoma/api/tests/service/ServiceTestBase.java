@@ -4,7 +4,6 @@ import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -25,6 +24,7 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
@@ -77,6 +77,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected JerseyClient fakeJerseyClient;
     @Mock
     protected AIChatServices fakeAiChatServices;
+    @Mock
+    protected Tools fakeTools;
 
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -120,6 +122,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiChatServices)).to(AIChatServices.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -128,7 +131,6 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(RateLimitCheck.class).to(RateLimitCheck.class);
                 bind(AIChatServices.class).to(AIChatServices.class);
                 bind(JerseyClient.class).to(JerseyClient.class);
-                bind(FakeTimerTools.class).to(Tools.class);
 
                 ServiceTestBase.this.addAdditionalBindings(this);
             }
@@ -167,6 +169,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeTransactionalDatabaseCall = mock(TransactionalDatabaseCall.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeAiChatServices = mock(AIChatServices.class);
+        this.fakeTools = mock(Tools.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
 
@@ -178,6 +181,13 @@ public abstract class ServiceTestBase extends JerseyTest {
         // Add validation filters
         rc.register(QueryFilter.class);
         rc.register(PostFilter.class);
+
+        // Register the multipart handler for supporting uploads
+        rc.register(MultiPartFeature.class);
         return rc;
+    }
+
+    protected String getTestsBaseLocation() {
+        return this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
     }
 }

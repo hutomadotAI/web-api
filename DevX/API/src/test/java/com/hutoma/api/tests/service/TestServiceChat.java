@@ -13,11 +13,13 @@ import junitparams.Parameters;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
+import java.util.UUID;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -46,6 +48,11 @@ public class TestServiceChat extends ServiceTestBase {
                 $("abc"),
                 $("-")
         );
+    }
+
+    @Before
+    public void setup() {
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
     }
 
     @Test

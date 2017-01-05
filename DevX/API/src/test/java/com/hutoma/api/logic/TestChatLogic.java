@@ -2,10 +2,10 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
@@ -65,7 +65,7 @@ public class TestChatLogic {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeChatTelemetryLogger = mock(ChatTelemetryLogger.class);
-        this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, new FakeTimerTools(),
+        this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger);
     }
 

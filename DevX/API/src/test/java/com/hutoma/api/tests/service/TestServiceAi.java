@@ -86,9 +86,11 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testCreateAI() throws Database.DatabaseException {
+        final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
         when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(),
                 anyInt(), anyInt(), any(), anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt())).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+                anyInt())).thenReturn(uuid);
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());

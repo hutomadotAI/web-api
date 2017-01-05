@@ -17,11 +17,15 @@ import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -134,7 +138,6 @@ public class AIBotStoreEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
-
     @POST
     @ValidateParameters({APIParameter.DevID})
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
@@ -184,6 +187,52 @@ public class AIBotStoreEndpoint {
                 classification,
                 version,
                 videoLink);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("{botId}/icon")
+    @GET
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public Response getBotIcon(
+            @PathParam("botId") int botId
+    ) {
+        ApiResult result = this.aiBotStoreLogic.getBotIcon(botId);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("{botId}/icon")
+    @POST
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public Response uploadBotIcon(
+            @Context ContainerRequestContext requestContext,
+            @PathParam("botId") int botId,
+            @FormDataParam("file") InputStream uploadedInputStream
+    ) {
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(
+                ParameterFilter.getDevid(requestContext),
+                botId,
+                uploadedInputStream);
         return result.getResponse(this.serializer).build();
     }
 }

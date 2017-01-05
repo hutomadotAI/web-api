@@ -1,15 +1,20 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiStreamResult;
 import com.hutoma.api.containers.sub.AiBot;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.joda.time.DateTime;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -21,13 +26,16 @@ import javax.inject.Inject;
 public class AIBotStoreLogic {
 
     private static final String LOGFROM = "botstorelogic";
+    private static final long MAX_ICON_FILE_SIZE = 65535; // 64K
     private final Database database;
     private final ILogger logger;
+    private final Tools tools;
 
     @Inject
-    public AIBotStoreLogic(Database database, ILogger logger) {
+    public AIBotStoreLogic(Database database, ILogger logger, final Tools tools) {
         this.database = database;
         this.logger = logger;
+        this.tools = tools;
     }
 
     public ApiResult getPublishedBots() {
@@ -103,6 +111,37 @@ public class AIBotStoreLogic {
                 return new ApiAiBot(bot).setSuccessStatus();
             }
         } catch (Database.DatabaseException e) {
+            this.logger.logException(LOGFROM, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getBotIcon(final int botId) {
+        try {
+            InputStream inputStream = this.database.getBotIcon(botId);
+            if (inputStream == null) {
+                return ApiError.getNotFound();
+            } else {
+                return new ApiStreamResult((outStream) -> IOUtils.copy(inputStream, outStream)).setSuccessStatus();
+            }
+        } catch (Database.DatabaseException e) {
+            this.logger.logException(LOGFROM, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult uploadBotIcon(final String devId, final int botId, final InputStream inputStream) {
+        try {
+            if (!this.tools.isStreamSmallerThan(inputStream, MAX_ICON_FILE_SIZE)) {
+                return ApiError.getBadRequest(
+                        String.format("File is larger than the maximum allowed size (%d bytes)", MAX_ICON_FILE_SIZE));
+            }
+            if (this.database.saveBotIcon(devId, botId, inputStream)) {
+                return new ApiResult().setSuccessStatus();
+            } else {
+                return ApiError.getNotFound();
+            }
+        } catch (Database.DatabaseException | IOException e) {
             this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }

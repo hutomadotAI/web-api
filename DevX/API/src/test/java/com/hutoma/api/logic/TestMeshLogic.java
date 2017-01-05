@@ -1,9 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiResult;
@@ -45,7 +43,6 @@ public class TestMeshLogic {
     SecurityContext fakeContext;
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
-    Tools fakeTools;
     MeshLogic meshLogic;
     ILogger fakeLogger;
 
@@ -54,7 +51,6 @@ public class TestMeshLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         this.fakeContext = mock(SecurityContext.class);
-        this.fakeTools = new FakeTimerTools();
         this.fakeLogger = mock(ILogger.class);
         this.meshLogic = new MeshLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase);
     }
