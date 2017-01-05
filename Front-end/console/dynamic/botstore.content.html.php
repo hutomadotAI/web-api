@@ -5,7 +5,7 @@
     </div>
 
     <div class="box-body" id="botstore">
-        <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0"
+        <input class="form-control flat no-shadow" id="search-bot" value="" placeholder="Search the Bot Store..." tabindex="0"
                onkeyup="searchDomain(this.value)">
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertMarketplace"
@@ -17,8 +17,17 @@
     </div>
 
     <div class="box-footer">
+        <a style="width:100px" class="btn btn-primary flat" id="btnBack" onClick="window.history.back();"><b>Back</b></a>
         <button style="width:100px" type="submit" id="btnMarketplaceSave" class="btn btn-success flat pull-right"><b>save</b>
         </button>
+    </div>
+</div>
+
+<div class="box-body no-padding" id="filter">
+    <div class="row no-margin">
+        <div class="col-xs-12 no-padding">
+            <?php include './dynamic/input.category.html.php'; ?>
+        </div>
     </div>
 </div>
 

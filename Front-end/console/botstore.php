@@ -50,6 +50,7 @@ function isSessionVariablesAvailable()
     <title>hu:toma | Botstore </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="./plugins/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
@@ -57,7 +58,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;" onload="showDomains('',1)">
+<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;" onload="showDomains('',1,'')">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -92,6 +93,7 @@ function isSessionVariablesAvailable()
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
+<script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/domain/domain.js"></script>
 <script src="./plugins/botstore/botstore.js"></script>
 
@@ -133,7 +135,10 @@ function isSessionVariablesAvailable()
     newNode.id = 'domains_list';
 
     function searchDomain(str) {
-        showDomains(str, 1);
+        var id_category = document.getElementById('bot_category');
+        var category = parseInt(id_category.options[id_category.selectedIndex].value);
+
+        showDomains(str, 1,category);
     }
 
     function getIndexOf(value) {

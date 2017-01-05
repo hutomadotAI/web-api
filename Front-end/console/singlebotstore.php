@@ -82,7 +82,7 @@ function isPostInputAvailable(){
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 2, false, false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 3, false, false,"<?php echo $bot->getName(); ?>"]);
     </script>
 </form>
 

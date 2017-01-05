@@ -6280,7 +6280,8 @@ ul.pagination li a {
 }
 
 .bot-box{
-    max-width: 740px;
+    max-width: 640px;
+    min-width: 640px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -6289,13 +6290,22 @@ ul.pagination li a {
     padding:10px 10px 0px 10px;
 }
 
+.bot-image{
+    max-width: 205px;
+    min-width: 205px;
+    max-height: 205px;
+    min-height: 205px;
+    margin:0px;
+    padding:0px;
+}
+
 .bot-icon {
     min-height: 180px;
     max-height: 180px;
     min-width: 130px;
     max-width: 170px;
     text-align: center;
-    font-size: 85px;
+    font-size: 95px;
     line-height: 100px;
     margin:auto;
 }
@@ -6305,43 +6315,42 @@ ul.pagination li a {
 }
 
 .bot-info {
-    padding:0;
-    max-width: 550px;
+    min-width: 320px;
     min-height: 170px;
+    padding:0px 0px 0px 10px;
 }
 
 .bot-title {
-    padding: 0px 10px 0px 10px;
     text-align: left;
     font-size: 22px;
     height:30px;
-    padding-left:10px;
+    padding: 0px 10px 0px 0px;
 }
 
 .bot-badge {
-    padding: 0px 0px 0px 10px;
     text-align: right;
     font-weight: bold;
     font-size: 14px;
     height:30px;
+    padding: 0px 0px 0px 10px;
 }
 
 .bot-description {
-    padding:0px 0px 0px 10px;
     text-align: left;
     font-size: 14px;
     height:40px;
+    padding: 0px 10px 0px 0px;
 }
 
 .bot-msg{
-    padding:10px 10px 0px 10px;
     text-align: justify;
     font-size: 12px;
     height:50px;
+    padding:10px 0px 0px 0px;
 }
 
 .bot-other{
-    height:20px;
+    height:45px;
 }
 
 .bot-star{
@@ -6352,9 +6361,17 @@ ul.pagination li a {
     height:40px;
 }
 .bot-licence{
-    padding: 0px 0px 0px 10px;
+    padding: 0px 0px 0px 0px;
     font-size: 12px;
 }
+
+.bot-price{
+    font-weight: bold;
+    font-size: 16px;
+    height:20px;
+    padding:0px 0px 0px 0px;
+}
+
 .bot-video {
     margin-left: auto;
     margin-right: auto;
@@ -6381,13 +6398,6 @@ ul.pagination li a {
     padding-top:20px;
     font-weight: bold;
     text-align: left;
-}
-
-.bot-price{
-    padding:0px 0px 0px 10px;
-    font-weight: bold;
-    font-size: 16px;
-    height:20px;
 }
 
 .bot-buy{
@@ -6517,7 +6527,7 @@ ul.pagination li a {
     max-width: 100%;
 }
 
-.drop-zone{
+.drop-zone {
     min-width: 205px;
     max-width: 205px;
     margin:0px;

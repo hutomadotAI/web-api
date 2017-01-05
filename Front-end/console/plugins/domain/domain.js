@@ -17,36 +17,40 @@ function backPage(){
     document.domainsNewAIformGoBack.submit();
 }
 
-function showDomains(str,option){
+function showDomains(str,option,category){
     var wHTML = "";
 
     for (var x in domains) {
         var boxid = domains[x].aiid;
+
+        var fake_category = 'All';
         if ( (str!=" ") && ( (str.length==0) || (domains[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
             var key = domains[x].aiid;
 
-            if ( userActived[key] === false )
-                wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat" id="'+boxid+'">');
-            else
-                wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat borderActive" id="'+boxid+'">');
-            
-            if ( option == 0)
-                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'"><i class="'+domains[x].iconPath+'"></i></div>');
-            else
-                wHTML += ('<div class="info-circle-icon '+domains[x].widgetColor+'" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"'+domains[x].aiid+'"); ><i class="'+domains[x].iconPath+'"></i></div>');
+            if ( category =='' || category==fake_category) {
+                if (userActived[key] === false)
+                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat" id="' + boxid + '">');
+                else
+                    wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><div class="box box-solid box-default-fixed flat borderActive" id="' + boxid + '">');
 
-            wHTML += ('<h4 class="text-center text-mute unselectable">'+domains[x].name+'</h4>');
-            wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">'+domains[x].description+'</h5>');
+                if (option == 0)
+                    wHTML += ('<div class="info-circle-icon ' + domains[x].widgetColor + '" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'"><i class="' + domains[x].iconPath + '"></i></div>');
+                else
+                    wHTML += ('<div class="info-circle-icon ' + domains[x].widgetColor + '" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + domains[x].aiid + '"); ><i class="' + domains[x].iconPath + '"></i></div>');
 
-            wHTML += addHtmlStarRating(userActived[key],boxid,domains[x].rating);
-            wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"'+domains[x].aiid+'"); >info and settings</h5>');
+                wHTML += ('<h4 class="text-center text-mute unselectable">' + domains[x].name + '</h4>');
+                wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">' + domains[x].description + '</h5>');
 
-            if ( userActived[key] === false )
-                wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
-            else
-                wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"'+key+'");></div>');
-            wHTML += ('</div>');
-            wHTML += ('</div></div>');
+                wHTML += addHtmlStarRating(userActived[key], boxid, domains[x].rating);
+                wHTML += ('<div class="box-footer-flatdown flat"><h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + domains[x].aiid + '"); >info and settings</h5>');
+
+                if (userActived[key] === false)
+                    wHTML += ('<div class="switch" data-rnn="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"' + key + '");></div>');
+                else
+                    wHTML += ('<div class="switch switchOn" data-rnn="1" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"' + key + '");></div>');
+                wHTML += ('</div>');
+                wHTML += ('</div></div>');
+            }
         }
     }
     newNode.innerHTML = wHTML;
