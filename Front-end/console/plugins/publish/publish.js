@@ -39,7 +39,7 @@ function checkInput(){
             return false;
         }
     }
-
+/*
     // BOT developer email input validation
     var developer_email = document.getElementById('bot_developer_email');
     if (developer_email.value != '' && developer_email.value !== 'undefined') {
@@ -48,6 +48,7 @@ function checkInput(){
             return false;
         }
     }
+    */
     
     // block submit request
     $(this).prop("disabled", true);

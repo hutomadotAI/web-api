@@ -24,7 +24,6 @@ $response = $developerApi->updateDeveloperInfo(
     $_POST['developer_postCode'],
     $_POST['developer_city'],
     $_POST['developer_country'],
-
     $_POST['developer_website']
 );
 unset($developerApi);
