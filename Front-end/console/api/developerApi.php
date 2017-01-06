@@ -25,10 +25,6 @@ class developerApi extends apiBase
             $this->curl->setVerbGet();
             $this->curl->addHeader('Content-Type', 'application/json');
             $curl_response = $this->curl->exec();
-
-            // here we have an error 404 not found
-            //print($curl_response);
-
             $this->handleApiCallError($curl_response, 380);
             $json_response = json_decode($curl_response, true);
             return $json_response;

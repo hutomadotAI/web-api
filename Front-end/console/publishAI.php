@@ -1,9 +1,11 @@
 <?php
 require "../pages/config.php";
 require_once "../console/common/bot.php";
+require_once "../console/common/developer.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/aiApi.php";
 require_once "../console/api/developerApi.php";
+
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -11,19 +13,15 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 }
 
 // If is it set, it means the user has selected a existing AI from home list
-if (isset($_POST['ai']))
-    getFirstInfoFromPublication($_POST['ai'],$_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id']);
-
-
-function getFirstInfoFromPublication($aiid,$devid)
-{
-    getBasicAiInfo($aiid);
-    getDeveloperInfo($devid);
-    exit;
+if (isset($_POST['ai'])) {
+    getBasicAiInfo($_POST['ai']);
 }
 
+$developerApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$developer = $developerApi->getDeveloperInfo($_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id']);
+unset($developerApi);
+
 function getBasicAiInfo($aiid){
-    // get basic info from AI for publication
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $singleAI = $aiApi->getSingleAI($aiid);
     unset($aiApi);
@@ -38,14 +36,6 @@ function getBasicAiInfo($aiid){
     unset($singleAI);
 }
 
-function getDeveloperInfo($devid) {
-    // get developer info from AI for publication
-    $developerApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $developer = $developerApi->getDeveloperInfo($devid);
-    var_dump($developer);
-    exit;
-    unset($developerApi);
-}
 
 function setSessionVariables($singleAI)
 {
@@ -122,6 +112,31 @@ function setSessionVariables($singleAI)
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <script src="./plugins/cropper/jquery.cropit.js"></script>
+<script>
+    var developer = <?php
+        $tmp_dev = [];
+
+        if (isset($developer) && ($developer['status']['code'] === 200)) {
+            $dev = new \hutoma\developer();
+
+            $dev->setName($developer['name']);
+            $dev->setCompany($developer['company']);
+            $dev->setEmail($developer['email']);
+            $dev->setAddress($developer['address']);
+            $dev->setPostcode($developer['postCode']);
+            $dev->setCity($developer['city']);
+            $dev->setCountry($developer['country']);
+            $dev->setWebsite($developer['website']);
+
+            $tmp_dev = $dev->toJSON();
+
+            unset($dev);
+        }
+        echo json_encode($tmp_dev);
+        unset($tmp_dev);
+        ?>;
+</script>
+
 <script>
     $(function() {
         $('.image-editor').cropit({
