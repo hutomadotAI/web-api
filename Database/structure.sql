@@ -1757,7 +1757,7 @@ BEGIN
 
   START TRANSACTION;
     SELECT @botPrice = price FROM botStore WHERE id = param_botId;
-    // TODO: this assumes no real money needs to be tranferred for the moment
+    /* TODO: this assumes no real money needs to be tranferred for the moment */
     INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, @botPrice);
   COMMIT;
 END ;;
@@ -1775,6 +1775,7 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPublishedBotForAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50))
     NO SQL
 BEGIN

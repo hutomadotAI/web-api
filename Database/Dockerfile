@@ -6,6 +6,9 @@ COPY structure.sql /docker-entrypoint-initdb.d/0.sql
 COPY users.sql /docker-entrypoint-initdb.d/1.sql
 COPY default-data.sql /docker-entrypoint-initdb.d/2.sql
 
+# Test data - should not be added to production
+COPY test-data.sql /docker-entrypoint-initdb.d/3.sql
+
 # Default values for passwords and database name. Can be overridden on docker run
 ENV MYSQL_ROOT_PASSWORD=password
 
