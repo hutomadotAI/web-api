@@ -2722,12 +2722,13 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50), IN `param_variables` TEXT)
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50),
+  IN `param_variables` TEXT, IN `param_isFulFilled` TINYINT(1))
 BEGIN
-	INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess)
-		VALUES(param_aiid, param_chatId, param_name, param_variables, NOW())
+  INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess, isFulfilled)
+    VALUES(param_aiid, param_chatId, param_name, param_variables, NOW(), param_isFulFilled)
 
-	ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW();
+  ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW(), isFulfilled = param_isFulFilled;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

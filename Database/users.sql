@@ -155,7 +155,7 @@ GRANT EXECUTE ON `hutoma`.* TO 'userTableWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'userTableWriter'@'127.0.0.1';
 
-GRANT DELETE ON `hutoma`.`memoryIntent` TO 'userTableWriter'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`memoryIntent` TO 'userTableWriter'@'127.0.0.1';
 
 
 # Privileges for `mesh_reader`@`127.0.0.1`
