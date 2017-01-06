@@ -6,6 +6,8 @@ ini_set("display_errors", "on");
 require __DIR__ . "/../class.logsys.php";
 \hutoma\console::config(array(
     "db" => array(
+        //"host" => "52.44.215.190",
+        //"port" => 3306,
         "host" => "10.132.0.9",
         "port" => 12306,
         "username" => "hutoma_caller",
@@ -16,9 +18,9 @@ require __DIR__ . "/../class.logsys.php";
         "token_table" =>  "resetTokens"
     ),
     "api" => array(
+        //"request_url" => "http://api.hutoma.com/v1"
         "request_url" => "http://10.132.0.6:11080/v1"
-      //"request_url" => "http://api.hutoma.com/v1"
-      //"request_url" => "http://localhost:8081/v1"
+        //"request_url" => "http://localhost:8081/v1"
     ),
     "features" => array(
         "auto_init" => true

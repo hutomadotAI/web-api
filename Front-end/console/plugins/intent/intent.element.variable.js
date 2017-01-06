@@ -154,6 +154,11 @@ function pushEntitiesList(node) {
         fc = ul.firstChild;
     }
 
+    if (entityListFromServer.length < 1) {
+        msgAlertIntentVariable(1, 'No entities available.');
+        return;
+    }
+
     for (var x in entityListFromServer) {
         // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
         if (!isUsedEntities(entityListFromServer[x]) || selected.text().replace(/[@]/g, "") == entityListFromServer[x]) {
@@ -214,7 +219,7 @@ function isJustAddedNewRow() {
     }
 
     var len = parent.childElementCount;
-    if (len == entityListFromServer.length) { // se hai raggiunto in numero massimo MSG ALERT
+    if (len == entityListFromServer.length) { // if are reach the max number of entity
         msgAlertIntentVariable(1, 'All entities are used!');
         return true;
     }

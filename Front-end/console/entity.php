@@ -27,6 +27,15 @@ if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) 
     \hutoma\console::redirect('./error.php?err=225');
     exit;
 }
+
+function echoJsonEntitiesResponse($entities)
+{
+    if ($entities['status']['code'] !== 404) {
+        echo json_encode($entities['entity_name']);
+    }
+    else
+        echo '""'; // return empty string
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -104,7 +113,7 @@ if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) 
 
 <script>
     // FAKE API JSON REQUEST INTEGRATION RESPONSE
-    var entities = <?php echo json_encode($entities['entity_name']); unset($entities)?>;
+    var entities = <?php echoJsonEntitiesResponse($entities); unset($entities)?>;
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'entities_list';
