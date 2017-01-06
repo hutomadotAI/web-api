@@ -3,6 +3,7 @@ require "../pages/config.php";
 require_once "../console/common/bot.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/aiApi.php";
+require_once "../console/api/developerApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -11,14 +12,22 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 
 // If is it set, it means the user has selected a existing AI from home list
 if (isset($_POST['ai']))
-    CallGetSingleAI($_POST['ai']);
+    getFirstInfoFromPublication($_POST['ai'],$_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id']);
 
 
-function CallGetSingleAI($aiid)
+function getFirstInfoFromPublication($aiid,$devid)
 {
+    getBasicAiInfo($aiid);
+    getDeveloperInfo($devid);
+    exit;
+}
+
+function getBasicAiInfo($aiid){
+    // get basic info from AI for publication
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $singleAI = $aiApi->getSingleAI($aiid);
     unset($aiApi);
+
     if ($singleAI['status']['code'] === 200) {
         setSessionVariables($singleAI);
     } else {
@@ -27,6 +36,15 @@ function CallGetSingleAI($aiid)
         exit;
     }
     unset($singleAI);
+}
+
+function getDeveloperInfo($devid) {
+    // get developer info from AI for publication
+    $developerApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $developer = $developerApi->getDeveloperInfo($devid);
+    var_dump($developer);
+    exit;
+    unset($developerApi);
 }
 
 function setSessionVariables($singleAI)
