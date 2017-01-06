@@ -114,6 +114,10 @@ function setSessionVariables($singleAI)
             window.open(imageData);
         });
     });
+
+    $(function () {
+        $('.select2').select2();
+    });
 </script>
 
 <form action="" method="post" enctype="multipart/form-data">

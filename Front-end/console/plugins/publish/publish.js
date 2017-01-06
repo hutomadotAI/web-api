@@ -10,6 +10,8 @@ document.getElementById("bot_developer_country").addEventListener("keydown",func
 document.getElementById("bot_developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_email").addEventListener("keydown",function(){removeAlert(this)}, false);
 
+populateDeveloperFields(developer);
+
 function checkInput(){
     // BOT name input validation
     var bot_name = document.getElementById('bot_name');
@@ -28,12 +30,7 @@ function checkInput(){
             return false;
         }
     }
-
-    // BOT long description input validation
-    // BOT usecase input validation
-    // BOT alert Message input validation
-    // BOT link privacy input validation
-
+    
     // BOT licence fee ( price ) input validation
     var bot_licence_fee = document.getElementById('bot_licence_fee');
     if (bot_licence_fee.value != '' && bot_licence_fee.value !== 'undefined') {
@@ -43,52 +40,6 @@ function checkInput(){
         }
     }
 
-    // BOT version input validation
-    /*
-    var bot_version = document.getElementById('bot_version');
-    if (bot_version.value != '' && bot_licence_fee.value !== 'undefined') {
-        if (inputValidation(bot_version.value, 'bot_version')) {
-            createAlertMessage(2, 'Incorrect Version.','bot_version');
-            return false;
-        }
-    }
-    */
-
-    // BOT developer name input validation
-    /*
-    var developer_name = document.getElementById('bot_developer_name');
-    if (developer_name.value != '' && developer_name.value !== 'undefined') {
-        if (inputValidation(developer_name.value, 'developer_name')) {
-            createAlertMessage(2, 'Please enter a name that contains alphanumeric characters','bot_developer_name');
-            return false;
-        }
-    }
-    */
-    
-    // BOT developer address input validation
-
-    // BOT developer city input validation
-    /*
-    var developer_city = document.getElementById('bot_developer_city');
-    if (developer_city.value != '' && developer_city.value !== 'undefined') {
-        if (inputValidation(developer_city.value, 'developer_city')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_developer_city');
-            return false;
-        }
-    }
-    */
-
-    // BOT developer country input validation
-    /*
-    var developer_country = document.getElementById('bot_developer_country');
-    if (developer_country.value != '' && developer_country.value !== 'undefined') {
-        if (inputValidation(developer_country.value, 'developer_country')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_developer_country');
-            return false;
-        }
-    }
-    */
-
     // BOT developer email input validation
     var developer_email = document.getElementById('bot_developer_email');
     if (developer_email.value != '' && developer_email.value !== 'undefined') {
@@ -97,10 +48,7 @@ function checkInput(){
             return false;
         }
     }
-    // BOT developer company input validation
-    // BOT developer website input validation
-
-
+    
     // block submit request
     $(this).prop("disabled", true);
 
@@ -194,26 +142,31 @@ function createAlertMessage(alarm,message,id) {
 
 }
 
-function populateBotFields(){
-    document.getElementById('bot_name').value = bot['name'];
-    document.getElementById('bot_description').value = bot['shortDescription'];
-    document.getElementById('bot_long_description').innerText = bot['longDescription'];
-    setSelectValue('bot_licence_type',bot['licenceType']);
-    setSelectValue('bot_category',bot['category']);
-    setSelectValue('bot_classification',bot['classification']);
-    document.getElementById('bot_licence_fee').value = bot['licenceFee'];
-    document.getElementById('bot_version').value = bot['version'];
-    document.getElementById('bot_usecase').innerText = bot['usecase'];
-    document.getElementById('bot_alert_message').value = bot['alarmMsg'];
-    document.getElementById('bot_link_privacy').value = bot['privacyLink'];
-    document.getElementById('bot_developer_name').value = bot['developer']['name'];
-    document.getElementById('bot_developer_email').value = bot['developer']['email'];
-    document.getElementById('bot_developer_address').value = bot['developer']['address'];
-    document.getElementById('bot_developer_postcode').value = bot['developer']['postcode'];
-    document.getElementById('bot_developer_city').value = bot['developer']['city'];
-    document.getElementById('bot_developer_country').value = bot['developer']['country'];
-    document.getElementById('bot_developer_website').value = bot['developer']['website'];
-    document.getElementById('bot_developer_company').value = bot['developer']['company'];
+function populateBotFields(bot){
+    var json = JSON.parse(bot);
+    document.getElementById('bot_name').value = json['name'];
+    document.getElementById('bot_description').value = json['shortDescription'];
+    document.getElementById('bot_long_description').innerText = json['longDescription'];
+    setSelectValue('bot_licence_type',json['licenceType']);
+    setSelectValue('bot_category',json['category']);
+    setSelectValue('bot_classification',json['classification']);
+    document.getElementById('bot_licence_fee').value = json['licenceFee'];
+    document.getElementById('bot_version').value = json['version'];
+    document.getElementById('bot_usecase').innerText = json['usecase'];
+    document.getElementById('bot_alert_message').value = json['alarmMsg'];
+    document.getElementById('bot_link_privacy').value = json['privacyLink'];
+}
+
+function populateDeveloperFields(developer){
+    var json = JSON.parse(developer);
+    document.getElementById('bot_developer_name').value = json["name"];
+    document.getElementById('bot_developer_email').value = json['email'];
+    document.getElementById('bot_developer_address').value = json['address'];
+    document.getElementById('bot_developer_postcode').value = json['postcode'];
+    document.getElementById('bot_developer_city').value = json['city'];
+    document.getElementById('bot_developer_country').value = json['country'];
+    document.getElementById('bot_developer_company').value = json['company'];
+    document.getElementById('bot_developer_website').value = json['website'];
 }
 
 function fieldsToBotIstance(){
@@ -266,11 +219,3 @@ function licenceTypeShow(){
             break;
     }
 }
-
-$(function () {
-    $('.select2').select2();
-});
-
-$( document ).ready(function() {
-    populateBotFields();
-});

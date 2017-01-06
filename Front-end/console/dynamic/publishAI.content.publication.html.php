@@ -1,73 +1,6 @@
 <?php
-require_once "./common/developer.php";
-
-// TODO remove hardcoded part
-$bot = new \hutoma\bot();
-
-if ( existsBotInStore($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']))
-    $bot = getBot();
-else
-    $bot = setBasicBotDefaultValues();
-
-$bot->developer = getDeveloper();
-
-
-function existsBotInStore($aiid){
-    $fakelist = array(1 => '6ea04c96-2ec3-4a5a-bd46-81742e38aab0', 2 => 'b9907c0b-3d7f-4919-a635-e964840fb8ab', 3 => '189c8ed5-0fe1-4bc0-ba07-d73bb02aa300',4 => '6214abb0-b9dd-4b5c-8194-2e1df15f89dd',5 => '5e643a75-04da-47e3-b920-546406068808');
-    foreach ($fakelist as $singlebot) {
-        if ($singlebot == $aiid)
-            return true;
-    }
-    return false;
-}
-
-function getBot(){
-    // TODO remove this fake hardcoded data
-    $infoBot = new \hutoma\bot();
-    $infoBot->setName("Fake botName");
-    $infoBot->setDescription("Fake shortDescription");
-    $infoBot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment and yet I feel that I never was a greater artist than now.');
-    $infoBot->setUsecase('User: I want to sleep.
-Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
-User: You\'re so sweet.
-Agent: I like you too. You\'re a lot of fun to talk to.');
-    $infoBot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
-    $infoBot->setPrivacyLink('https://www.google.it/intl/it/policies/privacy/');
-    $infoBot->setUpdate('10 september 2016');  // setted when you send request publish bot
-    $infoBot->setLicenceType('Free');
-    $infoBot->setLicenceFee('0.0');
-    $infoBot->setCategory('Other');
-    $infoBot->setClassification('EVERYONE');
-    $infoBot->setVersion('1.0.0');
-    return $infoBot;
-}
-
-function getDeveloper(){
-    $infoDeveloper = new \hutoma\developer();
-    $infoDeveloper->setName('hu:toma Ltd.');
-    $infoDeveloper->setCompany('HUTOMA');
-    $infoDeveloper->setEmail('support@hutoma.com');
-    $infoDeveloper->setAddress('Carrer del Consell de Cent, 341');
-    $infoDeveloper->setPostcode('08007');
-    $infoDeveloper->setCity('Barcelona');
-    $infoDeveloper->setCountry('Spain');
-    $infoDeveloper->setWebsite('http://www.hutoma.com');
-    return $infoDeveloper;
-}
-
-function setBasicBotDefaultValues(){
-    $infoBot = new \hutoma\bot();
-    $infoBot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
-    $infoBot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
-    $infoBot->setLicenceType('Free');
-    $infoBot->setClassification('EVERYONE');
-    $infoBot->setCategory('No category');
-    $infoBot->setLicenceFee('0.0');
-    $infoBot->setVersion('1.0.0');
-    return $infoBot;
-}
+    require_once "./common/developer.php";
 ?>
-
 
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
@@ -255,26 +188,7 @@ function setBasicBotDefaultValues(){
         </div>
         <!-- end row 2 BOTTOM-->
         <br>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
+        
         <!-- row 3 -->
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
             <!-- row 3A -->
@@ -286,7 +200,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-university"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_name" name="bot_developer_name" placeholder="Enter the name of developer...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow unselectable"  id="bot_developer_name" name="bot_developer_name" placeholder="Enter the name of developer..." readonly>
                         </div>
                     </div>
                 </div>
@@ -297,7 +211,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-building-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_address" name="bot_developer_address" placeholder="Enter the address...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow unselectable"  id="bot_developer_address" name="bot_developer_address" placeholder="Enter the address..." readonly>
                         </div>
                     </div>
                 </div>
@@ -308,7 +222,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-map-signs"></i>
                             </div>
-                            <input type="text" maxlength="30" class="form-control flat no-shadow"  id="bot_developer_postcode" name="bot_developer_postcode" placeholder="Enter the postcode...">
+                            <input type="text" maxlength="30" class="form-control flat no-shadow unselectable"  id="bot_developer_postcode" name="bot_developer_postcode" placeholder="Enter the postcode..." readonly>
                         </div>
                     </div>
                 </div>
@@ -323,7 +237,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-map-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_city" name="bot_developer_city" placeholder="Enter the city...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow unselectable"  id="bot_developer_city" name="bot_developer_city" placeholder="Enter the city..." readonly>
                         </div>
                     </div>
                 </div>
@@ -334,7 +248,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-globe"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow"  id="bot_developer_country" name="bot_developer_country" placeholder="Enter the country...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow unselectable"  id="bot_developer_country" name="bot_developer_country" placeholder="Enter the country..." readonly>
                         </div>
                     </div>
                 </div>
@@ -345,7 +259,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="100" class="form-control flat no-shadow"  id="bot_developer_email" name="bot_developer_email" placeholder="Enter email...">
+                            <input type="text" maxlength="100" class="form-control flat no-shadow unselectable"  id="bot_developer_email" name="bot_developer_email" placeholder="Enter email..." readonly>
                         </div>
                     </div>
                 </div>
@@ -360,7 +274,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="glyphicon glyphicon-link"></i>
                             </div>
-                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="bot_developer_website" name="bot_developer_website" placeholder="Enter the link of website...">
+                            <input type="text" maxlength="1800" class="form-control flat no-shadow unselectable"  id="bot_developer_website" name="bot_developer_website" placeholder="Enter the link of website..." readonly>
                         </div>
                     </div>
                 </div>
@@ -371,7 +285,7 @@ function setBasicBotDefaultValues(){
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow" id="bot_developer_company" name="bot_developer_company" placeholder="Enter company...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow unselectable" id="bot_developer_company" name="bot_developer_company" placeholder="Enter company...">
                         </div>
                     </div>
                 </div>
@@ -393,33 +307,32 @@ function setBasicBotDefaultValues(){
     </div>
 </div>
 
-
-<script>
-    var bot = <?php echo $bot->toJSON(); unset($bot);?>;
-    var cropper;
-</script>
-
-
 <script>
     var developer = <?php
-
         $dev = new \hutoma\developer();
-
-        $dev->setName($developer['name']);
-        $dev->setCompany($developer['company']);
-        $dev->setEmail($developer['email']);
-        $dev->setAddress($developer['address']);
-        $dev->setPostcode($developer['postCode']);
-        $dev->setCity($developer['city']);
-        $dev->setCountry($developer['country']);
-        $dev->setWebsite($developer['website']);
+        $dev->setName($developer['info']['name']);
+        $dev->setCompany($developer['info']['company']);
+        $dev->setEmail($developer['info']['email']);
+        $dev->setAddress($developer['info']['address']);
+        $dev->setPostcode($developer['info']['postCode']);
+        $dev->setCity($developer['info']['city']);
+        $dev->setCountry($developer['info']['country']);
+        $dev->setWebsite($developer['info']['website']);
+        unset($developer);
 
         $tmp_dev = $dev->toJSON();
-
         echo json_encode($tmp_dev);
         unset($dev);
         unset($tmp_dev);
         ?>;
 </script>
 
-<script src="./plugins/publish/publish.js"></script>
+<script src="./plugins/publish/publish.js">
+    alert();
+    $( document ).ready(function() {
+        alert(developer);
+        populateDeveloperFields(developer);
+        populateBotFields();
+    });
+</script>
+

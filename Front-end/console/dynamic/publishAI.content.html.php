@@ -11,6 +11,7 @@
                 include './dynamic/publishAI.content.publication.html.php';
                 break;
             case 404:
+                unset($developer);
                 include './dynamic/publishAI.content.developer.html.php';
                 break;
         }

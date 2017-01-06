@@ -18,19 +18,34 @@ $developerApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hut
 $response = $developerApi->updateDeveloperInfo(
     $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'],
     $_POST['developer_name'],
+    $_POST['developer_company'],
     $_POST['developer_email'],
     $_POST['developer_address'],
     $_POST['developer_postCode'],
     $_POST['developer_city'],
     $_POST['developer_country'],
-    $_POST['developer_company'],
+
     $_POST['developer_website']
 );
-
 unset($developerApi);
 
-echo json_encode($response);
-unset($response);
+switch($response['code']){
+    case 200:
+        // UPDATED developer
+        unset($response);
+        \hutoma\console::redirect('./publishAI.php');
+        break;
+    case 404:
+        // MISSING or NULL FIELD in  developer
+        unset($response);
+        \hutoma\console::redirect('./publishAI.php');
+        break;
+    case 500:
+        // DEVELOPER JUST EXISTS
+        unset($response);
+        \hutoma\console::redirect('./publishAI.php');
+        break;
+}
 
 function isPostInputAvailable()
 {

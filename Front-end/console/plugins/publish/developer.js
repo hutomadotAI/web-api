@@ -8,9 +8,7 @@ document.getElementById("developer_city").addEventListener("keydown",function(){
 document.getElementById("developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
 
-
-setDeveloperJustForDebug();
-// TODO remove
+/*
 function setDeveloperJustForDebug(){
     document.getElementById('developer_name').value=('hu:toma Ltd.');
     document.getElementById('developer_company').value=('HUTOMA');
@@ -21,7 +19,7 @@ function setDeveloperJustForDebug(){
     document.getElementById('developer_country').value=('Spain');
     document.getElementById('developer_website').value=('http://www.hutoma.com');
 }
-
+*/
 
 function checkDevInput(){
     // Missing - developer name input validation
