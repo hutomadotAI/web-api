@@ -59,12 +59,12 @@
             </div>
             <div class="col-xs-3">
                 <div class="form-group">
-                    <label for="developer_postcode">Postcode</label>
+                    <label for="developer_postCode">Postcode</label>
                     <div class="input-group">
                         <div class="input-group-addon">
                             <i class="fa fa-map-signs"></i>
                         </div>
-                        <input type="text" maxlength="30" class="form-control flat no-shadow"  id="developer_postcode" name="developer_postcode" placeholder="Enter the postcode...">
+                        <input type="text" maxlength="30" class="form-control flat no-shadow"  id="developer_postCode" name="developer_postCode" placeholder="Enter the postcode...">
                     </div>
                 </div>
             </div>

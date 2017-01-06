@@ -20,7 +20,7 @@ $response = $developerApi->updateDeveloperInfo(
     $_POST['developer_name'],
     $_POST['developer_email'],
     $_POST['developer_address'],
-    $_POST['developer_postcode'],
+    $_POST['developer_postCode'],
     $_POST['developer_city'],
     $_POST['developer_country'],
     $_POST['developer_company'],
@@ -38,7 +38,7 @@ function isPostInputAvailable()
         isset($_POST['developer_name']) &&
         isset($_POST['developer_email']) &&
         isset($_POST['developer_address']) &&
-        isset($_POST['developer_postcode']) &&
+        isset($_POST['developer_postCode']) &&
         isset($_POST['developer_city']) &&
         isset($_POST['developer_country']) &&
         isset($_POST['developer_company']) &&

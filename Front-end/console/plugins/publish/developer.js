@@ -3,7 +3,7 @@ document.getElementById("btnPublishDeveloper").addEventListener("click", checkDe
 document.getElementById("developer_name").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_email").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_address").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("developer_postcode").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("developer_postCode").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_city").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
@@ -16,7 +16,7 @@ function setDeveloperJustForDebug(){
     document.getElementById('developer_company').value=('HUTOMA');
     document.getElementById('developer_email').value=('support@hutoma.com');
     document.getElementById('developer_address').value= ('Carrer del Consell de Cent, 341');
-    document.getElementById('developer_postcode').value=('08007');
+    document.getElementById('developer_postCode').value=('08007');
     document.getElementById('developer_city').value= ('Barcelona');
     document.getElementById('developer_country').value=('Spain');
     document.getElementById('developer_website').value=('http://www.hutoma.com');
@@ -121,7 +121,7 @@ function fieldsValidation(){
         return false;
     }
 
-    elem = document.getElementById('developer_postcode');
+    elem = document.getElementById('developer_postCode');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
         createAlertMessage(2, 'The postcode field cannot is empty!');
@@ -209,17 +209,4 @@ function createAlertMessage(alarm,message,id) {
         document.getElementById('msgAlertDeveloper').innerText = message;
     }
 
-}
-
-function fieldsDevToArray(){
-    var tmp_dev =[];
-    tmp_dev['name'] = document.getElementById('developer_name').value;
-    tmp_dev['email'] = document.getElementById('developer_email').value;
-    tmp_dev['address'] = document.getElementById('developer_address').value;
-    tmp_dev['postcode'] = document.getElementById('developer_postcode').value;
-    tmp_dev['city'] = document.getElementById('developer_city').value;
-    tmp_dev['country'] = document.getElementById('developer_country').value;
-    tmp_dev['company'] = document.getElementById('developer_company').value;
-    tmp_dev['website'] = document.getElementById('developer_website').value;
-    return tmp_dev;
 }
