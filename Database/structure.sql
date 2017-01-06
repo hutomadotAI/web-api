@@ -2303,18 +2303,9 @@ CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `setDeveloperInfo`(
   IN `param_country` varchar(100),
   IN `param_website` varchar(1024))
 BEGIN
-  UPDATE developerInfo
-    SET
-      `name` = param_name,
-      `company` = param_company,
-      `email` = param_email,
-      `address` = param_address,
-      `post_code` = param_postCode,
-      `city` = param_city,
-      `country` = param_country,
-      `website` = param_website
-    WHERE dev_id = param_devid;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  INSERT INTO developerInfo
+  (`dev_id`, `name`,`company`,`email`,`address`,`post_code`,`city`,`country`,`website`)
+  VALUES (param_devid,param_name,param_company,param_email,param_address,param_postCode,param_city,param_country,param_website);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
