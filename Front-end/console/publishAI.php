@@ -1,25 +1,16 @@
 <?php
 require "../pages/config.php";
-require_once "../console/common/bot.php";
-require_once "../console/common/developer.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/aiApi.php";
-require_once "../console/api/developerApi.php";
-
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
 
-// If is it set, it means the user has selected a existing AI from home list
 if (isset($_POST['ai'])) {
     getBasicAiInfo($_POST['ai']);
 }
-
-$developerApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$developer = $developerApi->getDeveloperInfo($_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id']);
-unset($developerApi);
 
 function getBasicAiInfo($aiid){
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
@@ -35,7 +26,6 @@ function getBasicAiInfo($aiid){
     }
     unset($singleAI);
 }
-
 
 function setSessionVariables($singleAI)
 {
@@ -105,38 +95,12 @@ function setSessionVariables($singleAI)
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/publish/publish.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <script src="./plugins/cropper/jquery.cropit.js"></script>
-<script>
-    var developer = <?php
-        $tmp_dev = [];
-
-        if (isset($developer) && ($developer['status']['code'] === 200)) {
-            $dev = new \hutoma\developer();
-
-            $dev->setName($developer['name']);
-            $dev->setCompany($developer['company']);
-            $dev->setEmail($developer['email']);
-            $dev->setAddress($developer['address']);
-            $dev->setPostcode($developer['postCode']);
-            $dev->setCity($developer['city']);
-            $dev->setCountry($developer['country']);
-            $dev->setWebsite($developer['website']);
-
-            $tmp_dev = $dev->toJSON();
-
-            unset($dev);
-        }
-        echo json_encode($tmp_dev);
-        unset($tmp_dev);
-        ?>;
-</script>
-
 <script>
     $(function() {
         $('.image-editor').cropit({
