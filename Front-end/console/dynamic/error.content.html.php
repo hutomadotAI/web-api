@@ -239,6 +239,10 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - UNABLE TO UPDATE DEVELOPER INFORMATION';
             $details = ' We could not find the data you were looking for';
             break;
+        case 385 :
+            $msg = 'INTERNAL ERROR - UNABLE TO UPDATE BOT INFORMATION';
+            $details = ' We could not find the data you were looking for';
+            break;
         case 500 :
             $msg = 'INTERNAL ERROR - UNEXCEPTION ERROR';
             $details = ' We could not find the data you were looking for';

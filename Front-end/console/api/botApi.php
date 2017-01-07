@@ -12,67 +12,45 @@ include "../common/bot.php";
 
 class botApi extends apiBase
 {
-    private static $publishPath = "";
-    private static $bot;
+    private static $botstorePath = "/botstore";
     
     function __construct($sessionObject, $devToken)
     {
         parent::__construct($sessionObject, $devToken);
     }
-
- 
-    public function publishBot($devid, $bot)
+    
+    public function publishBot($bot)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$publishPath . '/' . $devid));
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath));
             $this->curl->setVerbPost();
 
-/*
             $args =  array(
-                'aiid' => $aiid,
-                'name' => $name,
-                'longDescription' => $longDescription,
-                'alertMessage' => $alertMessage,
-                'badge' => $badge,
-                'price' => $price,
-                'sample' => $sample,
-                'category' => $category,
-                'privacyPolicy' => $privacyPolicy,
-                'price' => $price,
-                'classification' => $classification,
-                'version' => $version,
-                'videoLink' => $videoLink
+                'aiid' => $bot['aiid'],
+                'alertMessage' => $bot['alertMessage'],
+                //TODO remove hard code on badge after set NULL in API
+                'badge' => 'fake badge',
+                'category' => $bot['category'],
+                'classification' =>  $bot['classification'],
+                'description' => $bot['description'],
+                //TODO ADD licenseType in API and in the new DB
+                'licenseType' => $bot['licenseType'],
+                'longDescription' => $bot['longDescription'],
+                'name' => $bot['name'],
+                'price' =>$bot['price'],
+                'privacyPolicy' => $bot['privacyPolicy'],
+                'sample' => $bot['sample'],
+                'version' => $bot['version'],
+                'videoLink' =>  $bot['videoLink'],
             );
-*/
-            
-            $args = $bot->toArray();
-            
+
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 381);
+            $this->handleApiCallError($curl_response, 385);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
         return $this->getDefaultResponse();
-    }
-
-    public function getBotInfo(){
-        $bot = new \hutoma\bot();
-        $bot->getName();
-        $bot->getDescription();
-        $bot->getLongDescription();
-        $bot->getUsecase();
-        $bot->getAlarmMessage();
-        $bot->getPrivacyLink();
-        $bot->getUpdate();
-        $bot->getLicenceType();
-        $bot->getLicenceFee();
-        $bot->getCategory();
-        $bot->getClassification();
-        $bot->getVersion();
-
-        $arr = $bot->toArray();
-        return $arr;
     }
 
     public function __destruct()

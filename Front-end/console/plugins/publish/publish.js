@@ -63,21 +63,23 @@ function requestPublish(){
     $.ajax({
         type: "POST",
         url: './dynamic/publishBot.php',
-        data: {bot : jsonString},
+        data: {'bot' : jsonString},
         cache: false,
         success: function(response){
             //switch ($response['status']['code']) {
             switch (response) {
                 case '200':
                     createAlertMessage(3, 'Request sended!');
+                    buttonPublishToRequest();
                     break;
                 case 400:
                     break;
+                default:
+                    createAlertMessage(2, response);
             }
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
-            buttonPublishToRequest();
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
@@ -164,11 +166,11 @@ function populateBotFields(bot){
     document.getElementById('bot_alertMessage').value = json['alertMessage'];
     //document.getElementById('bot_badge').value = json['badge'];
     document.getElementById('bot_description').value = json['description'];
-    document.getElementById('bot_longDescription').innerText = json['longDescription'];
+    document.getElementById('bot_longDescription').value = json['longDescription'];
     document.getElementById('bot_name').value = json['name'];
     document.getElementById('bot_price').value = json['price'];
     document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
-    document.getElementById('bot_sample').innerText = json['sample'];
+    document.getElementById('bot_sample').innerHTML = json['sample'];
     document.getElementById('bot_version').value = json['version'];
     document.getElementById('bot_videoLink').value = json['videoLink'];
     setSelectValue('bot_category',json['category']);
@@ -189,7 +191,7 @@ function populateDeveloperFields(developer) {
 }
 
 function fieldsToBotIstance(){
-    var bot=[];
+    var bot={};
     bot['aiid'] = document.getElementById('bot_aiid').value;
     bot['alertMessage'] = document.getElementById('bot_alertMessage').value;
     bot['badge'] = '';
@@ -197,11 +199,11 @@ function fieldsToBotIstance(){
     bot['classification'] =document.getElementById('bot_classification').value;
     bot['description'] = document.getElementById('bot_description').value;
     bot['licenseType'] = document.getElementById('bot_licenseType').value;
-    bot['longDescription'] = document.getElementById('bot_longDescription').innerText;
+    bot['longDescription'] = document.getElementById('bot_longDescription').value;
     bot['name'] = document.getElementById('bot_name').value;
     bot['price'] = document.getElementById('bot_price').value;
     bot['privacyPolicy'] = document.getElementById('bot_privacyPolicy').value;
-    bot['sample'] = document.getElementById('bot_sample').innerText;
+    bot['sample'] = document.getElementById('bot_sample').innerHTML;
     bot['version'] =  document.getElementById('bot_version').value;
     bot['videoLink'] = document.getElementById('bot_videoLink').value;
     return bot;
