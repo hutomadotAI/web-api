@@ -71,6 +71,10 @@ function getUIStatusCall(){
             if (!justStopped())
                 createMessageWarningInfoAlert();
             break;
+        case (state == 10):
+            msgAlertProgressBar(3, 'Training completed.');
+            hidePreTrainingBar(state);
+            break;
         default:
     }
 }
@@ -165,7 +169,6 @@ function setStateResponse(response){
             break;
         case 'training_completed' :
             setUICurrentStatus(10); // code 10
-            msgAlertProgressBar(3, 'Training completed.');
             break;
         case 'training_nothing_to_train' :
             setUICurrentStatus(-1);
