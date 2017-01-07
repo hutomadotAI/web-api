@@ -38,9 +38,9 @@ function checkInput(){
     }
     
     // BOT licence fee ( price ) input validation
-    var bot_licence_fee = document.getElementById('bot_price');
-    if (bot_licence_fee.value != '' && bot_licence_fee.value !== 'undefined') {
-        if (inputValidation(bot_licence_fee.value, 'bot_licence_fee')) {
+    var bot_price = document.getElementById('bot_price');
+    if (bot_price.value != '' && bot_price.value !== 'undefined') {
+        if (inputValidation(bot_price.value, 'bot_price')) {
             createAlertMessage(2, 'Please enter a valid number.','bot_price');
             return false;
         }
@@ -58,19 +58,26 @@ function requestPublish(){
     $("#btnPublishRequest").prop("disabled", true);
 
     createAlertMessage(1, 'Sending request...');
-    fieldsToBotIstance();
+    var botInfo = fieldsToBotIstance();
+    var jsonString = JSON.stringify(botInfo);
     $.ajax({
-        url: './dynamic/publish.php',
-        data: {
-            bot: bot
-        },
-        type: 'POST',
-        success: function (response) {
-            createAlertMessage(4, 'Request submitted!');
+        type: "POST",
+        url: './dynamic/publishBot.php',
+        data: {bot : jsonString},
+        cache: false,
+        success: function(response){
+            //switch ($response['status']['code']) {
+            switch (response) {
+                case '200':
+                    createAlertMessage(3, 'Request sended!');
+                    break;
+                case 400:
+                    break;
+            }
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
-            $("#btnPublishRequest").prop("disabled", false);
+            buttonPublishToRequest();
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
@@ -87,6 +94,14 @@ function removeAlert(node){
             document.getElementById('containerMsgAlertPublish').remove();
     }
 }
+
+function buttonPublishToRequest(){
+    $('#btnPublishRequest').prop('disabled', true);
+    document.getElementById('btnPublishRequest').className = 'btn btn-primary pull-right flat';
+    document.getElementById('btnPublishRequestText').innerText = 'Request Sended';
+    document.getElementById('iconPublishRequest').className = 'fa fa-check-circle';
+}
+
 
 function createAlertMessage(alarm,message,id) {
     var msg_class;
@@ -110,6 +125,10 @@ function createAlertMessage(alarm,message,id) {
             ico_class = 'icon fa fa-warning';
             if (id!=null)
                 document.getElementById(id).style.border ="1px solid red";
+            break;
+        case 3:
+            msg_class = 'alert alert-dismissable flat alert-success text-white';
+            ico_class = 'icon fa fa-check';
             break;
         case 4:
             msg_class = 'alert alert-dismissable flat alert-primary';
@@ -142,58 +161,85 @@ function createAlertMessage(alarm,message,id) {
 function populateBotFields(bot){
     var json = JSON.parse(bot);
     document.getElementById('bot_aiid').value = json['aiid'];
-    document.getElementById('bot_name').value = json['name'];
+    document.getElementById('bot_alertMessage').value = json['alertMessage'];
+    //document.getElementById('bot_badge').value = json['badge'];
     document.getElementById('bot_description').value = json['description'];
     document.getElementById('bot_longDescription').innerText = json['longDescription'];
-    document.getElementById('bot_alertMessage').value = json['alarmMesssage'];
-    //document.getElementById('bot_badge').value = json['badge'];
+    document.getElementById('bot_name').value = json['name'];
     document.getElementById('bot_price').value = json['price'];
-    document.getElementById('bot_sample').innerText = json['sample'];
     document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
-    setSelectValue('bot_category',json['category']);
-    setSelectValue('bot_classification',json['classification']);
-    setSelectValue('bot_licence_type',json['licenceType']);
+    document.getElementById('bot_sample').innerText = json['sample'];
     document.getElementById('bot_version').value = json['version'];
     document.getElementById('bot_videoLink').value = json['videoLink'];
+    setSelectValue('bot_category',json['category']);
+    setSelectValue('bot_classification',json['classification']);
+    setSelectValue('bot_licenseType',json['licenseType']);
 }
 
-function populateDeveloperFields(developer){
+function populateDeveloperFields(developer) {
     var json = JSON.parse(developer);
-    document.getElementById('bot_developer_name').value = json["name"];
-    document.getElementById('bot_developer_email').value = json['email'];
     document.getElementById('bot_developer_address').value = json['address'];
-    document.getElementById('bot_developer_postcode').value = json['postcode'];
     document.getElementById('bot_developer_city').value = json['city'];
-    document.getElementById('bot_developer_country').value = json['country'];
     document.getElementById('bot_developer_company').value = json['company'];
+    document.getElementById('bot_developer_country').value = json['country'];
+    document.getElementById('bot_developer_email').value = json['email'];
+    document.getElementById('bot_developer_name').value = json["name"];
+    document.getElementById('bot_developer_postcode').value = json['postcode'];
     document.getElementById('bot_developer_website').value = json['website'];
+}
+
+function fieldsToBotIstance(){
+    var bot=[];
+    bot['aiid'] = document.getElementById('bot_aiid').value;
+    bot['alertMessage'] = document.getElementById('bot_alertMessage').value;
+    bot['badge'] = '';
+    bot['category'] = document.getElementById('bot_category').value;
+    bot['classification'] =document.getElementById('bot_classification').value;
+    bot['description'] = document.getElementById('bot_description').value;
+    bot['licenseType'] = document.getElementById('bot_licenseType').value;
+    bot['longDescription'] = document.getElementById('bot_longDescription').innerText;
+    bot['name'] = document.getElementById('bot_name').value;
+    bot['price'] = document.getElementById('bot_price').value;
+    bot['privacyPolicy'] = document.getElementById('bot_privacyPolicy').value;
+    bot['sample'] = document.getElementById('bot_sample').innerText;
+    bot['version'] =  document.getElementById('bot_version').value;
+    bot['videoLink'] = document.getElementById('bot_videoLink').value;
+    return bot;
 }
 
 function setSelectValue(id,valueToSelect) {
     var element = document.getElementById(id);
-    element.value = valueToSelect;
-    element.selected = true;
-    document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
+    for (var i = 0; i < element.options.length; ++i) {
+        if (element.options[i].text === valueToSelect) {
+            element.options[i].selected = true;
+            break;
+        }
+    }
 }
 
-function licenceTypeShow(){
-    var myselect = document.getElementById('bot_licence_type');
+function licenseTypeShow(){
+    var myselect = document.getElementById('bot_licenseType');
     var val = parseInt(myselect.options[myselect.selectedIndex].value);
 
     switch(val){
         case 0:
-            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse';
-            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse';
             break;
         case 1:
-            document.getElementById('collapseLicenceDetailsSubscription').setAttribute('aria-expanded','true');
-            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse in';
-            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsSubscription').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse in';
+            document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse';
             break;
         case 2:
-            document.getElementById('collapseLicenceDetailsPerpetual').setAttribute('aria-expanded','true');
-            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse in';
-            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsPerpetual').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse in';
+            document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse';
             break;
     }
 }
+
+
+$(function () {
+    $('.select2').select2();
+});

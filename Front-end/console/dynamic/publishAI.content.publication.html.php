@@ -2,7 +2,6 @@
     require_once "./common/developer.php";
     require_once "./common/bot.php";
 ?>
-
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
         <!-- row 0 -->
@@ -51,10 +50,10 @@
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
             <div class="col-xs-4 drop-zone2">
                 <div class="row no-margin">
-                    <?php include './dynamic/input.licenceType.html.php'; ?>
+                    <?php include './dynamic/input.licenseType.html.php'; ?>
                 </div>
                 <div class="row no-margin">
-                    <?php include './dynamic/input.category.html.php'; ?>
+                    <?php include './dynamic/input.category.publish.html.php'; ?>
                 </div>
                 <div class="row no-margin">
                     <?php include './dynamic/input.classification.html.php'; ?>
@@ -75,8 +74,8 @@
 
 
         <!-- row 2 MIDDLE-->
-        <!-- showed only for licence subscription  -->
-        <div id="collapseLicenceDetailsSubscription" class="panel-collapse collapse">
+        <!-- showed only for license subscription  -->
+        <div id="collapseLicenseDetailsSubscription" class="panel-collapse collapse">
             <div class="row no-margin" style="border-top: 1px solid #434343; border-bottom: 1px solid #434343;">
                 <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
                     <!--
@@ -120,8 +119,8 @@
         <!-- end row 2 MIDDLE-->
 
         <!-- row 2 MIDDLE-->
-        <!-- showed only for licence perpetual  -->
-        <div id="collapseLicenceDetailsPerpetual" class="panel-collapse collapse">
+        <!-- showed only for license perpetual  -->
+        <div id="collapseLicenseDetailsPerpetual" class="panel-collapse collapse">
             <div class="row no-margin" style="border-top: 1px solid #434343; border-bottom: 1px solid #434343;">
                 <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
                    <!--
@@ -208,7 +207,7 @@
             <div class="row no-margin"  style="padding:10px 0px 0px 0px;">
                 <div class="col-xs-4 no-padding">
                     <div class="form-group">
-                        <label for="bot_developer_name">Developer Name</label>
+                        <label class="unselectable" for="bot_developer_name">Developer Name</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-university"></i>
@@ -219,7 +218,7 @@
                 </div>
                 <div class="col-xs-5">
                     <div class="form-group">
-                        <label for="bot_developer_address">Address</label>
+                        <label class="unselectable" for="bot_developer_address">Address</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-building-o"></i>
@@ -230,7 +229,7 @@
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label for="bot_developer_postcode">Postcode</label>
+                        <label class="unselectable" for="bot_developer_postcode">Postcode</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-map-signs"></i>
@@ -245,7 +244,7 @@
             <div class="row no-margin">
                 <div class="col-xs-4 no-padding">
                     <div class="form-group">
-                        <label for="bot_developer_city">City</label>
+                        <label class="unselectable" for="bot_developer_city">City</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-map-o"></i>
@@ -256,7 +255,7 @@
                 </div>
                 <div class="col-xs-5">
                     <div class="form-group">
-                        <label for="bot_developer_country">Country</label>
+                        <label class="unselectable" for="bot_developer_country">Country</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-globe"></i>
@@ -267,7 +266,7 @@
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label for="bot_developer_email">Email</label>
+                        <label class="unselectable" for="bot_developer_email">Email</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
@@ -282,7 +281,7 @@
             <div class="row no-margin">
                 <div class="col-xs-9" style="padding:0px 15px 0px 0px;">
                     <div class="form-group">
-                        <label for="bot_developer_website">Website</label>
+                        <label class="unselectable" for="bot_developer_website">Website</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="glyphicon glyphicon-link"></i>
@@ -293,12 +292,12 @@
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label for="bot_developer_company">Company</label>
+                        <label class="unselectable" for="bot_developer_company">Company</label>
                         <div class="input-group" >
                             <div class="input-group-addon">
                                 <i class="fa fa-envelope-o"></i>
                             </div>
-                            <input type="text" maxlength="50" class="form-control flat no-shadow unselectable" id="bot_developer_company" name="bot_developer_company" placeholder="Enter company...">
+                            <input type="text" maxlength="50" class="form-control flat no-shadow unselectable" id="bot_developer_company" name="bot_developer_company" placeholder="Enter company..." readonly>
                         </div>
                     </div>
                 </div>
@@ -313,10 +312,12 @@
         <!-- end row 3 -->
         <div class="box-footer">
             <a style="width:100px" class="btn btn-primary flat" id="btnBack" onClick="window.location.href='./home.php';"><b>Back</b></a>
-            <button class="btn btn-success pull-right flat" id="btnPublishRequest"><b>Publish new Bot</b>
-                <span class="fa fa-arrow-circle-right"></span>
+            <button class="btn btn-success pull-right flat" id="btnPublishRequest"><b id="btnPublishRequestText">Publish new Bot</b>
+                <span class="fa fa-arrow-circle-right" id="iconPublishRequest"></span>
             </button>
         </div>
+
+        <input type="hidden" id="bot_aiid" name="bot_aiid">
     </div>
 </div>
 
@@ -342,22 +343,26 @@
     var bot = <?php
         // TODO remove this fake hardcoded data
         $bot = new \hutoma\bot();
-        $bot->setName("Fake botName");
-        $bot->setDescription("Fake shortDescription");
-        $bot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment and yet I feel that I never was a greater artist than now.');
-        $bot->setUsecase('User: I want to sleep.
-        Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
-            User: You\'re so sweet.
-        Agent: I like you too. You\'re a lot of fun to talk to.');
-        $bot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
-        $bot->setPrivacyLink('https://www.google.it/intl/it/policies/privacy/');
-        $bot->setUpdate('10 september 2016');  // setted when you send request publish bot
-        $bot->setLicenceType('Free');
-        $bot->setLicenceFee('0.0');
-        $bot->setCategory('Other');
+        $bot->setAiid($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+        $bot->setAlertMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
+        $bot->setBadge("");
+        $bot->setCategory('Finance');
         $bot->setClassification('EVERYONE');
+        $bot->setDescription("Fake shortDescription");
+        $bot->setLicenseType('Free');
+        $bot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment and yet I feel that I never was a greater artist than now.');
+        $bot->setName("Fake botName");
+        $bot->setPrice('0.0');
+        $bot->setPrivacyPolicy('https://www.google.it/intl/it/policies/privacy/');
+        $bot->setSample('User: I want to sleep.
+Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
+
+User: You\'re so sweet.
+Agent: I like you too. You\'re a lot of fun to talk to.');
+        $bot->setUpdate('10 september 2016');  // setted when you send request publish bot
         $bot->setVersion('1.0.0');
-        
+        $bot->setVideoLink('https://www.youtube.com/watch?v=N4IMIpgUVis');
+
 
         $tmp_bot = $bot->toJSON();
         echo json_encode($tmp_bot);
@@ -365,6 +370,7 @@
         unset($tmp_bot);
         ?>;
 </script>
-
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="./plugins/publish/publish.js"></script>
+
 

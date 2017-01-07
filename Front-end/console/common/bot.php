@@ -10,158 +10,32 @@ namespace hutoma;
 
 class bot
 {
-    private $name;
-    private $description;
-    private $longDescription;
-    private $usecase;
-    private $alarmMsg;
-
-    private $iconPath;
-    private $widgetColor;
-
-    private $licenceType;
-    private $licenceFee;
-
+    private $activations;
+    private $aiid;
+    private $alertMessage;
+    private $badge;
     private $category;
     private $classification;
-    private $activations;
+    private $description;
+    private $imagePath;
+    private $licenseType;
+    private $longDescription;
+    private $name;
+    private $price;
+    private $privacyPolicy;
     private $rating;
+    private $report;
+    private $sample;
+    private $update;
     private $users;
     private $version;
-    private $update;
-
-    private $badge;
-    private $badgeIcon;
-
-    private $permissionLink;
-    private $privacyLink;
-
-    private $report;
+    private $videoLink;
+    private $widgetColor;
 
     
     public function __construct()
     {
 
-    }
-
-    public function setName($botName)
-    {
-        $this->name = $botName;
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-
-    public function setDescription($botDescription)
-    {
-        $this->description = $botDescription;
-    }
-
-    public function getDescription()
-    {
-        return $this->description;
-    }
-
-
-    public function setLongDescription($botLongDescription)
-    {
-        $this->longDescription = $botLongDescription;
-    }
-
-    public function getLongDescription()
-    {
-        return $this->longDescription;
-    }
-
-
-    public function setUsecase($botUsecase)
-    {
-        $this->usecase = $botUsecase;
-    }
-
-    public function getUsecase()
-    {
-        return $this->usecase;
-    }
-
-
-    public function setAlarmMessage($botAlarmMsg)
-    {
-        $this->alarmMsg = $botAlarmMsg;
-    }
-
-    public function getAlarmMessage()
-    {
-        return $this->alarmMsg;
-    }
-
-
-    public function setIconPath($botIconPath)
-    {
-        $this->iconPath = $botIconPath;
-    }
-
-    public function getIconPath()
-    {
-        return $this->iconPath;
-    }
-
-
-    public function setWidgetColor($botWidgetColor)
-    {
-        $this->widgetColor = $botWidgetColor;
-    }
-
-    public function getWidgetColor()
-    {
-        return $this->widgetColor;
-    }
-
-
-    public function setLicenceType($botLicenceType)
-    {
-        $this->licenceType = $botLicenceType;
-    }
-
-    public function getLicenceType()
-    {
-        return $this->licenceType;
-    }
-
-
-    public function setLicenceFee($botLicenceFee)
-    {
-        $this->licenceFee = $botLicenceFee;
-    }
-
-    public function getLicenceFee()
-    {
-        return $this->licenceFee;
-    }
-
-
-    public function setCategory($botCategory)
-    {
-        $this->category = $botCategory;
-    }
-
-    public function getCategory()
-    {
-        return $this->category;
-    }
-
-
-    public function setClassification($botClassification)
-    {
-        $this->classification = $botClassification;
-    }
-
-    public function getClassification()
-    {
-        return $this->classification;
     }
 
 
@@ -176,52 +50,31 @@ class bot
     }
 
 
-    public function setRating($botRating)
+    public function setAiid($aiid)
     {
-        $this->rating = $botRating;
+        $this->aiid = $aiid;
     }
 
-    public function getRating()
+    public function getAiid()
     {
-        return $this->rating;
-    }
-
-
-    public function setUsers($botUsers)
-    {
-        $this->users = $botUsers;
-    }
-
-    public function getUsers()
-    {
-        return $this->users;
-    }
-
-    public function setVersion($botVersion)
-    {
-        $this->version = $botVersion;
-    }
-
-    public function getVersion()
-    {
-        return $this->version;
+        return $this->aiid;
     }
 
 
-    public function setUpdate($botUpdate)
+    public function setAlertMessage($alertMessage)
     {
-        $this->update = $botUpdate;
+        $this->alertMessage = $alertMessage;
     }
 
-    public function getUpdate()
+    public function getAlertMessage()
     {
-        return $this->update;
+        return $this->alertMessage;
     }
 
 
-    public function setBadge($botBadge)
+    public function setBadge($badge)
     {
-        $this->badge = $botBadge;
+        $this->badge = $badge;
     }
 
     public function getBadge()
@@ -230,48 +83,191 @@ class bot
     }
 
 
-    public function setBadgeIcon($botBadgeIcon)
+    public function setCategory($category)
     {
-        $this->badgeIcon = $botBadgeIcon;
+        $this->category = $category;
     }
 
-    public function getBadgeIcon()
+    public function getCategory()
     {
-        return $this->badgeIcon;
-    }
-
-
-    public function setPermissionLink($botPermissionLink)
-    {
-        $this->permissionLink = $botPermissionLink;
-    }
-
-    public function getPermissionLink()
-    {
-        return $this->permissionLink;
+        return $this->category;
     }
 
 
-    public function setPrivacyLink($botPrivacyLink)
+    public function setClassification($classification)
     {
-        $this->privacyLink = $botPrivacyLink;
+        $this->classification = $classification;
     }
 
-    public function getPrivacyLink()
+    public function getClassification()
     {
-        return $this->privacyLink;
+        return $this->classification;
     }
 
 
-    public function setReport($botReport)
+    public function setDescription($description)
     {
-        $this->report = $botReport;
+        $this->description = $description;
+    }
+
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+
+    public function setImagePath($imagePath)
+    {
+        $this->imagePath = $imagePath;
+    }
+
+    public function getImagePath()
+    {
+        return $this->imagePath;
+    }
+
+
+    public function setLicenseType($licenseType)
+    {
+        $this->licenseType = $licenseType;
+    }
+
+    public function getLicenseType()
+    {
+        return $this->licenseType;
+    }
+
+
+    public function setLongDescription($longDescription)
+    {
+        $this->longDescription = $longDescription;
+    }
+
+    public function getLongDescription()
+    {
+        return $this->longDescription;
+    }
+
+
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+
+    public function setPrice($price)
+    {
+        $this->price = $price;
+    }
+
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+
+    public function setPrivacyPolicy($privacyPolicy)
+    {
+        $this->privacyPolicy = $privacyPolicy;
+    }
+
+    public function getPrivacyPolicy()
+    {
+        return $this->privacyPolicy;
+    }
+
+
+    public function setRating($rating)
+    {
+        $this->rating = $rating;
+    }
+
+    public function getRating()
+    {
+        return $this->rating;
+    }
+
+
+    public function setReport($report)
+    {
+        $this->report = $report;
     }
 
     public function getReport()
     {
         return $this->report;
     }
+
+
+    public function setSample($sample)
+    {
+        $this->sample = $sample;
+    }
+
+    public function getSample()
+    {
+        return $this->sample;
+    }
+
+
+    public function setUpdate($update)
+    {
+        $this->update = $update;
+    }
+
+    public function getUpdate()
+    {
+        return $this->update;
+    }
+
+
+    public function setUsers($users)
+    {
+        $this->users = $users;
+    }
+
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+
+    public function setVersion($version)
+    {
+        $this->version = $version;
+    }
+
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+
+    public function setVideoLink($videoLink)
+    {
+        $this->videoLink = $videoLink;
+    }
+
+    public function getVideoLink()
+    {
+        return $this->videoLink;
+    }
+
+    public function setWidgetColor($eidgetColor)
+    {
+        $this->widgetColor = $eidgetColor;
+    }
+
+    public function getWidgetColor()
+    {
+        return $this->widgetColor;
+    }
+
 
     function licenceTypeToString($x){
         switch ($x) {
@@ -315,27 +311,29 @@ class bot
 
     public function toJSON()
     {
+
         $json = array(
-            'name' => $this->getName(),
-            'shortDescription' => $this->getDescription(),
-            'longDescription' => $this->getLongDescription(),
-            'usecase' => $this->getUsecase(),
-            'alarmMsg' => $this->getAlarmMessage(),
-            'iconPath' => $this->getIconPath(),
-            'widgetColor' => $this->getWidgetColor(),
-            'licenceType' => $this->getLicenceType(),
-            'licenceFee' => $this->getLicenceFee(),
+            'activations' => $this->getActivations(),
+            'aiid' => $this->getAiid(),
+            'alertMessage' => $this->getAlertMessage(),
+            'badge' => $this->getBadge(),
             'category' => $this->getCategory(),
             'classification' => $this->getClassification(),
-            'activations' => $this->getActivations(),
+            'description' => $this->getDescription(),
+            'imagePath' => $this->getImagePath(),
+            'licenceType' => $this->getLicenseType(),
+            'longDescription' => $this->getLongDescription(),
+            'name' => $this->getName(),
+            'price' => $this->getPrice(),
+            'privacyPolicy' => $this->getPrivacyPolicy(),
             'rating' => $this->getRating(),
+            'report' => $this->getReport(),
+            'sample' => $this->getSample(),
+            'update' => $this->getUpdate(),
             'users' => $this->getUsers(),
             'version' => $this->getVersion(),
-            'update' => $this->getUpdate(),
-            'badge' => $this->getBadge(),
-            'iconBadge' => $this->getBadgeIcon(),
-            'privacyLink' => $this->getPrivacyLink(),
-            'report' => $this->getReport(),
+            'videoLink' => $this->getVideoLink(),
+            'widgetColor' => $this->getWidgetColor()
         );
         return json_encode($json);
     }
