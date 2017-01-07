@@ -10,12 +10,13 @@
 </script>
 <ul class="sidebar-menu" id="console-menu">
     <div class="box-header no-border text-gray text-center" style="background:#1e282c; color:#8A8A8A; height:35px; padding-top:10px;">
-        <div class="box-title text-center text-gray" style="font-size: 12px;"> CHAT</div>
-        <div class="pull-right">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" >
+
+        <div class="input-group">
+            <div class="box-title text-gray" style="font-size: 12px; margin-left: 150px;"> CHAT</div>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" style="margin-left: 125px;">
                 <i class="fa fa-gears text-gray text-sm "></i>
             </a>
-            <ul class="dropdown-menu no-border flat">
+            <ul class="dropdown-menu no-border flat" style="margin-top:5px;margin-left: 139px;">
                 <li id="speech-option" onMouseOver="this.style.cursor='pointer'">
                     <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn Off Speech</spam></a>
                 </li>
@@ -24,6 +25,8 @@
                 </li>
             </ul>
         </div>
+
+
     </div>
 </ul>
 
@@ -42,16 +45,6 @@
             <i id="microphone" style="font-size: 18px; width:20px;" class="fa fa-microphone text-red"></i>
         </div>
     </div>
-    <ul class="dropdown-menu no-border flat">
-        <li id="speech-option" onMouseOver="this.style.cursor='pointer'">
-            <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn Off Speech</spam></a>
-        </li>
-
-        <li class="footer" id="json-option" value ="0" onClick="jsonOption(this.value)" onMouseOver="this.style.cursor='pointer'">
-            <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-white"></i><spam id="json-text" class="text-white"> Show Json Message</spam></a>
-        </li>
-
-    </ul>
 </div>
 
 
