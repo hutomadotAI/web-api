@@ -1,5 +1,6 @@
 <?php
     require_once "./common/developer.php";
+    require_once "./common/bot.php";
 ?>
 
 <div class="box box-solid flat no-shadow drop-zone-580">
@@ -38,8 +39,8 @@
             <div class="drop-zone-460">
                 <div class="row no-margin">
                     <div class="form-group">
-                        <label for="bot_long_description">Long Description</label>
-                        <textarea rows="9" maxlength="5000" class="form-control flat textarea-justify" placeholder="Enter long description..." id="bot_long_description" style="height:204px;"></textarea>
+                        <label for="bot_longDescription">Long Description</label>
+                        <textarea rows="9" maxlength="5000" class="form-control flat textarea-justify" placeholder="Enter long description..." id="bot_longDescription" name="bot_longDescription"style="height:204px;"></textarea>
                     </div>
                 </div>
             </div>
@@ -63,8 +64,8 @@
             <div class="drop-zone-460">
                 <div class="row no-margin" style="padding-top:10px;">
                     <div class="form-group no-margin">
-                        <label for="bot_usecase">Show Example of Conversation</label>
-                        <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="bot_usecase" style="height:182px;"></textarea>
+                        <label for="bot_sample">Show Example of Conversation</label>
+                        <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="bot_sample" name="bot_sample" style="height:182px;"></textarea>
                     </div>
                 </div>
             </div>
@@ -156,7 +157,7 @@
         <div class="row no-margin">
             <div class="col-xs-4 drop-zone2">
                 <div class="row no-margin">
-                    <?php include './dynamic/input.licenceFee.html.php'; ?>
+                    <?php include './dynamic/input.price.html.php'; ?>
                 </div>
                 <div class="row no-margin">
                     <?php include './dynamic/input.version.html.php'; ?>
@@ -166,22 +167,34 @@
             <div class="drop-zone-460">
                 <div class="row no-margin" style="padding-top:10px;">
                     <div class="form-group">
-                        <label for="bot_alert_message">Alert message</label>
+                        <label for="bot_alertMessage">Alert message</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-info-circle"></i>
                             </div>
-                            <input type="text" maxlength="150" class="form-control flat no-shadow"  id="bot_alert_message" name="bot_alert_message" placeholder="Enter a message to show..">
+                            <input type="text" maxlength="150" class="form-control flat no-shadow"  id="bot_alertMessage" name="bot_alertMessage" placeholder="Enter a message to show..">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="bot_link_privacy">Link Privacy Policy Page</label>
+                        <label for="bot_privacyPolicy">Link Privacy Policy Page</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-eye"></i>
                             </div>
-                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="bot_link_privacy" name="bot_link_privacy" placeholder="Enter a link to privacy policy">
+                            <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="bot_privacyPolicy" name="bot_privacyPolicy" placeholder="Enter a link to privacy policy">
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 no-padding">
+                <div class="form-group">
+                    <label for="bot_videoLink">Link Video Sample</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-video-camera"></i>
+                        </div>
+                        <input type="text" maxlength="1800" class="form-control flat no-shadow"  id="bot_videoLink" name="bot_videoLink" placeholder="Enter a link to a video">
                     </div>
                 </div>
             </div>
@@ -325,14 +338,33 @@
         unset($dev);
         unset($tmp_dev);
         ?>;
+    
+    var bot = <?php
+        // TODO remove this fake hardcoded data
+        $bot = new \hutoma\bot();
+        $bot->setName("Fake botName");
+        $bot->setDescription("Fake shortDescription");
+        $bot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment and yet I feel that I never was a greater artist than now.');
+        $bot->setUsecase('User: I want to sleep.
+        Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
+            User: You\'re so sweet.
+        Agent: I like you too. You\'re a lot of fun to talk to.');
+        $bot->setAlarmMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
+        $bot->setPrivacyLink('https://www.google.it/intl/it/policies/privacy/');
+        $bot->setUpdate('10 september 2016');  // setted when you send request publish bot
+        $bot->setLicenceType('Free');
+        $bot->setLicenceFee('0.0');
+        $bot->setCategory('Other');
+        $bot->setClassification('EVERYONE');
+        $bot->setVersion('1.0.0');
+        
+
+        $tmp_bot = $bot->toJSON();
+        echo json_encode($tmp_bot);
+        unset($bot);
+        unset($tmp_bot);
+        ?>;
 </script>
 
-<script src="./plugins/publish/publish.js">
-    alert();
-    $( document ).ready(function() {
-        alert(developer);
-        populateDeveloperFields(developer);
-        populateBotFields();
-    });
-</script>
+<script src="./plugins/publish/publish.js"></script>
 

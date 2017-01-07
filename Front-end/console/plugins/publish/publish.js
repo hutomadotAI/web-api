@@ -2,8 +2,13 @@ document.getElementById("btnPublishRequest").addEventListener("click", checkInpu
 
 document.getElementById("bot_name").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_description").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_licence_fee").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_longDescription").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_alertMessage").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_price").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_sample").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_privacyPolicy").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_version").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_videoLink").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_name").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_city").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
@@ -11,6 +16,7 @@ document.getElementById("bot_developer_company").addEventListener("keydown",func
 document.getElementById("bot_developer_email").addEventListener("keydown",function(){removeAlert(this)}, false);
 
 populateDeveloperFields(developer);
+populateBotFields(bot);
 
 function checkInput(){
     // BOT name input validation
@@ -32,23 +38,13 @@ function checkInput(){
     }
     
     // BOT licence fee ( price ) input validation
-    var bot_licence_fee = document.getElementById('bot_licence_fee');
+    var bot_licence_fee = document.getElementById('bot_price');
     if (bot_licence_fee.value != '' && bot_licence_fee.value !== 'undefined') {
         if (inputValidation(bot_licence_fee.value, 'bot_licence_fee')) {
-            createAlertMessage(2, 'Please enter a valid number.','bot_licence_fee');
+            createAlertMessage(2, 'Please enter a valid number.','bot_price');
             return false;
         }
     }
-/*
-    // BOT developer email input validation
-    var developer_email = document.getElementById('bot_developer_email');
-    if (developer_email.value != '' && developer_email.value !== 'undefined') {
-        if (inputValidation(developer_email.value, 'developer_email')) {
-            createAlertMessage(2, 'Please enter a valid email.','bot_developer_email');
-            return false;
-        }
-    }
-    */
     
     // block submit request
     $(this).prop("disabled", true);
@@ -145,17 +141,20 @@ function createAlertMessage(alarm,message,id) {
 
 function populateBotFields(bot){
     var json = JSON.parse(bot);
+    document.getElementById('bot_aiid').value = json['aiid'];
     document.getElementById('bot_name').value = json['name'];
-    document.getElementById('bot_description').value = json['shortDescription'];
-    document.getElementById('bot_long_description').innerText = json['longDescription'];
-    setSelectValue('bot_licence_type',json['licenceType']);
+    document.getElementById('bot_description').value = json['description'];
+    document.getElementById('bot_longDescription').innerText = json['longDescription'];
+    document.getElementById('bot_alertMessage').value = json['alarmMesssage'];
+    //document.getElementById('bot_badge').value = json['badge'];
+    document.getElementById('bot_price').value = json['price'];
+    document.getElementById('bot_sample').innerText = json['sample'];
+    document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
     setSelectValue('bot_category',json['category']);
     setSelectValue('bot_classification',json['classification']);
-    document.getElementById('bot_licence_fee').value = json['licenceFee'];
+    setSelectValue('bot_licence_type',json['licenceType']);
     document.getElementById('bot_version').value = json['version'];
-    document.getElementById('bot_usecase').innerText = json['usecase'];
-    document.getElementById('bot_alert_message').value = json['alarmMsg'];
-    document.getElementById('bot_link_privacy').value = json['privacyLink'];
+    document.getElementById('bot_videoLink').value = json['videoLink'];
 }
 
 function populateDeveloperFields(developer){
@@ -168,28 +167,6 @@ function populateDeveloperFields(developer){
     document.getElementById('bot_developer_country').value = json['country'];
     document.getElementById('bot_developer_company').value = json['company'];
     document.getElementById('bot_developer_website').value = json['website'];
-}
-
-function fieldsToBotIstance(){
-    bot['name'] = document.getElementById('bot_name').value;
-    bot['shortDescription'] = document.getElementById('bot_description').value;
-    bot['longDescription'] = document.getElementById('bot_long_description').innerText;
-    bot['licenceType'] = document.getElementById('bot_licence_type').value;
-    bot['category'] = document.getElementById('bot_category').value;
-    bot['classification'] =document.getElementById('bot_classification').value;
-    bot['licenceFee'] = document.getElementById('bot_licence_fee').value;
-    bot['version'] =  document.getElementById('bot_version').value;
-    bot['usecase'] = document.getElementById('bot_usecase').innerText;
-    bot['alarmMsg'] = document.getElementById('bot_alert_message').value;
-    bot['privacyLink'] = document.getElementById('bot_link_privacy').value;
-    bot['developer']['name'] = document.getElementById('bot_developer_name').value;
-    bot['developer']['email'] = document.getElementById('bot_developer_email').value;
-    bot['developer']['address'] = document.getElementById('bot_developer_address').value;
-    bot['developer']['postcode'] = document.getElementById('bot_developer_postcode').value;
-    bot['developer']['city'] = document.getElementById('bot_developer_city').value;
-    bot['developer']['country'] = document.getElementById('bot_developer_country').value;
-    bot['developer']['website'] = document.getElementById('bot_developer_website').value;
-    bot['developer']['company'] = document.getElementById('bot_developer_company').value;
 }
 
 function setSelectValue(id,valueToSelect) {

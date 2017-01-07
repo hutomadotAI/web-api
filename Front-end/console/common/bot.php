@@ -8,8 +8,6 @@
 
 namespace hutoma;
 
-include "developer.php";
-
 class bot
 {
     private $name;
@@ -40,11 +38,10 @@ class bot
 
     private $report;
 
-    public $developer;
     
     public function __construct()
     {
-        $this->developer = new developer();
+
     }
 
     public function setName($botName)
@@ -315,10 +312,6 @@ class bot
                 return '5.000.000-10.000.000';
         }
     }
-    
-    public function ciao(){
-        return $this->developer->getName();
-    }
 
     public function toJSON()
     {
@@ -343,21 +336,9 @@ class bot
             'iconBadge' => $this->getBadgeIcon(),
             'privacyLink' => $this->getPrivacyLink(),
             'report' => $this->getReport(),
-            'developer' => array(
-                'name' => $this->developer->getName(),
-                'email' => $this->developer->getEmail(),
-                'address' => $this->developer->getAddress(),
-                'postcode' => $this->developer->getPostcode(),
-                'city' => $this->developer->getCity(),
-                'country' => $this->developer->getCountry(),
-                'website' => $this->developer->getWebsite(),
-                'company' => $this->developer->getCompany()
-            )
         );
-        
         return json_encode($json);
     }
-
 
     public function __destruct()
     {

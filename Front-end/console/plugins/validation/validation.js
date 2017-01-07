@@ -37,7 +37,7 @@ function inputValidation(txt,field) {
 
         case 'bot_name' :       letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
         case 'bot_description': letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
-        case 'bot_licence_fee': letters = /^([0-9]{0,2}((.)[0-9]{0,2}))$/;      break;
+        case 'bot_price':       letters = /^([0-9]{0,2}((.)[0-9]{0,2}))$/;      break;
         case 'bot_version' :    letters = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/;        break;
 
         case 'developer_name' :   letters = /^[a-zA-Z0-9\-_.,:?!+()£$%&@'\s]+$/;break;
