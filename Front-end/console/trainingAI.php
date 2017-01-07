@@ -121,7 +121,7 @@ function localeToLanguage($locale)
                 <div class="col-md-12">
                     <?php include './dynamic/training.content.upload.html.php'; ?>
                     <?php include './dynamic/training.content.monitor.html.php'; ?>
-                    <?php include './dynamic/training.content.keys.html.php'; ?>
+                    <?php //include './dynamic/training.content.keys.html.php'; ?>
                 </div>
             </div>
         </section>
