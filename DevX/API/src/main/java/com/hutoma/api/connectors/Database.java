@@ -410,7 +410,7 @@ public class Database {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotDetails", 1).add(botId);
             final ResultSet rs = call.executeQuery();
-            return getAiBotFromResultset(rs);
+            return rs.next() ? getAiBotFromResultset(rs) : null;
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -632,29 +632,25 @@ public class Database {
     }
 
     private AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
-        if (rs.next()) {
-            return new AiBot(
-                    rs.getString("dev_id"),
-                    UUID.fromString(rs.getString("aiid")),
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getString("long_description"),
-                    rs.getString("alert_message"),
-                    rs.getString("badge"),
-                    rs.getBigDecimal("price"),
-                    rs.getString("sample"),
-                    rs.getString("category"),
-                    new DateTime(rs.getTimestamp("last_update")),
-                    rs.getString("privacy_policy"),
-                    rs.getString("classification"),
-                    rs.getString("version"),
-                    rs.getString("video_link"),
-                    rs.getBoolean("is_published")
-            );
-        } else {
-            return null;
-        }
+        return new AiBot(
+                rs.getString("dev_id"),
+                UUID.fromString(rs.getString("aiid")),
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("long_description"),
+                rs.getString("alert_message"),
+                rs.getString("badge"),
+                rs.getBigDecimal("price"),
+                rs.getString("sample"),
+                rs.getString("category"),
+                new DateTime(rs.getTimestamp("last_update")),
+                rs.getString("privacy_policy"),
+                rs.getString("classification"),
+                rs.getString("version"),
+                rs.getString("video_link"),
+                rs.getBoolean("is_published")
+        );
     }
 
     private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {

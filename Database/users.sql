@@ -24,6 +24,10 @@ GRANT SELECT ON `hutoma`.`ai` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`ai_training` TO 'aiReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`botPurchase` TO 'aiReader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`botStore` TO 'aiReader'@'127.0.0.1';
+
 
 # Privileges for `aiWriter`@`127.0.0.1`
 
@@ -34,6 +38,10 @@ GRANT EXECUTE ON `hutoma`.* TO 'aiWriter'@'127.0.0.1';
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai` TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai_training` TO 'aiWriter'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`bot_ai` TO 'aiWriter'@'127.0.0.1';
+
+GRANT INSERT ON `hutoma`.`botPurchase` TO 'aiWriter'@'127.0.0.1';
 
 
 # Privileges for `chatlogReader`@`127.0.0.1`
@@ -180,3 +188,14 @@ GRANT USAGE ON *.* TO 'mesh_writer'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112
 GRANT EXECUTE ON `hutoma`.* TO 'mesh_writer'@'127.0.0.1';
 
 GRANT INSERT, UPDATE, DELETE ON `hutoma`.`ai_mesh` TO 'mesh_writer'@'127.0.0.1';
+
+
+# Privileges for `botStoreReader`@`127.0.0.1`
+
+GRANT USAGE ON *.* TO 'botStoreReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
+
+GRANT EXECUTE ON `hutoma`.* TO 'botStoreReader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`botStore` TO 'botStoreReader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`bot_ai` TO 'botStoreReader'@'127.0.0.1';
