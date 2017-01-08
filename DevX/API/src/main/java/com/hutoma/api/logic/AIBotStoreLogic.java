@@ -97,12 +97,13 @@ public class AIBotStoreLogic {
     public ApiResult publishBot(final String devId, final UUID aiid, final String name, final String description,
                                 final String longDescription, final String alertMessage, final String badge,
                                 final BigDecimal price, final String sample, final String category,
-                                final String privacyPolicy, final String classification, final String version,
-                                final String videoLink) {
+                                final String licenseType, final String privacyPolicy, final String classification,
+                                final String version, final String videoLink) {
         try {
             this.logger.logDebug(LOGFROM, "request to publish bot for AI " + aiid.toString());
             AiBot bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
-                    sample, category, DateTime.now(), privacyPolicy, classification, version, videoLink, true);
+                    sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
+                    videoLink, true);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
                 return ApiError.getBadRequest("Invalid publish request");

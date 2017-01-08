@@ -163,13 +163,14 @@ public class AIBotStoreEndpoint {
             @NotNull final @FormParam("description") String description,
             @NotNull final @FormParam("longDescription") String longDescription,
             @NotNull final @FormParam("alertMessage") String alertMessage,
-            @NotNull final @FormParam("badge") String badge,
+            @DefaultValue("") final @FormParam("badge") String badge,
             @NotNull final @FormParam("price") BigDecimal price,
             @NotNull final @FormParam("sample") String sample,
             @NotNull final @FormParam("category") String category,
             @NotNull final @FormParam("privacyPolicy") String privacyPolicy,
             @NotNull final @FormParam("classification") String classification,
             @NotNull final @FormParam("version") String version,
+            @NotNull final @FormParam("licenseType") String licenseType,
             @DefaultValue("") final @FormParam("videoLink") String videoLink
     ) {
         ApiResult result = this.aiBotStoreLogic.publishBot(
@@ -183,6 +184,7 @@ public class AIBotStoreEndpoint {
                 price,
                 sample,
                 category,
+                licenseType,
                 privacyPolicy,
                 classification,
                 version,

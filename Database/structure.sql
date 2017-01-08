@@ -145,6 +145,7 @@ CREATE TABLE `botStore` (
   `long_description` TEXT,
   `alert_message` VARCHAR(150),
   `badge` VARCHAR(20),
+  `license_type` VARCHAR(50) NOT NULL,
   `price` DECIMAL NOT NULL,
   `sample` TEXT,
   `last_update` TIMESTAMP NOT NULL,
@@ -1627,6 +1628,7 @@ CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
   IN `param_sample` TEXT,
   IN `param_lastUpdate` DATETIME,
   IN `param_category` VARCHAR(50),
+  IN `param_licenseType` VARCHAR(50),
   IN `param_privacyPolicy` TEXT,
   IN `param_classification` VARCHAR(50),
   IN `param_version` VARCHAR(25),
@@ -1643,10 +1645,10 @@ BEGIN
 
   INSERT INTO botStore
     (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
-    privacy_policy, classification, version, video_link)
+    privacy_policy, classification, version, video_link, license_type)
     VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
     param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
-    param_version, param_videoLink);
+    param_version, param_videoLink, param_licenseType);
 
     SELECT LAST_INSERT_ID();
 END ;;

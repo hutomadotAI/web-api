@@ -10,7 +10,6 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -19,7 +18,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +26,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import javax.ws.rs.core.SecurityContext;
 
+import static com.hutoma.api.common.BotHelper.BOTID;
+import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,14 +39,10 @@ public class TestAILogic {
 
     private static final String DEVID = "devid";
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private static final int BOTID = 1234;
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String VALIDDEVID = "DevidExists";
     private static final String AI_ENGINE = "MOCKENGINE";
-    private static final AiBot SAMPLEBOT =
-            new AiBot(DEVID, AIID, BOTID, "name", "description", "long description", "alert message", "badge",
-                    BigDecimal.valueOf(1.123), "sample", "category", DateTime.now(), "privacy policy",
-                    "classification", "version", "http://video", true);
+
     //http://mockito.org/
     FakeJsonSerializer fakeSerializer;
     SecurityContext fakeContext;

@@ -418,7 +418,7 @@ public class Database {
 
     public int publishBot(final AiBot bot) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("publishBot", 16)
+            call.initialise("publishBot", 17)
                     .add(bot.getDevId())
                     .add(bot.getAiid())
                     .add(bot.getName())
@@ -430,6 +430,7 @@ public class Database {
                     .add(bot.getSample())
                     .add(bot.getLastUpdate())
                     .add(bot.getCategory())
+                    .add(bot.getLicenseType())
                     .add(bot.getPrivacyPolicy())
                     .add(bot.getClassification())
                     .add(bot.getVersion())
@@ -644,6 +645,7 @@ public class Database {
                 rs.getBigDecimal("price"),
                 rs.getString("sample"),
                 rs.getString("category"),
+                rs.getString("license_type"),
                 new DateTime(rs.getTimestamp("last_update")),
                 rs.getString("privacy_policy"),
                 rs.getString("classification"),

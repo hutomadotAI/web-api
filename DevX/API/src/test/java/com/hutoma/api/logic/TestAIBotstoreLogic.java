@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.BotHelper;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
@@ -7,9 +8,7 @@ import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiStreamResult;
-import com.hutoma.api.containers.sub.AiBot;
 
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,12 +16,10 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.Collections;
-import java.util.UUID;
 
+import static com.hutoma.api.common.BotHelper.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,17 +29,7 @@ import static org.mockito.Mockito.when;
  */
 public class TestAIBotstoreLogic {
 
-    private static final String DEVID = "devid";
-    private static final UUID AIID = UUID.randomUUID();
-    private static final int BOTID = 1234;
-
-    private static final AiBot SAMPLEBOT =
-            new AiBot(DEVID, AIID, BOTID, "name", "description", "long description", "alert message", "badge",
-                    BigDecimal.valueOf(1.123), "sample", "category", DateTime.now(), "privacy policy",
-                    "classification", "version", "http://video", true);
-    private static final byte[] BOTICON_CONTENT = "this is an image!".getBytes();
-    private static final InputStream BOTICON_STREAM = new ByteArrayInputStream(BOTICON_CONTENT);
-
+    private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
     private Database fakeDatabase;
     private AIBotStoreLogic aiBotStoreLogic;
     private Tools fakeTools;
@@ -152,7 +139,7 @@ public class TestAIBotstoreLogic {
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 987654;
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
-        ApiAiBot result = (ApiAiBot) publishSampleBot();
+        ApiAiBot result = (ApiAiBot) BotHelper.publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertNotNull(result.getBot());
         Assert.assertEquals(newBotId, result.getBot().getBotId());
@@ -162,14 +149,14 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot_errorInsert() throws Database.DatabaseException {
         when(this.fakeDatabase.publishBot(any())).thenReturn(-1);
-        ApiResult result = publishSampleBot();
+        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testPublishBot_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.publishBot(any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = publishSampleBot();
+        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -182,16 +169,17 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testGetBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(BOTICON_STREAM);
+        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(this.botIconStream);
         ApiStreamResult result = (ApiStreamResult) this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertNotNull(result.getStream());
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         result.getStream().write(outStream);
-        Assert.assertEquals(BOTICON_CONTENT.length, outStream.size());
+        Assert.assertEquals(BotHelper.getBotIconContentSize(), outStream.size());
         byte[] icon = outStream.toByteArray();
-        for (int i = 0; i < BOTICON_CONTENT.length; i++) {
-            Assert.assertEquals(BOTICON_CONTENT[i], icon[i]);
+        byte[] expected = BotHelper.getBotIconContent();
+        for (int i = 0; i < BotHelper.getBotIconContentSize(); i++) {
+            Assert.assertEquals(expected[i], icon[i]);
         }
     }
 
@@ -213,7 +201,7 @@ public class TestAIBotstoreLogic {
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
         when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(true);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, BOTICON_STREAM);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
@@ -221,7 +209,7 @@ public class TestAIBotstoreLogic {
     public void testUploadBotIcon_DBException() throws Database.DatabaseException, IOException {
         when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, BOTICON_STREAM);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -229,21 +217,14 @@ public class TestAIBotstoreLogic {
     public void testUploadBotIcon_invalid_botId() throws Database.DatabaseException, IOException {
         when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(false);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, BOTICON_STREAM);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testUploadBotIcon_iconSize_overLimit() throws Database.DatabaseException, IOException {
         when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(false);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, BOTICON_STREAM);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-    }
-
-    private ApiResult publishSampleBot() {
-        return this.aiBotStoreLogic.publishBot(SAMPLEBOT.getDevId(), SAMPLEBOT.getAiid(), SAMPLEBOT.getName(),
-                SAMPLEBOT.getDescription(), SAMPLEBOT.getLongDescription(), SAMPLEBOT.getAlertMessage(), SAMPLEBOT.getBadge(),
-                SAMPLEBOT.getPrice(), SAMPLEBOT.getSample(), SAMPLEBOT.getCategory(), SAMPLEBOT.getPrivacyPolicy(),
-                SAMPLEBOT.getClassification(), SAMPLEBOT.getVersion(), SAMPLEBOT.getVideoLink());
     }
 }

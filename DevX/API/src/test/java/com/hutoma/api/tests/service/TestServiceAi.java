@@ -5,7 +5,6 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
-import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AILogic;
 import junitparams.JUnitParamsRunner;
@@ -16,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Locale;
@@ -26,6 +24,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import static com.hutoma.api.common.BotHelper.BOTID;
+import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
@@ -38,13 +38,7 @@ public class TestServiceAi extends ServiceTestBase {
     private static final String AI_BASEPATH = "/ai";
     private static final String AI_PATH = AI_BASEPATH + "/" + AIID;
     private static final String BOT_BASEPATH = AI_PATH + "/bot";
-    private static final int BOTID = 1234;
     private static final String BOT_PATH = BOT_BASEPATH + "/" + BOTID;
-
-    private static final AiBot SAMPLEBOT =
-            new AiBot(DEVID.toString(), AIID, BOTID, "name", "description", "long description", "alert message", "badge",
-                    BigDecimal.valueOf(1.123), "sample", "category", DateTime.now(), "privacy policy",
-                    "classification", "version", "http://video", true);
 
     private static MultivaluedMap<String, String> getCreateAiRequestParams() {
         return new MultivaluedHashMap<String, String>() {{

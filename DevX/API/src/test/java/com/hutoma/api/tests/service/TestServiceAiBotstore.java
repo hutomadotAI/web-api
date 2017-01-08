@@ -1,9 +1,9 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.BotHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
-import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.endpoints.AIBotStoreEndpoint;
 import com.hutoma.api.logic.AIBotStoreLogic;
 
@@ -12,7 +12,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.UUID;
@@ -30,6 +28,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import static com.hutoma.api.common.BotHelper.BOTID;
+import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
@@ -38,20 +38,11 @@ import static org.mockito.Mockito.when;
  */
 public class TestServiceAiBotstore extends ServiceTestBase {
 
-    private static final int BOTID = 1234;
     private static final String BOTSTORE_BASEPATH = "/botstore";
     private static final String BOTSTORE_BOTPATH = BOTSTORE_BASEPATH + "/" + BOTID;
     private static final String BOTSTORE_PURCHASEDPATH = BOTSTORE_BASEPATH + "/purchased";
     private static final String BOTSTORE_BOTICONPATH = BOTSTORE_BOTPATH + "/icon";
     private static final String BOTSTORE_PURCHASEBOTPATH = BOTSTORE_BASEPATH + "/purchase/" + BOTID;
-
-    private static final AiBot SAMPLEBOT =
-            new AiBot(DEVID.toString(), AIID, BOTID, "name", "description", "long description", "alert message", "badge",
-                    BigDecimal.valueOf(1.123), "sample", "category", DateTime.now(), "privacy policy",
-                    "classification", "version", "http://video", true);
-    private static final byte[] BOTICON_CONTENT = "this is an image!".getBytes();
-    private static final InputStream BOTICON_STREAM = new ByteArrayInputStream(BOTICON_CONTENT);
-
 
     private static final MultivaluedMap<String, String> BOT_PUBLISH_POST = new MultivaluedHashMap<String, String>() {{
         this.put("aiid", Collections.singletonList(UUID.randomUUID().toString()));
@@ -147,14 +138,15 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testGetBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(BOTICON_STREAM);
+        final InputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
+        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(botIconStream);
         final Response response = target(BOTSTORE_BOTICONPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         InputStream inputStream = (InputStream) response.getEntity();
         Assert.assertNotNull(inputStream);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         IOUtils.copy(inputStream, outputStream);
-        Assert.assertEquals(BOTICON_CONTENT.length, outputStream.size());
+        Assert.assertEquals(BotHelper.getBotIconContentSize(), outputStream.size());
     }
 
     @Test

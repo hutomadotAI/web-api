@@ -23,6 +23,7 @@ public class AiBot {
     private final BigDecimal price;
     private final String sample;
     private final String category;
+    private final String licenseType;
     private final DateTime lastUpdate;
     private final String privacyPolicy;
     private final String classification;
@@ -33,8 +34,9 @@ public class AiBot {
 
     public AiBot(final String devId, final UUID aiid, final int botId, final String name, final String description,
                  final String longDescription, final String alertMessage, final String badge, final BigDecimal price,
-                 final String sample, final String category, final DateTime lastUpdate, final String privacyPolicy,
-                 final String classification, final String version, final String videoLink, final boolean isPublished) {
+                 final String sample, final String category, final String licenseType, final DateTime lastUpdate,
+                 final String privacyPolicy, final String classification, final String version, final String videoLink,
+                 final boolean isPublished) {
         this.botId = botId;
         this.devId = devId;
         this.aiid = aiid;
@@ -46,6 +48,7 @@ public class AiBot {
         this.price = price;
         this.sample = sample;
         this.category = category;
+        this.licenseType = licenseType;
         this.lastUpdate = lastUpdate;
         this.privacyPolicy = privacyPolicy;
         this.classification = classification;
@@ -124,5 +127,9 @@ public class AiBot {
 
     public boolean isPublished() {
         return this.isPublished;
+    }
+
+    public String getLicenseType() {
+        return this.licenseType;
     }
 }
