@@ -1,6 +1,5 @@
 <?php
 require "../pages/config.php";
-require_once "../console/common/bot.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/aiApi.php";
 
@@ -9,16 +8,15 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-// If is it set, it means the user has selected a existing AI from home list
-if (isset($_POST['ai']))
-    CallGetSingleAI($_POST['ai']);
+if (isset($_POST['ai'])) {
+    getBasicAiInfo($_POST['ai']);
+}
 
-
-function CallGetSingleAI($aiid)
-{
+function getBasicAiInfo($aiid){
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $singleAI = $aiApi->getSingleAI($aiid);
     unset($aiApi);
+
     if ($singleAI['status']['code'] === 200) {
         setSessionVariables($singleAI);
     } else {
@@ -97,7 +95,6 @@ function setSessionVariables($singleAI)
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/publish/publish.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>

@@ -123,7 +123,7 @@ class developer
             'city' => $this->getCity(),
             'country' => $this->getCountry(),
             'website' => $this->getWebsite(),
-            'company' => $this->getCompany(),
+            'company' => $this->getCompany()
         );
         return json_encode($json);
     }

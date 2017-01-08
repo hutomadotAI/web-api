@@ -71,4 +71,6 @@ $(function () {
     option.selected="selected";
     select.prepend(option);
     document.getElementById('select2-bot_category-container').innerHTML = option.text;
+
+    select.setAttribute('onchange',"showCategory()");
 });

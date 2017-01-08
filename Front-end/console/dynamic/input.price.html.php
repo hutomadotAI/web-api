@@ -1,10 +1,10 @@
 <div class="form-group">
-    <label for="bot_licence_fee">Price</label>
+    <label for="bot_price">Price</label>
     <div class="input-group">
         <div class="input-group-addon">
             <i class="fa fa-euro"></i>
         </div>
-        <input type="text" class="form-control flat no-shadow unselectable"  id="bot_licence_fee" name="bot_licence_fee" placeholder="Enter the price" style=" text-align: right;" >
+        <input type="text" class="form-control flat no-shadow unselectable"  id="bot_price" name="bot_price" placeholder="Enter the price" style=" text-align: right;" >
     </div>
 </div>
 

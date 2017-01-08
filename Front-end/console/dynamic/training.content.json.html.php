@@ -1,5 +1,5 @@
 
-<div class="box box-solid box-clean flat no-shadow no-margin"  id="jsonBox" style="position: absolute; bottom:0;">
+<div class="box box-solid box-clean flat no-shadow no-margin"  id="jsonBox" style="position: absolute; bottom:0; z-index: -1;">
     <div class="box-header no-border text-gray text-center" style="background:#1e282c; color:#8A8A8A; height:35px; padding-top:10px;">
         <div class="box-title text-center text-gray" style="font-size: 12px;"> JSON Message</div>
     </div>

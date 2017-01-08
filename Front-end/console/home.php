@@ -35,7 +35,7 @@ unset($aiApi);
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-    <header class="main-header" style="border:1px solid black;">
+    <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
     </header>
 
@@ -48,7 +48,6 @@ unset($aiApi);
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-
         <section class="content">
             <?php
             include './dynamic/home.content.start.html.php';

@@ -32,7 +32,6 @@ $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\co
 $entityList = $entityApi->getEntities();
 unset($entityApi);
 
-
 $intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 unset($intentsApi);
 
@@ -57,6 +56,15 @@ function echoJsonIntentResponse($intent)
 {
     if ($intent['status']['code'] !== 404)
         echo json_encode($intent);
+    else
+        echo '""'; // return empty string
+}
+
+function echoJsonEntityListResponse($entityList)
+{
+    if ($entityList['status']['code'] !== 404) {
+        echo json_encode($entityList['entity_name']);
+    }
     else
         echo '""'; // return empty string
 }
@@ -146,7 +154,7 @@ function echoJsonIntentResponse($intent)
     </script>
 </form>
 <script>
-    var entityListFromServer = <?php echo json_encode($entityList['entity_name']); unset($entityList);?>;
+    var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
 </script>
 </body>

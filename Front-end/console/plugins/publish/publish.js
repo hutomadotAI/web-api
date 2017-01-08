@@ -2,13 +2,21 @@ document.getElementById("btnPublishRequest").addEventListener("click", checkInpu
 
 document.getElementById("bot_name").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_description").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_licence_fee").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_longDescription").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_alertMessage").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_price").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_sample").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_privacyPolicy").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_version").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_videoLink").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_name").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_city").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("bot_developer_email").addEventListener("keydown",function(){removeAlert(this)}, false);
+
+populateDeveloperFields(developer);
+populateBotFields(bot);
 
 function checkInput(){
     // BOT name input validation
@@ -28,79 +36,16 @@ function checkInput(){
             return false;
         }
     }
-
-    // BOT long description input validation
-    // BOT usecase input validation
-    // BOT alert Message input validation
-    // BOT link privacy input validation
-
-    // BOT licence fee ( price ) input validation
-    var bot_licence_fee = document.getElementById('bot_licence_fee');
-    if (bot_licence_fee.value != '' && bot_licence_fee.value !== 'undefined') {
-        if (inputValidation(bot_licence_fee.value, 'bot_licence_fee')) {
-            createAlertMessage(2, 'Please enter a valid number.','bot_licence_fee');
-            return false;
-        }
-    }
-
-    // BOT version input validation
-    /*
-    var bot_version = document.getElementById('bot_version');
-    if (bot_version.value != '' && bot_licence_fee.value !== 'undefined') {
-        if (inputValidation(bot_version.value, 'bot_version')) {
-            createAlertMessage(2, 'Incorrect Version.','bot_version');
-            return false;
-        }
-    }
-    */
-
-    // BOT developer name input validation
-    /*
-    var developer_name = document.getElementById('bot_developer_name');
-    if (developer_name.value != '' && developer_name.value !== 'undefined') {
-        if (inputValidation(developer_name.value, 'developer_name')) {
-            createAlertMessage(2, 'Please enter a name that contains alphanumeric characters','bot_developer_name');
-            return false;
-        }
-    }
-    */
     
-    // BOT developer address input validation
-
-    // BOT developer city input validation
-    /*
-    var developer_city = document.getElementById('bot_developer_city');
-    if (developer_city.value != '' && developer_city.value !== 'undefined') {
-        if (inputValidation(developer_city.value, 'developer_city')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_developer_city');
+    // BOT licence fee ( price ) input validation
+    var bot_price = document.getElementById('bot_price');
+    if (bot_price.value != '' && bot_price.value !== 'undefined') {
+        if (inputValidation(bot_price.value, 'bot_price')) {
+            createAlertMessage(2, 'Please enter a valid number.','bot_price');
             return false;
         }
     }
-    */
-
-    // BOT developer country input validation
-    /*
-    var developer_country = document.getElementById('bot_developer_country');
-    if (developer_country.value != '' && developer_country.value !== 'undefined') {
-        if (inputValidation(developer_country.value, 'developer_country')) {
-            createAlertMessage(2, 'The name need contains only a-z characters.','bot_developer_country');
-            return false;
-        }
-    }
-    */
-
-    // BOT developer email input validation
-    var developer_email = document.getElementById('bot_developer_email');
-    if (developer_email.value != '' && developer_email.value !== 'undefined') {
-        if (inputValidation(developer_email.value, 'developer_email')) {
-            createAlertMessage(2, 'Please enter a valid email.','bot_developer_email');
-            return false;
-        }
-    }
-    // BOT developer company input validation
-    // BOT developer website input validation
-
-
+    
     // block submit request
     $(this).prop("disabled", true);
 
@@ -113,19 +58,28 @@ function requestPublish(){
     $("#btnPublishRequest").prop("disabled", true);
 
     createAlertMessage(1, 'Sending request...');
-    fieldsToBotIstance();
+    var botInfo = fieldsToBotIstance();
+    var jsonString = JSON.stringify(botInfo);
     $.ajax({
-        url: './dynamic/publish.php',
-        data: {
-            bot: bot
-        },
-        type: 'POST',
-        success: function (response) {
-            createAlertMessage(4, 'Request submitted!');
+        type: "POST",
+        url: './dynamic/publishBot.php',
+        data: {'bot' : jsonString},
+        cache: false,
+        success: function(response){
+            //switch ($response['status']['code']) {
+            switch (response) {
+                case '200':
+                    createAlertMessage(3, 'Request sended!');
+                    buttonPublishToRequest();
+                    break;
+                case 400:
+                    break;
+                default:
+                    createAlertMessage(2, response);
+            }
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
-            $("#btnPublishRequest").prop("disabled", false);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
@@ -142,6 +96,14 @@ function removeAlert(node){
             document.getElementById('containerMsgAlertPublish').remove();
     }
 }
+
+function buttonPublishToRequest(){
+    $('#btnPublishRequest').prop('disabled', true);
+    document.getElementById('btnPublishRequest').className = 'btn btn-primary pull-right flat';
+    document.getElementById('btnPublishRequestText').innerText = 'Request Sended';
+    document.getElementById('iconPublishRequest').className = 'fa fa-check-circle';
+}
+
 
 function createAlertMessage(alarm,message,id) {
     var msg_class;
@@ -165,6 +127,10 @@ function createAlertMessage(alarm,message,id) {
             ico_class = 'icon fa fa-warning';
             if (id!=null)
                 document.getElementById(id).style.border ="1px solid red";
+            break;
+        case 3:
+            msg_class = 'alert alert-dismissable flat alert-success text-white';
+            ico_class = 'icon fa fa-check';
             break;
         case 4:
             msg_class = 'alert alert-dismissable flat alert-primary';
@@ -194,83 +160,88 @@ function createAlertMessage(alarm,message,id) {
 
 }
 
-function populateBotFields(){
-    document.getElementById('bot_name').value = bot['name'];
-    document.getElementById('bot_description').value = bot['shortDescription'];
-    document.getElementById('bot_long_description').innerText = bot['longDescription'];
-    setSelectValue('bot_licence_type',bot['licenceType']);
-    setSelectValue('bot_category',bot['category']);
-    setSelectValue('bot_classification',bot['classification']);
-    document.getElementById('bot_licence_fee').value = bot['licenceFee'];
-    document.getElementById('bot_version').value = bot['version'];
-    document.getElementById('bot_usecase').innerText = bot['usecase'];
-    document.getElementById('bot_alert_message').value = bot['alarmMsg'];
-    document.getElementById('bot_link_privacy').value = bot['privacyLink'];
-    document.getElementById('bot_developer_name').value = bot['developer']['name'];
-    document.getElementById('bot_developer_email').value = bot['developer']['email'];
-    document.getElementById('bot_developer_address').value = bot['developer']['address'];
-    document.getElementById('bot_developer_postcode').value = bot['developer']['postcode'];
-    document.getElementById('bot_developer_city').value = bot['developer']['city'];
-    document.getElementById('bot_developer_country').value = bot['developer']['country'];
-    document.getElementById('bot_developer_website').value = bot['developer']['website'];
-    document.getElementById('bot_developer_company').value = bot['developer']['company'];
+function populateBotFields(bot){
+    var json = JSON.parse(bot);
+    document.getElementById('bot_aiid').value = json['aiid'];
+    document.getElementById('bot_alertMessage').value = json['alertMessage'];
+    //document.getElementById('bot_badge').value = json['badge'];
+    document.getElementById('bot_description').value = json['description'];
+    document.getElementById('bot_longDescription').value = json['longDescription'];
+    document.getElementById('bot_name').value = json['name'];
+    document.getElementById('bot_price').value = json['price'];
+    document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
+    document.getElementById('bot_sample').innerHTML = json['sample'];
+    document.getElementById('bot_version').value = json['version'];
+    document.getElementById('bot_videoLink').value = json['videoLink'];
+    setSelectValue('bot_category',json['category']);
+    setSelectValue('bot_classification',json['classification']);
+    setSelectValue('bot_licenseType',json['licenseType']);
+}
+
+function populateDeveloperFields(developer) {
+    var json = JSON.parse(developer);
+    document.getElementById('bot_developer_address').value = json['address'];
+    document.getElementById('bot_developer_city').value = json['city'];
+    document.getElementById('bot_developer_company').value = json['company'];
+    document.getElementById('bot_developer_country').value = json['country'];
+    document.getElementById('bot_developer_email').value = json['email'];
+    document.getElementById('bot_developer_name').value = json["name"];
+    document.getElementById('bot_developer_postcode').value = json['postcode'];
+    document.getElementById('bot_developer_website').value = json['website'];
 }
 
 function fieldsToBotIstance(){
-    bot['name'] = document.getElementById('bot_name').value;
-    bot['shortDescription'] = document.getElementById('bot_description').value;
-    bot['longDescription'] = document.getElementById('bot_long_description').innerText;
-    bot['licenceType'] = document.getElementById('bot_licence_type').value;
+    var bot={};
+    bot['aiid'] = document.getElementById('bot_aiid').value;
+    bot['alertMessage'] = document.getElementById('bot_alertMessage').value;
+    bot['badge'] = '';
     bot['category'] = document.getElementById('bot_category').value;
     bot['classification'] =document.getElementById('bot_classification').value;
-    bot['licenceFee'] = document.getElementById('bot_licence_fee').value;
+    bot['description'] = document.getElementById('bot_description').value;
+    bot['licenseType'] = document.getElementById('bot_licenseType').value;
+    bot['longDescription'] = document.getElementById('bot_longDescription').value;
+    bot['name'] = document.getElementById('bot_name').value;
+    bot['price'] = document.getElementById('bot_price').value;
+    bot['privacyPolicy'] = document.getElementById('bot_privacyPolicy').value;
+    bot['sample'] = document.getElementById('bot_sample').innerHTML;
     bot['version'] =  document.getElementById('bot_version').value;
-    bot['usecase'] = document.getElementById('bot_usecase').innerText;
-    bot['alarmMsg'] = document.getElementById('bot_alert_message').value;
-    bot['privacyLink'] = document.getElementById('bot_link_privacy').value;
-    bot['developer']['name'] = document.getElementById('bot_developer_name').value;
-    bot['developer']['email'] = document.getElementById('bot_developer_email').value;
-    bot['developer']['address'] = document.getElementById('bot_developer_address').value;
-    bot['developer']['postcode'] = document.getElementById('bot_developer_postcode').value;
-    bot['developer']['city'] = document.getElementById('bot_developer_city').value;
-    bot['developer']['country'] = document.getElementById('bot_developer_country').value;
-    bot['developer']['website'] = document.getElementById('bot_developer_website').value;
-    bot['developer']['company'] = document.getElementById('bot_developer_company').value;
+    bot['videoLink'] = document.getElementById('bot_videoLink').value;
+    return bot;
 }
 
 function setSelectValue(id,valueToSelect) {
     var element = document.getElementById(id);
-    element.value = valueToSelect;
-    element.selected = true;
-    document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
+    for (var i = 0; i < element.options.length; ++i) {
+        if (element.options[i].text === valueToSelect) {
+            element.options[i].selected = true;
+            break;
+        }
+    }
 }
 
-function licenceTypeShow(){
-    var myselect = document.getElementById('bot_licence_type');
+function licenseTypeShow(){
+    var myselect = document.getElementById('bot_licenseType');
     var val = parseInt(myselect.options[myselect.selectedIndex].value);
 
     switch(val){
         case 0:
-            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse';
-            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse';
             break;
         case 1:
-            document.getElementById('collapseLicenceDetailsSubscription').setAttribute('aria-expanded','true');
-            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse in';
-            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsSubscription').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse in';
+            document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse';
             break;
         case 2:
-            document.getElementById('collapseLicenceDetailsPerpetual').setAttribute('aria-expanded','true');
-            document.getElementById('collapseLicenceDetailsPerpetual').className = 'panel-collapse collapse in';
-            document.getElementById('collapseLicenceDetailsSubscription').className = 'panel-collapse collapse';
+            document.getElementById('collapseLicenseDetailsPerpetual').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse in';
+            document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse';
             break;
     }
 }
 
+
 $(function () {
     $('.select2').select2();
-});
-
-$( document ).ready(function() {
-    populateBotFields();
 });

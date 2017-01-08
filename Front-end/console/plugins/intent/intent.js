@@ -71,6 +71,7 @@ function showIntents(str) {
     else
         msgAlertIntent(0, 'Create an Intent to trigger your own business logic.');
 
+
     for (var x in intents) {
         if ((str != " ") && ( (str.length == 0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
 
