@@ -53,7 +53,7 @@
                     <?php include './dynamic/input.licenseType.html.php'; ?>
                 </div>
                 <div class="row no-margin">
-                    <?php include './dynamic/input.category.publish.html.php'; ?>
+                    <?php include './dynamic/input.category.html.php'; ?>
                 </div>
                 <div class="row no-margin">
                     <?php include './dynamic/input.classification.html.php'; ?>
