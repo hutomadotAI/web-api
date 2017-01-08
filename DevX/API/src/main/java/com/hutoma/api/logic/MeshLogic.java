@@ -39,7 +39,7 @@ public class MeshLogic {
             }
             return new ApiMeshList(mv).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error getting mesh: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -55,7 +55,7 @@ public class MeshLogic {
             }
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error adding mesh: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -70,7 +70,7 @@ public class MeshLogic {
             }
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error deleting single mesh: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -84,7 +84,7 @@ public class MeshLogic {
             }
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error delering mesh: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }

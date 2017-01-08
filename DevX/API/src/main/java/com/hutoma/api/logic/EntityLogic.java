@@ -44,7 +44,7 @@ public class EntityLogic {
             }
             return new ApiEntityList(entityList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error getting entities: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -55,7 +55,7 @@ public class EntityLogic {
             final ApiEntity entity = this.database.getEntity(devid, entityName);
             return entity.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error getting entity: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -70,7 +70,7 @@ public class EntityLogic {
             this.logger.logDebug(LOGFROM, "attempt to rename to existing name");
             return ApiError.getBadRequest("entity name already in use");
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error writing entity: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -84,7 +84,7 @@ public class EntityLogic {
             stopTrainingIfEntityInUse(devid, entityName);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error writing entity: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -93,7 +93,7 @@ public class EntityLogic {
         try {
             return this.database.getAisForEntity(devid, entityName);
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error getting entities: " + e.toString());
+            this.logger.logException(LOGFROM, e);
         }
         return new ArrayList<>();
     }

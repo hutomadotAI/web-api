@@ -46,7 +46,7 @@ class CentralLogger implements ILogger {
     }
 
     public void logException(String fromLabel, final Exception ex) {
-        logOutput(EventType.ERROR, fromLabel, ex.toString());
+        logOutput(EventType.ERROR, fromLabel, ex.getMessage());
     }
 
     public void logWarning(String fromLabel, String logComment) {

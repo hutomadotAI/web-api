@@ -105,7 +105,7 @@ public class AILogic {
 
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "error creating new ai: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -123,7 +123,8 @@ public class AILogic {
             }
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseException ex) {
-            return ApiError.getInternalServerError(ex.getMessage());
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
         }
     }
 
@@ -156,7 +157,7 @@ public class AILogic {
             }
             return new ApiResult().setSuccessStatus("successfully updated");
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "error updating ai: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -174,7 +175,7 @@ public class AILogic {
             }
             return new ApiAiList(aiList).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "error getting all ais: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -194,7 +195,7 @@ public class AILogic {
                 return ai.setSuccessStatus();
             }
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "error getting single ai: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -212,7 +213,7 @@ public class AILogic {
             this.aiServices.deleteAI(devid, aiid);
             return new ApiResult().setSuccessStatus("deleted successfully");
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "error deleting ai: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }

@@ -150,11 +150,8 @@ public class TrainingLogic {
         } catch (UploadTooLargeException tooLarge) {
             this.logger.logInfo(LOGFROM, "upload attempt was larger than maximum allowed");
             return ApiError.getPayloadTooLarge();
-        } catch (DatabaseException dde) {
-            this.logger.logError(LOGFROM, "database error " + dde.getCause().toString());
-            return ApiError.getInternalServerError();
-        } catch (Exception ex) {
-            this.logger.logError(LOGFROM, "exception " + ex.toString());
+        } catch (Exception e) {
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         } finally {
             try {

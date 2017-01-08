@@ -149,7 +149,7 @@ public class ChatLogic {
             return ApiError.getInternalServerError();
 
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "AI chat request exception: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", e, this.telemetryMap);
             return ApiError.getInternalServerError();
 

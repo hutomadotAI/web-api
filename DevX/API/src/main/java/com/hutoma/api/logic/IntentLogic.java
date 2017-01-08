@@ -43,7 +43,7 @@ public class IntentLogic {
             }
             return new ApiIntentList(aiid, intentList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error getting intents: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -57,7 +57,7 @@ public class IntentLogic {
             }
             return intent.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error getting intent: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -75,7 +75,7 @@ public class IntentLogic {
             this.logger.logDebug(LOGFROM, "attempt to rename to existing name");
             return ApiError.getBadRequest("intent name already in use");
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error writing intent: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -89,7 +89,7 @@ public class IntentLogic {
             this.trainingLogic.stopTraining(null, devid, aiid);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logError(LOGFROM, "error deleting intent: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }

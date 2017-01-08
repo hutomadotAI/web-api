@@ -79,7 +79,7 @@ public class AdminLogic {
 
             return new ApiAdmin(devToken, devId.toString()).setSuccessStatus("created successfully");
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "failed to create dev: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -98,7 +98,7 @@ public class AdminLogic {
             }
             this.aiServices.deleteDev(devid);
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "failed to create dev: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
         return new ApiResult().setSuccessStatus("deleted successfully");
@@ -115,7 +115,7 @@ public class AdminLogic {
             }
             return new ApiAdmin(devtoken, devid).setSuccessStatus("token found");
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "failed to get dev token: " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }

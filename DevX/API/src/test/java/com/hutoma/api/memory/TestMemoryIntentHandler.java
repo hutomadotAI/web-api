@@ -142,7 +142,7 @@ public class TestMemoryIntentHandler {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
         when(this.fakeDatabase.updateMemoryIntent(any(), any())).thenThrow(exception);
         this.memoryIntentHandler.updateStatus(mi);
-        verify(this.fakeLogger).logError(anyString(), anyString());
+        verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test()
@@ -150,7 +150,7 @@ public class TestMemoryIntentHandler {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
         when(this.fakeDatabase.getMemoryIntentsForChat(any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.getCurrentIntentsStateForChat(AIID, CHATID);
-        verify(this.fakeLogger).logError(anyString(), anyString());
+        verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test
@@ -158,7 +158,7 @@ public class TestMemoryIntentHandler {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
         when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, DEFAULT_INTENT);
-        verify(this.fakeLogger).logError(anyString(), anyString());
+        verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test
@@ -220,7 +220,7 @@ public class TestMemoryIntentHandler {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
         when(this.fakeDatabase.deleteAllMemoryIntents(any())).thenThrow(exception);
         this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
-        verify(this.fakeLogger).logError(anyString(), anyString());
+        verify(this.fakeLogger).logException(anyString(), any());
     }
 
     private MemoryIntent setDummyMemoryIntent(final String response) throws Database.DatabaseException {

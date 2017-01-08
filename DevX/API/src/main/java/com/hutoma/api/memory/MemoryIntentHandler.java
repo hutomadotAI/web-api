@@ -60,7 +60,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         try {
             return this.database.getMemoryIntentsForChat(aiid, chatId, this.jsonSerializer);
         } catch (Database.DatabaseException e) {
-            this.logger.logError(LOGFROM, e.getMessage());
+            this.logger.logException(LOGFROM, e);
         }
         return null;
     }
@@ -72,7 +72,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         try {
             this.database.updateMemoryIntent(intent, this.jsonSerializer);
         } catch (Database.DatabaseException e) {
-            this.logger.logError(LOGFROM, e.getMessage());
+            this.logger.logException(LOGFROM, e);
         }
     }
 
@@ -83,7 +83,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         try {
             this.database.deleteAllMemoryIntents(aiid);
         } catch (Database.DatabaseException e) {
-            this.logger.logError(LOGFROM, e.getMessage());
+            this.logger.logException(LOGFROM, e);
         }
     }
 
@@ -94,7 +94,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         try {
             return this.databaseIntents.getIntent(devid, aiid, intentName);
         } catch (Database.DatabaseException e) {
-            this.logger.logError(LOGFROM, e.getMessage());
+            this.logger.logException(LOGFROM, e);
         }
         return null;
     }
@@ -126,7 +126,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 this.database.updateMemoryIntent(intent, this.jsonSerializer);
             }
         } catch (Database.DatabaseException e) {
-            this.logger.logError(LOGFROM, e.getMessage());
+            this.logger.logException(LOGFROM, e);
         }
         return intent;
     }
