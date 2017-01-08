@@ -26,7 +26,7 @@ function inputValidation(txt,field) {
 
         case 'ai_name' :        letters = /^[a-zA-Z0-9\-_\s]+$/;                break;
         case 'ai_description' : letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
-        case 'entity_name' :    letters = /^[a-zA-Z0-9]+$/;                  break;
+        case 'entity_name' :    letters = /^[a-zA-Z0-9_]+$/;                    break;
         case 'entity_value' :   letters = /^[a-zA-Z0-9\-_\s]+$/;                break;
         case 'intent_name' :    letters = /^[a-zA-Z0-9\-_]+$/;                  break;
         case 'intent_response': letters = /^[a-zA-Z0-9\-_.,?!'\s]+$/;           break;
