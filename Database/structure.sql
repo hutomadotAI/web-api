@@ -130,6 +130,40 @@ CREATE TABLE `api_rate_limit` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `botIcon`
+--
+
+DROP TABLE IF EXISTS `botIcon`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `botIcon` (
+  `botId` int(11) NOT NULL,
+  `icon` mediumblob NOT NULL,
+  PRIMARY KEY (`botId`),
+  CONSTRAINT `botIcon_ibfk_1` FOREIGN KEY (`botId`) REFERENCES `botStore` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `botPurchase`
+--
+
+DROP TABLE IF EXISTS `botPurchase`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `botPurchase` (
+  `botId` int(11) NOT NULL,
+  `dev_id` varchar(50) NOT NULL,
+  `purchase_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `price` decimal(10,0) NOT NULL,
+  PRIMARY KEY (`botId`,`dev_id`),
+  KEY `dev_id` (`dev_id`),
+  CONSTRAINT `botPurchase_ibfk_1` FOREIGN KEY (`botId`) REFERENCES `botStore` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `botPurchase_ibfk_2` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `botStore`
 --
 
@@ -140,31 +174,48 @@ CREATE TABLE `botStore` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dev_id` varchar(50) NOT NULL,
   `aiid` varchar(50) NOT NULL,
-  `name` VARCHAR(50) NOT NULL,
-  `description` VARCHAR(1024) NOT NULL,
-  `long_description` TEXT,
-  `alert_message` VARCHAR(150),
-  `badge` VARCHAR(20),
-  `license_type` VARCHAR(50) NOT NULL,
-  `price` DECIMAL NOT NULL,
-  `sample` TEXT,
-  `last_update` TIMESTAMP NOT NULL,
-  `category` VARCHAR(50) NOT NULL,
-  `privacy_policy` TEXT,
-  `classification` VARCHAR(50) NOT NULL,
-  `version` VARCHAR(25) NOT NULL,
-  `video_link` VARCHAR(1800),
-  `is_published` TINYINT(1) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` varchar(1024) NOT NULL,
+  `long_description` text,
+  `alert_message` varchar(150) DEFAULT NULL,
+  `badge` varchar(20) DEFAULT NULL,
+  `license_type` varchar(50) NOT NULL,
+  `price` decimal(10,0) NOT NULL,
+  `sample` text,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `category` varchar(50) NOT NULL,
+  `privacy_policy` text,
+  `classification` varchar(50) NOT NULL,
+  `version` varchar(25) NOT NULL,
+  `video_link` varchar(1800) DEFAULT NULL,
+  `is_published` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`dev_id`)
-        REFERENCES users(`dev_id`)
-        ON DELETE CASCADE,
-  FOREIGN KEY (`aiid`)
-        REFERENCES ai(`aiid`)
-        ON DELETE CASCADE
+  KEY `dev_id` (`dev_id`),
+  KEY `aiid` (`aiid`),
+  CONSTRAINT `botStore_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE,
+  CONSTRAINT `botStore_ibfk_2` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `bot_ai`
+--
+
+DROP TABLE IF EXISTS `bot_ai`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `bot_ai` (
+  `botId` int(11) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `dev_id` varchar(50) NOT NULL,
+  PRIMARY KEY (`botId`,`aiid`,`dev_id`),
+  KEY `aiid` (`aiid`),
+  KEY `dev_id` (`dev_id`),
+  CONSTRAINT `bot_ai_ibfk_1` FOREIGN KEY (`botId`) REFERENCES `botStore` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `bot_ai_ibfk_2` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE,
+  CONSTRAINT `bot_ai_ibfk_3` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `chatlog`
@@ -197,6 +248,28 @@ CREATE TABLE `debug` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `developerInfo`
+--
+
+DROP TABLE IF EXISTS `developerInfo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `developerInfo` (
+  `dev_id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `company` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `address` varchar(200) NOT NULL,
+  `post_code` varchar(100) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `website` varchar(1024) NOT NULL,
+  PRIMARY KEY (`dev_id`),
+  CONSTRAINT `developerInfo_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -522,94 +595,7 @@ CREATE TABLE `users` (
   `valid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id_UNIQUE` (`dev_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `bot_ai`
---
-
-DROP TABLE IF EXISTS `bot_ai`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `bot_ai` (
-  `botId` int(11) NOT NULL,
-  `aiid` varchar(50) NOT NULL,
-  `dev_id` varchar(50) NOT NULL,
-  PRIMARY KEY (`botId`, `aiid`, `dev_id`),
-  FOREIGN KEY (botId)
-        REFERENCES botStore(id)
-        ON DELETE CASCADE,
-  FOREIGN KEY (aiid)
-        REFERENCES ai(aiid)
-        ON DELETE CASCADE,
-  FOREIGN KEY (dev_id)
-        REFERENCES users(dev_id)
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `developerInfo`
---
-
-DROP TABLE IF EXISTS `developerInfo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `developerInfo` (
-  `dev_id` varchar(50) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `company` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `address` varchar(200) NOT NULL,
-  `post_code` varchar(100) NOT NULL,
-  `city` varchar(100) NOT NULL,
-  `country` varchar(100) NOT NULL,
-  `website` varchar(1024) NOT NULL,
-  PRIMARY KEY (`dev_id`),
-  FOREIGN KEY (`dev_id`)
-		REFERENCES users(dev_id)
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `botPurchase`
---
-
-DROP TABLE IF EXISTS `botPurchase`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `botPurchase` (
-  `botId` int(11) NOT NULL,
-  `dev_id` varchar(50) NOT NULL,
-  `purchase_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `price` decimal NOT NULL,
-  PRIMARY KEY (`botId`, `dev_id`),
-  FOREIGN KEY (botId)
-        REFERENCES botStore(id)
-        ON DELETE CASCADE,
-  FOREIGN KEY (dev_id)
-        REFERENCES users(dev_id)
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `botIcon`
---
-
-DROP TABLE IF EXISTS `botIcon`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `botIcon` (
-  `botId` int(11) NOT NULL,
-  `icon` MEDIUMBLOB NOT NULL,
-  PRIMARY KEY (`botId`),
-  FOREIGN KEY (botId)
-        REFERENCES botStore(id)
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1545,26 +1531,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getPublishedBots` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`()
-    NO SQL
-BEGIN
-  SELECT * FROM botStore WHERE is_published = 1;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getBotIcon` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1585,79 +1551,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `saveBotIcon` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `saveBotIcon`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11), IN `param_icon` MEDIUMBLOB)
-NO SQL
-  BEGIN
-    REPLACE INTO botIcon (botId, icon)
-      SELECT param_botId, param_icon FROM botStore bs WHERE bs.dev_id = param_devId AND bs.id = param_botId;
-  END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `publishBot` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
-  IN `param_devId` VARCHAR(50),
-  IN `param_aiid` VARCHAR(50),
-  IN `param_name` VARCHAR(50),
-  IN `param_description` VARCHAR(1024),
-  IN `param_longDescription` TEXT,
-  IN `param_alertMessage` VARCHAR(150),
-  IN `param_badge` VARCHAR(20),
-  IN `param_price` DECIMAL,
-  IN `param_sample` TEXT,
-  IN `param_lastUpdate` DATETIME,
-  IN `param_category` VARCHAR(50),
-  IN `param_licenseType` VARCHAR(50),
-  IN `param_privacyPolicy` TEXT,
-  IN `param_classification` VARCHAR(50),
-  IN `param_version` VARCHAR(25),
-  IN `param_videoLink` VARCHAR(1800),
-  IN `param_isPublished` TINYINT(1)
-)
-NO SQL
-  BEGIN
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-      ROLLBACK;
-      SELECT -1;
-    END;
-
-    INSERT INTO botStore
-    (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
-     privacy_policy, classification, version, video_link, license_type, is_published)
-    VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
-                         param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
-            param_version, param_videoLink, param_licenseType, param_isPublished);
-
-    SELECT LAST_INSERT_ID();
-  END;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getBotsLinkedToAi` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1672,118 +1565,6 @@ CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotsLinkedToAi`(IN `pa
     NO SQL
 BEGIN
   SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai WHERE bai.aiid = param_aiid AND bs.dev_id = param_devId;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `linkBotToAi` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `linkBotToAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_botId` INT(11))
-    NO SQL
-BEGIN
-  INSERT INTO bot_ai (botId, dev_id, aiid) VALUES(param_botId, param_devId, param_aiid);
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `unlinkBotFromAi` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `unlinkBotFromAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_botId` INT(11))
-    NO SQL
-BEGIN
-  DELETE FROM bot_ai
-  WHERE botId = param_botId AND aiid = param_aiid AND dev_id = param_devId;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getPurchasedBots` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPurchasedBots`(IN `param_devId` VARCHAR(50))
-    NO SQL
-BEGIN
-  SELECT bs.* FROM botPurchase bp INNER JOIN botStore bs ON bs.id = bp.botId WHERE bp.dev_id = param_devId;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `purchaseBot` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `purchaseBot`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11))
-    NO SQL
-BEGIN
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    ROLLBACK;
-  END;
-
-  START TRANSACTION;
-    SELECT @botPrice = price FROM botStore WHERE id = param_botId;
-    /* TODO: this assumes no real money needs to be tranferred for the moment */
-    INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, @botPrice);
-  COMMIT;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getPublishedBotForAi` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPublishedBotForAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50))
-    NO SQL
-BEGIN
-   SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id
-   WHERE bs.is_published = 1 AND bs.dev_id = param_devId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1827,6 +1608,25 @@ CREATE DEFINER=`root`@`127.0.0.1` PROCEDURE `getDebug`(IN `l1` INT UNSIGNED)
 SELECT *
 FROM `debug`
 LIMIT 0 , l1 ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getDeveloperInfo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDeveloperInfo`(IN `param_devid` VARCHAR(50))
+BEGIN
+	SELECT * FROM developerInfo WHERE dev_id = param_devid;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2266,55 +2066,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getDeveloperInfo` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getDeveloperInfo`(IN `param_devid` VARCHAR(50))
-BEGIN
-	SELECT * FROM developerInfo WHERE dev_id = param_devid;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `setDeveloperInfo` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `setDeveloperInfo`(
-  IN `param_devid` VARCHAR(50),
-  IN `param_name` varchar(100),
-  IN `param_company` varchar(100),
-  IN `param_email` varchar(100),
-  IN `param_address` varchar(200),
-  IN `param_postCode` varchar(100),
-  IN `param_city` varchar(100),
-  IN `param_country` varchar(100),
-  IN `param_website` varchar(1024))
-BEGIN
-  INSERT INTO developerInfo
-  (`dev_id`, `name`,`company`,`email`,`address`,`post_code`,`city`,`country`,`website`)
-  VALUES (param_devid,param_name,param_company,param_email,param_address,param_postCode,param_city,param_country,param_website);
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getMesh` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2332,6 +2083,67 @@ SELECT ai_mesh.aiid_mesh, ai.*
 FROM ai
 INNER JOIN ai_mesh ON ai.aiid = ai_mesh.aiid
 WHERE ai.dev_id=in_dev_id AND ai.aiid = in_aiid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getPublishedBotForAi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPublishedBotForAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+   SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id
+   WHERE bs.is_published = 1 AND bs.dev_id = param_devId;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getPublishedBots` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`()
+    NO SQL
+BEGIN
+  SELECT * FROM botStore WHERE is_published = 1;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getPurchasedBots` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPurchasedBots`(IN `param_devId` VARCHAR(50))
+    NO SQL
+BEGIN
+  SELECT bs.* FROM botPurchase bp INNER JOIN botStore bs ON bs.id = bp.botId WHERE bp.dev_id = param_devId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2558,6 +2370,108 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `linkBotToAi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `linkBotToAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_botId` INT(11))
+    NO SQL
+BEGIN
+  INSERT INTO bot_ai (botId, dev_id, aiid) VALUES(param_botId, param_devId, param_aiid);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `publishBot` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
+  IN `param_devId` VARCHAR(50),
+  IN `param_aiid` VARCHAR(50),
+  IN `param_name` VARCHAR(50),
+  IN `param_description` VARCHAR(1024),
+  IN `param_longDescription` TEXT,
+  IN `param_alertMessage` VARCHAR(150),
+  IN `param_badge` VARCHAR(20),
+  IN `param_price` DECIMAL,
+  IN `param_sample` TEXT,
+  IN `param_lastUpdate` DATETIME,
+  IN `param_category` VARCHAR(50),
+  IN `param_licenseType` VARCHAR(50),
+  IN `param_privacyPolicy` TEXT,
+  IN `param_classification` VARCHAR(50),
+  IN `param_version` VARCHAR(25),
+  IN `param_videoLink` VARCHAR(1800),
+  IN `param_isPublished` TINYINT(1)
+)
+    NO SQL
+BEGIN
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      SELECT -1;
+    END;
+
+    INSERT INTO botStore
+    (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
+     privacy_policy, classification, version, video_link, license_type, is_published)
+    VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
+                         param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
+            param_version, param_videoLink, param_licenseType, param_isPublished);
+
+    SELECT LAST_INSERT_ID();
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `purchaseBot` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `purchaseBot`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11))
+    NO SQL
+BEGIN
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+  END;
+
+  START TRANSACTION;
+    SELECT @botPrice = price FROM botStore WHERE id = param_botId;
+    
+    INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, @botPrice);
+  COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `rate_limit_check` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2601,6 +2515,27 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `saveBotIcon` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `saveBotIcon`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11), IN `param_icon` MEDIUMBLOB)
+    NO SQL
+BEGIN
+    REPLACE INTO botIcon (botId, icon)
+      SELECT param_botId, param_icon FROM botStore bs WHERE bs.dev_id = param_devId AND bs.id = param_botId;
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `setAiTrainingStatus` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2620,6 +2555,57 @@ BEGIN
 	UPDATE `ai`
     SET `ai_status`= ai_status, `deep_learning_error`= training_error
 	WHERE `aiid` = param_aiid AND `dev_id` = param_devid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `setDeveloperInfo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `setDeveloperInfo`(
+  IN `param_devid` VARCHAR(50),
+  IN `param_name` varchar(100),
+  IN `param_company` varchar(100),
+  IN `param_email` varchar(100),
+  IN `param_address` varchar(200),
+  IN `param_postCode` varchar(100),
+  IN `param_city` varchar(100),
+  IN `param_country` varchar(100),
+  IN `param_website` varchar(1024))
+BEGIN
+  INSERT INTO developerInfo
+  (`dev_id`, `name`,`company`,`email`,`address`,`post_code`,`city`,`country`,`website`)
+  VALUES (param_devid,param_name,param_company,param_email,param_address,param_postCode,param_city,param_country,param_website);
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `unlinkBotFromAi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `unlinkBotFromAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_botId` INT(11))
+    NO SQL
+BEGIN
+  DELETE FROM bot_ai
+  WHERE botId = param_botId AND aiid = param_aiid AND dev_id = param_devId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2759,4 +2745,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-19 14:53:44
+-- Dump completed on 2017-01-09 14:27:38
