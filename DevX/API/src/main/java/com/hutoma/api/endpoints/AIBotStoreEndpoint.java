@@ -144,10 +144,8 @@ public class AIBotStoreEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
-            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
-                    condition = "Request does not contain all valid data."),
-            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
-            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Bot already purchased."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition =
+                    "Developer information hasn't been update yet; Invalid publish information."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({

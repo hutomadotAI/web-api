@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.BotHelper;
+import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
@@ -20,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.util.Collections;
 
 import static com.hutoma.api.common.BotHelper.*;
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -138,6 +140,7 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 987654;
+        when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
         ApiAiBot result = (ApiAiBot) BotHelper.publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -155,6 +158,7 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testPublishBot_DBException() throws Database.DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.publishBot(any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());

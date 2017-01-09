@@ -28,6 +28,8 @@ import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.BotHelper.BOTID;
 import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
+import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,8 +39,6 @@ import static org.mockito.Mockito.when;
  */
 public class TestAILogic {
 
-    private static final String DEVID = "devid";
-    private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String VALIDDEVID = "DevidExists";
     private static final String AI_ENGINE = "MOCKENGINE";
@@ -114,7 +114,7 @@ public class TestAILogic {
     public void testGetSingle_Valid_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(getAI());
         ApiAi result = (ApiAi) this.aiLogic.getSingleAI(this.fakeContext, VALIDDEVID, AIID);
-        Assert.assertEquals(this.AIID.toString(), result.getAiid());
+        Assert.assertEquals(AIID.toString(), result.getAiid());
     }
 
     @Test

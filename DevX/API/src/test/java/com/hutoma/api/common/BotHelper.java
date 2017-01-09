@@ -8,14 +8,15 @@ import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.util.UUID;
+
+import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 
 /**
  * Created by pedrotei on 08/01/17.
  */
 public final class BotHelper {
-    public static final String DEVID = "devid";
-    public static final UUID AIID = UUID.randomUUID();
+
     public static final int BOTID = 1234;
 
     public static final AiBot SAMPLEBOT =

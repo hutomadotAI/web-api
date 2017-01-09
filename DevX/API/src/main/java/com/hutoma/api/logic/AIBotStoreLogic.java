@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiStreamResult;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.DeveloperInfo;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.joda.time.DateTime;
@@ -101,6 +102,10 @@ public class AIBotStoreLogic {
                                 final String version, final String videoLink) {
         try {
             this.logger.logDebug(LOGFROM, "request to publish bot for AI " + aiid.toString());
+            DeveloperInfo devInfo = this.database.getDeveloperInfo(devId);
+            if (devInfo == null) {
+                return ApiError.getBadRequest("Developer information hasn't been update yet");
+            }
             AiBot bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
                     videoLink, true);

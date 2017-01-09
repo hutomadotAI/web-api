@@ -4,7 +4,6 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiDeveloperInfo;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.DeveloperInfo;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,6 +11,8 @@ import org.junit.Test;
 
 import java.net.HttpURLConnection;
 
+import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,11 +21,6 @@ import static org.mockito.Mockito.when;
  * Created by pedrotei on 03/01/17.
  */
 public class TestDeveloperInfoLogic {
-
-    private static final String DEVID = "devid";
-    private static final DeveloperInfo DEVINFO = new DeveloperInfo(
-            DEVID, "name", "company", "email@email.com", "address", "post code", "city", "country", "http://web"
-    );
 
     private Database fakeDatabase;
     private DeveloperInfoLogic devInfoLogic;
@@ -46,10 +42,17 @@ public class TestDeveloperInfoLogic {
     }
 
     @Test
+    public void testGet_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(null);
+        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, info.getStatus().getCode());
+    }
+
+    @Test
     public void testGet_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenThrow(Database.DatabaseException.class);
         ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID);
-        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, info.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, info.getStatus().getCode());
     }
 
     @Test

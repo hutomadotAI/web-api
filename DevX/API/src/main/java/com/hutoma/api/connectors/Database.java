@@ -159,9 +159,8 @@ public class Database {
                         rs.getString("country"),
                         rs.getString("website")
                 );
-            } else {
-                throw new DatabaseException("stored procedure returned nothing");
             }
+            return null;
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }

@@ -1,6 +1,7 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.BotHelper;
+import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
@@ -116,6 +117,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     @Test
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 76832;
+        when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
         final Response response = target(BOTSTORE_BASEPATH)
                 .request()

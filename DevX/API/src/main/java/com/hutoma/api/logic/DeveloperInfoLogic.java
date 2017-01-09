@@ -29,9 +29,12 @@ public class DeveloperInfoLogic {
     public ApiResult getDeveloperInfo(final String devId) {
         try {
             DeveloperInfo info = this.database.getDeveloperInfo(devId);
-            return new ApiDeveloperInfo(info).setSuccessStatus();
+            return info == null
+                    ? ApiError.getNotFound(String.format("Developer %s not found", devId))
+                    : new ApiDeveloperInfo(info).setSuccessStatus();
         } catch (Database.DatabaseException ex) {
-            return ApiError.getNotFound(String.format("Developer %s not found", devId));
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
         }
     }
 
@@ -42,8 +45,12 @@ public class DeveloperInfoLogic {
             return ApiError.getBadRequest("At least one of the required parameters is null or empty");
         }
 
-        DeveloperInfo info = new DeveloperInfo(devId, name, company, email, address, postCode, city, country, website);
         try {
+            DeveloperInfo info = this.database.getDeveloperInfo(devId);
+            if (info != null) {
+                return ApiError.getBadRequest("Developer info already submitted");
+            }
+            info = new DeveloperInfo(devId, name, company, email, address, postCode, city, country, website);
             if (this.database.setDeveloperInfo(info)) {
                 return new ApiDeveloperInfo(info).setSuccessStatus();
             } else {

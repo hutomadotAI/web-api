@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.core.SecurityContext;
 
+import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -38,8 +40,6 @@ import static org.mockito.Mockito.*;
  */
 public class TestChatLogic {
 
-    private static final String DEVID = "devid";
-    private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String SEMANTICRESULT = "semanticresult";

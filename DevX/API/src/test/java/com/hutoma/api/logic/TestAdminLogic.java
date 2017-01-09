@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.net.HttpURLConnection;
 import javax.ws.rs.core.SecurityContext;
 
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.when;
  */
 public class TestAdminLogic {
 
-    private static final String DEVID = "devid";
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String VALIDDEVID = "DevidExists";
     private static final String DEVTOKEN = "wieqejqwkjeqwejqlkejqwejwldslkfhslkdhflkshflskfh-sdfjdf";

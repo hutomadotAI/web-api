@@ -91,7 +91,8 @@ public class DeveloperInfoEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
-            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Developer not found")
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Developer info already submitted."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Developer id not found.")
     })
     @RequestHeaders({
             @RequestHeader(name = "Authorization", description = "Developer token")

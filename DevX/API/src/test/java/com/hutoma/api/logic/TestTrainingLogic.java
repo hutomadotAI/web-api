@@ -45,6 +45,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import javax.ws.rs.core.SecurityContext;
 
+import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -55,8 +57,6 @@ import static org.mockito.Mockito.*;
 @RunWith(JUnitParamsRunner.class)
 public class TestTrainingLogic {
 
-    private static final String DEVID = "devid";
-    private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String UURL = "url://";
     private static final String SOMETEXT = "some text\nsome response";
