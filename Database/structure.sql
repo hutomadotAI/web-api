@@ -2103,7 +2103,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPublishedBotForAi`(IN `param
     NO SQL
 BEGIN
    SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id
-   WHERE bs.is_published = 1 AND bs.dev_id = param_devId;
+   WHERE bs.dev_id = param_devId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

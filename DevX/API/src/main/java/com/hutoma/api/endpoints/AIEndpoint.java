@@ -144,7 +144,7 @@ public class AIEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
-    @Path("{aiid}/bot")
+    @Path("{aiid}/bots")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
@@ -217,14 +217,14 @@ public class AIEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
-    @Path("{aiid}/bot/{botId}")
+    @Path("{aiid}/bot")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
-            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "No published bot for AI."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "No bot for AI."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({

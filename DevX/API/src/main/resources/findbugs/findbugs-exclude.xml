@@ -5,7 +5,7 @@
         <Bug pattern="URF_UNREAD_FIELD"/>
     </Match>
     <Match>
-        <Package name="KPI.*"/>
+        <Package name="~KPI.*"/>
     </Match>
     <Match>
         <Package name="~test\.functional.*"/>

@@ -37,6 +37,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     private static final String AI_BASEPATH = "/ai";
     private static final String AI_PATH = AI_BASEPATH + "/" + AIID;
+    private static final String BOTS_BASEPATH = AI_PATH + "/bots";
     private static final String BOT_BASEPATH = AI_PATH + "/bot";
     private static final String BOT_PATH = BOT_BASEPATH + "/" + BOTID;
 
@@ -134,7 +135,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetLinkedBots() throws Database.DatabaseException {
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
-        final Response response = target(BOT_BASEPATH).request().headers(defaultHeaders).get();
+        final Response response = target(BOTS_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBotList botList = deserializeResponse(response, ApiAiBotList.class);
         Assert.assertEquals(1, botList.getBotList().size());
@@ -143,7 +144,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testGetLinkedBots_devId_invalid() throws Database.DatabaseException {
-        final Response response = target(BOT_BASEPATH).request().headers(noDevIdHeaders).get();
+        final Response response = target(BOTS_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
@@ -182,13 +183,13 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetPublishedBotForAI() throws Database.DatabaseException {
         when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(SAMPLEBOT);
-        final Response response = target(BOT_PATH).request().headers(defaultHeaders).get();
+        final Response response = target(BOT_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testGetPublishedBotForAI_devId_invalid() throws Database.DatabaseException {
-        final Response response = target(BOT_PATH).request().headers(noDevIdHeaders).get();
+        final Response response = target(BOT_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
