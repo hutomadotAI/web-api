@@ -26,6 +26,3 @@ ENV API_LOGGING_CADENCY 5000
 EXPOSE 8080
 
 CMD ["catalina.sh", "run"]
-
-
-EXPOSE 80
