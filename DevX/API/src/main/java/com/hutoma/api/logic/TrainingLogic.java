@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -102,10 +103,20 @@ public class TrainingLogic {
                         return ApiError.getInternalServerError();
                     }
 
+                    // Check if there are any bots associated with this AI
+                    List<AiBot> bots = this.database.getBotsLinkedToAi(devid, aiid);
+                    StringBuilder sb = new StringBuilder();
+                    for (AiBot bot : bots) {
+                        // And add the training file
+                        sb.append(this.database.getAiTrainingFile(bot.getAiid()));
+                        sb.append(EOL).append(EOL);
+                    }
+                    sb.append(trainingMaterials);
+
                     try {
-                        this.aiServices.uploadTraining(devid, aiid, trainingMaterials);
+                        this.aiServices.uploadTraining(devid, aiid, sb.toString());
                     } catch (AIServices.AiServicesException ex) {
-                        this.logger.logError(LOGFROM, "error uploading training: " + ex.getMessage());
+                        this.logger.logException(LOGFROM, ex);
                         return ApiError.getInternalServerError("could not upload training data to AI servers");
                     }
 

@@ -14,7 +14,6 @@ public class AiBot {
 
     @SerializedName("dev_id")
     private final String devId;
-    private final UUID aiid;
     private final String name;
     private final String description;
     private final String longDescription;
@@ -30,6 +29,7 @@ public class AiBot {
     private final String version;
     private final String videoLink;
     private final boolean isPublished;
+    private UUID aiid;
     private int botId;
 
     public AiBot(final String devId, final UUID aiid, final int botId, final String name, final String description,
@@ -57,6 +57,27 @@ public class AiBot {
         this.isPublished = isPublished;
     }
 
+    public AiBot(final AiBot other) {
+        this.botId = other.botId;
+        this.devId = other.devId;
+        this.aiid = other.aiid;
+        this.name = other.name;
+        this.description = other.description;
+        this.longDescription = other.longDescription;
+        this.alertMessage = other.alertMessage;
+        this.badge = other.badge;
+        this.price = other.price;
+        this.sample = other.sample;
+        this.category = other.category;
+        this.licenseType = other.licenseType;
+        this.lastUpdate = other.lastUpdate;
+        this.privacyPolicy = other.privacyPolicy;
+        this.classification = other.classification;
+        this.version = other.version;
+        this.videoLink = other.videoLink;
+        this.isPublished = other.isPublished;
+    }
+
     public int getBotId() {
         return this.botId;
     }
@@ -71,6 +92,10 @@ public class AiBot {
 
     public UUID getAiid() {
         return this.aiid;
+    }
+
+    public void setAiid(final UUID aiid) {
+        this.aiid = aiid;
     }
 
     public String getName() {
