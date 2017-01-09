@@ -1632,26 +1632,27 @@ CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
   IN `param_privacyPolicy` TEXT,
   IN `param_classification` VARCHAR(50),
   IN `param_version` VARCHAR(25),
-  IN `param_videoLink` VARCHAR(1800)
+  IN `param_videoLink` VARCHAR(1800),
+  IN `param_isPublished` TINYINT(1)
 )
-    NO SQL
-BEGIN
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+NO SQL
   BEGIN
-	ROLLBACK;
-    SELECT -1;
-  END;
 
-  INSERT INTO botStore
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      SELECT -1;
+    END;
+
+    INSERT INTO botStore
     (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
-    privacy_policy, classification, version, video_link, license_type)
+     privacy_policy, classification, version, video_link, license_type, is_published)
     VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
-    param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
-    param_version, param_videoLink, param_licenseType);
+                         param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
+            param_version, param_videoLink, param_licenseType, param_isPublished);
 
     SELECT LAST_INSERT_ID();
-END ;;
+  END;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

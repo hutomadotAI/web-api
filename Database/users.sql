@@ -199,3 +199,12 @@ GRANT EXECUTE ON `hutoma`.* TO 'botStoreReader'@'127.0.0.1';
 GRANT SELECT ON `hutoma`.`botStore` TO 'botStoreReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`bot_ai` TO 'botStoreReader'@'127.0.0.1';
+
+
+# Privileges for `botStoreWriter`@`127.0.0.1`
+
+GRANT USAGE ON *.* TO 'botStoreWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
+
+GRANT EXECUTE ON `hutoma`.* TO 'botStoreWriter'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botStore` TO 'botStoreWriter'@'127.0.0.1';
