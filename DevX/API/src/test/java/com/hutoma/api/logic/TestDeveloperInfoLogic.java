@@ -92,6 +92,13 @@ public class TestDeveloperInfoLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
+    @Test
+    public void testSet_alreadyExists() throws Database.DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
+        ApiResult result = callSetDeveloperInfo();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
     private ApiResult callSetDeveloperInfo() {
         return this.devInfoLogic.setDeveloperInfo(DEVID, DEVINFO.getName(), DEVINFO.getCompany(),
                 DEVINFO.getEmail(), DEVINFO.getAddress(), DEVINFO.getPostCode(), DEVINFO.getCity(),

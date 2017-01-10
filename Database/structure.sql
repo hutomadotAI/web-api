@@ -1531,6 +1531,26 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotDetails` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotDetails`(IN `param_botId` INT(11))
+NO SQL
+  BEGIN
+    SELECT * FROM botStore WHERE id = param_botId;
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getBotIcon` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2455,18 +2475,10 @@ DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `purchaseBot`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11))
     NO SQL
 BEGIN
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    ROLLBACK;
-  END;
-
-  START TRANSACTION;
-    SELECT @botPrice = price FROM botStore WHERE id = param_botId;
-    
-    INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, @botPrice);
-  COMMIT;
-END ;;
+    DECLARE thePrice DECIMAL;
+    SELECT price INTO thePrice FROM botStore WHERE id = param_botId;
+    INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, thePrice);
+END;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

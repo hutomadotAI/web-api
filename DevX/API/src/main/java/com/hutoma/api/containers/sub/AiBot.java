@@ -28,7 +28,7 @@ public class AiBot {
     private final String classification;
     private final String version;
     private final String videoLink;
-    private final boolean isPublished;
+    private boolean isPublished;
     private UUID aiid;
     private int botId;
 
@@ -152,6 +152,10 @@ public class AiBot {
 
     public boolean isPublished() {
         return this.isPublished;
+    }
+
+    public void setPublished(final boolean published) {
+        this.isPublished = published;
     }
 
     public String getLicenseType() {

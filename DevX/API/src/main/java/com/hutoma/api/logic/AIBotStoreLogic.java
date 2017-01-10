@@ -62,6 +62,13 @@ public class AIBotStoreLogic {
     public ApiResult purchaseBot(final String devId, final int botId) {
         try {
             this.logger.logDebug(LOGFROM, String.format("request to purchase bot %d for devId %s", botId, devId));
+            // Check if the bot actually exists in the store
+            AiBot bot = this.database.getBotDetails(botId);
+            if (bot == null || !bot.isPublished()) {
+                this.logger.logInfo(LOGFROM, String.format("Bot %d not %s", botId,
+                        bot == null ? "found" : "published"));
+                return ApiError.getNotFound("Bot not found");
+            }
             // Check if the bot has already been purchased
             List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
@@ -76,7 +83,7 @@ public class AIBotStoreLogic {
             } else {
                 this.logger.logWarning(LOGFROM,
                         String.format("Could not purchase bot %d for devId %s", botId, devId));
-                return ApiError.getNotFound("Bot not found");
+                return ApiError.getInternalServerError();
             }
         } catch (Database.DatabaseException e) {
             this.logger.logException(LOGFROM, e);
