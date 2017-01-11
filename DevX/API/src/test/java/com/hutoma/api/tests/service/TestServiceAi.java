@@ -150,6 +150,9 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testLinkBotToAi() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(true);
         final Response response = target(BOT_PATH)
                 .request()

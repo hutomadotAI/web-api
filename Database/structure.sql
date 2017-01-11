@@ -1584,7 +1584,7 @@ DELIMITER ;;
 CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotsLinkedToAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50))
     NO SQL
 BEGIN
-  SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai WHERE bai.aiid = param_aiid AND bs.dev_id = param_devId;
+  SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id WHERE bai.aiid = param_aiid AND bai.dev_id = param_devId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
