@@ -15,7 +15,8 @@ import java.net.HttpURLConnection;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -27,22 +28,22 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
 
     @Test
     public void testUpdateStatus() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
         final Response response = sendRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testUpdateStatus_dbDidNotUpdate() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(false);
         final Response response = sendRequest(getCommonAiStatusJson());
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, response.getStatus());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
     }
 
     @Test
     public void testUpdateStatus_invalidStatus() throws Database.DatabaseException {
         String statusJson = getCommonAiStatusJson();
-        statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), "NOT_A_REAL_STATUS");
+        statusJson = statusJson.replace(TrainingStatus.AI_READY_TO_TRAIN.value(), "NOT_A_REAL_STATUS");
         final Response response = sendRequest(statusJson);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
@@ -50,9 +51,12 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
     @Test
     public void testUpdateStatus_newStatus() throws Database.DatabaseException {
         String statusJson = getCommonAiStatusJson();
-        statusJson = statusJson.replace(TrainingStatus.NOT_STARTED.value(), TrainingStatus.NEW_AI_TRAINING_QUEUED.value());
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), any(), anyString(), anyDouble(), anyDouble())).thenReturn(false);
-        when(this.fakeDatabase.updateAIStatus(anyString(), any(), eq(TrainingStatus.QUEUED), anyString(), anyDouble(), anyDouble())).thenReturn(true);
+        statusJson = statusJson.replace(TrainingStatus.AI_READY_TO_TRAIN.value(), TrainingStatus.AI_TRAINING_QUEUED.value());
+        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(
+                argThat(aiStatus -> ((AiStatus) aiStatus).getTrainingStatus() == TrainingStatus.AI_TRAINING_QUEUED),
+                any())).thenReturn(true);
+
         final Response response = sendRequest(statusJson);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
@@ -65,7 +69,7 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
     }
 
     private String getCommonAiStatusJson() {
-        return this.serializeObject(new AiStatus(DEVID.toString(), AIID, TrainingStatus.NOT_STARTED, AI_ENGINE,
+        return this.serializeObject(new AiStatus(DEVID.toString(), AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0));
     }
 

@@ -52,16 +52,12 @@ GRANT USAGE ON *.* TO 'chatlogReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*57A6F
 
 GRANT EXECUTE ON `hutoma`.* TO 'chatlogReader'@'127.0.0.1';
 
-GRANT SELECT ON `hutoma`.`chatlog` TO 'chatlogReader'@'127.0.0.1';
-
 
 # Privileges for `chatlogWriter`@`127.0.0.1`
 
 GRANT USAGE ON *.* TO 'chatlogWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*CE7F2778A67D63A07FF11AE78559ADC96A612CFD';
 
 GRANT EXECUTE ON `hutoma`.* TO 'chatlogWriter'@'127.0.0.1';
-
-GRANT INSERT ON `hutoma`.`chatlog` TO 'chatlogWriter'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`ai` TO `chatlogWriter`@`127.0.0.1`;
 

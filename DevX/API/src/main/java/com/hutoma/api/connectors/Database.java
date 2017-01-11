@@ -1,20 +1,13 @@
 package com.hutoma.api.connectors;
 
+import com.google.gson.JsonParseException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiIntegration;
-import com.hutoma.api.containers.sub.DevPlan;
-import com.hutoma.api.containers.sub.DeveloperInfo;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.MeshVariable;
-import com.hutoma.api.containers.sub.RateLimitStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.*;
 
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
@@ -74,13 +67,56 @@ public class Database {
         }
     }
 
-    private static TrainingStatus getTrainingStatusValue(final String value)
-            throws DatabaseException {
-        TrainingStatus trainingStatus = TrainingStatus.forValue(value);
-        if (trainingStatus == null) {
-            throw new DatabaseException("ai_status field does not contain an expected status");
+    /***
+     * Try to deserialize json to create a valid BackendStatus
+     * or return a blank BackendStatus if the json field was null or empty
+     * @param statusJson json string
+     * @param jsonSerializer serialiser
+     * @return valid BackendStatus object
+     * @throws DatabaseException if there was data it did not parse correctly
+     */
+    private static BackendStatus getBackendStatus(final String statusJson, JsonSerializer jsonSerializer) throws DatabaseException {
+        BackendStatus backendStatus = null;
+        // try to deserialize
+        if ((statusJson != null) || (!statusJson.isEmpty())) {
+            try {
+                backendStatus = (BackendStatus) jsonSerializer.deserialize(statusJson, BackendStatus.class);
+            } catch (JsonParseException jpe) {
+                throw new DatabaseException("Error parsing JSON in BackendStatus field");
+            }
         }
-        return trainingStatus;
+        // if the field was empty then use an empty structure
+        return (backendStatus == null) ? new BackendStatus() : backendStatus;
+    }
+
+    /***
+     * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
+     * @param backendStatus
+     * @return
+     */
+    private static TrainingStatus getSummaryTrainingStatus(final BackendStatus backendStatus) {
+        TrainingStatus wnetStatus = backendStatus.getEngineStatus("wnet").getTrainingStatus();
+        TrainingStatus rnnStatus = backendStatus.getEngineStatus("rnn").getTrainingStatus();
+
+        if ((wnetStatus == TrainingStatus.AI_UNDEFINED) || (rnnStatus == TrainingStatus.AI_UNDEFINED)) {
+            return TrainingStatus.AI_UNDEFINED;
+        }
+        if ((wnetStatus == TrainingStatus.AI_ERROR) || (rnnStatus == TrainingStatus.AI_ERROR)) {
+            return TrainingStatus.AI_ERROR;
+        }
+        if ((wnetStatus == TrainingStatus.AI_READY_TO_TRAIN) || (rnnStatus == TrainingStatus.AI_READY_TO_TRAIN)) {
+            return TrainingStatus.AI_READY_TO_TRAIN;
+        }
+        if ((wnetStatus == TrainingStatus.AI_TRAINING_QUEUED) || (rnnStatus == TrainingStatus.AI_TRAINING_QUEUED)) {
+            return TrainingStatus.AI_TRAINING_QUEUED;
+        }
+        if ((wnetStatus == TrainingStatus.AI_TRAINING_STOPPED) || (rnnStatus == TrainingStatus.AI_TRAINING_STOPPED)) {
+            return TrainingStatus.AI_TRAINING_STOPPED;
+        }
+        if ((wnetStatus == TrainingStatus.AI_TRAINING) || (rnnStatus == TrainingStatus.AI_TRAINING)) {
+            return TrainingStatus.AI_TRAINING;
+        }
+        return TrainingStatus.AI_TRAINING_COMPLETE;
     }
 
     public boolean createDev(final String username, final String email, final String password,
@@ -195,36 +231,32 @@ public class Database {
      * @param description ai_description
      * @param devid the owner dev
      * @param isPrivate private ai
-     * @param deepLearningError
-     * @param deepLearningStatus
-     * @param shallowLearningStatus
-     * @param status
-     * @param clientToken
-     * @param language
-     * @param timezoneString
-     * @param confidence
-     * @param personality
-     * @param voice
+     * @param backendStatus status of this ai in back end servers
+     * @param clientToken a guest token that the dev can give out to users
+     * @param language UI parameter
+     * @param timezoneString UI parameter
+     * @param confidence UI parameter
+     * @param personality UI parameter
+     * @param voice UI parameter
      * @return
      * @throws DatabaseException
      */
     public UUID createAI(final UUID aiid, final String name, final String description, final String devid,
-                         final boolean isPrivate, final double deepLearningError, final int deepLearningStatus,
-                         final int shallowLearningStatus, final TrainingStatus status, final String clientToken,
+                         final boolean isPrivate,
+                         final BackendStatus backendStatus,
+                         final String clientToken,
                          final Locale language, final String timezoneString,
-                         final double confidence, final int personality, final int voice)
+                         final double confidence, final int personality, final int voice,
+                         final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addAI_v2", 15)
+            call.initialise("addAi", 12)
                     .add(aiid)
                     .add(name)
                     .add(description)
                     .add(devid)
                     .add(isPrivate)
-                    .add(deepLearningError)
-                    .add(deepLearningStatus)
-                    .add(shallowLearningStatus)
-                    .add(status.value())
+                    .add(jsonSerializer.serialize(backendStatus))
                     .add(clientToken)
                     .add(language == null ? null : language.toLanguageTag())
                     .add(timezoneString)
@@ -249,7 +281,7 @@ public class Database {
                             final int personality, final int voice)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAI_v1", 9)
+            call.initialise("updateAi", 9)
                     .add(aiid)
                     .add(description)
                     .add(devId)
@@ -263,31 +295,52 @@ public class Database {
         }
     }
 
-    public boolean updateAIStatus(final String devId, final UUID aiid, final TrainingStatus status,
-                                  final String aiEngine, final double trainingProgress, final double trainingError)
+    public boolean updateAIStatus(final AiStatus status, final JsonSerializer jsonSerializer)
             throws DatabaseException {
-        if (aiEngine != null && aiEngine.equalsIgnoreCase("rnn")) {
-            try (DatabaseCall call = this.callProvider.get()) {
-                call.initialise("setAiTrainingStatus", 4)
-                        .add(status.value())
-                        .add(devId)
-                        .add(aiid)
-                        .add(trainingError);
-                return call.executeUpdate() > 0;
+
+        // open a transaction since this is a read/modify/write operation and we need consistency
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            // read the status json for all the servers
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatus", 2)
+                    .add(status.getAiid()).add(status.getDevId()).executeQuery();
+
+            // if there is nothing then end here (not found)
+            if (!rs.next()) {
+                return false;
             }
+
+            // retrieve the status
+            BackendStatus backendStatus = getBackendStatus(rs.getString("backend_status"), jsonSerializer);
+
+            // modify the bit of the structure that relates to the server we are updating
+            backendStatus.setEngineStatus(status);
+
+            // write the json block back to the AI table
+            transaction.getDatabaseCall().initialise("updateAiStatus", 3)
+                    .add(status.getAiid())
+                    .add(status.getDevId())
+                    .add(jsonSerializer.serialize(backendStatus))
+                    .executeUpdate();
+
+            // if all goes well, commit
+            transaction.commit();
+
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         }
-        // else TODO call a different DB call for other AI engines
+        // flag success
         return true;
     }
 
-    public List<ApiAi> getAllAIs(final String devid) throws DatabaseException {
+    public List<ApiAi> getAllAIs(final String devid, final JsonSerializer jsonSerializer) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIs", 1).add(devid);
             final ResultSet rs = call.executeQuery();
             final ArrayList<ApiAi> res = new ArrayList<>();
             try {
                 while (rs.next()) {
-                    res.add(getAiFromResultset(rs));
+                    res.add(getAiFromResultset(rs, jsonSerializer));
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -296,13 +349,13 @@ public class Database {
         }
     }
 
-    public ApiAi getAI(final String devid, final UUID aiid) throws DatabaseException {
+    public ApiAi getAI(final String devid, final UUID aiid, final JsonSerializer jsonSerializer) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAI_v1", 2).add(devid).add(aiid);
+            call.initialise("getAi", 2).add(devid).add(aiid);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return getAiFromResultset(rs);
+                    return getAiFromResultset(rs, jsonSerializer);
                 }
                 return null;
             } catch (final SQLException sqle) {
@@ -343,7 +396,7 @@ public class Database {
 
     public boolean deleteAi(final String devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteAI_v1", 2).add(devid).add(aiid);
+            call.initialise("deleteAi", 2).add(devid).add(aiid);
             return call.executeUpdate() > 0;
         }
     }
@@ -489,7 +542,7 @@ public class Database {
     public RateLimitStatus checkRateLimit(final String devId, final String rateKey, final double burst,
                                           final double frequency) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("rate_limit_check", 4).add(devId).add(rateKey).add(burst).add(frequency);
+            call.initialise("rateLimitCheck", 4).add(devId).add(rateKey).add(burst).add(frequency);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
@@ -654,23 +707,25 @@ public class Database {
         );
     }
 
-    private ApiAi getAiFromResultset(final ResultSet rs) throws SQLException, DatabaseException {
-        String localeString = rs.getString("ai_language");
-        String timezoneString = rs.getString("ai_timezone");
-        return new ApiAi(rs.getString("aiid"),
+    private ApiAi getAiFromResultset(final ResultSet rs, JsonSerializer jsonSerializer) throws SQLException, DatabaseException {
+        String localeString = rs.getString("ui_ai_language");
+        String timezoneString = rs.getString("ui_ai_timezone");
+        // deserialize the backend-status block of JSON
+        BackendStatus backendStatus = getBackendStatus(rs.getString("backend_status"), jsonSerializer);
+        // create one summary trainign status from the block of data
+        TrainingStatus summaryTrainingStatus = getSummaryTrainingStatus(backendStatus);
+        return new ApiAi(
+                rs.getString("aiid"),
                 rs.getString("client_token"),
                 rs.getString("ai_name"),
                 rs.getString("ai_description"),
                 new DateTime(rs.getDate("created_on")),
                 rs.getBoolean("is_private"),
-                rs.getDouble("deep_learning_error"),
-                null /*training_debug_info*/,
-                rs.getString("deep_learning_status"),
-                getTrainingStatusValue(rs.getString("ai_status")),
-                null /*training file*/,
-                rs.getInt("ai_personality"),
-                rs.getDouble("ai_confidence"),
-                rs.getInt("ai_voice"),
+                backendStatus,
+                summaryTrainingStatus,
+                rs.getInt("ui_ai_personality"),
+                rs.getDouble("ui_ai_confidence"),
+                rs.getInt("ui_ai_voice"),
                 // Java, being funny, can't follow rfc5646 so we need to replace the separator
                 localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
                 timezoneString);

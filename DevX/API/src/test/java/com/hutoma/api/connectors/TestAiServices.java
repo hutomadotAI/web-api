@@ -1,8 +1,8 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -39,7 +39,7 @@ public class TestAiServices {
     private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
-    private FakeJsonSerializer fakeSerializer;
+    private JsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
     private Database fakeDatabase;
     private Config fakeConfig;
@@ -51,7 +51,7 @@ public class TestAiServices {
 
     @Before
     public void setup() {
-        this.fakeSerializer = new FakeJsonSerializer();
+        this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);

@@ -35,8 +35,6 @@ function setSessionVariables($singleAI)
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['created_on'] = $singleAI['created_on'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['training_status'] = $singleAI['training_status'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
 
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
@@ -58,7 +56,7 @@ function localeToLanguage($locale)
         'it-IT' => 'Italiano',
         'nl-NL' => 'Nederlands',
         'pt-PT' => 'Português',
-        'en-US' =>'English'
+        'en-US' => 'English'
     );
 
     if (array_key_exists($locale, $languages)) {
@@ -91,7 +89,7 @@ function localeToLanguage($locale)
 
 <script>
     //TODO validation status API value returned 
-    var status = <?php echo json_encode(\hutoma\console::getAiStatus($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var status = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status']);?>;
     var training_file = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
     var deep_error = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
 </script>

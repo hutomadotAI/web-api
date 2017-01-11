@@ -15,7 +15,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.BackendStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -32,9 +32,6 @@ import javax.ws.rs.core.SecurityContext;
  */
 public class AILogic {
 
-    private static final double DEEP_LEARNING_ERROR = -1.0;
-    private static final int DEEP_LEARNING_STATUS = -1;
-    private static final int DEFAULT_WNET_ERROR = -1;
     private static final String LOGFROM = "ailogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
@@ -79,22 +76,24 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
+            // this creates an empty container for multiple-backend statuses
+            // which is the same as setting each server to AI_UNDEFINED
+            BackendStatus statusNew = new BackendStatus();
+
             UUID namedAiid = this.database.createAI(
                     aiUUID,
                     name,
                     description,
                     devid,
                     isPrivate,
-                    DEEP_LEARNING_ERROR,
-                    DEEP_LEARNING_STATUS,
-                    DEFAULT_WNET_ERROR,
-                    TrainingStatus.NOT_STARTED,
+                    statusNew,
                     token,
                     language,
                     timezone,
                     confidence,
                     personality,
-                    voice);
+                    voice,
+                    this.jsonSerializer);
 
             // if the stored procedure returns a different aiid then it didn't
             // create the one we requested because of a name clash
@@ -112,14 +111,8 @@ public class AILogic {
 
     public ApiResult updateAIStatus(final SecurityContext securityContext, final AiStatus status) {
         try {
-            if (!this.database.updateAIStatus(
-                    status.getDevId(),
-                    status.getAiid(),
-                    status.getTrainingStatus(),
-                    status.getAiEngine(),
-                    status.getTrainingProgress(),
-                    status.getTrainingError())) {
-                return ApiError.getInternalServerError("Could not update");
+            if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
+                return ApiError.getNotFound();
             }
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseException ex) {
@@ -168,7 +161,7 @@ public class AILogic {
 
         try {
             this.logger.logDebug(LOGFROM, "request to list all ais");
-            List<ApiAi> aiList = this.database.getAllAIs(devid);
+            List<ApiAi> aiList = this.database.getAllAIs(devid, this.jsonSerializer);
             if (aiList.isEmpty()) {
                 this.logger.logDebug(LOGFROM, "ai list is empty");
                 return ApiError.getNotFound();
@@ -187,7 +180,7 @@ public class AILogic {
 
         try {
             this.logger.logDebug(LOGFROM, devid + " request to list " + aiid);
-            ApiAi ai = this.database.getAI(devid, aiid);
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (null == ai) {
                 this.logger.logDebug(LOGFROM, "ai not found");
                 return ApiError.getNotFound();

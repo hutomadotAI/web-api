@@ -1,7 +1,6 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -54,7 +53,7 @@ public class TestAiServicesClient {
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
     private static HttpServer httpServer;
-    private FakeJsonSerializer fakeSerializer;
+    private JsonSerializer fakeSerializer;
     private Database fakeDatabase;
     private Config fakeConfig;
     private ILogger fakeLogger;
@@ -75,7 +74,7 @@ public class TestAiServicesClient {
 
     @Before
     public void setup() {
-        this.fakeSerializer = new FakeJsonSerializer();
+        this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeLogger = mock(ILogger.class);

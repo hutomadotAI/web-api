@@ -1,5 +1,7 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -7,25 +9,34 @@ import java.util.Optional;
  * Created by mauriziocibelli on 11/10/16.
  */
 public enum TrainingStatus {
-    STOPPED("training_stopped"),
-    NOT_STARTED("training_not_started"),
-    QUEUED("training_queued"),
-    IN_PROGRESS("training_in_progress"),
-    STOPPED_MAX_TIME("training_stopped_maxtime"),
-    COMPLETED("training_completed"),
-    DELETED("training_deleted"),
-    ERROR("internal_error"),
-    MALFORMEDFILE("malformed_training_file"),
-    CANCELLED("training_cancelled"),
-    NOTHING_TO_TRAIN("training_nothing_to_train"),
 
-    NEW_AI_UNDEFINED("ai_undefined"),
-    NEW_AI_READY_TO_TRAIN("ai_ready_to_train"),
-    NEW_AI_TRAINING_QUEUED("ai_training_queued"),
-    NEW_AI_TRAINING("ai_training"),
-    NEW_AI_TRAINING_STOPPED("ai_training_stopped"),
-    NEW_AI_TRAINING_COMPLETE("ai_training_complete"),
-    NEW_AI_ERROR("ai_error");
+    // ai created but no training uploaded
+    @SerializedName("ai_undefined")
+    AI_UNDEFINED("ai_undefined"),
+
+    // training file uploaded but training not started
+    @SerializedName("ai_ready_to_train")
+    AI_READY_TO_TRAIN("ai_ready_to_train"),
+
+    // queued for training but server has not actually started training yet
+    @SerializedName("ai_training_queued")
+    AI_TRAINING_QUEUED("ai_training_queued"),
+
+    // training in progress
+    @SerializedName("ai_training")
+    AI_TRAINING("ai_training"),
+
+    // training has been stopped but is not complete
+    @SerializedName("ai_training_stopped")
+    AI_TRAINING_STOPPED("ai_training_stopped"),
+
+    // training has completed
+    @SerializedName("ai_training_complete")
+    AI_TRAINING_COMPLETE("ai_training_complete"),
+
+    // training encountered an error
+    @SerializedName("ai_error")
+    AI_ERROR("ai_error");
 
     private final String value;
 

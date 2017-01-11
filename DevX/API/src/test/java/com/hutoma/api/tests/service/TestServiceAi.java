@@ -5,6 +5,8 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AILogic;
 import junitparams.JUnitParamsRunner;
@@ -54,7 +56,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAIs() throws Database.DatabaseException {
         ApiAi ai = getAI();
-        when(this.fakeDatabase.getAllAIs(any())).thenReturn(Collections.singletonList(ai));
+        when(this.fakeDatabase.getAllAIs(any(), any())).thenReturn(Collections.singletonList(ai));
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiList list = deserializeResponse(response, ApiAiList.class);
@@ -65,7 +67,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAI() throws Database.DatabaseException {
         ApiAi ai = getAI();
-        when(this.fakeDatabase.getAI(any(), any())).thenReturn(ai);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
@@ -83,9 +85,9 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCreateAI() throws Database.DatabaseException {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyDouble(),
-                anyInt(), anyInt(), any(), anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt())).thenReturn(uuid);
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyObject(),
+                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyInt(), anyObject())).thenReturn(uuid);
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -194,8 +196,9 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     private ApiAi getAI() {
-        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false, 0.5, "debuginfo",
-                "trainstatus", null, "", 0, 0.0, 1, Locale.UK, "Europe/London");
+        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false,
+                new BackendStatus(), TrainingStatus.AI_UNDEFINED,
+                0, 0.0, 1, Locale.UK, "Europe/London");
     }
 
     protected Class<?> getClassUnderTest() {

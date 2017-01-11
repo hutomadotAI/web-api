@@ -1,8 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeJsonSerializer;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAdmin;
@@ -29,7 +29,7 @@ public class TestAdminLogic {
     private static final String VALIDDEVID = "DevidExists";
     private static final String DEVTOKEN = "wieqejqwkjeqwejqlkejqwejwldslkfhslkdhflkshflskfh-sdfjdf";
 
-    private FakeJsonSerializer fakeSerializer;
+    private JsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
     private Database fakeDatabase;
     private AIServices fakeAiServices;
@@ -39,7 +39,7 @@ public class TestAdminLogic {
 
     @Before
     public void setup() {
-        this.fakeSerializer = new FakeJsonSerializer();
+        this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeContext = mock(SecurityContext.class);

@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
@@ -55,11 +56,12 @@ public class TrainingLogic {
     private final ILogger logger;
     private final Validate validate;
     private final IMemoryIntentHandler memoryIntentHandler;
+    private final JsonSerializer jsonSerializer;
 
     @Inject
     public TrainingLogic(Config config, AIServices aiServices, HTMLExtractor htmlExtractor,
                          DatabaseEntitiesIntents database, Tools tools, ILogger logger, Validate validate,
-                         IMemoryIntentHandler memoryIntentHandler) {
+                         IMemoryIntentHandler memoryIntentHandler, JsonSerializer jsonSerializer) {
         this.config = config;
         this.aiServices = aiServices;
         this.htmlExtractor = htmlExtractor;
@@ -68,6 +70,7 @@ public class TrainingLogic {
         this.logger = logger;
         this.validate = validate;
         this.memoryIntentHandler = memoryIntentHandler;
+        this.jsonSerializer = jsonSerializer;
     }
 
     public ApiResult uploadFile(SecurityContext securityContext, String devid, UUID aiid, int type, String url,
@@ -188,22 +191,22 @@ public class TrainingLogic {
         this.logger.logDebug(LOGFROM, "on demand training start");
         ApiAi ai = null;
         try {
-            ai = this.database.getAI(devid, aiid);
+            ai = this.database.getAI(devid, aiid, this.jsonSerializer);
         } catch (DatabaseException ex) {
-            this.logger.logError(LOGFROM, "could not get AI: " + ex.getMessage());
+            this.logger.logException(LOGFROM, ex);
             return ApiError.getBadRequest("Invalid AI.");
         }
         if (ai == null) {
             this.logger.logInfo(LOGFROM, "Unknown AI" + aiid);
             return ApiError.getNotFound("Unknown AI");
         }
-        TrainingStatus trainingStatus = ai.getAiStatus();
+        TrainingStatus trainingStatus = ai.getSummaryAiStatus();
         this.logger.logDebug(LOGFROM, "training start from state " + trainingStatus);
-        if (trainingStatus == TrainingStatus.NOT_STARTED || trainingStatus == TrainingStatus.STOPPED) {
+        if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
                 this.aiServices.startTraining(devid, aiid);
             } catch (AIServices.AiServicesException | RuntimeException ex) {
-                this.logger.logError(LOGFROM, "Could not start training\n" + ex.toString());
+                this.logger.logException(LOGFROM, ex);
                 return ApiError.getInternalServerError("Could not start training");
             }
             // Delete all memory variables for this AI
@@ -212,13 +215,13 @@ public class TrainingLogic {
         } else {
             this.logger.logInfo(LOGFROM, "Training start in invalid state: " + trainingStatus);
             switch (trainingStatus) {
-                case COMPLETED:
+                case AI_TRAINING_COMPLETE:
                     return ApiError.getBadRequest("Training could not be started because it was already completed.");
-                case IN_PROGRESS:
+                case AI_TRAINING:
                     return ApiError.getBadRequest("A training session is already running.");
-                case QUEUED:
+                case AI_TRAINING_QUEUED:
                     return ApiError.getBadRequest("A training session is already queued.");
-                case STOPPED_MAX_TIME:
+                case AI_TRAINING_STOPPED:
                     return ApiError.getBadRequest("You reached the maximum allocated time to train your AI. "
                             + "Please upgrade your subscription.");
                 default:
@@ -239,18 +242,18 @@ public class TrainingLogic {
     public ApiResult stopTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
             this.logger.logDebug(LOGFROM, "on demand training stop");
-            ApiAi ai = this.database.getAI(devid, aiid);
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 return ApiError.getNotFound("AI not found");
             }
-            TrainingStatus trainingStatus = ai.getAiStatus();
+            TrainingStatus trainingStatus = ai.getSummaryAiStatus();
 
-            if (trainingStatus == TrainingStatus.IN_PROGRESS) {
+            if (trainingStatus == TrainingStatus.AI_TRAINING) {
                 this.aiServices.stopTraining(devid, aiid);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             }
         } catch (Exception ex) {
-            this.logger.logError(LOGFROM, "exception (stopTraining):" + ex.toString());
+            this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError("Internal server error. Training could not be stopped.");
 
         }
@@ -268,16 +271,17 @@ public class TrainingLogic {
 
     public ApiResult updateTraining(SecurityContext securityContext, String devid, UUID aiid) {
         try {
-            ApiAi ai = this.database.getAI(devid, aiid);
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 return ApiError.getNotFound("AI not found");
             }
-            switch (ai.getAiStatus()) {
-                case IN_PROGRESS:   // fallthrough
-                case NOT_STARTED:   // fallthrough
-                case STOPPED:       // fallthrough
-                case COMPLETED:     // fallthrough
-                case DELETED:
+
+            switch (ai.getSummaryAiStatus()) {
+                case AI_TRAINING:           // fallthrough
+                case AI_READY_TO_TRAIN:     // fallthrough
+                case AI_TRAINING_STOPPED:   // fallthrough
+                case AI_TRAINING_COMPLETE:  // fallthrough
+                case AI_TRAINING_QUEUED:
                     this.logger.logDebug(LOGFROM, "on demand training update");
                     this.aiServices.updateTraining(devid, aiid);
                     // Delete all memory variables for this AI
@@ -290,9 +294,8 @@ public class TrainingLogic {
 
             }
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "exception (stopTraining):" + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError("Internal server error. Training could not be updated.");
-
         }
     }
 
@@ -313,7 +316,7 @@ public class TrainingLogic {
             result.setSuccessStatus();
             return result;
         } catch (DatabaseException dbe) {
-            this.logger.logError(LOGFROM, "exception (getTrainingMaterials):" + dbe.toString());
+            this.logger.logException(LOGFROM, dbe);
             return ApiError.getInternalServerError("Internal server error. Could not get the training materials.");
         }
     }
@@ -402,7 +405,7 @@ public class TrainingLogic {
 
     private String getTrainingMaterialsCommon(final String devId, final UUID aiid) throws DatabaseException {
         StringBuilder sb = new StringBuilder();
-        ApiAi ai = this.database.getAI(devId, aiid);
+        ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
         if (ai == null) {
             this.logger.logError(LOGFROM, String.format("AI id not found: %s", aiid));
             return null;

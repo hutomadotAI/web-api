@@ -1,49 +1,49 @@
 document.getElementById("btnCreateAI").addEventListener("click", wizardNext);
 
 function wizardNext() {
-    $(this).prop("disabled",true);
-    if(document.startForm.onsubmit)
+    $(this).prop("disabled", true);
+    if (document.startForm.onsubmit)
         return;
     RecursiveUnbind($('#wrapper'));
     document.startForm.submit();
 }
 
-function sendAIID(elem,action){
+function sendAIID(elem, action) {
     var value = elem.value;
-    elem.setAttribute('disabled','disabled');
+    elem.setAttribute('disabled', 'disabled');
 
     // color disabled in cascade buttons
     //$('button[name="btnSelectAI"]').css('background', '#afcbe2');
 
-    if(document.viewAllForm.onsubmit)
+    if (document.viewAllForm.onsubmit)
         return;
     RecursiveUnbind($('#listTable'));
-   // deactiveButtons();
+    // deactiveButtons();
 
     document.viewAllForm.action = action;
     document.getElementById("ai").value = value;
     document.viewAllForm.submit();
 }
 
-function recursiveDisable($jElement){
+function recursiveDisable($jElement) {
     $jElement.children().each(function () {
         recursiveDisable($(this));
     });
 }
 
-function publishAI(elem){
-    if ( elem.className == 'btn btn-info flat pull-right'){
+function publishAI(elem) {
+    if (elem.className == 'btn btn-info flat pull-right') {
         elem.className = 'btn btn-warning flat pull-right';
         elem.innerHTML = '<i class="fa fa-globe"></i> Unpublish AI';
     }
-    else{
+    else {
         elem.className = 'btn btn-info flat pull-right';
         elem.innerHTML = '<i class="fa fa-globe"></i> Publish AI';
     }
 }
 
-function deactiveButtons(){
-    document.getElementById('btnCreateAI').setAttribute('disabled','disabled');
+function deactiveButtons() {
+    document.getElementById('btnCreateAI').setAttribute('disabled', 'disabled');
 }
 
 function drawTableRows() {
@@ -79,32 +79,26 @@ function drawTableRows() {
 }
 function decodeAIState(state) {
     switch (state) {
-        case 'STOPPED' :
+        case 'ai_training_stopped' :
             return ('<span class="label label-warning">Stopped</span>');
             break;
-        case 'NOT_STARTED' :
+        case 'ai_ready_to_train' :
             return ('<span class="label label-primary">Not Started</span>');
             break;
-        case 'QUEUED' :
+        case 'ai_training_queued' :
             return ('<span class="label label-warning">Queued</span>');
             break;
-        case 'IN_PROGRESS' :
+        case 'ai_training' :
             return ('<span class="label label-primary">In Progress</span>');
             break;
-        case 'STOPPED_MAX_TIME' :
-            return ('<span class="label label-danger" >Stopped Max Time</span>');
-            break;
-        case 'COMPLETED' :
+        case 'ai_training_complete' :
             return ('<span class="label label-success">Completed</span>');
             break;
-        case 'ERROR' :
+        case 'ai_error' :
             return ('<span class="label label-danger">Error</span>');
             break;
-        case 'MALFORMEDFILE' :
-            return ('<span class="label label-danger">Malformed</span>');
-            break;
-        case 'NOTHING_TO_TRAIN' :
-            return ('<span class="label label-danger">Void</span>');
+        case 'ai_undefined' :
+            return ('<span class="label label-primary">None</span>');
             break;
         default:
             return ('<span class="label label-danger"></span>');
@@ -112,12 +106,12 @@ function decodeAIState(state) {
 }
 
 // VIDEO TUTORIAL
-$("#collapseFirstVideoTutorial").on('hidden.bs.collapse', function(){
+$("#collapseFirstVideoTutorial").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
-    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' +   '","args":""}', '*');
+    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });
 
-$(document).ready(function(){
+$(document).ready(function () {
     drawTableRows();
 
     $(function () {
