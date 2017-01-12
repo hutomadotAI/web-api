@@ -221,7 +221,7 @@ public class TestAILogic {
 
     @Test
     public void testUpdateAiStatus() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, this.AI_ENGINE, 0.0, 0.0);
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
         when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -229,7 +229,7 @@ public class TestAILogic {
 
     @Test
     public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, this.AI_ENGINE, 0.0, 0.0);
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
         when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(false);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
@@ -237,10 +237,19 @@ public class TestAILogic {
 
     @Test
     public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, this.AI_ENGINE, 0.0, 0.0);
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
         when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_doubleNaN() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
+        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        status.setTrainingError(Double.NaN);
+        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test

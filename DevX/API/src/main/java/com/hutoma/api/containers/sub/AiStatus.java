@@ -20,12 +20,10 @@ public class AiStatus {
 
     @SerializedName("ai_engine")
     private final String aiEngine;
-
-    @SerializedName("training_error")
-    private final double trainingError;
-
     @SerializedName("training_progress")
     private final double trainingProgress;
+    @SerializedName("training_error")
+    private double trainingError;
 
     public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus, final String aiEngine,
                     final double trainingError, final double trainingProgress) {
@@ -55,6 +53,10 @@ public class AiStatus {
 
     public double getTrainingError() {
         return this.trainingError;
+    }
+
+    public void setTrainingError(final double trainingError) {
+        this.trainingError = trainingError;
     }
 
     public double getTrainingProgress() {

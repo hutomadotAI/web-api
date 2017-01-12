@@ -111,6 +111,10 @@ public class AILogic {
 
     public ApiResult updateAIStatus(final SecurityContext securityContext, final AiStatus status) {
         try {
+            // Check if any of the backends sent a rogue double, as MySQL does not handle NaN
+            if (Double.isNaN(status.getTrainingError()) || Double.isNaN(status.getTrainingProgress())) {
+                return ApiError.getBadRequest("Double sent is NaN");
+            }
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
                 return ApiError.getNotFound();
             }
