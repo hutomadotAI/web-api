@@ -99,6 +99,7 @@ public class ChatLogic {
                 // if we are taking WNET's reply then process intents
                 this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap);
                 this.telemetryMap.put("AnsweredBy", "WNET");
+                this.telemetryMap.put("AnsweredWithConfidence", "true");
             } else {
                 // otherwise,
                 // wait for the AIML server to respond
@@ -110,10 +111,22 @@ public class ChatLogic {
 
                 if (aimlConfident) {
                     this.telemetryMap.put("AnsweredBy", "AIML");
+                    this.telemetryMap.put("AnsweredWithConfidence", "true");
                 } else {
                     // get a response from the RNN
-                    result = this.interpretRnnResult();
-                    this.telemetryMap.put("AnsweredBy", "RNN");
+                    ChatResult rnnResult = this.interpretRnnResult();
+
+                    // If the RNN was clueless or returned an empty response
+                    if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
+                        // Use AIML's smartmouth response as it will always generate something
+                        this.telemetryMap.put("AnsweredBy", "AIML");
+                        // Mark it as not really answered
+                        this.telemetryMap.put("AnsweredWithConfidence", "false");
+                    } else {
+                        result = rnnResult;
+                        this.telemetryMap.put("AnsweredBy", "RNN");
+                        this.telemetryMap.put("AnsweredWithConfidence", "true");
+                    }
                 }
             }
 
