@@ -75,10 +75,11 @@ public class Database {
      * @return valid BackendStatus object
      * @throws DatabaseException if there was data it did not parse correctly
      */
-    private static BackendStatus getBackendStatus(final String statusJson, JsonSerializer jsonSerializer) throws DatabaseException {
+    private static BackendStatus getBackendStatus(final String statusJson, JsonSerializer jsonSerializer)
+            throws DatabaseException {
         BackendStatus backendStatus = null;
         // try to deserialize
-        if ((statusJson != null) || (!statusJson.isEmpty())) {
+        if (statusJson != null && !statusJson.isEmpty()) {
             try {
                 backendStatus = (BackendStatus) jsonSerializer.deserialize(statusJson, BackendStatus.class);
             } catch (JsonParseException jpe) {
@@ -349,7 +350,8 @@ public class Database {
         }
     }
 
-    public ApiAi getAI(final String devid, final UUID aiid, final JsonSerializer jsonSerializer) throws DatabaseException {
+    public ApiAi getAI(final String devid, final UUID aiid, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAi", 2).add(devid).add(aiid);
             final ResultSet rs = call.executeQuery();
@@ -707,7 +709,8 @@ public class Database {
         );
     }
 
-    private ApiAi getAiFromResultset(final ResultSet rs, JsonSerializer jsonSerializer) throws SQLException, DatabaseException {
+    private ApiAi getAiFromResultset(final ResultSet rs, JsonSerializer jsonSerializer)
+            throws SQLException, DatabaseException {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
         // deserialize the backend-status block of JSON

@@ -87,7 +87,8 @@ public class ServerConnector {
         return futures.get(callName).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
 
-    protected HashMap<String, Future<InvocationResult>> execute(final HashMap<String, Callable<InvocationResult>> callables) {
+    protected HashMap<String, Future<InvocationResult>> execute(
+            final HashMap<String, Callable<InvocationResult>> callables) {
         this.logger.logDebug(LOGFROM, String.format("Issuing %d requests for %s",
                 callables.size(), this.tools.getCallerMethod(3)));
         HashMap<String, Future<InvocationResult>> futures = new HashMap<>();

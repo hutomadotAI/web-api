@@ -202,7 +202,8 @@ public class TrainingLogic {
         }
         TrainingStatus trainingStatus = ai.getSummaryAiStatus();
         this.logger.logDebug(LOGFROM, "training start from state " + trainingStatus);
-        if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
+        if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
+                || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
                 this.aiServices.startTraining(devid, aiid);
             } catch (AIServices.AiServicesException | RuntimeException ex) {

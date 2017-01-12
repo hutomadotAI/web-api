@@ -125,15 +125,15 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
-    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
-                                                                                       final String command) {
+    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
+            final String devId, final UUID aiid, final String command) {
         return getTrainingCallablesForCommand(devId, aiid, new HashMap<String, String>() {{
             put(AIServices.COMMAND_PARAM, command);
         }});
     }
 
-    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
-                                                                                       Map<String, String> params) {
+    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
+            final String devId, final UUID aiid, Map<String, String> params) {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
 
