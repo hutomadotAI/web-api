@@ -18,6 +18,7 @@ import java.util.logging.Logger;
  */
 public class recallBaseClass {
 
+    private static final String RECALL_FILES_DIR = "recall-tests/";
     static Logger logger = Logger.getLogger("recall");
     private final PrintStream stdout = System.out;
     public String costa_ground_truth_file;
@@ -25,8 +26,8 @@ public class recallBaseClass {
 
     public recallBaseClass() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        this.costa_ground_truth_file = classLoader.getResource("costa_bot_recall_test.xls").getPath();
-        this.nhs_ground_truth_file = classLoader.getResource("nhs_bot_recall_test.xls").getPath();
+        this.costa_ground_truth_file = classLoader.getResource(RECALL_FILES_DIR + "costa_bot_recall_test.xls").getPath();
+        this.nhs_ground_truth_file = classLoader.getResource(RECALL_FILES_DIR + "nhs_bot_recall_test.xls").getPath();
     }
 
     public static void printRecall(long start, ArrayList<crecall> recall) {
@@ -84,6 +85,19 @@ public class recallBaseClass {
         logger.info(string.toString().replace("\n", ""));
     }
 
+    protected static void addPostBody(final HttpURLConnection con, final String body) throws IOException {
+        if (!body.isEmpty()) {
+            byte[] postData = body.getBytes(StandardCharsets.UTF_8);
+            int postDataLength = postData.length;
+            con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+            OutputStream os = con.getOutputStream();
+            os.write(postData);
+            os.flush();
+            os.close();
+        }
+
+    }
+
     public static String curl(String role, String method, String endpoint, String body) throws IOException {
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -94,15 +108,7 @@ public class recallBaseClass {
         con.setRequestMethod(method);
         con.setDoOutput(true);
 
-        if (!body.isEmpty()) {
-            byte[] postData = body.getBytes(StandardCharsets.UTF_8);
-            int postDataLength = postData.length;
-            con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-            OutputStream os = con.getOutputStream();
-            os.write(postData);
-            os.flush();
-            os.close();
-        }
+        addPostBody(con, body);
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;

@@ -13,10 +13,8 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -25,9 +23,9 @@ import java.util.ArrayList;
 public class microsoft extends recallBaseClass {
 
 
-    private static ArrayList<crecall> recall = new ArrayList<>();
-    private static String base_uri = "https://westus.api.cognitive.microsoft.com/qnamaker/v1.0/knowledgebases/538895a6-6c8d-4a33-b829-fea34eda782b/generateAnswer";
-    private String costa_devkey = "2981eb7eb3324c8d9b4c1971ab152ebf";
+    private static final ArrayList<crecall> recall = new ArrayList<>();
+    private static final String base_uri = "https://westus.api.cognitive.microsoft.com/qnamaker/v1.0/knowledgebases/538895a6-6c8d-4a33-b829-fea34eda782b/generateAnswer";
+    private final String costa_devkey = "2981eb7eb3324c8d9b4c1971ab152ebf";
 
 
     public microsoft() throws IOException {
@@ -44,15 +42,8 @@ public class microsoft extends recallBaseClass {
         con.setRequestMethod(method);
         con.setDoOutput(true);
         String body = "question=" + q;
-        if (!body.isEmpty()) {
-            byte[] postData = body.getBytes(StandardCharsets.UTF_8);
-            int postDataLength = postData.length;
-            con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-            OutputStream os = con.getOutputStream();
-            os.write(postData);
-            os.flush();
-            os.close();
-        }
+
+        addPostBody(con, body);
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
