@@ -1,10 +1,14 @@
 package com.hutoma.api.common;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.JerseyClient;
 
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -24,12 +28,24 @@ import javax.ws.rs.core.Response;
 @Singleton
 class CentralLogger implements ILogger {
 
+    private static final int LOGGING_QUEUE_LENGTH = 2000;
+
+    private static final Map<EventType, Level> mapEventToLog4j = new HashMap<EventType, Level>() {{
+        put(EventType.DEBUG, Level.DEBUG);
+        put(EventType.INFO, Level.INFO);
+        put(EventType.WARNING, Level.WARN);
+        put(EventType.ERROR, Level.ERROR);
+        put(EventType.TRACE, Level.TRACE);
+        put(EventType.EXCEPTION, Level.ERROR);
+        put(EventType.COUNT, Level.INFO);
+    }};
+    private static final Logger LOGGER = LogManager.getRootLogger();
+
     protected final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
-    private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(1000);
+    private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(LOGGING_QUEUE_LENGTH);
     private Timer timer;
     private String loggingUrl;
-
 
     @Inject
     public CentralLogger(final JerseyClient jerseyClient, final JsonSerializer serializer) {
@@ -82,7 +98,7 @@ class CentralLogger implements ILogger {
                 .request()
                 .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-            System.out.println("Failed to upload  logs to the logging server! - " + response.getStatus());
+            LOGGER.error("Failed to upload  logs to the logging server! - " + response.getStatus());
         }
     }
 
@@ -140,7 +156,15 @@ class CentralLogger implements ILogger {
         event.tag = (fromLabel == null || fromLabel.isEmpty()) ? "none" : fromLabel;
         event.message = logComment == null ? "" : logComment;
         event.params = params;
+
+        // If the queue is full then it means that we can't contact the logging service, or that we're
+        // logging too many operations within a session
+        if (this.logQueue.size() == LOGGING_QUEUE_LENGTH) {
+            LOGGER.error("Logging queue full!!! Removing oldest entry.");
+            this.logQueue.remove();
+        }
+
         this.logQueue.add(event);
-        System.out.println(event.toString());
+        LOGGER.log(mapEventToLog4j.get(level), String.format("[%s] %s", event.tag, event.message));
     }
 }

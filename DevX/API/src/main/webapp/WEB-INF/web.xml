@@ -16,4 +16,5 @@
         <servlet-name>HutomaAPI</servlet-name>
         <url-pattern>/v1/*</url-pattern>
     </servlet-mapping>
+
 </web-app>

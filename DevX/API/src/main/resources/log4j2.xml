@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss,SSS}] %-5level %logger{36} %msg%n"/>
+        </Console>
+        <RollingFile name="APIFileAppender" fileName="${sys:catalina.base}/logs/HutomaAPI.log"
+                     filePattern="${sys:catalina.base}/logs/$${date:yyyy-MM}/HutomaAPI-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>[%d{yyyy-MM-dd HH:mm:ss,SSS}] %-5level %logger{36} %msg%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="APIFileAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
