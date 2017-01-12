@@ -23,7 +23,6 @@ import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 public class AIServices extends ServerConnector {
 
@@ -46,7 +45,7 @@ public class AIServices extends ServerConnector {
         }
         this.logger.logDebug(LOGFROM, "Issuing \"start training\" command to backends for AI " + aiid.toString());
         final int maxTrainingSecs = devPlan.getMaxTrainingSecs();
-        HashMap<String, Callable<Response>> callables = getTrainingCallablesForCommand(devId, aiid,
+        HashMap<String, Callable<InvocationResult>> callables = getTrainingCallablesForCommand(devId, aiid,
                 new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "start");
                     put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(maxTrainingSecs));
@@ -55,49 +54,54 @@ public class AIServices extends ServerConnector {
     }
 
     public void stopTraining(final String devId, final UUID aiid) throws AiServicesException {
-        HashMap<String, Callable<Response>> callables = getTrainingCallablesForCommand(devId, aiid, "stop");
+        HashMap<String, Callable<InvocationResult>> callables = getTrainingCallablesForCommand(devId, aiid, "stop");
         executeAndWait(callables);
     }
 
     public void deleteAI(final String devId, final UUID aiid) throws AiServicesException {
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         this.logger.logDebug(LOGFROM, "Issuing \"delete AI\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getAllEndpoints()) {
-            callables.put(endpoint, () -> this.jerseyClient
-                    .target(endpoint).path(devId).path(aiid.toString())
-                    .request()
-                    .delete());
+            callables.put(endpoint, () -> new InvocationResult(
+                    this.jerseyClient
+                            .target(endpoint).path(devId).path(aiid.toString())
+                            .request()
+                            .delete(),
+                    0));
         }
         executeAndWait(callables);
     }
 
     public void deleteDev(final String devId) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
-            callables.put(endpoint, () -> this.jerseyClient
-                    .target(endpoint).path(devId)
-                    .request()
-                    .delete());
+            callables.put(endpoint, () -> new InvocationResult(
+                    this.jerseyClient
+                            .target(endpoint).path(devId)
+                            .request()
+                            .delete(), 0));
         }
         executeAndWait(callables);
     }
 
     public void updateTraining(final String devId, final UUID aiid) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"update training\" command to backends for AI " + aiid.toString());
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
-            callables.put(endpoint, () -> this.jerseyClient
-                    .target(endpoint).path(devId).path(aiid.toString())
-                    .request()
-                    .put(Entity.json("")));
+            callables.put(endpoint, () -> new InvocationResult(
+                    this.jerseyClient
+                            .target(endpoint).path(devId).path(aiid.toString())
+                            .request()
+                            .put(Entity.json("")),
+                    0));
         }
         executeAndWait(callables);
     }
 
     public void uploadTraining(final String devId, final UUID aiid, final String trainingMaterials)
             throws AiServicesException {
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getAllEndpoints()) {
             this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
@@ -111,24 +115,26 @@ public class AIServices extends ServerConnector {
             FormDataMultiPart multipart = (FormDataMultiPart) new FormDataMultiPart()
                     .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
                     .bodyPart(bodyPart);
-            callables.put(endpoint, () -> this.jerseyClient
-                    .target(endpoint)
-                    .request()
-                    .post(Entity.entity(multipart, multipart.getMediaType())));
+            callables.put(endpoint, () -> new InvocationResult(
+                    this.jerseyClient
+                            .target(endpoint)
+                            .request()
+                            .post(Entity.entity(multipart, multipart.getMediaType())),
+                    0));
         }
         executeAndWait(callables);
     }
 
-    private HashMap<String, Callable<Response>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
-                                                                               final String command) {
+    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
+                                                                                       final String command) {
         return getTrainingCallablesForCommand(devId, aiid, new HashMap<String, String>() {{
             put(AIServices.COMMAND_PARAM, command);
         }});
     }
 
-    private HashMap<String, Callable<Response>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
-                                                                               Map<String, String> params) {
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
+    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(final String devId, final UUID aiid,
+                                                                                       Map<String, String> params) {
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
 
             JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString());
@@ -137,7 +143,7 @@ public class AIServices extends ServerConnector {
             }
 
             final JerseyInvocation.Builder builder = target.request();
-            callables.put(endpoint, () -> builder.post(null));
+            callables.put(endpoint, () -> new InvocationResult(builder.post(null), 0));
         }
         return callables;
     }

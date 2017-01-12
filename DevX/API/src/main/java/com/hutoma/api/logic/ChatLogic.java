@@ -62,13 +62,11 @@ public class ChatLogic {
     public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
                           String history, String topic, float minP) {
 
-        // start timestamp
-        long startTime = this.tools.getTimestamp();
+        final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
         // prepare the result container
-        ApiChat apiChat = new ApiChat(chatUuid, startTime);
-        apiChat.setID(chatUuid);
+        ApiChat apiChat = new ApiChat(chatUuid, 0);
 
         // Add telemetry for the request
         this.telemetryMap = new HashMap<String, String>() {
@@ -91,7 +89,7 @@ public class ChatLogic {
             this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history, topic);
 
             // wait for WNET to return
-            ChatResult result = this.interpretSemanticResult(startTime);
+            ChatResult result = this.interpretSemanticResult();
 
             // are we confident enough with this reply?
             boolean wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
@@ -104,7 +102,7 @@ public class ChatLogic {
             } else {
                 // otherwise,
                 // wait for the AIML server to respond
-                result = this.interpretAimlResult(startTime);
+                result = this.interpretAimlResult();
 
                 // are we confident enough with this reply?
                 boolean aimlConfident = (result.getScore() > 0.0d);
@@ -114,7 +112,7 @@ public class ChatLogic {
                     this.telemetryMap.put("AnsweredBy", "AIML");
                 } else {
                     // get a response from the RNN
-                    result = this.interpretRnnResult(startTime);
+                    result = this.interpretRnnResult();
                     this.telemetryMap.put("AnsweredBy", "RNN");
                 }
             }
@@ -125,6 +123,11 @@ public class ChatLogic {
 
             // prepare to send back a result
             result.setScore(toOneDecimalPlace(result.getScore()));
+
+            // set the chat response time to the whole duration since the start of the request until now
+            result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+            this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
+
             apiChat.setResult(result);
 
         } catch (AIChatServices.AiNotFoundException notFoundException) {
@@ -157,12 +160,13 @@ public class ChatLogic {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
         }
+
         // log the results
         ITelemetry.addTelemetryEvent(this.chatTelemetryLogger, "ApiChat", this.telemetryMap);
         return apiChat.setSuccessStatus();
     }
 
-    private ChatResult interpretSemanticResult(long startTime) throws ServerConnector.AiServicesException {
+    private ChatResult interpretSemanticResult() throws ServerConnector.AiServicesException {
 
         // wait for result to complete
         ChatResult chatResult = this.chatServices.awaitWnet();
@@ -184,8 +188,6 @@ public class ChatLogic {
             this.telemetryMap.put("WNETResponseNULL", "");
         }
 
-        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
-
         this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
@@ -195,7 +197,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretAimlResult(long startTime) throws ServerConnector.AiServicesException {
+    private ChatResult interpretAimlResult() throws ServerConnector.AiServicesException {
 
         // wait for result to complete
         ChatResult chatResult = this.chatServices.awaitAiml();
@@ -205,7 +207,6 @@ public class ChatLogic {
 
         // remove trailing newline
         chatResult.setAnswer(chatResult.getAnswer().trim());
-        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
 
         this.logger.logDebug(LOGFROM, String.format("AIML response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
@@ -215,7 +216,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretRnnResult(long startTime) throws ServerConnector.AiServicesException {
+    private ChatResult interpretRnnResult() throws ServerConnector.AiServicesException {
 
         // wait for result to complete
         ChatResult chatResult = this.chatServices.awaitRnn();
@@ -225,7 +226,6 @@ public class ChatLogic {
 
         // remove trailing newline
         chatResult.setAnswer(chatResult.getAnswer().trim());
-        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.0d);
 
         this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));

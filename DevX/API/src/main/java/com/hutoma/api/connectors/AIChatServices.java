@@ -31,9 +31,8 @@ public class AIChatServices extends ServerConnector {
     public static final String WNET = "wnet";
     public static final String AIML = "aiml";
     public static final String RNN = "rnn";
-
     // active requests
-    private HashMap<String, Future<Response>> requestMap;
+    private HashMap<String, Future<InvocationResult>> requestMap;
 
     @Inject
     public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
@@ -55,7 +54,7 @@ public class AIChatServices extends ServerConnector {
                                   final String history, final String topicIn) throws AiServicesException {
 
         // store the call map
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
 
         // generate the parameters to send
         HashMap<String, String> parameters = new HashMap<String, String>() {{
@@ -109,7 +108,7 @@ public class AIChatServices extends ServerConnector {
         }
 
         // get and wait for the call to complete
-        Response response = null;
+        InvocationResult response = null;
         try {
             if (!this.requestMap.get(label).isDone()) {
                 response = this.waitFor(label, this.requestMap);
@@ -120,7 +119,8 @@ public class AIChatServices extends ServerConnector {
             throw new AiServicesException(String.format("%s: %s", label, e.getMessage()));
         }
 
-        switch (response.getStatusInfo().getStatusCode()) {
+        Response.StatusType statusInfo = response.getResponse().getStatusInfo();
+        switch (statusInfo.getStatusCode()) {
             case HttpURLConnection.HTTP_OK:
                 break;
             case HttpURLConnection.HTTP_NOT_FOUND:
@@ -130,18 +130,20 @@ public class AIChatServices extends ServerConnector {
                 // (ignores response body for now)
                 String errorText = String.format("%s http error: %d %s)",
                         label,
-                        response.getStatusInfo().getStatusCode(),
-                        response.getStatusInfo().getReasonPhrase());
+                        statusInfo.getStatusCode(),
+                        statusInfo.getReasonPhrase());
                 throw new AiServicesException(errorText);
         }
 
         // otherwise attempt to deserialize the chat result
         try {
-            String content = response.readEntity(String.class);
+            String content = response.getResponse().readEntity(String.class);
             ITelemetry.addTelemetryEvent(this.logger, "chat response", new HashMap<String, String>() {{
                 this.put("From", label);
             }});
-            return new ChatResult((ChatResult) this.serializer.deserialize(content, ChatResult.class));
+            ChatResult chatResult = new ChatResult((ChatResult) this.serializer.deserialize(content, ChatResult.class));
+            chatResult.setElapsedTime(response.getDurationMs() / 1000.0);
+            return chatResult;
         } catch (JsonParseException jpe) {
             throw new AiServicesException(jpe.getMessage());
         }
@@ -150,7 +152,7 @@ public class AIChatServices extends ServerConnector {
     private void createCallable(final String label, final String endpoint,
                                 final String devId, final UUID aiid,
                                 final HashMap<String, String> params,
-                                final HashMap<String, Callable<Response>> callables) {
+                                final HashMap<String, Callable<InvocationResult>> callables) {
 
         // create call to back-end chat endpoints
         // e.g.
@@ -162,7 +164,11 @@ public class AIChatServices extends ServerConnector {
         }
 
         final JerseyInvocation.Builder builder = target.request();
-        callables.put(label, () -> builder.get());
+        callables.put(label, () -> {
+            long startTime = AIChatServices.this.tools.getTimestamp();
+            Response response = builder.get();
+            return new InvocationResult(response, AIChatServices.this.tools.getTimestamp() - startTime);
+        });
     }
 
     public static class AiNotFoundException extends AiServicesException {

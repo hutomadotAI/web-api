@@ -36,8 +36,8 @@ public class ServerConnector {
     protected final Config config;
     protected final JerseyClient jerseyClient;
     protected final ILogger logger;
+    protected final Tools tools;
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
-    private final Tools tools;
 
     @Inject
     public ServerConnector(final Database database, final ILogger logger, final JsonSerializer serializer,
@@ -55,13 +55,31 @@ public class ServerConnector {
         this.executor.shutdownNow();
     }
 
+    public static class InvocationResult {
+        private final Response response;
+        private final long durationMs;
+
+        public InvocationResult(final Response response, final long durationMs) {
+            this.response = response;
+            this.durationMs = durationMs;
+        }
+
+        public Response getResponse() {
+            return this.response;
+        }
+
+        public long getDurationMs() {
+            return this.durationMs;
+        }
+    }
+
     public static class AiServicesException extends Exception {
         public AiServicesException(String message) {
             super(message);
         }
     }
 
-    protected Response waitFor(String callName, HashMap<String, Future<Response>> futures)
+    protected InvocationResult waitFor(String callName, HashMap<String, Future<InvocationResult>> futures)
             throws AiServicesException, ExecutionException, InterruptedException, TimeoutException {
         if (!futures.containsKey(callName)) {
             throw new AiServicesException(String.format("Call %s not found", callName));
@@ -69,10 +87,10 @@ public class ServerConnector {
         return futures.get(callName).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
 
-    protected HashMap<String, Future<Response>> execute(final HashMap<String, Callable<Response>> callables) {
+    protected HashMap<String, Future<InvocationResult>> execute(final HashMap<String, Callable<InvocationResult>> callables) {
         this.logger.logDebug(LOGFROM, String.format("Issuing %d requests for %s",
                 callables.size(), this.tools.getCallerMethod(3)));
-        HashMap<String, Future<Response>> futures = new HashMap<>();
+        HashMap<String, Future<InvocationResult>> futures = new HashMap<>();
 
         // get a named future for a named callable response
         callables.entrySet().forEach((entry) -> {
@@ -82,25 +100,26 @@ public class ServerConnector {
         return futures;
     }
 
-    void executeAndWait(final HashMap<String, Callable<Response>> callables) throws AiServicesException {
+    void executeAndWait(final HashMap<String, Callable<InvocationResult>> callables) throws AiServicesException {
         try {
             // start the calls async
-            HashMap<String, Future<Response>> futures = execute(callables);
+            HashMap<String, Future<InvocationResult>> futures = execute(callables);
 
             List<String> errors = new ArrayList<>();
             for (String endpoint : callables.keySet()) {
                 // wait for each call to terminate
-                Response response = waitFor(endpoint, futures);
+                InvocationResult response = waitFor(endpoint, futures);
 
+                Response.StatusType statusInfo = response.getResponse().getStatusInfo();
                 // aggregate the errors
-                if (response.getStatusInfo().getStatusCode() != HttpURLConnection.HTTP_OK) {
+                if (statusInfo.getStatusCode() != HttpURLConnection.HTTP_OK) {
                     errors.add(String.format("%d %s",
-                            response.getStatusInfo().getStatusCode(),
-                            response.getStatusInfo().getReasonPhrase()));
+                            statusInfo.getStatusCode(),
+                            statusInfo.getReasonPhrase()));
                     this.logger.logError(LOGFROM, String.format("Failure status %s (id=%d msg=%s)",
                             endpoint,
-                            response.getStatusInfo().getStatusCode(),
-                            response.getStatusInfo().getReasonPhrase()));
+                            statusInfo.getStatusCode(),
+                            statusInfo.getReasonPhrase()));
                 }
             }
             if (!errors.isEmpty()) {
