@@ -1,5 +1,7 @@
 package com.hutoma.api.containers;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -7,13 +9,14 @@ import java.util.List;
  */
 public class ApiAiList extends ApiResult {
 
-    List<ApiAi> ai_list;
+    @SerializedName("ai_list")
+    private final List<ApiAi> aiList;
 
     public ApiAiList(List<ApiAi> aiList) {
-        this.ai_list = aiList;
+        this.aiList = aiList;
     }
 
     public List<ApiAi> getAiList() {
-        return this.ai_list;
+        return this.aiList;
     }
 }

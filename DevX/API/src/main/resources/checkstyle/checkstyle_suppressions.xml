@@ -14,9 +14,6 @@
     <suppress checks="AvoidStarImport" files=".*\.java$"/>
     <suppress checks="ImportOrder" files=".*\.java$"/>
 
-    <!-- Java naming conventions -->
-    <suppress checks="MemberName" files=".*\.java$"/>
-
     <!-- To allow defining "} while ()" -->
     <suppress checks="RightCurly" files=".*\.java$"/>
 

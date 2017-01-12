@@ -622,62 +622,6 @@ public class Database {
         }
     }
 
-    /***
-     * AI Mesh Calls
-     */
-    public List<MeshVariable> getMesh(final String devId, final String aiid)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getMesh", 2).add(devId).add(aiid);
-            ResultSet rs = call.executeQuery();
-            List<MeshVariable> mesh = new ArrayList<>();
-            try {
-                while (rs.next()) {
-                    mesh.add(new MeshVariable(
-                            rs.getString("aiid"),
-                            rs.getString("aiid_mesh"),
-                            rs.getString("ai_name"),
-                            rs.getString("ai_description"),
-                            rs.getString("licenceType"),
-                            rs.getFloat("licenceFee"),
-                            rs.getFloat("rating"),
-                            rs.getInt("numberOfActivations"),
-                            rs.getBoolean("isBanned"),
-                            rs.getString("iconPath"),
-                            rs.getString("color")
-                    ));
-                }
-            } catch (SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-            return mesh;
-        }
-    }
-
-    public boolean addMesh(final String devId, final String aiid, final String aiidMesh)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addMesh", 3).add(devId).add(aiid).add(aiidMesh);
-            return call.executeUpdate() > 0;
-        }
-    }
-
-    public boolean deleteSingleMesh(final String devId, final String aiid, final String aiidMesh)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteMesh", 3).add(devId).add(aiid).add(aiidMesh);
-            return call.executeUpdate() > 0;
-        }
-    }
-
-    public boolean deleteAllMesh(final String devId, final String aiid)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteAllMesh", 2).add(devId).add(aiid);
-            return call.executeUpdate() > 0;
-        }
-    }
-
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
         final ArrayList<AiBot> bots = new ArrayList<>();
         while (rs.next()) {

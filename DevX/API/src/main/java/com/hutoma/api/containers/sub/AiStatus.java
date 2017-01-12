@@ -11,7 +11,9 @@ public class AiStatus {
 
     @SerializedName("ai_id")
     private final String aiid;
-    private final String dev_id;
+
+    @SerializedName("dev_id")
+    private final String devId;
 
     @SerializedName("training_status")
     private final String trainingStatus;
@@ -27,7 +29,7 @@ public class AiStatus {
 
     public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus, final String aiEngine,
                     final double trainingError, final double trainingProgress) {
-        this.dev_id = devId;
+        this.devId = devId;
         this.aiid = aiid.toString();
         this.trainingStatus = trainingStatus.value();
         this.aiEngine = aiEngine;
@@ -40,7 +42,7 @@ public class AiStatus {
     }
 
     public String getDevId() {
-        return this.dev_id;
+        return this.devId;
     }
 
     public TrainingStatus getTrainingStatus() {

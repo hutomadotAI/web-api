@@ -205,7 +205,7 @@ public class ChatLogic {
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
         this.telemetryMap.put("WNETAnswer", chatResult.getAnswer());
-        this.telemetryMap.put("WNETTopicOut", chatResult.getTopic_out());
+        this.telemetryMap.put("WNETTopicOut", chatResult.getTopicOut());
         this.telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
         return chatResult;
     }
@@ -245,7 +245,7 @@ public class ChatLogic {
 
         this.telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
         this.telemetryMap.put("RNNAnswer", chatResult.getAnswer());
-        this.telemetryMap.put("RNNTopicOut", chatResult.getTopic_out());
+        this.telemetryMap.put("RNNTopicOut", chatResult.getTopicOut());
 
         return chatResult;
     }

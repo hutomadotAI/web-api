@@ -1,5 +1,7 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,18 +10,20 @@ import java.util.List;
  */
 public class IntentVariable {
 
-    private final String entity_name;
+    @SerializedName("entityName")
+    private final String entityName;
     private final boolean required;
-    private final int n_prompts;
+    @SerializedName("numberOfPrompts")
+    private final int numberOfPrompts;
     private String value;
     private int id;
 
     private List<String> prompts;
 
     public IntentVariable(String entityName, boolean required, int numPrompts, String value) {
-        this.entity_name = entityName;
+        this.entityName = entityName;
         this.required = required;
-        this.n_prompts = numPrompts;
+        this.numberOfPrompts = numPrompts;
         this.value = value;
         this.prompts = new ArrayList<>();
     }
@@ -35,7 +39,7 @@ public class IntentVariable {
     }
 
     public String getEntityName() {
-        return this.entity_name;
+        return this.entityName;
     }
 
     public boolean isRequired() {
@@ -43,7 +47,7 @@ public class IntentVariable {
     }
 
     public int getNumPrompts() {
-        return this.n_prompts;
+        return this.numberOfPrompts;
     }
 
     public List<String> getPrompts() {

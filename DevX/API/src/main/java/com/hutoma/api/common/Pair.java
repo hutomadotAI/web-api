@@ -10,11 +10,11 @@ public class Pair<A, B> {
     /**
      * The first part.
      */
-    private final A a;
+    private final A partA;
     /**
      * The second part.
      */
-    private final B b;
+    private final B partB;
 
     /**
      * Ctor.
@@ -22,8 +22,8 @@ public class Pair<A, B> {
      * @param partB the second part
      */
     public Pair(A partA, B partB) {
-        this.a = partA;
-        this.b = partB;
+        this.partA = partA;
+        this.partB = partB;
     }
 
     /**
@@ -31,8 +31,8 @@ public class Pair<A, B> {
      * @param other the other pair
      */
     public Pair(Pair<? extends A, ? extends B> other) {
-        this.a = other.getA();
-        this.b = other.getB();
+        this.partA = other.getA();
+        this.partB = other.getB();
     }
 
     /**
@@ -50,7 +50,7 @@ public class Pair<A, B> {
      * @return the first part of the pair
      */
     public A getA() {
-        return this.a;
+        return this.partA;
     }
 
     /**
@@ -58,13 +58,13 @@ public class Pair<A, B> {
      * @return the second part of the pair
      */
     public B getB() {
-        return this.b;
+        return this.partB;
     }
 
     public int hashCode() {
         return new HashCodeBuilder(17, 31)
-                .append(this.a)
-                .append(this.b)
+                .append(this.partA)
+                .append(this.partB)
                 .toHashCode();
     }
 
@@ -78,6 +78,6 @@ public class Pair<A, B> {
             return false;
         }
         Pair<?, ?> castedOther = (Pair<?, ?>) other;
-        return eq(this.a, castedOther.getA()) && eq(this.b, castedOther.getB());
+        return eq(this.partA, castedOther.getA()) && eq(this.partB, castedOther.getB());
     }
 }

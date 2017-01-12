@@ -14,7 +14,8 @@ import java.util.Locale;
 public class ApiAi extends ApiResult {
 
     private final String aiid;
-    private final String client_token;
+    @SerializedName("client_token")
+    private final String clientToken;
 
     private String name;
     private String description;
@@ -40,14 +41,14 @@ public class ApiAi extends ApiResult {
 
     public ApiAi(String aiid, String clientToken) {
         this.aiid = aiid;
-        this.client_token = clientToken;
+        this.clientToken = clientToken;
     }
 
     public ApiAi(String aiid, String clientToken, String name, String description, DateTime createdOn,
                  boolean isPrivate, BackendStatus backendStatus, TrainingStatus summaryStatus,
                  int personality, double confidence, int voice, Locale language, String timezone) {
         this.aiid = aiid;
-        this.client_token = clientToken;
+        this.clientToken = clientToken;
         this.name = name;
         this.description = description;
         this.createdOn = createdOn;
@@ -66,7 +67,7 @@ public class ApiAi extends ApiResult {
     }
 
     public String getClient_token() {
-        return this.client_token;
+        return this.clientToken;
     }
 
     public TrainingStatus getSummaryAiStatus() {

@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors;
 
+import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -162,20 +163,22 @@ public class AIServices extends ServerConnector {
     }
 
     public static class AiInfo {
-        private final String ai_id;
-        private final String dev_id;
+        @SerializedName("ai_id")
+        private final String aiid;
+        @SerializedName("dev_id")
+        private final String devId;
 
         public AiInfo(final String devId, final UUID aiid) {
-            this.ai_id = aiid.toString();
-            this.dev_id = devId;
+            this.aiid = aiid.toString();
+            this.devId = devId;
         }
 
         public String getAiid() {
-            return this.ai_id;
+            return this.aiid;
         }
 
         public String getDevId() {
-            return this.dev_id;
+            return this.devId;
         }
     }
 }

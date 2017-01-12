@@ -14,7 +14,7 @@ import javax.inject.Provider;
  */
 public class DatabaseTransaction implements AutoCloseable {
 
-    private final String LOGFROM = "dbtransaction";
+    private static final String LOGFROM = "dbtransaction";
     private final DatabaseConnectionPool pool;
     private final Provider<TransactionalDatabaseCall> callprovider;
     private final ArrayList<TransactionalDatabaseCall> openCalls = new ArrayList<>();
@@ -87,7 +87,7 @@ public class DatabaseTransaction implements AutoCloseable {
         try {
             rollback();
         } catch (Database.DatabaseException e) {
-            this.logger.logError(this.LOGFROM, "transaction rollback failed: " + e.toString());
+            this.logger.logError(LOGFROM, "transaction rollback failed: " + e.toString());
         }
     }
 

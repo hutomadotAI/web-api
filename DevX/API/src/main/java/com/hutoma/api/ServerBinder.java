@@ -24,7 +24,6 @@ import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.logic.DeveloperInfoLogic;
 import com.hutoma.api.logic.EntityLogic;
 import com.hutoma.api.logic.IntentLogic;
-import com.hutoma.api.logic.MeshLogic;
 import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -75,7 +74,6 @@ public class ServerBinder extends AbstractBinder {
         bind(TrainingLogic.class).to(TrainingLogic.class);
         bind(EntityLogic.class).to(EntityLogic.class);
         bind(IntentLogic.class).to(IntentLogic.class);
-        bind(MeshLogic.class).to(MeshLogic.class);
         bind(DeveloperInfoLogic.class).to(DeveloperInfoLogic.class);
 
         // other

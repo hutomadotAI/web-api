@@ -1,5 +1,6 @@
 package com.hutoma.api.containers;
 
+import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.sub.IntentVariable;
 
 import java.util.ArrayList;
@@ -11,24 +12,28 @@ import java.util.List;
 public class ApiIntent extends ApiResult {
 
     private final List<IntentVariable> variables = new ArrayList<>();
-    private final String intent_name;
-    private final String topic_in;
-    private final String topic_out;
+    @SerializedName("intentName")
+    private final String intentName;
+    @SerializedName("topicIn")
+    private final String topicIn;
+    @SerializedName("topicOut")
+    private final String topicOut;
     private List<String> responses = new ArrayList<>();
-    private List<String> user_says = new ArrayList<>();
+    @SerializedName("userSays")
+    private List<String> userSays = new ArrayList<>();
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
-        this.intent_name = intentName;
-        this.topic_in = topicIn;
-        this.topic_out = topicOut;
+        this.intentName = intentName;
+        this.topicIn = topicIn;
+        this.topicOut = topicOut;
     }
 
     public String getIntentName() {
-        return this.intent_name;
+        return this.intentName;
     }
 
     public ApiIntent addUserSays(String says) {
-        this.user_says.add(says);
+        this.userSays.add(says);
         return this;
     }
 
@@ -47,11 +52,11 @@ public class ApiIntent extends ApiResult {
     }
 
     public List<String> getUserSays() {
-        return this.user_says;
+        return this.userSays;
     }
 
     public void setUserSays(final List<String> userSays) {
-        this.user_says = userSays;
+        this.userSays = userSays;
     }
 
     public List<String> getResponses() {
@@ -63,10 +68,10 @@ public class ApiIntent extends ApiResult {
     }
 
     public String getTopicIn() {
-        return this.topic_in;
+        return this.topicIn;
     }
 
     public String getTopicOut() {
-        return this.topic_out;
+        return this.topicOut;
     }
 }

@@ -9,14 +9,14 @@ import java.util.List;
  */
 public class ApiAiIntegrations extends ApiResult {
 
-    List<AiIntegration> _integrationList;
+    private final List<AiIntegration> integrationList;
 
     public ApiAiIntegrations(List<AiIntegration> integrationList) {
-        this._integrationList = integrationList;
+        this.integrationList = integrationList;
     }
 
     public List<AiIntegration> getIntegrationList() {
-        return this._integrationList;
+        return this.integrationList;
     }
 
 }

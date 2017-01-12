@@ -1,5 +1,7 @@
 package com.hutoma.api.containers;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -8,15 +10,16 @@ import java.util.UUID;
  */
 public class ApiIntentList extends ApiResult {
 
-    private final List<String> intent_name;
+    @SerializedName("intentName")
+    private final List<String> intentName;
     private final UUID aiid;
 
     public ApiIntentList(UUID aiid, List<String> intentName) {
-        this.intent_name = intentName;
+        this.intentName = intentName;
         this.aiid = aiid;
     }
 
     public List<String> getIntentNames() {
-        return this.intent_name;
+        return this.intentName;
     }
 }

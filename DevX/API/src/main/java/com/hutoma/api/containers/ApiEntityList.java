@@ -1,5 +1,7 @@
 package com.hutoma.api.containers;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -7,13 +9,14 @@ import java.util.List;
  */
 public class ApiEntityList extends ApiResult {
 
-    List<String> entity_name;
+    @SerializedName("entity_name")
+    private final List<String> entityName;
 
     public ApiEntityList(List<String> entityName) {
-        this.entity_name = entityName;
+        this.entityName = entityName;
     }
 
     public List<String> getEntities() {
-        return this.entity_name;
+        return this.entityName;
     }
 }
