@@ -254,7 +254,7 @@ public class TrainingLogic {
 
     public ApiResult updateTraining(SecurityContext securityContext, String devId, UUID aiid) {
         try {
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 return ApiError.getNotFound("AI not found");
             }

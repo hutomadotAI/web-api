@@ -371,7 +371,7 @@ public class TestTrainingLogic {
 
     @Test
     public void testUpdateTraining_failedUploading() throws Database.DatabaseException, AIServices.AiServicesException {
-        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(TrainingStatus.COMPLETED, false));
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getCommonAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(SOMETEXT);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(anyString(), any(), anyString());
         ApiResult result = this.logic.updateTraining(this.fakeContext, DEVID, AIID);
