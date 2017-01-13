@@ -3,7 +3,7 @@
         <div class="box-title"><b>Basic AI Settings</b></div>
     </div>
     
-    <form method="POST" name="createAIform" action="./newAIBotstore.php">
+    <form method="POST" name="createAIform" action="./NewAIBotstore.php">
         <div class="box-body">
            
             <div class="row">

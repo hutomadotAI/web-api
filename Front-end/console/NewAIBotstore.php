@@ -108,7 +108,7 @@ function setSessionVariablesFromPost()
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="plugins/createAI/createAIwizard.js"></script>
+<script src="plugins/createAI/createAIWizard.js"></script>
 <script src="plugins/botstore/botstore.js"></script>
 <script src="plugins/botstore/buyBot.js"></script>
 

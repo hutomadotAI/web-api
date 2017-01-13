@@ -39,7 +39,7 @@ CREATE TABLE `ai` (
   `ui_ai_confidence` double DEFAULT NULL,
   `ui_ai_personality` tinyint(4) DEFAULT '0',
   `ui_ai_voice` int(11) DEFAULT '0',
-  'deleted' tinyint(1) DEFAULT '0',
+  `deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
