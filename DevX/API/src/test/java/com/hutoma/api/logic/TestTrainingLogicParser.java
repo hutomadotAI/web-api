@@ -37,8 +37,7 @@ public class TestTrainingLogicParser {
 
     @Before
     public void setup() {
-        this.logic = new TrainingLogic(null, null, null, null,
-                null, null, null, null, null);
+        this.logic = new TrainingLogic(null, null, null, null, null, null, null, null);
     }
 
     @Test

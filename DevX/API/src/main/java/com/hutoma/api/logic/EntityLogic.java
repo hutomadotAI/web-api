@@ -102,7 +102,7 @@ public class EntityLogic {
         List<UUID> ais = getAisWithEntityInUse(devid, entityName);
         if (!ais.isEmpty()) {
             for (UUID ai : ais) {
-                this.trainingLogic.stopTraining(null, devid, ai);
+                this.trainingLogic.stopTraining(devid, ai);
             }
         }
     }

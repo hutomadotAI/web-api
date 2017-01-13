@@ -3,7 +3,6 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
@@ -26,17 +25,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
 import static com.hutoma.api.connectors.Database.DatabaseException;
 
 /**
- * Created by mauriziocibelli on 28/04/16.
+ * Logic to handle AI training.
  */
 public class TrainingLogic {
 
@@ -52,7 +52,6 @@ public class TrainingLogic {
     private final AIServices aiServices;
     private final HTMLExtractor htmlExtractor;
     private final DatabaseEntitiesIntents database;
-    private final Tools tools;
     private final ILogger logger;
     private final Validate validate;
     private final IMemoryIntentHandler memoryIntentHandler;
@@ -60,21 +59,20 @@ public class TrainingLogic {
 
     @Inject
     public TrainingLogic(Config config, AIServices aiServices, HTMLExtractor htmlExtractor,
-                         DatabaseEntitiesIntents database, Tools tools, ILogger logger, Validate validate,
+                         DatabaseEntitiesIntents database, ILogger logger, Validate validate,
                          IMemoryIntentHandler memoryIntentHandler, JsonSerializer jsonSerializer) {
         this.config = config;
         this.aiServices = aiServices;
         this.htmlExtractor = htmlExtractor;
         this.database = database;
-        this.tools = tools;
         this.logger = logger;
         this.validate = validate;
         this.memoryIntentHandler = memoryIntentHandler;
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ApiResult uploadFile(SecurityContext securityContext, String devid, UUID aiid, int type, String url,
-                                InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+    public ApiResult uploadFile(final String devid, final UUID aiid, final TrainingType type, final String url,
+                                final InputStream uploadedInputStream, final FormDataContentDisposition fileDetail) {
 
         ArrayList<String> source;
 
@@ -84,17 +82,17 @@ public class TrainingLogic {
             switch (type) {
 
                 // 0 = training file is text chat
-                case 0:
+                case TEXT:
                     this.logger.logDebug(LOGFROM, "training from uploaded training file");
                     if (null == fileDetail) {
-                        return ApiError.getBadRequest("upload could not be processed");
+                        return ApiError.getBadRequest("no file was specified");
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
                     TrainingFileParsingResult result = parseTrainingFile(source);
                     // Bail out if there are fatal events during the parsing
                     if (result.hasFatalEvents()) {
-                        return ApiError.getBadRequest("upload parsing errors", result.getEvents());
+                        return ApiError.getBadRequest("file parsing errors", result.getEvents());
                     }
                     if (!this.database.updateAiTrainingFile(aiid, result.getTrainingText())) {
                         return ApiError.getNotFound("ai not found");
@@ -109,10 +107,10 @@ public class TrainingLogic {
                     return uploadCompositeTrainingFile(devid, aiid, trainingMaterials, result);
 
                 // 1 = training file is a document
-                case 1:
+                case DOCUMENT:
                     this.logger.logDebug(LOGFROM, "training from uploaded document");
                     if (null == fileDetail) {
-                        return ApiError.getBadRequest("upload could not be processed");
+                        return ApiError.getBadRequest("no file was specified");
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
@@ -125,7 +123,7 @@ public class TrainingLogic {
                     return new ApiResult().setSuccessStatus("upload document accepted");
 
                 // 2 = training file is a webpage
-                case 2:
+                case WEBPAGE:
                     this.logger.logDebug(LOGFROM, "training from uploaded URL");
                     if (!this.database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
                         return ApiError.getNotFound("ai not found");
@@ -163,24 +161,23 @@ public class TrainingLogic {
      * Submit a training request to SQS only if the training file is avaialable or a previous
      * valid training session was stopped.
      * In all other cases we return an error
-     * @param securityContext
      * @param devid
      * @param aiid
      * @return
      */
-    public ApiResult startTraining(SecurityContext securityContext, String devid, UUID aiid) {
+    public ApiResult startTraining(final String devid, final UUID aiid) {
 
         this.logger.logDebug(LOGFROM, "on demand training start");
-        ApiAi ai = null;
+        ApiAi ai;
         try {
             ai = this.database.getAI(devid, aiid, this.jsonSerializer);
         } catch (DatabaseException ex) {
             this.logger.logException(LOGFROM, ex);
-            return ApiError.getBadRequest("Invalid AI.");
+            return ApiError.getInternalServerError();
         }
         if (ai == null) {
-            this.logger.logInfo(LOGFROM, "Unknown AI" + aiid);
-            return ApiError.getNotFound("Unknown AI");
+            this.logger.logInfo(LOGFROM, "AI not found: " + aiid);
+            return ApiError.getNotFound("AI not found");
         }
         TrainingStatus trainingStatus = ai.getSummaryAiStatus();
         this.logger.logDebug(LOGFROM, "training start from state " + trainingStatus);
@@ -190,7 +187,7 @@ public class TrainingLogic {
                 this.aiServices.startTraining(devid, aiid);
             } catch (AIServices.AiServicesException | RuntimeException ex) {
                 this.logger.logException(LOGFROM, ex);
-                return ApiError.getInternalServerError("Could not start training");
+                return ApiError.getInternalServerError();
             }
             // Delete all memory variables for this AI
             this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
@@ -204,9 +201,6 @@ public class TrainingLogic {
                     return ApiError.getBadRequest("A training session is already running.");
                 case AI_TRAINING_QUEUED:
                     return ApiError.getBadRequest("A training session is already queued.");
-                case AI_TRAINING_STOPPED:
-                    return ApiError.getBadRequest("You reached the maximum allocated time to train your AI. "
-                            + "Please upgrade your subscription.");
                 default:
                     return ApiError.getBadRequest("Malformed training file. Training could not be started.");
             }
@@ -216,13 +210,12 @@ public class TrainingLogic {
 
     /**
      * Send a stop msg to SQS only if a training session is currently ongoing
-     * @param securityContext
      * @param devid
      * @param aiid
      * @return
      */
 
-    public ApiResult stopTraining(SecurityContext securityContext, String devid, UUID aiid) {
+    public ApiResult stopTraining(final String devid, final UUID aiid) {
         try {
             this.logger.logDebug(LOGFROM, "on demand training stop");
             ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
@@ -237,22 +230,21 @@ public class TrainingLogic {
             }
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
-            return ApiError.getInternalServerError("Internal server error. Training could not be stopped.");
+            return ApiError.getInternalServerError();
 
         }
-        return ApiError.getBadRequest("Impossible to stop the current training session. ");
+        return ApiError.getBadRequest("AI not in an allowed state for stop training");
     }
 
     /**
      * An update to an existing training session means we will have to delete any existing neural
      * network and start from scratch.
-     * @param securityContext
      * @param devId
      * @param aiid
      * @return
      */
 
-    public ApiResult updateTraining(SecurityContext securityContext, String devId, UUID aiid) {
+    public ApiResult updateTraining(final String devId, final UUID aiid) {
         try {
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
@@ -282,22 +274,20 @@ public class TrainingLogic {
                     this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:"
                             + aiid.toString() + " devid:" + devId);
                     return ApiError.getInternalServerError("Impossible to update the current training session.");
-
             }
         } catch (Exception e) {
             this.logger.logException(LOGFROM, e);
-            return ApiError.getInternalServerError("Internal server error. Training could not be updated.");
+            return ApiError.getInternalServerError();
         }
     }
 
     /**
      * Gets the training materials for an AI.
-     * @param securityContext
      * @param devId
      * @param aiid
      * @return
      */
-    public ApiResult getTrainingMaterials(final SecurityContext securityContext, final String devId, final UUID aiid) {
+    public ApiResult getTrainingMaterials(final String devId, final UUID aiid) {
         try {
             String trainingMaterials = this.getTrainingMaterialsCommon(devId, aiid);
             if (trainingMaterials == null) {
@@ -308,7 +298,7 @@ public class TrainingLogic {
             return result;
         } catch (DatabaseException dbe) {
             this.logger.logException(LOGFROM, dbe);
-            return ApiError.getInternalServerError("Internal server error. Could not get the training materials.");
+            return ApiError.getInternalServerError();
         }
     }
 
@@ -317,7 +307,7 @@ public class TrainingLogic {
      * @param training list of strings, one for each line of conversation
      * @return single string with processed training
      */
-    public TrainingFileParsingResult parseTrainingFile(List<String> training) {
+    public TrainingFileParsingResult parseTrainingFile(final List<String> training) {
 
         TrainingFileParsingResult result = new TrainingFileParsingResult();
         String lastAISentence = EMPTY_STRING;
@@ -422,7 +412,7 @@ public class TrainingLogic {
      * @return clean result
      * @throws Exception
      */
-    private String getTextFromUrl(String url, long maxUploadFileSize) throws Exception {
+    private String getTextFromUrl(final String url, final long maxUploadFileSize) throws Exception {
         // retrieve the url and extract the text
         String article = this.htmlExtractor.getTextFromUrl(url);
 
@@ -431,12 +421,12 @@ public class TrainingLogic {
         }
 
         // split into lines
-        String[] text = article.split("\n");
+        String[] text = article.split(EOL);
 
         // recombine the lines after they've been sanitised
         StringBuilder sb = new StringBuilder();
         for (String line : text) {
-            sb.append(this.validate.textSanitizer(line)).append('\n');
+            sb.append(this.validate.textSanitizer(line)).append(EOL);
         }
         return sb.toString();
     }
@@ -454,7 +444,7 @@ public class TrainingLogic {
         }
     }
 
-    private void checkMaxUploadFileSize(FormDataContentDisposition fileDetail, long maxUploadFileSize)
+    private void checkMaxUploadFileSize(final FormDataContentDisposition fileDetail, final long maxUploadFileSize)
             throws UploadTooLargeException {
         if (null != fileDetail) {
             if (fileDetail.getSize() > maxUploadFileSize) {
@@ -471,7 +461,7 @@ public class TrainingLogic {
      * @throws UploadTooLargeException
      * @throws IOException
      */
-    private ArrayList<String> getFile(long maxUploadSize, InputStream uploadedInputStream)
+    private ArrayList<String> getFile(final long maxUploadSize, final InputStream uploadedInputStream)
             throws UploadTooLargeException, IOException {
 
         ArrayList<String> source = new ArrayList<>();
@@ -529,6 +519,34 @@ public class TrainingLogic {
 
         return new ApiResult().setSuccessStatus("upload accepted",
                 result.getEventCount() == 0 ? null : result.getEvents());
+    }
+
+    public enum TrainingType {
+        TEXT(0),
+        DOCUMENT(1),
+        WEBPAGE(2);
+        private final int type;
+
+        TrainingType(final int type) {
+            this.type = type;
+        }
+
+        /**
+         * Obtains the enum value from the integer type
+         * @param type the integer type
+         * @return the enum value
+         */
+        public static TrainingType fromType(final int type) {
+            Optional<TrainingType> optType = Arrays.stream(values()).filter(x -> x.type == type).findFirst();
+            if (optType.isPresent()) {
+                return optType.get();
+            }
+            throw new IllegalArgumentException("type not supported: " + type);
+        }
+
+        public int type() {
+            return this.type;
+        }
     }
 
     private static class UploadTooLargeException extends Exception {

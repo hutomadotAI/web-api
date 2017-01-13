@@ -158,13 +158,13 @@ public class TestIntentLogic {
     public void testDeleteIntent_triggersTrainingStop() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(true);
         this.intentLogic.deleteIntent(DEVID, AIID, this.INTENTNAME);
-        verify(this.trainingLogic).stopTraining(any(), any(), any());
+        verify(this.trainingLogic).stopTraining(any(), any());
     }
 
     @Test
     public void testUpdateIntent_triggersTrainingStop() throws Database.DatabaseException {
         this.intentLogic.writeIntent(DEVID, AIID, this.INTENTNAME, getIntent());
-        verify(this.trainingLogic).stopTraining(any(), any(), any());
+        verify(this.trainingLogic).stopTraining(any(), any());
     }
 
     private List<String> getIntentsList() {

@@ -21,6 +21,7 @@ public enum APIParameter {
     AiConfidence,
     Timezone,
     Locale,
+    TrainingSourceType,
     // Backend
     AiStatusJson
 }

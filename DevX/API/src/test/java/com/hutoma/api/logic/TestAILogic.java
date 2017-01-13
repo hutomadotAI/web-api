@@ -12,10 +12,8 @@ import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,14 +106,14 @@ public class TestAILogic {
 
     @Test
     public void testGetSingle_Valid() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(getAI());
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiResult result = this.aiLogic.getSingleAI(this.fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_Valid_Return() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(getAI());
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiAi result = (ApiAi) this.aiLogic.getSingleAI(this.fakeContext, VALIDDEVID, AIID);
         Assert.assertEquals(AIID.toString(), result.getAiid());
     }
@@ -137,7 +135,7 @@ public class TestAILogic {
     @Test
     public void testGetAll_Valid() throws Database.DatabaseException {
         ArrayList<ApiAi> returnList = getAIList();
-        when(this.fakeDatabase.getAllAIs(eq(this.VALIDDEVID), any())).thenReturn(returnList);
+        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID), any())).thenReturn(returnList);
         ApiResult result = this.aiLogic.getAIs(this.fakeContext, VALIDDEVID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
@@ -145,7 +143,7 @@ public class TestAILogic {
     @Test
     public void testGetAll_Valid_Return() throws Database.DatabaseException {
         ArrayList<ApiAi> returnList = getAIList();
-        when(this.fakeDatabase.getAllAIs(eq(this.VALIDDEVID), any())).thenReturn(returnList);
+        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID), any())).thenReturn(returnList);
         ApiResult result = this.aiLogic.getAIs(this.fakeContext, VALIDDEVID);
         Assert.assertTrue(result instanceof ApiAiList);
         ApiAiList list = (ApiAiList) result;
@@ -378,15 +376,9 @@ public class TestAILogic {
                 anyInt(), anyObject())).thenReturn(aiid);
     }
 
-    private ApiAi getAI() {
-        return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,
-                new BackendStatus(), TrainingStatus.AI_UNDEFINED,
-                0, 0.0, 1, Locale.getDefault(), "UTC");
-    }
-
     private ArrayList<ApiAi> getAIList() {
         ArrayList<ApiAi> returnList = new ArrayList<>();
-        returnList.add(getAI());
+        returnList.add(TestDataHelper.getSampleAI());
         return returnList;
     }
 }

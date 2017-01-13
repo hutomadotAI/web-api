@@ -66,7 +66,7 @@ public class IntentLogic {
         try {
             this.logger.logDebug(LOGFROM, "request to edit intent " + intent.getIntentName() + " from " + devid);
             this.database.writeIntent(devid, aiid, intentName, intent);
-            this.trainingLogic.stopTraining(null, devid, aiid);
+            this.trainingLogic.stopTraining(devid, aiid);
             return new ApiResult().setSuccessStatus();
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
             this.logger.logDebug(LOGFROM, "entity " + dmee.getMessage() + " duplicated or non-existent");
@@ -86,7 +86,7 @@ public class IntentLogic {
             if (!this.database.deleteIntent(devid, aiid, intentName)) {
                 return ApiError.getNotFound();
             }
-            this.trainingLogic.stopTraining(null, devid, aiid);
+            this.trainingLogic.stopTraining(devid, aiid);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logException(LOGFROM, e);

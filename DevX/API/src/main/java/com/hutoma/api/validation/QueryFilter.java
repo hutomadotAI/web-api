@@ -107,6 +107,11 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                 requestContext.setProperty(APIParameter.Min_P.toString(),
                         this.validateOptionalFloat(MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(MINP))));
             }
+            if (checkList.contains(APIParameter.TrainingSourceType)) {
+                requestContext.setProperty(APIParameter.TrainingSourceType.toString(),
+                        validateTrainingSourceType(TRAINING_SOURCE_TYPE,
+                                getFirst(queryParameters.get(TRAINING_SOURCE_TYPE))));
+            }
             this.logger.logDebug(LOGFROM, "parameter validation passed");
 
 

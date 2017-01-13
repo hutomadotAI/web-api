@@ -11,6 +11,10 @@ import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
+import com.webcohesion.enunciate.metadata.rs.RequestHeader;
+import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
+import com.webcohesion.enunciate.metadata.rs.ResponseCode;
+import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -21,7 +25,6 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -31,10 +34,9 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
- * Created by David MG on 09/08/2016.
+ * AI Training endpoints.
  */
 @Path("/ai/")
 @RateLimit(RateKey.QuickRead)
@@ -52,19 +54,31 @@ public class TrainingEndpoint {
     @POST
     @Path("/{aiid}/training")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.AIID, APIParameter.TrainingSourceType})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadTrainingFile(@Context SecurityContext securityContext,
-                                       @Context ContainerRequestContext requestContext,
-                                       @DefaultValue("") @HeaderParam("_developer_id") String devid,
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
+                    condition = "No file was specified; File parsing errors; Incorrect training type"),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI not found"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    public Response uploadTrainingFile(@Context ContainerRequestContext requestContext,
                                        @DefaultValue("0") @QueryParam("source_type") int type,
                                        @DefaultValue("") @QueryParam("url") String url,
                                        @FormDataParam("file") InputStream uploadedInputStream,
                                        @FormDataParam("file") FormDataContentDisposition fileDetail) {
-        ApiResult result = this.trainingLogic.uploadFile(securityContext, devid,
+        ApiResult result = this.trainingLogic.uploadFile(
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
-                type, url, uploadedInputStream, fileDetail);
+                TrainingLogic.TrainingType.fromType(type),
+                url,
+                uploadedInputStream,
+                fileDetail);
         return result.getResponse(this.serializer).build();
     }
 
@@ -73,11 +87,21 @@ public class TrainingEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response trainingStart(@Context SecurityContext securityContext,
-                                  @Context ContainerRequestContext requestContext,
-                                  @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.trainingLogic.startTraining(securityContext, devid,
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
+                    condition = "Training could not be started because it was already completed; "
+                            + "A training session is already running; A training session is already queued;"
+                            + "Malformed training file. Training could not be started."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI not found"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    public Response trainingStart(@Context ContainerRequestContext requestContext) {
+        ApiResult result = this.trainingLogic.startTraining(
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
@@ -87,11 +111,19 @@ public class TrainingEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response trainingStop(@Context SecurityContext securityContext,
-                                 @Context ContainerRequestContext requestContext,
-                                 @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.trainingLogic.stopTraining(securityContext, devid,
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
+                    condition = "AI not in an allowed state for stop training"),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI not found"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    public Response trainingStop(@Context ContainerRequestContext requestContext) {
+        ApiResult result = this.trainingLogic.stopTraining(
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
@@ -101,12 +133,19 @@ public class TrainingEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response trainingUpdate(@Context SecurityContext securityContext,
-                                   @Context ContainerRequestContext requestContext,
-                                   @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-
-        ApiResult result = this.trainingLogic.updateTraining(securityContext, devid,
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
+                    condition = "AI not in an allowed state for update training"),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI not found"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    public Response trainingUpdate(@Context ContainerRequestContext requestContext) {
+        ApiResult result = this.trainingLogic.updateTraining(
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
@@ -116,10 +155,17 @@ public class TrainingEndpoint {
     @Secured({Role.ROLE_ADMIN, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.TEXT_PLAIN) // TODO: Produce MediaType.APPLICATION_OCTET_STREAM to support large files
-    public Response trainingGetMaterials(@Context SecurityContext securityContext,
-                                         @Context ContainerRequestContext requestContext,
-                                         @DefaultValue("") @HeaderParam("_developer_id") String devid) {
-        ApiResult result = this.trainingLogic.getTrainingMaterials(securityContext, devid,
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI not found"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    public Response trainingGetMaterials(@Context ContainerRequestContext requestContext) {
+        ApiResult result = this.trainingLogic.getTrainingMaterials(
+                ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
 
         // TODO: send out a properly formatted JSON response when we no longer use SQS.

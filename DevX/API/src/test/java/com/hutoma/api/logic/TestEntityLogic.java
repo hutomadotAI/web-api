@@ -157,7 +157,7 @@ public class TestEntityLogic {
         when(this.fakeDatabase.getAisForEntity(DEVID, this.ENTNAME)).thenReturn(Collections.singletonList(aiid));
         when(this.fakeDatabase.deleteEntity(anyString(), anyString())).thenReturn(true);
         this.entityLogic.deleteEntity(DEVID, this.ENTNAME);
-        verify(this.trainingLogic).stopTraining(null, DEVID, aiid);
+        verify(this.trainingLogic).stopTraining(DEVID, aiid);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class TestEntityLogic {
         when(this.fakeDatabase.getAisForEntity(DEVID, this.ENTNAME)).thenReturn(new ArrayList<>());
         when(this.fakeDatabase.deleteEntity(anyString(), anyString())).thenReturn(true);
         this.entityLogic.deleteEntity(DEVID, this.ENTNAME);
-        verify(this.trainingLogic, never()).stopTraining(any(), any(), any());
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
     @Test
@@ -173,7 +173,7 @@ public class TestEntityLogic {
         when(this.fakeDatabase.getAisForEntity(DEVID, this.ENTNAME)).thenReturn(Collections.singletonList(UUID.randomUUID()));
         when(this.fakeDatabase.deleteEntity(anyString(), anyString())).thenThrow(Database.DatabaseException.class);
         this.entityLogic.deleteEntity(DEVID, this.ENTNAME);
-        verify(this.trainingLogic, never()).stopTraining(any(), any(), any());
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class TestEntityLogic {
         UUID aiid = UUID.randomUUID();
         when(this.fakeDatabase.getAisForEntity(DEVID, this.ENTNAME)).thenReturn(Collections.singletonList(aiid));
         this.entityLogic.writeEntity(DEVID, this.ENTNAME, getEntity());
-        verify(this.trainingLogic).stopTraining(null, DEVID, aiid);
+        verify(this.trainingLogic).stopTraining(DEVID, aiid);
     }
 
     @Test
@@ -189,14 +189,14 @@ public class TestEntityLogic {
         UUID aiid = UUID.randomUUID();
         when(this.fakeDatabase.getAisForEntity(any(), any())).thenThrow(Database.DatabaseException.class);
         this.entityLogic.writeEntity(DEVID, this.ENTNAME, getEntity());
-        verify(this.trainingLogic, never()).stopTraining(any(), any(), any());
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
     @Test
     public void testWriteEntity_entityNotInUse_doesNotStopTraining() throws Database.DatabaseException {
         when(this.fakeDatabase.getAisForEntity(DEVID, this.ENTNAME)).thenReturn(new ArrayList<>());
         this.entityLogic.writeEntity(DEVID, this.ENTNAME, getEntity());
-        verify(this.trainingLogic, never()).stopTraining(any(), any(), any());
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
 

@@ -1,5 +1,7 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.logic.TrainingLogic;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -182,6 +184,44 @@ public class Validate {
             return fallback;
         }
         return validateFloat(paramName, min, max, param);
+    }
+
+    /***
+     * Validates an optional floating point number
+     * @param paramName parameter name used for exception
+     * @param min valid range lowest value
+     * @param max valid range highest value
+     * @param fallback return this if the field is empty or missing
+     * @param param the parameter value
+     * @return valid float representing the input, or fallback
+     * @throws ParameterValidationException if the float was invalid or out of range
+     */
+    TrainingLogic.TrainingType validateTrainingSourceType(final String paramName, final String param) throws ParameterValidationException {
+
+        int num = validateInteger(paramName, param);
+        try {
+            return TrainingLogic.TrainingType.fromType(num);
+        } catch (IllegalArgumentException ex) {
+            throw new ParameterValidationException("invalid training type", paramName);
+        }
+    }
+
+    int validateInteger(final String paramName, final String param) throws ParameterValidationException {
+        if ((null == param) || (param.isEmpty())) {
+            throw new ParameterValidationException("parameter null or empty", paramName);
+        }
+        try {
+            return Integer.parseInt(param);
+        } catch (NumberFormatException ex) {
+            throw new ParameterValidationException("Invalid integer", paramName);
+        }
+    }
+
+    int validateInteger(final String paramName, final int defaultValue, final String param) throws ParameterValidationException {
+        if ((null == param) || (param.isEmpty())) {
+            return defaultValue;
+        }
+        return validateInteger(paramName, param);
     }
 
     /***

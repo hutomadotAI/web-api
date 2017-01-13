@@ -36,6 +36,7 @@ public class ParameterFilter extends Validate {
     protected static final String INTENT_USERSAYS = "intent_usersays";
     protected static final String INTENT_RESPONSES = "intent_responses";
     protected static final String INTENT_VAR_VALUE = "intent_variable_value";
+    protected static final String TRAINING_SOURCE_TYPE = "source_type";
 
     protected final ILogger logger;
     protected final Tools tools;
