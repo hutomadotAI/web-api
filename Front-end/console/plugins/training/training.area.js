@@ -62,10 +62,10 @@ function getUIStatusCall() {
             msgAlertProgressBar(1, 'Initialization may take few minutes. please wait.');
             break;
         case (state == 6): // start phase two
-
+            phaseOneFlashing(false);
+            phaseOneJump();
             deep_error = getUICurrentError();
             hideChart(false);
-            phaseOneJump();
             phaseTwoActive();
             phaseTwoFlashing(false);
             phaseTwoUpdate(deep_error, getUICurrentMaxError());
@@ -78,8 +78,12 @@ function getUIStatusCall() {
                 createMessageWarningInfoAlert();
             break;
         case (state == 10):
+            phaseTwoFlashing(false);
+            phaseTwoMaxValue();
             msgAlertProgressBar(3, 'Training completed.');
             hidePreTrainingBar(state);
+            hideTrainingBar(state);
+            hideChart(true);
             break;
         default:
     }
@@ -138,6 +142,8 @@ function trainingErrorPing() {
         processData: false,  // tell jQuery not to process the data
         contentType: "application/json; charset=utf-8",
         success: function (response) {
+
+                //alert(response);
             // TODO JSON validation when API is ready
             setErrorResponse(response); //  response is deep_learning_error value returned
         },

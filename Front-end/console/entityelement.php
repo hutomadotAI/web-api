@@ -114,7 +114,7 @@ function isPostInputAvailable()
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "entities", 2, false, false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "entities", 1, false, false]);
     </script>
 </form>
 

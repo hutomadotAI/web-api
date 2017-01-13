@@ -53,16 +53,17 @@ function drawTableRows() {
         var wHTML = '';
         var newNode = document.createElement('tr');
         wHTML += '<td style="padding-top: 15px;padding-left:0px;">' + aiList[i]['aiid'] + '</td>';
-        wHTML += '<td style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
+        wHTML += '<td class="text-gray"style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
         wHTML += '<td style="padding-top: 15px;">' + aiList[i]['description'] + '</td>';
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
-        wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"';
-        //wHTML += 'onClick="sendAIID(this,\'\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
-        wHTML += 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
-        wHTML += '<b> <span class="fa fa-globe">';
-        wHTML += '</span> Publish AI </b></button></td>';
+        wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">' + '<b> <span class="fa fa-globe">';
+        //TODO for update the state og Publish BUtton
+        //if ($.inArray(aiList[i]['aiid'], publishedBots) != -1)
+            wHTML += '</span> Publish AI </b></button></td>';
+        //else
+        //wHTML += '</span> Request Sent</b></button></td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
@@ -101,7 +102,7 @@ function decodeAIState(state) {
             return ('<span class="label label-primary">None</span>');
             break;
         default:
-            return ('<span class="label label-danger"></span>');
+            return ('<span class="text-red" flat></span>');
     }
 }
 

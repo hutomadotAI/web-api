@@ -14,7 +14,7 @@ class developer
     private $name;
     private $email;
     private $address;
-    private $postcode;
+    private $postCode;
     private $city;
     private $country;
     private $website;
@@ -58,14 +58,14 @@ class developer
     }
 
 
-    public function setPostcode($devPostcode)
+    public function setPostCode($devPostCode)
     {
-        $this->postcode = $devPostcode;
+        $this->postCode = $devPostCode;
     }
 
-    public function getPostcode()
+    public function getPostCode()
     {
-        return $this->postcode;
+        return $this->postCode;
     }
 
 
@@ -119,7 +119,7 @@ class developer
             'name' => $this->getName(),
             'email' => $this->getEmail(),
             'address' => $this->getAddress(),
-            'postcode' => $this->getPostcode(),
+            'postCode' => $this->getPostCode(),
             'city' => $this->getCity(),
             'country' => $this->getCountry(),
             'website' => $this->getWebsite(),

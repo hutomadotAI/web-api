@@ -106,25 +106,7 @@ public class TrainingLogic {
                         return ApiError.getInternalServerError();
                     }
 
-                    // Check if there are any bots associated with this AI
-                    List<AiBot> bots = this.database.getBotsLinkedToAi(devid, aiid);
-                    StringBuilder sb = new StringBuilder();
-                    for (AiBot bot : bots) {
-                        // And add the training file
-                        sb.append(this.database.getAiTrainingFile(bot.getAiid()));
-                        sb.append(EOL).append(EOL);
-                    }
-                    sb.append(trainingMaterials);
-
-                    try {
-                        this.aiServices.uploadTraining(devid, aiid, sb.toString());
-                    } catch (AIServices.AiServicesException ex) {
-                        this.logger.logException(LOGFROM, ex);
-                        return ApiError.getInternalServerError("could not upload training data to AI servers");
-                    }
-
-                    return new ApiResult().setSuccessStatus("upload accepted",
-                            result.getEventCount() == 0 ? null : result.getEvents());
+                    return uploadCompositeTrainingFile(devid, aiid, trainingMaterials, result);
 
                 // 1 = training file is a document
                 case 1:
@@ -265,12 +247,12 @@ public class TrainingLogic {
      * An update to an existing training session means we will have to delete any existing neural
      * network and start from scratch.
      * @param securityContext
-     * @param devid
+     * @param devId
      * @param aiid
      * @return
      */
 
-    public ApiResult updateTraining(SecurityContext securityContext, String devid, UUID aiid) {
+    public ApiResult updateTraining(SecurityContext securityContext, String devId, UUID aiid) {
         try {
             ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
@@ -284,13 +266,21 @@ public class TrainingLogic {
                 case AI_TRAINING_COMPLETE:  // fallthrough
                 case AI_TRAINING_QUEUED:
                     this.logger.logDebug(LOGFROM, "on demand training update");
-                    this.aiServices.updateTraining(devid, aiid);
-                    // Delete all memory variables for this AI
-                    this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
-                    return new ApiResult().setSuccessStatus("Training session updated.");
+                    String trainingFile = this.database.getAiTrainingFile(aiid);
+                    String finalMaterials = composeTrainingMaterials(devId, aiid, trainingFile);
+                    try {
+                        this.aiServices.uploadTraining(devId, aiid, finalMaterials);
+                        // Delete all memory variables for this AI
+                        this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
+                    } catch (AIServices.AiServicesException ex) {
+                        this.logger.logException(LOGFROM, ex);
+                        return ApiError.getInternalServerError("could not update training");
+                    }
+                    return new ApiResult().setSuccessStatus("training updated");
+
                 default:
                     this.logger.logError(LOGFROM, "it was impossible to update training session for aiid:"
-                            + aiid.toString() + " devid:" + devid);
+                            + aiid.toString() + " devid:" + devId);
                     return ApiError.getInternalServerError("Impossible to update the current training session.");
 
             }
@@ -508,6 +498,37 @@ public class TrainingLogic {
             }
         }
         return source;
+    }
+
+    private String composeTrainingMaterials(final String devId, final UUID aiid, final String trainingFile)
+            throws DatabaseException {
+        // Check if there are any bots associated with this AI
+        List<AiBot> bots = this.database.getBotsLinkedToAi(devId, aiid);
+        StringBuilder sb = new StringBuilder();
+        for (AiBot bot : bots) {
+            // And add the training file
+            sb.append(this.database.getAiTrainingFile(bot.getAiid()));
+            sb.append(EOL).append(EOL);
+        }
+        sb.append(trainingFile);
+
+        return sb.toString();
+    }
+
+    private ApiResult uploadCompositeTrainingFile(final String devId, final UUID aiid, final String trainingMaterials,
+                                                  final TrainingFileParsingResult result)
+            throws DatabaseException {
+        String finalMaterials = composeTrainingMaterials(devId, aiid, trainingMaterials);
+
+        try {
+            this.aiServices.uploadTraining(devId, aiid, finalMaterials);
+        } catch (AIServices.AiServicesException ex) {
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError("could not upload training data to AI servers");
+        }
+
+        return new ApiResult().setSuccessStatus("upload accepted",
+                result.getEventCount() == 0 ? null : result.getEvents());
     }
 
     private static class UploadTooLargeException extends Exception {

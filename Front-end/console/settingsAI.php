@@ -1,38 +1,45 @@
 <?php
-require "../pages/config.php";
-require_once "../console/api/apiBase.php";
-require_once "../console/api/aiApi.php";
+    require "../pages/config.php";
+    require_once "api/apiBase.php";
+    require_once "api/aiApi.php";
+    require_once "api/botApi.php";
+    require_once "common/bot.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
-}
 
-if (!isSessionVariablesAvailable()) {
-    \hutoma\console::redirect('./error.php?err=105');
-    exit;
-}
+    if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
 
-$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$AisMesh = $aiApi->getMesh($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-if ($AisMesh['status']['code'] == 200) $AisMesh = $AisMesh['mesh'];
-else $AisMesh = "";
+    if (!isSessionVariablesAvailable()) {
+        \hutoma\console::redirect('./error.php?err=105');
+        exit;
+    }
 
-function isSessionVariablesAvailable()
-{
-    return (
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
-    );
-}
+    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $puchasedBots = $botApi->getPurchasedBots();
+    unset($botApi);
+
+    $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+    unset($aiApi);
+
+
+    function isSessionVariablesAvailable()
+    {
+        return (
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
+            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
+        );
+    }
 ?>
 
 <!DOCTYPE html>
@@ -54,7 +61,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
+<body class="hold-transition skin-blue fixed sidebar-mini" onload="showBots('',2)">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -77,7 +84,7 @@ function isSessionVariablesAvailable()
             <div class="nav-tabs-custom flat no-shadow no-border">
                 <ul class="nav nav-tabs">
                     <li class="active" id="tab_general"><a href="#page_general" data-toggle="tab">General</a></li>
-                    <li id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">AI Skills</a></li>
+                    <li id="tab_aiskill" id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">AI Skills</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-bottom:0px;">
@@ -85,14 +92,14 @@ function isSessionVariablesAvailable()
                     <div class="tab-pane active" id="page_general">
                         <?php include './dynamic/settings.content.general.html.php'; ?>
                     </div>
-                    <!-- DOMAINS TAB -->
+
+                    <!-- BOT LINK TAB -->
                     <div class="tab-pane" id="page_aiskill">
                         <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
                         <div class="row" style="background-color: #434343;">
                             <div class="col-lg-12" style="background-color: #434343; padding:5px;">
                                 <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                             </div>
-                            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
                         </div>
                     </div>
 
@@ -118,37 +125,76 @@ function isSessionVariablesAvailable()
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 <script src="./plugins/clipboard/clipboard.min.js"></script>
 <script src="./plugins/deleteAI/deleteAI.js"></script>
-<script src="./plugins/domain/domain.js"></script>
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/inputCommon/inputCommon.js"></script>
+<script src="./plugins/setting/setting.linkBot.js"></script>
 <script src="./plugins/setting/setting.general.js"></script>
 <script src="./plugins/setting/setting.aiSkill.js"></script>
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, true, false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, false, false]);
+    </script>
+    <script>
+        $( document ).ready(function() {
+            activeRightMenu("<?php if(isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
+        });
     </script>
 </form>
+<script>
+    var purchasedBots = <?php
+        $tmp_list = [];
+        if (isset($puchasedBots) && (array_key_exists("bots", $puchasedBots))) {
+            foreach ($puchasedBots['bots'] as $botDetails) {
+                $puchasedBot = new \hutoma\bot();
+                $puchasedBot->setAiid($botDetails['aiid']);
+                $puchasedBot->setAlertMessage($botDetails['alertMessage']);
+                $puchasedBot->setBadge($botDetails['badge']);
+                $puchasedBot->setBotId($botDetails['botId']);
+                $puchasedBot->setCategory($botDetails['category']);
+                $puchasedBot->setClassification($botDetails['classification']);
+                $puchasedBot->setDescription($botDetails['description']);
+                $puchasedBot->setLicenseType($botDetails['licenseType']);
+                $puchasedBot->setLongDescription($botDetails['longDescription']);
+                $puchasedBot->setName($botDetails['name']);
+                $puchasedBot->setPrice($botDetails['price']);
+                $puchasedBot->setPrivacyPolicy($botDetails['privacyPolicy']);
+                $puchasedBot->setSample($botDetails['sample']);
+                $puchasedBot->setVersion($botDetails['version']);
+                $puchasedBot->setVideoLink($botDetails['videoLink']);
+                $tmp_bot = $puchasedBot->toJSON();
+                array_push($tmp_list, $tmp_bot);
+            }
+        }
+        echo json_encode($tmp_list);
+        unset($puchasedBots);
+        unset($tmp_list);
+        ?>;
+
+
+    var linkedBots = <?php
+        $tmp_linked_list = [];
+        if (isset($linkedBots) && (array_key_exists("bots", $linkedBots))) {
+            foreach ($linkedBots['bots'] as $botDetails) {
+                $linkedBot = new \hutoma\bot();
+                array_push($tmp_linked_list, $botDetails['botId']);
+            }
+        }
+        echo json_encode($tmp_linked_list);
+        unset($puchasedBots);
+        unset($tmp_linked_list);
+        ?>;
+</script>
 
 <script>
-    var previousGeneralInfo = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']); ?>;
-    var domains = <?php  echo json_encode($AisMesh); unset($AisMesh)?>;
-
-    var userActived = {};
-    for (var x in domains) {
-        var key = domains[x].aiid;
-        userActived[key] = true;
-    }
-
     var newNode = document.createElement('div');
     newNode.className = 'row';
-    newNode.id = 'domains_list';
+    newNode.id = 'bot_list';
 
-    function searchDomain(str) {
-        showDomains(str, 1);
+    function searchBots(str) {
+        showBots(str,2);
     }
 </script>
 </body>

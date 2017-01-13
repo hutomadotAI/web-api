@@ -1,20 +1,28 @@
-<div class="box box-solid box-clean flat no-shadow" id="newAicontent">
+<div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
     <div class="box-header with-border">
         <div class="box-title"><b>Add Skills to your AI</b></div>
-        <a data-toggle="collapse"  href="#collapseInfoNewDomains">
+        <a data-toggle="collapse"  href="#collapseInfoNewAIBotstore">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
             </div>
         </a>
     </div>
 
-    <div class="box-body" id="boxNewDomains">
-        <?php include './dynamic/domainsNewAI.content.info.html.php'; ?>
-        <input class="form-control flat no-shadow" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchDomain(this.value)">
+    <div class="box-body" id="boxNewAIBotstore">
+        <div class="alert alert-dismissable flat alert-info" id="containerMsgAlertNewAiBotstore" style="padding-bottom: 25px;">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <span id="msgAlertNewAiBotstore" >
+        <dt>Hutoma Bot Store</dt>
+        <dd>
+           You can power up your AI by combining and mixing existing AIs from out Bot Store.
+        </dd>
+        </span>
+        </div>
+        <input class="form-control flat no-shadow" id="botSearch" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchBots(this.value)">
         <p></p>
     </div>
 
-    <div id="collapseInfoNewDomains" class="panel-collapse collapse">
+    <div id="collapseInfoNewAIBotstore" class="panel-collapse collapse">
         <div class="box-body no-margin">
             <div class="overlay center-block">
                 <section class="content-info" >
@@ -33,14 +41,15 @@
     </div>
 </div>
 
-<form method="POST" name="domainsNewAIform" action="./dynamic/saveAI.php"><!-- across market page for demo -->
+
     <p></p>
     <h2></h2>
-    <p id="domsearch"></p>
-    <input type="hidden" name="userActivedDomains" id="userActivedDomains" val="" style="display:none;">
+    <p id="botsSearch"></p>
+<form method="POST" name="newAIbotstoreform" action="./dynamic/saveAI.php">
+    <input type="hidden" name="userActivedBots" id="userActivedBots" val="" style="display:none;">
 </form>
 
-<form method="POST" name="domainsNewAIformGoBack">
+<form method="POST" name="newAIbotstoreformGoBack">
     <input type="hidden" style="display:none;">
 </form>
 

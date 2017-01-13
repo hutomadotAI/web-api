@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow" id="box_monitor">
+<div class="box box-solid box-clean flat no-shadow unselectable" id="box_monitor">
 
     <div class="box-header with-border">
         <i class="fa fa-bar-chart-o text-success"></i>

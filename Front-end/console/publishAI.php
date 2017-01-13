@@ -1,7 +1,7 @@
 <?php
 require "../pages/config.php";
-require_once "../console/api/apiBase.php";
-require_once "../console/api/aiApi.php";
+require_once "api/apiBase.php";
+require_once "api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -30,10 +30,8 @@ function getBasicAiInfo($aiid){
 function setSessionVariables($singleAI)
 {
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
 }
 
 ?>
@@ -107,11 +105,6 @@ function setSessionVariables($singleAI)
             imageState: {
                 src: '',
             },
-        });
-
-        $('.export').click(function() {
-            var imageData = $('.image-editor').cropit('export');
-            window.open(imageData);
         });
     });
 </script>

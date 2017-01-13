@@ -1,27 +1,31 @@
 <?php
-require '../pages/config.php';
-
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
-}
-
-if (!isPostInputAvailable()) {
-    \hutoma\console::redirect('./error.php?err=100');
-    exit;
-}
-
-setSessionVariablesFromPost();
-$domains = \hutoma\console::getBotsInStore();
+    require "../pages/config.php";
+    require_once "api/apiBase.php";
+    require_once "api/aiApi.php";
+    require_once "api/botApi.php";
+    require_once "common/bot.php";
 
 
-//TODO replace me with API call once done
-//if ($domains['status']['code'] !== 200) {
-if ($domains === '') {
-    unset($domains);
-    \hutoma\console::redirect('./error.php?err=103');
-    exit;
-}
+    if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+        \hutoma\console::redirect('../pages/login.php');
+        exit;
+    }
+
+    if (!isPostInputAvailable()) {
+        \hutoma\console::redirect('./error.php?err=100');
+        exit;
+    }
+
+    setSessionVariablesFromPost();
+
+    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $bots = $botApi->getPublishedBots();
+    unset($botApi);
+
+    $botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $purchasedBots = $botPurchaseApi->getPurchasedBots();
+    unset($botPurchaseApi);
+
 
 function isPostInputAvailable()
 {
@@ -71,7 +75,7 @@ function setSessionVariablesFromPost()
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showDomains('',1)">
+<body class="hold-transition skin-blue fixed sidebar-mini" onload="showBots('',0)">
 <div class="wrapper" id="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -87,8 +91,8 @@ function setSessionVariablesFromPost()
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/domainsNewAI.content.html.php'; ?>
-            <?php include './dynamic/botstore.content.info.details.html.php'; ?>
+            <?php include './dynamic/newAIBotstore.content.html.php'; ?>
+            <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
 
@@ -104,9 +108,11 @@ function setSessionVariablesFromPost()
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./plugins/domain/domain.js"></script>
-<script src="./plugins/iCheck/icheck.min.js"></script>
+<script src="plugins/createAI/createAIwizard.js"></script>
+<script src="plugins/botstore/botstore.js"></script>
+<script src="plugins/botstore/buyBot.js"></script>
 
+<script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
@@ -116,23 +122,56 @@ function setSessionVariablesFromPost()
         MENU.init(["", "home", 0, true, true]);
     </script>
 </form>
-
 <script>
-    var domains = <?php echo json_encode($domains);  unset($domains); ?>;
-    var userActived = {};
-    for (var x in domains) {
-        var key = domains[x].aiid;
-        userActived[key] = false;
-    }
+    var bots = <?php
+        $tmp_list = [];
+        if (isset($bots) && (array_key_exists("bots", $bots))) {
+            foreach ($bots['bots'] as $botDetails) {
+                $bot = new \hutoma\bot();
+                $bot->setAiid($botDetails['aiid']);
+                $bot->setAlertMessage($botDetails['alertMessage']);
+                $bot->setBadge($botDetails['badge']);
+                $bot->setBotId($botDetails['botId']);
+                $bot->setCategory($botDetails['category']);
+                $bot->setClassification($botDetails['classification']);
+                $bot->setDescription($botDetails['description']);
+                $bot->setLicenseType($botDetails['licenseType']);
+                $bot->setLongDescription($botDetails['longDescription']);
+                $bot->setName($botDetails['name']);
+                $bot->setPrice($botDetails['price']);
+                $bot->setPrivacyPolicy($botDetails['privacyPolicy']);
+                $bot->setSample($botDetails['sample']);
+                $bot->setVersion($botDetails['version']);
+                $bot->setVideoLink($botDetails['videoLink']);
+                $tmp_bot = $bot->toJSON();
+                array_push($tmp_list, $tmp_bot);
+            }
+        }
+        echo json_encode($tmp_list);
+        unset($bots);
+        unset($tmp_list);
+        ?>;
 
+    var purchasedBots = <?php
+        $tmp_purchased_list = [];
+        if (isset($purchasedBots) && (array_key_exists("bots", $purchasedBots))) {
+            foreach ($purchasedBots['bots'] as $botDetails) {
+                $purchasedBot = new \hutoma\bot();
+                array_push($tmp_purchased_list, $botDetails['botId']);
+            }
+        }
+        echo json_encode($tmp_purchased_list);
+        unset($purchasedBot);
+        unset($tmp_purchased_list);
+        ?>;
+</script>
+<script>
     var newNode = document.createElement('div');
     newNode.className = 'row';
-    newNode.id = 'domains_list';
-</script>
+    newNode.id = 'bot_list';
 
-<script>
-    function searchDomain(str) {
-        showDomains(str, 1);
+    function searchBots(str) {
+        showBots(str,0);
     }
 </script>
 </body>

@@ -15,6 +15,7 @@ function wizardNext() {
         return;
     }
 
+    // check if exist the same AIs name in the list of AIs
     for (var i=0; i<name_list.length; i++) {
         if (value_name.replace(/\s+$/, '') == name_list[i]) {
             msgAlertNameAI(2, 'This name is already used for another AI. Please choose another name.');
@@ -30,8 +31,6 @@ function wizardNext() {
         inputsActiveDeactive(false);
         return;
     }
-
-
 
     if(document.createAIform.onsubmit)
         return;
@@ -70,7 +69,7 @@ function getValueFromConfidence(confidence_text){
 }
 
 function checkDescriptionLength() {
-    var limitTextInputSize = 100;
+    var limitTextInputSize = 50;
     if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
         msgAlertDescriptionAI(1, 'Limit AI description reached.');
     else {
@@ -106,6 +105,6 @@ $(document).ready(function(){
             msgAlertNameAI(2, document.getElementById('ai_name').value+' AI exists with same name, please change the item name.');
     }
     else {
-        setSliderValue('ai_confidence', 0.0); // default value "never"
+        setSliderValue('ai_confidence', 0.4); // default value "often"
     }
 });
