@@ -168,26 +168,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`memoryIntent` TO 'userTableWri
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`developerInfo` TO 'userTableWriter'@'127.0.0.1';
 
 
-# Privileges for `mesh_reader`@`127.0.0.1`
-
-GRANT USAGE ON *.* TO 'mesh_reader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
-
-GRANT EXECUTE ON `hutoma`.* TO 'mesh_reader'@'127.0.0.1';
-
-GRANT SELECT ON `hutoma`.`ai_mesh` TO 'mesh_reader'@'127.0.0.1';
-
-GRANT SELECT ON `hutoma`.`ai` TO 'mesh_reader'@'127.0.0.1';
-
-
-# Privileges for `mesh_writer`@`127.0.0.1`
-
-GRANT USAGE ON *.* TO 'mesh_writer'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';
-
-GRANT EXECUTE ON `hutoma`.* TO 'mesh_writer'@'127.0.0.1';
-
-GRANT INSERT, UPDATE, DELETE ON `hutoma`.`ai_mesh` TO 'mesh_writer'@'127.0.0.1';
-
-
 # Privileges for `botStoreReader`@`127.0.0.1`
 
 GRANT USAGE ON *.* TO 'botStoreReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0112CCFFE4EC5C6CAC0EC435260677A747D95';

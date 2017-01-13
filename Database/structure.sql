@@ -39,6 +39,7 @@ CREATE TABLE `ai` (
   `ui_ai_confidence` double DEFAULT NULL,
   `ui_ai_personality` tinyint(4) DEFAULT '0',
   `ui_ai_voice` int(11) DEFAULT '0',
+  'deleted' tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -62,22 +63,6 @@ CREATE TABLE `ai_memory` (
   `variable_type` varchar(20) NOT NULL,
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`aiid`,`uid`,`variable_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `ai_mesh`
---
-
-DROP TABLE IF EXISTS `ai_mesh`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ai_mesh` (
-  `dev_id` varchar(50) NOT NULL,
-  `aiid` varchar(50) NOT NULL,
-  `aiid_mesh` varchar(50) NOT NULL,
-  PRIMARY KEY (`dev_id`,`aiid`,`aiid_mesh`),
-  UNIQUE KEY `aiid` (`aiid`,`aiid_mesh`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -697,27 +682,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `addMesh` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`hutoma_caller`@`127.0.0.1` PROCEDURE `addMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50), IN `in_aiid_mesh` VARCHAR(50))
-    NO SQL
-BEGIN
-  INSERT INTO ai_mesh (dev_id,aiid,aiid_mesh)
-  VALUES (in_dev_id,in_aiid, in_aiid_mesh);
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `addUpdateEntity` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -874,8 +838,8 @@ CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAi`(
 	IN `in_aiid` VARCHAR(50))
     MODIFIES SQL DATA
 BEGIN
-	DELETE 
-    FROM `ai`
+  UPDATE `ai`
+    SET `deleted` = 1
     WHERE `dev_id`=`in_dev_id` AND `aiid`=`in_aiid`;
 END ;;
 DELIMITER ;
@@ -896,7 +860,7 @@ DELIMITER ;;
 CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAllAIs`(IN `param_devid` varchar(50))
     MODIFIES SQL DATA
 BEGIN
-	delete from ai where dev_id=param_devid;
+	UPDATE ai SET `deleted` = 1 WHERE dev_id=param_devid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -916,27 +880,6 @@ DELIMITER ;;
 CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `deleteAllMemoryIntents`(IN `param_aiid` VARCHAR(50))
 BEGIN
 	DELETE FROM memoryIntent WHERE aiid = param_aiid;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `deleteAllMesh` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`mesh_writer`@`127.0.0.1` PROCEDURE `deleteAllMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50))
-    NO SQL
-BEGIN
-DELETE FROM ai_mesh
-WHERE dev_id=in_dev_id AND aiid=in_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1131,27 +1074,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `deleteMesh` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`mesh_writer`@`127.0.0.1` PROCEDURE `deleteMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50), IN `in_aiid_mesh` VARCHAR(50))
-    NO SQL
-BEGIN
-DELETE FROM ai_mesh
-WHERE dev_id=in_dev_id AND aiid=in_aiid AND aiid_mesh = in_aiid_mesh;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `deleteUser` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1208,7 +1130,7 @@ DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAi`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-	SELECT * FROM ai WHERE `dev_id`=in_dev_id AND `aiid`=in_aiid;
+	SELECT * FROM ai WHERE `dev_id`=in_dev_id AND `aiid` = in_aiid AND `deleted` = 0;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1276,7 +1198,7 @@ DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIs`(IN `param_devid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-	SELECT * FROM ai WHERE dev_id=param_devid;
+	SELECT * FROM ai WHERE dev_id=param_devid AND `deleted` = 0;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1904,29 +1826,6 @@ DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getMemoryIntentsForChat`(IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
 BEGIN
 	SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getMesh` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`mesh_reader`@`127.0.0.1` PROCEDURE `getMesh`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50))
-    NO SQL
-BEGIN
-SELECT ai_mesh.aiid_mesh, ai.*
-FROM ai
-INNER JOIN ai_mesh ON ai.aiid = ai_mesh.aiid
-WHERE ai.dev_id=in_dev_id AND ai.aiid = in_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
