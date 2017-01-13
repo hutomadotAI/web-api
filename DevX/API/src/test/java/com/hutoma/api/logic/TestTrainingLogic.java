@@ -323,7 +323,6 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
         ApiResult result = this.logic.startTraining(this.fakeContext, DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).updateTraining(any(), any());
     }
 
     @Test
@@ -379,6 +378,15 @@ public class TestTrainingLogic {
     @Test
     public void testUpdateTraining_dbException() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_dbException(() -> this.logic.updateTraining(this.fakeContext, DEVID, AIID));
+    }
+
+    @Test
+    public void testUpdateTraining_failedUploading() throws Database.DatabaseException, AIServices.AiServicesException {
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(getCommonAi(TrainingStatus.COMPLETED, false));
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(SOMETEXT);
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(anyString(), any(), anyString());
+        ApiResult result = this.logic.updateTraining(this.fakeContext, DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
@@ -528,7 +536,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(null);
         ApiResult result = supplier.get();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).updateTraining(any(), any());
+        verify(this.fakeAiServices, never()).startTraining(any(), any());
     }
 
     private void testTraining_dbException(Supplier<ApiResult> supplier, int expectedErrorCode)
@@ -536,7 +544,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(any(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = supplier.get();
         Assert.assertEquals(expectedErrorCode, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).updateTraining(any(), any());
+        verify(this.fakeAiServices, never()).startTraining(any(), any());
     }
 
     private void testTraining_dbException(Supplier<ApiResult> supplier) throws Database.DatabaseException,

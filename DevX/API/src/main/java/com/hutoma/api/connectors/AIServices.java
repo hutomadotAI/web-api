@@ -83,18 +83,6 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
-    public void updateTraining(final String devId, final UUID aiid) throws AiServicesException {
-        this.logger.logDebug(LOGFROM, "Issuing \"update training\" command to backends for AI " + aiid.toString());
-        HashMap<String, Callable<Response>> callables = new HashMap<>();
-        for (String endpoint : this.getAllEndpoints()) {
-            callables.put(endpoint, () -> this.jerseyClient
-                    .target(endpoint).path(devId).path(aiid.toString())
-                    .request()
-                    .put(Entity.json("")));
-        }
-        executeAndWait(callables);
-    }
-
     public void uploadTraining(final String devId, final UUID aiid, final String trainingMaterials)
             throws AiServicesException {
         HashMap<String, Callable<Response>> callables = new HashMap<>();
