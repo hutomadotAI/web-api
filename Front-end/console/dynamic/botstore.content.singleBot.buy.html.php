@@ -8,9 +8,9 @@
                 <div class="box-body bot-payment flat">
                     <div class="row no-margin">
                         <div class="col-xs-4 no-padding">
-                            <div class="bot-icon-payment bot-absolute bot-shadow-light <?php echo $bot->getWidgetColor();?> text-bg">
+                            <div class="bot-icon-payment bot-absolute bot-shadow-light bg-blue-gradient text-bg">
                                 <div class=".bot-icon-payment">
-                                    <i class="<?php echo $bot->getIconPath();?> text-white"></i>
+                                    <i class="fa fa-question text-white"></i>
                                 </div>
                             </div>
                         </div>
@@ -19,29 +19,28 @@
                             <div class="row no-margin">
                                 <div class="col-xs-12 bot-30">
                                     <div class="col-xs-8 bot-buy-title">
-                                        <?php echo $bot->getName();?>
+                                        <span id="botNamePurchase"></span>
                                     </div>
                                     <div class="col-xs-4 bot-buy-price" id="botTitle">
                                         <div class="pull-right text-orange text-md"> price
-                                            <?php echo number_format($bot->getLicenceFee(), 2, '.', ''); ?> £
+                                            <span id="botPricePurchase"></span> &#8364
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="row no-margin">
                                 <div class="col-xs-6 bot-70" style="padding-top:20px;">
-                                    <!--
-                                    <div class="text-sm" disabled><i class="fa fa-credit-card "></i> Add credit o debit card</div>
-                                    <div class="text-sm" disabled><i class="fa fa-cc-paypal"></i> Add PayPal</div>
-                                    <div class="text-sm" disabled><i class="fa  fa-gift"></i> Add promotional code</div>
-                                    -->
+                                    <span class="text-gray" id="botDescriptionPurchase"></span>
                                 </div>
                                 <div class="col-xs-6 bot-70" style="padding-top:35px;">
-                                    <button class="btn btn-success pull-right flat" data-dismiss="modal" id="btnPayment">
-                                        <b>Buy new Bot</b>
+                                    <button class="btn btn-success pull-right flat" data-dismiss="modal" id="btnPayment" style="width:130px;">
+                                        <b>Buy Bot </b>
                                         <span class="fa fa-arrow-circle-right"></span>
                                     </button>
                                 </div>
+                            </div>
+                            <div class="row no-margin">
+                                <span id="message"></span>
                             </div>
 
                         </div>
@@ -52,3 +51,5 @@
 
     </div>
 </div>
+<input type="hidden" id="purchase_state" name="purchase_state" value="0">
+<input type="hidden" id="bot_id" name="bot_id">

@@ -1,5 +1,3 @@
-<form method="POST" name="publishDeveloperForm" action="./dynamic/updateDeveloper.php">
-
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
         <div class="box-title"><b>Developer Info</b></div>
@@ -149,6 +147,5 @@
         </button>
     </div>
 </div>
-</form>
 
 <script src="./plugins/publish/developer.js"></script>

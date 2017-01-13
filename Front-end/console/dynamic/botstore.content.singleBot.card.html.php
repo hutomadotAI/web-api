@@ -1,48 +1,38 @@
-<div class="box-body bot-card" id="botcard">
-        <div class="col-xs-4 no-padding">
-            <div class="bot-image <?php echo $bot->getWidgetColor();?> ">
+<div class="box-body bot-card unselectable" id="botcard">
+        <div class="col-xs-4 no-padding bg-blue-gradient">
+            <div class="bot-image ">
                 <div class="bot-icon" id="botIcon">
-                    <i class="<?php echo $bot->getIconPath();?>" style="padding-top:45px;"></i>
+                    <i class="fa fa-question" style="padding-top:45px;"></i>
                 </div>
             </div>
         </div>
-
-
+    
         <div class="col-xs-8 bot-info">
 
                 <div class="row no-margin">
                     <!--title-->
-                    <div class="col-xs-6 bot-title text-white" id="botTitle">
-                        <?php echo $bot->getName();?>
+                    <div class="col-xs-6 bot-title text-white">
+                        <span id="botTitle"></span>
                     </div>
-                    <!--developer-->
-                    <div class="col-xs-6 bot-badge" id="botBagde">
-                        <i class="<?php echo $bot->getBadgeIcon();?> text-aqua"></i> <?php echo $bot->getBadge();?>
+                    <!--badge-->
+                    <div class="col-xs-6 bot-badge">
+                        <span id="botBadge" hidden></span>
+                        <!--<i class="fa fa-ra text-aqua"></i>-->
+                        <a href="" id="btnBuyBotBack" class="fa fa-close text-md text-darkgray"></a>
                     </div>
                 </div>
 
                 <div class="row no-margin">
                     <!--description-->
-                    <div class="col-xs-7 bot-description" id="botDescription">
-                        <?php echo $bot->getDescription();?>
+                    <div class="col-xs-7 bot-description">
+                        <span id="botDescription"></span>
                     </div>
                     <!--rating-->
-                    <div class="col-xs-5 bot-star"  id="botUsers">
-                        <?php echo $bot->getUsers();?> users
+                    <div class="col-xs-5 bot-star">
+                        <span id="botUsers"></span> users
                         <div class="star-rating text-right">
                             <div class="star-rating__wrap">
-                                <?php
-                                for ($i=5; $i>0; $i--) {
-                                    if ($i==intval($bot->getRating())) {
-                                        echo '<input class="star-rating__input" id="star--rating-' . $i . '" type="radio" name="rating" value="' . $i . '" checked="checked" disabled="disabled">';
-                                        echo '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' . $i . '" title="' . $i . ' out of ' . $i . ' stars"></label>';
-                                    }
-                                    else {
-                                        echo '<input class="star-rating__input" id="star--rating-' . $i . '" type="radio" name="rating" value="' . $i . '" disabled="disabled">';
-                                        echo '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' . $i . '" title="' . $i . ' out of ' . $i . ' stars"></label>';
-                                    }
-                                }
-                                ?>
+                              <span id="botRating"></span>
                             </div>
                         </div>
                     </div>
@@ -50,8 +40,9 @@
 
                 <div class="row no-margin">
                     <!--message-->
-                    <div class="col-xs-12 bot-msg" id="botMessage">
-                        <i class="fa fa-info-circle text-sm text-yellow"></i> <?php echo $bot->getAlarmMessage();?>
+                    <div class="col-xs-12 bot-msg">
+                        <i class="fa fa-info-circle text-sm text-yellow"></i>
+                        <span id="botMessage"></span>
                     </div>
                 </div>
 
@@ -62,25 +53,57 @@
                 </div>
 
                 <div class="row no-margin">
-                    <div class="col-xs-6 no-padding" id="botLicense">
+                    <div class="col-xs-4 no-padding">
                         <!--licence-->
                         <div class="row no-margin bot-licence">
-                            licence <?php echo strtoupper($bot->licenceTypeToString($bot->getLicenceType()));?>
+                            licence <span id="botLicense"></span>
                         </div >
                         <!--price-->
-                        <div class="row no-margin bot-price" id="botPrice">
-                            <div class="pull-left text-orange">price <span class="text-orange"><?php echo number_format($bot->getLicenceFee(), 2, '.', ''); ?></span> <span class="bot-badge no-padding text-orange">£</span></div>
+                        <div class="row no-margin bot-price">
+                            <div class="pull-left text-orange">price <span class="text-orange"></span> <span id="botPrice"></span><span class="bot-badge no-padding text-orange"> &#8364</span></div>
                         </div >
                     </div>
-                    <div class="col-xs-6 bot-buy">
-                        <button class="btn btn-success pull-right flat" id="btnBuyBot" data-toggle="modal" data-target="#buyBot">
-                            <b>Buy new Bot</b>
+                    <div class="col-xs-8 bot-buy">
+                        <!--<a href="" id="btnBuyBotBack" class="btn btn-primary text-center flat" style="width:125px;"></a>-->
+                        <button class="btn btn-success pull-right flat" id="btnBuyBot" data-toggle="modal" data-target="#buyBot" style="width:135px;">
+                            <b>Buy Bot </b>
                             <span class="fa fa-arrow-circle-right"></span>
                         </button>
                     </div>
                 </div>
-
-
-
+            
         </div>
 </div>
+
+<script>
+    var bot = <?php
+        $bot = new \hutoma\bot();
+        if (isset($botDetails) && (array_key_exists('bot', $botDetails))) {
+
+            $bot->setAiid($botDetails['bot']['aiid']);
+            $bot->setAlertMessage($botDetails['bot']['alertMessage']);
+            $bot->setBadge('Top Developer');                        //$botDetails['bot']['badge']);
+            $bot->setBotId($botDetails['bot']['botId']);
+            $bot->setCategory($botDetails['bot']['category']);
+            $bot->setClassification($botDetails['bot']['classification']);
+            $bot->setDescription($botDetails['bot']['description']);
+            $bot->setLicenseType($botDetails['bot']['licenseType']);
+            $bot->setUpdate($botDetails['bot']['lastUpdate']);
+            $bot->setLongDescription($botDetails['bot']['longDescription']);
+            $bot->setName($botDetails['bot']['name']);
+            $bot->setPrice($botDetails['bot']['price']);
+            $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
+            $bot->setSample($botDetails['bot']['sample']);
+            $bot->setUsers('103');                                  //$botDetails['bot']['users']);
+            $bot->setRating('4.3');                                   //$botDetails['bot']['rating']);
+            $bot->setActivations($bot->rangeActivation($bot->getUsers()));
+            $bot->setVersion($botDetails['bot']['version']);
+            $bot->setVideoLink($botDetails['bot']['videoLink']);
+        }
+        $tmp_bot = $bot->toJSON();
+        unset($bot);
+
+        echo json_encode($tmp_bot);
+        unset($tmp_bot);
+        ?>;
+</script>

@@ -98,11 +98,6 @@ public class TestAiServicesClient {
     }
 
     @Test
-    public void testUpdateTraining() throws AIServices.AiServicesException {
-        this.aiServices.updateTraining(DEVID, AIID);
-    }
-
-    @Test
     public void testDeleteAi() throws AIServices.AiServicesException {
         this.aiServices.deleteAI(DEVID, AIID);
     }

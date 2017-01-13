@@ -19,35 +19,41 @@ function uploadTextFile() {
         url : './dynamic/upload.php',
         type : 'POST',
         data : formData,
-        dataType: 'json',
         processData: false,  // tell jQuery not to process the data
         contentType: false,  // tell jQuery not to set contentType
         success: function (response) {
-            var JSONdata = response;
-            var statusCode = JSONdata['status']['code'];
+            var JSONdata = JSON.parse(response);
+            switch(JSONdata['status']['code']) {
+                case 200:
+                    var uploadWarnings = null;
+                    var additionalInfo = JSONdata['status']['additionalInfo'];
 
-            if (statusCode === 200) {
-                var uploadWarnings = null;
-                var additionalInfo = JSONdata['status']['additionalInfo'];
+                    if (additionalInfo != null)
+                        uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
 
-                if (additionalInfo != null)
-                    uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
+                    if (uploadWarnings != null && uploadWarnings.length > 0)
+                        msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
+                    else
+                        msgAlertUploadFile(4, 'File uploaded');
+                    setUICurrentStatus(1);
+                    hideRestartBox();
+                    break;
+                case 400:
+                    if (haNoContentError(JSONdata['status']['additionalInfo']))
+                        msgAlertUploadFile(2, 'File not uploaded. No right content was found.');
+                    else
+                        msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded.');
 
-                if (uploadWarnings != null && uploadWarnings.length > 0)
-                    msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
-                else
-                    msgAlertUploadFile(4, 'File uploaded');
-                setUICurrentStatus(1);
-                hideRestartBox();
-            } else {
-                if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
-                    msgAlertUploadFile(2, 'File not uploaded. No right content was found.');
-                } else {
-                    msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded.');
-                }
-                setUICurrentStatus(-1);
-                disableButtonUploadTextFile(false);
-                disableRestartBoxButton(false);
+                    setUICurrentStatus(-1);
+                    disableButtonUploadTextFile(false);
+                    disableRestartBoxButton(false);
+                    break;
+                case 500:
+                    msgAlertUploadFile(2, statusCode['status']['info']);
+                    setUICurrentStatus(-1);
+                    disableButtonUploadTextFile(false);
+                    disableRestartBoxButton(false);
+                    break;
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
@@ -158,6 +164,11 @@ function phaseOneJump(){
 function phaseOneMaxValue(){
     document.getElementById('progress-upload-file').style.width = '100%';
     document.getElementById('status-badge-upload').innerHTML = '100%';
+}
+
+function phaseTwoMaxValue(){
+    document.getElementById("progress-training-file").style.width = '100%';
+    document.getElementById('status-badge-training').innerHTML = '100%';
 }
 
 function removeProgressStripedPhaseOne(){

@@ -1,75 +1,75 @@
 <div class="box-footer">
-    <div class="row no-margin">
+    <div class="row no-margin unselectable">
         <div class="col-xs-12 bot-h2">
             More details
         </div>
     </div>
-    <div class="row no-margin">
+    <div class="row no-margin unselectable">
         <div class="col-xs-4">
             <div class="bot-more-details">Last Update</div>
-            <div class="text-left" id="botUpdated">
-                <?php echo $bot->getUpdate();?>
+            <div class="text-left">
+                <span id="botLastUpdate"></span>
             </div>
         </div>
         <div class="col-xs-4">
-            <div class="bot-more-details" id="botCategory">Category</div>
+            <div class="bot-more-details">Category</div>
             <div class="text-left">
-                <?php echo $bot->getCategory();?>
+                <span id="botCategory"></span>
             </div>
         </div>
         <div class="col-xs-4">
             <div class="bot-more-details">Version</div>
-            <div class="text-left" id="botVersion">
-                <?php echo $bot->getVersion();?>
+            <div class="text-left">
+                <span id="botVersion"></span>
             </div>
         </div>
     </div>
 
-    <div class="row no-margin">
+    <div class="row no-margin unselectable">
         <div class="col-xs-4">
             <div class="bot-more-details">Offer by</div>
             <div class="text-left" id="botCompany">
-                <?php echo $bot->developer->getCompany();?>
+                <span id="botCompany"></span>
             </div>
         </div>
         <div class="col-xs-4">
-            <div class="bot-more-details" id="botClassification">Classification</div>
+            <div class="bot-more-details">Classification</div>
             <div class="text-left">
-                <?php echo $bot->getClassification();?>
+                <span id="botClassification"></span>
             </div>
         </div>
         <div class="col-xs-4">
             <div class="bot-more-details">Activations</div>
-            <div class="text-left" id="botActivations">
-                <?php echo $bot->rangeActivation($bot->getActivations());?>
+            <div class="text-left">
+                <span id="botActivations"></span>
             </div>
         </div>
     </div>
 
     <div class="row no-margin">
-        <div class="col-xs-4">
+        <div class="col-xs-4 unselectable">
             <div class="bot-more-details">Report</div>
-            <div class="text-left" id="botReport">
-                <a class="dev-link" href="<?php echo $bot->getReport();?>" rel="nofollow" target="_blank">Report as inappropriate</a>
-            </div>
-        </div>
-        <div class="col-xs-4">
-            <div class="bot-more-details">Privacy</div>
-            <div class="text-left" id="botPrivacyPage">
-                <a class="dev-link" href="<?php echo $bot->getPrivacyLink();?>" rel="nofollow" target="_blank">View Privacy Policy</a>
-            </div>
-        </div>
-        <div class="col-xs-4">
-            <div class="bot-more-details">Developer</div>
             <div class="text-left">
-                <a class="dev-link" href="<?php echo $bot->developer->getWebsite();?>" rel="nofollow" target="_blank">Visit Website</a>
-                <div id="botDeveloper"><?php echo $bot->developer->getName();?></div>
-                <div id="botEmail"><?php echo $bot->developer->getEmail();?></div>
-                <div id="botAddress"><?php echo $bot->developer->getAddress();?></div>
-                <div id="botPostcode"><?php echo $bot->developer->getPostcode().' '. $bot->developer->getCity();?></div>
-                <div id="botCountry"><?php echo $bot->developer->getCountry();?></div>
+                <a class="dev-link"  id="botReport" href="" rel="nofollow" target="_blank">Report as inappropriate</a>
+            </div>
+        </div>
+        <div class="col-xs-4 unselectable">
+            <div class="bot-more-details">Privacy</div>
+            <div class="text-left">
+                <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy Policy</a>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="bot-more-details unselectable">Developer</div>
+            <div class="text-left">
+                <a class="dev-link unselectable" id="botWebsite" href="" rel="nofollow" target="_blank">Visit Website</a>
+                <div id="botDeveloper"></div>
+                <div id="botEmail"></div>
+                <div id="botAddress"></div>
+                <div><span id="botPostCode"></span> <span id="botCity"></span></div>
+                <div class="unselectable" id="botCountry"></div>
             </div>
         </div>
     </div>
-
+    <a href="./botstore.php" class="btn btn-primary pull-left flat">Go to Botstore</a>
 </div>

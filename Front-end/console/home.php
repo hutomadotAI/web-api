@@ -1,7 +1,9 @@
 <?php
 require '../pages/config.php';
-require_once "../console/api/apiBase.php";
-require_once "../console/api/aiApi.php";
+require_once "./api/apiBase.php";
+require_once "./api/aiApi.php";
+require_once "./api/botApi.php";
+require_once "./common/bot.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -14,6 +16,11 @@ $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\c
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $response_getAIs = $aiApi->getAIs();
 unset($aiApi);
+
+$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$bots = $botApi->getPublishedBots();
+unset($botApi);
+
 ?>
 
 <!DOCTYPE html>
@@ -78,6 +85,7 @@ unset($aiApi);
 
 <script>
     var aiList = <?php
+        // HIDE AI INFOs NOT USED
         $tmp_list = [];
         if (isset($response_getAIs) && (array_key_exists("ai_list", $response_getAIs))) {
             foreach ($response_getAIs['ai_list'] as $ai) {
@@ -93,6 +101,19 @@ unset($aiApi);
         echo json_encode($tmp_list);
         unset($response_getAIs);
         unset($tmp_list);
+        ?>;
+
+    var publishedBots = <?php
+        $tmp_published_list = [];
+        if (isset($publishedBots) && (array_key_exists("bots", $publishedBots))) {
+            foreach ($publishedBots['bots'] as $botDetails) {
+                $publishedBot = new \hutoma\bot();
+                array_push($tmp_published_list, $botDetails['aiid']);
+            }
+        }
+        echo json_encode($tmp_published_list);
+        unset($publishedBot);
+        unset($tmp_published_list);
         ?>;
 </script>
 

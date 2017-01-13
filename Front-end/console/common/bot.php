@@ -14,9 +14,11 @@ class bot
     private $aiid;
     private $alertMessage;
     private $badge;
+    private $botId;
     private $category;
     private $classification;
     private $description;
+    private $devId;
     private $imagePath;
     private $licenseType;
     private $longDescription;
@@ -50,6 +52,7 @@ class bot
     }
 
 
+
     public function setAiid($aiid)
     {
         $this->aiid = $aiid;
@@ -60,7 +63,7 @@ class bot
         return $this->aiid;
     }
 
-
+    
     public function setAlertMessage($alertMessage)
     {
         $this->alertMessage = $alertMessage;
@@ -80,6 +83,17 @@ class bot
     public function getBadge()
     {
         return $this->badge;
+    }
+
+
+    public function setBotId($botId)
+    {
+        $this->botId = $botId;
+    }
+
+    public function getBotId()
+    {
+        return $this->botId;
     }
 
 
@@ -113,6 +127,16 @@ class bot
     public function getDescription()
     {
         return $this->description;
+    }
+
+    public function setDevId($devId)
+    {
+        $this->devId = $devId;
+    }
+
+    public function getDevId()
+    {
+        return $this->devId;
     }
 
 
@@ -269,7 +293,7 @@ class bot
     }
 
 
-    function licenceTypeToString($x){
+    function licenseTypeToString($x){
         switch ($x) {
             case 0:
                 return 'Trial';
@@ -313,15 +337,16 @@ class bot
     {
 
         $json = array(
-            'activations' => $this->getActivations(),
             'aiid' => $this->getAiid(),
+            'activations' => $this->getActivations(),
+            'botId' => $this->getBotId(),
             'alertMessage' => $this->getAlertMessage(),
             'badge' => $this->getBadge(),
             'category' => $this->getCategory(),
             'classification' => $this->getClassification(),
             'description' => $this->getDescription(),
             'imagePath' => $this->getImagePath(),
-            'licenceType' => $this->getLicenseType(),
+            'licenseType' => $this->getLicenseType(),
             'longDescription' => $this->getLongDescription(),
             'name' => $this->getName(),
             'price' => $this->getPrice(),

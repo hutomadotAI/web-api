@@ -84,62 +84,47 @@ public class TestAiServices {
     }
 
     @Test
-    public void testStopTraining() throws AIServices.AiServicesException {
+    public void testStopTraining() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand((a, b) -> this.aiServices.stopTraining(DEVID, AIID), HttpMethod.POST);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testStopTraining_serverError() throws AIServices.AiServicesException {
+    public void testStopTraining_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand_serverError((a, b) -> this.aiServices.stopTraining(DEVID, AIID), HttpMethod.POST);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testStopTraining_response_noEntity() throws AIServices.AiServicesException {
+    public void testStopTraining_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand_response_noEntity((a, b) -> this.aiServices.stopTraining(DEVID, AIID), HttpMethod.POST);
     }
 
     @Test
-    public void testDeleteAI() throws AIServices.AiServicesException {
+    public void testDeleteAI() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteAI_serverError() throws AIServices.AiServicesException {
+    public void testDeleteAI_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand_serverError((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteAI_response_noEntity() throws AIServices.AiServicesException {
+    public void testDeleteAI_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand_response_noEntity((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
     }
 
     @Test
-    public void testUpdateTraining() throws AIServices.AiServicesException {
-        testCommand((a, b) -> this.aiServices.updateTraining(DEVID, AIID), HttpMethod.PUT);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testUpdateTraining_serverError() throws AIServices.AiServicesException {
-        testCommand_serverError((a, b) -> this.aiServices.updateTraining(DEVID, AIID), HttpMethod.PUT);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testUpdateTraining_response_noEntity() throws AIServices.AiServicesException {
-        testCommand_response_noEntity((a, b) -> this.aiServices.updateTraining(DEVID, AIID), HttpMethod.PUT);
-    }
-
-    @Test
-    public void testDeleteDev() throws AIServices.AiServicesException {
+    public void testDeleteDev() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteDev_serverError() throws AIServices.AiServicesException {
+    public void testDeleteDev_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand_serverError((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException {
+    public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
         testCommand_response_noEntity((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
@@ -151,7 +136,7 @@ public class TestAiServices {
     }
 
     private void testCommand(CheckedByConsumer<String, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException {
+            throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
             case HttpMethod.POST:
@@ -170,7 +155,7 @@ public class TestAiServices {
     }
 
     private void testCommand_serverError(CheckedByConsumer<String, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException {
+            throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
             case HttpMethod.POST:
@@ -189,7 +174,7 @@ public class TestAiServices {
     }
 
     private void testCommand_response_noEntity(CheckedByConsumer<String, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException {
+            throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
             case HttpMethod.POST:

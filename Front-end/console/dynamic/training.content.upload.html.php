@@ -1,4 +1,4 @@
-<div class="nav-tabs-custom no-shadow flat" id="box_upload">
+<div class="nav-tabs-custom no-shadow flat unselectable" id="box_upload">
     <ul class="nav nav-tabs pull-right">
         <!-- <li><a href="#trainingweb" data-toggle="tab">Video</a></li> -->
         <li class="text-sm"><a href="#trainingbook" data-toggle="tab">Book Pages</a></li>

@@ -243,6 +243,14 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - UNABLE TO UPDATE BOT INFORMATION';
             $details = ' We could not find the data you were looking for';
             break;
+        case 390 :
+            $msg = 'INTERNAL ERROR - UNABLE TO UPDATE BOT IMAGE';
+            $details = ' We could not find the data you were looking for';
+            break;
+        case 391 :
+            $msg = 'INTERNAL ERROR - REQUEST SINGLE BOT INFORMATION FAILED';
+            $details = ' We could not find the data you were looking for';
+            break;
         case 500 :
             $msg = 'INTERNAL ERROR - UNEXCEPTION ERROR';
             $details = ' We could not find the data you were looking for';
@@ -278,15 +286,15 @@ if (isset($_GET['err'])) {
             <?php echo $details;
             unset($details); ?>
         </p>
-        <form class="search-form">
+
             <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Search">
                 <div class="input-group-btn">
-                    <button type="submit" name="submit" class="btn btn-warning btn-flat"><i class="fa fa-search"></i>
+                    <button name="submit" class="btn btn-warning btn-flat"><i class="fa fa-search"></i>
                     </button>
                 </div>
             </div><!-- /.input-group -->
-        </form>
+      
     </div><!-- /.error-content -->
 </div><!-- /.error-page -->
 

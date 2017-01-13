@@ -102,6 +102,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testPurchaseBot() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(true);
         final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(defaultHeaders).post(Entity.text(""));

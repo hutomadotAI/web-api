@@ -8,19 +8,6 @@ document.getElementById("developer_city").addEventListener("keydown",function(){
 document.getElementById("developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
 
-/*
-function setDeveloperJustForDebug(){
-    document.getElementById('developer_name').value=('hu:toma Ltd.');
-    document.getElementById('developer_company').value=('HUTOMA');
-    document.getElementById('developer_email').value=('support@hutoma.com');
-    document.getElementById('developer_address').value= ('Carrer del Consell de Cent, 341');
-    document.getElementById('developer_postCode').value=('08007');
-    document.getElementById('developer_city').value= ('Barcelona');
-    document.getElementById('developer_country').value=('Spain');
-    document.getElementById('developer_website').value=('http://www.hutoma.com');
-}
-*/
-
 function checkDevInput(){
     // Missing - developer name input validation
     // Missing - Developer address input validation
@@ -43,46 +30,46 @@ function checkDevInput(){
     requestDevPublish();
 }
 
-
 function requestDevPublish(){
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnPublishDeveloper").prop("disabled", true);
 
-    if (!fieldsValidation()){
+    if (!fieldsDevValidation()){
         $("#btnPublishDeveloper").prop("disabled", false);
         document.body.style.cursor = '';
         return false;
     }
     createAlertMessage(1, 'Sending request...');
+    var devInfo = fieldsToDevInstance();
+    var jsonString = JSON.stringify(devInfo);
 
-    if(document.publishDeveloperForm.onsubmit)
-        return;
-    
-    RecursiveUnbind($('#wrapper'));
-    document.publishDeveloperForm.submit();
-    
-    /*
-    var developer = fieldsDevToArray();
     $.ajax({
         url: './dynamic/updateDeveloper.php',
-        data: {
-            name: developer['name'],
-            email: developer['email'],
-            address: developer['address'],
-            postcode: developer['postcode'],
-            city: developer['city'],
-            country: developer['country'],
-            company: developer['company'],
-            website: developer['website']
-        },
+        data: {'developer' : jsonString},
+        cache: false,
         type: 'POST',
         success: function (response) {
-            createAlertMessage(4, 'Request submitted!');
+            var statusCode = JSON.parse(response);
+            switch(statusCode['status']['code']){
+                case 200:
+                    // UPDATED developer
+                    createAlertMessage(4, 'Request submitted!');
+                    $("#btnPublishDeveloper").prop("disabled", false);
+                    break;
+                case 400:
+                    // UPDATED not complete
+                    createAlertMessage(2,'At least one of the required parameters is null or empty');
+                    $("#btnPublishDeveloper").prop("disabled", false);
+                    break;
+                case 500:
+                    // DEVELOPER JUST EXISTS
+                    createAlertMessage(1,'Developer info just sended');
+                    break;
+            }
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
-            $("#btnPublishDeveloper").prop("disabled", false);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
@@ -90,9 +77,8 @@ function requestDevPublish(){
             createAlertMessage(2, 'Request not sended!');
         }
     });
-    */
-}
 
+}
 
 function removeAlert(node){
     if( node.getAttribute("style") != null && node.getAttribute("style")!="" ) {
@@ -100,61 +86,6 @@ function removeAlert(node){
         if( document.getElementById('containerMsgAlertPublish') !== null )
             document.getElementById('containerMsgAlertPublish').remove();
     }
-}
-
-function fieldsValidation(){
-    var elem;
-
-    elem = document.getElementById('developer_name');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The name field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('developer_address');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The address field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('developer_postCode');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The postcode field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('developer_city');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The city field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('developer_country');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The country field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('developer_email');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The email field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('developer_company');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The company field cannot is empty!');
-        return false;
-    }
-
-    return true;
 }
 
 
@@ -207,4 +138,72 @@ function createAlertMessage(alarm,message,id) {
         document.getElementById('msgAlertDeveloper').innerText = message;
     }
 
+}
+
+function fieldsToDevInstance(){
+    var dev={};
+    dev['name'] = document.getElementById('developer_name').value;
+    dev['email'] = document.getElementById('developer_email').value;
+    dev['address'] = document.getElementById('developer_address').value;
+    dev['postCode'] = document.getElementById('developer_postCode').value;
+    dev['city'] =document.getElementById('developer_city').value;
+    dev['country'] = document.getElementById('developer_country').value;
+    dev['company'] = document.getElementById('developer_company').value;
+    dev['website'] = document.getElementById('developer_website').value;
+    return dev;
+}
+
+function fieldsDevValidation(){
+    var elem;
+
+    elem = document.getElementById('developer_name');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The name field cannot is empty!');
+        return false;
+    }
+
+    elem = document.getElementById('developer_address');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The address field cannot is empty!');
+        return false;
+    }
+
+    elem = document.getElementById('developer_postCode');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The postcode field cannot is empty!');
+        return false;
+    }
+
+    elem = document.getElementById('developer_city');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The city field cannot is empty!');
+        return false;
+    }
+
+    elem = document.getElementById('developer_country');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The country field cannot is empty!');
+        return false;
+    }
+
+    elem = document.getElementById('developer_email');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The email field cannot is empty!');
+        return false;
+    }
+
+    elem = document.getElementById('developer_company');
+    if (elem.value == '') {
+        elem.style.border ="1px solid red";
+        createAlertMessage(2, 'The company field cannot is empty!');
+        return false;
+    }
+
+    return true;
 }

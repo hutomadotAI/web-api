@@ -228,6 +228,17 @@ public class AILogic {
     public ApiResult linkBotToAI(final String devId, final UUID aiid, final int botId) {
         try {
             this.logger.logDebug(LOGFROM, String.format("request to link bot %d to AI %s", botId, aiid));
+            if (this.database.getBotDetails(botId) == null) {
+                return ApiError.getBadRequest(String.format("Bot %d not found", botId));
+            }
+            List<AiBot> purchased = this.database.getPurchasedBots(devId);
+            if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
+                return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
+            }
+            List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
+            if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
+                return ApiError.getBadRequest(String.format("Bot %d already linked to AI", botId));
+            }
             if (this.database.linkBotToAi(devId, aiid, botId)) {
                 return new ApiResult().setSuccessStatus();
             } else {

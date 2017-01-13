@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow" >
+<div class="box box-solid box-clean flat no-shadow unselectable" >
 
     <div class="box-header with-border ">
         <div class="box-title"><span style="padding: 0 3px 0 3px;"></span><b>User Expressions</b></div>

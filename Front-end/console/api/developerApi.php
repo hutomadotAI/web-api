@@ -8,7 +8,6 @@
 
 namespace hutoma\api;
 
-
 class developerApi extends apiBase
 {
     private static $developerPath = "/developer";
@@ -32,26 +31,25 @@ class developerApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function updateDeveloperInfo($devid, $name, $company, $email, $address, $postCode, $city, $country, $website)
+    public function updateDeveloperInfo($devid, $developer)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$developerPath . '/' . $devid));
             $this->curl->setVerbPost();
 
-            $args =   array(
-                'name' => $name,
-                'company' => $company,
-                'email' => $email,
-                'address' => $address,
-                'postCode' => $postCode,
-                'city' => $city,
-                'country' => $country,
-                'website' => $website
+            $args =  array(
+                'name' => $developer['name'],
+                'email' => $developer['email'],
+                'address' =>  $developer['address'],
+                'postCode' => $developer['postCode'],
+                'city' => $developer['city'],
+                'country' => $developer['country'],
+                'company' => $developer['company'],
+                'website' =>$developer['website'],
             );
 
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 381);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
