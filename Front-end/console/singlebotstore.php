@@ -1,28 +1,53 @@
 <?php
-require '../pages/config.php';
+require "../pages/config.php";
 require_once "./api/apiBase.php";
-require_once "./api/aiApi.php";
+require_once "./api/entityApi.php";
+require_once "api/aiApi.php";
+require_once "api/botApi.php";
+require_once "common/bot.php";
+require_once "common/developer.php";
+
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
 
-// If is it set, it means the user has selected a existing AI from botstore
-if (!isPostInputAvailable()) {
+if (!isset($_POST['botId'])) {
     \hutoma\console::redirect('./error.php?err=100');
     exit;
 }
-// TODO it needs getSingleBotInStore like API call
-$tmp_bot = \hutoma\console::getSingleBotInStore($_POST['aiid']);
 
-function isPostInputAvailable(){
+$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botDetails = $botApi->getBotDetails($_POST['botId']);
+unset($botApi);
+
+
+if (isset($botDetails)) {
+    switch ($botDetails['status']['code']) {
+        case 200:
+            break;
+        case 404:
+            \hutoma\console::redirect('./error.php?err=100');
+            exit;
+        case 500:
+            \hutoma\console::redirect('./error.php?err=100');
+            exit;
+    }
+}
+
+
+function isPostCameFromBotstore()
+{
     return (
-    isset($_POST['aiid'])
+        isset($_POST['menu_title'])&&
+        isset($_POST['menu_level']) &&
+        isset($_POST['menu_block']) &&
+        isset($_POST['menu_active']) &&
+        isset($_POST['menu_deep'])
     );
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -57,8 +82,18 @@ function isPostInputAvailable(){
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
+
                 <div class="col-md-12">
-                    <?php include './dynamic/botstore.content.singleBot.html.php'; ?>
+                    <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
+                    <?php
+                        include './dynamic/botstore.content.singleBot.card.html.php';
+                        include './dynamic/botstore.content.singleBot.video.html.php';
+                        include './dynamic/botstore.content.singleBot.description.html.php';
+                        include './dynamic/botstore.content.singleBot.footer.html.php';
+                    ?>
+                    </div>
+                    <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
+                    <script src="./plugins/botstore/botstoreWizard.js"></script>
                 </div>
             </div>
         </section>
@@ -73,8 +108,9 @@ function isPostInputAvailable(){
 <script src="./bootstrap/js/bootstrap.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="./plugins/botstore/buyBot.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/botstore/singlebot.js"></script>
+
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
@@ -82,9 +118,12 @@ function isPostInputAvailable(){
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 3, false, false,"<?php echo $bot->getName(); ?>"]);
+        var info = infoForBotstore("<?php if(isset($_POST['menu_title'])) echo ($_POST['menu_title']);?>","<?php if(isset($_POST['purchased'])) echo ($_POST['purchased']);?>");
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>
-
+<script>
+    populateBotFields(bot);
+</script>
 </body>
 </html>

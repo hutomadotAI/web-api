@@ -21,6 +21,7 @@
         );
     }
 
+
     function isErrorOccurred(){
         return isset($_POST['err']);
     }
@@ -34,7 +35,7 @@
         for ($i = 0, $l = count($response_getAIs['ai_list']); $i < $l; ++$i)
             $name_list[$i] = $response_getAIs['ai_list'][$i]['name'];
     }
-    
+
     unset($response_getAIs);
 ?>
 <!DOCTYPE html>

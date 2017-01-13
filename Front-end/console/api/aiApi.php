@@ -50,7 +50,9 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 305);
+
+            // TODO the AI was correctly deleted but it always return 305 error on response
+            //$this->handleApiCallError($curl_response, 305);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -101,7 +103,7 @@ class aiApi extends apiBase
     }
 
     public function createAI($name, $description, $private, $language, $timezone, $confidence,
-                             $personality, $voice, $contract, $payment_type, $price)
+                             $personality, $voice)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
@@ -208,8 +210,7 @@ class aiApi extends apiBase
     public function uploadFile($aiid, $file, $source_type, $url)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/training',
-                array('source_type' => $source_type)));
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/training', array('source_type' => $source_type)));
 
             $filename = $file['tmp_name'];
             $args['file'] = new \CurlFile($filename, 'text/plain', 'postfilename.txt');
@@ -225,24 +226,14 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function addMesh($aiid, $aiid_mesh)
-    {
-        if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/mesh/' . $aiid_mesh));
-            $this->curl->setVerbPost();
-            $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 001);
-        }
-        return true;
-    }
 
-    public function getMesh($aiid)
+    public function getLinkedBots($aiid)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/mesh'));
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bots'));
             $this->curl->setVerbGet();
+            $this->curl->addHeader('Content-Type', 'application/json');
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 001);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -250,27 +241,30 @@ class aiApi extends apiBase
     }
 
 
-    public function deleteMesh($aiid, $aiid_mesh)
+    public function linkBotToAI($aiid,$botId)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/mesh/' . $aiid_mesh));
-            $this->curl->setVerbDelete();
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bot/' . $botId));
+            $this->curl->setVerbPost();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 001);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
         }
-        return true;
+        return $this->getDefaultResponse();
     }
 
-    public function deleteAllMesh($aiid)
+    public function unlinkBotFromAI($aiid,$botId)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/mesh'));
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bot/' . $botId));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 001);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
         }
-        return true;
+        return $this->getDefaultResponse();
     }
+
 
     public function __destruct()
     {

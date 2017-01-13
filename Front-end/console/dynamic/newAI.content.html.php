@@ -1,9 +1,9 @@
-<div class="box box-solid box-clean flat no-shadow" id="newAicontent">
+<div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
     <div class="box-header with-border">
         <div class="box-title"><b>Basic AI Settings</b></div>
     </div>
     
-    <form method="POST" name="createAIform" action="./domainsNewAI.php">
+    <form method="POST" name="createAIform" action="./newAIBotstore.php">
         <div class="box-body">
            
             <div class="row">

@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow">
+<div class="box box-solid box-clean flat no-shadow unselectable">
 
     <div class="box-header with-border">
         <div class="box-title"><b>Video Tutorial: Create Your First AI</b></div>

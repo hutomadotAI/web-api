@@ -8,7 +8,6 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-
 if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
 
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
@@ -41,7 +40,7 @@ if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) 
 
     } else {
         unset($response);
-        \hutoma\console::redirect('./error.php?err=203');
+        \hutoma\console::redirect('../error.php?err=203');
         exit;
     }
 

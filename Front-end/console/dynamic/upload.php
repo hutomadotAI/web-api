@@ -9,69 +9,70 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 }
 
 if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
-    header('Location: ./error.php?err=2');
+    echo json_encode(prepareResponse(500,'Missing AI Id info'), true);
     exit;
 }
 
 if (!isset($_POST['tab'])) {
-    echo('no select: ' . $_POST['tab']);
+    echo 'ciao3' ;//echo json_encode(prepareResponse(500,'Missing TAB info'), true);
     exit;
 }
-
-$response = '';
-$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 
 switch ($_POST['tab']) {
     case 'file':
         if (!isset($_FILES['inputfile'])) {
-            echo 'Upload file failed';
+            echo json_encode(prepareResponse(500,'Upload file failed'), true);
             exit;
         }
         if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK) {
-            echo 'Something is gone wrong';
+            echo json_encode(prepareResponse(500,'Something is gone wrong'), true);
             exit;
         }
         if (!is_uploaded_file($_FILES['inputfile']['tmp_name'])) {
-            echo 'empty file';
+            echo 'ciao6' ;//echo json_encode(prepareResponse(500,'Empty file'), true);
             exit;
         }
 
         //$source_type = 0;
         //$url = "";
-        $response = $aiApi->uploadFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $_FILES['inputfile'], 0, '');
+        $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+        $responseFile = $aiApi->uploadFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $_FILES['inputfile'], 0, '');
+        unset($aiApi);
+        echo json_encode($responseFile, true);
+        unset($responseFile);
         break;
 
     case 'structure':
 
         if (!isset($_FILES['inputstructure'])) {
-            echo 'Upload complex file failed';
+            echo json_encode(prepareResponse(500,'Upload complex file failed'), true);
             exit;
         }
         if ($_FILES['inputstructure']['error'] != UPLOAD_ERR_OK) {
-            echo 'Something is gone wrong';
+            echo json_encode(prepareResponse(500,'Something is gone wrong'), true);
             exit;
         }
         if (!is_uploaded_file($_FILES['inputstructure']['tmp_name'])) {
-            echo 'empty file';
+            echo json_encode(prepareResponse(500,'Empty file'), true);
             exit;
         }
 
         //$source_type = 0;
         //$url = "";
-        $response = $aiApi->uploadFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $_FILES['inputstructure'], 1, '');
-
+        $aiApiStructure = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+        $responseStructure = $aiApiStructure->uploadFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $_FILES['inputstructure'], 1, '');
+        unset($aiApiStructure);
+        echo json_encode($responseStructure, true);
+        unset($responseStructure);
         break;
 
     case 'url':
         if (!isset($_POST['url'])) {
-            echo 'Send URL failed';
+            echo json_encode(prepareResponse(500,'No upload URl available'), true);
             exit;
         }
-        // $response = hutoma\console::uploadURL( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'],$_POST['url']);
         break;
 }
-
-unset($aiApi);
 
 
 /**********  EVENTUALLY copy file to server-side
@@ -83,7 +84,9 @@ unset($aiApi);
  * }
  */
 
-echo json_encode($response, JSON_PRETTY_PRINT);
-unset($response);
-unset($filename);
+function prepareResponse($code,$info)
+{
+    $arr = array('status' => array('code' => $code,'info'=> $info));
+    return $arr;
+}
 ?>

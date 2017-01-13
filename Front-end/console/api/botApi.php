@@ -7,18 +7,73 @@
  */
 
 namespace hutoma\api;
-include "../common/bot.php";
-
 
 class botApi extends apiBase
 {
     private static $botstorePath = "/botstore";
+    private static $purchasePath = "/purchase";
+    private static $path = "/ai";
     
     function __construct($sessionObject, $devToken)
     {
         parent::__construct($sessionObject, $devToken);
     }
-    
+
+    public function getPublishedBots()
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath));
+            $this->curl->setVerbGet();
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function getPurchasedBots()
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/purchased'));
+            $this->curl->setVerbGet();
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function getBotDetails($botId)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/' . $botId, array('botId' => $botId)));
+            $this->curl->setVerbGet();
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $curl_response = $this->curl->exec();
+            //$this->handleApiCallError($curl_response, 100);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+
+    public function getAiBotDetails($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bots'));
+            $this->curl->setVerbGet();
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+
     public function publishBot($bot)
     {
         if ($this->isLoggedIn()) {
@@ -28,12 +83,10 @@ class botApi extends apiBase
             $args =  array(
                 'aiid' => $bot['aiid'],
                 'alertMessage' => $bot['alertMessage'],
-                //TODO remove hard code on badge after set NULL in API
-                'badge' => 'fake badge',
+                'badge' => $bot['badge'],
                 'category' => $bot['category'],
                 'classification' =>  $bot['classification'],
                 'description' => $bot['description'],
-                //TODO ADD licenseType in API and in the new DB
                 'licenseType' => $bot['licenseType'],
                 'longDescription' => $bot['longDescription'],
                 'name' => $bot['name'],
@@ -46,12 +99,46 @@ class botApi extends apiBase
 
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 385);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
         return $this->getDefaultResponse();
     }
+
+
+    public function uploadBotIcon($botId, $file)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/' . $botId . '/icon'));
+
+            $filename = $file['name'];
+            $args['file'] = new \CurlFile($filename, 'text/plain', 'icon.jpg');
+
+            $this->curl->setVerbPost();
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
+            $curl_response = $this->curl->exec();
+
+            $this->handleApiCallError($curl_response, 390);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+
+    public function purchaseBot($botId)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/purchase/' . $botId));
+            $this->curl->setVerbPost();
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+    
 
     public function __destruct()
     {

@@ -1,5 +1,5 @@
 <input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
-<div class="box box-solid box-clean flat no-shadow" style="padding-bottom:0px;">
+<div class="box box-solid box-clean flat no-shadow unselectable" style="padding-bottom:0px;">
 
     <div class="box-header no-border">
         <i class="fa fa-commenting-o text-green"></i>

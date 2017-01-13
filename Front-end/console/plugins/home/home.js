@@ -18,7 +18,7 @@ function sendAIID(elem,action){
     if(document.viewAllForm.onsubmit)
         return;
     RecursiveUnbind($('#listTable'));
-   // deactiveButtons();
+    // deactiveButtons();
 
     document.viewAllForm.action = action;
     document.getElementById("ai").value = value;
@@ -53,16 +53,17 @@ function drawTableRows() {
         var wHTML = '';
         var newNode = document.createElement('tr');
         wHTML += '<td style="padding-top: 15px;padding-left:0px;">' + aiList[i]['aiid'] + '</td>';
-        wHTML += '<td style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
+        wHTML += '<td class="text-gray"style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
         wHTML += '<td style="padding-top: 15px;">' + aiList[i]['description'] + '</td>';
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
-        wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"';
-        //wHTML += 'onClick="sendAIID(this,\'\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
-        wHTML += 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">';
-        wHTML += '<b> <span class="fa fa-globe">';
-        wHTML += '</span> Publish AI </b></button></td>';
+        wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 115px;">' + '<b> <span class="fa fa-globe">';
+        //TODO for update the state og Publish BUtton
+        //if ($.inArray(aiList[i]['aiid'], publishedBots) != -1)
+            wHTML += '</span> Publish AI </b></button></td>';
+        //else
+        //wHTML += '</span> Request Sent</b></button></td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
@@ -80,34 +81,34 @@ function drawTableRows() {
 function decodeAIState(state) {
     switch (state) {
         case 'STOPPED' :
-            return ('<span class="label label-warning">Stopped</span>');
+            return ('<span class="text-red">Stopped</span>');
             break;
         case 'NOT_STARTED' :
-            return ('<span class="label label-primary">Not Started</span>');
+            return ('<span class="text-darkgray">Not Started</span>');
             break;
         case 'QUEUED' :
-            return ('<span class="label label-warning">Queued</span>');
+            return ('<span class="text-gray">Queued</span>');
             break;
         case 'IN_PROGRESS' :
-            return ('<span class="label label-primary">In Progress</span>');
+            return ('<span class="text-orange">In Progress</span>');
             break;
         case 'STOPPED_MAX_TIME' :
-            return ('<span class="label label-danger" >Stopped Max Time</span>');
+            return ('<span class="text-red" >Stopped Max Time</span>');
             break;
         case 'COMPLETED' :
-            return ('<span class="label label-success">Completed</span>');
+            return ('<span class="text-olive">Completed</span>');
             break;
         case 'ERROR' :
-            return ('<span class="label label-danger">Error</span>');
+            return ('<span class="text-red" flat>Error</span>');
             break;
         case 'MALFORMEDFILE' :
-            return ('<span class="label label-danger">Malformed</span>');
+            return ('<span class="text-red" flat>Malformed</span>');
             break;
         case 'NOTHING_TO_TRAIN' :
-            return ('<span class="label label-danger">Void</span>');
+            return ('<span class="text-black" flat>Void</span>');
             break;
         default:
-            return ('<span class="label label-danger"></span>');
+            return ('<span class="text-red" flat></span>');
     }
 }
 

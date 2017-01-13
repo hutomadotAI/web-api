@@ -23,16 +23,16 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./plugins/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/hutoma-skin.css"
+    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
 </head>
 
-<body class="hold-transition skin-blue-light fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
     </header>
@@ -57,10 +57,6 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
-
-    <aside class="control-sidebar control-sidebar-dark">
-
-    </aside>
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

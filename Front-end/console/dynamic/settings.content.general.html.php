@@ -1,4 +1,8 @@
-<div class="box-header with-border">
+<script>
+    var previousGeneralInfo = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']); ?>;
+</script>
+
+<div class="box-header with-border unselectable">
     <i class="fa fa-sliders text-success"></i>
     <div class="box-title"><b>General Informations</b></div>
     <a data-toggle="collapse" href="#collapseInfoGeneral">
@@ -36,7 +40,7 @@
 
 
 <form role="form">
-    <div class="box-body">
+    <div class="box-body unselectable">
         <div class="row">
             <div class="col-md-6">
                 <?php include './dynamic/input.name.html.php'; ?>
@@ -124,7 +128,7 @@
 </form>
 
 
-<div class="box-footer">
+<div class="box-footer unselectable">
     <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">reset</button>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
@@ -136,7 +140,7 @@
 
 <!-- Modal DELETE AI-->
 <div class="modal fade" id="deleteAI" role="dialog">
-    <div class="modal-dialog flat">
+    <div class="modal-dialog flat"  style="border: 1px solid red;">
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
@@ -144,7 +148,7 @@
                 <h4 class="modal-title"><i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> DELETE AI
                 </h4>
             </div>
-            <div class="modal-body" style="background-color: #212121" >
+            <div class="modal-body">
                 <div class="box-body" id="delete-ai-label">
 
                 </div>

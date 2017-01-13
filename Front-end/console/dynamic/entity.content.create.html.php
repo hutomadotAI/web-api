@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow" >
+<div class="box box-solid box-clean flat no-shadow unselectable" >
    
     <div class="box-header with-border">
         <i class="fa fa-sitemap text-yellow"></i>

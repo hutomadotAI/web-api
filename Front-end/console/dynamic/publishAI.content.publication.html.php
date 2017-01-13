@@ -1,6 +1,12 @@
 <?php
     require_once "./common/developer.php";
     require_once "./common/bot.php";
+    require_once "./api/botApi.php";
+
+    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $botDetails = $botApi->getAiBotDetails($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+    unset($botApi);
+
 ?>
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
@@ -8,7 +14,7 @@
         <div class="row no-margin">
             <div class="col-xs-4 drop-zone">
                 <div class="form-group">
-                    <label for="bot_name">Name</label>
+                    <label class="unselectable" for="bot_name">Name</label>
                     <div class="input-group">
                         <div class="input-group-addon">
                             <i class="glyphicon glyphicon-user"></i>
@@ -20,7 +26,7 @@
             <div class="drop-zone1">
                 <div class="row no-margin">
                     <div class="form-group">
-                        <label for="bot_description">Short Description</label>
+                        <label class="unselectable" for="bot_description">Short Description</label>
                         <input type="text" maxlength="50" class="form-control flat no-shadow"  id="bot_description" name="bot_description">
                     </div>
                 </div>
@@ -38,7 +44,7 @@
             <div class="drop-zone-460">
                 <div class="row no-margin">
                     <div class="form-group">
-                        <label for="bot_longDescription">Long Description</label>
+                        <label class="unselectable" for="bot_longDescription">Long Description</label>
                         <textarea rows="9" maxlength="5000" class="form-control flat textarea-justify" placeholder="Enter long description..." id="bot_longDescription" name="bot_longDescription"style="height:204px;"></textarea>
                     </div>
                 </div>
@@ -63,7 +69,7 @@
             <div class="drop-zone-460">
                 <div class="row no-margin" style="padding-top:10px;">
                     <div class="form-group no-margin">
-                        <label for="bot_sample">Show Example of Conversation</label>
+                        <label class="unselectable" for="bot_sample">Show Example of Conversation</label>
                         <textarea rows="8" maxlength="2000" class="form-control flat" value="" placeholder="Add sample of conversation..." id="bot_sample" name="bot_sample" style="height:182px;"></textarea>
                     </div>
                 </div>
@@ -166,7 +172,7 @@
             <div class="drop-zone-460">
                 <div class="row no-margin" style="padding-top:10px;">
                     <div class="form-group">
-                        <label for="bot_alertMessage">Alert message</label>
+                        <label class="unselectable" for="bot_alertMessage">Alert message</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-info-circle"></i>
@@ -175,7 +181,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="bot_privacyPolicy">Link Privacy Policy Page</label>
+                        <label class="unselectable" for="bot_privacyPolicy">Link Privacy Policy Page</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-eye"></i>
@@ -188,7 +194,7 @@
 
             <div class="col-xs-12 no-padding">
                 <div class="form-group">
-                    <label for="bot_videoLink">Link Video Sample</label>
+                    <label class="unselectable" for="bot_videoLink">Link Video Sample</label>
                     <div class="input-group">
                         <div class="input-group-addon">
                             <i class="fa fa-video-camera"></i>
@@ -229,12 +235,12 @@
                 </div>
                 <div class="col-xs-3 no-padding">
                     <div class="form-group">
-                        <label class="unselectable" for="bot_developer_postcode">Postcode</label>
+                        <label class="unselectable" for="bot_developer_postCode">Postcode</label>
                         <div class="input-group">
                             <div class="input-group-addon">
                                 <i class="fa fa-map-signs"></i>
                             </div>
-                            <input type="text" maxlength="30" class="form-control flat no-shadow unselectable"  id="bot_developer_postcode" name="bot_developer_postcode" placeholder="Enter the postcode..." readonly>
+                            <input type="text" maxlength="30" class="form-control flat no-shadow unselectable"  id="bot_developer_postCode" name="bot_developer_postCode" placeholder="Enter the postcode..." readonly>
                         </div>
                     </div>
                 </div>
@@ -317,9 +323,12 @@
             </button>
         </div>
 
+        <input type="hidden" id="bot_id" name="bot_id">
         <input type="hidden" id="bot_aiid" name="bot_aiid">
+        <input type="hidden" id="bot_badge" name="bot_badge">
     </div>
 </div>
+
 
 <script>
     var developer = <?php
@@ -339,37 +348,44 @@
         unset($dev);
         unset($tmp_dev);
         ?>;
-    
+
     var bot = <?php
-        // TODO remove this fake hardcoded data
         $bot = new \hutoma\bot();
-        $bot->setAiid($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-        $bot->setAlertMessage('Questi contenuti non sono disponibili in Italiano. Leggi ulteriori informazioni sulle lingue supportate.');
-        $bot->setBadge("");
-        $bot->setCategory('Finance');
-        $bot->setClassification('EVERYONE');
-        $bot->setDescription("Fake shortDescription");
-        $bot->setLicenseType('Free');
-        $bot->setLongDescription('A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment and yet I feel that I never was a greater artist than now.');
-        $bot->setName("Fake botName");
-        $bot->setPrice('0.0');
-        $bot->setPrivacyPolicy('https://www.google.it/intl/it/policies/privacy/');
-        $bot->setSample('User: I want to sleep.
-Agent: Need a pick-me-up? I can find somewhere nearby to get some coffee.
+        //TODO need check controll on value returned by API
+        /* if (isset($botDetails)!=200) {} */
 
-User: You\'re so sweet.
-Agent: I like you too. You\'re a lot of fun to talk to.');
-        $bot->setUpdate('10 september 2016');  // setted when you send request publish bot
-        $bot->setVersion('1.0.0');
-        $bot->setVideoLink('https://www.youtube.com/watch?v=N4IMIpgUVis');
-
+        if (!empty($botDetails['bot'])){
+            $bot->setAiid($botDetails['bot']['aiid']);
+            $bot->setAlertMessage($botDetails['bot']['alertMessage']);
+            $bot->setBadge($botDetails['bot']['badge']);
+            $bot->setBotId($botDetails['bot']['botId']);
+            $bot->setCategory($botDetails['bot']['category']);
+            $bot->setClassification($botDetails['bot']['classification']);
+            $bot->setDescription($botDetails['bot']['description']);
+            $bot->setLicenseType($botDetails['bot']['licenseType']);
+            $bot->setLongDescription($botDetails['bot']['longDescription']);
+            $bot->setName($botDetails['bot']['name']);
+            $bot->setPrice($botDetails['bot']['price']);
+            $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
+            $bot->setSample($botDetails['bot']['sample']);
+            $bot->setVersion($botDetails['bot']['version']);
+            $bot->setVideoLink($botDetails['bot']['videoLink']);
+        }
+        else{
+            $bot->setAiid($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+            $bot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
+            $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
+        }
 
         $tmp_bot = $bot->toJSON();
-        echo json_encode($tmp_bot);
         unset($bot);
+
+        echo json_encode($tmp_bot);
         unset($tmp_bot);
         ?>;
 </script>
+
+
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="./plugins/publish/publish.js"></script>
 
