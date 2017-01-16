@@ -200,7 +200,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     private ApiAi getAI() {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false,
-                new BackendStatus(), TrainingStatus.AI_UNDEFINED,
+                new BackendStatus(), true,
                 0, 0.0, 1, Locale.UK, "Europe/London");
     }
 

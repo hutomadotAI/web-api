@@ -19,6 +19,14 @@ $singleAI = $aiApi->getSingleAI($aiid);
 unset($aiid);
 unset($aiApi);
 if ($singleAI['status']['code'] === 200) {
-    echo $singleAI['ai_status'];
+    $statusEx = array(
+        "ai_status" => $singleAI['ai_status'],
+        "phase_1_progress" => $singleAI['phase_1_progress'],
+        "phase_2_progress" => $singleAI['phase_2_progress'],
+        "training_file_uploaded" => $singleAI['training_file_uploaded'],
+        "deep_learning_error" => $singleAI['deep_learning_error'],
+        "status" => $singleAI['status']
+    );
+    echo json_encode($statusEx);
 }
 unset($singleAI);

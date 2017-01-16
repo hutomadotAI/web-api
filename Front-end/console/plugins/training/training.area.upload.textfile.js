@@ -5,20 +5,20 @@ function uploadTextFile() {
 
     if (!isTextFileSelected())
         return;
-    if ( !checkTextFileSize('inputfile',Mbyte) )
+    if (!checkTextFileSize('inputfile', Mbyte))
         return;
-    
+
     disableButtonUploadTextFile(true);
-    
+
     var formData = new FormData();
     formData.append("inputfile", document.getElementById('inputfile').files[0]);
-    formData.append("tab","file");
+    formData.append("tab", "file");
 
-    msgAlertUploadFile(1,'Uploading file...');
+    msgAlertUploadFile(1, 'Uploading file...');
     $.ajax({
-        url : './dynamic/upload.php',
-        type : 'POST',
-        data : formData,
+        url: './dynamic/upload.php',
+        type: 'POST',
+        data: formData,
         processData: false,  // tell jQuery not to process the data
         contentType: false,  // tell jQuery not to set contentType
         success: function (response) {
@@ -58,36 +58,36 @@ function uploadTextFile() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertUploadFile(2,'Unexpected error occurred during upload');
+            msgAlertUploadFile(2, 'Unexpected error occurred during upload');
             disableButtonUploadTextFile(false);
             disableRestartBoxButton(false);
         }
     });
 }
 
-function isTextFileSelected(){
+function isTextFileSelected() {
     var elementValue = document.getElementById("inputfile").value;
-    if ( elementValue == null ||  elementValue == "") {
+    if (elementValue == null || elementValue == "") {
         disableButtonUploadTextFile(true);
-        msgAlertUploadFile(1,'You need to choose a file first');
+        msgAlertUploadFile(1, 'You need to choose a file first');
         return false;
     }
     return true;
 }
 
-function checkTextFileSize(fileID,size) {
+function checkTextFileSize(fileID, size) {
     var input, file;
     input = document.getElementById(fileID);
     if (!window.FileReader) {
-        msgAlertUploadFile(2,'The file API isn\'t supported on this browser');
+        msgAlertUploadFile(2, 'The file API isn\'t supported on this browser');
         return false;
     }
     if (!input.files) {
-        msgAlertUploadFile(2,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
+        msgAlertUploadFile(2, 'This browser doesn\'t seem to support the \'files\' property of file inputs.');
         return false;
     }
     file = input.files[0];
-    if(file.size > size*1048476) {
+    if (file.size > size * 1048476) {
         msgAlertUploadFile(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
         return false;
     }
@@ -95,25 +95,25 @@ function checkTextFileSize(fileID,size) {
 }
 
 function enableUploadTextFile() {
-    if ( $(this).val() == null || $(this).val == "")
+    if ($(this).val() == null || $(this).val == "")
         disableButtonUploadTextFile(true);
     else
         disableButtonUploadTextFile(false);
-    msgAlertUploadFile(0,'You can now upload your file');
+    msgAlertUploadFile(0, 'You can now upload your file');
 }
 
-function disableButtonUploadTextFile(state){
+function disableButtonUploadTextFile(state) {
     document.getElementById("btnUploadFile").disabled = state;
 }
 
-function justStopped(){
-    if (document.getElementById('containerMsgWarningAlertTrainingInfo') !== null) 
+function justStopped() {
+    if (document.getElementById('containerMsgWarningAlertTrainingInfo') !== null)
         return true;
-    else 
+    else
         return false;
 }
 
-function phaseOneReset(){
+function phaseOneReset() {
     document.getElementById('progress-upload-file').style.width = '0%';
     document.getElementById('progress-upload-file-action').className = 'progress progress-xs progress-striped active';
     hidePreTrainingBar(false);
@@ -122,11 +122,11 @@ function phaseOneReset(){
 function phaseOneUpdate() {
     // simulation phaseOne -  pretraining
     var width = document.getElementById("progress-upload-file").style.width;
-    width = width.substr(0, width.length-1);
+    width = width.substr(0, width.length - 1);
 
-    if( parseInt(width) <= 100 ){
-        document.getElementById("progress-upload-file").style.width = (parseInt(width)+1)+'%';
-        document.getElementById('status-badge-upload').innerHTML = width+'%';
+    if (parseInt(width) <= 100) {
+        document.getElementById("progress-upload-file").style.width = (parseInt(width) + 1) + '%';
+        document.getElementById('status-badge-upload').innerHTML = width + '%';
         setTimeout(phaseOneUpdate, 100);
     }
     else {
@@ -135,33 +135,33 @@ function phaseOneUpdate() {
     }
 }
 
-function phaseOneFlashing(flag){
+function phaseOneFlashing(flag) {
     if (flag) {
         document.getElementById('status-upload-file').innerText = 'initialising';
         document.getElementById('status-upload-file').setAttribute('class', 'text-center flashing');
-    }else{
+    } else {
         document.getElementById('status-upload-file').innerText = 'phase 1';
         document.getElementById('status-upload-file').setAttribute('class', 'text-center');
     }
 }
 
-function phaseTwoFlashing(flag){
+function phaseTwoFlashing(flag) {
     if (flag) {
         document.getElementById('status-training-file').innerText = 'initialising';
         document.getElementById('status-training-file').setAttribute('class', 'text-center flashing');
-    }else{
+    } else {
         document.getElementById('status-training-file').innerText = 'phase 2';
         document.getElementById('status-training-file').setAttribute('class', 'text-center');
     }
 }
 
-function phaseOneJump(){
+function phaseOneJump() {
     removeProgressStripedPhaseOne();
     phaseOneMaxValue();
     hidePreTrainingBar(false);
 }
 
-function phaseOneMaxValue(){
+function phaseOneMaxValue() {
     document.getElementById('progress-upload-file').style.width = '100%';
     document.getElementById('status-badge-upload').innerHTML = '100%';
 }
@@ -171,67 +171,57 @@ function phaseTwoMaxValue(){
     document.getElementById('status-badge-training').innerHTML = '100%';
 }
 
-function removeProgressStripedPhaseOne(){
+function removeProgressStripedPhaseOne() {
     $('#progress-upload-file-action').removeClass('active');
     $('#progress-upload-file-action').removeClass('progress-striped');
 }
 
-function hidePreTrainingBar(state){
+function hidePreTrainingBar(state) {
     $('#pretrainingbar').prop('hidden', state);
 }
 
-function hideTrainingBar(state){
+function hideTrainingBar(state) {
     $('#trainingbar').prop('hidden', state);
 }
 
-function hideChart(state){
+function hideChart(state) {
     $('#chart-details').prop('hidden', state);
     $('#chart-details-footer').prop('hidden', state);
 }
-function phaseTwoActive(){
+function phaseTwoActive() {
     disableButtonUploadTextFile(false);
     disableButtonUploadBookFile(false);
     hideTrainingBar(false);
 }
 
-function phaseTwoUpdate(error,max_error){
-
-    if (parseFloat(error) > parseFloat(max_error)) {
-        setUICurrentMaxError(error);
-        max_error = error;
+function phaseTwoUpdate(progress) {
+    if (progress < 0.0) {
+        progress = 0.0;
     }
-    var new_value = max_error == 0 ? 0 : (100 - (error *(100 / max_error)));
-    //alert('err:'+error+' max:'+max_error+' new:'+new_value);
-
-   if (parseFloat(error) > 0.01 ) {
-       document.getElementById("progress-training-file").setAttribute('value', new_value);
-       document.getElementById("progress-training-file").style.width = (parseInt(new_value)) + '%';
-       document.getElementById('status-badge-training').innerHTML = parseInt(new_value) + '%';
-   }
-    else{
-       // TODO re-define check error limit
-       document.getElementById("progress-training-file").setAttribute('value', 99);
-       document.getElementById("progress-training-file").style.width = (parseInt(99)) + '%';
-       document.getElementById('status-badge-training').innerHTML = parseInt(99) + '%';
-   }
+    if (progress > 100.0) {
+        progress = 100.0;
+    }
+    document.getElementById("progress-training-file").setAttribute('value', progress);
+    document.getElementById("progress-training-file").style.width = (parseInt(progress)) + '%';
+    document.getElementById('status-badge-training').innerHTML = parseInt(progress) + '%';
 }
 
-function hideRestartBox(){
+function hideRestartBox() {
     var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
     if (element !== null) {
         element.parentNode.removeChild(element);
     }
 }
 
-function disableRestartBoxButton(state){
+function disableRestartBoxButton(state) {
     var element = document.getElementById('containerMsgWarningAlertTrainingInfo');
     if (element !== null) {
-        if (state){
-            document.getElementById('restart-button').setAttribute('onClick','');
+        if (state) {
+            document.getElementById('restart-button').setAttribute('onClick', '');
             document.getElementById('restart-button').setAttribute("disabled", "disabled");
         }
-        else{
-            document.getElementById('restart-button').setAttribute('onClick','trainingRestart()');
+        else {
+            document.getElementById('restart-button').setAttribute('onClick', 'trainingRestart()');
             document.getElementById('restart-button').setAttribute("disabled", "enabled");
         }
 

@@ -42,7 +42,7 @@ CREATE TABLE `ai` (
   `deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1127,10 +1127,36 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAi`(IN `in_dev_id` VARCHAR(50), IN `in_aiid` VARCHAR(50))
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAi`(
+	IN `in_dev_id` VARCHAR(50), 
+	IN `in_aiid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-	SELECT * FROM ai WHERE `dev_id`=in_dev_id AND `aiid` = in_aiid AND `deleted` = 0;
+      
+	SELECT 
+		`id`,
+		`aiid`,
+		`ai_name`,
+		`ai_description`,
+		`created_on`,
+		`dev_id`,
+		`is_private`,
+		`client_token`,
+		`backend_status`,
+		`ui_ai_language`,
+		`ui_ai_timezone`,
+		`ui_ai_confidence`,
+		`ui_ai_personality`,
+		`ui_ai_voice`,
+		(SELECT COUNT(`ai_training`.`aiid`) 
+			FROM `ai_training`
+			WHERE `ai_training`.`aiid`=`in_aiid`)
+			AS `has_training_file`
+    FROM `ai`
+    WHERE `ai`.`dev_id`=`in_dev_id` 
+    AND `ai`.`aiid`=`in_aiid`
+    AND `deleted`=0;
+    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1193,12 +1219,36 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIs`(IN `param_devid` VARCHAR(50))
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIs`(
+	IN `in_dev_id` VARCHAR(50))
     READS SQL DATA
 BEGIN
-	SELECT * FROM ai WHERE dev_id=param_devid AND `deleted` = 0;
+      
+	SELECT 
+		`id`,
+		`aiid`,
+		`ai_name`,
+		`ai_description`,
+		`created_on`,
+		`dev_id`,
+		`is_private`,
+		`client_token`,
+		`backend_status`,
+		`ui_ai_language`,
+		`ui_ai_timezone`,
+		`ui_ai_confidence`,
+		`ui_ai_personality`,
+		`ui_ai_voice`,
+		(SELECT COUNT(`ai_training`.`aiid`) 
+			FROM `ai_training`
+			WHERE `ai_training`.`aiid`=`ai`.`aiid`)
+			AS `has_training_file`
+    FROM `ai`
+    WHERE `ai`.`dev_id`=`in_dev_id`
+    AND `deleted`=0;
+    
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2419,4 +2469,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-09 15:06:24
+-- Dump completed on 2017-01-13 13:16:21

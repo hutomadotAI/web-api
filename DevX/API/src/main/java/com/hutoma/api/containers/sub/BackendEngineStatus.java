@@ -28,4 +28,12 @@ public class BackendEngineStatus {
     public TrainingStatus getTrainingStatus() {
         return this.trainingStatus;
     }
+
+    public double getTrainingError() {
+        return this.trainingError;
+    }
+
+    public double getTrainingProgress() {
+        return this.trainingProgress;
+    }
 }

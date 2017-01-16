@@ -1,15 +1,12 @@
 var scale_chart_max_error = 10000;
 initializeEventListeners();
-initializeConsole(status, training_file, deep_error);
+initializeConsole(aiStatus);
 
-var async_status_UI = setInterval(function () {
-    getUIStatusCall()
-}, 2000);
 var async_status_AI = setInterval(function () {
     trainingStatusCall()
 }, 2000);
-var async_error_ping = setInterval(function () {
-    trainingErrorPing()
+var async_status_UI = setInterval(function () {
+    getUIStatusCall()
 }, 2000);
 
 function initializeEventListeners() {
@@ -24,10 +21,11 @@ function initializeEventListeners() {
     //document.getElementById('zoomIn').addEventListener('click', zoomIn);
 }
 
-function initializeConsole(status, file, error) {
-    setStateResponse(status);
-    if (file == 1)
+function initializeConsole(aiStatus) {
+    setStateResponse(aiStatus);
+    if (aiStatus["training_file_uploaded"]) {
         msgAlertUploadFile(4, 'A file is already loaded.');
+    }
 }
 
 function getUIStatusCall() {
@@ -59,16 +57,15 @@ function getUIStatusCall() {
             phaseOneJump();
             phaseTwoFlashing(true);
             phaseTwoActive();
-            msgAlertProgressBar(1, 'Initialization may take few minutes. please wait.');
+            msgAlertProgressBar(1, 'Initialization may take a few minutes. Please wait.');
             break;
         case (state == 6): // start phase two
-            phaseOneFlashing(false);
+            var progress = getP2Progress();
             phaseOneJump();
-            deep_error = getUICurrentError();
             hideChart(false);
             phaseTwoActive();
             phaseTwoFlashing(false);
-            phaseTwoUpdate(deep_error, getUICurrentMaxError());
+            phaseTwoUpdate(progress);
             document.getElementById('show-error').innerText = deep_error;
             msgAlertProgressBar(4, 'Phase two in progress...');
             break;
@@ -123,81 +120,73 @@ function trainingStatusCall() {
         processData: false,  // tell jQuery not to process the data
         contentType: "application/json; charset=utf-8",
         success: function (response) {
-            // TODO JSON validation when API is ready
-            setStateResponse(response);
+            try {
+                var aiStatus = JSON.parse(response);
+                if (aiStatus['status']['code'] === 200) {
+                    setStateResponse(aiStatus);
+                } else {
+                    setUICurrentStatus(-1);
+                    msgAlertProgressBar(2, 'An error has occurred while trying to get the AI\'s status');
+                }
+            } catch (e) {
+                setUICurrentStatus(-1);
+                msgAlertProgressBar(2, 'Unable to query AI training status');
+            }
+
+                //alert(response);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(-1);
-            msgAlertProgressBar(2, 'Unexpected error occurred during training');
+            msgAlertProgressBar(2, 'Cannot contact server to query AI status');
         }
     });
 }
 
-function trainingErrorPing() {
-    jQuery.ajax({
-        url: './dynamic/trainingError.php',
-        type: 'GET',
-        dataType: 'json',
-        processData: false,  // tell jQuery not to process the data
-        contentType: "application/json; charset=utf-8",
-        success: function (response) {
+function setStateResponse(aiStatus) {
 
-                //alert(response);
-            // TODO JSON validation when API is ready
-            setErrorResponse(response); //  response is deep_learning_error value returned
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            setUICurrentStatus(-1);
-            msgAlertProgressBar(2, 'Unexpected error occurred during training ping');
-        }
-    });
-}
+    deep_error = aiStatus["deep_learning_error"];
+    var status = aiStatus["ai_status"];
+    var phaseTwoPercentProgress = aiStatus["phase_2_progress"] * 100.0;
 
-function setStateResponse(response) {
-    switch (response) {
+    switch (status) {
         case 'ai_ready_to_train':
+            setP2Progress(0);
             // code 0
             break;
         case 'ai_training_queued' :
+            setP2Progress(0);
             setUICurrentStatus(3);  // code 3
             break;
         case 'ai_training':
-            if (getUICurrentError() != -1)
+            if (getP2Progress() != -1) {
+                setP2Progress(phaseTwoPercentProgress);
                 setUICurrentStatus(6); // code 5
-            else {
+            } else {
                 if (document.getElementById('status-badge-upload').innerHTML == '0%') {
                     setUICurrentStatus(4); // code 4
                 }
             }
             break;
         case 'ai_training_stopped' :
+            setP2Progress(phaseTwoPercentProgress);
             setUICurrentStatus(7); // code 6
             break;
         case 'ai_training_complete' :
+            setP2Progress(100);
             setUICurrentStatus(10); // code 10
             break;
         case 'ai_undefined' :
+            setP2Progress(0);
             setUICurrentStatus(-1);
             break;
         case 'ai_error' :
+            setP2Progress(phaseTwoPercentProgress);
             setUICurrentStatus(-1);
             msgAlertProgressBar(2, 'An error has occurred');
             break;
         default:
             setUICurrentStatus(999);
-            break;
-    }
-}
-
-function setErrorResponse(response) {
-    switch (response) {
-        case ('error'):
-            msgAlertProgressBar(2, 'Unexpected error occurred during reading confidence value');
-            setUICurrentStatus(-1);
-            break;
-        default:
-            setUICurrentError(response);
             break;
     }
 }
@@ -231,12 +220,12 @@ function setStateListeningMode() {
     setUICurrentStatus(999);
 }
 
-function getUICurrentError() {
-    return document.getElementById('training-error').value;
+function getP2Progress() {
+    return document.getElementById('training-progress').value;
 }
 
-function setUICurrentError(error) {
-    document.getElementById('training-error').value = error.toFixed(7);
+function setP2Progress(progress) {
+    document.getElementById('training-progress').value = progress.toFixed(7);
 }
 
 function getUICurrentMaxError() {
@@ -393,7 +382,6 @@ function stopChart() {
     clearTimeout(async_chart_update);
 }
 $(function () {
-
 
     switch (true) {
         case (deep_error == -1):

@@ -36,15 +36,15 @@ function setSessionVariables($singleAI)
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['created_on'] = $singleAI['created_on'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
-
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = localeToLanguage($singleAI['language']);
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
-
-    // TODO getAiTrainingFile needs API call with response check before assigh the value
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = \hutoma\console::existsAiTrainingFile($singleAI['aiid']);
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = $singleAI['training_file_uploaded'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_1_progress'] = $singleAI['phase_1_progress'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_2_progress'] = $singleAI['phase_2_progress'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
 }
 
 function localeToLanguage($locale)
@@ -88,10 +88,15 @@ function localeToLanguage($locale)
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <script>
-    //TODO validation status API value returned 
-    var status = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status']);?>;
-    var training_file = <?php echo json_encode(\hutoma\console::existsAiTrainingFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
-    var deep_error = <?php echo json_encode(\hutoma\console::getAiDeepLearningError($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?>;
+    var deep_error = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error']);?>;
+    var aiStatus = {
+        "ai_status": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status']);?>,
+        "phase_1_progress": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_1_progress']);?>,
+        "phase_2_progress": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_2_progress']);?>,
+        "deep_learning_error": deep_error,
+        "training_file_uploaded": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']);?>
+    };
+
 </script>
 
 <div class="wrapper">

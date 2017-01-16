@@ -74,6 +74,7 @@ public class TestTrainingLogic {
     private IMemoryIntentHandler fakeIntentHandler;
     private JsonSerializer fakeSerializer;
 
+
     private static Object[] updateTraining_successStates() {
         return $(
                 $(TrainingStatus.AI_TRAINING),
@@ -584,8 +585,14 @@ public class TestTrainingLogic {
     private void makeAiServiceLogicFail(TrainingLogic.TrainingType trainingType) throws Exception {
         doThrow(AIServices.AiServicesException.class).when(this.fakeAiServices).startTraining(anyString(), any());
         InputStream stream = createUpload(SOMETEXT);
-        ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, new BackendStatus(), TrainingStatus.AI_READY_TO_TRAIN,
-                0, 0.5, 1, Locale.UK, "UTC");
+        ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, new BackendStatus(),
+                true,
+                0, 0.5, 1, Locale.UK, "UTC") {
+            @Override
+            public TrainingStatus getSummaryAiStatus() {
+                return TrainingStatus.AI_READY_TO_TRAIN;
+            }
+        };
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = this.logic.uploadFile(DEVID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);

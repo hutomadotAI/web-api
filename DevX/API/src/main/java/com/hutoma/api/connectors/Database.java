@@ -7,7 +7,15 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.containers.sub.DeveloperInfo;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.RateLimitStatus;
 
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
@@ -88,36 +96,6 @@ public class Database {
         }
         // if the field was empty then use an empty structure
         return (backendStatus == null) ? new BackendStatus() : backendStatus;
-    }
-
-    /***
-     * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
-     * @param backendStatus
-     * @return
-     */
-    private static TrainingStatus getSummaryTrainingStatus(final BackendStatus backendStatus) {
-        TrainingStatus wnetStatus = backendStatus.getEngineStatus("wnet").getTrainingStatus();
-        TrainingStatus rnnStatus = backendStatus.getEngineStatus("rnn").getTrainingStatus();
-
-        if ((wnetStatus == TrainingStatus.AI_UNDEFINED) || (rnnStatus == TrainingStatus.AI_UNDEFINED)) {
-            return TrainingStatus.AI_UNDEFINED;
-        }
-        if ((wnetStatus == TrainingStatus.AI_ERROR) || (rnnStatus == TrainingStatus.AI_ERROR)) {
-            return TrainingStatus.AI_ERROR;
-        }
-        if ((wnetStatus == TrainingStatus.AI_READY_TO_TRAIN) || (rnnStatus == TrainingStatus.AI_READY_TO_TRAIN)) {
-            return TrainingStatus.AI_READY_TO_TRAIN;
-        }
-        if ((wnetStatus == TrainingStatus.AI_TRAINING_QUEUED) || (rnnStatus == TrainingStatus.AI_TRAINING_QUEUED)) {
-            return TrainingStatus.AI_TRAINING_QUEUED;
-        }
-        if ((wnetStatus == TrainingStatus.AI_TRAINING_STOPPED) || (rnnStatus == TrainingStatus.AI_TRAINING_STOPPED)) {
-            return TrainingStatus.AI_TRAINING_STOPPED;
-        }
-        if ((wnetStatus == TrainingStatus.AI_TRAINING) || (rnnStatus == TrainingStatus.AI_TRAINING)) {
-            return TrainingStatus.AI_TRAINING;
-        }
-        return TrainingStatus.AI_TRAINING_COMPLETE;
     }
 
     public boolean createDev(final String username, final String email, final String password,
@@ -660,7 +638,6 @@ public class Database {
         // deserialize the backend-status block of JSON
         BackendStatus backendStatus = getBackendStatus(rs.getString("backend_status"), jsonSerializer);
         // create one summary trainign status from the block of data
-        TrainingStatus summaryTrainingStatus = getSummaryTrainingStatus(backendStatus);
         return new ApiAi(
                 rs.getString("aiid"),
                 rs.getString("client_token"),
@@ -669,7 +646,7 @@ public class Database {
                 new DateTime(rs.getDate("created_on")),
                 rs.getBoolean("is_private"),
                 backendStatus,
-                summaryTrainingStatus,
+                rs.getBoolean("has_training_file"),
                 rs.getInt("ui_ai_personality"),
                 rs.getDouble("ui_ai_confidence"),
                 rs.getInt("ui_ai_voice"),

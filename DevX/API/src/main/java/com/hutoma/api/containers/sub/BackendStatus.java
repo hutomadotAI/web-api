@@ -7,7 +7,11 @@ import java.util.HashMap;
  */
 public class BackendStatus {
 
-    HashMap<String, BackendEngineStatus> engines;
+    public static final String ENGINE_WNET = "wnet";
+    public static final String ENGINE_RNN = "rnn";
+    public static final String ENGINE_AIML = "aiml";
+
+    private HashMap<String, BackendEngineStatus> engines;
 
     /***
      * Initialising BackendStatus effectively sets all engines to state AI_UNDEFINED,

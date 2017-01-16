@@ -18,12 +18,17 @@ public class TestDataHelper {
 
     public static ApiAi getSampleAI() {
         return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,
-                new BackendStatus(), TrainingStatus.AI_UNDEFINED,
+                new BackendStatus(), true,
                 0, 0.0, 1, Locale.getDefault(), "UTC");
     }
 
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {
-        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, new BackendStatus(), status,
-                0, 0.0, 1, Locale.getDefault(), "UTC");
+        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, new BackendStatus(), true,
+                0, 0.0, 1, Locale.getDefault(), "UTC") {
+            @Override
+            public TrainingStatus getSummaryAiStatus() {
+                return status;
+            }
+        };
     }
 }
