@@ -1,4 +1,5 @@
 var scale_chart_max_error = 10000;
+
 initializeEventListeners();
 initializeConsole(aiStatus);
 
@@ -31,7 +32,7 @@ function initializeConsole(aiStatus) {
 function getUIStatusCall() {
     var state = parseInt(getUICurrentStatus());
     switch (true) {
-        case (state == 0):
+        case (state == 0): //nothing is started
             break;
         case (state == 1): // File uploaded
             msgAlertProgressBar(1, 'Initialising. please wait.');
@@ -39,10 +40,13 @@ function getUIStatusCall() {
             trainingStartCall();
             break;
         case (state == 2): //  Initialising - Phase One
-            //msgAlertProgressBar(1,'Initialising. please wait.');
+            msgAlertProgressBar(1, 'Initialising. please wait.');
             break;
-        case (state == 3): // Initialising - Phase One - queue
-            //msgAlertProgressBar(1,'Initialising. please wait.');
+        case (state == 3): //Initialising - Phase One - queue
+            phaseOneFlashing(false);
+            phaseQueue();
+            hideTrainingBar(true);
+            msgAlertProgressBar(1, 'Initialising. please wait. The process is queued');
             break;
         case (state == 4): // Execute - Phase One ( simulation ) waiting API
             if (document.getElementById('status-badge-upload').innerHTML == '0%') {
@@ -54,8 +58,10 @@ function getUIStatusCall() {
             }
             break;
         case (state == 5): // Initialising - Phase Two
+            phaseOneFlashing(false);
             phaseOneJump();
             phaseTwoFlashing(true);
+            hideChart(true);
             phaseTwoActive();
             msgAlertProgressBar(1, 'Initialization may take a few minutes. Please wait.');
             break;
@@ -71,15 +77,24 @@ function getUIStatusCall() {
             break;
         case (state == 7):
             msgAlertProgressBar(1, 'Training stopped. Please restart training');
-            if (!justStopped())
+            if (!justStopped()) {
                 createMessageWarningInfoAlert();
+                hideChart(true);
+                hidePreTrainingBar(true);
+                hideTrainingBar(true);
+            }
             break;
         case (state == 10):
             phaseTwoFlashing(false);
             phaseTwoMaxValue();
             msgAlertProgressBar(3, 'Training completed.');
-            hidePreTrainingBar(state);
-            hideTrainingBar(state);
+            hidePreTrainingBar(true);
+            hideTrainingBar(true);
+            hideChart(true);
+            break;
+        case (state == -1):
+            hidePreTrainingBar(true);
+            hideTrainingBar(true);
             hideChart(true);
             break;
         default:
@@ -132,8 +147,6 @@ function trainingStatusCall() {
                 setUICurrentStatus(-1);
                 msgAlertProgressBar(2, 'Unable to query AI training status');
             }
-
-                //alert(response);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
@@ -263,6 +276,15 @@ function createMessageWarningInfoAlert() {
     parent.innerHTML = wHTML;
 }
 
+
+function closeMessageWarningInfoAlert() {
+    if (justStopped()) {
+        var node = document.getElementById('containerMsgWarningAlertTrainingInfo');
+        var parent = node.parentNode;
+        parent.innerHTML = '';
+    }
+}
+
 function getUploadWarnings(info) {
     var warnings = [];
     var maxItemsToShow = 5;
@@ -381,6 +403,7 @@ function startChart() {
 function stopChart() {
     clearTimeout(async_chart_update);
 }
+
 $(function () {
 
     switch (true) {

@@ -11,8 +11,6 @@
     <div class="box-body" id="boxNewIntegrations">
         <input class="form-control flat no-shadow" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchIntegration(this.value)">
 
-        <p></p>
-
         <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertNewIntegraions">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertNewIntegrations"></i>
@@ -28,18 +26,15 @@
                            Integration system required bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla blablabla.
                     </div>
                 </section>
-                <p></p>
             </div>
         </div>
     </div>
 
 </div>
 
-<div class="box box-solid box-clean flat no-shadow" id="newAiintegration">
-    <div class="box-body">
-        <div class="col-xs-12">
-         
-
+<div class="box box-solid box-clean flat no-shadow no-margin" id="newAiintegration" style="padding-bottom: 0px;">
+    <div class="box-body" style="padding-bottom: 0px;">
+        <div class="col-xs-12" style="padding-bottom: 0px;">
         <p id="intsearch"></p>
         </div>
     </div>

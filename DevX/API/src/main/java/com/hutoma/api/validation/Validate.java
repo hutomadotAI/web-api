@@ -196,7 +196,8 @@ public class Validate {
      * @return valid float representing the input, or fallback
      * @throws ParameterValidationException if the float was invalid or out of range
      */
-    TrainingLogic.TrainingType validateTrainingSourceType(final String paramName, final String param) throws ParameterValidationException {
+    TrainingLogic.TrainingType validateTrainingSourceType(final String paramName, final String param)
+            throws ParameterValidationException {
 
         int num = validateInteger(paramName, param);
         try {
@@ -217,7 +218,8 @@ public class Validate {
         }
     }
 
-    int validateInteger(final String paramName, final int defaultValue, final String param) throws ParameterValidationException {
+    int validateInteger(final String paramName, final int defaultValue, final String param)
+            throws ParameterValidationException {
         if ((null == param) || (param.isEmpty())) {
             return defaultValue;
         }

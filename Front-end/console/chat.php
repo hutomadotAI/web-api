@@ -40,7 +40,7 @@ $response = $aiApi->chatAI(
 unset($aiApi);
 
 if ($response['status']['code'] !== 200) {
-    echo(json_encode($response, JSON_PRETTY_PRINT));
+    echo(json_encode($response, true));
     unset($response);
     exit;
 }

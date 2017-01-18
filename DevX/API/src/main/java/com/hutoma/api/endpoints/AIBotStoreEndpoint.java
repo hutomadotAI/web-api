@@ -121,7 +121,8 @@ public class AIBotStoreEndpoint {
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
-            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Bot already purchased."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST,
+                    condition = "Bot already purchased; Cannot purchase owned bot"),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({
@@ -145,7 +146,8 @@ public class AIBotStoreEndpoint {
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition =
-                    "Developer information hasn't been update yet; Invalid publish information."),
+                    "Developer information hasn't been update yet; Invalid publish information; "
+                            + "AI already has a published bot"),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({

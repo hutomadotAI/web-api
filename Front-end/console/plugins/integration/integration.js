@@ -38,7 +38,7 @@ function showIntegrations(str){
             wHTML += ('</section>');
             wHTML += ('</div>');
             wHTML += ('</div>');
-            wHTML += ('<p></p>');
+          
         
     }
   }

@@ -11,9 +11,8 @@ namespace hutoma\api;
 class botApi extends apiBase
 {
     private static $botstorePath = "/botstore";
-    private static $purchasePath = "/purchase";
     private static $path = "/ai";
-    
+
     function __construct($sessionObject, $devToken)
     {
         parent::__construct($sessionObject, $devToken);
@@ -63,7 +62,7 @@ class botApi extends apiBase
     public function getAiBotDetails($aiid)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bots'));
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bot'));
             $this->curl->setVerbGet();
             $this->curl->addHeader('Content-Type', 'application/json');
             $curl_response = $this->curl->exec();
@@ -119,7 +118,7 @@ class botApi extends apiBase
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
 
-            $this->handleApiCallError($curl_response, 390);
+            $this->handleApiCallError($curl_response, 386);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -138,7 +137,7 @@ class botApi extends apiBase
         }
         return $this->getDefaultResponse();
     }
-    
+
 
     public function __destruct()
     {

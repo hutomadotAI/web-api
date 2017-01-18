@@ -11,12 +11,14 @@
         exit;
     }
 
-    if (!isPostInputAvailable()) {
-        \hutoma\console::redirect('./error.php?err=100');
-        exit;
-    }
+    if (!isSessionVariablesAvailable()) {
 
-    setSessionVariablesFromPost();
+        if (!isPostInputAvailable()) {
+            \hutoma\console::redirect('./error.php?err=100');
+            exit;
+        }
+        setSessionVariablesFromPost();
+    }
 
     $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $bots = $botApi->getPublishedBots();
@@ -53,6 +55,20 @@ function setSessionVariablesFromPost()
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = 0;
     else
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = 1;
+}
+
+function isSessionVariablesAvailable()
+{
+    return (
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] ) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
+         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'])
+    );
 }
 
 ?>

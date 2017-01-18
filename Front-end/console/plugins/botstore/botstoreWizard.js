@@ -11,7 +11,7 @@ function switchCard(botId){
     targetDiv.setAttribute('data-target','');
     targetDiv.innerHTML = ('<b>Bot purchased </b><span class="fa fa-check-circle-o"></span>');
 
-    node.children[0].children[0].classList.add("borderActive");
+    //node.children[0].children[0].classList.add("borderActive");
 }
 
 
@@ -73,7 +73,21 @@ function populateBotFields(bot){
 
 function infoForBotstore(title,purchased){
     var v=[];
+
     switch(title){
+        case 'home' :
+            v['menu_title']= title;
+            v['menu_level']= 0;
+            v['menu_block']= false;
+            v['menu_active']= false;
+            v['menu_deep']= 0;
+
+            if(purchased=='true')
+                btnFromBuyToPurchased();
+
+            document.getElementById('btnBuyBotBack').setAttribute('href','./NewAiBotstore.php');
+            
+            break;
         case 'settings' :
             v['menu_title']= title;
             v['menu_level']= 1;
@@ -84,14 +98,7 @@ function infoForBotstore(title,purchased){
             document.getElementById('btnBuyBotBack').setAttribute('href','./settingsAI.php?botstore=1');
             //document.getElementById('btnBuyBotBack').innerText = 'Back to Ai Skill';
 
-            var wHTML = '';
-            var nodeBtn = document.getElementById('btnBuyBot');
-            wHTML += ('<b>Bot purchased </b>');
-            wHTML += ('<span class="fa fa-check-circle-o"></span>');
-            nodeBtn.setAttribute('data-toggle','');
-            nodeBtn.setAttribute('data-target','');
-            nodeBtn.innerHTML = wHTML;
-            nodeBtn.className = 'btn btn-primary pull-right flat';
+            btnFromBuyToPurchased();
 
             break;
         case 'botstore' :
@@ -102,20 +109,24 @@ function infoForBotstore(title,purchased){
             v['menu_active']= false;
             v['menu_deep']= 0;
             
-            if(purchased=='true'){
-                var wHTML = '';
-                var nodeBtn = document.getElementById('btnBuyBot');
-                wHTML += ('<b>Bot purchased </b>');
-                wHTML += ('<span class="fa fa-check-circle-o"></span>');
-                nodeBtn.setAttribute('data-toggle','');
-                nodeBtn.setAttribute('data-target','');
-                nodeBtn.innerHTML = wHTML;
-                nodeBtn.className = 'btn btn-primary pull-right flat';
-            }
+            if(purchased=='true')
+                btnFromBuyToPurchased()
 
             document.getElementById('btnBuyBotBack').setAttribute('href','./botstore.php');
             //document.getElementById('btnBuyBotBack').innerText = 'Back to Botstore';
     }
    return v;
+}
+
+
+function btnFromBuyToPurchased(){
+    var wHTML = '';
+    var nodeBtn = document.getElementById('btnBuyBot');
+    wHTML += ('<b>Bot purchased </b>');
+    wHTML += ('<span class="fa fa-check-circle-o"></span>');
+    nodeBtn.setAttribute('data-toggle','');
+    nodeBtn.setAttribute('data-target','');
+    nodeBtn.innerHTML = wHTML;
+    nodeBtn.className = 'btn btn-primary pull-right flat';
 }
 

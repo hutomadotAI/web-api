@@ -11,10 +11,13 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-if (!isSessionVariablesAvailable()) {
+// TODO temporary removed - it block the visualization of Botstore during creation Ai processs
+/*
+if (!isAuthorizedToAccess()) {
     \hutoma\console::redirect('./error.php?err=105');
     exit;
 }
+*/
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bots = $botApi->getPublishedBots();
@@ -24,7 +27,7 @@ $botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\
 $purchasedBots = $botPurchaseApi->getPurchasedBots();
 unset($botPurchaseApi);
 
-function isSessionVariablesAvailable()
+function isAuthorizedToAccess()
 {
     return (
     isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])

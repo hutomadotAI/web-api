@@ -7,6 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
@@ -16,6 +17,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -239,6 +241,7 @@ public class AILogic {
             if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
                 return ApiError.getBadRequest(String.format("Bot %d already linked to AI", botId));
             }
+            this.stopTrainingIfNeeded(devId, aiid);
             if (this.database.linkBotToAi(devId, aiid, botId)) {
                 return new ApiResult().setSuccessStatus();
             } else {
@@ -253,6 +256,8 @@ public class AILogic {
     public ApiResult unlinkBotFromAI(final String devId, final UUID aiid, final int botId) {
         try {
             this.logger.logDebug(LOGFROM, String.format("request to unlink bot %d from AI %s", botId, aiid));
+            this.stopTrainingIfNeeded(devId, aiid);
+
             if (this.database.unlinkBotFromAi(devId, aiid, botId)) {
                 return new ApiResult().setSuccessStatus();
             } else {
@@ -272,6 +277,19 @@ public class AILogic {
         } catch (Database.DatabaseException ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
+        }
+    }
+
+    private void stopTrainingIfNeeded(final String devId, final UUID aiid)
+            throws Database.DatabaseException {
+        try {
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            TrainingStatus status = ai.getSummaryAiStatus();
+            if (status == TrainingStatus.AI_TRAINING || status == TrainingStatus.AI_TRAINING_QUEUED) {
+                this.aiServices.stopTraining(devId, aiid);
+            }
+        } catch (ServerConnector.AiServicesException ex) {
+            this.logger.logWarning(LOGFROM, "Could not stop training for ai " + aiid);
         }
     }
 }

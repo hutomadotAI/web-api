@@ -27,7 +27,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
     var wHTML = "";
 
     wHTML += ('<li class="header unselectable" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
-    wHTML += ('<li class="unselectable"><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>');
+    wHTML += ('<li id="menu_home" class="unselectable"><a href="./home.php"><i class="fa fa-home text-light-blue" id="level0"></i><span>home</span></a></li>');
 
     wHTML += ('<li class="unselectable" id="level1">');
     wHTML += ('<a href="#">');
@@ -49,7 +49,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
     */
 
     if ((deep_level_name === '' || deep_level_name === undefined)) {
-        wHTML += ('<li class="unselectable" id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i><span class="unselectable"> dbotstore</span></a></li>');
+        wHTML += ('<li class="unselectable" id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i><span class="unselectable"> botstore</span></a></li>');
         wHTML += ('</li>');
     }
     else {

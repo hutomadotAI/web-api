@@ -17,10 +17,12 @@ function purchaseBot(){
                 case 200:
                     document.getElementById('message').innerText = 'Skill succesfully added!';
                     $('#purchase_state').val('1');
+                    var $tmp = $('#btnBuyBot');;
+                    if ( $tmp.length)
+                        btnFromBuyToPurchased();
                     break;
                 case 400:
                     document.getElementById('message').innerText = 'You have already bought.';
-                    $('#purchase_state').val('1');
                     break;
                 case 404:
                     document.getElementById('message').innerText = 'Purchase Denied!';

@@ -1,25 +1,22 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
-import com.hutoma.api.containers.sub.BackendStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AILogic;
 import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -55,7 +52,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testGetAIs() throws Database.DatabaseException {
-        ApiAi ai = getAI();
+        ApiAi ai = TestDataHelper.getAI();
         when(this.fakeDatabase.getAllAIs(any(), any())).thenReturn(Collections.singletonList(ai));
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -66,7 +63,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testGetAI() throws Database.DatabaseException {
-        ApiAi ai = getAI();
+        ApiAi ai = TestDataHelper.getAI();
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -152,6 +149,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testLinkBotToAi() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
@@ -174,6 +172,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testUnlinkBotToAi() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(true);
         final Response response = target(BOT_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -196,12 +195,6 @@ public class TestServiceAi extends ServiceTestBase {
     public void testGetPublishedBotForAI_devId_invalid() throws Database.DatabaseException {
         final Response response = target(BOT_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
-    }
-
-    private ApiAi getAI() {
-        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false,
-                new BackendStatus(), true,
-                0, 0.0, 1, Locale.UK, "Europe/London");
     }
 
     protected Class<?> getClassUnderTest() {

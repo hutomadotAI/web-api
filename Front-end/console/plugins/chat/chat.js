@@ -149,7 +149,7 @@ function requestAnswerAI(ai_name, question, chatId) {
             error: function (xhr, ajaxOptions, thrownError) {
                 //alert(JSON.stringify(xhr.responseText));
                 var JSONdata = JSON.stringify(xhr.responseText);
-                createRightMsg(ai_name, JSONdata['status']['info'], chatId, true);
+                createRightMsg(ai_name, 'The AI is in training. Please try later.', '', true);
             }
         });
     }

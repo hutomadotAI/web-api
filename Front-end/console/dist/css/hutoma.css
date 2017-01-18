@@ -2861,14 +2861,14 @@ a:focus {
 }
 
 .btn-warning {
-    background-color: #f39c12;
-    border-color: #e08e0b;
+    background-color: #7d5528;
+    border-color: #885f29;
 }
 
 .btn-warning:hover,
 .btn-warning:active,
 .btn-warning.hover {
-    background-color: #e08e0b;
+    background-color: #b1670b;
 }
 
 .btn-outline {

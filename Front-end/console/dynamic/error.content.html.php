@@ -243,6 +243,10 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - UNABLE TO UPDATE BOT INFORMATION';
             $details = ' We could not find the data you were looking for';
             break;
+        case 386 :
+            $msg = 'INTERNAL ERROR - UNABLE TO UPLOAD BOT ICON';
+            $details = ' We could not find the data you were looking for';
+            break;
         case 390 :
             $msg = 'INTERNAL ERROR - UNABLE TO UPDATE BOT IMAGE';
             $details = ' We could not find the data you were looking for';
@@ -287,14 +291,14 @@ if (isset($_GET['err'])) {
             unset($details); ?>
         </p>
 
-            <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search">
-                <div class="input-group-btn">
-                    <button name="submit" class="btn btn-warning btn-flat"><i class="fa fa-search"></i>
-                    </button>
-                </div>
-            </div><!-- /.input-group -->
-      
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search">
+            <div class="input-group-btn">
+                <button name="submit" class="btn btn-warning btn-flat"><i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div><!-- /.input-group -->
+
     </div><!-- /.error-content -->
 </div><!-- /.error-page -->
 

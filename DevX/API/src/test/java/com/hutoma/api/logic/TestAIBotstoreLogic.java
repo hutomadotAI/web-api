@@ -32,6 +32,8 @@ import static org.mockito.Mockito.when;
  */
 public class TestAIBotstoreLogic {
 
+    private static final String ALTERNATE_DEVID = "other_devId";
+
     private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
     private Database fakeDatabase;
     private AIBotStoreLogic aiBotStoreLogic;
@@ -97,7 +99,7 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(true);
-        ApiResult result = this.aiBotStoreLogic.purchaseBot(DEVID, BOTID);
+        ApiResult result = this.aiBotStoreLogic.purchaseBot(ALTERNATE_DEVID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
@@ -106,7 +108,7 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.aiBotStoreLogic.purchaseBot(DEVID, BOTID);
+        ApiResult result = this.aiBotStoreLogic.purchaseBot(ALTERNATE_DEVID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -128,11 +130,20 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
+    public void testPurchaseBot_tryPurchaseOwnBot() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(true);
+        ApiResult result = this.aiBotStoreLogic.purchaseBot(SAMPLEBOT.getDevId(), BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testPurchaseBot_insertReturnsNoRows() throws Database.DatabaseException {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(false);
-        ApiResult result = this.aiBotStoreLogic.purchaseBot(DEVID, BOTID);
+        ApiResult result = this.aiBotStoreLogic.purchaseBot(ALTERNATE_DEVID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -183,6 +194,14 @@ public class TestAIBotstoreLogic {
     public void testPublishBot_errorInsert() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.publishBot(any())).thenReturn(-1);
+        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testPublishBot_alreadyPublished() throws Database.DatabaseException {
+        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(BotHelper.SAMPLEBOT);
+        when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }

@@ -72,7 +72,7 @@
 
     <div id="chart-details" hidden>
         <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
-            <a data-toggle="collapse"  href="#collapseChartTrainingError" aria-expanded="true" class="">
+            <a data-toggle="collapse"  href="#collapseChartTrainingError">
                 <div class=" pull-left">
                       Show training chart
                     <i class="fa fa-info-circle text-sm text-yellow"></i>
@@ -86,7 +86,7 @@
         <div class="row no-padding">
             <div class="col-xs-12">
                 <div class="box-body table-responsive no-border" style="padding-bottom:0px;">
-                    <div id="collapseChartTrainingError" class="panel-collapse collapse in">
+                    <div id="collapseChartTrainingError" class="panel-collapse collapse"> <!-- class="panel-collapse collapse in" -->
                         <div id="interactive" style="width: 100%;height: 150px;">
                         </div>
                         <div class="unselectable text-center">
@@ -101,7 +101,7 @@
 
     </div>
     <div class="box-footer" id="chart-details-footer" hidden>
-        <div class="alert alert-dismissable flat alert-warning no-margin no-padding">
+        <div class="alert alert-dismissable flat alert-info no-margin no-padding">
             <div class="text-muted text-center no-margin no-padding" >
                 Your AI is trained, when the learning error reaches a number that is close to 0
             </div>

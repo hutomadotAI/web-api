@@ -18,7 +18,7 @@ $response_getAIs = $aiApi->getAIs();
 unset($aiApi);
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$bots = $botApi->getPublishedBots();
+$publishedBots = $botApi->getPublishedBots();
 unset($botApi);
 
 ?>

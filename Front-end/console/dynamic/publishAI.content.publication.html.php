@@ -26,7 +26,7 @@
             <div class="drop-zone1">
                 <div class="row no-margin">
                     <div class="form-group">
-                        <label class="unselectable" for="bot_description">Short Description</label>
+                        <label class="unselectable" for="bot_description">Short Description</label><a href="./home.php" id="btnHomeBack" class="fa fa-close text-md text-darkgray pull-right"></a>
                         <input type="text" maxlength="50" class="form-control flat no-shadow"  id="bot_description" name="bot_description">
                     </div>
                 </div>

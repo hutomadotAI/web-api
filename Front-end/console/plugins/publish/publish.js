@@ -36,7 +36,7 @@ function checkInput(){
             return false;
         }
     }
-    
+
     // BOT licence fee ( price ) input validation
     var bot_price = document.getElementById('bot_price');
     if (bot_price.value != '' && bot_price.value !== 'undefined') {
@@ -50,7 +50,8 @@ function checkInput(){
     $(this).prop("disabled", true);
 
     requestPublish();
-    //uploadIconFile();
+    // TODO check if upload works
+    //uploadIconFile(document.getElementById('botId'));
 }
 
 function requestPublish(){
@@ -67,26 +68,27 @@ function requestPublish(){
     createAlertMessage(1, 'Sending request...');
     var botInfo = fieldsToBotIstance();
     var jsonString = JSON.stringify(botInfo);
-    
+
     $.ajax({
         type: "POST",
         url: './dynamic/publishBot.php',
         data: {'bot' : jsonString},
         cache: false,
         success: function(response){
-            var statusCode = JSON.parse(response);
-            switch(statusCode['status']['code']){
+            var JSONdata = JSON.parse(response);
+            switch(JSONdata['status']['code']){
                 case 200:
-
                     createAlertMessage(3, 'Request sent!');
                     buttonPublishToRequest();
+                    // necessary store in UI for image upload at second step
+                    document.getElementById('bot_id').value = JSONdata['bot']['botId'];
                     break;
                 case 400:
                     createAlertMessage(2,'At least one of the required parameters is null or empty');
-                    $("#btnPublishDeveloper").prop("disabled", false);
+                    $("#btnPublishRequest").prop("disabled", false);
                     break;
                 default:
-                    createAlertMessage(2, response);
+                    createAlertMessage(2, JSONdata['status']['info']);
             }
         },
         complete: function () {
@@ -101,55 +103,39 @@ function requestPublish(){
 
 }
 
-function uploadIconFile() {
+function uploadIconFile(botId) {
 
-    var imageData = $('.image-editor').cropit('export');
-    window.open(imageData);
-
+    var icon = $('.image-editor').cropit('export');
     var formData = new FormData();
-    formData.append("inputfile", document.getElementById('inputfile').files[0]);
-    formData.append("tab","file");
-
+    formData.append('icon', icon);
+    formData.append('botId', botId);
+    
     createAlertMessage(1,'Uploading image...');
+
     $.ajax({
-        url : './dynamic/upload.php',
-        type : 'POST',
-        data : formData,
-        dataType: 'json',
-        processData: false,  // tell jQuery not to process the data
-        contentType: false,  // tell jQuery not to set contentType
+        type: "POST",
+        url: './dynamic/uploadIcon.php',
+        data: formData,
+        contentType: false,
+        processData: false,
+        
         success: function (response) {
-            var JSONdata = response;
-            var statusCode = JSONdata['status']['code'];
-
-            if (statusCode === 200) {
-                var uploadWarnings = null;
-                var additionalInfo = JSONdata['status']['additionalInfo'];
-
-                if (additionalInfo != null)
-                    uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
-
-                if (uploadWarnings != null && uploadWarnings.length > 0)
-                    msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
-                else
-                    msgAlertUploadFile(4, 'File uploaded');
-                setUICurrentStatus(1);
-                hideRestartBox();
-            } else {
-                if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
-                    msgAlertUploadFile(2, 'File not uploaded. No right content was found.');
-                } else {
-                    msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded.');
-                }
-                setUICurrentStatus(-1);
-                disableButtonUploadTextFile(false);
-                disableRestartBoxButton(false);
+            var JSONdata = JSON.parse(response);
+            switch (JSONdata['status']['code']) {
+                case 200:
+                    createAlertMessage(3, 'image ok!');
+                    break;
+                case 400:
+                    createAlertMessage(2, 'At least one of the required parameters is null or empty');
+                    break;
+                default:
+                    createAlertMessage(2, JSONdata['status']['info']);
             }
         },
+        complete: function () {
+        },
         error: function (xhr, ajaxOptions, thrownError) {
-            var JSONdata = JSON.stringify(xhr.responseText);
-            createAlertMessage(2,'Unexpected error occurred during upload');
-            $("#btnPublishRequest").prop("disabled", false);
+            createAlertMessage(2, 'Request not sent!');
         }
     });
 }
@@ -360,12 +346,14 @@ function fieldsBotValidation(){
         return false;
     }
 
+    /*
     elem = document.getElementById('bot_sample');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
         createAlertMessage(2, 'The sample field cannot is empty!');
         return false;
     }
+    */
 
     elem = document.getElementById('bot_price');
     if (elem.value == '') {
@@ -374,12 +362,14 @@ function fieldsBotValidation(){
         return false;
     }
 
+    /*
     elem = document.getElementById('bot_alertMessage');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
         createAlertMessage(2, 'The alertMessage field cannot is empty!');
         return false;
     }
+    */
 
     elem = document.getElementById('bot_version');
     if (elem.value == '') {
@@ -394,7 +384,7 @@ function fieldsBotValidation(){
         createAlertMessage(2, 'The privacy Policy field cannot is empty!');
         return false;
     }
-    
+
     return true;
 }
 

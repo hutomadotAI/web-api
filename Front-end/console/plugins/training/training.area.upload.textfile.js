@@ -23,7 +23,7 @@ function uploadTextFile() {
         contentType: false,  // tell jQuery not to set contentType
         success: function (response) {
             var JSONdata = JSON.parse(response);
-            switch(JSONdata['status']['code']) {
+            switch (JSONdata['status']['code']) {
                 case 200:
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
@@ -86,11 +86,13 @@ function checkTextFileSize(fileID, size) {
         msgAlertUploadFile(2, 'This browser doesn\'t seem to support the \'files\' property of file inputs.');
         return false;
     }
+
     file = input.files[0];
     if (file.size > size * 1048476) {
         msgAlertUploadFile(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
         return false;
     }
+
     return true;
 }
 
@@ -145,6 +147,11 @@ function phaseOneFlashing(flag) {
     }
 }
 
+function phaseQueue() {
+    document.getElementById('status-upload-file').innerText = 'queued';
+    document.getElementById('status-upload-file').setAttribute('class', 'text-center');
+}
+
 function phaseTwoFlashing(flag) {
     if (flag) {
         document.getElementById('status-training-file').innerText = 'initialising';
@@ -166,7 +173,7 @@ function phaseOneMaxValue() {
     document.getElementById('status-badge-upload').innerHTML = '100%';
 }
 
-function phaseTwoMaxValue(){
+function phaseTwoMaxValue() {
     document.getElementById("progress-training-file").style.width = '100%';
     document.getElementById('status-badge-training').innerHTML = '100%';
 }
