@@ -20,7 +20,7 @@ function checkDevInput(){
     var developer_email = document.getElementById('developer_email');
     if (developer_email.value != '' && developer_email.value !== 'undefined') {
         if (inputValidation(developer_email.value, 'developer_email')) {
-            createAlertMessage(2, 'Please enter a valid email.','developer_email');
+            createAlertMessage(ALERT.DANGER.value, 'Please enter a valid email.','developer_email');
             return false;
         }
     }
@@ -40,7 +40,7 @@ function requestDevPublish(){
         document.body.style.cursor = '';
         return false;
     }
-    createAlertMessage(1, 'Sending request...');
+    createAlertMessage(ALERT.WARNING.value, 'Sending request...');
     var devInfo = fieldsToDevInstance();
     var jsonString = JSON.stringify(devInfo);
 
@@ -54,17 +54,17 @@ function requestDevPublish(){
             switch(statusCode['status']['code']){
                 case 200:
                     // UPDATED developer
-                    createAlertMessage(4, 'Request submitted!');
+                    createAlertMessage(ALERT.PRIMARY.value, 'Request submitted!');
                     $("#btnPublishDeveloper").prop("disabled", false);
                     break;
                 case 400:
                     // UPDATED not complete
-                    createAlertMessage(2,'At least one of the required parameters is null or empty');
+                    createAlertMessage(ALERT.DANGER.value,'At least one of the required parameters is null or empty');
                     $("#btnPublishDeveloper").prop("disabled", false);
                     break;
                 case 500:
                     // DEVELOPER JUST EXISTS
-                    createAlertMessage(1,'Developer info just sended');
+                    createAlertMessage(ALERT.WARNING.value,'Developer info just sended');
                     break;
             }
         },
@@ -74,7 +74,7 @@ function requestDevPublish(){
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
             $("#btnPublishDeveloper").prop("disabled", false);
-            createAlertMessage(2, 'Request not sended!');
+            createAlertMessage(ALERT.DANGER.value, 'Request not sended!');
         }
     });
 
@@ -159,49 +159,49 @@ function fieldsDevValidation(){
     elem = document.getElementById('developer_name');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The name field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The name field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_address');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The address field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The address field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_postCode');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The postcode field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The postcode field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_city');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The city field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The city field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_country');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The country field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The country field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_email');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The email field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The email field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_company');
     if (elem.value == '') {
         elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The company field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The company field cannot is empty!');
         return false;
     }
 

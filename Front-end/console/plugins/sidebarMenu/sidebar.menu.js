@@ -10,10 +10,11 @@ var MENU = MENU || (function () {
                 // _args[3] -> block href link on clicked menu
                 // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
 
-                if (!(_args[0] === ''))
-                    buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[5]);
-                else
+                if ((_args[0] === '') || (_args[1] === 'home'))
                     buildLimitedConsoleMenu(_args[1]);
+                else
+                    buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[5]);
+
 
                 buildAccountMenu();
             }

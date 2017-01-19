@@ -71,5 +71,5 @@
             </div>
         </div>
     </div>
-    <a href="./botstore.php" class="btn btn-primary pull-left flat">Go to Botstore</a>
+    <a href="./botstore.php" id="bthBackToBotstore" class="btn btn-primary pull-left flat">Go to Botstore</a>
 </div>

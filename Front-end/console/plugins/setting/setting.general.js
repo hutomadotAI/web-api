@@ -21,7 +21,7 @@ function updateAI() {
 
     var value_desc = document.getElementById('ai_description').value;
     if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
-        msgAlertDescriptionAI(2, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
+        msgAlertDescriptionAI(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
         document.getElementById('btnSave').setAttribute('disabled','disabled');
         document.getElementById('btnReset').removeAttribute('disabled');
         document.getElementById('btnDelete').removeAttribute('disabled');
@@ -74,7 +74,7 @@ function updateAI() {
 function checkDescriptionLength() {
     var limitTextInputSize = 100;
     if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
-        msgAlertDescriptionAI(1, 'Limit AI description reached.');
+        msgAlertDescriptionAI(ALERT.WARNING.value, 'Limit AI description reached.');
     else {
         document.getElementById('btnSave').removeAttribute('disabled');
         document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';

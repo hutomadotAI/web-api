@@ -1,29 +1,57 @@
 document.getElementById("btnPublishRequest").addEventListener("click", checkInput);
 
-document.getElementById("bot_name").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_description").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_longDescription").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_alertMessage").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_price").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_sample").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_privacyPolicy").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_version").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_videoLink").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_developer_name").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_developer_city").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("bot_developer_email").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("bot_name").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_description").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_longDescription").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_alertMessage").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_price").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_sample").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_privacyPolicy").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_version").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_videoLink").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_developer_name").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_developer_city").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_developer_country").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_developer_company").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
+document.getElementById("bot_developer_email").addEventListener("keydown", function () {
+    removeAlert(this)
+}, false);
 
 populateDeveloperFields(developer);
 populateBotFields(bot);
 
-function checkInput(){
+function checkInput() {
     // BOT name input validation
     var bot_name = document.getElementById('bot_name');
     if (bot_name.value !== 'undefined') {
         if (inputValidation(bot_name.value, 'bot_name')) {
-            createAlertMessage(2, 'The AI name can only contains letters and numbers.','bot_name');
+            createAlertMessage(ALERT.DANGER.value, 'The AI name can only contains letters and numbers.', 'bot_name');
             return false;
         }
     }
@@ -32,7 +60,7 @@ function checkInput(){
     var bot_description = document.getElementById('bot_description');
     if (bot_description.value != '' && bot_description.value !== 'undefined') {
         if (inputValidation(bot_description.value, 'bot_description')) {
-            createAlertMessage(2, 'Invalid description text. Please enter a string that contains alphanumeric characters.','bot_description');
+            createAlertMessage(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.', 'bot_description');
             return false;
         }
     }
@@ -41,7 +69,7 @@ function checkInput(){
     var bot_price = document.getElementById('bot_price');
     if (bot_price.value != '' && bot_price.value !== 'undefined') {
         if (inputValidation(bot_price.value, 'bot_price')) {
-            createAlertMessage(2, 'Please enter a valid number.','bot_price');
+            createAlertMessage(ALERT.DANGER.value, 'Please enter a valid number.', 'bot_price');
             return false;
         }
     }
@@ -50,45 +78,43 @@ function checkInput(){
     $(this).prop("disabled", true);
 
     requestPublish();
-    // TODO check if upload works
-    //uploadIconFile(document.getElementById('botId'));
 }
 
-function requestPublish(){
+function requestPublish() {
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnPublishRequest").prop("disabled", true);
 
-    if (!fieldsBotValidation()){
+    if (!fieldsBotValidation()) {
         $("#btnPublishRequest").prop("disabled", false);
         document.body.style.cursor = '';
         return false;
     }
 
-    createAlertMessage(1, 'Sending request...');
+    createAlertMessage(ALERT.WARNING.value, 'Sending request...');
     var botInfo = fieldsToBotIstance();
     var jsonString = JSON.stringify(botInfo);
 
     $.ajax({
         type: "POST",
         url: './dynamic/publishBot.php',
-        data: {'bot' : jsonString},
+        data: {'bot': jsonString},
         cache: false,
-        success: function(response){
+        success: function (response) {
             var JSONdata = JSON.parse(response);
-            switch(JSONdata['status']['code']){
+            switch (JSONdata['status']['code']) {
                 case 200:
-                    createAlertMessage(3, 'Request sent!');
+                    createAlertMessage(ALERT.SUCCESS.value, 'Request sent ');
                     buttonPublishToRequest();
                     // necessary store in UI for image upload at second step
-                    document.getElementById('bot_id').value = JSONdata['bot']['botId'];
+                    callback(JSONdata['bot']['botId']);
                     break;
                 case 400:
-                    createAlertMessage(2,'At least one of the required parameters is null or empty');
+                    createAlertMessage(ALERT.DANGER.value, 'At least one of the required parameters is null or empty.');
                     $("#btnPublishRequest").prop("disabled", false);
                     break;
                 default:
-                    createAlertMessage(2, JSONdata['status']['info']);
+                    createAlertMessage(ALERT.DANGER.value, JSONdata['status']['info']);
             }
         },
         complete: function () {
@@ -97,10 +123,17 @@ function requestPublish(){
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
             $("#btnPublishRequest").prop("disabled", false);
-            createAlertMessage(2, 'Request not sent!');
+            createAlertMessage(ALERT.DANGER.value, 'Request not sent!');
         }
     });
 
+}
+
+function callback(botId) {
+    //TODO probably we can ignore this assignment
+    document.getElementById('bot_id').value = botId;
+    //TODO uncomment only when the backend uploadicon is ready we can ignore this assignment
+    //uploadIconFile(botId,formData)
 }
 
 function uploadIconFile(botId) {
@@ -109,8 +142,8 @@ function uploadIconFile(botId) {
     var formData = new FormData();
     formData.append('icon', icon);
     formData.append('botId', botId);
-    
-    createAlertMessage(1,'Uploading image...');
+
+    createAlertMessage(1, 'Uploading image...');
 
     $.ajax({
         type: "POST",
@@ -118,7 +151,7 @@ function uploadIconFile(botId) {
         data: formData,
         contentType: false,
         processData: false,
-        
+
         success: function (response) {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
@@ -135,20 +168,21 @@ function uploadIconFile(botId) {
         complete: function () {
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            createAlertMessage(2, 'Request not sent!');
+            var prev_msg = document.getElementById('msgAlertPublish').innerText;
+            createAlertMessage(ALERT.DANGER.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
         }
     });
 }
 
-function removeAlert(node){
-    if( node.getAttribute("style") != null && node.getAttribute("style")!="" ) {
+function removeAlert(node) {
+    if (node.getAttribute("style") != null && node.getAttribute("style") != "") {
         node.style.border = "0px";
-        if( document.getElementById('containerMsgAlertPublish') !== null )
+        if (document.getElementById('containerMsgAlertPublish') !== null)
             document.getElementById('containerMsgAlertPublish').remove();
     }
 }
 
-function buttonPublishToRequest(){
+function buttonPublishToRequest() {
     $('#btnPublishRequest').prop('disabled', true);
     document.getElementById('btnPublishRequest').className = 'btn btn-primary pull-right flat';
     document.getElementById('btnPublishRequestText').innerText = 'Request Sent';
@@ -156,62 +190,62 @@ function buttonPublishToRequest(){
 }
 
 
-function createAlertMessage(alarm,message,id) {
+function createAlertMessage(alarm, message, id) {
     var msg_class;
     var ico_class;
 
-    switch (alarm){
-        case 0:
+    switch (alarm) {
+        case ALERT.BASIC.value:
             msg_class = 'alert alert-dismissable flat alert-base';
             ico_class = 'icon fa fa-check';
-            if (id!=null)
-                document.getElementById(id).style.border ="0px";
+            if (id != null)
+                document.getElementById(id).style.border = "0px";
             break;
-        case 1:
+        case ALERT.WARNING.value:
             msg_class = 'alert alert-dismissable flat alert-warning';
             ico_class = 'icon fa fa-check';
-            if (id!=null)
-                document.getElementById(id).style.border ="1px solid orange";
+            if (id != null)
+                document.getElementById(id).style.border = "1px solid orange";
             break;
-        case 2:
+        case ALERT.DANGER.value:
             msg_class = 'alert alert-dismissable flat alert-danger';
             ico_class = 'icon fa fa-warning';
-            if (id!=null)
-                document.getElementById(id).style.border ="1px solid red";
+            if (id != null)
+                document.getElementById(id).style.border = "1px solid red";
             break;
-        case 3:
+        case ALERT.SUCCESS.value:
             msg_class = 'alert alert-dismissable flat alert-success text-white';
             ico_class = 'icon fa fa-check';
             break;
-        case 4:
+        case ALERT.PRIMARY.value:
             msg_class = 'alert alert-dismissable flat alert-primary';
             ico_class = 'icon fa fa-check';
             break;
     }
 
-    if (document.getElementById('containerMsgAlertPublish')===null) {
+    if (document.getElementById('containerMsgAlertPublish') === null) {
         var wHTML = '';
         wHTML += '<button type="button" class="close text-white" data-dismiss="alert" aria-hidden="true">×</button>';
-        wHTML += '<i class="'+ ico_class+'" id="iconAlertPublish"></i>';
-        wHTML += '<span id="msgAlertPublish">'+message+'</span>';
+        wHTML += '<i class="' + ico_class + '" id="iconAlertPublish"></i>';
+        wHTML += '<span id="msgAlertPublish">' + message + '</span>';
 
         var newNode = document.createElement('div');
         newNode.setAttribute('class', msg_class);
         newNode.setAttribute('id', 'containerMsgAlertPublish');
-        newNode.style.marginBottom ='15px';
+        newNode.style.marginBottom = '15px';
 
         newNode.innerHTML = wHTML;
         document.getElementById('alertPublishMessage').appendChild(newNode);
     }
-    else{
-        document.getElementById('containerMsgAlertPublish').setAttribute('class',msg_class);
+    else {
+        document.getElementById('containerMsgAlertPublish').setAttribute('class', msg_class);
         document.getElementById('iconAlertPublish').setAttribute('class', ico_class);
         document.getElementById('msgAlertPublish').innerText = message;
     }
 
 }
 
-function populateBotFields(bot){
+function populateBotFields(bot) {
     var json = JSON.parse(bot);
     document.getElementById('bot_id').value = json['botId'];
     document.getElementById('bot_aiid').value = json['aiid'];
@@ -222,12 +256,13 @@ function populateBotFields(bot){
     document.getElementById('bot_name').value = json['name'];
     document.getElementById('bot_price').value = json['price'];
     document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
-    document.getElementById('bot_sample').innerHTML = json['sample'];
+    document.getElementById('bot_sample').value = json['sample'];
     document.getElementById('bot_version').value = json['version'];
     document.getElementById('bot_videoLink').value = json['videoLink'];
-    setSelectValue('bot_category',json['category']);
-    setSelectValue('bot_classification',json['classification']);
-    setSelectValue('bot_licenseType',json['licenseType']);
+
+    setSelectValue('bot_category', json['category']);
+    setSelectValue('bot_classification', json['classification']);
+    setSelectValue('bot_licenseType', json['licenseType']);
 }
 
 function populateDeveloperFields(developer) {
@@ -243,8 +278,8 @@ function populateDeveloperFields(developer) {
 }
 
 
-function fieldsToBotIstance(){
-    var bot={};
+function fieldsToBotIstance() {
+    var bot = {};
     bot['aiid'] = document.getElementById('bot_aiid').value;
     bot['botId'] = document.getElementById('bot_id').value;
     bot['alertMessage'] = document.getElementById('bot_alertMessage').value;
@@ -257,19 +292,19 @@ function fieldsToBotIstance(){
     bot['name'] = document.getElementById('bot_name').value;
     bot['price'] = document.getElementById('bot_price').value;
     bot['privacyPolicy'] = document.getElementById('bot_privacyPolicy').value;
-    bot['sample'] = document.getElementById('bot_sample').innerHTML;
-    bot['version'] =  document.getElementById('bot_version').value;
+    bot['sample'] = document.getElementById('bot_sample').value;
+    bot['version'] = document.getElementById('bot_version').value;
     bot['videoLink'] = document.getElementById('bot_videoLink').value;
     return bot;
 }
 
-function getSelectValueText(id){
+function getSelectValueText(id) {
     var element = document.getElementById(id);
     var i = element.selectedIndex;
     return element.options[element.selectedIndex].text;
 }
 
-function setSelectValue(id,valueToSelect) {
+function setSelectValue(id, valueToSelect) {
     var element = document.getElementById(id);
     for (var i = 0; i < element.options.length; ++i) {
         if (element.options[i].text === valueToSelect) {
@@ -279,109 +314,106 @@ function setSelectValue(id,valueToSelect) {
     }
 }
 
-function licenseTypeShow(){
+function licenseTypeShow() {
     var myselect = document.getElementById('bot_licenseType');
     var val = parseInt(myselect.options[myselect.selectedIndex].value);
 
-    switch(val){
+    switch (val) {
         case 0:
             document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse';
             document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse';
             break;
         case 1:
-            document.getElementById('collapseLicenseDetailsSubscription').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenseDetailsSubscription').setAttribute('aria-expanded', 'true');
             document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse in';
             document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse';
             break;
         case 2:
-            document.getElementById('collapseLicenseDetailsPerpetual').setAttribute('aria-expanded','true');
+            document.getElementById('collapseLicenseDetailsPerpetual').setAttribute('aria-expanded', 'true');
             document.getElementById('collapseLicenseDetailsPerpetual').className = 'panel-collapse collapse in';
             document.getElementById('collapseLicenseDetailsSubscription').className = 'panel-collapse collapse';
             break;
     }
 }
 
-function fieldsBotValidation(){
+
+function fieldsBotValidation() {
     var elem;
 
     elem = document.getElementById('bot_name');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The name field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The name field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('bot_description');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The description field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The description field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('bot_longDescription');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The long description field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The long description field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('bot_licenseType');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The licenseType field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The licenseType field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('bot_category');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The category field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The category field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('bot_classification');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The classification field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The classification field cannot is empty!');
         return false;
     }
 
-    /*
     elem = document.getElementById('bot_sample');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The sample field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The sample field cannot is empty!');
         return false;
     }
-    */
 
     elem = document.getElementById('bot_price');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The price field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The price field cannot is empty!');
         return false;
     }
 
-    /*
     elem = document.getElementById('bot_alertMessage');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The alertMessage field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The alertMessage field cannot is empty!');
         return false;
     }
-    */
 
     elem = document.getElementById('bot_version');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The version field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The version field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('bot_privacyPolicy');
     if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(2, 'The privacy Policy field cannot is empty!');
+        elem.style.border = "1px solid red";
+        createAlertMessage(ALERT.DANGER.value, 'The privacy Policy field cannot is empty!');
         return false;
     }
 

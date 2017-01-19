@@ -149,7 +149,8 @@
         if (isset($puchasedBots) && (array_key_exists("bots", $puchasedBots))) {
             foreach ($puchasedBots['bots'] as $botDetails) {
                 $puchasedBot = new \hutoma\bot();
-                $puchasedBot->setAiid($botDetails['aiid']);
+                // TODO probably this value is hidden to client side
+                //$puchasedBot->setAiid($botDetails['aiid']);
                 $puchasedBot->setAlertMessage($botDetails['alertMessage']);
                 $puchasedBot->setBadge($botDetails['badge']);
                 $puchasedBot->setBotId($botDetails['botId']);
@@ -157,6 +158,7 @@
                 $puchasedBot->setClassification($botDetails['classification']);
                 $puchasedBot->setDescription($botDetails['description']);
                 $puchasedBot->setLicenseType($botDetails['licenseType']);
+                $puchasedBot->setImagePath('');
                 $puchasedBot->setLongDescription($botDetails['longDescription']);
                 $puchasedBot->setName($botDetails['name']);
                 $puchasedBot->setPrice($botDetails['price']);

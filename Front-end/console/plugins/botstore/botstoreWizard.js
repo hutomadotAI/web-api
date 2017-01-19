@@ -1,5 +1,5 @@
-function switchCard(botId){
-    var node = document.getElementById('card'+botId);
+function switchCard(botId) {
+    var node = document.getElementById('card' + botId);
     var btnClassName = 'btn btn-success center-block flat'
     var pos = node.getAttribute('data-pos');
     var targetDiv = node.getElementsByClassName(btnClassName)[0];
@@ -7,18 +7,18 @@ function switchCard(botId){
     targetDiv.classList.remove("btn-success");
     targetDiv.classList.add("btn-primary");
 
-    targetDiv.setAttribute('data-toggle','');
-    targetDiv.setAttribute('data-target','');
+    targetDiv.setAttribute('data-toggle', '');
+    targetDiv.setAttribute('data-target', '');
     targetDiv.innerHTML = ('<b>Bot purchased </b><span class="fa fa-check-circle-o"></span>');
 
     //node.children[0].children[0].classList.add("borderActive");
 }
 
 
-function codeHTMLstars(rating){
-    var wHTML='';
-    for (var i=5; i>0; i--) {
-        if ( i== Math.round(rating)) {
+function codeHTMLstars(rating) {
+    var wHTML = '';
+    for (var i = 5; i > 0; i--) {
+        if (i == Math.round(rating)) {
             wHTML += '<input class="star-rating__input" id="star--rating-' + i + '" type="radio" name="rating" value="' + i + '" checked="checked" disabled="disabled">';
             wHTML += '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' + i + '" title="' + i + ' out of ' + i + ' stars"></label>';
         }
@@ -31,7 +31,7 @@ function codeHTMLstars(rating){
 }
 
 
-function populateBotFields(bot){
+function populateBotFields(bot) {
     var json = JSON.parse(bot);
     document.getElementById('botTitle').innerText = json['name'];
     document.getElementById('botBadge').innerText = json['badge'];
@@ -49,9 +49,9 @@ function populateBotFields(bot){
     document.getElementById('botClassification').innerText = json['classification'];
     document.getElementById('botCompany').innerText = 'hu:toma'; //json['company'];
     document.getElementById('botActivations').innerText = json['activations'];
-    document.getElementById('botReport').setAttribute('href',json['report']);
-    document.getElementById('botPrivacyPolicy').setAttribute('href',json['privacyPolicy']);
-    document.getElementById('botWebsite').setAttribute('href',json['website']);
+    document.getElementById('botReport').setAttribute('href', json['report']);
+    document.getElementById('botPrivacyPolicy').setAttribute('href', json['privacyPolicy']);
+    document.getElementById('botWebsite').setAttribute('href', json['website']);
     document.getElementById('botDeveloper').innerText = 'hutoma';
     document.getElementById('botEmail').innerText = 'support@hutoma.com';
     document.getElementById('botAddress').innerText = 'Carrer del Consell de Cent, 341';
@@ -59,73 +59,101 @@ function populateBotFields(bot){
     document.getElementById('botCity').innerText = 'Barcelona';
     document.getElementById('botCountry').innerText = 'Spain';
 
-
-    /*
-     document.getElementById('bot_aiid').value = json['aiid'];
-     document.getElementById('bot_videoLink').value = json['videoLink'];
-     */
+    //TODO complete this field with iconPath from API call
+    //document.getElementById('botIcon').setAttribute('src','');
+    //document.getElementById('bot_aiid').value = json['aiid'];
 
     document.getElementById('botNamePurchase').innerText = json['name'];
     document.getElementById('botDescriptionPurchase').innerText = json['description'];
     document.getElementById('botPricePurchase').innerText = json['price'];
     document.getElementById('bot_id').value = json['botId'];
+
+    if (videoLinkFilter(json['videoLink']) == '')
+        document.getElementById('botVideoLinkSection').innerHTML = '';
+    else
+        document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(json['videoLink']));
 }
 
-function infoForBotstore(title,purchased){
-    var v=[];
 
-    switch(title){
+function infoForBotstore(title, purchased) {
+    var v = [];
+
+    switch (title) {
         case 'home' :
-            v['menu_title']= title;
-            v['menu_level']= 0;
-            v['menu_block']= false;
-            v['menu_active']= false;
-            v['menu_deep']= 0;
+            v['menu_title'] = title;
+            v['menu_level'] = 0;
+            v['menu_block'] = false;
+            v['menu_active'] = false;
+            v['menu_deep'] = 0;
 
-            if(purchased=='true')
+            if (purchased == 'true')
                 btnFromBuyToPurchased();
 
-            document.getElementById('btnBuyBotBack').setAttribute('href','./NewAiBotstore.php');
-            
+            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAiBotstore.php');
+            document.getElementById('bthBackToBotstore').innerText = 'Go back';
+            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAiBotstore.php');
+
             break;
         case 'settings' :
-            v['menu_title']= title;
-            v['menu_level']= 1;
-            v['menu_block']= false;
-            v['menu_active']= false;
-            v['menu_deep']= 0;
+            v['menu_title'] = title;
+            v['menu_level'] = 1;
+            v['menu_block'] = false;
+            v['menu_active'] = false;
+            v['menu_deep'] = 0;
 
-            document.getElementById('btnBuyBotBack').setAttribute('href','./settingsAI.php?botstore=1');
-            //document.getElementById('btnBuyBotBack').innerText = 'Back to Ai Skill';
+            document.getElementById('btnBuyBotBack').setAttribute('href', './settingsAI.php?botstore=1');
+
 
             btnFromBuyToPurchased();
 
             break;
         case 'botstore' :
 
-            v['menu_title']= 'botstore';
-            v['menu_level']= 2;
-            v['menu_block']= false;
-            v['menu_active']= false;
-            v['menu_deep']= 0;
-            
-            if(purchased=='true')
+            v['menu_title'] = 'botstore';
+            v['menu_level'] = 2;
+            v['menu_block'] = false;
+            v['menu_active'] = false;
+            v['menu_deep'] = 0;
+
+            if (purchased == 'true')
                 btnFromBuyToPurchased()
 
-            document.getElementById('btnBuyBotBack').setAttribute('href','./botstore.php');
-            //document.getElementById('btnBuyBotBack').innerText = 'Back to Botstore';
+            document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
     }
-   return v;
+    return v;
 }
 
+function videoLinkFilter(url) {
+    var src = '//www.youtube.com/embed/';
+    var param = '?controls=1&hd=1&enablejsapi=1';
+    url = url.replace(/\s/g, '');
 
-function btnFromBuyToPurchased(){
+    if (url == '')
+        return '';
+
+    if (url.indexOf('https://www.youtube.com') != -1) {
+        var pos = url.lastIndexOf('=');
+        if (pos == -1)
+            pos = url.lastIndexOf("/");
+        src += url.substring(pos + 1) + param;
+        return src;
+    }
+
+    if (url.indexOf('https://youtu.be/') != -1) {
+        var pos = url.lastIndexOf("/");
+        src += url.substring(pos) + param;
+        return src;
+    }
+    return '';
+}
+
+function btnFromBuyToPurchased() {
     var wHTML = '';
     var nodeBtn = document.getElementById('btnBuyBot');
     wHTML += ('<b>Bot purchased </b>');
     wHTML += ('<span class="fa fa-check-circle-o"></span>');
-    nodeBtn.setAttribute('data-toggle','');
-    nodeBtn.setAttribute('data-target','');
+    nodeBtn.setAttribute('data-toggle', '');
+    nodeBtn.setAttribute('data-target', '');
     nodeBtn.innerHTML = wHTML;
     nodeBtn.className = 'btn btn-primary pull-right flat';
 }

@@ -6311,24 +6311,13 @@ ul.pagination li a {
     padding:10px 10px 0px 10px;
 }
 
-.bot-image{
+.bot-icon{
     max-width: 205px;
     min-width: 205px;
     max-height: 205px;
     min-height: 205px;
     margin:0px;
     padding:0px;
-}
-
-.bot-icon {
-    min-height: 180px;
-    max-height: 180px;
-    min-width: 130px;
-    max-width: 170px;
-    text-align: center;
-    font-size: 95px;
-    line-height: 100px;
-    margin:auto;
 }
 
 .bot-padding{

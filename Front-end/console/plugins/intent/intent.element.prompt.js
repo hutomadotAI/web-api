@@ -18,11 +18,11 @@ function activeButtonCreateIntentPrompt() {
             $("#btnAddIntentPrompt").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntentPrompt(0, 'You can add intent prompts.');
+            msgAlertIntentPrompt(ALERT.BASIC.value, 'You can add intent prompts.');
             $("#btnAddIntentPrompt").prop("disabled", false);
             return true;
         case 1:
-            msgAlertIntentPrompt(1, 'The intent prompt is too long!');
+            msgAlertIntentPrompt(ALERT.WARNING.value, 'The intent prompt is too long!');
             $("#btnAddIntentPrompt").prop("disabled", true);
             return false
         default:
@@ -35,14 +35,14 @@ function addIntentPrompt() {
     $(this).prop("disabled", true);
 
     if (inputValidation($("#intent-prompt").val(), 'intent_prompt')) {
-        msgAlertIntentPrompt(2, 'The intent prompt need contain only the following: BLA BLA BLA BLA character');
+        msgAlertIntentPrompt(ALERT.DANGER.value, 'The intent prompt need contain only the following: BLA BLA BLA BLA character');
         return;
     }
 
     var prompts = getMultipleElementValues('intent-prompt-row', 'value');
 
     if (isNameExists($("#intent-prompt").val(), prompts)) {
-        msgAlertIntentPrompt(2, 'Two identical intent prompts are not allowed. Please choose a different name.');
+        msgAlertIntentPrompt(ALERT.DANGER.value, 'Two identical intent prompts are not allowed. Please choose a different name.');
         return;
     }
 
@@ -52,7 +52,7 @@ function addIntentPrompt() {
     document.getElementById('intent-prompt').value = '';
 
     createNewPromptRow(value, parent);
-    msgAlertIntentPrompt(0, 'You can add additional an user expression');
+    msgAlertIntentPrompt(ALERT.BASIC.value, 'You can add additional an user expression');
 
     resetMsgAlertIntentVariable();
 }

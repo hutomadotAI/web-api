@@ -47,6 +47,7 @@ function isPostCameFromBotstore()
         isset($_POST['menu_deep'])
     );
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -62,6 +63,39 @@ function isPostCameFromBotstore()
     <link rel="stylesheet" href="./plugins/switch/switch.css">
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
+<script>
+    var bot = <?php
+        $bot = new \hutoma\bot();
+        if (isset($botDetails) && (array_key_exists('bot', $botDetails))) {
+            // TODO probably this value is hidden to client side
+            //$bot->setAiid($botDetails['bot']['aiid']);
+            $bot->setAlertMessage($botDetails['bot']['alertMessage']);
+            $bot->setBadge('Top Developer');                        //$botDetails['bot']['badge']);
+            $bot->setBotId($botDetails['bot']['botId']);
+            $bot->setCategory($botDetails['bot']['category']);
+            $bot->setClassification($botDetails['bot']['classification']);
+            $bot->setDescription($botDetails['bot']['description']);
+            $bot->setLicenseType($botDetails['bot']['licenseType']);
+            $bot->setUpdate($botDetails['bot']['lastUpdate']);
+            $bot->setLongDescription($botDetails['bot']['longDescription']);
+            $bot->setImagePath('');
+            $bot->setName($botDetails['bot']['name']);
+            $bot->setPrice($botDetails['bot']['price']);
+            $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
+            $bot->setSample($botDetails['bot']['sample']);
+            $bot->setUsers('103');                                  //$botDetails['bot']['users']);
+            $bot->setRating('4.3');                                   //$botDetails['bot']['rating']);
+            $bot->setActivations($bot->rangeActivation($bot->getUsers()));
+            $bot->setVersion($botDetails['bot']['version']);
+            $bot->setVideoLink($botDetails['bot']['videoLink']);
+        }
+        $tmp_bot = $bot->toJSON();
+        unset($bot);
+
+        echo json_encode($tmp_bot);
+        unset($tmp_bot);
+        ?>;
+</script>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">
 <?php include_once "../console/common/google_analytics.php"; ?>

@@ -1,7 +1,7 @@
 function uploadUrl(){
     if ( $('#inputurl').val() == null ||  $('#inputurl').val() == "") {
         $("#btnUploadUrl").prop("disabled", true);
-        msgAlertUploadStructure(1,'You need to choose a complex file first');
+        msgAlertUploadStructure(ALERT.WARNING.value,'You need to choose a complex file first');
         return;
     }
     else

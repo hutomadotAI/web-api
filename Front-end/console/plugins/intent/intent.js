@@ -20,11 +20,11 @@ function activeButtonCreateIntent() {
             $("#btnCreateIntent").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntent(0, 'Create an Intent to trigger your own business logic.');
+            msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
             $("#btnCreateIntent").prop("disabled", false);
             return true;
         case 1:
-            msgAlertIntent(1, 'The intent name is too long!');
+            msgAlertIntent(ALERT.WARNING.value, 'The intent name is too long!');
             $("#btnCreateIntent").prop("disabled", false);
             return false;
         default:
@@ -37,12 +37,12 @@ function postingIntentName() {
     $(this).prop("disabled", true);
 
     if (inputValidation($("#inputIntentName").val(), 'intent_name')) {
-        msgAlertIntent(2, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
+        msgAlertIntent(ALERT.DANGER.value, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
         return false;
     }
 
     if(isNameExists($("#inputIntentName").val(),intents)){
-        msgAlertIntent(2, 'Two identical Intent names are not allowed. Please choose a different name.');
+        msgAlertIntent(ALERT.DANGER.value, 'Two identical Intent names are not allowed. Please choose a different name.');
         return false;
     }
 
@@ -65,11 +65,11 @@ function showIntents(str) {
     var wHTML = "";
 
     if (intents.length < 1) {
-        msgAlertIntent(0, 'No intents yet. Create the first one');
+        msgAlertIntent(ALERT.BASIC.value, 'No intents yet. Create the first one');
         return;
     }
     else
-        msgAlertIntent(0, 'Create an Intent to trigger your own business logic.');
+        msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
 
 
     for (var x in intents) {

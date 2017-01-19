@@ -6,7 +6,6 @@
     $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $botDetails = $botApi->getAiBotDetails($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
     unset($botApi);
-
 ?>
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
@@ -195,6 +194,9 @@
             <div class="col-xs-12 no-padding">
                 <div class="form-group">
                     <label class="unselectable" for="bot_videoLink">Link Video Sample</label>
+                    <a data-toggle="collapse" href="#collapseVideoLink" tabindex="-1">
+                    <div class=" pull-right">more info <i class="fa fa-question-circle text-sm text-yellow"></i></div>
+                        </a>
                     <div class="input-group">
                         <div class="input-group-addon">
                             <i class="fa fa-video-camera"></i>
@@ -204,9 +206,20 @@
                 </div>
             </div>
         </div>
+        <div id="collapseVideoLink" class="panel-collapse collapse">
+            <div class="box-body no-padding">
+                <div class="overlay center-block">
+                    <section class="content-info" >
+                        <div class="box-body">
+                            We support youtube link video.
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
         <!-- end row 2 BOTTOM-->
-        <br>
-        
+
+        <p></p>
         <!-- row 3 -->
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
             <!-- row 3A -->
@@ -322,10 +335,9 @@
                 <span class="fa fa-arrow-circle-right" id="iconPublishRequest"></span>
             </button>
         </div>
-
-        <input type="hidden" id="bot_id" name="bot_id">
-        <input type="hidden" id="bot_aiid" name="bot_aiid">
-        <input type="hidden" id="bot_badge" name="bot_badge">
+        <input type="hidden" id="bot_id" name="bot_id" style="display:none;">
+        <input type="hidden" id="bot_aiid" name="bot_aiid" style="display:none;">
+        <input type="hidden" id="bot_badge" name="bot_badge" style="display:none;">
     </div>
 </div>
 
@@ -384,9 +396,3 @@
         unset($tmp_bot);
         ?>;
 </script>
-
-
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="./plugins/publish/publish.js"></script>
-
-

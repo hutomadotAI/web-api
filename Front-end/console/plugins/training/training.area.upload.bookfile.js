@@ -44,9 +44,9 @@ function uploadBookFile(){
                     }
 
                     if (uploadWarnings != null && uploadWarnings.length > 0) {
-                        msgAlertUploadStructure(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
+                        msgAlertUploadStructure(ALERT.PRIMARY.value, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
                     } else {
-                        msgAlertUploadStructure(4, 'File uploaded');
+                        msgAlertUploadStructure(ALERT.PRIMARY.value, 'File uploaded');
                     }
 
                     resetComponentsPhaseOne();
@@ -57,22 +57,22 @@ function uploadBookFile(){
                     hideMsgWarningAlertTrainingInfo();
                 } else {
                     if (statusCode == 400 && haNoContentError(JSONdata['status']['additionalInfo'])) {
-                        msgAlertUploadStructure(2, 'File not uploaded. No content was found.');
+                        msgAlertUploadStructure(ALERT.DANGER.value, 'File not uploaded. No content was found.');
                     } else {
-                        msgAlertUploadStructure(2, 'Something has gone wrong. File not uploaded');
+                        msgAlertUploadStructure(ALERT.DANGER.value, 'Something has gone wrong. File not uploaded');
                     }
                     disableButtonUploadBookFile(false);
                     disableMsgWarningAlertTrainingInfoRestartButton(false);
                 }
             } catch (e) {
-                msgAlertUploadStructure(2,'A generic error occurred');
+                msgAlertUploadStructure(ALERT.DANGER.value,'A generic error occurred');
                 disableButtonUploadBookFile(false);
                 disableMsgWarningAlertTrainingInfoRestartButton(false);
             }
         }
     };
 
-    msgAlertUploadStructure(1,'Uploading file...');
+    msgAlertUploadStructure(ALERT.WARNING.value,'Uploading file...');
     xmlhttp.send(file_data);
 }
 
@@ -80,7 +80,7 @@ function isBookFileSelected(){
     var elementValue = document.getElementById("inputstructure").value;
     if ( elementValue == null ||  elementValue == "") {
         disableButtonUploadBookFile(true);
-        msgAlertUploadStructure(1,'You need to choose a file first');
+        msgAlertUploadStructure(ALERT.WARNING.value,'You need to choose a file first');
         return false;
     }
     return true;
@@ -90,16 +90,16 @@ function checkBookFileSize(fileID,size) {
     var input, file;
     input = document.getElementById(fileID);
     if (!window.FileReader) {
-        msgAlertUploadStructure(2,'The file API isn\'t supported on this browser');
+        msgAlertUploadStructure(ALERT.DANGER.value,'The file API isn\'t supported on this browser');
         return false;
     }
     if (!input.files) {
-        msgAlertUploadStructure(2,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
+        msgAlertUploadStructure(ALERT.DANGER.value,'This browser doesn\'t seem to support the \'files\' property of file inputs.');
         return false;
     }
     file = input.files[0];
     if(file.size > size*1048476) {
-        msgAlertUploadStructure(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
+        msgAlertUploadStructure(ALERT.DANGER.value, 'The file size exceeds the limit allowed and cannot be uploaded.');
         return false;
     }
     return true;
@@ -110,7 +110,7 @@ function enableUploadBookFile() {
         disableButtonUploadBookFile(true);
     else
         disableButtonUploadBookFile(false);
-    msgAlertUploadStructure(0,'You can now upload your structured text');
+    msgAlertUploadStructure(ALERT.BASIC.value,'You can now upload your structured text');
 }
 
 function disableButtonUploadBookFile(state){
@@ -129,7 +129,7 @@ function updateComponentsPhaseOneComplexBook() {
         var status = getAiStatusCall();
 
         if ( status == 'malformed_training_file') {
-            msgAlertUploadStructure(2, 'The training file is malformed');
+            msgAlertUploadStructure(ALERT.DANGER.value, 'The training file is malformed');
             document.getElementById("progress-upload-file").style.width = 0 + '%';
             document.getElementById('status-badge-upload').innerHTML = 0 + '%';
             msgAlertProgressBar(0,'Training not started. Please upload training data.');
@@ -159,7 +159,7 @@ function updateComponentsPhaseOneComplexBook() {
 function waitBook(){
     var status = getAiStatusCall();
     if ( status == 'malformed_training_file') {
-        msgAlertUploadStructure(2, 'The training file is malformed');
+        msgAlertUploadStructure(ALERT.DANGER.value, 'The training file is malformed');
         document.getElementById("progress-upload-file").style.width = 0 + '%';
         document.getElementById('status-badge-upload').innerHTML = 0 + '%';
         msgAlertProgressBar(0,'Training not started. Please upload training data.');

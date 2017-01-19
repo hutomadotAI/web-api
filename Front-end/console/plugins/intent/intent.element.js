@@ -36,8 +36,8 @@ function saveIntent() {
         var elem = $(node_entity).find("ul").find("li.selected");
         if (elem.text() == '') {
             node.children[i].children[0].children[0].children[0].style.border = "thin dotted red";
-            msgAlertIntentVariable(2, 'Cannot save. Missing entity.');
-            msgAlertIntentElement(2, 'Intent not saved!');
+            msgAlertIntentVariable(ALERT.DANGER.value, 'Cannot save. Missing entity.');
+            msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
             return false;
         }
 
@@ -49,8 +49,8 @@ function saveIntent() {
         if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
             if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
-                msgAlertIntentVariable(2, 'The number of prompts must be a number between 1 and 99.');
-                msgAlertIntentElement(2, 'Intent not saved!');
+                msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be a number between 1 and 99.');
+                msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
                 return false;
             }
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
@@ -58,8 +58,8 @@ function saveIntent() {
 
         if (node_nprompt.getAttribute('placeholder') == 'n° prompt') {
             node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
-            msgAlertIntentVariable(2, 'Cannot save. Missing n° prompt value.');
-            msgAlertIntentElement(2, 'Intent not saved!');
+            msgAlertIntentVariable(ALERT.DANGER.value, 'Cannot save. Missing n° prompt value.');
+            msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
             return false;
         }
 
@@ -72,8 +72,8 @@ function saveIntent() {
 
         if (list_prompt == '' || prompts_split.length == 0) {
             node.children[i].children[2].children[0].children[0].style.border = "thin dotted red";
-            msgAlertIntentVariable(2, 'Please add at least one prompt before saving.');
-            msgAlertIntentElement(2, 'Intent not saved!');
+            msgAlertIntentVariable(ALERT.DANGER.value, 'Please add at least one prompt before saving.');
+            msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
             return false;
         }
 
@@ -95,7 +95,7 @@ function saveIntent() {
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
 
-    msgAlertIntentElement(1, 'saving...');
+    msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
     $.ajax({
         url: 'intentelement.php?intent=' + intentName,
         data: {
@@ -104,7 +104,7 @@ function saveIntent() {
         },
         type: 'POST',
         success: function (result) {
-            msgAlertIntentElement(4, 'Intent saved!!');
+            msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
@@ -112,7 +112,7 @@ function saveIntent() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
-            msgAlertIntentElement(2, 'Intent not saved!');
+            msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
         }
     });
 }

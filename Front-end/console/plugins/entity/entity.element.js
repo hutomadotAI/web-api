@@ -20,11 +20,11 @@ function activeButtonCreateEntityValue() {
             $("#btnAddEntityValue").prop("disabled", true);
             return false;
         case 0:
-            msgAlertEntityValues(0, 'You can add additional values for current entity.');
+            msgAlertEntityValues(ALERT.BASIC.value, 'You can add additional values for current entity.');
             $("#btnAddEntityValue").prop("disabled", false);
             return true;
         case 1:
-            msgAlertEntityValues(1, 'The value name is too long!');
+            msgAlertEntityValues(ALERT.WARNING.value, 'The value name is too long!');
             $("#btnAddEntityValue").prop("disabled", true);
             return false
         default:
@@ -37,7 +37,7 @@ function addEntityValue() {
     $(this).prop("disabled", true);
 
     if (inputValidation($("#value-entity").val(), 'entity_value')) {
-        msgAlertEntityValues(2, 'Value name need contain only the following: A-Z, a-z, 0-9 character');
+        msgAlertEntityValues(ALERT.DANGER.value, 'Value name need contain only the following: A-Z, a-z, 0-9 character');
         return;
     }
 
@@ -48,7 +48,7 @@ function addEntityValue() {
     }
 
     if(isNameExists($("#value-entity").val(),values)){
-        msgAlertEntityValues(2, 'Two identical values name are not allowed. Please choose a different expression.');
+        msgAlertEntityValues(ALERT.DANGER.value, 'Two identical values name are not allowed. Please choose a different expression.');
         return;
     }
 
@@ -57,7 +57,7 @@ function addEntityValue() {
     var parent = document.getElementById('entityValues-list');
     document.getElementById('value-entity').value = '';
     createNewValueEntityRow(value, parent);
-    msgAlertEntityValues(0,'You can add additional values for this entity');
+    msgAlertEntityValues(ALERT.BASIC.value,'You can add additional values for this entity');
 }
 
 function createNewValueEntityRow(value, parent) {
@@ -141,7 +141,7 @@ function saveEntity() {
     document.body.style.cursor = 'wait';
     $("#btnSaveEntity").prop("disabled", true);
 
-    msgAlertEntityValues(1, 'Saving...');
+    msgAlertEntityValues(ALERT.WARNING.value, 'Saving...');
 
     $.ajax({
         url: 'entityelement.php?entity=' + entityName,
@@ -153,10 +153,10 @@ function saveEntity() {
          alert(xhr.status + ' ' + thrownError);
          }*/
         success: function (result) {
-            msgAlertEntityValues(4, 'Entity saved');
+            msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved');
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            msgAlertEntityValues(2, 'Entity not saved');
+            msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved');
         },
         complete: function () {
             checkListEntityValuesSize();

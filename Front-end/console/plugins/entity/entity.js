@@ -20,11 +20,11 @@ function activeButtonCreateEntity() {
             $("#btnCreateEntity").prop("disabled", true);
             return false;
         case 0:
-            msgAlertEntity(0, 'In this section you can create different entities.');
+            msgAlertEntity(ALERT.BASIC.value, 'In this section you can create different entities.');
             $("#btnCreateEntity").prop("disabled", false);
             return true;
         case 1:
-            msgAlertEntity(1, 'The entity name is too long!');
+            msgAlertEntity(ALERT.WARNING.value, 'The entity name is too long!');
             $("#btnCreateEntity").prop("disabled", false);
             return false;
         default:
@@ -38,13 +38,13 @@ function postingEntityName() {
     document.getElementById("btnCreateEntity").removeEventListener("click", postingEntityName);
 
     if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
-        msgAlertEntity(2, 'Entity name need contain only the following: A-Z, a-z, 0-9 and _ character');
+        msgAlertEntity(ALERT.DANGER.value, 'Entity name need contain only the following: A-Z, a-z, 0-9 and _ character');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
     
     if(isNameExists($("#inputEntityName").val(),entities)){
-        msgAlertEntity(2, 'Two identical Entity names are not allowed. Please choose a different name.');
+        msgAlertEntity(ALERT.DANGER.value, 'Two identical Entity names are not allowed. Please choose a different name.');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
@@ -68,11 +68,11 @@ function showEntities(str) {
     var wHTML = "";
 
     if (entities.length < 1) {
-        msgAlertEntity(0, 'No entities yet. Create the first one.');
+        msgAlertEntity(ALERT.BASIC.value, 'No entities yet. Create the first one.');
         return;
     }
     else
-        msgAlertEntity(0, 'In this section you can create different entities.');
+        msgAlertEntity(ALERT.BASIC.value, 'In this section you can create different entities.');
 
     for (var x in entities) {
         if ((str != " ") && ( (str.length == 0) || (entities[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {

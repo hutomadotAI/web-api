@@ -150,6 +150,7 @@ function localeToLanguage($locale)
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
+<script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/training/training.area.upload.textfile.js"></script>
@@ -165,8 +166,6 @@ function localeToLanguage($locale)
 <script src="./plugins/flot/jquery.flot.pie.min.js"></script>
 <script src="./plugins/flot/jquery.flot.categories.min.js"></script>
 
-
-<script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <script>

@@ -9,26 +9,32 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 }
 
 if (!isset($_POST['botId'])) {
-    echo json_encode(prepareResponse(500,'Sorry image upload failed. Permission denied!'), true);
+    echo json_encode(prepareResponse(500, 'Image upload failed - permission denied!'), true);
     exit;
 }
 
-if (!isset($_POST['icon'])) {
-    echo json_encode(prepareResponse(500,'Sorry image upload failed. Please try again. If the problem persists, contact our support team.'), true);
+if (!isset($_FILES['file'])) {
+    echo json_encode(prepareResponse(500, 'Image upload failed - permission denied!'), true);
     exit;
 }
 
-$file = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['icon']));
+if ($_FILES['file']['error'] != UPLOAD_ERR_OK) {
+    echo json_encode(prepareResponse(500, 'Image upload failed - permission denied!.'), true);
+    exit;
+}
+
 
 $botApi = new hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$response = $botApi->uploadBotIcon($_POST['botId'], $file);
+$response = $botApi->uploadBotIcon($_POST['botId'], $_FILES['file']);
 unset($botApi);
+
 echo json_encode($response, true);
 unset($response);
 
-function prepareResponse($code,$info)
+function prepareResponse($code, $info)
 {
-    $arr = array('status' => array('code' => $code,'info'=> $info));
+    $arr = array('status' => array('code' => $code, 'info' => $info));
     return $arr;
 }
+
 ?>

@@ -20,11 +20,11 @@ function activeButtonCreateIntentResponse() {
             $("#btnAddIntentResponse").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntentResponse(0, ' Give the AI examples of how a user would response this intent.');
+            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the AI examples of how a user would response this intent.');
             $("#btnAddIntentResponse").prop("disabled", false);
             return true;
         case 1:
-            msgAlertIntentResponse(1, 'The intent resposne is too long!');
+            msgAlertIntentResponse(ALERT.WARNING.value, 'The intent resposne is too long!');
             $("#btnAddIntentResponse").prop("disabled", true);
             return false
         default:
@@ -37,7 +37,7 @@ function addIntentResponse() {
     $(this).prop("disabled", true);
 
     if (inputValidation($("#intent-response").val(), 'intent_response')) {
-        msgAlertIntentResponse(2, 'The intent response need contain only the following: BLA BLA BLA BLA character');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response need contain only the following: BLA BLA BLA BLA character');
         return;
     }
 
@@ -48,7 +48,7 @@ function addIntentResponse() {
     }
 
     if(isNameExists($("#intent-response").val(),responses)){
-        msgAlertIntentResponse(2, 'Two identical intent responses are not allowed. Please choose a different name.');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'Two identical intent responses are not allowed. Please choose a different name.');
         return;
     }
 
@@ -57,7 +57,7 @@ function addIntentResponse() {
     var parent = document.getElementById('intentresponse-list');
     document.getElementById('intent-response').value = '';
     createNewIntentResponseRow(value, parent);
-    msgAlertIntentResponse(0,' Give the AI examples of how a user would response this intent.');
+    msgAlertIntentResponse(ALERT.BASIC.value,' Give the AI examples of how a user would response this intent.');
 }
 
 function createNewIntentResponseRow(value, parent) {

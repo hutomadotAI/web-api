@@ -155,7 +155,7 @@ function pushEntitiesList(node) {
     }
 
     if (entityListFromServer.length < 1) {
-        msgAlertIntentVariable(1, 'No entities available.');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'No entities available.');
         return;
     }
 
@@ -200,8 +200,8 @@ function resetBorderHighlightError(node) {
 }
 
 function resetMsgAlertIntentVariable() {
-    msgAlertIntentElement(0, 'Use intents to map what a user says and what action should be taken by your business logic.');
-    msgAlertIntentVariable(0, 'Describe what variables you want the AI to extract from a conversation');
+    msgAlertIntentVariable(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
+    msgAlertIntentVariable(ALERT.BASIC.value, 'Describe what variables you want the AI to extract from a conversation');
 }
 
 function isJustAddedNewRow() {
@@ -214,13 +214,13 @@ function isJustAddedNewRow() {
     var node = parent.children[0].children[0].children[0].children[0];
     var elem = $(node).find("ul").find("li.selected");
     if (elem.text() == '') {
-        msgAlertIntentVariable(1, 'Complete field first before add a new line');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'Complete field first before add a new line');
         return true;
     }
 
     var len = parent.childElementCount;
     if (len == entityListFromServer.length) { // if are reach the max number of entity
-        msgAlertIntentVariable(1, 'All entities are used!');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'All entities are used!');
         return true;
     }
     return false;

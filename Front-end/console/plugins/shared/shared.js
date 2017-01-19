@@ -1,3 +1,14 @@
+var ALERT =
+{
+    BASIC: { value: 0},
+    WARNING: { value: 1},
+    DANGER: { value: 2},
+    SUCCESS: { value: 3},
+    INFO: { value: 4},
+    PRIMARY: { value: 5},
+};
+
+
 $(window).on('beforeunload', function(){
     $('*').css("cursor", "progress");
 });

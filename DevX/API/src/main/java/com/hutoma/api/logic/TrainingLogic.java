@@ -201,6 +201,8 @@ public class TrainingLogic {
                     return ApiError.getBadRequest("A training session is already running.");
                 case AI_TRAINING_QUEUED:
                     return ApiError.getBadRequest("A training session is already queued.");
+                case AI_UNDEFINED:
+                    return ApiError.getBadRequest("No training file or not ready to train.");
                 default:
                     return ApiError.getBadRequest("Malformed training file. Training could not be started.");
             }

@@ -22,10 +22,6 @@
     }
 
 
-    function isErrorOccurred(){
-        return isset($_POST['err']);
-    }
-
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $response_getAIs = $aiApi->getAIs();
     unset($aiApi);
@@ -87,9 +83,9 @@
 
 <script>
     var name_list = <?php echo json_encode($name_list); unset($name_list);?>;
-    var previousFilled = '<?php if (isPreviousFieldsFilled()) echo "1"; else echo "0"; ?>';
+    var previousFilled = <?php if (isPreviousFieldsFilled()) echo('true'); else echo ('false'); ?>;
     var previousGeneralInfo  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
-    var err = '<?php if (isErrorOccurred()) echo $_POST['err']; else echo "0"; ?>';
+    var err = <?php if(isset($_POST['err'])) echo('true'); else echo ('false'); ?>;
 </script>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>

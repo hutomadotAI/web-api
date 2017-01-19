@@ -1,4 +1,5 @@
 var scale_chart_max_error = 10000;
+var ai_status_last = "";
 
 initializeEventListeners();
 initializeConsole(aiStatus);
@@ -24,8 +25,10 @@ function initializeEventListeners() {
 
 function initializeConsole(aiStatus) {
     setStateResponse(aiStatus);
-    if (aiStatus["training_file_uploaded"]) {
-        msgAlertUploadFile(4, 'A file is already loaded.');
+    if (aiStatus["training_file_uploaded"] != 0) {
+        msgAlertUploadFile(ALERT.PRIMARY.value, 'A file is already loaded.');
+        setStateResponse(aiStatus);
+        // tecnicamente dovrebbe già essere partito
     }
 }
 
@@ -35,18 +38,18 @@ function getUIStatusCall() {
         case (state == 0): //nothing is started
             break;
         case (state == 1): // File uploaded
-            msgAlertProgressBar(1, 'Initialising. please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. please wait.');
             phaseOneFlashing(true);
             trainingStartCall();
             break;
         case (state == 2): //  Initialising - Phase One
-            msgAlertProgressBar(1, 'Initialising. please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. please wait.');
             break;
         case (state == 3): //Initialising - Phase One - queue
             phaseOneFlashing(false);
             phaseQueue();
             hideTrainingBar(true);
-            msgAlertProgressBar(1, 'Initialising. please wait. The process is queued');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. please wait. The process is queued');
             break;
         case (state == 4): // Execute - Phase One ( simulation ) waiting API
             if (document.getElementById('status-badge-upload').innerHTML == '0%') {
@@ -54,7 +57,7 @@ function getUIStatusCall() {
                 phaseOneReset();
                 phaseOneUpdate();
                 document.getElementById('show-error').innerText = 'not yet available';
-                msgAlertProgressBar(4, 'Phase one in progress...');
+                msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
             }
             break;
         case (state == 5): // Initialising - Phase Two
@@ -63,7 +66,7 @@ function getUIStatusCall() {
             phaseTwoFlashing(true);
             hideChart(true);
             phaseTwoActive();
-            msgAlertProgressBar(1, 'Initialization may take a few minutes. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization Phase two may take one minute. please wait.');
             break;
         case (state == 6): // start phase two
             var progress = getP2Progress();
@@ -73,10 +76,10 @@ function getUIStatusCall() {
             phaseTwoFlashing(false);
             phaseTwoUpdate(progress);
             document.getElementById('show-error').innerText = deep_error;
-            msgAlertProgressBar(4, 'Phase two in progress...');
+            msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two in progress...');
             break;
         case (state == 7):
-            msgAlertProgressBar(1, 'Training stopped. Please restart training');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training');
             if (!justStopped()) {
                 createMessageWarningInfoAlert();
                 hideChart(true);
@@ -87,7 +90,7 @@ function getUIStatusCall() {
         case (state == 10):
             phaseTwoFlashing(false);
             phaseTwoMaxValue();
-            msgAlertProgressBar(3, 'Training completed.');
+            msgAlertProgressBar(ALERT.SUCCESS.value, 'Training completed.');
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
@@ -115,14 +118,14 @@ function trainingStartCall() {
             if ((statusCode === 200 ) || (statusCode === 400 )) {
                 setUICurrentStatus(2);
             } else {
-                msgAlertProgressBar(2, 'Training cannot start! code error ' + statusCode);
+                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! code error ' + statusCode);
                 setUICurrentStatus(-1);
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(-1);
-            msgAlertProgressBar(2, 'Unexpected error occurred during start training');
+            msgAlertProgressBar(ALERT.DANGER.value, 'Unexpected error occurred during start training');
         }
     });
 }
@@ -136,22 +139,22 @@ function trainingStatusCall() {
         contentType: "application/json; charset=utf-8",
         success: function (response) {
             try {
-                var aiStatus = JSON.parse(response);
-                if (aiStatus['status']['code'] === 200) {
-                    setStateResponse(aiStatus);
+                var jsonData = JSON.parse(response);
+                if (jsonData['api_status']['code'] === 200) {
+                    setStateResponse(jsonData);
                 } else {
                     setUICurrentStatus(-1);
-                    msgAlertProgressBar(2, 'An error has occurred while trying to get the AI\'s status');
+                    msgAlertProgressBar(ALERT.DANGER.value, 'An error has occurred while trying to get the AI\'s status');
                 }
             } catch (e) {
                 setUICurrentStatus(-1);
-                msgAlertProgressBar(2, 'Unable to query AI training status');
+                msgAlertProgressBar(ALERT.DANGER.value, 'Unable to query AI training status');
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(-1);
-            msgAlertProgressBar(2, 'Cannot contact server to query AI status');
+            msgAlertProgressBar(ALERT.DANGER.value, 'Cannot contact server to query AI status');
         }
     });
 }
@@ -161,47 +164,51 @@ function setStateResponse(aiStatus) {
     deep_error = aiStatus["deep_learning_error"];
     var status = aiStatus["ai_status"];
     var phaseTwoPercentProgress = aiStatus["phase_2_progress"] * 100.0;
+    setP2Progress(phaseTwoPercentProgress);
 
     switch (status) {
+        case 'ai_error' :
+            //setP2Progress(phaseTwoPercentProgress);
+            setUICurrentStatus(-1);
+            msgAlertProgressBar(ALERT.DANGER.value, 'An error has occurred.');
+            break;
         case 'ai_ready_to_train':
             setP2Progress(0);
+            if (status != ai_status_last) {
+                setUICurrentStatus(1);
+            }
             // code 0
             break;
         case 'ai_training_queued' :
             setP2Progress(0);
+            closeMessageWarningInfoAlert();
             setUICurrentStatus(3);  // code 3
             break;
         case 'ai_training':
-            if (getP2Progress() != -1) {
-                setP2Progress(phaseTwoPercentProgress);
-                setUICurrentStatus(6); // code 5
-            } else {
-                if (document.getElementById('status-badge-upload').innerHTML == '0%') {
-                    setUICurrentStatus(4); // code 4
-                }
+            closeMessageWarningInfoAlert();
+            switch (true) {
+                case ( deep_error > 0 ):
+                    setUICurrentStatus(6);
+                    break;
+                case ( deep_error == 0 ):
+                    setUICurrentStatus(5);
+                    break;
             }
             break;
         case 'ai_training_stopped' :
-            setP2Progress(phaseTwoPercentProgress);
             setUICurrentStatus(7); // code 6
             break;
         case 'ai_training_complete' :
             setP2Progress(100);
+            closeMessageWarningInfoAlert();
             setUICurrentStatus(10); // code 10
             break;
         case 'ai_undefined' :
-            setP2Progress(0);
-            setUICurrentStatus(-1);
-            break;
-        case 'ai_error' :
-            setP2Progress(phaseTwoPercentProgress);
-            setUICurrentStatus(-1);
-            msgAlertProgressBar(2, 'An error has occurred');
-            break;
         default:
             setUICurrentStatus(999);
             break;
     }
+    ai_status_last = status;
 }
 
 function trainingRestart() {

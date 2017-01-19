@@ -9,7 +9,7 @@
             <span id="botLongDescription"></span>
         </div>
     </div>
-    <div class="row no-margin" style="padding-top:10px; border-top: 1px solid #535353;">
+    <div class="row no-margin" style="padding-top:10px;">
         <div class="col-xs-12 bot-h2">
             Sample Request
         </div>

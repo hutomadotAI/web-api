@@ -9,27 +9,27 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 }
 
 if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
-    echo json_encode(prepareResponse(500,'Missing AI Id info'), true);
+    echo json_encode(prepareResponse(500, 'Missing AI Id info'), true);
     exit;
 }
 
 if (!isset($_POST['tab'])) {
-    echo 'ciao3' ;//echo json_encode(prepareResponse(500,'Missing TAB info'), true);
+    echo json_encode(prepareResponse(500, 'Missing TAB info'), true);
     exit;
 }
 
 switch ($_POST['tab']) {
     case 'file':
         if (!isset($_FILES['inputfile'])) {
-            echo json_encode(prepareResponse(500,'Upload file failed'), true);
+            echo json_encode(prepareResponse(500, 'Upload file failed'), true);
             exit;
         }
         if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK) {
-            echo json_encode(prepareResponse(500,'Something is gone wrong'), true);
+            echo json_encode(prepareResponse(500, 'Something is gone wrong'), true);
             exit;
         }
         if (!is_uploaded_file($_FILES['inputfile']['tmp_name'])) {
-            echo 'ciao6' ;//echo json_encode(prepareResponse(500,'Empty file'), true);
+            echo json_encode(prepareResponse(500, 'Empty file'), true);
             exit;
         }
 
@@ -45,15 +45,15 @@ switch ($_POST['tab']) {
     case 'structure':
 
         if (!isset($_FILES['inputstructure'])) {
-            echo json_encode(prepareResponse(500,'Upload complex file failed'), true);
+            echo json_encode(prepareResponse(500, 'Upload complex file failed'), true);
             exit;
         }
         if ($_FILES['inputstructure']['error'] != UPLOAD_ERR_OK) {
-            echo json_encode(prepareResponse(500,'Something is gone wrong'), true);
+            echo json_encode(prepareResponse(500, 'Something is gone wrong'), true);
             exit;
         }
         if (!is_uploaded_file($_FILES['inputstructure']['tmp_name'])) {
-            echo json_encode(prepareResponse(500,'Empty file'), true);
+            echo json_encode(prepareResponse(500, 'Empty file'), true);
             exit;
         }
 
@@ -68,7 +68,7 @@ switch ($_POST['tab']) {
 
     case 'url':
         if (!isset($_POST['url'])) {
-            echo json_encode(prepareResponse(500,'No upload URl available'), true);
+            echo json_encode(prepareResponse(500, 'No upload URl available'), true);
             exit;
         }
         break;
@@ -84,9 +84,10 @@ switch ($_POST['tab']) {
  * }
  */
 
-function prepareResponse($code,$info)
+function prepareResponse($code, $info)
 {
-    $arr = array('status' => array('code' => $code,'info'=> $info));
+    $arr = array('status' => array('code' => $code, 'info' => $info));
     return $arr;
 }
+
 ?>

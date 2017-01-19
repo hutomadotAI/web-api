@@ -34,7 +34,7 @@ class bot
     private $videoLink;
     private $widgetColor;
 
-    
+
     public function __construct()
     {
 
@@ -63,7 +63,7 @@ class bot
         return $this->aiid;
     }
 
-    
+
     public function setAlertMessage($alertMessage)
     {
         $this->alertMessage = $alertMessage;
@@ -282,9 +282,9 @@ class bot
         return $this->videoLink;
     }
 
-    public function setWidgetColor($eidgetColor)
+    public function setWidgetColor($widgetColor)
     {
-        $this->widgetColor = $eidgetColor;
+        $this->widgetColor = $widgetColor;
     }
 
     public function getWidgetColor()

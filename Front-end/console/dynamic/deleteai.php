@@ -47,5 +47,8 @@ if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) 
     unset($response);
     \hutoma\console::redirect('../home.php');
 }
+
+
+
 ?>
 

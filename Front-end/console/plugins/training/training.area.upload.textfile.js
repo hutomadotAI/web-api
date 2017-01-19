@@ -14,7 +14,7 @@ function uploadTextFile() {
     formData.append("inputfile", document.getElementById('inputfile').files[0]);
     formData.append("tab", "file");
 
-    msgAlertUploadFile(1, 'Uploading file...');
+    msgAlertUploadFile(ALERT.WARNING.value, 'Uploading file...');
     $.ajax({
         url: './dynamic/upload.php',
         type: 'POST',
@@ -32,24 +32,23 @@ function uploadTextFile() {
                         uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
 
                     if (uploadWarnings != null && uploadWarnings.length > 0)
-                        msgAlertUploadFile(4, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
+                        msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
                     else
-                        msgAlertUploadFile(4, 'File uploaded');
-                    setUICurrentStatus(1);
+                        msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded');
                     hideRestartBox();
                     break;
                 case 400:
                     if (haNoContentError(JSONdata['status']['additionalInfo']))
-                        msgAlertUploadFile(2, 'File not uploaded. No right content was found.');
+                        msgAlertUploadFile(ALERT.DANGER.value, 'File not uploaded. No right content was found.');
                     else
-                        msgAlertUploadFile(2, 'Something has gone wrong. File not uploaded.');
+                        msgAlertUploadFile(ALERT.DANGER.value, 'Something has gone wrong. File not uploaded.');
 
                     setUICurrentStatus(-1);
                     disableButtonUploadTextFile(false);
                     disableRestartBoxButton(false);
                     break;
                 case 500:
-                    msgAlertUploadFile(2, statusCode['status']['info']);
+                    msgAlertUploadFile(ALERT.DANGER.value, statusCode['status']['info']);
                     setUICurrentStatus(-1);
                     disableButtonUploadTextFile(false);
                     disableRestartBoxButton(false);
@@ -58,7 +57,7 @@ function uploadTextFile() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertUploadFile(2, 'Unexpected error occurred during upload');
+            msgAlertUploadFile(ALERT.DANGER.value, 'Unexpected error occurred during upload');
             disableButtonUploadTextFile(false);
             disableRestartBoxButton(false);
         }
@@ -69,7 +68,7 @@ function isTextFileSelected() {
     var elementValue = document.getElementById("inputfile").value;
     if (elementValue == null || elementValue == "") {
         disableButtonUploadTextFile(true);
-        msgAlertUploadFile(1, 'You need to choose a file first');
+        msgAlertUploadFile(ALERT.WARNING.value, 'You need to choose a file first');
         return false;
     }
     return true;
@@ -79,17 +78,17 @@ function checkTextFileSize(fileID, size) {
     var input, file;
     input = document.getElementById(fileID);
     if (!window.FileReader) {
-        msgAlertUploadFile(2, 'The file API isn\'t supported on this browser');
+        msgAlertUploadFile(ALERT.DANGER.value, 'The file API isn\'t supported on this browser');
         return false;
     }
     if (!input.files) {
-        msgAlertUploadFile(2, 'This browser doesn\'t seem to support the \'files\' property of file inputs.');
+        msgAlertUploadFile(ALERT.DANGER.value, 'This browser doesn\'t seem to support the \'files\' property of file inputs.');
         return false;
     }
 
     file = input.files[0];
     if (file.size > size * 1048476) {
-        msgAlertUploadFile(2, 'The file size exceeds the limit allowed and cannot be uploaded.');
+        msgAlertUploadFile(ALERT.DANGER.value, 'The file size exceeds the limit allowed and cannot be uploaded.');
         return false;
     }
 
@@ -101,7 +100,7 @@ function enableUploadTextFile() {
         disableButtonUploadTextFile(true);
     else
         disableButtonUploadTextFile(false);
-    msgAlertUploadFile(0, 'You can now upload your file');
+    msgAlertUploadFile(ALERT.BASIC.value, 'You can now upload your file');
 }
 
 function disableButtonUploadTextFile(state) {

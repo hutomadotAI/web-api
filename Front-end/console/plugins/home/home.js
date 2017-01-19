@@ -58,7 +58,7 @@ function drawTableRows() {
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
-        if ( publishedBots.indexOf(aiList[i]['aiid']) == -1){
+        if (publishedBots.indexOf(aiList[i]['aiid']) == -1) {
             wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
             wHTML += ' Publish AI </b></button></td>';
         }
@@ -80,28 +80,27 @@ function drawTableRows() {
     }
 
 }
+
 function decodeAIState(state) {
     switch (state) {
         case 'ai_training_stopped' :
-            return ('<span class="label label-warning">Stopped</span>');
+            return ('<span class="text-red">Stopped</span>');
             break;
         case 'ai_ready_to_train' :
-            return ('<span class="label label-primary">Not Started</span>');
+        case 'ai_undefined' :
+            return ('<span class="text-darkgray">Not Started</span>');
             break;
         case 'ai_training_queued' :
-            return ('<span class="label label-warning">Queued</span>');
+            return ('<span class="text-gray">Queued</span>');
             break;
         case 'ai_training' :
-            return ('<span class="label label-primary">In Progress</span>');
+            return ('<span class="text-orange">In Progress</span>');
             break;
         case 'ai_training_complete' :
-            return ('<span class="label label-success">Completed</span>');
+            return ('<span class="text-olive">Completed</span>');
             break;
         case 'ai_error' :
-            return ('<span class="label label-danger">Error</span>');
-            break;
-        case 'ai_undefined' :
-            return ('<span class="label label-primary">None</span>');
+            return ('<span class="text-red" flat>Error</span>');
             break;
         default:
             return ('<span class="text-red" flat></span>');
@@ -129,3 +128,4 @@ $(document).ready(function () {
         });
     });
 });
+

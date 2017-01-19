@@ -92,22 +92,13 @@ function setSessionVariables($singleAI)
 
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/select2/select2.full.js"></script>
+<script src="./plugins/drag-and-drop/drag-and-drop.js"></script>
+<script src="./plugins/publish/publish.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
-<script src="./plugins/cropper/jquery.cropit.js"></script>
-<script>
-    $(function() {
-        $('.image-editor').cropit({
-            imageState: {
-                src: '',
-            },
-        });
-    });
-</script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">

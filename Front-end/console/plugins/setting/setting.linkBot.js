@@ -11,12 +11,12 @@ function showBots(str,option){
                 wHTML += ('<div class="box box-solid box-default-fixed flat borderActive" id="' + bot['aiid'] + '">');
             else
                 wHTML += ('<div class="box box-solid box-default-fixed flat" id="' + bot['aiid'] + '">');
-            wHTML += ('<div class="info-circle-icon bg-blue-gradient" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + bot['botId'] + '"); ><i class="fa fa-question"></i></div>');
+            wHTML += ('<img class="info-circle-icon" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); ><i class="'+ bot['imagePath']+'"></i></img>');
             wHTML += ('<h4 class="text-center text-mute unselectable">' + bot['name'] + '</h4>');
             wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</h5>');
             wHTML += ('<div class="box-footer-flatdown flat">');
             wHTML += addHtmlStarRating(0, bot['aiid'], bot['rating']);
-            wHTML += ('<h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + bot['botId'] + '"); >info and details</h5>');
+            wHTML += ('<h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); >info and details</h5>');
             if ($.inArray(bot['botId'], linkedBots) != -1) {
                 wHTML += ('<span class="bot-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
                 wHTML += ('<div class="switch switchOn" data-link="1" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '","' + x + '");></div>');
@@ -86,7 +86,7 @@ function switchClick(node,botId,pos){
 }
 
 
-function openSingleBot(elem,botId){
+function openSingleBot(elem,option,botId,purchased){
     elem.setAttribute('onClick','');
 
     var form = document.createElement("form");
@@ -97,6 +97,12 @@ function openSingleBot(elem,botId){
     var element = document.createElement("INPUT");
     element.name="botId";
     element.value = botId;
+    element.type = 'hidden';
+    form.appendChild(element);
+
+    var element = document.createElement("INPUT");
+    element.name="purchased";
+    element.value = purchased;
     element.type = 'hidden';
     form.appendChild(element);
 

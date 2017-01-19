@@ -25,7 +25,7 @@ if ($singleAI['status']['code'] === 200) {
         "phase_2_progress" => $singleAI['phase_2_progress'],
         "training_file_uploaded" => $singleAI['training_file_uploaded'],
         "deep_learning_error" => $singleAI['deep_learning_error'],
-        "status" => $singleAI['status']
+        "api_status" => $singleAI['status']
     );
     echo json_encode($statusEx);
 }

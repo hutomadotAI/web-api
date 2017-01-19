@@ -1,32 +1,32 @@
 <?php
-    require "../pages/config.php";
-    require_once "api/apiBase.php";
-    require_once "api/aiApi.php";
-    require_once "api/botApi.php";
-    require_once "common/bot.php";
+require "../pages/config.php";
+require_once "api/apiBase.php";
+require_once "api/aiApi.php";
+require_once "api/botApi.php";
+require_once "common/bot.php";
 
 
-    if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
+
+if (!isSessionVariablesAvailable()) {
+
+    if (!isPostInputAvailable()) {
+        \hutoma\console::redirect('./error.php?err=100');
         exit;
     }
+    setSessionVariablesFromPost();
+}
 
-    if (!isSessionVariablesAvailable()) {
+$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$bots = $botApi->getPublishedBots();
+unset($botApi);
 
-        if (!isPostInputAvailable()) {
-            \hutoma\console::redirect('./error.php?err=100');
-            exit;
-        }
-        setSessionVariablesFromPost();
-    }
-
-    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $bots = $botApi->getPublishedBots();
-    unset($botApi);
-
-    $botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $purchasedBots = $botPurchaseApi->getPurchasedBots();
-    unset($botPurchaseApi);
+$botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$purchasedBots = $botPurchaseApi->getPurchasedBots();
+unset($botPurchaseApi);
 
 
 function isPostInputAvailable()
@@ -60,14 +60,14 @@ function setSessionVariablesFromPost()
 function isSessionVariablesAvailable()
 {
     return (
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] ) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
-         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'])
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'])
     );
 }
 
@@ -159,6 +159,7 @@ function isSessionVariablesAvailable()
                 $bot->setSample($botDetails['sample']);
                 $bot->setVersion($botDetails['version']);
                 $bot->setVideoLink($botDetails['videoLink']);
+
                 $tmp_bot = $bot->toJSON();
                 array_push($tmp_list, $tmp_bot);
             }
@@ -187,7 +188,7 @@ function isSessionVariablesAvailable()
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        showBots(str,0);
+        showBots(str, 0);
     }
 </script>
 </body>

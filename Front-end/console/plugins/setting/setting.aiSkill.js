@@ -4,7 +4,7 @@ document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkil
 
 $(function () {
     if((purchasedBots).length==0) {
-        msgAlertAiSkill(1,'This list is empty. Please go to the <a href="./botstore.php">botstore</a>');
+        msgAlertAiSkill(ALERT.WARNING.value,'This list is empty. Please go to the <a href="./botstore.php">botstore</a>');
         deactiveAiSkillButtons();
     }
 });
@@ -45,7 +45,7 @@ function updateAISkill() {
     var jsonString = JSON.stringify(tasks['bots']);
 
     if (jsonString.length<=2){   // character [] is empty request
-        msgAlertAiSkill(1, 'Nothing is change and nothing to do');
+        msgAlertAiSkill(ALERT.WARNING.value, 'Nothing is change and nothing to do');
         activeAiSkillButtons();
         return;
     }
@@ -59,24 +59,24 @@ function updateAISkill() {
 
             switch(statusCode['status']['code']){
                 case 200:
-                    msgAlertAiSkill(4, 'Your AI skill has been updated');
+                    msgAlertAiSkill(ALERT.PRIMARY.value, 'Your AI skill has been updated');
                     activeAiSkillButtons();
                     //TODO probably make difference to refresh data on redirection ( use POST not simple for messaging and cards BOT )
                     callback(jsonString);
                     break;
                 case 404:
-                    msgAlertAiSkill(2,'AI or Bot not found, or not currently linked');
+                    msgAlertAiSkill(ALERT.DANGER.value,'AI or Bot not found, or not currently linked');
                     activeAiSkillButtons();
                     break;
                 case 500:
-                    msgAlertAiSkill(2,'Try again. If the problem persists, contact us');
+                    msgAlertAiSkill(ALERT.DANGER.value,'Try again. If the problem persists, contact us');
                     activeAiSkillButtons();
                     break;
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertAiSkill(2,'Something went wrong. Your changes were not saved.');
+            msgAlertAiSkill(ALERT.DANGER.value,'Something went wrong. Your changes were not saved.');
             activeAiSkillButtons();
         }
     });

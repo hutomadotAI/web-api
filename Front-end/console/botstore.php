@@ -108,7 +108,8 @@ function isAuthorizedToAccess()
         if (isset($bots) && (array_key_exists("bots", $bots))) {
             foreach ($bots['bots'] as $botDetails) {
                 $bot = new \hutoma\bot();
-                $bot->setAiid($botDetails['aiid']);
+                // TODO probably this value is hidden to client side
+                //$bot->setAiid($botDetails['aiid']);
                 $bot->setAlertMessage($botDetails['alertMessage']);
                 $bot->setBadge($botDetails['badge']);
                 $bot->setBotId($botDetails['botId']);
@@ -117,6 +118,7 @@ function isAuthorizedToAccess()
                 $bot->setDescription($botDetails['description']);
                 $bot->setLicenseType($botDetails['licenseType']);
                 $bot->setLongDescription($botDetails['longDescription']);
+                $bot->setImagePath('');
                 $bot->setName($botDetails['name']);
                 $bot->setPrice($botDetails['price']);
                 $bot->setPrivacyPolicy($botDetails['privacyPolicy']);
