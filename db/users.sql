@@ -11,7 +11,7 @@ GRANT USAGE ON *.* TO 'aiDeleter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*7EFA4E71A
 
 GRANT EXECUTE ON `hutoma`.* TO 'aiDeleter'@'127.0.0.1';
 
-GRANT SELECT, DELETE ON `hutoma`.`ai` TO 'aiDeleter'@'127.0.0.1';
+GRANT SELECT, UPDATE, DELETE ON `hutoma`.`ai` TO 'aiDeleter'@'127.0.0.1';
 
 
 # Privileges for `aiReader`@`127.0.0.1`
