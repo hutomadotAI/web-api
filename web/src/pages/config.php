@@ -1,8 +1,8 @@
 <?php
-/**
- * For Development Purposes
- */
-ini_set("display_errors", "on");
+// Disable all PHP error reporting
+error_reporting(0);
+//ini_set("display_errors", "on"); // for development only
+
 require __DIR__ . "/../class.logsys.php";
 \hutoma\console::config(array(
     "db" => array(
