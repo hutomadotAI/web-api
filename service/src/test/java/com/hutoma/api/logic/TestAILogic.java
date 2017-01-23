@@ -178,14 +178,14 @@ public class TestAILogic {
     @Test
     public void testDelete_Valid() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(true);
-        ApiResult result = this.aiLogic.deleteAI(this.fakeContext, VALIDDEVID, AIID);
+        ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testDelete_DBFail_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(false);
-        ApiResult result = this.aiLogic.deleteAI(this.fakeContext, VALIDDEVID, AIID);
+        ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
@@ -219,7 +219,7 @@ public class TestAILogic {
     @Test
     public void testDelete_DBFail_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.aiLogic.deleteAI(this.fakeContext, VALIDDEVID, AIID);
+        ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 

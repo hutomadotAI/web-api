@@ -135,10 +135,8 @@ public class AIEndpoint {
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAI(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.aiLogic.deleteAI(
-                securityContext,
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();

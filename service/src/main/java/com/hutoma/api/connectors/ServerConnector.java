@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
@@ -74,8 +73,19 @@ public class ServerConnector {
     }
 
     public static class AiServicesException extends Exception {
+        private int responseStatus = 0;
+
         public AiServicesException(String message) {
             super(message);
+        }
+
+        public AiServicesException(String message, int responseStatus) {
+            this(message);
+            this.responseStatus = responseStatus;
+        }
+
+        public int getResponseStatus() {
+            return this.responseStatus;
         }
     }
 
@@ -106,7 +116,7 @@ public class ServerConnector {
             // start the calls async
             HashMap<String, Future<InvocationResult>> futures = execute(callables);
 
-            List<String> errors = new ArrayList<>();
+            List<Response> errors = new ArrayList<>();
             for (String endpoint : callables.keySet()) {
                 // wait for each call to terminate
                 InvocationResult response = waitFor(endpoint, futures);
@@ -114,9 +124,7 @@ public class ServerConnector {
                 Response.StatusType statusInfo = response.getResponse().getStatusInfo();
                 // aggregate the errors
                 if (statusInfo.getStatusCode() != HttpURLConnection.HTTP_OK) {
-                    errors.add(String.format("%d %s",
-                            statusInfo.getStatusCode(),
-                            statusInfo.getReasonPhrase()));
+                    errors.add(response.getResponse());
                     this.logger.logError(LOGFROM, String.format("Failure status %s (id=%d msg=%s)",
                             endpoint,
                             statusInfo.getStatusCode(),
@@ -124,9 +132,12 @@ public class ServerConnector {
                 }
             }
             if (!errors.isEmpty()) {
-                throw new AiServicesException(errors.stream()
-                        .map(Object::toString)
-                        .collect(Collectors.joining(";")));
+                AiServicesException ex = new AiServicesException("Errors found");
+                for (Response r : errors) {
+                    ex.addSuppressed(new AiServicesException(
+                            r.getStatusInfo().getReasonPhrase(), r.getStatusInfo().getStatusCode()));
+                }
+                throw ex;
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AiServicesException(e.getMessage());

@@ -22,9 +22,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
 
@@ -199,17 +201,26 @@ public class AILogic {
         }
     }
 
-    public ApiResult deleteAI(
-            SecurityContext securityContext,
-            String devid,
-            UUID aiid) {
-
+    public ApiResult deleteAI(final String devid, final UUID aiid) {
         try {
             this.logger.logDebug(LOGFROM, devid + " request to delete " + aiid);
             if (!this.database.deleteAi(devid, aiid)) {
                 return ApiError.getNotFound();
             }
-            this.aiServices.deleteAI(devid, aiid);
+            try {
+                this.aiServices.deleteAI(devid, aiid);
+            } catch (ServerConnector.AiServicesException ex) {
+                if (Stream.of(ex.getSuppressed())
+                        .filter(c -> c instanceof ServerConnector.AiServicesException)
+                        .map(ServerConnector.AiServicesException.class::cast)
+                        .allMatch(x -> x.getResponseStatus() == HttpURLConnection.HTTP_NOT_FOUND)) {
+                    // all exceptions are related to AI not being found by the backends, so just ignore
+                    this.logger.logInfo(LOGFROM, "Suppressed NOT FOUND errors from backends for AI Delete");
+                } else {
+                    // rethrow
+                    throw ex;
+                }
+            }
             return new ApiResult().setSuccessStatus("deleted successfully");
         } catch (Exception e) {
             this.logger.logException(LOGFROM, e);
