@@ -148,11 +148,11 @@ if(isset($_POST['action_login'])){
         </div>
         <nav style="padding: 5px;margin-right: 115px;" class="collapse navbar-collapse navbar-right" role="navigation">
             <ul id="nav" class="nav navbar-nav">
-                <li><a href="../index.html" class="external">Home</a></li>
-                <li><a href="./pages/login.php" class="external">Login</a></li>
-                <li><a href="../index.html" class="external">Features  </a></li>
-                <li><a href="../about.html" class="external">About</a></li>
-                <li><a href="../contactus.html" class="external">Contacts</a></li>
+                <li><a href="https://hutoma.com" class="external">Home</a></li>
+                <li><a href="#" class="external">Login</a></li>
+                <li><a href="https://hutoma.com/index.html#features" class="external">Features  </a></li>
+                <li><a href="https://hutoma.com/about.html" class="external">About</a></li>
+                <li><a href="https://hutoma.com/contactus.html" class="external">Contacts</a></li>
             </ul>
         </nav>
     </div>
@@ -217,9 +217,8 @@ if(isset($_POST['action_login'])){
                 <div class="footer-single">
                     <h6>About</h6>
                     <ul>
-                        <li><a class="af" href="../about.html">About Hutoma</a></li>
-                        <li><a class="af" href="../pricing.html">Pricing</a></li>
-                        <li><a class="af" href="../contactus.html">Contact Us</a></li>
+                        <li><a class="af" href="https://hutoma.com/about.html">About Hutoma</a></li>
+                        <li><a class="af" href="https://hutoma.com/contactus.html">Contact Us</a></li>
 
                     </ul>
                 </div>
@@ -231,7 +230,7 @@ if(isset($_POST['action_login'])){
                     <h6>Get in Touch</h6>
                     <ul>
                         <li><a class="af"  href="https://twitter.com/hutomata"><i class="fa fa-twitter fa-lg"> </i> twitter</a></li>
-                        <li><a class="af" href="https://www.facebook.com/hutoma.machine/"><i class="fa fa-facebook fa-lg"></i>
+                        <li><a class="af" href="https://www.facebook.com/HutomadotAI/"><i class="fa fa-facebook fa-lg"></i>
                                 facebook</a></li>
                         <li><a class="af" href="https://www.linkedin.com/company/hutoma"><i class="fa fa-linkedin fa-lg"></i>
                                 linkedin</a></li>
