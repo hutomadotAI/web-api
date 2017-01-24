@@ -19,8 +19,8 @@ require __DIR__ . "/../class.logsys.php";
     ),
     "api" => array(
         //"request_url" => "http://api.hutoma.com/v1"
-        "request_url" => "http://10.132.0.6:11080/v1"
-        //"request_url" => "http://localhost:8081/v1"
+        "request_url" => "http://10.132.0.4:11080/v1"
+        //"request_url" => "http://localhost:8080/v1"
     ),
     "features" => array(
         "auto_init" => true

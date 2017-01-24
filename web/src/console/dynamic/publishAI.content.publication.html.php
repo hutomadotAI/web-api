@@ -396,3 +396,5 @@
         unset($tmp_bot);
         ?>;
 </script>
+<script src="./plugins/drag-and-drop/drag-and-drop.js"></script>
+<script src="./plugins/publish/publish.js"></script>

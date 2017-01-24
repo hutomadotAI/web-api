@@ -64,7 +64,7 @@
                     </div>
                 </section>
                 <section class="content-info" style="padding-left:15px;">
-                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
+                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>support@email.com</a>
                 </section>
             </div>
         </div>
@@ -74,7 +74,7 @@
         <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
             <a data-toggle="collapse"  href="#collapseChartTrainingError">
                 <div class=" pull-left">
-                      Show training chart
+                    Show training chart
                     <i class="fa fa-info-circle text-sm text-yellow"></i>
                 </div>
             </a>
@@ -91,7 +91,7 @@
                         </div>
                         <div class="unselectable text-center">
                             <i class="fa fa-minus-circle text-sm text-yellow" id="zoomout" onClick="zoomOut();" onMouseOver="this.style.cursor='pointer'"></i>
-                                <span class="unselectable text-gray">zoom</span>
+                            <span class="unselectable text-gray">zoom</span>
                             <i class="fa fa-plus-circle text-sm text-yellow" id="zoomin" onClick="zoomIn();" onMouseOver="this.style.cursor='pointer'"></i>
                         </div>
                     </div>

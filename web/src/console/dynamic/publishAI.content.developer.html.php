@@ -14,7 +14,7 @@
             <span id="msgAlertDomainsNewAIInfo" >
                 <dt>Hutoma Publish</dt>
                 <dd>
-                   This is your first publich. It needs to add a Developer infos.
+                   This is your first publish. It needs to add a Developer infos.
                 </dd>
             </span>
         </div>
@@ -142,8 +142,7 @@
 
     <div class="box-footer">
         <a  class="btn btn-primary flat" id="btnBack" onClick="window.location.href='./home.php';" style="width:100px"><b>Back</b></a>
-        <button class="btn btn-success pull-right flat" id="btnPublishDeveloper" style="width:100px"><b>Next</b>
-            <span class="fa fa-arrow-circle-right"></span>
+        <button class="btn btn-success pull-right flat" id="btnPublishDeveloper" style="width:100px"><b>Save</b>
         </button>
     </div>
 </div>

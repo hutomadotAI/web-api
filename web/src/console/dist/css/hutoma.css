@@ -1982,15 +1982,6 @@ a:focus {
     height: 110px;
 }
 
-.box.box-solid.box-default-fixed {
-    border: 1px solid #515151;
-    height: 320px;
-}
-
-.box.box-solid.box-default-fixed.borderActive {
-    border: 1px solid #ffffff;
-}
-
 .box.box-solid.box-default-small-fixed {
     border: 1px solid #515151;
     height: 110px;
@@ -2278,17 +2269,6 @@ a:focus {
     padding: 10px;
     background-color: #212121;
 
-}
-
-.box-footer-flatdown {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    position: absolute;
-    text-align: center;
-    width: 100%;
-    bottom: 15px;
 }
 
 .box-footer-stars {
@@ -6300,6 +6280,207 @@ ul.pagination li a {
     user-select: none;
 }
 
+
+/* layout.css Style */
+.upload-drop-zone {
+    min-height: 185px;
+    max-height: 185px;
+    min-width: 185px;
+    max-width: 185px;
+    border-width: 2px;
+    padding: 10px;
+}
+
+/* skin.css Style*/
+.upload-drop-zone {
+    color: #ccc;
+    border-style: dashed;
+    border-color: #ccc;
+    text-align: center
+}
+.upload-drop-zone.drop {
+    color: #222;
+    border-color: #222;
+}
+
+
+.drag-icon {
+     min-height: 205px;
+     max-height: 205px;
+     min-width: 205px;
+     max-width: 205px;
+     text-align: center;
+     font-size: 65px;
+     background: #515181;
+     margin:auto;
+ }
+
+.drag-area{
+    min-height: 305px;
+    max-height: 305px;
+    min-width: 305px;
+    max-width: 305px;
+    text-align: center;
+    font-size: 65px;
+    background: #515181;
+    margin:auto;
+}
+.drag-area img {
+    max-width: 100%;
+}
+
+.drop-zone {
+    min-width: 205px;
+    max-width: 205px;
+    margin:0px;
+    padding:0px;
+}
+
+.drop-zone1{
+
+    min-width: 460px;
+    width: auto;
+    padding:0px 0px 0px 235px;
+    margin:0px;
+}
+
+.drop-zone2{
+    min-width: 205px;
+    max-width: 205px;
+    margin:0px;
+    padding:10px 0px 0px 0px;
+}
+
+.drop-zone-460{
+    min-height: 130px;
+    max-height: 230px;
+    min-width: 460px;
+    width: auto;
+    padding:0px 0px 0px 235px;
+    margin:0px;
+}
+
+.drop-zone-580{
+    min-width: 550px;
+}
+
+.textarea-justify{
+    resize: none;
+    text-align: justify;
+    white-space: pre-line;
+    -moz-text-align-last: left;
+    text-align-last: left;
+}
+
+.cropit-preview {
+    min-height: 205px;
+    max-height: 205px;
+    min-width: 205px;
+    max-width: 205px;
+    text-align: center;
+    font-size: 65px;
+    background: #515181;
+    margin:auto;
+}
+
+.cropit-preview-image-container {
+    cursor: move;
+}
+
+
+/*   BOX botstore  */
+.box.box-solid.card {
+    border: 1px solid #515151;
+    height: 320px;
+    border-top-left-radius: 3;
+    border-top-right-radius: 3;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.box.box-solid.card.borderActive {
+    border: 1px solid #ffffff;
+}
+
+.box.box-solid.card.flat {
+    border-radius: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+
+.card-icon {
+    border-top-left-radius: 55px;
+    border-top-right-radius: 55px;
+    border-bottom-right-radius: 55px;
+    border-bottom-left-radius: 55px;
+    display: block;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    height: 100px;
+    width: 100px;
+    text-align: center;
+    font-size: 55px;
+    line-height: 100px;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.card-icon > img {
+    max-width: 100%;
+}
+
+.card-footer {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    bottom: 15px;
+}
+
+.card-footer.flat {
+    border-radius: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.card-title{
+    font-size: 18px;
+    text-align: center;
+    color: #999; !important;
+    margin: 0 0 5px 0;
+}
+
+.card-description{
+    font-size: 14px;
+    text-align: center;
+    color: #d2d6de !important;
+    margin: 0 0 5px 0;
+}
+
+.card-link {
+    font-size: 14px;
+    text-align: center;
+    color: #3c8dbc !important;
+    margin: 10px 0 10px 0;
+    cursor: pointer;
+}
+
+.card-linked{
+
+}
+
+
+
+/*  BOTSTORE DETAILS CARD  */
+
+
 .bot-box{
     max-width: 640px;
     min-width: 640px;
@@ -6489,112 +6670,3 @@ ul.pagination li a {
     height:40px;
 }
 
-/* layout.css Style */
-.upload-drop-zone {
-    min-height: 185px;
-    max-height: 185px;
-    min-width: 185px;
-    max-width: 185px;
-    border-width: 2px;
-    padding: 10px;
-}
-
-/* skin.css Style*/
-.upload-drop-zone {
-    color: #ccc;
-    border-style: dashed;
-    border-color: #ccc;
-    text-align: center
-}
-.upload-drop-zone.drop {
-    color: #222;
-    border-color: #222;
-}
-
-
-.drag-icon {
-     min-height: 205px;
-     max-height: 205px;
-     min-width: 205px;
-     max-width: 205px;
-     text-align: center;
-     font-size: 65px;
-     background: #515181;
-     margin:auto;
- }
-
-.drag-area{
-    min-height: 305px;
-    max-height: 305px;
-    min-width: 305px;
-    max-width: 305px;
-    text-align: center;
-    font-size: 65px;
-    background: #515181;
-    margin:auto;
-}
-.drag-area img {
-    max-width: 100%;
-}
-
-.drop-zone {
-    min-width: 205px;
-    max-width: 205px;
-    margin:0px;
-    padding:0px;
-}
-
-.drop-zone1{
-
-    min-width: 460px;
-    width: auto;
-    padding:0px 0px 0px 235px;
-    margin:0px;
-}
-
-.drop-zone2{
-    min-width: 205px;
-    max-width: 205px;
-    margin:0px;
-    padding:10px 0px 0px 0px;
-}
-
-.drop-zone-460{
-    min-height: 130px;
-    max-height: 230px;
-    min-width: 460px;
-    width: auto;
-    padding:0px 0px 0px 235px;
-    margin:0px;
-}
-
-.drop-zone-580{
-    min-width: 550px;
-}
-
-.textarea-justify{
-    resize: none;
-    text-align: justify;
-    white-space: pre-line;
-    -moz-text-align-last: left;
-    text-align-last: left;
-}
-
-.cropit-preview {
-    min-height: 205px;
-    max-height: 205px;
-    min-width: 205px;
-    max-width: 205px;
-    text-align: center;
-    font-size: 65px;
-    background: #515181;
-    margin:auto;
-}
-
-.cropit-preview-image-container {
-    cursor: move;
-}
-
-.bot-linked{
-
-}

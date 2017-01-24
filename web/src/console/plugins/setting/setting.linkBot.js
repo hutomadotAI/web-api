@@ -8,20 +8,20 @@ function showBots(str,option){
             wHTML += ('<span id="card' + bot['botId'] + '" data-pos="'+x+'">');
             wHTML += ('<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4">');
             if($.inArray(bot['botId'], linkedBots)!=-1)
-                wHTML += ('<div class="box box-solid box-default-fixed flat borderActive" id="' + bot['aiid'] + '">');
+                wHTML += ('<div class="box box-solid card flat borderActive" id="' + bot['aiid'] + '">');
             else
-                wHTML += ('<div class="box box-solid box-default-fixed flat" id="' + bot['aiid'] + '">');
-            wHTML += ('<img class="info-circle-icon" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); ><i class="'+ bot['imagePath']+'"></i></img>');
-            wHTML += ('<h4 class="text-center text-mute unselectable">' + bot['name'] + '</h4>');
-            wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</h5>');
-            wHTML += ('<div class="box-footer-flatdown flat">');
+                wHTML += ('<div class="box box-solid card flat" id="' + bot['aiid'] + '">');
+            wHTML += ('<img class="card-icon" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); ><i class="'+ bot['imagePath']+'"></i></img>');
+            wHTML += ('<div class="card-title unselectable">' + bot['name'] + '</div>');
+            wHTML += ('<div class="card-description unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</div>');
+            wHTML += ('<div class="card-footer flat">');
             wHTML += addHtmlStarRating(0, bot['aiid'], bot['rating']);
-            wHTML += ('<h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); >info and details</h5>');
+            wHTML += ('<div class="card-link unselectable" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); >info and details</div>');
             if ($.inArray(bot['botId'], linkedBots) != -1) {
-                wHTML += ('<span class="bot-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
+                wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
                 wHTML += ('<div class="switch switchOn" data-link="1" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '","' + x + '");></div>');
             }else {
-                wHTML += ('<span class="bot-linked" data-botid = "' + bot['botId'] + '" data-linked="0">');
+                wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="0">');
                 wHTML += ('<div class="switch"  data-link="0" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '");></div>');
             }
             wHTML += ('</span>');

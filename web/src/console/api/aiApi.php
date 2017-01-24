@@ -50,8 +50,6 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-
-            // TODO the AI was correctly deleted but it always return 305 error on response
             //$this->handleApiCallError($curl_response, 305);
             $json_response = json_decode($curl_response, true);
             return $json_response;
@@ -219,7 +217,7 @@ class aiApi extends apiBase
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
             
-            $this->handleApiCallError($curl_response, 350);
+            //$this->handleApiCallError($curl_response, 350);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

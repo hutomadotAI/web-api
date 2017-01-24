@@ -126,9 +126,8 @@ function localeToLanguage($locale)
 
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/training.content.upload.html.php'; ?>
+                    <?php include './dynamic/training.content.upload.file.html.php'; ?>
                     <?php include './dynamic/training.content.monitor.html.php'; ?>
-                    <?php //include './dynamic/training.content.keys.html.php'; ?>
                 </div>
             </div>
         </section>
@@ -154,8 +153,6 @@ function localeToLanguage($locale)
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/training/training.area.upload.textfile.js"></script>
-<script src="./plugins/training/training.area.upload.bookfile.js"></script>
-<script src="./plugins/training/training.area.upload.urlfile.js"></script>
 <script src="./plugins/training/training.area.js"></script>
 <script src="./plugins/chat/chat.js"></script>
 <script src="./plugins/chat/voice.js"></script>

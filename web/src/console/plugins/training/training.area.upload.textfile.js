@@ -48,7 +48,7 @@ function uploadTextFile() {
                     disableRestartBoxButton(false);
                     break;
                 case 500:
-                    msgAlertUploadFile(ALERT.DANGER.value, statusCode['status']['info']);
+                    msgAlertUploadFile(ALERT.DANGER.value, JSONdata['status']['info']);
                     setUICurrentStatus(-1);
                     disableButtonUploadTextFile(false);
                     disableRestartBoxButton(false);
@@ -196,7 +196,6 @@ function hideChart(state) {
 }
 function phaseTwoActive() {
     disableButtonUploadTextFile(false);
-    disableButtonUploadBookFile(false);
     hideTrainingBar(false);
 }
 

@@ -56,6 +56,7 @@ function requestDevPublish(){
                     // UPDATED developer
                     createAlertMessage(ALERT.PRIMARY.value, 'Request submitted!');
                     $("#btnPublishDeveloper").prop("disabled", false);
+                    updateButton();
                     break;
                 case 400:
                     // UPDATED not complete
@@ -64,7 +65,7 @@ function requestDevPublish(){
                     break;
                 case 500:
                     // DEVELOPER JUST EXISTS
-                    createAlertMessage(ALERT.WARNING.value,'Developer info just sended');
+                    createAlertMessage(ALERT.WARNING.value,'Developer info sent');
                     break;
             }
         },
@@ -138,6 +139,14 @@ function createAlertMessage(alarm,message,id) {
         document.getElementById('msgAlertDeveloper').innerText = message;
     }
 
+}
+
+function updateButton(){
+    var btnNode = document.getElementById('btnPublishDeveloper');
+    btnNode.className = 'btn btn-primary pull-right flat';
+    btnNode.innerHTML = '<b>Next</b>' + '<span class="fa fa-arrow-circle-right"></span>';
+    btnNode.removeEventListener("click", checkDevInput);
+    btnNode.onclick = function () {  location.href = "./publishAI.php"; };
 }
 
 function fieldsToDevInstance(){

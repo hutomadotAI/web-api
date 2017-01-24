@@ -13,12 +13,13 @@ var async_status_UI = setInterval(function () {
 
 function initializeEventListeners() {
     document.getElementById('inputfile').addEventListener('change', enableUploadTextFile);
-    document.getElementById('inputstructure').addEventListener('change', enableUploadBookFile);
-    document.getElementById('inputurl').addEventListener('keyup', enableUploadUrl);
+    //TODO when the book uploading backend is ok then uncomment this lines
+    //document.getElementById('inputstructure').addEventListener('change', enableUploadBookFile);
+    //document.getElementById('inputurl').addEventListener('keyup', enableUploadUrl);
 
     document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
-    document.getElementById('btnUploadStructure').addEventListener('click', uploadBookFile);
-    document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
+    //document.getElementById('btnUploadStructure').addEventListener('click', uploadBookFile);
+    //document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
 
     //document.getElementById('zoomIn').addEventListener('click', zoomIn);
 }
@@ -28,7 +29,6 @@ function initializeConsole(aiStatus) {
     if (aiStatus["training_file_uploaded"] != 0) {
         msgAlertUploadFile(ALERT.PRIMARY.value, 'A file is already loaded.');
         setStateResponse(aiStatus);
-        // tecnicamente dovrebbe già essere partito
     }
 }
 

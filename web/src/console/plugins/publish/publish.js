@@ -419,7 +419,3 @@ function fieldsBotValidation() {
 
     return true;
 }
-
-$(function () {
-    $('.select2').select2();
-});

@@ -11,14 +11,14 @@ function showBots(str, option) {
             //if($.inArray(bot['botId'], purchasedBots)!=-1)
             //    wHTML += ('<div class="box box-solid box-default-fixed flat borderActive" id="' + bot['aiid'] + '">');
             //else
-            wHTML += ('<div class="box box-solid box-default-fixed flat" id="' + bot['aiid'] + '">');
-            wHTML += ('<img class="info-circle-icon" style="margin-top: 40px;" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');>');
-            wHTML += ('<h4 class="text-center text-mute unselectable">' + bot['name'] + '</h4>');
-            wHTML += ('<h5 class="text-center text-gray unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</h5>');
-            wHTML += ('<div class="box-footer-flatdown flat">');
+            wHTML += ('<div class="box box-solid card flat" id="' + bot['aiid'] + '">');
+            wHTML += ('<img class="card-icon" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');>');
+            wHTML += ('<div class="card-title unselectable">' + bot['name'] + '</div>');
+            wHTML += ('<div class="card-description unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</div>');
+            wHTML += ('<div class="card-footer flat">');
             wHTML += addHtmlStarRating(0, bot['aiid'], bot['rating']);
-            wHTML += ('<h5 class="text-center text-light-blue unselectable" onMouseOver="this.style.cursor=\'pointer\'" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + '); >info and details</h5>');
-            wHTML += ('<span class="bot-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
+            wHTML += ('<div class="card-link unselectable" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + '); >info and details</div>');
+            wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
 
             switch (option) {
                 case 0:  // botstore showed during creation AI wizard
