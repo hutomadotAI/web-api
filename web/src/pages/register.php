@@ -8,7 +8,7 @@ if(isset($_POST['submit'])) {
         $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
         if($response['success'] == false)
         {
-            $msg ='<div class="alert alert-warning">';
+            $msg ='<div class="alert alert-warning text-white">';
             $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
             $msg .='</div>';
         }
@@ -20,23 +20,23 @@ if(isset($_POST['submit'])) {
             $terms = isset($_POST['terms']);
             $invite_code =$_POST['invite_code'];
 
-            $missingfields  ='<div class="alert alert-warning">';
+            $missingfields  ='<div class="alert alert-warning text-white">';
             $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
             $missingfields .='</div>';
 
-            $passwordmismatch  ='<div class="alert alert-warning">';
+            $passwordmismatch  ='<div class="alert alert-warning text-white">';
             $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
             $passwordmismatch .='</div>';
 
-            $termsmsg  ='<div class="alert alert-warning">';
+            $termsmsg  ='<div class="alert alert-warning text-white">';
             $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the Terms and Conditions and Privacy Policy';
             $termsmsg .='</div>';
 
-            $userexists  ='<div class="alert alert-warning">';
+            $userexists  ='<div class="alert alert-warning text-white">';
             $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
             $userexists .='</div>';
 
-            $invalidcode  ='<div class="alert alert-warning">';
+            $invalidcode  ='<div class="alert alert-warning text-white">';
             $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
             $invalidcode .='</div>';
 
