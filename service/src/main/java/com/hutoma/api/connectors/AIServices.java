@@ -68,6 +68,7 @@ public class AIServices extends ServerConnector {
                             .target(endpoint).path(devId).path(aiid.toString())
                             .request()
                             .delete(),
+                    endpoint,
                     0));
         }
         executeAndWait(callables);
@@ -81,7 +82,7 @@ public class AIServices extends ServerConnector {
                     this.jerseyClient
                             .target(endpoint).path(devId)
                             .request()
-                            .delete(), 0));
+                            .delete(), endpoint, 0));
         }
         executeAndWait(callables);
     }
@@ -107,6 +108,7 @@ public class AIServices extends ServerConnector {
                             .target(endpoint)
                             .request()
                             .post(Entity.entity(multipart, multipart.getMediaType())),
+                    endpoint,
                     0));
         }
         executeAndWait(callables);
@@ -130,7 +132,7 @@ public class AIServices extends ServerConnector {
             }
 
             final JerseyInvocation.Builder builder = target.request();
-            callables.put(endpoint, () -> new InvocationResult(builder.post(null), 0));
+            callables.put(endpoint, () -> new InvocationResult(builder.post(null), endpoint, 0));
         }
         return callables;
     }

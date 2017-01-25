@@ -167,7 +167,7 @@ public class AIChatServices extends ServerConnector {
         callables.put(label, () -> {
             long startTime = AIChatServices.this.tools.getTimestamp();
             Response response = builder.get();
-            return new InvocationResult(response, AIChatServices.this.tools.getTimestamp() - startTime);
+            return new InvocationResult(response, endpoint, AIChatServices.this.tools.getTimestamp() - startTime);
         });
     }
 

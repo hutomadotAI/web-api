@@ -56,10 +56,12 @@ public class ServerConnector {
 
     public static class InvocationResult {
         private final Response response;
+        private final String endpoint;
         private final long durationMs;
 
-        public InvocationResult(final Response response, final long durationMs) {
+        public InvocationResult(final Response response, final String endpoint, final long durationMs) {
             this.response = response;
+            this.endpoint = endpoint;
             this.durationMs = durationMs;
         }
 
@@ -69,6 +71,10 @@ public class ServerConnector {
 
         public long getDurationMs() {
             return this.durationMs;
+        }
+
+        public String getEndpoint() {
+            return this.endpoint;
         }
     }
 
@@ -116,7 +122,7 @@ public class ServerConnector {
             // start the calls async
             HashMap<String, Future<InvocationResult>> futures = execute(callables);
 
-            List<Response> errors = new ArrayList<>();
+            List<InvocationResult> errors = new ArrayList<>();
             for (String endpoint : callables.keySet()) {
                 // wait for each call to terminate
                 InvocationResult response = waitFor(endpoint, futures);
@@ -124,7 +130,7 @@ public class ServerConnector {
                 Response.StatusType statusInfo = response.getResponse().getStatusInfo();
                 // aggregate the errors
                 if (statusInfo.getStatusCode() != HttpURLConnection.HTTP_OK) {
-                    errors.add(response.getResponse());
+                    errors.add(response);
                     this.logger.logError(LOGFROM, String.format("Failure status %s (id=%d msg=%s)",
                             endpoint,
                             statusInfo.getStatusCode(),
@@ -133,9 +139,12 @@ public class ServerConnector {
             }
             if (!errors.isEmpty()) {
                 AiServicesException ex = new AiServicesException("Errors found");
-                for (Response r : errors) {
+                for (InvocationResult r : errors) {
                     ex.addSuppressed(new AiServicesException(
-                            r.getStatusInfo().getReasonPhrase(), r.getStatusInfo().getStatusCode()));
+                            String.format("%s for %s",
+                                    r.getResponse().getStatusInfo().getReasonPhrase(),
+                                    r.getEndpoint()),
+                            r.getResponse().getStatusInfo().getStatusCode()));
                 }
                 throw ex;
             }
