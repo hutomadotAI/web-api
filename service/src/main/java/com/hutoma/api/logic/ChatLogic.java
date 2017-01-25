@@ -179,6 +179,48 @@ public class ChatLogic {
         return apiChat.setSuccessStatus();
     }
 
+    public ApiResult assistantChat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
+                          String history, String topic, float minP) {
+
+        final long startTime = this.tools.getTimestamp();
+        UUID chatUuid = UUID.fromString(chatId);
+
+        // prepare the result container
+        ApiChat apiChat = new ApiChat(chatUuid, 0);
+
+        // Add telemetry for the request
+        this.telemetryMap = new HashMap<String, String>() {
+            {
+                put("DevId", devId);
+                put("AIID", aiid.toString());
+                put("Topic", topic);
+                // TODO: potentially PII info, we may need to mask this later, but for
+                // development purposes log this
+                put("ChatId", chatUuid.toString());
+                put("History", history);
+                put("Q", question);
+            }
+        };
+
+        ChatResult result = new ChatResult();
+        result.setElapsedTime(this.tools.getTimestamp() - startTime);
+        result.setQuery(question);
+
+        // Set a fixed response.
+        result.setAnswer("Hello");
+        result.setScore(1.0);
+
+        // set the chat response time to the whole duration since the start of the request until now
+        result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+        this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
+
+        apiChat.setResult(result);
+
+        // log the results
+        ITelemetry.addTelemetryEvent(this.chatTelemetryLogger, "AssistantChat", this.telemetryMap);
+        return apiChat.setSuccessStatus();
+    }
+
     private ChatResult interpretSemanticResult() throws ServerConnector.AiServicesException {
 
         // wait for result to complete

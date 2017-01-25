@@ -43,6 +43,7 @@ public class TestChatLogic {
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String SEMANTICRESULT = "semanticresult";
+    private static final String ASSISTANTRESULT = "Hello";
     private static final String NEURALRESULT = "neuralresult";
     private static final String AIMLRESULT = "aimlresult";
     private static final String QUESTION = "question";
@@ -452,6 +453,17 @@ public class TestChatLogic {
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
     }
 
+    /***
+     * Tests for a valid semantic response from assistant.
+     * @throws ServerConnector.AiServicesException
+     */
+    @Test
+    public void testAssistant_Valid_Semantic() throws ServerConnector.AiServicesException {
+        ApiResult result = getAssistantChat(0.2f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(ASSISTANTRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
     private void historySemanticReset(String resetCommand) throws ServerConnector.AiServicesException {
         setupFakeChat(0.7d, resetCommand, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.3f);
@@ -466,6 +478,14 @@ public class TestChatLogic {
 
     private ApiResult getChat(float min_p, String question) {
         return this.chatLogic.chat(this.fakeContext, AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
+    }
+
+    private ApiResult getAssistantChat(float min_p) {
+        return this.getAssistantChat(min_p, QUESTION);
+    }
+
+    private ApiResult getAssistantChat(float min_p, String question) {
+        return this.chatLogic.assistantChat(this.fakeContext, AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
     /***
