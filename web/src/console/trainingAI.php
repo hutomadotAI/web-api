@@ -158,11 +158,6 @@ function localeToLanguage($locale)
 <script src="./plugins/chat/voice.js"></script>
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 
-<script src="./plugins/flot/jquery.flot.min.js"></script>
-<script src="./plugins/flot/jquery.flot.resize.min.js"></script>
-<script src="./plugins/flot/jquery.flot.pie.min.js"></script>
-<script src="./plugins/flot/jquery.flot.categories.min.js"></script>
-
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
 <script>

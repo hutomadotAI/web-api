@@ -13,15 +13,7 @@ var async_status_UI = setInterval(function () {
 
 function initializeEventListeners() {
     document.getElementById('inputfile').addEventListener('change', enableUploadTextFile);
-    //TODO when the book uploading backend is ok then uncomment this lines
-    //document.getElementById('inputstructure').addEventListener('change', enableUploadBookFile);
-    //document.getElementById('inputurl').addEventListener('keyup', enableUploadUrl);
-
     document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
-    //document.getElementById('btnUploadStructure').addEventListener('click', uploadBookFile);
-    //document.getElementById('btnUploadUrl').addEventListener('click', uploadUrl);
-
-    //document.getElementById('zoomIn').addEventListener('click', zoomIn);
 }
 
 function initializeConsole(aiStatus) {
@@ -213,7 +205,6 @@ function setStateResponse(aiStatus) {
 
 function trainingRestart() {
     disableButtonUploadTextFile(true);
-    disableButtonUploadBookFile(true);
 
     phaseOneReset();
     hideTrainingBar(true);
@@ -223,7 +214,6 @@ function trainingRestart() {
     setUICurrentStatus(1);
 
     disableButtonUploadTextFile(false);
-    disableButtonUploadBookFile(false);
 }
 
 function getUICurrentStatus() {
@@ -316,154 +306,8 @@ function haNoContentError(info) {
     return false;
 }
 
-function zoomIn() {
-    stopChart();
-    if (scale_chart_max_error > 0.0001) {
-        scale_chart_max_error = scale_chart_max_error / 5;
-        document.getElementById('zoomout').disabled = false;
-        document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-yellow';
-        document.getElementById('zoomout').setAttribute('onClick', 'zoomOut()');
-        startChart();
-    }
-    else {
-        document.getElementById('zoomin').disabled = true;
-        document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-gray';
-        document.getElementById('zoomin').setAttribute('onClick', '');
-    }
-}
-
-function zoomOut() {
-    stopChart();
-    if (scale_chart_max_error < 10000) {
-        scale_chart_max_error = scale_chart_max_error * 5;
-        document.getElementById('zoomin').disabled = false;
-        document.getElementById('zoomin').className = 'fa fa-plus-circle text-sm text-yellow';
-        document.getElementById('zoomin').setAttribute('onClick', 'zoomIn()');
-        startChart();
-    }
-    else {
-        document.getElementById('zoomout').disabled = true;
-        document.getElementById('zoomout').className = 'fa fa-minus-circle text-sm text-gray';
-        document.getElementById('zoomout').setAttribute('onClick', '');
-    }
-}
-
-
-var data = [];
-var async_chart_update;
-
-function getData() {
-    var totalPoints = 50;
-
-    if (data.length > 0)
-        data = data.slice(1);
-
-    while (data.length < totalPoints) {
-        if (deep_error != -1)
-            data.push(deep_error);
-        else
-            data.push(scale_chart_max_error);
-    }
-
-    var res = [];
-    for (var i = 0; i < data.length; ++i) {
-        res.push([i, data[i]]);
-    }
-    return res;
-}
-
-function startChart() {
-    var interactive_plot = $.plot("#interactive", [getData()], {
-        grid: {
-            //borderColor: "#f3f3f3",
-            //borderWidth: 0,
-            //tickColor: "#f3f3f3"
-        },
-        series: {
-            shadowSize: 0, // Drawing is faster without shadows
-            color: "#3c8dbc"
-        },
-        lines: {
-            fill: true, //Converts the line chart to area chart
-            color: "#3c8dbc"
-        },
-        yaxis: {
-            min: 0,
-            max: scale_chart_max_error,
-            show: true
-        },
-        xaxis: {
-            show: true
-        }
-    });
-
-    var updateInterval = 2000; //Fetch data ever x milliseconds
-    function update() {
-        interactive_plot.setData([getData()]);
-        interactive_plot.draw();
-        async_chart_update = setTimeout(update, updateInterval);
-    }
-
-    update();
-}
-
-function stopChart() {
-    clearTimeout(async_chart_update);
-}
-
-$(function () {
-
-    switch (true) {
-        case (deep_error == -1):
-            scale_chart_max_error = 5000; // default scale value
-            break;
-        case (deep_error < 0.00005):
-            scale_chart_max_error = 0.00005;
-            break;
-        case (deep_error < 0.0001):
-            scale_chart_max_error = 0.0001;
-            break;
-        case (deep_error < 0.001):
-            scale_chart_max_error = 0.001;
-            break;
-        case (deep_error < 0.01):
-            scale_chart_max_error = 0.01;
-            break;
-        case (deep_error < 0.1):
-            scale_chart_max_error = 0.1;
-            break;
-        case (deep_error < 1):
-            scale_chart_max_error = 1;
-            break;
-        case (deep_error < 10):
-            scale_chart_max_error = 10;
-            break;
-        case (deep_error < 100):
-            scale_chart_max_error = 100;
-            break;
-        case (deep_error < 500):
-            scale_chart_max_error = 100;
-            break;
-        case (deep_error < 1000):
-            scale_chart_max_error = 1000;
-            break;
-        case (deep_error < 5000):
-            scale_chart_max_error = 5000;
-            break;
-        default:
-            scale_chart_max_error = 10000;
-    }
-    startChart();
-});
-
 // VIDEO TUTORIAL TRAINING CHAT EXAMPLE
 $("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function () {
-    var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
-    iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
-});
-
-// VIDEO TUTORIAL TRAINING BOOK
-$("#collapseVideoTutorialTrainingBook").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });

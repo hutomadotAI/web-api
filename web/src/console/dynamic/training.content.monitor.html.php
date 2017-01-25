@@ -72,33 +72,10 @@
 
     <div id="chart-details" hidden>
         <div class="box-header no-border" style="padding-top: 0px;padding-bottom: 0px;">
-            <a data-toggle="collapse"  href="#collapseChartTrainingError">
-                <div class=" pull-left">
-                    Show training chart
-                    <i class="fa fa-info-circle text-sm text-yellow"></i>
-                </div>
-            </a>
-            <div class="text-gray pull-right">
+            <div class="text-gray pull-right" style="padding-bottom:5px;">
                 Learning error : <span id="show-error"></span>
             </div>
         </div>
-
-        <div class="row no-padding">
-            <div class="col-xs-12">
-                <div class="box-body table-responsive no-border" style="padding-bottom:0px;">
-                    <div id="collapseChartTrainingError" class="panel-collapse collapse"> <!-- class="panel-collapse collapse in" -->
-                        <div id="interactive" style="width: 100%;height: 150px;">
-                        </div>
-                        <div class="unselectable text-center">
-                            <i class="fa fa-minus-circle text-sm text-yellow" id="zoomout" onClick="zoomOut();" onMouseOver="this.style.cursor='pointer'"></i>
-                            <span class="unselectable text-gray">zoom</span>
-                            <i class="fa fa-plus-circle text-sm text-yellow" id="zoomin" onClick="zoomIn();" onMouseOver="this.style.cursor='pointer'"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
     <div class="box-footer" id="chart-details-footer" hidden>
         <div class="alert alert-dismissable flat alert-info no-margin no-padding">
