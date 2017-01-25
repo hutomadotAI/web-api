@@ -5,7 +5,7 @@ if(isset($_POST['submit'])) {
 
     if(isset($_POST['g-recaptcha-response'])) {
         $captcha=$_POST['g-recaptcha-response'];
-        $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LcArBsTAAAAAMWrUUlxsiK9Cg9fJiIYroRycv_z&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+        $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfUJhMUAAAAAF_JWYab5E1oBqZ-XWtHer5n67xO&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
         if($response['success'] == false)
         {
             $msg ='<div class="alert alert-warning text-white">';
@@ -118,6 +118,7 @@ if(isset($_POST['submit'])) {
     <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/icheck/1.0.2/icheck.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
+
     <script src='../console/plugins/security/password.js'></script>
 
 
@@ -256,11 +257,7 @@ if(isset($_POST['submit'])) {
                 </div><!-- /.col -->
             </div>
             <br/>
-            <div class="g-recaptcha" data-sitekey="6LcArBsTAAAAADPS78hYLKb05FNfwY0cMQBJZLAV"></div>
-
-
-
-            <!--   <div class="g-recaptcha" data-sitekey="6LcArBsTAAAAADPS78hYLKb05FNfwY0cMQBJZLAV"></div> -->
+            <div class="g-recaptcha" data-sitekey="6LfUJhMUAAAAAJEn_XfTOR6tOeyecWX6o6i9jqiW"></div>
 
         </form>
 
