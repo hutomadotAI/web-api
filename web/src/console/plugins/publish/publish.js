@@ -134,6 +134,7 @@ function callback(botId) {
     document.getElementById('bot_id').value = botId;
     //TODO uncomment only when the backend uploadicon is ready we can ignore this assignment
     //uploadIconFile(botId,formData)
+    window.location.href = './home.php';
 }
 
 function uploadIconFile(botId) {
