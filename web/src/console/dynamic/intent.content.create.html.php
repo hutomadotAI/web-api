@@ -14,7 +14,7 @@
         <div class="bootstrap-filestyle input-group" id="GrpIntentButton">
             <input type="text" class="form-control flat no-shadow" id="inputIntentName" name="intent" placeholder="Intent name" style="width: 96%;" onkeyup="checkIntentCode(this,event.keyCode)">
             <div class="input-group-btn" tabindex="0">
-                <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;" disabled>Create Intent</button>
+                <button id="btnCreateIntent"  class="btn btn-success flat" style="width: 120px;">Create Intent</button>
             </div>
         </div>
         <p></p>

@@ -14,7 +14,7 @@
         <div class="bootstrap-filestyle input-group" id="GrpEntityButton">
             <input type="text" class="form-control flat no-shadow" id="inputEntityName" name="entity" placeholder="Enter entity name" style="width: 96%;" onkeyup="checkEntityCode(this,event.keyCode)">
             <div class="input-group-btn" tabindex="0">
-                <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;" disabled> Create Entity</button>
+                <button id="btnCreateEntity"  class="btn btn-success flat" style="width: 120px;"> Create Entity</button>
             </div>
         </div>
         <p></p>
