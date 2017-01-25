@@ -260,7 +260,6 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(true);
         ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -268,7 +267,6 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testUploadBotIcon_DBException() throws Database.DatabaseException, IOException {
-        when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -276,7 +274,6 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testUploadBotIcon_invalid_botId() throws Database.DatabaseException, IOException {
-        when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(false);
         ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
@@ -284,8 +281,9 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testUploadBotIcon_iconSize_overLimit() throws Database.DatabaseException, IOException {
-        when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(false);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
+        ByteArrayInputStream bigStream = new ByteArrayInputStream(
+                new byte[(int) (AIBotStoreLogic.MAX_ICON_FILE_SIZE + 1)]);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, bigStream);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 }

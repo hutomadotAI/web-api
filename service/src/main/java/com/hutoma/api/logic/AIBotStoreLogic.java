@@ -14,6 +14,9 @@ import com.hutoma.api.containers.sub.DeveloperInfo;
 import org.apache.commons.compress.utils.IOUtils;
 import org.joda.time.DateTime;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -26,8 +29,8 @@ import javax.inject.Inject;
  */
 public class AIBotStoreLogic {
 
+    public static final long MAX_ICON_FILE_SIZE = 512 * 1024; // 512Kb
     private static final String LOGFROM = "botstorelogic";
-    private static final long MAX_ICON_FILE_SIZE = 65535; // 64K
     private final Database database;
     private final ILogger logger;
     private final Tools tools;
@@ -152,12 +155,24 @@ public class AIBotStoreLogic {
     }
 
     public ApiResult uploadBotIcon(final String devId, final int botId, final InputStream inputStream) {
+        File tempFile = null;
         try {
-            if (!this.tools.isStreamSmallerThan(inputStream, MAX_ICON_FILE_SIZE)) {
-                return ApiError.getBadRequest(
-                        String.format("File is larger than the maximum allowed size (%d bytes)", MAX_ICON_FILE_SIZE));
+            tempFile = File.createTempFile("boticon", ".tmp");
+            final int bufferLen = 1024;
+            try (FileOutputStream out = new FileOutputStream(tempFile)) {
+                byte[] buffer = new byte[bufferLen];
+                int n1;
+                for (long count = 0L; -1 != (n1 = inputStream.read(buffer)); count += (long) n1) {
+                    out.write(buffer, 0, n1);
+                    if ((count + n1) > MAX_ICON_FILE_SIZE) {
+                        return ApiError.getBadRequest(
+                                String.format("File is larger than the maximum allowed size (%d bytes)", MAX_ICON_FILE_SIZE));
+                    }
+                }
             }
-            if (this.database.saveBotIcon(devId, botId, inputStream)) {
+
+            InputStream inputStreamTempFile = new FileInputStream(tempFile);
+            if (this.database.saveBotIcon(devId, botId, inputStreamTempFile)) {
                 return new ApiResult().setSuccessStatus();
             } else {
                 return ApiError.getNotFound();
@@ -165,6 +180,12 @@ public class AIBotStoreLogic {
         } catch (Database.DatabaseException | IOException e) {
             this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
+        } finally {
+            if (tempFile != null) {
+                if (!tempFile.delete()) {
+                    this.logger.logWarning(LOGFROM, "Could not delete temp file " + tempFile.getAbsolutePath());
+                }
+            }
         }
     }
 }

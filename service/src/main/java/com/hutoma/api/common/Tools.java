@@ -1,19 +1,11 @@
 package com.hutoma.api.common;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.UUID;
 
 /**
  * Created by David MG on 02/08/2016.
  */
 public class Tools {
-
-    public boolean isStreamSmallerThan(final InputStream stream, final long size) throws IOException {
-        final long skipped = stream.skip(size + 1);
-        stream.reset();
-        return skipped < size;
-    }
 
     public String getCallerMethod(final int depth) {
         StackTraceElement[] elements = new Throwable().fillInStackTrace().getStackTrace();

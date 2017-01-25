@@ -188,3 +188,5 @@ GRANT USAGE ON *.* TO 'botStoreWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E0
 GRANT EXECUTE ON `hutoma`.* TO 'botStoreWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botStore` TO 'botStoreWriter'@'127.0.0.1';
+
+GRANT INSERT, DELETE ON `hutoma`.`botIcon` TO 'botStoreWriter'@'127.0.0.1';

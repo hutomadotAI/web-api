@@ -160,7 +160,6 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeTools.isStreamSmallerThan(any(), anyLong())).thenReturn(true);
         when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(true);
         FormDataMultiPart multipart = generateIconMultipartEntity();
         final Response response = target(BOTSTORE_BOTICONPATH)
