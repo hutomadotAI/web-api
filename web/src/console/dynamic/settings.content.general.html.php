@@ -129,7 +129,7 @@
 
 
 <div class="box-footer unselectable">
-    <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">reset</button>
+    <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">revert to saved values</button>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
             value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>"
