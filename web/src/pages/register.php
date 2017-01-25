@@ -8,7 +8,7 @@ if(isset($_POST['submit'])) {
         $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfUJhMUAAAAAF_JWYab5E1oBqZ-XWtHer5n67xO&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
         if($response['success'] == false)
         {
-            $msg ='<div class="alert alert-warning text-white">';
+            $msg ='<div class="alert alert-warning text-white flat">';
             $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
             $msg .='</div>';
         }
@@ -20,23 +20,23 @@ if(isset($_POST['submit'])) {
             $terms = isset($_POST['terms']);
             $invite_code =$_POST['invite_code'];
 
-            $missingfields  ='<div class="alert alert-warning text-white">';
+            $missingfields  ='<div class="alert alert-warning text-white flat">';
             $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
             $missingfields .='</div>';
 
-            $passwordmismatch  ='<div class="alert alert-warning text-white">';
+            $passwordmismatch  ='<div class="alert alert-warning text-white flat">';
             $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
             $passwordmismatch .='</div>';
 
-            $termsmsg  ='<div class="alert alert-warning text-white">';
+            $termsmsg  ='<div class="alert alert-warning text-white flat">';
             $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the Terms and Conditions and Privacy Policy';
             $termsmsg .='</div>';
 
-            $userexists  ='<div class="alert alert-warning text-white">';
+            $userexists  ='<div class="alert alert-warning text-white flat">';
             $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
             $userexists .='</div>';
 
-            $invalidcode  ='<div class="alert alert-warning text-white">';
+            $invalidcode  ='<div class="alert alert-warning text-white flat">';
             $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
             $invalidcode .='</div>';
 
@@ -191,6 +191,10 @@ if(isset($_POST['submit'])) {
             height: 11px;
         }
 
+        .progress-hide {
+            visibility: hidden;
+        }
+
         .progress-bar-text {
             color: white;
             text-align: right;
@@ -217,30 +221,32 @@ if(isset($_POST['submit'])) {
         <form action="register.php" method="POST">
             <?php if(isset($msg)){echo $msg;}?>
             <div class="form-group has-feedback">
-                <input name="username" type="text" class="form-control" placeholder="Full name" value="<?php if (isset($_POST['username'])) echo $_POST['username']?>">
+                <input name="username" type="text" class="form-control flat" placeholder="Full name" value="<?php if (isset($_POST['username'])) echo $_POST['username']?>">
                 <span class="glyphicon glyphicon-user form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="email"  type="email" class="form-control" placeholder="Email" value="<?php if (isset($_POST['email'])) echo $_POST['email']?>">
+                <input name="email"  type="email" class="form-control flat" placeholder="Email" value="<?php if (isset($_POST['email'])) echo $_POST['email']?>">
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
-            <div class="form-group has-feedback">
-                <input id="passwordField" name="pass"  type="password" class="form-control" placeholder="Password" onkeyup="passwordStrength(this.value)">
+            <div class="form-group has-feedback no-margin">
+                <input id="passwordField" name="pass"  type="password" class="form-control flat" placeholder="Password" onkeyup="passwordStrength(this.value)">
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-                <div class="progress active">
-                    <div id="pstrength" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                        <span id="progress-bar-text" class="progress-bar-text"></span>
+                <div style="margin-top:2px;margin-bottom:2px;">
+                    <div class="progress active no-margin flat progress-hide" id="progress_strength" style="background-color: #343434;">
+                        <div id="pstrength" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                            <span id="progress-bar-text" class="progress-bar-text"></span>
+                        </div>
                     </div>
                 </div>
 
             </div>
             <div class="form-group has-feedback">
-                <input id="passConfirmationField" name="retyped_password"  type="password" class="form-control" placeholder="Retype password"
+                <input id="passConfirmationField" name="retyped_password"  type="password" class="form-control flat" placeholder="Retype password"
                        onkeyup="confirmPassword('passwordField','passConfirmationField');">
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="invite_code"  type="invite_code" class="form-control" placeholder="Invitation Code" value="<?php if (isset($_POST['invite_code'])) echo $_POST['invite_code']?>">
+                <input name="invite_code"  type="invite_code" class="form-control flat" placeholder="Invitation Code" value="<?php if (isset($_POST['invite_code'])) echo $_POST['invite_code']?>">
                 <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
             </div>
             <div class="row">
@@ -257,8 +263,9 @@ if(isset($_POST['submit'])) {
                 </div><!-- /.col -->
             </div>
             <br/>
-            <div class="g-recaptcha" data-sitekey="6LfUJhMUAAAAAJEn_XfTOR6tOeyecWX6o6i9jqiW"></div>
-
+            <div class="col-xs-12" style="padding: 5px 15px 15px 10px;">
+                <div class="g-recaptcha" data-sitekey="6LfUJhMUAAAAAJEn_XfTOR6tOeyecWX6o6i9jqiW"></div>
+            </div>
         </form>
 
         <!--    <div class="social-auth-links text-center">

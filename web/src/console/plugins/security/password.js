@@ -6,6 +6,12 @@ function passwordStrength(password) {
     var fullScore = 6;
     var score = 0;
 
+    if ( $("#passwordField").val().length == 0 )
+        $("#progress_strength").css("visibility", "hidden");
+    else
+        $("#progress_strength").css("visibility", "visible");
+
+
     for (var i = 0; i < descClass.length; i++) {
         $("#pstrength").removeClass(descClass[i]);
     }

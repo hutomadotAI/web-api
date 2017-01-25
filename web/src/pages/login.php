@@ -143,11 +143,11 @@ if(isset($_POST['action_login'])){
             <form action="login.php" method="POST">
                 <?php if(isset($msg)){echo "$msg[1]";}?>
                 <div class="form-group has-feedback">
-                    <input name="login" type="email" class="form-control" placeholder="Email">
+                    <input name="login" type="email" class="form-control flat" placeholder="Email">
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
-                    <input name="password" type="password" class="form-control" placeholder="Password">
+                    <input name="password" type="password" class="form-control flat" placeholder="Password">
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                 </div>
                 <div class="row">
