@@ -1232,65 +1232,6 @@ class console
         return $token;
     }
 
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-
-    public static function existsAiTrainingFile($aiid)
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL existsAiTrainingFile(?)");
-                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=306');
-                exit;
-            }
-            $data = $sql->fetchAll();
-            $sql->nextRowset();
-            $value = ($data[0]['ai_trainingfile']);
-            return $value;
-        }
-    }
-
-    public static function getAiStatus($aiid)
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getAiStatus(?)");
-                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=307');
-                exit;
-            }
-            $data = $sql->fetchAll();
-            $sql->nextRowset();
-            $value = ($data[0]['ai_status']);
-            return $value;
-        }
-    }
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-
-    public static function getAiDeepLearningError($aiid)
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getAiDeepLearningError(?)");
-                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=351');
-                exit;
-            }
-            $data = $sql->fetchAll();
-            $sql->nextRowset();
-            $value = ($data[0]['deep_learning_error']);
-            return $value;
-        }
-    }
-
     public static function isLoggedIn()
     {
         return self::$loggedIn;
@@ -1301,29 +1242,6 @@ class console
      * End Extra Tools/Functions
      * -------------------------
      */
-
-    // DIRECTLY ACCESS TO STORED PROCEDURE - IT NEEDS API CALL
-
-    public static function getIntegrations()
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getIntegrations()");
-                $sql->execute();
-                $data = $sql->fetchAll();
-
-                // finally fetch the additional sql row for stored proc calls
-                $sql->nextRowset();
-
-            } catch (MySQLException $e) {
-                $e->getMessage();
-                $output = 'Query - sql all integration error' . $e;
-                include 'output.html.php';
-                exit();
-            }
-            return $data;
-        }
-    }
 
     public static function getAdminToken()
     {
@@ -1387,7 +1305,7 @@ class console
             return $value;
         }
     }
-    
+
     public static function isSessionActive()
     {
         if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {

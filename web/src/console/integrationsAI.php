@@ -1,19 +1,23 @@
 <?php
-    require "../pages/config.php";
+require "../pages/config.php";
+require_once "api/apiBase.php";
+require_once "api/aiApi.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    $response = \hutoma\console::getIntegrations();
-
-    /* CHECK RESPONSE NEEDS API CALL
-    if ($response['status']['code'] !== 200) {
-        unset($response);
-        \hutoma\console::redirect('./error.php?err=104');
-        exit;
-    }*/
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$response = $aiApi->getIntegrations();
+unset($aiApi);
+if ($response['status']['code'] !== 200) {
+    unset($response);
+    \hutoma\console::redirect('./error.php?err=104');
+    exit;
+} else {
+    $response = $response["integration_list"];
+}
 
 ?>
 <!DOCTYPE html>

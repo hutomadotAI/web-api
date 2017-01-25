@@ -18,6 +18,7 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.logic.AIBotStoreLogic;
+import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.AdminLogic;
 import com.hutoma.api.logic.ChatLogic;
@@ -75,6 +76,7 @@ public class ServerBinder extends AbstractBinder {
         bind(EntityLogic.class).to(EntityLogic.class);
         bind(IntentLogic.class).to(IntentLogic.class);
         bind(DeveloperInfoLogic.class).to(DeveloperInfoLogic.class);
+        bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

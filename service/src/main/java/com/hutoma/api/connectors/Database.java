@@ -8,11 +8,11 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiIntegration;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.DeveloperInfo;
+import com.hutoma.api.containers.sub.Integration;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.RateLimitStatus;
@@ -536,14 +536,6 @@ public class Database {
         }
     }
 
-    /***
-     * Temporarily fix build break
-     * @return
-     */
-    public List<AiIntegration> getAiIntegrationList() throws DatabaseException {
-        throw new DatabaseException(new Exception("getAiIntegrationList unimplemented"));
-    }
-
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
                                         final JsonSerializer jsonSerializer)
             throws DatabaseException {
@@ -597,6 +589,29 @@ public class Database {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAllMemoryIntents", 1).add(aiid);
             return call.executeUpdate() > 0;
+        }
+    }
+
+    public List<Integration> getAiIntegrationList() throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIntegrations", 0);
+            ResultSet rs = call.executeQuery();
+            List<Integration> list = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    list.add(
+                            new Integration(
+                                    rs.getInt("int_id"),
+                                    rs.getString("name"),
+                                    rs.getString("description"),
+                                    rs.getString("icon"),
+                                    rs.getBoolean("available")));
+
+                }
+                return list;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
         }
     }
 

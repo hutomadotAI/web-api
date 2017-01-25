@@ -4,10 +4,10 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.containers.ApiAiIntegrations;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntegrationList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.Integration;
 
 import java.util.List;
 import javax.inject.Inject;
@@ -36,15 +36,14 @@ public class AIIntegrationLogic {
             SecurityContext securityContext) {
 
         try {
-            this.logger.logDebug(LOGFROM, "request to get all integration ");
-            List<AiIntegration> integrationList = this.database.getAiIntegrationList();
+            List<Integration> integrationList = this.database.getAiIntegrationList();
             if (integrationList.size() == 0) {
-                this.logger.logDebug(LOGFROM, "no integration found");
+                this.logger.logDebug(LOGFROM, "no integrations found");
                 return ApiError.getNotFound();
             }
-            return new ApiAiIntegrations(integrationList).setSuccessStatus();
+            return new ApiIntegrationList(integrationList).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logError(LOGFROM, "could not get all integration; " + e.toString());
+            this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
     }

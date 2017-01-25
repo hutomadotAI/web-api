@@ -263,6 +263,17 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function getIntegrations()
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/integration'));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
 
     public function __destruct()
     {

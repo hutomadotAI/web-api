@@ -4,9 +4,9 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.containers.ApiAiIntegrations;
+import com.hutoma.api.containers.ApiIntegrationList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.AiIntegration;
+import com.hutoma.api.containers.sub.Integration;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,9 +43,9 @@ public class TestAIIntegrationLogic {
 
     @Test
     public void testGetIntegrations() throws Database.DatabaseException {
-        List<AiIntegration> list = Collections.singletonList(new AiIntegration("id", "name", "desc", "icon", true));
+        List<Integration> list = Collections.singletonList(new Integration(1, "name", "desc", "icon", true));
         when(this.fakeDatabase.getAiIntegrationList()).thenReturn(list);
-        ApiAiIntegrations integ = (ApiAiIntegrations) this.integLogic.getIntegrations(this.fakeContext);
+        ApiIntegrationList integ = (ApiIntegrationList) this.integLogic.getIntegrations(this.fakeContext);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(list, integ.getIntegrationList());
     }
