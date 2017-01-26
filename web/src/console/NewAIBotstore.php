@@ -11,14 +11,15 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-if (!isSessionVariablesAvailable()) {
 
-    if (!isPostInputAvailable()) {
+if (isPostInputAvailable())
+    setSessionVariablesFromPost();
+else
+    if (!isSessionVariablesAvailable()) {
         \hutoma\console::redirect('./error.php?err=100');
         exit;
     }
-    setSessionVariablesFromPost();
-}
+
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bots = $botApi->getPublishedBots();

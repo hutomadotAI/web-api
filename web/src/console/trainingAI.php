@@ -8,13 +8,7 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-
-// If is it set, it means the user has selected a existing AI from home list
-if (isset($_POST['ai'])) {
-    CallGetSingleAI($_POST['ai']);
-} else {
-    CallGetSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-}
+CallGetSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 
 function CallGetSingleAI($aiid)
 {

@@ -85,7 +85,7 @@
     var name_list = <?php echo json_encode($name_list); unset($name_list);?>;
     var previousFilled = <?php if (isPreviousFieldsFilled()) echo('true'); else echo ('false'); ?>;
     var previousGeneralInfo  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
-    var err = <?php if(isset($_POST['err'])) echo('true'); else echo ('false'); ?>;
+    var err = <?php if(isset($_GET['err'])) echo($_GET['err']); else echo ('false'); ?>;
 </script>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
