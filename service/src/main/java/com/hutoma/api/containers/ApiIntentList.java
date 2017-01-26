@@ -10,7 +10,7 @@ import java.util.UUID;
  */
 public class ApiIntentList extends ApiResult {
 
-    @SerializedName("intentName")
+    @SerializedName("intent_name")
     private final List<String> intentName;
     private final UUID aiid;
 

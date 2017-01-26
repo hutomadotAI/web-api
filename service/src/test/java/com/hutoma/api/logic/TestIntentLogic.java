@@ -108,28 +108,28 @@ public class TestIntentLogic {
 
     @Test
     public void testWriteIntent_Success() throws Database.DatabaseException {
-        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.INTENTNAME, this.getIntent());
+        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_NonExistentEntity() throws Database.DatabaseException {
         doThrow(new DatabaseEntitiesIntents.DatabaseEntityException("test")).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.INTENTNAME, this.getIntent());
+        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
         Assert.assertEquals(400, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_DuplicateName() throws Database.DatabaseException {
         doThrow(new Database.DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.INTENTNAME, this.getIntent());
+        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
         Assert.assertEquals(400, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_InternalError() throws Database.DatabaseException {
         doThrow(new Database.DatabaseException("test")).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.INTENTNAME, this.getIntent());
+        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
@@ -163,7 +163,7 @@ public class TestIntentLogic {
 
     @Test
     public void testUpdateIntent_triggersTrainingStop() throws Database.DatabaseException {
-        this.intentLogic.writeIntent(DEVID, AIID, this.INTENTNAME, getIntent());
+        this.intentLogic.writeIntent(DEVID, AIID, getIntent());
         verify(this.trainingLogic).stopTraining(any(), any());
     }
 
@@ -175,9 +175,5 @@ public class TestIntentLogic {
         return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT)
                 .addResponse("response").addUserSays("usersays")
                 .addVariable(new IntentVariable("entity", true, 3, "somevalue").addPrompt("prompt"));
-    }
-
-    private ApiIntent getIntentEmpty() {
-        return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT);
     }
 }

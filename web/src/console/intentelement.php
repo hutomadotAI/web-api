@@ -19,10 +19,15 @@ $intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\
 
 if (isset($_POST['intent_name'])) {
     // This is an intent update
-    $intentsApi->updateIntent(
+    $result = $intentsApi->updateIntent(
         $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
         $_POST['intent_name'], $_POST['intent_responses'],
         $_POST['intent_prompts'], $_POST['variables']);
+    if ($result['status']['code'] != 200) {
+        http_response_code($result['status']['code']);
+        exit;
+    }
+
     $intentName = $_POST['intent_name'];
 } else {
     $intentName = $_POST['intent'];
@@ -64,8 +69,7 @@ function echoJsonEntityListResponse($entityList)
 {
     if ($entityList['status']['code'] !== 404) {
         echo json_encode($entityList['entity_name']);
-    }
-    else
+    } else
         echo '""'; // return empty string
 }
 
@@ -103,11 +107,11 @@ function echoJsonEntityListResponse($entityList)
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                        <?php include './dynamic/intent.element.content.head.html.php'; ?>
-                        <?php include './dynamic/intent.element.content.expression.html.php'; ?>
-                        <?php include './dynamic/intent.element.content.variable.html.php'; ?>
-                        <?php include './dynamic/intent.element.content.response.html.php'; ?>
-                        <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.head.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.expression.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.variable.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.response.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
                 </div>
             </div>
         </section>

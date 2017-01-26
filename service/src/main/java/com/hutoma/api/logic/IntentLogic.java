@@ -62,10 +62,10 @@ public class IntentLogic {
         }
     }
 
-    public ApiResult writeIntent(String devid, UUID aiid, String intentName, ApiIntent intent) {
+    public ApiResult writeIntent(String devid, UUID aiid, ApiIntent intent) {
         try {
             this.logger.logDebug(LOGFROM, "request to edit intent " + intent.getIntentName() + " from " + devid);
-            this.database.writeIntent(devid, aiid, intentName, intent);
+            this.database.writeIntent(devid, aiid, intent.getIntentName(), intent);
             this.trainingLogic.stopTraining(devid, aiid);
             return new ApiResult().setSuccessStatus();
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {

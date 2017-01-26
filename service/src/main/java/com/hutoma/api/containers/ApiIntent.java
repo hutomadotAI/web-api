@@ -11,10 +11,11 @@ import java.util.List;
  */
 public class ApiIntent extends ApiResult {
 
+    @SerializedName("variables")
     private final List<IntentVariable> variables = new ArrayList<>();
     @SerializedName("intent_name")
     private final String intentName;
-    @SerializedName("topis_in")
+    @SerializedName("topic_in")
     private final String topicIn;
     @SerializedName("topic_out")
     private final String topicOut;

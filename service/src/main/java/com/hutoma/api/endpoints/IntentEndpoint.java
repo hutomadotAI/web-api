@@ -64,11 +64,9 @@ public class IntentEndpoint {
     public Response postIntent(
             @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
-
         final ApiResult result = this.intentLogic.writeIntent(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
-                ParameterFilter.getIntentName(requestContext),
                 ParameterFilter.getIntent(requestContext));
         return result.getResponse(this.serializer).build();
     }

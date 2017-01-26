@@ -25,6 +25,23 @@ function saveIntent() {
     var responses = getMultipleElementValues('intent-response-row', 'placeholder');
     var variables = [];
 
+    var hasErrors = false;
+    if (expressions.length == 0) {
+        msgAlertUserExpression(ALERT.DANGER.value, 'At least one user expression is required');
+        hasErrors = true;
+    }
+
+    if (responses.length == 0) {
+        msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required');
+        hasErrors = true;
+    }
+
+    if (hasErrors) {
+        msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
+        return false;
+    }
+
+
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
@@ -76,7 +93,6 @@ function saveIntent() {
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
             return false;
         }
-
 
         var promptsArray = [];
         for (var j = 0; j < prompts_split.length; j++)
