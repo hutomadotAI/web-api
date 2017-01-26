@@ -53,6 +53,16 @@ public class TelemetryCentralLogger extends CentralLogger implements ITelemetry 
         Map<String, String> map = properties == null ? new HashMap<>() : new HashMap<>(properties);
         map.put("message", exception.getMessage());
         map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
+        map.put("suppressedExceptions", exception.getSuppressed()
+                != null ? Integer.toString(exception.getSuppressed().length) : "0");
+        if (exception.getSuppressed() != null) {
+            for (int i = 0; i < exception.getSuppressed().length; i++) {
+                String key = String.format("suppressed_%d", i + 1);
+                Throwable ex = exception.getSuppressed()[i];
+                map.put(key + "_message", ex.getMessage());
+                map.put(key + "_stackTrace", getStackTraceAsString(ex.getStackTrace()));
+            }
+        }
         this.logOutput(EventType.EXCEPTION, eventName, exception.getClass().getName(), map);
     }
 

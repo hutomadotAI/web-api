@@ -62,7 +62,19 @@ class CentralLogger implements ILogger {
     }
 
     public void logException(String fromLabel, final Exception ex) {
-        logOutput(EventType.ERROR, fromLabel, ex.getMessage());
+        StringBuilder sb = new StringBuilder();
+        sb.append(ex.getMessage());
+        if (ex.getSuppressed() != null) {
+            sb.append(" [");
+            for (int i = 0; i < ex.getSuppressed().length; i++) {
+                if (i > 0) {
+                    sb.append(" ,");
+                }
+                sb.append(ex.getSuppressed()[i].getMessage());
+            }
+            sb.append("]");
+        }
+        logOutput(EventType.ERROR, fromLabel, sb.toString());
     }
 
     public void logWarning(String fromLabel, String logComment) {
