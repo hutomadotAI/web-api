@@ -95,25 +95,25 @@ function createAlertMessage(alarm,message,id) {
     var ico_class;
 
     switch (alarm){
-        case 0:
+        case ALERT.BASIC.value:
             msg_class = 'alert alert-dismissable flat alert-base no-margin';
             ico_class = 'icon fa fa-check';
             if (id!=null)
                 document.getElementById(id).style.border ="0px";
             break;
-        case 1:
+        case ALERT.WARNING.value:
             msg_class = 'alert alert-dismissable flat alert-warning no-margin';
             ico_class = 'icon fa fa-check';
             if (id!=null)
                 document.getElementById(id).style.border ="1px solid orange";
             break;
-        case 2:
+        case ALERT.DANGER.value:
             msg_class = 'alert alert-dismissable flat alert-danger no-margin';
             ico_class = 'icon fa fa-warning';
             if (id!=null)
                 document.getElementById(id).style.border ="1px solid red";
             break;
-        case 4:
+        case ALERT.PRIMARY.value:
             msg_class = 'alert alert-dismissable flat alert-primary no-margin';
             ico_class = 'icon fa fa-check';
             break;
