@@ -654,20 +654,12 @@ class console
                         ":uid" => $uid
                     ));
 
-                    if ($sql->rowCount() == 0) {
-                        $notfound = '<div class="alert alert-danger">';
-                        $notfound .= '<i class="icon fa fa-warning"></i> User Not Found.';
-                        $notfound .= '</div>';
-                        echo $notfound;
-                        $curStatus = "userNotFound"; // The user with the identity given was not found in the users database
-                    }
-
                     $encodedToken = urlencode($token);
                     $subject = "Hu:toma Password Reset";
-                    $body = "Hi, We got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
-              <blockquote>
-                <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
-              </blockquote>";
+                    $body = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
+                      <blockquote>
+                        <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
+                      </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
                     if (self::sendMail($email, $subject, $body)) {
                         echo "<p>Your password reset email has been sent. Do not forget to check your spam folder too.</p>";
                         $curStatus = "emailSent"; // E-Mail has been sent
@@ -704,6 +696,7 @@ class console
      */
     public static function sendMail($email, $subject, $body)
     {
+       $send = 0;
         /**
          * If there is a callback for email sending, use it else PHP's mail()
          */
@@ -715,8 +708,10 @@ class console
             $headers[] = "Content-type: text/html; charset=iso-8859-1";
             $headers[] = "From: " . self::$config['basic']['email'];
             $headers[] = "Reply-To: " . self::$config['basic']['email'];
-            mail($email, $subject, $body, implode("\r\n", $headers));
-        }
+            $res = mail($email, $subject, $body, implode("\r\n", $headers));
+            }
+    return $res;
+
     }
 
     /**
