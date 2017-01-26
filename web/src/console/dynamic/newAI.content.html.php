@@ -36,11 +36,7 @@
 
             </div>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <?php include './dynamic/input.public.html.php'; ?>
-                </div>
-            </div>
+            
         </div>
     </form>
 
