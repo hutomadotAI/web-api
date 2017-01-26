@@ -1,5 +1,4 @@
-FROM tomcat:7-jre8
-MAINTAINER  Pedro Teixeira pedrotei@hutoma.com
+FROM tomcat:8-jre8
 
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
 COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
