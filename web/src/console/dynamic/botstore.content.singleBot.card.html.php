@@ -23,15 +23,6 @@
                     <div class="col-xs-7 bot-description">
                         <span id="botDescription"></span>
                     </div>
-                    <!--rating-->
-                    <div class="col-xs-5 bot-star">
-                        <span id="botUsers"></span> users
-                        <div class="star-rating text-right">
-                            <div class="star-rating__wrap">
-                              <span id="botRating"></span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="row no-margin">

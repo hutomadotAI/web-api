@@ -14,30 +14,12 @@ function switchCard(botId) {
     //node.children[0].children[0].classList.add("borderActive");
 }
 
-
-function codeHTMLstars(rating) {
-    var wHTML = '';
-    for (var i = 5; i > 0; i--) {
-        if (i == Math.round(rating)) {
-            wHTML += '<input class="star-rating__input" id="star--rating-' + i + '" type="radio" name="rating" value="' + i + '" checked="checked" disabled="disabled">';
-            wHTML += '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' + i + '" title="' + i + ' out of ' + i + ' stars"></label>';
-        }
-        else {
-            wHTML += '<input class="star-rating__input" id="star--rating-' + i + '" type="radio" name="rating" value="' + i + '" disabled="disabled">';
-            wHTML += '<label class="star-rating__ico fa fa-star-o fa-lg" for="star--rating-' + i + '" title="' + i + ' out of ' + i + ' stars"></label>';
-        }
-    }
-    return wHTML;
-}
-
-
 function populateBotFields(bot) {
     var json = JSON.parse(bot);
     document.getElementById('botTitle').innerText = json['name'];
     document.getElementById('botBadge').innerText = json['badge'];
     document.getElementById('botDescription').innerText = json['description'];
     document.getElementById('botUsers').innerText = json['users'];
-    document.getElementById('botRating').innerHTML = codeHTMLstars(json['rating']);
     document.getElementById('botMessage').innerText = json['alertMessage'];
     document.getElementById('botLicense').innerText = json['licenseType'];
     document.getElementById('botPrice').innerText = json['price'];
