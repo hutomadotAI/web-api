@@ -133,6 +133,11 @@ function saveEntity() {
     var values = [];
     var entityName = document.getElementById('entity-name').value;
     var elements = document.getElementsByName('value-entity-row');
+
+    if (elements.length == 0){
+        msgAlertEntityValues(ALERT.WARNING.value, 'Please enter at least one value for this entity.');
+        return;
+    }
     for (var i = 0; i < elements.length; i++) {
          values.push(elements[i].value);
     }
@@ -144,16 +149,26 @@ function saveEntity() {
     msgAlertEntityValues(ALERT.WARNING.value, 'Saving...');
 
     $.ajax({
-        url: 'entityelement.php?entity=' + entityName,
+        url: './dynamic/updateEntity.php',
         data: {
             entity_name: entityName, entity_values: values
         },
         type: 'POST',
-        /*error: function (xhr, ajaxOptions, thrownError) {
-         alert(xhr.status + ' ' + thrownError);
-         }*/
-        success: function (result) {
-            msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved');
+        success: function (response) {
+            var JSONdata = JSON.parse(response);
+            switch (JSONdata['status']['code']) {
+                case 200:
+                    msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved!!');
+                    break;
+                case 400:
+                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
+                    break;
+                case 500:
+                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
+                    break;
+                default:
+                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
+            }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved');
