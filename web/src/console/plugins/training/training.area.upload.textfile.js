@@ -36,6 +36,7 @@ function uploadTextFile() {
                     else
                         msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded');
                     hideRestartBox();
+                    msgAlertProgressBar(ALERT.BASIC.value, 'Training not started.');
                     break;
                 case 400:
                     if (haNoContentError(JSONdata['status']['additionalInfo']))
