@@ -14,6 +14,7 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
+import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
@@ -39,6 +40,8 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
+import static org.mockito.Matchers.anyDouble;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -172,6 +175,13 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeTools = mock(Tools.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
+        try {
+            when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+                    .thenReturn(new RateLimitStatus(false, 1.0, true));
+        } catch (Database.DatabaseException e) {
+            // this will never happen, but on the zero in a million chance that it does ....
+            e.printStackTrace();
+        }
 
         ResourceConfig rc = new ResourceConfig(getClassUnderTest());
         AbstractBinder binder = this.getDefaultBindings();
@@ -181,6 +191,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         // Add validation filters
         rc.register(QueryFilter.class);
         rc.register(PostFilter.class);
+        rc.register(RateLimitCheck.class);
 
         // Register the multipart handler for supporting uploads
         rc.register(MultiPartFeature.class);

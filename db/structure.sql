@@ -42,7 +42,7 @@ CREATE TABLE `ai` (
   `deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1358,8 +1358,8 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotDetails`(IN `param_botId` INT(11))
-NO SQL
-  BEGIN
+    NO SQL
+BEGIN
     SELECT * FROM botStore WHERE id = param_botId;
   END ;;
 DELIMITER ;
@@ -2200,7 +2200,7 @@ BEGIN
     DECLARE thePrice DECIMAL;
     SELECT price INTO thePrice FROM botStore WHERE id = param_botId;
     INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, thePrice);
-END;;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2223,29 +2223,39 @@ IN `token_ceiling` FLOAT,
 IN `token_increment_delay_seconds` FLOAT)
     MODIFIES SQL DATA
 BEGIN
-DECLARE time_now BIGINT;
 
+DECLARE time_now BIGINT;
 DECLARE var_uuid VARCHAR(50);
+DECLARE user_valid tinyint;
 
 SET var_uuid = uuid();
-
 SET time_now = CONV(CONCAT(SUBSTR(var_uuid, 16, 3),SUBSTR(var_uuid, 10, 4),SUBSTR(var_uuid, 1, 8)), 16, 10) / 10000 - (141427 * 24 * 60 * 60);
 
-INSERT INTO api_rate_limit (dev_id, rate_key, tokens, token_update_time)
-VALUES (in_dev_id, in_rate_key, token_ceiling, time_now)
-  ON DUPLICATE KEY UPDATE
-    tokens = LEAST(tokens + (time_now - token_update_time)/(1000.0 * token_increment_delay_seconds), token_ceiling),
-    token_update_time = time_now;
+SELECT count(*) INTO user_valid 
+FROM users 
+WHERE users.dev_id = in_dev_id
+AND users.valid > 0;
 
-UPDATE api_rate_limit SET
-  tokens = tokens-1.0,
-  expires = now() + INTERVAL (token_ceiling * token_increment_delay_seconds) SECOND
-  WHERE
-    dev_id = in_dev_id AND rate_key = in_rate_key AND
-    tokens >= 1.0;
+IF NOT user_valid THEN
+	SELECT 1 AS rate_limit, 0.0 AS tokens, 0 AS valid;    
+ELSE 
+	INSERT INTO api_rate_limit (dev_id, rate_key, tokens, token_update_time)
+	VALUES (in_dev_id, in_rate_key, token_ceiling, time_now)
+	  ON DUPLICATE KEY UPDATE
+		tokens = LEAST(tokens + (time_now - token_update_time)/(1000.0 * token_increment_delay_seconds), token_ceiling),
+		token_update_time = time_now;
 
-SELECT IF(ROW_COUNT()>0, 0, 1) AS rate_limit, tokens FROM api_rate_limit WHERE
-dev_id = in_dev_id AND rate_key = in_rate_key;
+	UPDATE api_rate_limit SET
+	  tokens = tokens-1.0,
+	  expires = now() + INTERVAL (token_ceiling * token_increment_delay_seconds) SECOND
+	  WHERE
+		(dev_id = in_dev_id AND rate_key = in_rate_key)
+        AND tokens >= 1.0;
+
+	SELECT IF(ROW_COUNT()>0, 0, 1) AS rate_limit, tokens, 1 AS valid 
+    FROM api_rate_limit 
+    WHERE dev_id = in_dev_id AND rate_key = in_rate_key;
+END IF;
 
 END ;;
 DELIMITER ;
@@ -2469,4 +2479,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-13 13:16:21
+-- Dump completed on 2017-01-25 15:43:17

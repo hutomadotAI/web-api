@@ -43,15 +43,17 @@ public class RateLimitCheck implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
+        // retrieve a validated devid, or bundle ratelimiting with anonymous
+        String devid = ParameterFilter.getDevid(requestContext);
+
         try {
+            if ((null == devid) || (devid.isEmpty())) {
+                devid = "{null or empty}";
+                throw new AccountDisabledException();
+            }
+
             // get the bucket that we will use to rate limit this resource
             RateKey rateKey = determineRateKey(this.resourceInfo);
-
-            // retrieve a validated devid, or bundle ratelimiting with anonymous
-            String devid = ParameterFilter.getDevid(requestContext);
-            if ((null == devid) || (devid.isEmpty())) {
-                devid = "anonymous";
-            }
 
             switch (rateKey) {
                 case Chat:
@@ -72,6 +74,9 @@ public class RateLimitCheck implements ContainerRequestFilter {
                 default:
                     break;
             }
+        } catch (AccountDisabledException ade) {
+            requestContext.abortWith(ApiError.getAccountDisabled().getResponse(this.serializer).build());
+            this.logger.logInfo(LOGFROM, String.format("denying access to invalid account for devid %s", devid));
         } catch (RateLimitedException rle) {
             requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
             this.logger.logInfo(LOGFROM, rle.getMessage());
@@ -102,10 +107,14 @@ public class RateLimitCheck implements ContainerRequestFilter {
      * @param frequency rate limiting param
      * @throws Database.DatabaseException if db call fails
      * @throws RateLimitedException if we should fail the call due to limiting
+     * @throws AccountDisabledException if the devid was not recognised or the account was disabled
      */
     private void checkRateLimitReached(String devid, RateKey rateKey, double burst, double frequency)
-            throws Database.DatabaseException, RateLimitedException {
+            throws Database.DatabaseException, RateLimitedException, AccountDisabledException {
         RateLimitStatus rateLimitStatus = this.database.checkRateLimit(devid, rateKey.toString(), burst, frequency);
+        if (!rateLimitStatus.isAccountValid()) {
+            throw new AccountDisabledException();
+        }
         if (rateLimitStatus.isRateLimited()) {
             long blockedFor = Math.round(1000.0d * (1.0d - rateLimitStatus.getTokens()) * frequency);
             throw new RateLimitedException(devid + " hit limit on " + rateKey.toString() + ". BLOCKED for the next "
@@ -134,4 +143,6 @@ public class RateLimitCheck implements ContainerRequestFilter {
         }
     }
 
+    public static class AccountDisabledException extends Exception {
+    }
 }

@@ -7,6 +7,8 @@ import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AIIntegrationLogic;
+import com.hutoma.api.validation.APIParameter;
+import com.hutoma.api.validation.ValidateParameters;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -22,6 +24,7 @@ import javax.ws.rs.core.SecurityContext;
  */
 @Path("/ai/integration")
 @RateLimit(RateKey.QuickRead)
+@ValidateParameters({APIParameter.DevID})
 public class AIIntegrationEndpoint {
 
     AIIntegrationLogic aiIntegrationLogic;
@@ -34,10 +37,10 @@ public class AIIntegrationEndpoint {
     }
 
     @GET
-    @Secured( {Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getIntegrations(
-        @Context SecurityContext securityContext) {
+            @Context SecurityContext securityContext) {
         ApiResult result = this.aiIntegrationLogic.getIntegrations(securityContext);
         return result.getResponse(this.serializer).build();
     }

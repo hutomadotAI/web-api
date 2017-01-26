@@ -526,7 +526,10 @@ public class Database {
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return new RateLimitStatus(rs.getBoolean("rate_limit"), rs.getFloat("tokens"));
+                    return new RateLimitStatus(
+                            rs.getBoolean("rate_limit"),
+                            rs.getFloat("tokens"),
+                            rs.getBoolean("valid"));
                 }
                 throw new DatabaseException(
                         new Exception("stored proc should have returned a row but it returned none"));

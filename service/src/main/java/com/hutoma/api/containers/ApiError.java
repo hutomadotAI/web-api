@@ -37,7 +37,6 @@ public class ApiError extends ApiResult {
     /**
      * Use with care. Don't give too much information about what is happening internally.
      * For most situations, use the version of this call without a parameter
-     *
      * @param reason
      * @return
      */
@@ -92,12 +91,12 @@ public class ApiError extends ApiResult {
         return ApiError.getNotFound("Not Found");
     }
 
-    public static ApiError getNoResponse(String message) {
-        return ApiError.getError(HttpURLConnection.HTTP_ACCEPTED, message);
-    }
-
     public static ApiError getRateLimited() {
         return ApiError.getError(429, "Too Many Requests");
+    }
+
+    public static ApiError getAccountDisabled() {
+        return ApiError.getError(HttpURLConnection.HTTP_FORBIDDEN, "Account Not Valid");
     }
 
 }

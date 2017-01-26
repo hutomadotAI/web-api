@@ -7,10 +7,16 @@ public class RateLimitStatus {
 
     boolean rateLimited;
     double tokens;
+    boolean accountIsValid;
 
-    public RateLimitStatus(boolean rateLimited, double tokens) {
+    public RateLimitStatus(boolean rateLimited, double tokens, boolean accountIsValid) {
         this.rateLimited = rateLimited;
         this.tokens = tokens;
+        this.accountIsValid = accountIsValid;
+    }
+
+    public boolean isAccountValid() {
+        return this.accountIsValid;
     }
 
     public boolean isRateLimited() {

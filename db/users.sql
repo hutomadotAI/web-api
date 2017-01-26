@@ -131,6 +131,7 @@ GRANT DELETE, EXECUTE ON `hutoma`.* TO 'rateLimiter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`api_rate_limit` TO 'rateLimiter'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`users` TO 'rateLimiter'@'127.0.0.1';
 
 # Privileges for `userDeleter`@`127.0.0.1`
 
