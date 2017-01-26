@@ -10,11 +10,10 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-$_SESSION[$_SESSION['navigation_id']]['user_details'] = \hutoma\console::getUser();
-$_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[$_SESSION['navigation_id']]['user_details']);
-
-if(isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']))
-    unset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']);
+if(!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])){
+    $_SESSION[$_SESSION['navigation_id']]['user_details'] = \hutoma\console::getUser();
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[$_SESSION['navigation_id']]['user_details']);
+}
 
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $response_getAIs = $aiApi->getAIs();

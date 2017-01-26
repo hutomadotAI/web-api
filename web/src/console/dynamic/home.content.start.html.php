@@ -13,9 +13,7 @@
         Howdy! Thanks for joining our private tech preview. You are now just seconds away from creating your own conversational AI powered by deep learning. If you need help feel free to email us at support@hutoma.com!
         <br>
         <br>
-        <form method="POST" name="startForm" action="./newAI.php">
-            <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI"> <b>Create New AI</b> <span class="fa fa-arrow-circle-right"></span></button>
-        </form>
+        <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI"> <b>Create New AI</b> <span class="fa fa-arrow-circle-right"></span></button>
         <p></p>
 
         <div id="collapseStart" class="panel-collapse collapse">
