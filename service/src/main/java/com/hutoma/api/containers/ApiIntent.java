@@ -12,14 +12,15 @@ import java.util.List;
 public class ApiIntent extends ApiResult {
 
     private final List<IntentVariable> variables = new ArrayList<>();
-    @SerializedName("intentName")
+    @SerializedName("intent_name")
     private final String intentName;
-    @SerializedName("topicIn")
+    @SerializedName("topis_in")
     private final String topicIn;
-    @SerializedName("topicOut")
+    @SerializedName("topic_out")
     private final String topicOut;
+    @SerializedName("responses")
     private List<String> responses = new ArrayList<>();
-    @SerializedName("userSays")
+    @SerializedName("user_says")
     private List<String> userSays = new ArrayList<>();
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
