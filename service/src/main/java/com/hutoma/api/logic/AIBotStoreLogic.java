@@ -166,7 +166,8 @@ public class AIBotStoreLogic {
                     out.write(buffer, 0, n1);
                     if ((count + n1) > MAX_ICON_FILE_SIZE) {
                         return ApiError.getBadRequest(
-                                String.format("File is larger than the maximum allowed size (%d bytes)", MAX_ICON_FILE_SIZE));
+                                String.format("File is larger than the maximum allowed size (%d bytes)",
+                                        MAX_ICON_FILE_SIZE));
                     }
                 }
             }

@@ -180,13 +180,10 @@ public class ChatLogic {
     }
 
     public ApiResult assistantChat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
-                          String history, String topic, float minP) {
+                                   String history, String topic, float minP) {
 
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
-
-        // prepare the result container
-        ApiChat apiChat = new ApiChat(chatUuid, 0);
 
         // Add telemetry for the request
         this.telemetryMap = new HashMap<String, String>() {
@@ -214,6 +211,8 @@ public class ChatLogic {
         result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
         this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
 
+        // prepare the result container
+        ApiChat apiChat = new ApiChat(chatUuid, 0);
         apiChat.setResult(result);
 
         // log the results
