@@ -124,6 +124,11 @@ public class AIBotStoreLogic {
             if (bot != null) {
                 return ApiError.getBadRequest("AI already has a published bot");
             }
+            List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
+            if (!linkedBots.isEmpty()) {
+                return ApiError.getBadRequest(
+                        "Publishing an AI that is already linked to one or more bots is not supported");
+            }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
                     videoLink, true);

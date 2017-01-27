@@ -215,6 +215,13 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
+    public void testPublishBot_botsLinked() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(BotHelper.SAMPLEBOT));
+        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testPublishBot_noDevInfo() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(null);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);

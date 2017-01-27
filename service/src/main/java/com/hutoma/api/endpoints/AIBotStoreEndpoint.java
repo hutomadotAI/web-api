@@ -147,7 +147,8 @@ public class AIBotStoreEndpoint {
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition =
                     "Developer information hasn't been update yet; Invalid publish information; "
-                            + "AI already has a published bot"),
+                            + "AI already has a published bot; "
+                            + "Publishing an AI that is already linked to one or more bots is not supported"),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({
