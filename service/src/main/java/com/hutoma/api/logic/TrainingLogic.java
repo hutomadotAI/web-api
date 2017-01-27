@@ -104,6 +104,8 @@ public class TrainingLogic {
                         return ApiError.getInternalServerError();
                     }
 
+                    this.aiServices.stopTrainingIfNeeded(devid, aiid);
+
                     return uploadCompositeTrainingFile(devid, aiid, trainingMaterials, result);
 
                 // 1 = training file is a document

@@ -301,7 +301,7 @@ public class TestAILogic {
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices).stopTraining(DEVID, AIID);
+        verify(this.fakeAiServices).stopTrainingIfNeeded(DEVID, AIID);
     }
 
     @Test
@@ -379,7 +379,7 @@ public class TestAILogic {
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(true);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices).stopTraining(DEVID, AIID);
+        verify(this.fakeAiServices).stopTrainingIfNeeded(DEVID, AIID);
     }
 
     @Test

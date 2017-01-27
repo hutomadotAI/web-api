@@ -156,6 +156,7 @@ public class AIBotStoreLogic {
 
     public ApiResult uploadBotIcon(final String devId, final int botId, final InputStream inputStream) {
         File tempFile = null;
+        InputStream inputStreamTempFile = null;
         try {
             tempFile = File.createTempFile("boticon", ".tmp");
             final int bufferLen = 1024;
@@ -172,7 +173,7 @@ public class AIBotStoreLogic {
                 }
             }
 
-            InputStream inputStreamTempFile = new FileInputStream(tempFile);
+            inputStreamTempFile = new FileInputStream(tempFile);
             if (this.database.saveBotIcon(devId, botId, inputStreamTempFile)) {
                 return new ApiResult().setSuccessStatus();
             } else {
@@ -185,6 +186,13 @@ public class AIBotStoreLogic {
             if (tempFile != null) {
                 if (!tempFile.delete()) {
                     this.logger.logWarning(LOGFROM, "Could not delete temp file " + tempFile.getAbsolutePath());
+                }
+            }
+            if (inputStreamTempFile != null) {
+                try {
+                    inputStreamTempFile.close();
+                } catch (IOException ex) {
+                    this.logger.logException(LOGFROM, ex);
                 }
             }
         }

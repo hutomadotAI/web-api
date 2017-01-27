@@ -5,7 +5,9 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
@@ -112,6 +114,19 @@ public class AIServices extends ServerConnector {
                     0));
         }
         executeAndWait(callables);
+    }
+
+    public void stopTrainingIfNeeded(final String devId, final UUID aiid)
+            throws Database.DatabaseException {
+        try {
+            ApiAi ai = this.database.getAI(devId, aiid, this.serializer);
+            TrainingStatus status = ai.getSummaryAiStatus();
+            if (status == TrainingStatus.AI_TRAINING || status == TrainingStatus.AI_TRAINING_QUEUED) {
+                this.stopTraining(devId, aiid);
+            }
+        } catch (ServerConnector.AiServicesException ex) {
+            this.logger.logWarning(LOGFROM, "Could not stop training for ai " + aiid);
+        }
     }
 
     private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
