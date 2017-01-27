@@ -8,6 +8,11 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
+if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
+    \hutoma\console::redirect('./error.php?err=200');
+    exit;
+}
+
 CallGetSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 
 function CallGetSingleAI($aiid)
