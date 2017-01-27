@@ -16,8 +16,7 @@
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['timezone']) &&
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['confidence']) &&
             isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['personality']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice']) &&
-            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['private'])
+            isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['voice'])
         );
     }
 
@@ -98,7 +97,6 @@
 <script src="./plugins/validation/validation.js"></script>
 <script src="./plugins/createAI/createAI.js"></script>
 <script src="./plugins/select2/select2.full.js"></script>
-<script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
 

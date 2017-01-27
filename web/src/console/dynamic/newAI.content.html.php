@@ -2,19 +2,19 @@
     <div class="box-header with-border">
         <div class="box-title"><b>Basic AI Settings</b></div>
     </div>
-    
+
     <form method="POST" name="createAIform" action="./NewAIBotstore.php">
         <div class="box-body">
-           
+
             <div class="row">
                 <div class="col-md-6">
                     <?php include './dynamic/input.name.html.php'; ?>
                 </div>
                 <div class="col-md-6">
-                     <?php include './dynamic/input.language.html.php'; ?>
+                    <?php include './dynamic/input.language.html.php'; ?>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     <?php include './dynamic/input.description.html.php'; ?>
@@ -28,15 +28,13 @@
                 <div class="col-md-6">
                     <?php include './dynamic/input.confidence.html.php'; ?>
                 </div>
-                
+
                 <div class="col-md-6">
                     <?php include './dynamic/input.learn.html.php'; ?>
                     <?php include './dynamic/input.voice.html.php'; ?>
                 </div>
 
             </div>
-
-            
         </div>
     </form>
 

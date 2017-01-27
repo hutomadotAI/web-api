@@ -22,7 +22,6 @@ $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::g
 $response = $aiApi->updateAI(
     $_POST['aiid'],
     $_POST['description'],
-    $_POST['private'],
     $_POST['language'],
     $_POST['timezone'],
     $_POST['personality'],
@@ -39,7 +38,6 @@ unset($response);
 function updateSessionVariables()
 {
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $_POST['description'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $_POST['private'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $_POST['language'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $_POST['timezone'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $_POST['personality'];
@@ -52,7 +50,6 @@ function isPostInputAvailable()
     return (
         isset($_POST['aiid']) &&
         isset($_POST['description']) &&
-        isset($_POST['private']) &&
         isset($_POST['language']) &&
         isset($_POST['timezone']) &&
         isset($_POST['personality']) &&

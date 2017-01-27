@@ -52,10 +52,6 @@ function setSessionVariablesFromPost()
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $_POST['ai_personality'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $_POST['ai_voice'];
-    if (isset($_POST['ai_public']) && $_POST['ai_public'] == 'on')
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = 0;
-    else
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = 1;
 }
 
 function isSessionVariablesAvailable()
@@ -67,8 +63,7 @@ function isSessionVariablesAvailable()
         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'])
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'])
     );
 }
 
@@ -129,7 +124,6 @@ function isSessionVariablesAvailable()
 <script src="plugins/botstore/botstore.js"></script>
 <script src="plugins/botstore/buyBot.js"></script>
 
-<script src="./plugins/iCheck/icheck.min.js"></script>
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>

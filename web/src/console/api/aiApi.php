@@ -57,7 +57,7 @@ class aiApi extends apiBase
         return null;
     }
 
-    public function updateAI($aiid, $description, $private, $language, $timezone, $personality, $voice, $confidence)
+    public function updateAI($aiid, $description, $language, $timezone, $personality, $voice, $confidence)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
@@ -82,7 +82,8 @@ class aiApi extends apiBase
 
             $args = array(
                 'description' => $description,
-                'is_private' => $private == false ? 'false' : 'true',
+                //TODO leave 'is_private' parameter until the backend remove it
+                'is_private' => 'false',
                 'personality' => $personality,
                 'confidence' => $confidence,
                 'voice' => $voice,
@@ -100,7 +101,7 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function createAI($name, $description, $private, $language, $timezone, $confidence,
+    public function createAI($name, $description, $language, $timezone, $confidence,
                              $personality, $voice)
     {
         if ($this->isLoggedIn()) {
@@ -127,7 +128,8 @@ class aiApi extends apiBase
             $args = array(
                 'name' => $name,
                 'description' => $description,
-                'is_private' => $private == false ? 'false' : 'true',
+                //TODO leave 'is_private' parameter until the backend remove it
+                'is_private' => 'false',
                 'personality' => $personality,
                 'confidence' => $confidence,
                 'voice' => $voice,

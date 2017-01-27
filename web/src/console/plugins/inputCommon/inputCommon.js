@@ -4,7 +4,6 @@
 function resetGeneralInputFields(){
     setInputValue('ai_name',previousGeneralInfo.name);
     setInputValue('ai_description',previousGeneralInfo.description);
-    setCheckValue('ai_public',previousGeneralInfo.private);
     setSelectValue('ai_language',previousGeneralInfo.language);
     setSelectValue('ai_timezone',previousGeneralInfo.timezone);
     setSelectByIndex('ai_voice',previousGeneralInfo.voice);
@@ -15,13 +14,6 @@ function resetGeneralInputFields(){
 function setInputValue(id,value){
     var element = document.getElementById(id);
     element.value = value;
-}
-
-function setCheckValue(id,value){
-    if( value )
-        $('#' + id).iCheck('uncheck');
-    else
-        $('#' + id).iCheck('check');
 }
 
 function setSelectByIndex(id,i) {
@@ -75,10 +67,4 @@ function inputsActiveDeactive(flag){
 
 $(function () {
     $('.select2').select2();
-});
-
-$(document).ready(function(){
-    $('input').iCheck({
-        checkboxClass: 'icheckbox_square-blue'
-    });
 });

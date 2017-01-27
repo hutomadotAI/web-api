@@ -71,12 +71,6 @@
 
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <?php include './dynamic/input.public.html.php'; ?>
-            </div>
-        </div>
-
         <h3><p class="text-muted">API keys</p></h3>
         <div class="row">
             <div class="col-md-6">

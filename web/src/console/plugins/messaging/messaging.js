@@ -169,7 +169,7 @@ function msgAlertUpdateAI(alarm,msg){
             $("#iconAlertUpdateAI").attr('class', 'icon fa fa-warning');
             break;
         case ALERT.SUCCESS.value:
-            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-success');
+            $("#containerMsgAlertUpdateAI").attr('class','alert alert-dismissable flat alert-success text-white');
             $("#iconAlertUpdateAI").attr('class', 'icon fa fa-check');
             break;
         case ALERT.PRIMARY.value:

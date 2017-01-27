@@ -15,7 +15,6 @@ $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::ge
 $response = $aiApi->createAI(
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'],
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'],
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'],
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'],
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'],
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'],
