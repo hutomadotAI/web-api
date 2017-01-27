@@ -61,7 +61,6 @@ function isPostCameFromBotstore()
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./plugins/switch/switch.css">
-    <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 <script>
     var bot = <?php
@@ -84,7 +83,6 @@ function isPostCameFromBotstore()
             $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
             $bot->setSample($botDetails['bot']['sample']);
             $bot->setUsers('103');                                  //$botDetails['bot']['users']);
-            $bot->setRating('4.3');                                   //$botDetails['bot']['rating']);
             $bot->setActivations($bot->rangeActivation($bot->getUsers()));
             $bot->setVersion($botDetails['bot']['version']);
             $bot->setVideoLink($botDetails['bot']['videoLink']);

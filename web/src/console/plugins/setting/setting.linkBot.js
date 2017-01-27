@@ -15,7 +15,6 @@ function showBots(str,option){
             wHTML += ('<div class="card-title unselectable">' + bot['name'] + '</div>');
             wHTML += ('<div class="card-description unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</div>');
             wHTML += ('<div class="card-footer flat">');
-            wHTML += addHtmlStarRating(0, bot['botId'], bot['rating']);
             wHTML += ('<div class="card-link unselectable" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",'+($.inArray(bot['botId'], purchasedBots) != -1)+'); >info and details</div>');
             if ($.inArray(bot['botId'], linkedBots) != -1) {
                 wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
@@ -33,38 +32,6 @@ function showBots(str,option){
     }
     newNode.innerHTML = wHTML;
     document.getElementById('botsSearch').appendChild(newNode);
-}
-
-
-function addHtmlStarRating(actived,boxid,rating){
-    var wHTML='';
-
-    wHTML += ('<div class="flat">');
-    wHTML += ('<div class="star-rating text-center">');
-    wHTML += ('<div class="star-rating__wrap">');
-
-    if ( actived ) {
-        for (var i=5; i>0; i--) {
-            if (i==Math.round(rating))
-                wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
-            else
-                wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');
-            wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-' + i + '" title="'+i+' out of '+i+' stars"></label>');
-        }
-    }else {
-        // TODO if input is disable need add to input disabled="disabled" and in label icon __disabled - now the code is same
-        for (var i = 5; i > 0; i--) {
-            if (i==Math.round(rating))
-                wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '" checked="checked">');
-            else
-                wHTML += ('<input class="star-rating__input" id="star-' + boxid + '-rating-' + i + '" type="radio" name="rating' + boxid + '" value="' + i + '">');
-            wHTML += ('<label class="star-rating__ico fa fa-star-o fa-lg" for="star-' + boxid + '-rating-' + i + '" title="' + i + ' out of ' + i + ' stars"></label>');
-        }
-    }
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-    return wHTML;
 }
 
 

@@ -16,7 +16,6 @@ function showBots(str, option) {
             wHTML += ('<div class="card-title unselectable">' + bot['name'] + '</div>');
             wHTML += ('<div class="card-description unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</div>');
             wHTML += ('<div class="card-footer flat">');
-            wHTML += addHtmlStarRating(0, bot['botId'], bot['rating']);
             wHTML += ('<div class="card-link unselectable" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + '); >info and details</div>');
             wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
 
