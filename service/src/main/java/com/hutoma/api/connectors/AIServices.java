@@ -47,11 +47,10 @@ public class AIServices extends ServerConnector {
             throw new AiServicesException("Could not get plan for devId " + devId);
         }
         this.logger.logDebug(LOGFROM, "Issuing \"start training\" command to backends for AI " + aiid.toString());
-        final int maxTrainingSecs = devPlan.getMaxTrainingSecs();
         HashMap<String, Callable<InvocationResult>> callables = getTrainingCallablesForCommand(devId, aiid,
                 new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "start");
-                    put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(maxTrainingSecs));
+                    put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(devPlan.getMaxTrainingMins()));
                 }});
         executeAndWait(callables);
     }
