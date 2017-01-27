@@ -108,8 +108,6 @@ function isAuthorizedToAccess()
         if (isset($bots) && (array_key_exists("bots", $bots))) {
             foreach ($bots['bots'] as $botDetails) {
                 $bot = new \hutoma\bot();
-                // TODO probably this value is hidden to client side
-                //$bot->setAiid($botDetails['aiid']);
                 $bot->setAlertMessage($botDetails['alertMessage']);
                 $bot->setBadge($botDetails['badge']);
                 $bot->setBotId($botDetails['botId']);
@@ -125,8 +123,10 @@ function isAuthorizedToAccess()
                 $bot->setSample($botDetails['sample']);
                 $bot->setVersion($botDetails['version']);
                 $bot->setVideoLink($botDetails['videoLink']);
+                
                 $tmp_bot = $bot->toJSON();
-                array_push($tmp_list, $tmp_bot);
+                if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
+                    array_push($tmp_list, $tmp_bot);
             }
         }
         echo json_encode($tmp_list);

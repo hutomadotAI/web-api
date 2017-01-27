@@ -154,9 +154,10 @@ function isSessionVariablesAvailable()
                 $bot->setSample($botDetails['sample']);
                 $bot->setVersion($botDetails['version']);
                 $bot->setVideoLink($botDetails['videoLink']);
-
+                
                 $tmp_bot = $bot->toJSON();
-                array_push($tmp_list, $tmp_bot);
+                if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
+                    array_push($tmp_list, $tmp_bot);
             }
         }
         echo json_encode($tmp_list);
