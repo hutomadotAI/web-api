@@ -86,6 +86,7 @@ GRANT USAGE ON *.* TO 'hutoma_caller'@'%' IDENTIFIED BY PASSWORD '*EAF232196B73A
 
 GRANT EXECUTE ON `hutoma`.* TO 'hutoma_caller'@'%';
 
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`resetTokens` TO 'hutoma_caller'@'%';
 
 # Privileges for `integrReader`@`127.0.0.1`
 GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';
