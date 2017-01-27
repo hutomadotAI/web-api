@@ -1,29 +1,34 @@
 package com.hutoma.api.connectors;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import junitparams.JUnitParamsRunner;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import java.net.HttpURLConnection;
 import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +43,7 @@ public class TestAiServices {
     private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
     private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
+    private static final String AI_ENGINE = "MOCKENGINE";
 
     private JsonSerializer fakeSerializer;
     private SecurityContext fakeContext;
@@ -46,6 +52,7 @@ public class TestAiServices {
     private ILogger fakeLogger;
     private Tools fakeTools;
     private JerseyClient fakeClient;
+    private AiServiceStatusLogger fakeServicesStatusLogger;
 
     private AIServices aiServices;
 
@@ -58,11 +65,12 @@ public class TestAiServices {
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
+        this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
 
         when(this.fakeConfig.getWnetTrainingEndpoint()).thenReturn(WNET_ENDPOINT);
         when(this.fakeConfig.getRnnTrainingEndpoint()).thenReturn(RNN_ENDPOINT);
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, this.fakeClient);
+                this.fakeTools, this.fakeConfig, this.fakeClient, this.fakeServicesStatusLogger);
     }
 
     @Test
@@ -133,6 +141,39 @@ public class TestAiServices {
         JerseyInvocation.Builder builder = getFakeBuilder();
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
         this.aiServices.uploadTraining(DEVID, AIID, "training materials");
+    }
+
+    @Test
+    public void testUpdateAiStatus() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
+        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        ApiResult result = this.aiServices.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
+        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(false);
+        ApiResult result = this.aiServices.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
+        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiServices.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_doubleNaN() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
+        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        status.setTrainingError(Double.NaN);
+        ApiResult result = this.aiServices.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     private void testCommand(CheckedByConsumer<String, UUID> logicMethod, String verb)

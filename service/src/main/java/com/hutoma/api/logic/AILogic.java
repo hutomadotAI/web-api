@@ -15,7 +15,6 @@ import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -108,22 +107,6 @@ public class AILogic {
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
         } catch (Exception e) {
             this.logger.logException(LOGFROM, e);
-            return ApiError.getInternalServerError();
-        }
-    }
-
-    public ApiResult updateAIStatus(final SecurityContext securityContext, final AiStatus status) {
-        try {
-            // Check if any of the backends sent a rogue double, as MySQL does not handle NaN
-            if (Double.isNaN(status.getTrainingError()) || Double.isNaN(status.getTrainingProgress())) {
-                return ApiError.getBadRequest("Double sent is NaN");
-            }
-            if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
-                return ApiError.getNotFound();
-            }
-            return new ApiResult().setSuccessStatus();
-        } catch (Database.DatabaseException ex) {
-            this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
     }

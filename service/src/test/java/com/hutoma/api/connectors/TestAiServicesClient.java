@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -59,6 +60,7 @@ public class TestAiServicesClient {
     private ILogger fakeLogger;
     private Tools fakeTools;
     private AIServices aiServices;
+    private AiServiceStatusLogger fakeServicesStatusLogger;
 
     @BeforeClass
     public static void initializeClass() {
@@ -79,9 +81,10 @@ public class TestAiServicesClient {
         this.fakeDatabase = mock(Database.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
+        this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
 
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient());
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger);
         when(this.fakeConfig.getRnnTrainingEndpoint()).thenReturn(LOCAL_WEB_ENDPOINT);
         when(this.fakeConfig.getWnetTrainingEndpoint()).thenReturn(LOCAL_WEB_ENDPOINT);
     }
@@ -111,7 +114,7 @@ public class TestAiServicesClient {
     public void testUploadTraining() throws AIServices.AiServicesException {
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient());
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger);
         thisAiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
     }
 

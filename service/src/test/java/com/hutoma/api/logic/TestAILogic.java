@@ -12,8 +12,6 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +45,6 @@ public class TestAILogic {
 
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String VALIDDEVID = "DevidExists";
-    private static final String AI_ENGINE = "MOCKENGINE";
 
     SecurityContext fakeContext;
     Database fakeDatabase;
@@ -221,39 +218,6 @@ public class TestAILogic {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testUpdateAiStatus() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
-        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(false);
-        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
-        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testUpdateAiStatus_doubleNaN() throws Database.DatabaseException {
-        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, 0.0, 0.0);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
-        status.setTrainingError(Double.NaN);
-        ApiResult result = this.aiLogic.updateAIStatus(this.fakeContext, status);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test

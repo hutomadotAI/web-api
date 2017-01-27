@@ -1,11 +1,15 @@
 package com.hutoma.api.connectors;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -32,11 +36,14 @@ public class AIServices extends ServerConnector {
     private static final String LOGFROM = "aiservices";
     private static final String COMMAND_PARAM = "command";
     private static final String TRAINING_TIME_ALLOWED_PARAM = "training_time_allowed";
+    private final AiServiceStatusLogger serviceStatusLogger;
 
     @Inject
     public AIServices(final Database database, final ILogger logger, final JsonSerializer serializer, final Tools tools,
-                      final Config config, final JerseyClient jerseyClient) {
+                      final Config config, final JerseyClient jerseyClient,
+                      final AiServiceStatusLogger serviceStatusLogger) {
         super(database, logger, serializer, tools, config, jerseyClient);
+        this.serviceStatusLogger = serviceStatusLogger;
     }
 
     public void startTraining(final String devId, final UUID aiid) throws AiServicesException {
@@ -53,6 +60,27 @@ public class AIServices extends ServerConnector {
                     put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(devPlan.getMaxTrainingMins()));
                 }});
         executeAndWait(callables);
+    }
+
+    public ApiResult updateAIStatus(final AiStatus status) {
+        try {
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
+            // Check if any of the backends sent a rogue double, as MySQL does not handle NaN
+            if (Double.isNaN(status.getTrainingError()) || Double.isNaN(status.getTrainingProgress())) {
+                this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent a NaN for AI %s",
+                        status.getAiEngine(), status.getAiid()));
+                return ApiError.getBadRequest("Double sent is NaN");
+            }
+            if (!this.database.updateAIStatus(status, this.serializer)) {
+                this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent a an update for unknown AI %s",
+                        status.getAiEngine(), status.getAiid()));
+                return ApiError.getNotFound();
+            }
+            return new ApiResult().setSuccessStatus();
+        } catch (Database.DatabaseException ex) {
+            this.serviceStatusLogger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
+        }
     }
 
     public void stopTraining(final String devId, final UUID aiid) throws AiServicesException {

@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -52,7 +53,6 @@ public abstract class ServiceTestBase extends JerseyTest {
 
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    protected static final UUID CHATID = UUID.fromString("f9069b51-1d4b-4c17-83f8-b4538a85aed2");
     protected static final String AI_ENGINE = "MOCK_ENGINE";
 
     protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
@@ -80,6 +80,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected JerseyClient fakeJerseyClient;
     @Mock
     protected AIChatServices fakeAiChatServices;
+    @Mock
+    protected AiServiceStatusLogger fakeServicesStatusLogger;
     @Mock
     protected Tools fakeTools;
 
@@ -126,6 +128,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiChatServices)).to(AIChatServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -173,6 +176,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeLogger = mock(ILogger.class);
         this.fakeAiChatServices = mock(AIChatServices.class);
         this.fakeTools = mock(Tools.class);
+        this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {

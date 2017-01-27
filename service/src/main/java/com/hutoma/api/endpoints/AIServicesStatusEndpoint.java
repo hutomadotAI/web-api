@@ -1,9 +1,9 @@
 package com.hutoma.api.endpoints;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidatePost;
@@ -22,7 +22,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Endpoint to support updating AI status by backend services.
@@ -30,19 +29,18 @@ import javax.ws.rs.core.SecurityContext;
 @Path("/aiservices")
 public class AIServicesStatusEndpoint {
 
-    private final AILogic aiLogic;
+    private final AIServices aiServices;
     private final JsonSerializer serializer;
 
     @Inject
-    public AIServicesStatusEndpoint(final AILogic aiLogic, final JsonSerializer serializer) {
-        this.aiLogic = aiLogic;
+    public AIServicesStatusEndpoint(final AIServices aiServices, final JsonSerializer serializer) {
+        this.aiServices = aiServices;
         this.serializer = serializer;
     }
 
     /**
      * Update the AI status.
-     * @param securityContext the security context
-     * @param requestContext  the request context
+     * @param requestContext the request context
      * @return the result of the status update operation
      */
     @Path("{aiid}/status")
@@ -61,10 +59,8 @@ public class AIServicesStatusEndpoint {
     public
     @TypeHint(ApiResult.class)
     Response updateStatus(
-            @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
-        ApiResult result = this.aiLogic.updateAIStatus(
-                securityContext,
+        ApiResult result = this.aiServices.updateAIStatus(
                 ParameterFilter.getAiStatus(requestContext));
         return result.getResponse(this.serializer).build();
     }
