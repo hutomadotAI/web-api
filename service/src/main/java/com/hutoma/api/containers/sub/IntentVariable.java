@@ -10,10 +10,10 @@ import java.util.List;
  */
 public class IntentVariable {
 
-    @SerializedName("entityName")
+    @SerializedName("entity_name")
     private final String entityName;
     private final boolean required;
-    @SerializedName("numberOfPrompts")
+    @SerializedName("n_prompts")
     private final int numberOfPrompts;
     private String value;
     private int id;
