@@ -13,13 +13,19 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     exit;
 }
 
-if (!isset($_POST['botId'])) {
+if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'])) {
     \hutoma\console::redirect('./error.php?err=100');
     exit;
 }
 
+$botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
+$purchased = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['purchased'];
+$menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
+$name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
+
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$botDetails = $botApi->getBotDetails($_POST['botId']);
+$botDetails = $botApi->getBotDetails($botId);
+unset($botId);
 unset($botApi);
 
 
@@ -35,19 +41,6 @@ if (isset($botDetails)) {
             exit;
     }
 }
-
-
-function isPostCameFromBotstore()
-{
-    return (
-        isset($_POST['menu_title'])&&
-        isset($_POST['menu_level']) &&
-        isset($_POST['menu_block']) &&
-        isset($_POST['menu_active']) &&
-        isset($_POST['menu_deep'])
-    );
-}
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -150,8 +143,8 @@ function isPostCameFromBotstore()
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        var info = infoForBotstore("<?php if(isset($_POST['menu_title'])) echo ($_POST['menu_title']);?>","<?php if(isset($_POST['purchased'])) echo ($_POST['purchased']);?>");
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
+        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>","<?php echo $purchased; unset($purchased);?>");
+        MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>
 <script>

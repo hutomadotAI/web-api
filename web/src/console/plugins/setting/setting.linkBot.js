@@ -59,7 +59,7 @@ function openSingleBot(elem,option,botId,purchased){
     var form = document.createElement("form");
     document.body.appendChild(form);
     form.method = "POST";
-    form.action = "./singlebotstore.php";
+    form.action = "./dynamic/sessionBotMenu.php";
 
     var element = document.createElement("INPUT");
     element.name="botId";

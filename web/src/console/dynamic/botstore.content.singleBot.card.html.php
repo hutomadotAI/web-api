@@ -7,11 +7,11 @@
 
                 <div class="row no-margin">
                     <!--title-->
-                    <div class="col-xs-6 bot-title text-white">
+                    <div class="col-xs-10 bot-title text-white">
                         <span id="botTitle"></span>
                     </div>
                     <!--badge-->
-                    <div class="col-xs-6 bot-badge">
+                    <div class="col-xs-2 bot-badge">
                         <span id="botBadge" hidden></span>
                         <!--<i class="fa fa-ra text-aqua"></i>-->
                         <a href="" id="btnBuyBotBack" class="fa fa-close text-md text-darkgray"></a>

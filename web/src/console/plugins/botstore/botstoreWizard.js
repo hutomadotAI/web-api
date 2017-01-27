@@ -19,7 +19,6 @@ function populateBotFields(bot) {
     document.getElementById('botTitle').innerText = json['name'];
     document.getElementById('botBadge').innerText = json['badge'];
     document.getElementById('botDescription').innerText = json['description'];
-    document.getElementById('botUsers').innerText = json['users'];
     document.getElementById('botMessage').innerText = json['alertMessage'];
     document.getElementById('botLicense').innerText = json['licenseType'];
     document.getElementById('botPrice').innerText = json['price'];
@@ -50,7 +49,7 @@ function populateBotFields(bot) {
     document.getElementById('botPricePurchase').innerText = json['price'];
     document.getElementById('bot_id').value = json['botId'];
 
-    if (videoLinkFilter(json['videoLink']) == '')
+    if (json['videoLink']==null || videoLinkFilter(json['videoLink']) == '')
         document.getElementById('botVideoLinkSection').innerHTML = '';
     else
         document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(json['videoLink']));
@@ -98,7 +97,7 @@ function infoForBotstore(title, purchased) {
             v['menu_deep'] = 0;
 
             if (purchased == 'true')
-                btnFromBuyToPurchased()
+                btnFromBuyToPurchased();
 
             document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
     }
