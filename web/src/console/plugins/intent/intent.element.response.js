@@ -15,6 +15,7 @@ function checkIntentResponseCode(element, key) {
 
 function activeButtonCreateIntentResponse() {
     var limitTextInputSize = 50;
+    msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
     switch (limitText($("#intent-response"), limitTextInputSize)) {
         case -1:
             $("#btnAddIntentResponse").prop("disabled", true);

@@ -30,17 +30,14 @@ function saveIntent() {
         msgAlertUserExpression(ALERT.DANGER.value, 'At least one user expression is required');
         hasErrors = true;
     }
-
     if (responses.length == 0) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required');
         hasErrors = true;
     }
-
     if (hasErrors) {
         msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
         return false;
     }
-
 
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
@@ -94,6 +91,7 @@ function saveIntent() {
             return false;
         }
 
+
         var promptsArray = [];
         for (var j = 0; j < prompts_split.length; j++)
             promptsArray.push(removeEscapeCharacter(prompts_split[j]));
@@ -113,14 +111,29 @@ function saveIntent() {
 
     msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
     $.ajax({
-        url: 'intentelement.php?intent=' + intentName,
+        url: './dynamic/updateIntent.php',
         data: {
-            intent_name: intentName, intent_prompts: expressions, intent_responses: responses,
+            intent_name: intentName,
+            intent_expressions: expressions,
+            intent_responses: responses,
             variables: variables
         },
         type: 'POST',
-        success: function (result) {
-            msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
+        success: function (response) {
+            var JSONdata = JSON.parse(response);
+            switch (JSONdata['status']['code']) {
+                case 200:
+                    msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
+                    break;
+                case 400:
+                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
+                    break;
+                case 500:
+                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
+                    break;
+                default:
+                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
+            }
         },
         complete: function () {
             $("#btnSaveIntent").prop("disabled", false);
@@ -132,6 +145,7 @@ function saveIntent() {
         }
     });
 }
+
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
     var parent = $(e.relatedTarget).parent().parent().parent();

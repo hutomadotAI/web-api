@@ -15,6 +15,7 @@ function checkExpressionCode(element, key) {
 
 function activeButtonCreateUserExpression() {
     var limitTextInputSize = 50;
+    msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
     switch (limitText($("#user-expression"), limitTextInputSize)) {
         case -1:
             $("#btnAddExpression").prop("disabled", true);
