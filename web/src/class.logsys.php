@@ -696,7 +696,6 @@ class console
      */
     public static function sendMail($email, $subject, $body)
     {
-       $send = 0;
         /**
          * If there is a callback for email sending, use it else PHP's mail()
          */
