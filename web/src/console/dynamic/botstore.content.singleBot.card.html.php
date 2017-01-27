@@ -23,6 +23,10 @@
                     <div class="col-xs-7 bot-description">
                         <span id="botDescription"></span>
                     </div>
+
+                    <!--tmp div to fix UI to be updated once we have star ratings-->
+                    <div class="col-xs-5 bot-star">
+                    </div>
                 </div>
 
                 <div class="row no-margin">
