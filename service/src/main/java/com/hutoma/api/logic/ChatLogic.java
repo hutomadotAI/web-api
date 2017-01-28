@@ -97,10 +97,16 @@ public class ChatLogic {
 
             if (wnetConfident) {
                 // if we are taking WNET's reply then process intents
-                this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap);
-                this.telemetryMap.put("AnsweredBy", "WNET");
-                this.telemetryMap.put("AnsweredWithConfidence", "true");
-            } else {
+                if (this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap)) {
+                    this.telemetryMap.put("AnsweredBy", "WNET");
+                    this.telemetryMap.put("AnsweredWithConfidence", "true");
+                } else {
+                    // if intents processing returns false then we need to ignore WNET
+                    wnetConfident = false;
+                }
+            }
+
+            if (!wnetConfident) {
                 // otherwise,
                 // wait for the AIML server to respond
                 result = this.interpretAimlResult();
@@ -303,8 +309,12 @@ public class ChatLogic {
      * @param question     the question
      * @param telemetryMap the telemetry map
      */
-    private void handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
-                               final String question, final Map<String, String> telemetryMap) throws IntentException {
+    private boolean handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
+                                  final String question, final Map<String, String> telemetryMap) throws IntentException {
+
+        // the reply that we are processing is the one to return to the user
+        boolean replyConfidence = true;
+
         // Now that have the chat result, we need to check if there's an intent being returned
         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
                 devId, aiid, chatUuid, chatResult.getAnswer());
@@ -357,10 +367,10 @@ public class ChatLogic {
 
                         }
                     } else { // intent not fulfilled but no variables left to handle
-                        // TODO: Currently we're not doing anything when the number of prompts is exceeded
-                        // we just stop asking for that prompt, which means that the intent will remain
-                        // unfulfilled after using all the prompts and the user may be left on their own
+                        // if we run out of n_prompts we just stop asking.
+                        // the user can still answer the question ... or not
                         telemetryMap.put("IntentNotFulfilled", memoryIntent.getName());
+                        replyConfidence = false;
                     }
 
                 }
@@ -370,6 +380,7 @@ public class ChatLogic {
 
         // Add the current intents state to the chat response
         chatResult.setIntents(this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
+        return replyConfidence;
     }
 
     private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid,
