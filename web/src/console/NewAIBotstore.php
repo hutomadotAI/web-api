@@ -5,21 +5,15 @@ require_once "api/aiApi.php";
 require_once "api/botApi.php";
 require_once "common/bot.php";
 
-
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
     exit;
 }
 
-
-if (isPostInputAvailable())
-    setSessionVariablesFromPost();
-else
-    if (!isSessionVariablesAvailable()) {
-        \hutoma\console::redirect('./error.php?err=100');
-        exit;
-    }
-
+if (!isSessionVariablesAvailable()) {
+    \hutoma\console::redirect('./error.php?err=100');
+    exit;
+}
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bots = $botApi->getPublishedBots();
@@ -28,31 +22,6 @@ unset($botApi);
 $botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $purchasedBots = $botPurchaseApi->getPurchasedBots();
 unset($botPurchaseApi);
-
-
-function isPostInputAvailable()
-{
-    return (
-        isset($_POST['ai_name']) &&
-        isset($_POST['ai_description']) &&
-        isset($_POST['ai_language']) &&
-        isset($_POST['ai_timezone']) &&
-        isset($_POST['ai_confidence']) &&
-        isset($_POST['ai_personality']) &&
-        isset($_POST['ai_voice'])
-    );
-}
-
-function setSessionVariablesFromPost()
-{
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $_POST['ai_name'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $_POST['ai_description'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $_POST['ai_language'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $_POST['ai_timezone'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $_POST['ai_confidence'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $_POST['ai_personality'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $_POST['ai_voice'];
-}
 
 function isSessionVariablesAvailable()
 {
@@ -66,7 +35,6 @@ function isSessionVariablesAvailable()
         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'])
     );
 }
-
 ?>
 
 <!DOCTYPE html>
