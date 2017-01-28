@@ -4,12 +4,19 @@ var ai_status_last = "";
 initializeEventListeners();
 initializeConsole(aiStatus);
 
-var async_status_AI = setInterval(function () {
-    trainingStatusCall()
-}, 2000);
-var async_status_UI = setInterval(function () {
-    getUIStatusCall()
-}, 2000);
+
+function pollStatus() {
+    trainingStatusCall();
+    getUIStatusCall();
+}
+
+function startPollForStatus() {
+    setInterval(pollStatus, 2000);
+}
+
+function stopPollForStatus() {
+    clearInterval(pollStatus);
+}
 
 function initializeEventListeners() {
     document.getElementById('inputfile').addEventListener('change', enableUploadTextFile);
@@ -18,11 +25,26 @@ function initializeEventListeners() {
 
 function initializeConsole(aiStatus) {
     setStateResponse(aiStatus);
+
     if (aiStatus["training_file_uploaded"] != 0) {
         msgAlertUploadFile(ALERT.PRIMARY.value, 'A file is already loaded.');
         setStateResponse(aiStatus);
     }
+
+    switch(aiStatus['ai_status']){
+        case 'ai_undefined':
+            stopPollForStatus();
+            break;
+        case 'ai_training_complete' :
+            stopPollForStatus();
+            hidePreTrainingBar(true);
+            msgAlertProgressBar(ALERT.SUCCESS.value, 'Training completed.');
+            break;
+        default:
+            startPollForStatus();
+    }
 }
+
 
 function getUIStatusCall() {
     var state = parseInt(getUICurrentStatus());
@@ -80,6 +102,7 @@ function getUIStatusCall() {
             }
             break;
         case (state == 10):
+            stopPollForStatus();
             phaseTwoFlashing(false);
             phaseTwoMaxValue();
             msgAlertProgressBar(ALERT.SUCCESS.value, 'Training completed.');
