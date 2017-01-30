@@ -338,8 +338,7 @@ class console
                 /**
                  * Couldn't connect to Database
                  */
-                self::log('Couldn\'t connect to database. Check \Fr\LS::$config["db"] credentials');
-                telemetry::getInstance()->log(TelemetryEvent::ERROR, "db", "Exception: " . $e->getMessage());
+                self::log_error("init", "Exception: " . $e->getMessage());
                 return false;
             }
         }
@@ -378,7 +377,7 @@ class console
      */
     public static function logout()
     {
-        telemetry::getInstance()->log(TelemetryEvent::INFO, "logout", "UserId: " . $_SESSION['logSyscuruser']);
+        self::log_info("logout", "UserId: " . $_SESSION['logSyscuruser']);
         self::construct("logout");
         session_destroy();
         setcookie("logSyslogin", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
@@ -391,6 +390,30 @@ class console
         usleep(2000);
         self::redirect(self::$config['pages']['login_page']);
         return true;
+    }
+
+    /**
+     * Log something in the Francium.log file.
+     * To enable logging, make a file called "Francium.log" in the directory
+     * where "class.logsys.php" file is situated
+     */
+    public static function log_info($tag, $msg)
+    {
+        self::log(TelemetryEvent::INFO, $tag, $msg);
+    }
+
+    private static function log($type, $tag, $msg)
+    {
+        $log_file = __DIR__ . "/hutoma.log";
+        if (file_exists($log_file)) {
+            if ($msg != "") {
+                $message = "[" . date("Y-m-d H:i:s") . "] $msg";
+                $fh = fopen($log_file, 'a');
+                fwrite($fh, $message . "\n");
+                fclose($fh);
+            }
+        }
+        telemetry::getInstance()->log($type, $tag, $msg);
     }
 
     /**
@@ -416,23 +439,9 @@ class console
         self::$init_called = true;
     }
 
-    /**
-     * Log something in the Francium.log file.
-     * To enable logging, make a file called "Francium.log" in the directory
-     * where "class.logsys.php" file is situated
-     */
-    public static function log($msg = "")
+    public static function log_error($tag, $msg)
     {
-        $log_file = __DIR__ . "/hutoma.log";
-        if (file_exists($log_file)) {
-            if ($msg != "") {
-                $message = "[" . date("Y-m-d H:i:s") . "] $msg";
-                $fh = fopen($log_file, 'a');
-                fwrite($fh, $message . "\n");
-                fclose($fh);
-            }
-        }
-        telemetry::getInstance()->log(TelemetryEvent::INFO, "log", $msg);
+        self::log(TelemetryEvent::ERROR, $tag, $msg);
     }
 
     /**
@@ -629,6 +638,7 @@ class console
             $identification = $_POST['identification'];
             if ($identification == "") {
                 header("Location: reset.php"); /* Redirect browser */
+                self::log_error("reset_pwd", "User without identification");
                 exit();
 
             } else {
@@ -641,11 +651,8 @@ class console
                     ":checkEmail" => (self::$config['features']['email_login'] === true)
                 ));
                 if ($sql->rowCount() == 0) {
-                    $notfound = '<div class="alert alert-danger">';
-                    $notfound .= '<i class="icon fa fa-warning"></i> User Not Found.';
-                    $notfound .= '</div>';
-                    echo $notfound;
                     $curStatus = "userNotFound"; // The user with the identity given was not found in the users database
+                    self::log_info("reset_pwd", "User '" . $identification . "' attempted to reset password, but user not found");
                 } else {
                     $rows = $sql->fetch(\PDO::FETCH_ASSOC);
                     $email = $rows['email'];
@@ -664,13 +671,15 @@ class console
                       <blockquote>
                         <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
-                    if (self::sendMail($email, $subject, $body)) {
-                        echo "<p>Your password reset email has been sent. Do not forget to check your spam folder too.</p>";
-                        $curStatus = "emailSent"; // E-Mail has been sent
-                    } else {
+                    if (!self::sendMail($email, $subject, $body)) {
                         echo "<p>There was a problem sending the reset e-mail. Please go back and try again.</p>";
+                        self::log_error("reset_pwd", "User '" . $identification . "' attempted to reset password, but email could not be sent");
+                        return $curStatus;
                     }
+                    $curStatus = "emailSent"; // E-Mail has been sent
+                    self::log_info("reset_pwd", "User '" . $identification . "' successfully requested password reset");
                 }
+                echo "<p>If you entered a valid username, you should be receiving shortly a password reset email in your inbox. Don't forget to check your spam folder too!</p>";
             }
         }
         return $curStatus;
@@ -947,7 +956,7 @@ class console
                     echo $html;
                     return "formDisplay";
                 } else {
-                    self::log("two_step_login: Token Callback not present");
+                    self::log_error("2step_login", "two_step_login: Token Callback not present");
                 }
             }
         }
@@ -1025,7 +1034,7 @@ class console
                  * required to check whether the password fieldis left blank
                  */
                 if (!isset($blocked) && ($saltedPass == $us_pass || $password == "")) {
-                    telemetry::getInstance()->log(TelemetryEvent::INFO, "login", "UserId: " . $us_id);
+                    self::log_info("login", "UserId: " . $us_id);
                     if ($cookies === true) {
 
                         $_SESSION['logSyscuruser'] = $us_id;
@@ -1059,7 +1068,7 @@ class console
                         return true;
                     } else {
 
-                        telemetry::getInstance()->log(TelemetryEvent::INFO, "no_cookies", "UserId: " . $us_id);
+                        self::log_info("no_cookies", "UserId: " . $us_id);
                         /**
                          * If cookies shouldn't be set,
                          * it means login() was called
@@ -1126,84 +1135,11 @@ class console
     }
 
     /**
-     * Returns array of devices that are authorized
-     * to login by user's account credentials
-     */
-    public static function getDevices()
-    {
-        if (self::$loggedIn) {
-            //TODO: this statement needs to move to stored procedure
-            $sql = self::$dbh->prepare("SELECT * FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ?");
-            $sql->execute(array(self::$user));
-            return $sql->fetchAll(\PDO::FETCH_ASSOC);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Revoke a device
-     */
-    public static function revokeDevice($device_token)
-    {
-        if (self::$loggedIn) {
-            //TODO: this statement needs to move to stored procedure
-            $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
-            $sql->execute(array(self::$user, $device_token));
-            if (isset($_SESSION['device_check'])) {
-                unset($_SESSION['device_check']);
-            }
-            return $sql->rowCount() == 1;
-        }
-    }
-
-    /**
      * Check if E-Mail is valid
      */
     public static function validEmail($email = "")
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
-    }
-
-    /**
-     * CSRF Protection
-     */
-    public static function csrf($type = "")
-    {
-        if (!isset($_COOKIE['csrf_token'])) {
-            $csrf_token = self::rand_string(5);
-            setcookie("csrf_token", $csrf_token, 0, self::$config['cookies']['path'], self::$config['cookies']['domain']);
-        } else {
-            $csrf_token = $_COOKIE['csrf_token'];
-        }
-        if ($type == "s") {
-            /**
-             * Output as string
-             */
-            return urlencode($csrf_token);
-        } elseif ($type == "g") {
-            /**
-             * Output as a GET parameter
-             */
-            return "&csrf_token=" . urlencode($csrf_token);
-        } elseif ($type == "i") {
-            /**
-             * Output as an input field
-             */
-            echo "<input type='hidden' name='csrf_token' value='{$csrf_token}' />";
-        } else {
-            /**
-             * Check CSRF validity
-             */
-            if ((isset($_POST['csrf_token']) && $_COOKIE['csrf_token'] == $_POST['csrf_token']) || (isset($_GET['csrf_token']) && $_COOKIE['csrf_token'] == $_GET['csrf_token'])) {
-                return true;
-            } else {
-                /**
-                 * CSRF Token doesn't match.
-                 */
-                return false;
-            }
-        }
     }
 
 
@@ -1252,63 +1188,6 @@ class console
     {
         return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
 
-    }
-
-    public static function getClientToken()
-    {
-        $token = "";
-        if (self::$loggedIn) {
-            $query = "CALL getClientToken(:id)";
-            $sql = self::$dbh->prepare($query);
-            $sql->execute(array(
-                ":id" => self::$user
-            ));
-            if ($sql->rowCount() > 0) {
-                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-                $sql->nextRowset();
-                $token = $rows['client_token'];
-            }
-        }
-        return $token;
-    }
-
-    /**
-     * BotStore Functions
-     */
-
-    // TODO turn me into an API call
-
-    public static function getBotsInStore()
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getBotsInStore()");
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=123');
-                exit;
-            }
-            return $sql->fetchAll();
-        }
-    }
-
-    public static function getSingleBotInStore($aiid)
-    {
-        if (self::$loggedIn) {
-            try {
-                $sql = self::$dbh->prepare("CALL getBotInStore(?)");
-                $sql->bindValue(1, $aiid, \PDO::PARAM_STR);
-                $sql->execute();
-            } catch (MySQLException $e) {
-                \hutoma\console::redirect('./error.php?err=123');
-                exit;
-            }
-
-            $data = $sql->fetchAll();
-            $sql->nextRowset();
-            $value = ($data[0]);
-            return $value;
-        }
     }
 
     public static function isSessionActive()
