@@ -40,6 +40,14 @@ function initializeConsole(aiStatus) {
             hidePreTrainingBar(true);
             msgAlertProgressBar(ALERT.SUCCESS.value, 'Training completed.');
             break;
+        case 'ai_training_stopped':
+            stopPollForStatus();
+            createMessageWarningInfoAlert();
+            hideChart(true);
+            hidePreTrainingBar(true);
+            hideTrainingBar(true);
+            msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training');
+            break;
         default:
             startPollForStatus();
     }
@@ -228,6 +236,7 @@ function setStateResponse(aiStatus) {
 
 function trainingRestart() {
     disableButtonUploadTextFile(true);
+    startPollForStatus();
 
     phaseOneReset();
     hideTrainingBar(true);
