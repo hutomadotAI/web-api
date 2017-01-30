@@ -5,7 +5,7 @@
                 <span class="sr-only">Toggle navigation</span>
                 <i class="fa fa-bars fa-2x"></i>
             </button>
-            <a class="navbar-brand" href="#body">
+            <a class="navbar-brand" href="./login.php">
                 <h1 style="padding: 5px;margin-left: 115px;" >
                     <b> hu:toma </b>
                 </h1>
