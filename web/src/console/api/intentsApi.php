@@ -58,7 +58,7 @@ class intentsApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function updateIntent($aiid, $intentName, $responses, $user_says, $variables)
+    public function updateIntent($aiid, $intentName, $expressions, $responses, $variables)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid,
@@ -68,7 +68,7 @@ class intentsApi extends apiBase
             $this->curl->setOpt(CURLOPT_POSTFIELDS, json_encode(
                 array(
                     'intent_name' => $intentName,
-                    'user_says' => $user_says,
+                    'user_says' => $expressions,
                     'responses' => $responses,
                     'variables' => $variables
                 )
