@@ -4,7 +4,7 @@ function showIntegrations(str){
     for (var x in integrations) {
         if ( (str!=" ") && ( (str.length==0) || (integrations[x].name.toLowerCase()).indexOf(str.toLowerCase())!=-1 ) )  {
        
-            wHTML += ('<div class="box-body flat" style="background-color: #515151; border: 1px solid #202020;">');
+            wHTML += ('<div class="box-body flat" style="background-color: #404446; border: 1px solid #202020;">');
             wHTML += ('<div class="row">');
             wHTML += ('<div class="col-xs-1">');
             wHTML += ('<img src="./dist/img/social/icons/'+integrations[x].icon+'" width="30" height="30" alt="'+integrations[x].name+'">');

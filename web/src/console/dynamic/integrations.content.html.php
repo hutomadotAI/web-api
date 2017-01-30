@@ -3,15 +3,15 @@
         <div class="box-title"><b>Select integrations</b></div>
         <a data-toggle="collapse"  href="#collapseInfoIntegrations">
             <div class=" pull-right"> <i class="fa fa-info-circle text-sm text-yellow"></i> more info
-
             </div>
         </a>
     </div>
 
     <div class="box-body" id="boxNewIntegrations">
         <input class="form-control flat no-shadow" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchIntegration(this.value)">
-
-        <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertNewIntegraions">
+        <p></p>
+        
+        <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewIntegraions" style="margin-bottom:5px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertNewIntegrations"></i>
             <span id="msgAlertIntegrations">Check how combine AIs wit other system.</span>
