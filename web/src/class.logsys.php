@@ -17,6 +17,7 @@ if (function_exists('libxml_disable_entity_loader')) {
 
 require_once("console/common/apiConnector.php");
 require_once("console/common/telemetry.php");
+require_once("console/common/sessionObject.php");
 
 class console
 {
@@ -221,6 +222,7 @@ class console
     private static $constructed = false;
     private static $init_called = false;
     private static $cookie, $session, $remember_cookie, $dbh;
+    private static $sessionObj = null;
 
     /**
      * Merge user config and default config
@@ -247,6 +249,7 @@ class console
             if (self::$config['features']['start_session'] === true) {
                 session_start();
             }
+            self::$sessionObj = new sessionObject();
             /**
              * Try connecting to Database Server
              */
@@ -381,6 +384,7 @@ class console
         setcookie("logSyslogin", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
         setcookie("logSysrememberMe", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
 
+        self::$sessionObj->clear();
         /**
          * Wait for the cookies to be removed, then redirect
          */
@@ -708,8 +712,8 @@ class console
             $headers[] = "From: " . self::$config['basic']['email'];
             $headers[] = "Reply-To: " . self::$config['basic']['email'];
             $res = mail($email, $subject, $body, implode("\r\n", $headers));
-            }
-    return $res;
+        }
+        return $res;
 
     }
 
@@ -1044,6 +1048,10 @@ class console
                                 $us_id);
                         }
 
+                        // Store the dev token
+                        $devToken = $rows['dev_token'];
+                        self::$sessionObj->setDevToken($devToken);
+
                         // Redirect
                         if (self::$init_called) {
                             self::redirect(self::$config['pages']['home_page']);
@@ -1208,22 +1216,25 @@ class console
 
     public static function getDevToken()
     {
-        $token = "";
-        if (self::$loggedIn) {
-            $query = "CALL getDevToken(:id)";
-            $sql = self::$dbh->prepare($query);
-            $sql->execute(array(
-                ":id" => self::$user
-            ));
-            if ($sql->rowCount() > 0) {
-                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-                $sql->nextRowset();
-                $token = $rows['dev_token'];
-            } else {
-                telemetry::getInstance()->log(TelemetryEvent::ERROR, "getDevToken", "Could not obtain dev token");
+        if (self::$sessionObj->getDevToken() === NULL) {
+            $token = "";
+            if (self::$loggedIn) {
+                $query = "CALL getDevToken(:id)";
+                $sql = self::$dbh->prepare($query);
+                $sql->execute(array(
+                    ":id" => self::$user
+                ));
+                if ($sql->rowCount() > 0) {
+                    $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+                    $sql->nextRowset();
+                    $token = $rows['dev_token'];
+                } else {
+                    telemetry::getInstance()->log(TelemetryEvent::ERROR, "getDevToken", "Could not obtain dev token");
+                }
             }
+            self::$sessionObj->setDevToken($token);
         }
-        return $token;
+        return self::$sessionObj->getDevToken();
     }
 
     public static function isLoggedIn()
@@ -1302,12 +1313,12 @@ class console
 
     public static function isSessionActive()
     {
-        if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
+        if (self::$sessionObj->getLastActivity() != null && (time() - self::$sessionObj->getLastActivity() > 1800)) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
         }
-        $_SESSION['LAST_ACTIVITY'] = time();
+        self::$sessionObj->setLastActivity(time());
         $sid = session_id();
         return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
     }
