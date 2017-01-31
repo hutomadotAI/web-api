@@ -28,7 +28,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * AI Chat endpoint.
@@ -71,9 +70,8 @@ public class ChatEndpoint {
     public
     @TypeHint(ChatResult.class)
     Response chat(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext) {
-        ApiResult result = this.chatLogic.chat(securityContext,
+        ApiResult result = this.chatLogic.chat(
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
@@ -92,9 +90,8 @@ public class ChatEndpoint {
     @Secured({Role.ROLE_TEST})
     @Produces(MediaType.APPLICATION_JSON)
     public Response chatLoadTest(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext) {
-        ApiResult result = this.chatLogic.chat(securityContext,
+        ApiResult result = this.chatLogic.chat(
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),

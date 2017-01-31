@@ -63,7 +63,8 @@ public class TelemetryCentralLogger extends CentralLogger implements ITelemetry 
                 map.put(key + "_stackTrace", getStackTraceAsString(ex.getStackTrace()));
             }
         }
-        this.logOutput(EventType.EXCEPTION, eventName, exception.getClass().getName(), map);
+        this.logOutput(EventType.EXCEPTION, eventName,
+                String.format("%s: %s", exception.getClass().getName(), exception.getMessage()), map);
     }
 
     /**

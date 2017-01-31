@@ -16,6 +16,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.controllers.AiControllerBase;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
@@ -59,7 +60,7 @@ public class ChatLogic {
         this.chatTelemetryLogger = chatTelemetryLogger;
     }
 
-    public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
+    public ApiResult chat(UUID aiid, String devId, String question, String chatId,
                           String history, String topic, float minP) {
 
         final long startTime = this.tools.getTimestamp();
@@ -149,12 +150,12 @@ public class ChatLogic {
 
             apiChat.setResult(result);
 
-        } catch (AIChatServices.AiNotFoundException notFoundException) {
+        } catch (AiControllerBase.AiNotFoundException notFoundException) {
             this.logger.logError(LOGFROM, String.format("%s did not find ai %s", notFoundException.getMessage(), aiid));
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", notFoundException, this.telemetryMap);
             return ApiError.getNotFound("AI not found");
 
-        } catch (AIChatServices.AiRejectedStatusException rejected) {
+        } catch (AiControllerBase.AiRejectedStatusException rejected) {
             this.logger.logError(LOGFROM,
                     "question rejected because AI is in the wrong state: " + rejected.getMessage());
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", rejected, this.telemetryMap);
@@ -226,11 +227,25 @@ public class ChatLogic {
         return apiChat.setSuccessStatus();
     }
 
-    private ChatResult interpretSemanticResult() throws ServerConnector.AiServicesException {
+    private Pair<UUID, ChatResult> getTopScore(Map<UUID, ChatResult> chatResults) {
+        UUID responseFromAi = null;
+        ChatResult chatResult = new ChatResult();
+        for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
+            if (entry.getValue().getScore() >= chatResult.getScore()) {
+                chatResult = entry.getValue();
+                responseFromAi = entry.getKey();
+            }
+        }
+        return new Pair<>(responseFromAi, chatResult);
+    }
 
-        // wait for result to complete
-        ChatResult chatResult = this.chatServices.awaitWnet();
+    private ChatResult interpretSemanticResult() throws AiControllerBase.AiControllerException {
 
+        // Get the top score
+        Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitWnet());
+        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+
+        ChatResult chatResult = result.getB();
         if (chatResult.getAnswer() != null) {
             // if we receive a reset command then remove the command and flag the status
             if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
@@ -257,11 +272,13 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretAimlResult() throws ServerConnector.AiServicesException {
+    private ChatResult interpretAimlResult() throws AiControllerBase.AiControllerException {
 
-        // wait for result to complete
-        ChatResult chatResult = this.chatServices.awaitAiml();
+        // Get the top score
+        Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitAiml());
+        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
+        ChatResult chatResult = result.getB();
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
 
@@ -276,10 +293,13 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretRnnResult() throws ServerConnector.AiServicesException {
+    private ChatResult interpretRnnResult() throws AiControllerBase.AiControllerException {
 
-        // wait for result to complete
-        ChatResult chatResult = this.chatServices.awaitRnn();
+        // Get the top score
+        Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitRnn());
+        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+
+        ChatResult chatResult = result.getB();
 
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
@@ -310,7 +330,8 @@ public class ChatLogic {
      * @param telemetryMap the telemetry map
      */
     private boolean handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
-                                  final String question, final Map<String, String> telemetryMap) throws IntentException {
+                                  final String question, final Map<String, String> telemetryMap)
+            throws IntentException {
 
         // the reply that we are processing is the one to return to the user
         boolean replyConfidence = true;

@@ -4,6 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.controllers.InvocationResult;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
@@ -52,30 +53,6 @@ public class ServerConnector {
 
     public void abandonCalls() {
         this.executor.shutdownNow();
-    }
-
-    public static class InvocationResult {
-        private final Response response;
-        private final String endpoint;
-        private final long durationMs;
-
-        public InvocationResult(final Response response, final String endpoint, final long durationMs) {
-            this.response = response;
-            this.endpoint = endpoint;
-            this.durationMs = durationMs;
-        }
-
-        public Response getResponse() {
-            return this.response;
-        }
-
-        public long getDurationMs() {
-            return this.durationMs;
-        }
-
-        public String getEndpoint() {
-            return this.endpoint;
-        }
     }
 
     public static class AiServicesException extends Exception {

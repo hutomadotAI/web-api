@@ -12,6 +12,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.controllers.InvocationResult;
 
 import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
@@ -93,6 +94,7 @@ public class AIServices extends ServerConnector {
         this.logger.logDebug(LOGFROM, "Issuing \"delete AI\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getAllEndpoints()) {
             callables.put(endpoint, () -> new InvocationResult(
+                    aiid,
                     this.jerseyClient
                             .target(endpoint).path(devId).path(aiid.toString())
                             .request()
@@ -108,6 +110,7 @@ public class AIServices extends ServerConnector {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getAllEndpoints()) {
             callables.put(endpoint, () -> new InvocationResult(
+                    null,
                     this.jerseyClient
                             .target(endpoint).path(devId)
                             .request()
@@ -133,6 +136,7 @@ public class AIServices extends ServerConnector {
                     .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
                     .bodyPart(bodyPart);
             callables.put(endpoint, () -> new InvocationResult(
+                    aiid,
                     this.jerseyClient
                             .target(endpoint)
                             .request()
@@ -174,7 +178,7 @@ public class AIServices extends ServerConnector {
             }
 
             final JerseyInvocation.Builder builder = target.request();
-            callables.put(endpoint, () -> new InvocationResult(builder.post(null), endpoint, 0));
+            callables.put(endpoint, () -> new InvocationResult(aiid, builder.post(null), endpoint, 0));
         }
         return callables;
     }
