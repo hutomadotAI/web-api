@@ -104,6 +104,17 @@ class botApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function getBotIcon($botId)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/' . $botId . '/icon'));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            return $curl_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
 
     public function uploadBotIcon($botId, $file)
     {
@@ -111,7 +122,7 @@ class botApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/' . $botId . '/icon'));
 
             $filename = $file['tmp_name'];
-            $args['file'] = new \CurlFile($filename, 'image/png', 'postfilename.txt');
+            $args['file'] = new \CurlFile($filename, 'image/png', 'icon.png');
 
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);

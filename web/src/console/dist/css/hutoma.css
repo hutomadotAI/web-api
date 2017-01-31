@@ -45,6 +45,7 @@ body {
     font-weight: 400;
     overflow-x: hidden;
     overflow-y: auto;
+    background: #424242;
     color: #ADADAD;
 }
 
@@ -6411,21 +6412,22 @@ ul.pagination li a {
 
 
 .card-icon {
-    border-top-left-radius: 55px;
-    border-top-right-radius: 55px;
-    border-bottom-right-radius: 55px;
-    border-bottom-left-radius: 55px;
+
     display: block;
     margin: auto;
     margin-top: 20px;
     margin-bottom: 20px;
-    height: 100px;
-    width: 100px;
+    height: 110px;
+    width: 110px;
     text-align: center;
     font-size: 55px;
     line-height: 100px;
     background: rgba(0, 0, 0, 0.2);
     cursor: pointer;
+
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
 }
 
 .card-icon > img {

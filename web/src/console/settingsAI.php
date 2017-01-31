@@ -18,7 +18,6 @@
 
     $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $puchasedBots = $botApi->getPurchasedBots();
-    unset($botApi);
 
     $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
@@ -147,8 +146,6 @@
         if (isset($puchasedBots) && (array_key_exists("bots", $puchasedBots))) {
             foreach ($puchasedBots['bots'] as $botDetails) {
                 $puchasedBot = new \hutoma\bot();
-                // TODO probably this value is hidden to client side
-                //$puchasedBot->setAiid($botDetails['aiid']);
                 $puchasedBot->setAlertMessage($botDetails['alertMessage']);
                 $puchasedBot->setBadge($botDetails['badge']);
                 $puchasedBot->setBotId($botDetails['botId']);
@@ -156,7 +153,6 @@
                 $puchasedBot->setClassification($botDetails['classification']);
                 $puchasedBot->setDescription($botDetails['description']);
                 $puchasedBot->setLicenseType($botDetails['licenseType']);
-                $puchasedBot->setImagePath('');
                 $puchasedBot->setLongDescription($botDetails['longDescription']);
                 $puchasedBot->setName($botDetails['name']);
                 $puchasedBot->setPrice($botDetails['price']);
@@ -164,6 +160,11 @@
                 $puchasedBot->setSample($botDetails['sample']);
                 $puchasedBot->setVersion($botDetails['version']);
                 $puchasedBot->setVideoLink($botDetails['videoLink']);
+
+                $botIcon = $botApi->getBotIcon($botDetails['botId']);
+                $puchasedBot->setImagePath(base64_encode($botIcon));
+                unset($botIcon);
+
                 $tmp_bot = $puchasedBot->toJSON();
                 array_push($tmp_list, $tmp_bot);
             }
@@ -171,6 +172,7 @@
         echo json_encode($tmp_list);
         unset($puchasedBots);
         unset($tmp_list);
+        unset($botApi);
         ?>;
 
 
