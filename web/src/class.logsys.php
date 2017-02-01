@@ -545,7 +545,7 @@ class console
         if (!isset($_POST['logSysForgotPass']) && !isset($_GET['resetPassToken']) && !isset($_POST['logSysForgotPassChange'])) {
             $html = '<form action="' . self::curPageURL() . '" method="POST">';
             $html .= "<div class='form-group has-feedback'>";
-            $html .= "<input  type='email' class='form-control' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
+            $html .= "<input  type='email' class='form-control flat' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
             $html .= "<span class='glyphicon glyphicon-envelope form-control-feedback'></span>";
             $html .= "</div>";
             $html .= "<p><button name='logSysForgotPass' class='btn btn-primary btn-block btn-flat' type='submit'>Reset Password</button></p>";
