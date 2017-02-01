@@ -11,7 +11,6 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
-import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -106,7 +105,7 @@ public class TrainingLogic {
 
                     this.aiServices.stopTrainingIfNeeded(devid, aiid);
 
-                    return uploadCompositeTrainingFile(devid, aiid, trainingMaterials, result);
+                    return uploadTrainingFile(devid, aiid, trainingMaterials, result);
 
                 // 1 = training file is a document
                 case DOCUMENT:
@@ -263,9 +262,8 @@ public class TrainingLogic {
                 case AI_TRAINING_QUEUED:
                     this.logger.logDebug(LOGFROM, "on demand training update");
                     String trainingFile = this.database.getAiTrainingFile(aiid);
-                    String finalMaterials = composeTrainingMaterials(devId, aiid, trainingFile);
                     try {
-                        this.aiServices.uploadTraining(devId, aiid, finalMaterials);
+                        this.aiServices.uploadTraining(devId, aiid, trainingFile);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                     } catch (AIServices.AiServicesException ex) {
@@ -494,28 +492,11 @@ public class TrainingLogic {
         return source;
     }
 
-    private String composeTrainingMaterials(final String devId, final UUID aiid, final String trainingFile)
+    private ApiResult uploadTrainingFile(final String devId, final UUID aiid, final String trainingMaterials,
+                                         final TrainingFileParsingResult result)
             throws DatabaseException {
-        // Check if there are any bots associated with this AI
-        List<AiBot> bots = this.database.getBotsLinkedToAi(devId, aiid);
-        StringBuilder sb = new StringBuilder();
-        for (AiBot bot : bots) {
-            // And add the training file
-            sb.append(this.database.getAiTrainingFile(bot.getAiid()));
-            sb.append(EOL).append(EOL);
-        }
-        sb.append(trainingFile);
-
-        return sb.toString();
-    }
-
-    private ApiResult uploadCompositeTrainingFile(final String devId, final UUID aiid, final String trainingMaterials,
-                                                  final TrainingFileParsingResult result)
-            throws DatabaseException {
-        String finalMaterials = composeTrainingMaterials(devId, aiid, trainingMaterials);
-
         try {
-            this.aiServices.uploadTraining(devId, aiid, finalMaterials);
+            this.aiServices.uploadTraining(devId, aiid, trainingMaterials);
         } catch (AIServices.AiServicesException ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError("could not upload training data to AI servers");
