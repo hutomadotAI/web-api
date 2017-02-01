@@ -90,6 +90,6 @@
 </div>
 
 <input type="hidden" id="training-status" name="training-status" value="0" style="display:none;"/>
-<input type="hidden" id="training-progress" name="training-error" value="-1" style="display:none;"/>
-<input type="hidden" id="training-max-error" name="training-max-error" value="-1" style="display:none;"/>
-
+<input type="hidden" id="training-error" name="training-error" value="-1" style="display:none;"/>
+<input type="hidden" id="training-progress-phase1" name="training-progress-phase1" value="-1" style="display:none;"/>
+<input type="hidden" id="training-progress-phase2" name="training-progress-phase2" value="-1" style="display:none;"/>
