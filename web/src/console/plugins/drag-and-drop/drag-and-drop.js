@@ -1,5 +1,3 @@
-var formData = new FormData();
-
 document.getElementById("drop-zone").addEventListener("dragover",function(e){
     e.preventDefault();
     this.className = 'upload-drop-zone drop';
@@ -20,10 +18,7 @@ document.getElementById("drop-zone").addEventListener("drop",function(e){
     this.className = 'upload-drop-zone';
 
     document.getElementById("message").innerText = 'image uploading...';
-    //append file to variable next step
-    formData.append('file', e.dataTransfer.files[0]);
     loadFileIcon(e,true);
- 
 });
 
 function loadFileIcon(e,option){
@@ -32,10 +27,13 @@ function loadFileIcon(e,option){
     img.id = 'drop-zone';
     img.className = 'drag-icon';
 
-    if(option)
-        img.file = e.dataTransfer.files[0];
-    else
+    if(option) {
+        document.getElementById('inputfile').files = e.dataTransfer.files;
+        e.preventDefault();
+    }
+    else {
         img.file = e.target.files[0];
+    }
     
     img.addEventListener('click', function(e) {
         e.preventDefault();

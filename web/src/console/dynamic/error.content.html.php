@@ -247,6 +247,10 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - UNABLE TO UPLOAD BOT ICON';
             $details = ' We could not find the data you were looking for';
             break;
+        case 387 :
+            $msg = 'INTERNAL ERROR - UNABLE TO GET BOT ICON';
+            $details = ' We could not find the data you were looking for';
+            break;
         case 390 :
             $msg = 'INTERNAL ERROR - UNABLE TO UPDATE BOT IMAGE';
             $details = ' We could not find the data you were looking for';

@@ -144,7 +144,7 @@ function createAlertMessage(alarm,message,id) {
 function updateButton(){
     var btnNode = document.getElementById('btnPublishDeveloper');
     btnNode.className = 'btn btn-primary pull-right flat';
-    btnNode.innerHTML = '<b>Next</b>' + '<span class="fa fa-arrow-circle-right"></span>';
+    btnNode.innerHTML = '<b>Next </b>' + '<span class="fa fa-arrow-circle-right"></span>';
     btnNode.removeEventListener("click", checkDevInput);
     btnNode.onclick = function () {  location.href = "./publishAI.php"; };
 }

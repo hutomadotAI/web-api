@@ -17,7 +17,6 @@ if (!isSessionVariablesAvailable()) {
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bots = $botApi->getPublishedBots();
-unset($botApi);
 
 $botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $purchasedBots = $botPurchaseApi->getPurchasedBots();
@@ -55,7 +54,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showBots('',0)">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <div class="wrapper" id="wrapper">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
@@ -82,6 +81,13 @@ function isSessionVariablesAvailable()
 
 </div>
 
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init(["", "home", 0, true, true]);
+    </script>
+</form>
+
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
@@ -94,13 +100,6 @@ function isSessionVariablesAvailable()
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["", "home", 0, true, true]);
-    </script>
-</form>
 <script>
     var bots = <?php
         $tmp_list = [];
@@ -122,6 +121,10 @@ function isSessionVariablesAvailable()
                 $bot->setSample($botDetails['sample']);
                 $bot->setVersion($botDetails['version']);
                 $bot->setVideoLink($botDetails['videoLink']);
+
+                $botIcon = $botApi->getBotIcon($botDetails['botId']);
+                $bot->setImagePath(base64_encode($botIcon));
+                unset($botIcon);
                 
                 $tmp_bot = $bot->toJSON();
                 if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
@@ -131,6 +134,7 @@ function isSessionVariablesAvailable()
         echo json_encode($tmp_list);
         unset($bots);
         unset($tmp_list);
+        unset($botApi);
         ?>;
 
     var purchasedBots = <?php
@@ -154,6 +158,11 @@ function isSessionVariablesAvailable()
     function searchBots(str) {
         showBots(str, 0);
     }
+</script>
+<script>
+    $( document ).ready(function() {
+        showBots('',0);
+    });
 </script>
 </body>
 </html>

@@ -74,9 +74,7 @@ function checkInput() {
         }
     }
 
-    // block submit request
     $(this).prop("disabled", true);
-
     requestPublish();
 }
 
@@ -106,7 +104,6 @@ function requestPublish() {
                 case 200:
                     createAlertMessage(ALERT.SUCCESS.value, 'Request sent ');
                     buttonPublishToRequest();
-                    // necessary store in UI for image upload at second step
                     callback(JSONdata['bot']['botId']);
                     break;
                 case 400:
@@ -130,18 +127,20 @@ function requestPublish() {
 }
 
 function callback(botId) {
-    //TODO probably we can ignore this assignment
-    document.getElementById('bot_id').value = botId;
-    //TODO uncomment only when the backend uploadicon is ready we can ignore this assignment
-    //uploadIconFile(botId,formData)
+    if ( document.getElementById('inputfile').files[0] == undefined)
+        callRedirection();
+    else
+        uploadIconFile(botId);
+}
+
+function callRedirection(){
     window.location.href = './home.php';
 }
 
 function uploadIconFile(botId) {
 
-    var icon = $('.image-editor').cropit('export');
     var formData = new FormData();
-    formData.append('icon', icon);
+    formData.append("inputfile", document.getElementById('inputfile').files[0]);
     formData.append('botId', botId);
 
     createAlertMessage(1, 'Uploading image...');
@@ -157,20 +156,18 @@ function uploadIconFile(botId) {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
                 case 200:
-                    createAlertMessage(3, 'image ok!');
-                    break;
-                case 400:
-                    createAlertMessage(2, 'At least one of the required parameters is null or empty');
+                    callRedirection();
                     break;
                 default:
-                    createAlertMessage(2, JSONdata['status']['info']);
+                    var prev_msg = document.getElementById('msgAlertPublish').innerText;
+                    createAlertMessage(ALERT.WARNING.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
+                    buttonRequestToNext();
             }
-        },
-        complete: function () {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var prev_msg = document.getElementById('msgAlertPublish').innerText;
-            createAlertMessage(ALERT.DANGER.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
+            createAlertMessage(ALERT.WARNING.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
+            buttonRequestToNext();
         }
     });
 }
@@ -187,6 +184,13 @@ function buttonPublishToRequest() {
     $('#btnPublishRequest').prop('disabled', true);
     document.getElementById('btnPublishRequest').className = 'btn btn-primary pull-right flat';
     document.getElementById('btnPublishRequestText').innerText = 'Request Sent';
+    document.getElementById('iconPublishRequest').className = 'fa fa-check-circle';
+}
+
+function buttonRequestToNext(){
+    $('#btnPublishRequest').prop('disabled', false);
+    document.getElementById('btnPublishRequest').className = 'btn btn-primary pull-right flat';
+    document.getElementById('btnPublishRequestText').innerText = 'Next ';
     document.getElementById('iconPublishRequest').className = 'fa fa-check-circle';
 }
 
@@ -394,13 +398,6 @@ function fieldsBotValidation() {
     if (elem.value == '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The price field cannot is empty!');
-        return false;
-    }
-
-    elem = document.getElementById('bot_alertMessage');
-    if (elem.value == '') {
-        elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The alertMessage field cannot is empty!');
         return false;
     }
 

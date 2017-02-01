@@ -182,6 +182,8 @@ GRANT SELECT ON `hutoma`.`botStore` TO 'botStoreReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`bot_ai` TO 'botStoreReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`botIcon` TO 'botStoreReader'@'127.0.0.1';
+
 
 # Privileges for `botStoreWriter`@`127.0.0.1`
 

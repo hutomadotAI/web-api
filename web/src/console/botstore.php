@@ -21,7 +21,6 @@ if (!isAuthorizedToAccess()) {
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bots = $botApi->getPublishedBots();
-unset($botApi);
 
 $botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $purchasedBots = $botPurchaseApi->getPurchasedBots();
@@ -33,7 +32,6 @@ function isAuthorizedToAccess()
     isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
     );
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -52,7 +50,7 @@ function isAuthorizedToAccess()
     <link rel="stylesheet" href="./plugins/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;" onload="showBots('',1)">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -81,6 +79,13 @@ function isAuthorizedToAccess()
 </footer>
 </div>
 
+<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 2, true, false]);
+    </script>
+</form>
+
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
@@ -94,13 +99,8 @@ function isAuthorizedToAccess()
 
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
 
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 2, true, false]);
-    </script>
-</form>
+
 
 <script>
     var bots = <?php
@@ -116,14 +116,17 @@ function isAuthorizedToAccess()
                 $bot->setDescription($botDetails['description']);
                 $bot->setLicenseType($botDetails['licenseType']);
                 $bot->setLongDescription($botDetails['longDescription']);
-                $bot->setImagePath('');
                 $bot->setName($botDetails['name']);
                 $bot->setPrice($botDetails['price']);
                 $bot->setPrivacyPolicy($botDetails['privacyPolicy']);
                 $bot->setSample($botDetails['sample']);
                 $bot->setVersion($botDetails['version']);
                 $bot->setVideoLink($botDetails['videoLink']);
-                
+
+                $botIcon = $botApi->getBotIcon($botDetails['botId']);
+                $bot->setImagePath(base64_encode($botIcon));
+                unset($botIcon);
+
                 $tmp_bot = $bot->toJSON();
                 if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
                     array_push($tmp_list, $tmp_bot);
@@ -132,6 +135,7 @@ function isAuthorizedToAccess()
         echo json_encode($tmp_list);
         unset($bots);
         unset($tmp_list);
+        unset($botApi);
         ?>;
 
     var purchasedBots = <?php
@@ -156,6 +160,12 @@ function isAuthorizedToAccess()
     function searchBots(str) {
         showBots(str,1);
     }
+</script>
+<script>
+    $( document ).ready(function() {
+        showBots('',1);
+    });
+
 </script>
 </body>
 </html>

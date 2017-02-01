@@ -104,20 +104,29 @@ class botApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function getBotIcon($botId)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/' . $botId . '/icon'));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            return $curl_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
 
     public function uploadBotIcon($botId, $file)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$botstorePath . '/' . $botId . '/icon'));
 
-            $filename = $file['name'];
-            $args['file'] = new \CurlFile($filename, 'text/plain', 'icon.jpg');
+            $filename = $file['tmp_name'];
+            $args['file'] = new \CurlFile($filename, 'image/png', 'icon.png');
 
             $this->curl->setVerbPost();
-            $this->curl->addHeader('Content-Type', 'application/json');
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
-
             $this->handleApiCallError($curl_response, 386);
             $json_response = json_decode($curl_response, true);
             return $json_response;

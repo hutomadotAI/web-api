@@ -11,8 +11,8 @@ function showBots(str, option) {
             //if($.inArray(bot['botId'], purchasedBots)!=-1)
             //    wHTML += ('<div class="box box-solid box-default-fixed flat borderActive" id="' + bot['aiid'] + '">');
             //else
-            wHTML += ('<div class="box box-solid card flat" id="' + bot['aiid'] + '">');
-            wHTML += ('<img class="card-icon" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');>');
+            wHTML += ('<div class="box box-solid card flat" id="' + bot['botId'] + '">');
+            wHTML += ('<img class="card-icon" src="data:image/jpeg;base64,' + bot['imagePath'] + '" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');>');
             wHTML += ('<div class="card-title unselectable">' + bot['name'] + '</div>');
             wHTML += ('<div class="card-description unselectable" style="padding-left:5px;padding-right:5px;">' + bot['description'] + '</div>');
             wHTML += ('<div class="card-footer flat">');
