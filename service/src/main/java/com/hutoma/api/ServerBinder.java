@@ -1,14 +1,7 @@
 package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
-import com.hutoma.api.common.AiServiceStatusLogger;
-import com.hutoma.api.common.ChatTelemetryLogger;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TelemetryCentralLogger;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
@@ -70,6 +63,8 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatTelemetryLogger.class).to(ChatTelemetryLogger.class).in(Singleton.class);
         // AI Services Status specialized logger
         bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
+        bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
+        bind(ThreadSubPool.class).to(ThreadSubPool.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);

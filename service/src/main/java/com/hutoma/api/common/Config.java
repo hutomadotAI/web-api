@@ -143,6 +143,14 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
+    public int getThreadPoolMaxThreads() {
+        return 1024;
+    }
+
+    public int getThreadPoolIdleTimeMs() {
+        return 60 * 1000;
+    }
+
     public void dumpApiEnvironmentVars() {
         System.getenv().entrySet().stream().forEach(e -> {
             if (e.getKey().startsWith(API_ENV_PREFIX)) {
