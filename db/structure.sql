@@ -554,7 +554,7 @@ BEGIN
     DECLARE var_named_aiid VARCHAR(50);
 
 	SELECT count(aiid), min(aiid) INTO var_exists_count, var_named_aiid
-    FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name`;
+    FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name` AND `ai`.`deleted` = 0;
 
 	IF var_exists_count=0 THEN
 		INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private, 
