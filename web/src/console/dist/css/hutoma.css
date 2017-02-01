@@ -6503,6 +6503,12 @@ ul.pagination li a {
     padding:0px;
 }
 
+.drag-over-opacity{
+    background-color: rgba(255,255,255,0.9);
+    border: 2px solid #FFF;
+    opacity:0.3;
+}
+
 .bot-padding{
     padding:0px 0px 20px 0px;
 }

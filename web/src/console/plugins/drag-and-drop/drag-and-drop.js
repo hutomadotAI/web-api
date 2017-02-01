@@ -38,7 +38,22 @@ function loadFileIcon(e,option){
     img.addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('inputfile').click();
-    })
+    });
+
+    img.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        img.className = 'drag-icon drag-over-opacity';
+    });
+
+    img.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        img.className = 'drag-icon';
+    });
+
+    img.addEventListener('drop', function(e) {
+        e.preventDefault();
+        loadFileIcon(e,true);
+    });
 
     var reader = new FileReader();
     reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result;}; })(img);
