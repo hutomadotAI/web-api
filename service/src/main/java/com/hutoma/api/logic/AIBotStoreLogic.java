@@ -1,8 +1,10 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiError;
@@ -10,6 +12,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiStreamResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.DeveloperInfo;
+import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.joda.time.DateTime;
@@ -34,12 +37,14 @@ public class AIBotStoreLogic {
     private final Database database;
     private final ILogger logger;
     private final Tools tools;
+    private final JsonSerializer jsonSerializer;
 
     @Inject
-    public AIBotStoreLogic(Database database, ILogger logger, final Tools tools) {
+    public AIBotStoreLogic(Database database, ILogger logger, final Tools tools, final JsonSerializer jsonSerializer) {
         this.database = database;
         this.logger = logger;
         this.tools = tools;
+        this.jsonSerializer = jsonSerializer;
     }
 
     public ApiResult getPublishedBots() {
@@ -123,6 +128,10 @@ public class AIBotStoreLogic {
             AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
             if (bot != null) {
                 return ApiError.getBadRequest("AI already has a published bot");
+            }
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {
+                return ApiError.getBadRequest("AI needs to be fully trained before being allowed to be published");
             }
             List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
             if (!linkedBots.isEmpty()) {

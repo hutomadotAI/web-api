@@ -3,6 +3,8 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.BotHelper;
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
@@ -10,6 +12,7 @@ import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiStreamResult;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,13 +40,12 @@ public class TestAIBotstoreLogic {
     private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
     private Database fakeDatabase;
     private AIBotStoreLogic aiBotStoreLogic;
-    private Tools fakeTools;
 
     @Before
     public void setup() {
         this.fakeDatabase = mock(Database.class);
-        this.fakeTools = mock(Tools.class);
-        this.aiBotStoreLogic = new AIBotStoreLogic(this.fakeDatabase, mock(ILogger.class), this.fakeTools);
+        this.aiBotStoreLogic = new AIBotStoreLogic(this.fakeDatabase, mock(ILogger.class), mock(Tools.class),
+                mock(JsonSerializer.class));
     }
 
     @Test
@@ -182,6 +184,8 @@ public class TestAIBotstoreLogic {
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 987654;
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
         ApiAiBot result = (ApiAiBot) BotHelper.publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -193,6 +197,8 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot_errorInsert() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(-1);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -209,9 +215,20 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testPublishBot_aiNotTrained() throws Database.DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, false));
+        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
