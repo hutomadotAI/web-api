@@ -11,9 +11,12 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
-import com.hutoma.api.controllers.AimlController;
-import com.hutoma.api.controllers.RnnController;
-import com.hutoma.api.controllers.WnetController;
+import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.RequestAiml;
+import com.hutoma.api.controllers.RequestRnn;
+import com.hutoma.api.controllers.RequestWnet;
 import com.hutoma.api.logic.AIBotStoreLogic;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
@@ -94,9 +97,12 @@ public class ServerBinder extends AbstractBinder {
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
         bind(AIChatServices.class).to(AIChatServices.class);
-        bind(WnetController.class).to(WnetController.class);
-        bind(RnnController.class).to(RnnController.class);
-        bind(AimlController.class).to(AimlController.class);
+        bind(RequestWnet.class).to(RequestWnet.class);
+        bind(RequestRnn.class).to(RequestRnn.class);
+        bind(RequestAiml.class).to(RequestAiml.class);
+        bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
+        bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
+        bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
 
         // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);

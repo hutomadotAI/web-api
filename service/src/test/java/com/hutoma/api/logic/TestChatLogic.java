@@ -14,7 +14,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.controllers.AiControllerBase;
+import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
@@ -77,7 +77,7 @@ public class TestChatLogic {
      * Valid semantic response.
      */
     @Test
-    public void testChat_Valid_Semantic() throws AiControllerBase.AiControllerException {
+    public void testChat_Valid_Semantic() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -88,7 +88,7 @@ public class TestChatLogic {
      * Valid aiml net response.
      */
     @Test
-    public void testChat_Valid_Aiml() throws AiControllerBase.AiControllerException {
+    public void testChat_Valid_Aiml() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -99,7 +99,7 @@ public class TestChatLogic {
      * Valid neural net response.
      */
     @Test
-    public void testChat_Valid_Rnn() throws AiControllerBase.AiControllerException {
+    public void testChat_Valid_Rnn() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -107,25 +107,25 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_ErrorSemantic() throws AiControllerBase.AiControllerException {
+    public void testChat_ErrorSemantic() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitWnet()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testChat_ErrorAiml() throws AiControllerBase.AiControllerException {
+    public void testChat_ErrorAiml() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitAiml()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitAiml()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testChat_ErrorRnn() throws AiControllerBase.AiControllerException {
+    public void testChat_ErrorRnn() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -134,7 +134,7 @@ public class TestChatLogic {
      * Check that whitespaces are removed from each end
      */
     @Test
-    public void testChat_Semantic_Trimmed() throws AiControllerBase.AiControllerException {
+    public void testChat_Semantic_Trimmed() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, " " + SEMANTICRESULT + "\n",
                 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
@@ -146,7 +146,7 @@ public class TestChatLogic {
      * Check that whitespaces are removed from each end
      */
     @Test
-    public void testChat_Aiml_Trimmed() throws AiControllerBase.AiControllerException {
+    public void testChat_Aiml_Trimmed() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT,
                 0.5d, " " + AIMLRESULT + "\n",
                 0.3d, NEURALRESULT);
@@ -159,7 +159,7 @@ public class TestChatLogic {
      * Check that whitespaces are removed from each end
      */
     @Test
-    public void testChat_Rnn_Trimmed() throws AiControllerBase.AiControllerException {
+    public void testChat_Rnn_Trimmed() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT,
                 0.0d, AIMLRESULT,
                 0.3d, " " + NEURALRESULT + "\n");
@@ -172,9 +172,9 @@ public class TestChatLogic {
      * Semantic server does not find AI.
      */
     @Test
-    public void testChat_Wnet_AiNotFound() throws AiControllerBase.AiControllerException {
+    public void testChat_Wnet_AiNotFound() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(AiControllerBase.AiNotFoundException.class);
+        when(this.fakeChatServices.awaitWnet()).thenThrow(RequestBase.AiNotFoundException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -183,9 +183,9 @@ public class TestChatLogic {
      * Semantic server sends response below required confidence threshold, neuralnet is not found.
      */
     @Test
-    public void testChat_Rnn_AiNotFound() throws AiControllerBase.AiControllerException {
+    public void testChat_Rnn_AiNotFound() throws RequestBase.AiControllerException {
         setupFakeChat(0.0d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(AiControllerBase.AiNotFoundException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiNotFoundException.class);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -194,9 +194,9 @@ public class TestChatLogic {
      * Semantic server throws generic exception.
      */
     @Test
-    public void testChat_Wnet_AiException() throws AiControllerBase.AiControllerException {
+    public void testChat_Wnet_AiException() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitWnet()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -205,9 +205,9 @@ public class TestChatLogic {
      * Semantic server sends response below required confidence threshold, aiml throws generic exception.
      */
     @Test
-    public void testChat_Aiml_AiException() throws AiControllerBase.AiControllerException {
+    public void testChat_Aiml_AiException() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitAiml()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitAiml()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -216,9 +216,9 @@ public class TestChatLogic {
      * Semantic server sends response below required confidence threshold, neuralnet throws generic exception.
      */
     @Test
-    public void testChat_Rnn_AiException() throws AiControllerBase.AiControllerException {
+    public void testChat_Rnn_AiException() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -228,9 +228,9 @@ public class TestChatLogic {
      * but the semantic server is confident enough to reply.
      */
     @Test
-    public void testChat_RejectedNeuralDueToAIStatus_SemanticOverride() throws AiControllerBase.AiControllerException {
+    public void testChat_RejectedNeuralDueToAIStatus_SemanticOverride() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(AiControllerBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
@@ -241,9 +241,9 @@ public class TestChatLogic {
      * The semantic server has no confidence so we expect an error 400
      */
     @Test
-    public void testChat_RejectedNeuralDueToAIStatus() throws AiControllerBase.AiControllerException {
+    public void testChat_RejectedNeuralDueToAIStatus() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(AiControllerBase.AiRejectedStatusException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiRejectedStatusException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -252,7 +252,7 @@ public class TestChatLogic {
      * History is passed back to the user when semantic server wins
      */
     @Test
-    public void testChat_History_Semantic() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Semantic() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -263,7 +263,7 @@ public class TestChatLogic {
      * No history is passed back to the user when AIML server wins
      */
     @Test
-    public void testChat_History_Aiml_AlwaysEmpty() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Aiml_AlwaysEmpty() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -274,7 +274,7 @@ public class TestChatLogic {
      * No history is passed back to the user when RNN server wins
      */
     @Test
-    public void testChat_History_Rnn_AlwaysEmpty() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Rnn_AlwaysEmpty() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -285,7 +285,7 @@ public class TestChatLogic {
      * Reset command is processed and removed when text is at the beginning of the string
      */
     @Test
-    public void testChat_History_Semantic_Reset_Pre() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Semantic_Reset_Pre() throws RequestBase.AiControllerException {
         historySemanticReset(SEMANTICRESULT + HISTORY_REST_DIRECTIVE);
     }
 
@@ -293,7 +293,7 @@ public class TestChatLogic {
      * Reset command is processed and removed when text is in the middle of the string
      */
     @Test
-    public void testChat_History_Semantic_Reset_Mid() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Semantic_Reset_Mid() throws RequestBase.AiControllerException {
         historySemanticReset(SEMANTICRESULT.substring(0, 3) + HISTORY_REST_DIRECTIVE + SEMANTICRESULT.substring(3));
     }
 
@@ -301,7 +301,7 @@ public class TestChatLogic {
      * Reset command is processed and removed when text is at the end of the string
      */
     @Test
-    public void testChat_History_Semantic_Reset_Post() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Semantic_Reset_Post() throws RequestBase.AiControllerException {
         historySemanticReset(HISTORY_REST_DIRECTIVE + SEMANTICRESULT);
     }
 
@@ -309,7 +309,7 @@ public class TestChatLogic {
      * Semantic server sends reset command. History is cleared but if neuralnet wins the confidence contest then neuralnet response is returned unmodified.
      */
     @Test
-    public void testChat_History_Semantic_Reset_NeuralNet_Wins() throws AiControllerBase.AiControllerException {
+    public void testChat_History_Semantic_Reset_NeuralNet_Wins() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, HISTORY_REST_DIRECTIVE + SEMANTICRESULT,
                 0.0d, AIMLRESULT,
                 0.3d, NEURALRESULT);
@@ -323,7 +323,7 @@ public class TestChatLogic {
      * Semantic server sends reset command. History is cleared but if neuralnet wins the confidence contest then neuralnet response is returned unmodified.
      */
     @Test
-    public void testChat_History_NeuralNet_Reset_Ignored() throws AiControllerBase.AiControllerException {
+    public void testChat_History_NeuralNet_Reset_Ignored() throws RequestBase.AiControllerException {
         String neuralResetCommand = NEURALRESULT + HISTORY_REST_DIRECTIVE;
         setupFakeChat(0.7d, HISTORY_REST_DIRECTIVE + SEMANTICRESULT,
                 0.0d, AIMLRESULT,
@@ -338,7 +338,7 @@ public class TestChatLogic {
      * Tests an intent is recognized by the API when the backend sends it.
      */
     @Test
-    public void testChat_IntentRecognized() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentRecognized() throws RequestBase.AiControllerException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
@@ -356,7 +356,7 @@ public class TestChatLogic {
      * Memory intent is fulfilled.
      */
     @Test
-    public void testChat_IntentFulfilled() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentFulfilled() throws RequestBase.AiControllerException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         mv.setCurrentValue("a value"); // to fulfill
@@ -380,7 +380,7 @@ public class TestChatLogic {
      * Memory intent updates prompt when intent is recognized but doesn't match any entity value.
      */
     @Test
-    public void testChat_IntentPrompt() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentPrompt() throws RequestBase.AiControllerException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
@@ -396,7 +396,7 @@ public class TestChatLogic {
      * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
      */
     @Test
-    public void testChat_IntentPrompt_unfullfileldVar_exceededPrompts() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentPrompt_unfullfileldVar_exceededPrompts() throws RequestBase.AiControllerException {
         MemoryIntent mi = getMemoryIntentForPrompt(0, null);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
@@ -412,7 +412,7 @@ public class TestChatLogic {
      * Memory intent is fulfilled based on variable value included in last question
      */
     @Test
-    public void testChat_IntentPrompt_unfullfileldVar_fulfillFromUserQuestion() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentPrompt_unfullfileldVar_fulfillFromUserQuestion() throws RequestBase.AiControllerException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
             this.add(new Pair<>(mi.getVariables().get(0).getName(), "value"));
@@ -429,7 +429,7 @@ public class TestChatLogic {
      * Memory intent is fulfilled based on variable value included in last question
      */
     @Test
-    public void testChat_IntentPrompt_unfulfilledVar_variableWithNoPrompt() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentPrompt_unfulfilledVar_variableWithNoPrompt() throws RequestBase.AiControllerException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         mi.getVariables().get(0).setPrompts(new ArrayList<>());
         when(this.fakeRecognizer.retrieveEntities(any(), any())).thenReturn(new ArrayList<>());
@@ -444,7 +444,7 @@ public class TestChatLogic {
      * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
      */
     @Test
-    public void testChat_IntentPrompt_NoPromptWhenZero() throws AiControllerBase.AiControllerException {
+    public void testChat_IntentPrompt_NoPromptWhenZero() throws RequestBase.AiControllerException {
         MemoryIntent mi = getMemoryIntentForPrompt(1, "currentValue");
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
@@ -467,7 +467,7 @@ public class TestChatLogic {
         Assert.assertEquals(ASSISTANTRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
-    private void historySemanticReset(String resetCommand) throws AiControllerBase.AiControllerException {
+    private void historySemanticReset(String resetCommand) throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, resetCommand, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.3f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -503,7 +503,7 @@ public class TestChatLogic {
      */
     private void setupFakeChat(double wnetConfidence, String wnetResponse,
                                double aimlConfidence, String aimlResponse,
-                               double rnnConfidence, String rnnResponse) throws AiControllerBase.AiControllerException {
+                               double rnnConfidence, String rnnResponse) throws RequestBase.AiControllerException {
         ChatResult wnetResult = new ChatResult();
         wnetResult.setScore(wnetConfidence);
         wnetResult.setAnswer(wnetResponse);
@@ -526,7 +526,7 @@ public class TestChatLogic {
         }};
     }
 
-    private MemoryIntent getMemoryIntentForPrompt(int maxPrompts, String currentValue) throws AiControllerBase.AiControllerException {
+    private MemoryIntent getMemoryIntentForPrompt(int maxPrompts, String currentValue) throws RequestBase.AiControllerException {
         final String intentName = "intent1";
         final String promptTrigger = "variableValue";
         final String prompt = "prompt1";

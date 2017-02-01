@@ -16,7 +16,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.controllers.AiControllerBase;
+import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
@@ -150,12 +150,12 @@ public class ChatLogic {
 
             apiChat.setResult(result);
 
-        } catch (AiControllerBase.AiNotFoundException notFoundException) {
+        } catch (RequestBase.AiNotFoundException notFoundException) {
             this.logger.logError(LOGFROM, String.format("%s did not find ai %s", notFoundException.getMessage(), aiid));
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", notFoundException, this.telemetryMap);
             return ApiError.getNotFound("AI not found");
 
-        } catch (AiControllerBase.AiRejectedStatusException rejected) {
+        } catch (RequestBase.AiRejectedStatusException rejected) {
             this.logger.logError(LOGFROM,
                     "question rejected because AI is in the wrong state: " + rejected.getMessage());
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", rejected, this.telemetryMap);
@@ -239,7 +239,7 @@ public class ChatLogic {
         return new Pair<>(responseFromAi, chatResult);
     }
 
-    private ChatResult interpretSemanticResult() throws AiControllerBase.AiControllerException {
+    private ChatResult interpretSemanticResult() throws RequestBase.AiControllerException {
 
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitWnet());
@@ -272,7 +272,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretAimlResult() throws AiControllerBase.AiControllerException {
+    private ChatResult interpretAimlResult() throws RequestBase.AiControllerException {
 
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitAiml());
@@ -293,7 +293,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretRnnResult() throws AiControllerBase.AiControllerException {
+    private ChatResult interpretRnnResult() throws RequestBase.AiControllerException {
 
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitRnn());

@@ -7,11 +7,11 @@ import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.controllers.AimlController;
-import com.hutoma.api.controllers.AiControllerBase;
 import com.hutoma.api.controllers.InvocationResult;
-import com.hutoma.api.controllers.RnnController;
-import com.hutoma.api.controllers.WnetController;
+import com.hutoma.api.controllers.RequestAiml;
+import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.controllers.RequestRnn;
+import com.hutoma.api.controllers.RequestWnet;
 
 import org.glassfish.jersey.client.JerseyClient;
 
@@ -31,9 +31,9 @@ public class AIChatServices extends ServerConnector {
     private static final int TIMEOUT_RNN_REQUESTS_MS = 5000;
     private static final int TIMEOUT_WNET_REQUESTS_MS = 2000;
     private static final int TIMEOUT_AIML_REQUESTS_MS = 2000;
-    private final WnetController wnetController;
-    private final RnnController rnnController;
-    private final AimlController aimlController;
+    private final RequestWnet wnetController;
+    private final RequestRnn rnnController;
+    private final RequestAiml aimlController;
     private List<Future<InvocationResult>> wnetFutures;
     private List<Future<InvocationResult>> rnnFutures;
     private List<Future<InvocationResult>> aimlFutures;
@@ -41,8 +41,8 @@ public class AIChatServices extends ServerConnector {
     @Inject
     public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
-                          final WnetController wnetController, final RnnController rnnController,
-                          final AimlController aimlController) {
+                          final RequestWnet wnetController, final RequestRnn rnnController,
+                          final RequestAiml aimlController) {
         super(database, logger, serializer, tools, config, jerseyClient);
         this.wnetController = wnetController;
         this.rnnController = rnnController;
@@ -80,7 +80,7 @@ public class AIChatServices extends ServerConnector {
      * @return
      * @throws AiServicesException
      */
-    public Map<UUID, ChatResult> awaitWnet() throws AiControllerBase.AiControllerException {
+    public Map<UUID, ChatResult> awaitWnet() throws RequestBase.AiControllerException {
         return this.wnetController.waitForAll(this.wnetFutures, TIMEOUT_WNET_REQUESTS_MS);
     }
 
@@ -89,7 +89,7 @@ public class AIChatServices extends ServerConnector {
      * @return
      * @throws AiServicesException
      */
-    public Map<UUID, ChatResult> awaitAiml() throws AiControllerBase.AiControllerException {
+    public Map<UUID, ChatResult> awaitAiml() throws RequestBase.AiControllerException {
         return this.aimlController.waitForAll(this.aimlFutures, TIMEOUT_AIML_REQUESTS_MS);
     }
 
@@ -98,7 +98,7 @@ public class AIChatServices extends ServerConnector {
      * @return
      * @throws AiServicesException
      */
-    public Map<UUID, ChatResult> awaitRnn() throws AiControllerBase.AiControllerException {
+    public Map<UUID, ChatResult> awaitRnn() throws RequestBase.AiControllerException {
         return this.rnnController.waitForAll(this.rnnFutures, TIMEOUT_RNN_REQUESTS_MS);
     }
 

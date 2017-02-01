@@ -3,7 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.controllers.AiControllerBase;
+import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.memory.IEntityRecognizer;
@@ -57,7 +57,7 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat() throws AiControllerBase.AiControllerException {
+    public void testChat() throws RequestBase.AiControllerException {
         final String answer = "the answer";
         ChatResult semanticAnalysisResult = new ChatResult();
         semanticAnalysisResult.setAnswer(answer);

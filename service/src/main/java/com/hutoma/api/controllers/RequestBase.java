@@ -6,6 +6,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
 
@@ -21,8 +22,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -32,21 +31,23 @@ import javax.ws.rs.core.Response;
 /**
  * Base class for backend controllers.
  */
-public abstract class AiControllerBase {
+public abstract class RequestBase {
 
     protected final JerseyClient jerseyClient;
     protected final Tools tools;
     protected final Config config;
     protected final ILogger logger;
     protected final JsonSerializer serializer;
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ThreadSubPool threadSubPool;
 
     @Inject
-    public AiControllerBase(final JerseyClient jerseyClient, final Tools tools, final Config config,
-                            final ILogger logger, final JsonSerializer serializer) {
+    public RequestBase(final JerseyClient jerseyClient, final Tools tools, final Config config,
+                       final ThreadSubPool threadSubPool,
+                       final ILogger logger, final JsonSerializer serializer) {
         this.jerseyClient = jerseyClient;
         this.tools = tools;
         this.config = config;
+        this.threadSubPool = threadSubPool;
         this.logger = logger;
         this.serializer = serializer;
     }
@@ -134,7 +135,7 @@ public abstract class AiControllerBase {
     }
 
     public void abandonCalls() {
-        this.executor.shutdownNow();
+        this.threadSubPool.cancelAll();
     }
 
     private Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
@@ -150,10 +151,10 @@ public abstract class AiControllerBase {
         }
         final JerseyInvocation.Builder builder = target.request();
         return () -> {
-            long startTime = AiControllerBase.this.tools.getTimestamp();
+            long startTime = RequestBase.this.tools.getTimestamp();
             Response response = builder.get();
             return new InvocationResult(aiid, response, endpoint,
-                    AiControllerBase.this.tools.getTimestamp() - startTime);
+                    RequestBase.this.tools.getTimestamp() - startTime);
         };
     }
 
@@ -183,7 +184,7 @@ public abstract class AiControllerBase {
 
         // get a named future for a named callable response
         callables.forEach((entry) -> {
-            futures.add(this.executor.submit(entry));
+            futures.add(this.threadSubPool.submit(entry));
         });
 
         return futures;

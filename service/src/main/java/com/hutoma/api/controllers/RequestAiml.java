@@ -3,6 +3,7 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -14,11 +15,17 @@ import javax.inject.Inject;
 /**
  * AIML specialized controller.
  */
-public class AimlController extends AiControllerBase {
+public class RequestAiml extends RequestBase {
+
+    ControllerAiml controller;
+
     @Inject
-    public AimlController(final JerseyClient jerseyClient, final Tools tools, final Config config,
-                          final ILogger logger, final JsonSerializer serializer) {
-        super(jerseyClient, tools, config, logger, serializer);
+    public RequestAiml(final JerseyClient jerseyClient, final Tools tools,
+                       final Config config, final ThreadSubPool threadSubPool,
+                       final ILogger logger, final JsonSerializer serializer,
+                       final ControllerAiml controller) {
+        super(jerseyClient, tools, config, threadSubPool, logger, serializer);
+        this.controller = controller;
     }
 
     protected List<String> getBackendEndpoints() {
@@ -26,6 +33,6 @@ public class AimlController extends AiControllerBase {
     }
 
     protected String getLogFrom() {
-        return "AIMLController";
+        return "RequestAIML";
     }
 }

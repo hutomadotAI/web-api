@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -70,10 +71,10 @@ public class TestThreadPool {
     public void runManyCancel() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
         ThreadSubPool subPool = new ThreadSubPool(this.pool);
-        makeTasks(subPool, 32);
+        List<Future> tasks = makeTasks(subPool, 32);
         subPool.cancelAll();
-        Thread.sleep(20);
-        Assert.assertTrue(this.pool.getPoolSize() <= 16);
+        int cancelled = waitForTermination(tasks);
+        Assert.assertEquals(32, cancelled);
     }
 
     @Test
@@ -96,12 +97,19 @@ public class TestThreadPool {
     }
 
     private void makeTasksAndAwait(final ThreadSubPool subPool, final int max) throws InterruptedException, ExecutionException {
-        makeTasks(subPool, max).forEach((x) -> {
+        waitForTermination(makeTasks(subPool, max));
+    }
+
+    private int waitForTermination(List<Future> tasks) {
+        int exceptions = 0;
+        for (Future task : tasks) {
             try {
-                x.get();
+                task.get();
             } catch (Exception e) {
+                exceptions++;
             }
-        });
+        }
+        return exceptions;
     }
 
     private ArrayList<Future> makeTasks(final ThreadSubPool subPool, final int max) throws InterruptedException, ExecutionException {
