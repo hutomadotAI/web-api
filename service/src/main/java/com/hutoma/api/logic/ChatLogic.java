@@ -245,7 +245,8 @@ public class ChatLogic {
             chatResult.setAnswer(chatResult.getAnswer().trim());
         } else {
             chatResult.setAnswer("");
-            this.telemetryMap.put("WNETResponseNULL", "");
+            chatResult.setScore(0.0);
+            this.telemetryMap.put("WNETResponseNULL", "true");
         }
 
         this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",
@@ -280,6 +281,11 @@ public class ChatLogic {
 
         // wait for result to complete
         ChatResult chatResult = this.chatServices.awaitRnn();
+        if (chatResult.getAnswer() == null) {
+            chatResult.setAnswer("");
+            chatResult.setScore(0.0);
+            this.telemetryMap.put("RNNResponseNULL", "true");
+        }
 
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
