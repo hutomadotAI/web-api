@@ -109,7 +109,7 @@ function initializeTrainingConsole(aiStatus){
             showAlertMessage(aiStatus['ai_status']);
             startPollForStatus();
             break;
-        case API_AI_STATE.READY_TO_TRAINING.value:
+        case API_AI_STATE.READY_TO_TRAIN.value:
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
