@@ -25,8 +25,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import javax.ws.rs.core.SecurityContext;
 
-import static com.hutoma.api.common.BotHelper.BOTID;
-import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
+import static com.hutoma.api.common.TestBotHelper.BOTID;
+import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.any;
@@ -184,6 +184,28 @@ public class TestAILogic {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(false);
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDelete_servicesException_notFound() throws Database.DatabaseException, ServerConnector.AiServicesException {
+        when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(true);
+        ServerConnector.AiServicesException exMain = new ServerConnector.AiServicesException("main");
+        ServerConnector.AiServicesException exSub = new ServerConnector.AiServicesException("sub", HttpURLConnection.HTTP_NOT_FOUND);
+        exMain.addSuppressed(exSub);
+        doThrow(exMain).when(this.fakeAiServices).deleteAI(anyString(), any());
+        ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDelete_servicesException_other() throws Database.DatabaseException, ServerConnector.AiServicesException {
+        when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(true);
+        ServerConnector.AiServicesException exMain = new ServerConnector.AiServicesException("main");
+        ServerConnector.AiServicesException exSub = new ServerConnector.AiServicesException("sub", HttpURLConnection.HTTP_INTERNAL_ERROR);
+        exMain.addSuppressed(exSub);
+        doThrow(exMain).when(this.fakeAiServices).deleteAI(anyString(), any());
+        ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test

@@ -1,9 +1,9 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.BotHelper;
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 
-import static com.hutoma.api.common.BotHelper.*;
+import static com.hutoma.api.common.TestBotHelper.*;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -37,7 +37,7 @@ public class TestAIBotstoreLogic {
 
     private static final String ALTERNATE_DEVID = "other_devId";
 
-    private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
+    private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(TestBotHelper.getBotIconContent());
     private Database fakeDatabase;
     private AIBotStoreLogic aiBotStoreLogic;
 
@@ -187,7 +187,7 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
-        ApiAiBot result = (ApiAiBot) BotHelper.publishSampleBot(this.aiBotStoreLogic);
+        ApiAiBot result = (ApiAiBot) TestBotHelper.publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertNotNull(result.getBot());
         Assert.assertEquals(newBotId, result.getBot().getBotId());
@@ -206,7 +206,7 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testPublishBot_alreadyPublished() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(BotHelper.SAMPLEBOT);
+        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(TestBotHelper.SAMPLEBOT);
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -233,7 +233,7 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testPublishBot_botsLinked() throws Database.DatabaseException {
-        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(BotHelper.SAMPLEBOT));
+        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(TestBotHelper.SAMPLEBOT));
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -260,10 +260,10 @@ public class TestAIBotstoreLogic {
         Assert.assertNotNull(result.getStream());
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         result.getStream().write(outStream);
-        Assert.assertEquals(BotHelper.getBotIconContentSize(), outStream.size());
+        Assert.assertEquals(TestBotHelper.getBotIconContentSize(), outStream.size());
         byte[] icon = outStream.toByteArray();
-        byte[] expected = BotHelper.getBotIconContent();
-        for (int i = 0; i < BotHelper.getBotIconContentSize(); i++) {
+        byte[] expected = TestBotHelper.getBotIconContent();
+        for (int i = 0; i < TestBotHelper.getBotIconContentSize(); i++) {
             Assert.assertEquals(expected[i], icon[i]);
         }
     }

@@ -1,7 +1,7 @@
 package com.hutoma.api.tests.service;
 
-import com.hutoma.api.common.BotHelper;
 import com.hutoma.api.common.DeveloperInfoHelper;
+import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
@@ -31,8 +31,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import static com.hutoma.api.common.BotHelper.BOTID;
-import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
+import static com.hutoma.api.common.TestBotHelper.BOTID;
+import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
@@ -145,7 +145,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testGetBotIcon() throws Database.DatabaseException, IOException {
-        final InputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
+        final InputStream botIconStream = new ByteArrayInputStream(TestBotHelper.getBotIconContent());
         when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(botIconStream);
         final Response response = target(BOTSTORE_BOTICONPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -153,7 +153,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         Assert.assertNotNull(inputStream);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         IOUtils.copy(inputStream, outputStream);
-        Assert.assertEquals(BotHelper.getBotIconContentSize(), outputStream.size());
+        Assert.assertEquals(TestBotHelper.getBotIconContentSize(), outputStream.size());
     }
 
     @Test

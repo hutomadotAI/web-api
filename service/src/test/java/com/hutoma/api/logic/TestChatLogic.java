@@ -53,6 +53,7 @@ public class TestChatLogic {
     private static final String QUESTION = "question";
     private static final String MEMORY_VARIABLE_PROMPT = "prompt1";
     private static final String HISTORY_REST_DIRECTIVE = "@reset";
+    private static final String COMPLETELY_LOST_RESULT = "Erm... What?";
 
     private SecurityContext fakeContext;
     private AIChatServices fakeChatServices;
@@ -478,11 +479,67 @@ public class TestChatLogic {
      * @throws ServerConnector.AiServicesException
      */
     @Test
-    public void testAssistant_Valid_Semantic() throws
-            ServerConnector.AiServicesException {
+    public void testAssistant_Valid_Semantic() throws ServerConnector.AiServicesException {
         ApiResult result = getAssistantChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(ASSISTANTRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_noAiml_noRnn_wnetNotConfident() throws RequestBase.AiControllerException {
+        setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
+        when(this.fakeChatServices.awaitAiml()).thenReturn(null);
+        when(this.fakeChatServices.awaitRnn()).thenReturn(null);
+        ApiChat result = (ApiChat) getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_noAiml_noRnn_wnetNull() throws RequestBase.AiControllerException {
+        setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
+        when(this.fakeChatServices.awaitWnet()).thenReturn(null);
+        when(this.fakeChatServices.awaitAiml()).thenReturn(null);
+        when(this.fakeChatServices.awaitRnn()).thenReturn(null);
+        ApiChat result = (ApiChat) getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_noAiml_rnnEmpty_wnetNotConfident() throws RequestBase.AiControllerException {
+        setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
+        when(this.fakeChatServices.awaitAiml()).thenReturn(null);
+        ApiChat result = (ApiChat) getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException {
+        setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
+        doThrow(AIChatServices.AiNotReadyToChat.class)
+                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
+        ApiResult result = getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException {
+        setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
+        doThrow(AIChatServices.AiServicesException.class)
+                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
+        ApiResult result = getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException {
+        setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
+        doThrow(Exception.class)
+                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
+        ApiResult result = getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     private void historySemanticReset(String resetCommand) throws

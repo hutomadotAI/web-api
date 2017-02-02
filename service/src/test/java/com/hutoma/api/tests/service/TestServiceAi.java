@@ -23,8 +23,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import static com.hutoma.api.common.BotHelper.BOTID;
-import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
+import static com.hutoma.api.common.TestBotHelper.BOTID;
+import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 

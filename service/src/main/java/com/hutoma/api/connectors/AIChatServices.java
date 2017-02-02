@@ -110,7 +110,9 @@ public class AIChatServices extends ServerConnector {
         // If we're issuing a chat request but there are no AIs available to serve it, just fail
         if (ais.isEmpty() && !usedAimlBot) {
             throw new AiNotReadyToChat("No AIs ready to chat");
-        } else {
+        }
+
+        if (!ais.isEmpty()) {
             this.wnetFutures = this.wnetController.issueChatRequests(parameters, ais);
             this.rnnFutures = this.rnnController.issueChatRequests(parameters, ais);
         }
