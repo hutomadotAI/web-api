@@ -76,23 +76,7 @@ public abstract class RequestBase {
 
         // get and wait for the all the calls to complete
         for (Future<InvocationResult> future : futures) {
-            InvocationResult invocationResult;
-            try {
-                try {
-                    if (future.isDone()) {
-                        invocationResult = future.get();
-                    } else {
-                        invocationResult = future.get(timeoutMs, TimeUnit.MILLISECONDS);
-                    }
-                } catch (ExecutionException | TimeoutException ex) {
-                    this.logger.logException(this.getLogFrom(), ex);
-                    throw new AiControllerException("Error executing request: " + ex.getClass().getSimpleName());
-                }
-            } catch (InterruptedException ex) {
-                this.logger.logException(this.getLogFrom(), ex);
-                throw new AiControllerException("Interrupted");
-            }
-            final InvocationResult result = invocationResult;
+            final InvocationResult result = waitForResult(future, timeoutMs);
 
             if (result != null) {
                 Response.StatusType statusInfo = result.getResponse().getStatusInfo();
@@ -138,24 +122,25 @@ public abstract class RequestBase {
         this.threadSubPool.cancelAll();
     }
 
-    private Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
-                                                      final Map<String, String> params) {
-
-        // create call to back-end chat endpoints
-        // e.g.
-        //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
-        //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae&topic=&history=
-        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString()).path("chat");
-        for (Map.Entry<String, String> param : params.entrySet()) {
-            target = target.queryParam(param.getKey(), param.getValue());
+    private InvocationResult waitForResult(final Future<InvocationResult> future, final int timeoutMs)
+            throws AiControllerException {
+        InvocationResult invocationResult;
+        try {
+            try {
+                if (future.isDone()) {
+                    invocationResult = future.get();
+                } else {
+                    invocationResult = future.get(timeoutMs, TimeUnit.MILLISECONDS);
+                }
+            } catch (ExecutionException | TimeoutException ex) {
+                this.logger.logException(this.getLogFrom(), ex);
+                throw new AiControllerException("Error executing request: " + ex.getClass().getSimpleName());
+            }
+        } catch (InterruptedException ex) {
+            this.logger.logException(this.getLogFrom(), ex);
+            throw new AiControllerException("Interrupted");
         }
-        final JerseyInvocation.Builder builder = target.request();
-        return () -> {
-            long startTime = RequestBase.this.tools.getTimestamp();
-            Response response = builder.get();
-            return new InvocationResult(aiid, response, endpoint,
-                    RequestBase.this.tools.getTimestamp() - startTime);
-        };
+        return invocationResult;
     }
 
     public static class AiControllerException extends Exception {
@@ -174,6 +159,26 @@ public abstract class RequestBase {
         public AiRejectedStatusException(final String message) {
             super(message);
         }
+    }
+
+    protected Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
+                                                        final Map<String, String> params) {
+
+        // create call to back-end chat endpoints
+        // e.g.
+        //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
+        //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae&topic=&history=
+        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString()).path("chat");
+        for (Map.Entry<String, String> param : params.entrySet()) {
+            target = target.queryParam(param.getKey(), param.getValue());
+        }
+        final JerseyInvocation.Builder builder = target.request();
+        return () -> {
+            long startTime = RequestBase.this.tools.getTimestamp();
+            Response response = builder.get();
+            return new InvocationResult(aiid, response, endpoint,
+                    RequestBase.this.tools.getTimestamp() - startTime);
+        };
     }
 
     protected List<Future<InvocationResult>> execute(

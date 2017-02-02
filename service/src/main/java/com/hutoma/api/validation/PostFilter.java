@@ -219,14 +219,16 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
 
             if (checkList.contains(APIParameter.ServerRegistration)) {
-                ServerRegistration serverRegistration = (ServerRegistration) this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
+                ServerRegistration serverRegistration = (ServerRegistration)
+                        this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
                 checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
                 checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
                 request.setProperty(APIParameter.ServerRegistration.toString(), serverRegistration);
             }
 
             if (checkList.contains(APIParameter.ServerAffinity)) {
-                ServerAffinity serverAffinity = (ServerAffinity) this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
+                ServerAffinity serverAffinity = (ServerAffinity)
+                        this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
                 checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
                 checkParameterNotNull(SERVER_TYPE, serverAffinity.getServerType());
                 checkParameterNotNull(AI_LIST, serverAffinity.getAiList());

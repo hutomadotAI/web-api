@@ -139,6 +139,15 @@ public class Config {
         return getConfigFromProperties("logging_url", null);
     }
 
+    public List<String> getAimlBotAiids() {
+        List<String> list = getCSList("ai_aiml_bot_aiids");
+        if (list == null) {
+            return Arrays.asList("e1bb8226-e8ce-467a-8305-bc2fcb89dd7f");
+        } else {
+            return list;
+        }
+    }
+
     public int getLoggingUploadCadency() {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
@@ -168,7 +177,10 @@ public class Config {
 
     private List<String> getCSList(final String propertyName) {
         String instances = getConfigFromProperties(propertyName, null);
-        if (instances != null && !instances.isEmpty()) {
+        if (instances == null) {
+            return null;
+        }
+        if (!instances.isEmpty()) {
             return Arrays.asList(instances.split(","));
         }
         return new ArrayList<>();

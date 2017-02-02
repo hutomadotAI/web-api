@@ -56,12 +56,12 @@ public class ServerRegistration {
         return this.serverType;
     }
 
-    public class ServerRegistrationAi {
+    public static class ServerRegistrationAi {
 
         @SerializedName("ai_id")
-        private UUID aiid;
+        private final UUID aiid;
         @SerializedName("training_status")
-        private TrainingStatus trainingStatus;
+        private final TrainingStatus trainingStatus;
 
         /***
          * This will only be used in unit tests

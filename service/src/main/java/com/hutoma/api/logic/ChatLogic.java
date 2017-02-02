@@ -92,48 +92,74 @@ public class ChatLogic {
             // wait for WNET to return
             ChatResult result = this.interpretSemanticResult();
 
-            // are we confident enough with this reply?
-            boolean wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
-            this.telemetryMap.put("WNETConfident", Boolean.toString(wnetConfident));
+            boolean wnetConfident = false;
+            if (result != null) {
+                // are we confident enough with this reply?
+                wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
+                this.telemetryMap.put("WNETConfident", Boolean.toString(wnetConfident));
 
-            if (wnetConfident) {
-                // if we are taking WNET's reply then process intents
-                if (this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap)) {
-                    this.telemetryMap.put("AnsweredBy", "WNET");
-                    this.telemetryMap.put("AnsweredWithConfidence", "true");
-                } else {
-                    // if intents processing returns false then we need to ignore WNET
-                    wnetConfident = false;
+                if (wnetConfident) {
+                    // if we are taking WNET's reply then process intents
+                    if (this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap)) {
+                        this.telemetryMap.put("AnsweredBy", "WNET");
+                        this.telemetryMap.put("AnsweredWithConfidence", "true");
+                    } else {
+                        // if intents processing returns false then we need to ignore WNET
+                        wnetConfident = false;
+                    }
                 }
             }
+            this.telemetryMap.put("WNETAnswered", Boolean.toString(result != null));
 
             if (!wnetConfident) {
                 // otherwise,
                 // wait for the AIML server to respond
-                result = this.interpretAimlResult();
+                ChatResult aimlResult = this.interpretAimlResult();
 
-                // are we confident enough with this reply?
-                boolean aimlConfident = (result.getScore() > 0.0d);
-                this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
+                boolean aimlConfident = false;
+                // If we don't have AIML available (not linked)
+                if (aimlResult != null) {
+                    // are we confident enough with this reply?
+                    aimlConfident = aimlResult.getScore() > 0.0d;
+                    this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
+                    if (aimlConfident) {
+                        this.telemetryMap.put("AnsweredBy", "AIML");
+                        this.telemetryMap.put("AnsweredWithConfidence", "true");
+                        result = aimlResult;
+                    }
+                }
+                this.telemetryMap.put("AIMLAnswered", Boolean.toString(aimlResult != null));
 
-                if (aimlConfident) {
-                    this.telemetryMap.put("AnsweredBy", "AIML");
-                    this.telemetryMap.put("AnsweredWithConfidence", "true");
-                } else {
+                if (aimlResult == null || !aimlConfident) {
                     // get a response from the RNN
                     ChatResult rnnResult = this.interpretRnnResult();
 
-                    // If the RNN was clueless or returned an empty response
-                    if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
-                        // Use AIML's smartmouth response as it will always generate something
-                        this.telemetryMap.put("AnsweredBy", "AIML");
-                        // Mark it as not really answered
-                        this.telemetryMap.put("AnsweredWithConfidence", "false");
+                    if (rnnResult != null) {
+                        // If the RNN was clueless or returned an empty response
+                        if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
+                            // Mark it as not really answered
+                            this.telemetryMap.put("AnsweredWithConfidence", "false");
+                            // Use AIML, if available, use it as it will always generate something
+                            if (aimlResult != null) {
+                                this.telemetryMap.put("AnsweredBy", "AIML");
+                                result = aimlResult;
+                            } else {
+                                // TODO we need to figure out something
+                                this.telemetryMap.put("AnsweredBy", "NONE");
+                                result = getImCompletelyLostChatResult(chatUuid);
+                            }
+                        } else {
+                            result = rnnResult;
+                            this.telemetryMap.put("AnsweredBy", "RNN");
+                            this.telemetryMap.put("AnsweredWithConfidence", "true");
+                        }
                     } else {
-                        result = rnnResult;
-                        this.telemetryMap.put("AnsweredBy", "RNN");
-                        this.telemetryMap.put("AnsweredWithConfidence", "true");
+                        // TODO we need to figure out something
+                        this.telemetryMap.put("AnsweredBy", "NONE");
+                        result = getImCompletelyLostChatResult(chatUuid);
                     }
+
+                    this.telemetryMap.put("RNNAnswered", Boolean.toString(rnnResult != null));
                 }
             }
 
@@ -155,11 +181,9 @@ public class ChatLogic {
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", notFoundException, this.telemetryMap);
             return ApiError.getNotFound("AI not found");
 
-        } catch (RequestBase.AiRejectedStatusException rejected) {
-            this.logger.logError(LOGFROM,
-                    "question rejected because AI is in the wrong state: " + rejected.getMessage());
-            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", rejected, this.telemetryMap);
-            return ApiError.getBadRequest("This AI is not trained. Check the status and try again.");
+        } catch (AIChatServices.AiNotReadyToChat ex) {
+            this.logger.logInfo(LOGFROM, String.format("AI %s not ready to chat", aiid));
+            return ApiError.getBadRequest("This AI is not ready to chat. It needs to train and/or be linked to bots");
 
         } catch (ServerConnector.AiServicesException aiException) {
             this.logger.logError(LOGFROM, "AI services exception: " + aiException.toString());
@@ -167,6 +191,11 @@ public class ChatLogic {
             return ApiError.getInternalServerError();
 
         } catch (IntentException ex) {
+            this.logger.logError(LOGFROM, ex.toString());
+            ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", ex, this.telemetryMap);
+            return ApiError.getInternalServerError();
+
+        } catch (RequestBase.AiControllerException ex) {
             this.logger.logError(LOGFROM, ex.toString());
             ITelemetry.addTelemetryEvent(this.logger, "ApiChatError", ex, this.telemetryMap);
             return ApiError.getInternalServerError();
@@ -241,8 +270,12 @@ public class ChatLogic {
 
     private ChatResult interpretSemanticResult() throws RequestBase.AiControllerException {
 
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitWnet();
+        if (allResults == null) {
+            return null;
+        }
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitWnet());
+        Pair<UUID, ChatResult> result = getTopScore(allResults);
         this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
         ChatResult chatResult = result.getB();
@@ -274,11 +307,15 @@ public class ChatLogic {
 
     private ChatResult interpretAimlResult() throws RequestBase.AiControllerException {
 
-        // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitAiml());
-        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitAiml();
+        if (allResults == null) {
+            return null;
+        }
 
+        // Get the top score
+        Pair<UUID, ChatResult> result = getTopScore(allResults);
         ChatResult chatResult = result.getB();
+
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
 
@@ -295,17 +332,24 @@ public class ChatLogic {
 
     private ChatResult interpretRnnResult() throws RequestBase.AiControllerException {
 
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitRnn();
+        if (allResults == null) {
+            return null;
+        }
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(this.chatServices.awaitRnn());
+        Pair<UUID, ChatResult> result = getTopScore(allResults);
         this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
         ChatResult chatResult = result.getB();
-
-        // always reset the conversation if we have gone with a non-wnet result
-        chatResult.setResetConversation(true);
-
-        // remove trailing newline
-        chatResult.setAnswer(chatResult.getAnswer().trim());
+        if (chatResult.getAnswer() != null) {
+            // always reset the conversation if we have gone with a non-wnet result
+            chatResult.setResetConversation(true);
+            // remove trailing newline
+            chatResult.setAnswer(chatResult.getAnswer().trim());
+        } else {
+            chatResult.setAnswer("");
+            this.telemetryMap.put("RNNResponseNULL", "");
+        }
 
         this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
@@ -414,6 +458,16 @@ public class ChatLogic {
         }
         telemetryMap.put("IntentFulfilled", memoryIntent.getName());
 
+    }
+
+    private ChatResult getImCompletelyLostChatResult(final UUID chatId) {
+        ChatResult result = new ChatResult();
+        result.setChatId(chatId);
+        result.setScore(0.0);
+        result.setAnswer("Erm... What?");
+        result.setContext("");
+        result.setTopicOut("");
+        return result;
     }
 
     static class IntentException extends Exception {

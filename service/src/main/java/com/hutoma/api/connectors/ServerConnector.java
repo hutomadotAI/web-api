@@ -37,7 +37,7 @@ public class ServerConnector {
     protected final JerseyClient jerseyClient;
     protected final ILogger logger;
     protected final Tools tools;
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    protected final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     @Inject
     public ServerConnector(final Database database, final ILogger logger, final JsonSerializer serializer,

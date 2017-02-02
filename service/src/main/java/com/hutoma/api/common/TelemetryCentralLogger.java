@@ -64,7 +64,8 @@ public class TelemetryCentralLogger extends CentralLogger implements ITelemetry 
             }
         }
         this.logOutput(EventType.EXCEPTION, eventName,
-                String.format("%s: %s", exception.getClass().getName(), exception.getMessage()), map);
+                String.format("%s: %s - %s", exception.getClass().getName(), exception.getMessage(),
+                        getStackTraceAsString(exception.getStackTrace())), map);
     }
 
     /**
