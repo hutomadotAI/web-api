@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by pedrotei on 10/11/16.
  */
-public class TestServiceAiServicesStatus extends ServiceTestBase {
+public class TestServiceAiServices extends ServiceTestBase {
 
     private static final String AI_SERVICES_SERVER_REG_PATH = "/aiservices/register";
     private static final String AI_SERVICES_SERVER_AFFINITY_PATH = "/aiservices/affinity";
@@ -69,7 +69,7 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
 
     @Test
     public void testServerRegister() {
-        ServerRegistration wnet = new ServerRegistration("wnet", 2, 2);
+        ServerRegistration wnet = new ServerRegistration("wnet", "http://test:8000/server", 2, 2);
         wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE);
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);

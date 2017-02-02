@@ -42,6 +42,7 @@ public class ParameterFilter extends Validate {
     protected static final String SERVER_TYPE = "server_type";
     protected static final String AI_LIST = "ai_list";
     protected static final String SERVER_SESSION_ID = "server_session_id";
+    protected static final String SERVER_URL = "server_url";
 
     protected final ILogger logger;
     protected final Tools tools;

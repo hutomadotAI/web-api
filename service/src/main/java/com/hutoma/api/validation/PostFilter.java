@@ -223,6 +223,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
                 checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
                 checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
+                checkParameterNotNull(SERVER_URL, serverRegistration.getServerUrl());
                 request.setProperty(APIParameter.ServerRegistration.toString(), serverRegistration);
             }
 

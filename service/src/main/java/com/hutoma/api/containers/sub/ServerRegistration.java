@@ -20,6 +20,9 @@ public class ServerRegistration {
     @SerializedName("server_type")
     public String serverType;
 
+    @SerializedName("server_url")
+    public String serverUrl;
+
     @SerializedName("training_capacity")
     public int trainingCapacity;
 
@@ -32,9 +35,10 @@ public class ServerRegistration {
      * @param trainingCapacity
      * @param chatCapacity
      */
-    public ServerRegistration(final String serverType, final int trainingCapacity, final int chatCapacity) {
+    public ServerRegistration(final String serverType, final String serverUrl, final int trainingCapacity, final int chatCapacity) {
         this.aiList = new ArrayList<>();
         this.serverType = serverType;
+        this.serverUrl = serverUrl;
         this.trainingCapacity = trainingCapacity;
         this.chatCapacity = chatCapacity;
     }
@@ -54,6 +58,10 @@ public class ServerRegistration {
 
     public String getServerType() {
         return this.serverType;
+    }
+
+    public String getServerUrl() {
+        return this.serverUrl;
     }
 
     public static class ServerRegistrationAi {
