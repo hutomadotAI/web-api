@@ -63,20 +63,20 @@ function decodeAIState(state) {
         case 'ai_training_stopped' :
             return ('<span class="text-red">Stopped</span>');
             break;
-        case 'ai_ready_to_train' :
-        case 'ai_undefined' :
+        case API_AI_STATE.READY_TO_TRAIN.value :
+        case API_AI_STATE.UNDEFINED.value :
             return ('<span class="text-darkgray">Not Started</span>');
             break;
-        case 'ai_training_queued' :
+        case API_AI_STATE.QUEUED.value :
             return ('<span class="text-gray">Queued</span>');
             break;
-        case 'ai_training' :
+        case API_AI_STATE.TRAINING.value :
             return ('<span class="text-orange">In Progress</span>');
             break;
-        case 'ai_training_complete' :
+        case API_AI_STATE.COMPLETED.value :
             return ('<span class="text-olive">Completed</span>');
             break;
-        case 'ai_error' :
+        case API_AI_STATE.ERROR.value :
             return ('<span class="text-red" flat>Error</span>');
             break;
         default:
