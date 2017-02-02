@@ -10,6 +10,8 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerRegistration;
 
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -66,6 +68,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case IntentJson:
                 case EntityJson:
                 case AiStatusJson:
+                case ServerRegistration:
+                case ServerAffinity:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -213,6 +217,22 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 checkParameterNotNull("ai_engine", aiStatus.getAiEngine());
                 request.setProperty(APIParameter.AiStatusJson.toString(), aiStatus);
             }
+
+            if (checkList.contains(APIParameter.ServerRegistration)) {
+                ServerRegistration serverRegistration = (ServerRegistration) this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
+                checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
+                checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
+                request.setProperty(APIParameter.ServerRegistration.toString(), serverRegistration);
+            }
+
+            if (checkList.contains(APIParameter.ServerAffinity)) {
+                ServerAffinity serverAffinity = (ServerAffinity) this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
+                checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
+                checkParameterNotNull(SERVER_TYPE, serverAffinity.getServerType());
+                checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
+                request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
+            }
+
         } catch (JsonParseException jpe) {
             throw new ParameterValidationException("error in json format", "request body");
         }

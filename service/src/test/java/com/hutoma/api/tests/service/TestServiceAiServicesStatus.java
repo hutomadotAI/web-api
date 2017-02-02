@@ -3,15 +3,19 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.endpoints.AIServicesStatusEndpoint;
+import com.hutoma.api.endpoints.AIServicesEndpoint;
 import com.hutoma.api.logic.AILogic;
+import com.hutoma.api.logic.AIServicesLogic;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
@@ -24,19 +28,21 @@ import static org.mockito.Mockito.when;
  */
 public class TestServiceAiServicesStatus extends ServiceTestBase {
 
-    private static final String AI_SERVICES_PATH = "/aiservices/" + AIID + "/status";
+    private static final String AI_SERVICES_SERVER_REG_PATH = "/aiservices/register";
+    private static final String AI_SERVICES_SERVER_AFFINITY_PATH = "/aiservices/affinity";
+    private static final String AI_SERVICES_STATUS_PATH = "/aiservices/" + AIID + "/status";
 
     @Test
     public void testUpdateStatus() throws Database.DatabaseException {
         when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
-        final Response response = sendRequest(getCommonAiStatusJson());
+        final Response response = sendStatusUpdateRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testUpdateStatus_dbDidNotUpdate() throws Database.DatabaseException {
         when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(false);
-        final Response response = sendRequest(getCommonAiStatusJson());
+        final Response response = sendStatusUpdateRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
     }
 
@@ -44,7 +50,7 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
     public void testUpdateStatus_invalidStatus() throws Database.DatabaseException {
         String statusJson = getCommonAiStatusJson();
         statusJson = statusJson.replace(TrainingStatus.AI_READY_TO_TRAIN.value(), "NOT_A_REAL_STATUS");
-        final Response response = sendRequest(statusJson);
+        final Response response = sendStatusUpdateRequest(statusJson);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
@@ -57,12 +63,41 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
                 argThat(aiStatus -> ((AiStatus) aiStatus).getTrainingStatus() == TrainingStatus.AI_TRAINING_QUEUED),
                 any())).thenReturn(true);
 
-        final Response response = sendRequest(statusJson);
+        final Response response = sendStatusUpdateRequest(statusJson);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
-    private Response sendRequest(final String statusJson) {
-        return target(AI_SERVICES_PATH)
+    @Test
+    public void testServerRegister() {
+        ServerRegistration wnet = new ServerRegistration("wnet", 2, 2);
+        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE);
+        String json = this.serializeObject(wnet);
+        final Response response = sendRegistrationRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testServerAffinity() {
+        ServerAffinity affinity = new ServerAffinity(DEVID, "wnet", Collections.singletonList(AIID));
+        String json = this.serializeObject(affinity);
+        final Response response = sendAffinityRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    private Response sendStatusUpdateRequest(final String statusJson) {
+        return sendRequest(AI_SERVICES_STATUS_PATH, statusJson);
+    }
+
+    private Response sendRegistrationRequest(final String registrationJson) {
+        return sendRequest(AI_SERVICES_SERVER_REG_PATH, registrationJson);
+    }
+
+    private Response sendAffinityRequest(final String affinityJson) {
+        return sendRequest(AI_SERVICES_SERVER_AFFINITY_PATH, affinityJson);
+    }
+
+    private Response sendRequest(final String path, final String statusJson) {
+        return target(path)
                 .request()
                 .headers(defaultHeaders)
                 .post(Entity.json(statusJson));
@@ -74,12 +109,13 @@ public class TestServiceAiServicesStatus extends ServiceTestBase {
     }
 
     protected Class<?> getClassUnderTest() {
-        return AIServicesStatusEndpoint.class;
+        return AIServicesEndpoint.class;
     }
 
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(AILogic.class).to(AILogic.class);
         binder.bind(AIServices.class).to(AIServices.class);
+        binder.bind(AIServicesLogic.class).to(AIServicesLogic.class);
         return binder;
     }
 }

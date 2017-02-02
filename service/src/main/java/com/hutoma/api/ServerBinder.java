@@ -17,15 +17,7 @@ import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
-import com.hutoma.api.logic.AIBotStoreLogic;
-import com.hutoma.api.logic.AIIntegrationLogic;
-import com.hutoma.api.logic.AILogic;
-import com.hutoma.api.logic.AdminLogic;
-import com.hutoma.api.logic.ChatLogic;
-import com.hutoma.api.logic.DeveloperInfoLogic;
-import com.hutoma.api.logic.EntityLogic;
-import com.hutoma.api.logic.IntentLogic;
-import com.hutoma.api.logic.TrainingLogic;
+import com.hutoma.api.logic.*;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -81,6 +73,7 @@ public class ServerBinder extends AbstractBinder {
         bind(IntentLogic.class).to(IntentLogic.class);
         bind(DeveloperInfoLogic.class).to(DeveloperInfoLogic.class);
         bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
+        bind(AIServicesLogic.class).to(AIServicesLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

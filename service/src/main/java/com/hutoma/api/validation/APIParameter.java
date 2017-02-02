@@ -23,5 +23,7 @@ public enum APIParameter {
     Locale,
     TrainingSourceType,
     // Backend
-    AiStatusJson
+    AiStatusJson,
+    ServerRegistration,
+    ServerAffinity
 }

@@ -46,7 +46,7 @@ public class TestThreadPool {
     public void runOne() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 100);
         ThreadSubPool subPool = new ThreadSubPool(this.pool);
-        makeTasksAndAwait(subPool, 1);
+        makeTasksAndAwait(subPool, 50, 1);
         Assert.assertEquals(1, this.pool.getPoolSize());
     }
 
@@ -54,7 +54,7 @@ public class TestThreadPool {
     public void runMany() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 100);
         ThreadSubPool subPool = new ThreadSubPool(this.pool);
-        makeTasksAndAwait(subPool, 10);
+        makeTasksAndAwait(subPool, 50, 10);
         Assert.assertEquals(10, this.pool.getPoolSize());
     }
 
@@ -62,8 +62,8 @@ public class TestThreadPool {
     public void runManyEnd() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
         ThreadSubPool subPool = new ThreadSubPool(this.pool);
-        makeTasksAndAwait(subPool, 32);
-        Thread.sleep(1);
+        makeTasksAndAwait(subPool, 2, 32);
+        Thread.sleep(50);
         Assert.assertEquals(16, this.pool.getPoolSize());
     }
 
@@ -71,7 +71,7 @@ public class TestThreadPool {
     public void runManyCancel() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
         ThreadSubPool subPool = new ThreadSubPool(this.pool);
-        List<Future> tasks = makeTasks(subPool, 32);
+        List<Future> tasks = makeTasks(subPool, 200, 32);
         subPool.cancelAll();
         int cancelled = waitForTermination(tasks);
         Assert.assertEquals(32, cancelled);
@@ -81,23 +81,24 @@ public class TestThreadPool {
     public void launchTooMany() throws ExecutionException, InterruptedException {
         // hard limit of 32 threads
         this.pool = getPool(32, 0);
-        ThreadSubPool subPool = new ThreadSubPool(this.pool);
+        try (ThreadSubPool subPool = new ThreadSubPool(this.pool)) {
 
-        // expect an exception when launching more than 32
-        boolean exception = false;
-        try {
-            makeTasks(subPool, 64);
-        } catch (RejectedExecutionException ree) {
-            exception = true;
+            // expect an exception when launching more than 32
+            boolean exception = false;
+            try {
+                makeTasks(subPool, 100, 64);
+            } catch (RejectedExecutionException ree) {
+                exception = true;
+            }
+            Assert.assertTrue(exception);
+
+            // ensure that only 32 threads are running
+            Assert.assertTrue(this.pool.getPoolSize() == 32);
         }
-        Assert.assertTrue(exception);
-
-        // ensure that only 32 threads are running
-        Assert.assertTrue(this.pool.getPoolSize() == 32);
     }
 
-    private void makeTasksAndAwait(final ThreadSubPool subPool, final int max) throws InterruptedException, ExecutionException {
-        waitForTermination(makeTasks(subPool, max));
+    private void makeTasksAndAwait(final ThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
+        waitForTermination(makeTasks(subPool, taskDurationMs, howManyTasks));
     }
 
     private int waitForTermination(List<Future> tasks) {
@@ -112,10 +113,10 @@ public class TestThreadPool {
         return exceptions;
     }
 
-    private ArrayList<Future> makeTasks(final ThreadSubPool subPool, final int max) throws InterruptedException, ExecutionException {
+    private ArrayList<Future> makeTasks(final ThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
         ArrayList<Future> futures = new ArrayList<>();
-        for (int i = 0; i < max; i++) {
-            TestThread thread = new TestThread();
+        for (int i = 0; i < howManyTasks; i++) {
+            TestThread thread = new TestThread(taskDurationMs);
             futures.add(subPool.submit(thread));
         }
         return futures;
@@ -123,9 +124,15 @@ public class TestThreadPool {
 
     public class TestThread implements Callable {
 
+        int howLong;
+
+        public TestThread(final int howLong) {
+            this.howLong = howLong;
+        }
+
         @Override
         public Object call() throws Exception {
-            Thread.sleep(100);
+            Thread.sleep(this.howLong);
             return null;
         }
     }

@@ -9,6 +9,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -83,6 +84,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected AiServiceStatusLogger fakeServicesStatusLogger;
     @Mock
+    protected AIServices fakeAiServices;
+    @Mock
     protected Tools fakeTools;
 
     private static String getDevToken(final UUID devId, final Role role) {
@@ -127,6 +130,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiChatServices)).to(AIChatServices.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiServices)).to(AIServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
 
@@ -177,6 +181,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeAiChatServices = mock(AIChatServices.class);
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
+        this.fakeAiServices = mock(AIServices.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {

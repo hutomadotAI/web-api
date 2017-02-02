@@ -6,6 +6,8 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerRegistration;
 
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +39,9 @@ public class ParameterFilter extends Validate {
     protected static final String INTENT_RESPONSES = "intent_responses";
     protected static final String INTENT_VAR_VALUE = "intent_variable_value";
     protected static final String TRAINING_SOURCE_TYPE = "source_type";
+    protected static final String SERVER_TYPE = "server_type";
+    protected static final String AI_LIST = "ai_list";
+    protected static final String SERVER_SESSION_ID = "server_session_id";
 
     protected final ILogger logger;
     protected final Tools tools;
@@ -120,6 +125,14 @@ public class ParameterFilter extends Validate {
 
     public static AiStatus getAiStatus(final ContainerRequestContext requestContext) {
         return (AiStatus) requestContext.getProperty(APIParameter.AiStatusJson.toString());
+    }
+
+    public static ServerRegistration getServerRegistration(final ContainerRequestContext requestContext) {
+        return (ServerRegistration) requestContext.getProperty(APIParameter.ServerRegistration.toString());
+    }
+
+    public static ServerAffinity getServerAffinity(final ContainerRequestContext requestContext) {
+        return (ServerAffinity) requestContext.getProperty(APIParameter.ServerAffinity.toString());
     }
 
     /***
