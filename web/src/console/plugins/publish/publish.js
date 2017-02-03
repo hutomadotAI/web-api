@@ -74,6 +74,15 @@ function checkInput() {
         }
     }
 
+    // BOT privacy policy input validation URI
+    var bot_privacyPolicy = document.getElementById('bot_privacyPolicy');
+    if (bot_privacyPolicy.value != '' && bot_privacyPolicy.value !== 'undefined') {
+        if (inputValidation(bot_privacyPolicy.value, 'URI')) {
+            createAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'bot_privacyPolicy');
+            return false;
+        }
+    }
+
     $(this).prop("disabled", true);
     requestPublish();
 }
