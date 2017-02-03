@@ -152,12 +152,49 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
+    /***
+     * The maximum number of active threads in the threadpool
+     * after which anyone requesting a thread will get an exception
+     * @return
+     */
     public int getThreadPoolMaxThreads() {
         return 1024;
     }
 
-    public int getThreadPoolIdleTimeMs() {
+    /***
+     * The time after which an idle thread in the thread pool get be closed
+     * @return
+     */
+    public long getThreadPoolIdleTimeMs() {
         return 60 * 1000;
+    }
+
+    /***
+     * Under normal conditions the controller will ping the server every n milliseconds
+     * @return n
+     */
+    public long getServerHeartbeatEveryMs() {
+        return 2 * 1000;
+    }
+
+    /***
+     * However long the last call took, always wait a minimum of n milliseconds
+     * before issuing the next ping
+     * i.e. if we issue a ping every 2 seconds and the ping takes 2 seconds to complete
+     * we would still wait n ms between calls
+     * @return n
+     */
+    public long getServerHeartbeatMinimumGapMs() {
+        return 500;
+    }
+
+    /***
+     * If we haven't received a valid ping for n milliseconds
+     * then we write off this server and it has to re-register with us
+     * @return n
+     */
+    public long getServerHeartbeatFailureCutOffMs() {
+        return 5 * 1000;
     }
 
     public void dumpApiEnvironmentVars() {

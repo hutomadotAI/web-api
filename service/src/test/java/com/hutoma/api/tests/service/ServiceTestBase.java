@@ -7,6 +7,8 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadPool;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
@@ -17,6 +19,9 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
@@ -87,6 +92,12 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected AIServices fakeAiServices;
     @Mock
     protected Tools fakeTools;
+    @Mock
+    protected ControllerAiml fakeControllerAiml;
+    @Mock
+    protected ControllerWnet fakeControllerWnet;
+    @Mock
+    protected ControllerRnn fakeControllerRnn;
 
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -133,6 +144,9 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiServices)).to(AIServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerRnn)).to(ControllerRnn.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -141,6 +155,8 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(RateLimitCheck.class).to(RateLimitCheck.class);
                 bind(AIChatServices.class).to(AIChatServices.class);
                 bind(JerseyClient.class).to(JerseyClient.class);
+                bind(ThreadPool.class).to(ThreadPool.class);
+                bind(ThreadSubPool.class).to(ThreadSubPool.class);
 
                 ServiceTestBase.this.addAdditionalBindings(this);
             }
@@ -182,6 +198,9 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeAiServices = mock(AIServices.class);
+        this.fakeControllerAiml = mock(ControllerAiml.class);
+        this.fakeControllerWnet = mock(ControllerWnet.class);
+        this.fakeControllerRnn = mock(ControllerRnn.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {
@@ -191,6 +210,8 @@ public abstract class ServiceTestBase extends JerseyTest {
             // this will never happen, but on the zero in a million chance that it does ....
             e.printStackTrace();
         }
+
+        when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(16);
 
         ResourceConfig rc = new ResourceConfig(getClassUnderTest());
         AbstractBinder binder = this.getDefaultBindings();

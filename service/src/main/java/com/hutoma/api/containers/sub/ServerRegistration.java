@@ -64,6 +64,14 @@ public class ServerRegistration {
         return this.serverUrl;
     }
 
+    public int getTrainingCapacity() {
+        return this.trainingCapacity;
+    }
+
+    public int getChatCapacity() {
+        return chatCapacity;
+    }
+
     public static class ServerRegistrationAi {
 
         @SerializedName("ai_id")

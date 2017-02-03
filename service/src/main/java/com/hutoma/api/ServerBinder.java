@@ -17,6 +17,7 @@ import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
+import com.hutoma.api.controllers.ServerTracker;
 import com.hutoma.api.logic.*;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -60,6 +61,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);
+        bind(ServerTracker.class).to(ServerTracker.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);

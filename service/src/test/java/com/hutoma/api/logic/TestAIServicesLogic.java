@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
@@ -36,6 +37,7 @@ public class TestAIServicesLogic {
     private Tools fakeTools;
     private AIServices fakeServices;
     private AiServiceStatusLogger fakeServicesStatusLogger;
+    private ILogger fakeLogger;
 
     private AIServicesLogic aiServicesLogic;
 
@@ -47,8 +49,9 @@ public class TestAIServicesLogic {
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeServices = mock(AIServices.class);
+        this.fakeLogger = mock(ILogger.class);
         this.aiServicesLogic = new AIServicesLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase,
-                this.fakeServices, this.fakeServicesStatusLogger, this.fakeTools);
+                this.fakeServices, this.fakeServicesStatusLogger, this.fakeLogger, this.fakeTools, null, null, null);
     }
 
     @Test

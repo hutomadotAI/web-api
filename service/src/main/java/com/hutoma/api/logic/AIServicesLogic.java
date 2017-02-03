@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
@@ -12,7 +13,11 @@ import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
+import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
 
+import java.util.UUID;
 import javax.inject.Inject;
 
 /**
@@ -20,23 +25,36 @@ import javax.inject.Inject;
  */
 public class AIServicesLogic {
 
-    private static final String LOGFROM = "ailogic";
+    private static final String LOGFROM = "aiserviceslogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
     private final AIServices aiServices;
     private final AiServiceStatusLogger serviceStatusLogger;
+    private final ILogger logger;
     private final Tools tools;
+    ControllerWnet controllerWnet;
+    ControllerRnn controllerRnn;
+    ControllerAiml controllerAiml;
+
 
     @Inject
-    public AIServicesLogic(Config config, JsonSerializer jsonSerializer, Database database, AIServices aiServices,
-                           AiServiceStatusLogger serviceStatusLogger, Tools tools) {
+    public AIServicesLogic(final Config config, final JsonSerializer jsonSerializer,
+                           final Database database, final AIServices aiServices,
+                           final AiServiceStatusLogger serviceStatusLogger, ILogger logger,
+                           final Tools tools,
+                           final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
+                           final ControllerAiml controllerAiml) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
+        this.aiServices = aiServices;
         this.serviceStatusLogger = serviceStatusLogger;
         this.tools = tools;
-        this.aiServices = aiServices;
+        this.controllerWnet = controllerWnet;
+        this.controllerRnn = controllerRnn;
+        this.controllerAiml = controllerAiml;
+        this.logger = logger;
     }
 
     public ApiResult updateAIStatus(final AiStatus status) {
@@ -54,14 +72,36 @@ public class AIServicesLogic {
                 return ApiError.getNotFound();
             }
             return new ApiResult().setSuccessStatus();
-        } catch (Database.DatabaseException ex) {
+        } catch (Exception ex) {
             this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult registerServer(ServerRegistration registration) {
-        return new ApiServerAcknowledge(this.tools.createNewRandomUUID()).setSuccessStatus("registered");
+        UUID serverSessionID;
+        try {
+            switch (registration.getServerType()) {
+                case "wnet":
+                    serverSessionID = this.controllerWnet.registerServer(registration);
+                    break;
+                case "rnn":
+                    serverSessionID = this.controllerRnn.registerServer(registration);
+                    break;
+                case "aiml":
+                    serverSessionID = this.controllerAiml.registerServer(registration);
+                    break;
+                default:
+                    this.serviceStatusLogger.logError(LOGFROM,
+                            String.format("unrecognised server type %s", registration.getServerType()));
+                    return ApiError.getBadRequest("unrecognised server type");
+            }
+        } catch (Exception ex) {
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
+        }
+
+        return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
     }
 
     public ApiResult updateAffinity(final ServerAffinity serverAffinity) {

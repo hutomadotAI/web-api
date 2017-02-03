@@ -151,7 +151,7 @@ public class TestThreadPool {
         }
     }
 
-    TestableThreadPool getPool(int max, int lifespan) {
+    TestableThreadPool getPool(int max, long lifespan) {
         Config mockConfig = mock(Config.class);
         when(mockConfig.getThreadPoolMaxThreads()).thenReturn(max);
         when(mockConfig.getThreadPoolIdleTimeMs()).thenReturn(lifespan);

@@ -26,4 +26,8 @@ public class Tools {
     public long getTimestamp() {
         return System.currentTimeMillis();
     }
+
+    public void threadSleep(long milliseconds) throws InterruptedException {
+        Thread.sleep(milliseconds);
+    }
 }
