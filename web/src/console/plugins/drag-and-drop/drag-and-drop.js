@@ -40,10 +40,10 @@ function loadFileIcon(e,option){
         e.preventDefault();
         loadFileIcon(e,true);
     });
-
+    
     var reader = new FileReader();
     reader.onload = (function (aImg) { return function (e) { aImg.src = e.target.result; }; })(img);
-
+    
     if(option)
         reader.readAsDataURL(e.dataTransfer.files[0]);
     else
@@ -60,9 +60,10 @@ function isImageAllowed(e,option){
     var dt;
 
     if(!option)
-         dt = e.target;
+        dt = e.target;
     else
         dt = e.dataTransfer;
+
     var fileImage = dt.files[0];
 
     if(fileImage.size  > (imageSize*1024)){

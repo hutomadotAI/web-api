@@ -136,20 +136,34 @@ function requestPublish() {
 }
 
 function callback(botId) {
-    if ( document.getElementById('inputfile').files[0] == undefined)
+    var node = document.getElementById('drop-zone');
+
+    if(!node.hasAttribute('src'))
         callRedirection();
-    else
-        uploadIconFile(botId);
+    else {
+        var src = node.getAttribute('src');
+        var imageFile = dataURLtoFile(src, 'icon.png');
+        uploadIconFile(botId, imageFile);
+    }
 }
+
+function dataURLtoFile(dataurl, filename) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--)
+        u8arr[n] = bstr.charCodeAt(n);
+    return new File([u8arr], filename, {type:mime});
+}
+
 
 function callRedirection(){
     window.location.href = './home.php';
 }
 
-function uploadIconFile(botId) {
+function uploadIconFile(botId,imageFile) {
 
     var formData = new FormData();
-    formData.append("inputfile", document.getElementById('inputfile').files[0]);
+    formData.append("inputfile", imageFile);
     formData.append('botId', botId);
 
     createAlertMessage(1, 'Uploading image...');
