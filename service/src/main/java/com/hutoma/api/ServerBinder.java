@@ -18,6 +18,8 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
+import com.hutoma.api.containers.AssistantSessions;
+import com.hutoma.api.containers.AssistantState;
 import com.hutoma.api.logic.AIBotStoreLogic;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
@@ -65,6 +67,7 @@ public class ServerBinder extends AbstractBinder {
         bind(TelemetryCentralLogger.class).to(ITelemetry.class).to(ILogger.class).in(Singleton.class);
         // Chat requires specialized logging to support analytics
         bind(ChatTelemetryLogger.class).to(ChatTelemetryLogger.class).in(Singleton.class);
+        bind(AssistantSessions.class).to(AssistantSessions.class).in(Singleton.class);
         // AI Services Status specialized logger
         bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
 

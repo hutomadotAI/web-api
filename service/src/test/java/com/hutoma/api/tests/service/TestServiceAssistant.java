@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.AssistantSessions;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.endpoints.AssistantEndpoint;
 import com.hutoma.api.logic.ChatLogic;
@@ -61,7 +62,7 @@ public class TestServiceAssistant extends ServiceTestBase {
         final Response response = buildChatDefaultParams(target(CHAT_PATH)).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiChat apiChat = deserializeResponse(response, ApiChat.class);
-        Assert.assertEquals(answer, apiChat.getResult().getAnswer());
+        Assert.assertNotEquals("", apiChat.getResult().getAnswer());
         Assert.assertNotNull(apiChat.getChatId());
         Assert.assertNotNull(apiChat.getResult().getElapsedTime());
         Assert.assertNotNull(apiChat.getResult().getScore());
@@ -106,6 +107,7 @@ public class TestServiceAssistant extends ServiceTestBase {
         this.fakeChatTelemetryLogger = mock(ChatTelemetryLogger.class);
 
         binder.bind(ChatLogic.class).to(ChatLogic.class);
+        binder.bind(AssistantSessions.class).to(AssistantSessions.class);
 
         binder.bindFactory(new InstanceFactory<>(TestServiceAssistant.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceAssistant.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);

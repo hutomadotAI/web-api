@@ -13,12 +13,23 @@ import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.AssistantSessions;
+import com.hutoma.api.containers.AssistantState;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import org.mortbay.util.ajax.JSON;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +54,18 @@ public class ChatLogic {
     private final AIChatServices chatServices;
     private final ChatTelemetryLogger chatTelemetryLogger;
 
+
     private Map<String, String> telemetryMap;
+
+    // @TODO demo hack
+    private final AssistantSessions assistantSessions;
+    private String chatId;
+    // @TODO /demo hack
 
     @Inject
     public ChatLogic(Config config, JsonSerializer jsonSerializer, AIChatServices chatServices,
                      Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
-                     IEntityRecognizer entityRecognizer, ChatTelemetryLogger chatTelemetryLogger) {
+                     IEntityRecognizer entityRecognizer, ChatTelemetryLogger chatTelemetryLogger, AssistantSessions sessions) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.chatServices = chatServices;
@@ -57,6 +74,10 @@ public class ChatLogic {
         this.intentHandler = intentHandler;
         this.entityRecognizer = entityRecognizer;
         this.chatTelemetryLogger = chatTelemetryLogger;
+
+        // @TODO demo hack
+        this.assistantSessions = sessions;
+        // @TODO /demo hack
     }
 
     public ApiResult chat(SecurityContext context, UUID aiid, String devId, String question, String chatId,
@@ -190,6 +211,13 @@ public class ChatLogic {
 
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
+        this.chatId = chatId;
+
+        if (!assistantSessions.sessions.containsKey(chatId)) {
+            assistantSessions.sessions.put(chatId, new AssistantState());
+        }
+
+        String answer = insertMessage(question);
 
         // Add telemetry for the request
         this.telemetryMap = new HashMap<String, String>() {
@@ -208,23 +236,349 @@ public class ChatLogic {
         ChatResult result = new ChatResult();
         result.setElapsedTime(this.tools.getTimestamp() - startTime);
         result.setQuery(question);
+        result.setHistory(answer);
 
         // Set a fixed response.
-        result.setAnswer("Hello");
+        result.setAnswer(answer);
         result.setScore(1.0);
 
         // set the chat response time to the whole duration since the start of the request until now
         result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+
         this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
 
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
         apiChat.setResult(result);
+        sessionData(chatId).setHist(answer);
 
-        // log the results
-        ITelemetry.addTelemetryEvent(this.chatTelemetryLogger, "AssistantChat", this.telemetryMap);
         return apiChat.setSuccessStatus();
     }
+
+    // @TODO demo hack
+    private void setAlarmId(String message) {
+        message = message.toLowerCase();
+
+        if (message.contains("70359")
+                || message.contains("fail") && message.contains("hdd")
+                || message.contains("disk") && message.contains("fail")
+                || message.contains("problem") && message.contains("hdd")
+                || message.contains("disk") && message.contains("problem")
+                || message.contains("issue") && message.contains("hdd")
+                || message.contains("disk") && message.contains("issue")
+                || message.contains("disk") && message.contains("alarm")
+                || message.contains("hdd") && message.contains("alarm")) {
+            sessionData(chatId).setAlarmId(70359);
+        }
+
+        if (message.contains("3159") || message.contains("3199")
+                || message.contains("temp") && message.contains("high")
+                || message.contains("temperature") && message.contains("high")
+                || message.contains("subrack") && message.contains("hot")
+                || message.contains("temp") && message.contains("high")
+                || message.contains("disk") && message.contains("issue")
+                || message.contains("temperature") && message.contains("issue")
+                || message.contains("temperature") && message.contains("alarm")) {
+            sessionData(chatId).setAlarmId(3199);
+        }
+    }
+
+    public void setAction(String message) {
+        message = message.toLowerCase();
+
+        if (message.contains("troubleshoot")
+                || message.contains("truble")
+                || message.contains("troble")
+                || message.contains("trouble")
+                || message.contains("debug")
+                || message.contains("fix")
+                || message.contains("solve")
+                || message.contains("clear")) {
+            sessionData(chatId).setActionId(1);
+        }
+
+        if (message.contains("read")
+                || message.contains("check")
+                || message.contains("description")
+                || message.contains("describe")) {
+            sessionData(chatId).setAlarmId(2);
+        }
+    }
+
+    private void resetMemory() {
+        sessionData(chatId).setCurrentAI(1);
+        sessionData(chatId).setHist("");
+        sessionData(chatId).setT("");
+        sessionData(chatId).setActionId(-1);
+        sessionData(chatId).setAlarmId(-1);
+        sessionData(chatId).setTopic(-1);
+        sessionData(chatId).setFlag(0);
+        sessionData(chatId).setNtries(0);
+    }
+
+    private String insertMessage(String message) {
+        List<String> results = new ArrayList<String>();
+        if (message == "") {
+            return "";
+        }
+
+        setAction(message);
+        setAlarmId(message);
+
+        if (sessionData(chatId).getActionId() > 0 || sessionData(chatId).getAlarmId() > 0) {
+            sessionData(chatId).setCurrentAI(0);
+        }
+        else {
+            sessionData(chatId).setCurrentAI(1);
+        }
+
+        if (message.toLowerCase().contains("new issue") || message.toLowerCase().contains("reset")
+                || message.toLowerCase().contains("new topic") || message.toLowerCase().contains("forget")) {
+            resetMemory();
+            results.add("Ok, let's start fresh!");
+            message = "";
+        }
+
+        if (sessionData(chatId).getActionId() < 0 && sessionData(chatId).getAlarmId() < 0) {
+            sessionData(chatId).setCurrentAI(1);
+        }
+        if (sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() < 0) {
+            sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
+            if (sessionData(chatId).getNtries() == 1){
+                results.add("Can you please tell me the alarm number if you are refering to? You can type 70359 or 3159.");
+            }
+            else {
+                sessionData(chatId).setCurrentAI(1);
+                resetMemory();
+            }
+        }
+        if (sessionData(chatId).getActionId() < 0 && sessionData(chatId).getAlarmId() > 0) {
+            sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
+            if (sessionData(chatId).getNtries() == 1) {
+                results.add("Do you want to troubleshoot the alarm or check the description?");
+            }
+            else {
+                sessionData(chatId).setCurrentAI(1);
+                resetMemory();
+            }
+        }
+
+        if (sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() > 0) {
+            sessionData(chatId).setTopic(sessionData(chatId).getAlarmId());
+            sessionData(chatId).setT(Integer.toString(sessionData(chatId).getAlarmId()));
+
+            if (sessionData(chatId).getAlarmId() == 70359 && sessionData(chatId).getFlag() == 0) {
+                sessionData(chatId).setHist("do you want to troubleshoot it or check the description?");
+                sessionData(chatId).setFlag(1);
+                if (sessionData(chatId).getActionId() == 1) {
+                    message = "70359 troubleshoot";
+                }
+                else {
+                    message = "70359 description";
+                }
+            }
+            if (sessionData(chatId).getAlarmId() == 3199 && sessionData(chatId).getFlag() == 0) {
+                sessionData(chatId).setHist("do you want to troubleshoot alarm 3199 it or to check the description?");
+                sessionData(chatId).setFlag(1);
+                if (sessionData(chatId).getActionId() == 1) {
+                    message = "3199 troubleshoot";
+                }
+                else {
+                    message = "3199 description";
+                }
+            }
+        }
+
+        if (sessionData(chatId).getHist().contains("is the second field of alarm 00 or 01") &&
+                (message.toLowerCase().contains("cfpu0") ||
+                message.toLowerCase().contains("cfpu-0") ||
+                message.toLowerCase().contains("0") ||
+                message.toLowerCase().contains("cfpu1") ||
+                message.toLowerCase().contains("cfpu-1") ||
+                message.toLowerCase().contains("1") ||
+                message.toLowerCase().contains("first") ||
+                message.toLowerCase().contains("last")) == false) {
+            results.add("Sorry this is not a valid configuration. I will inform nokia. Your case number is NA081984827.");
+            resetMemory();
+            message = "";
+        }
+
+        if (sessionData(chatId).getHist().contains("Can you please tell me the alarm number if you are refering to? You can type 70359 or 3199.")
+                && (message.toLowerCase().contains("70359")
+                || message.toLowerCase().contains("3199")) == false) {
+            if (sessionData(chatId).getNtries() < 1) {
+                results.add("Sorry you need to tell me the alarm ID. You can type either 70359 or 3199.");
+                sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
+                message = "";
+            }
+            else {
+                results.add("Ok. lets talk about something else.");
+                resetMemory();
+                sessionData(chatId).setCurrentAI(1);
+                message = "";
+            }
+        }
+
+        if (sessionData(chatId).getHist().contains("is it cfpu-0 or cfpu-1") &&
+                (message.toLowerCase().contains("cfpu0") ||
+                message.toLowerCase().contains("cfpu-0") ||
+                message.toLowerCase().contains("0") ||
+                message.toLowerCase().contains("cfpu1") ||
+                message.toLowerCase().contains("cfpu-1") ||
+                message.toLowerCase().contains("1") ||
+                message.toLowerCase().contains("first") ||
+                message.toLowerCase().contains("last")) == false) {
+            results.add("is the second field of alarm 00 or 01?");
+            sessionData(chatId).setHist("is the second field of alarm 00 or 01?");
+            message = "";
+        }
+
+        if (sessionData(chatId).getCurrentAI() == 0 && sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() > 0 && message != "") {
+            HttpURLConnection connection = null;
+            Map output = null;
+
+            try {
+                String chatHistory = URLEncoder.encode(sessionData(chatId).getHist(), "UTF-8");
+                String currentTopic = URLEncoder.encode(sessionData(chatId).getT(), "UTF-8");
+                String q = URLEncoder.encode(message, "UTF-8");
+                URL url = new URL("https://api.hutoma.com/nokia/ai/8fa2a7c0-b681-4d5a-9b60-b61babfaf9ce/chat?confidence_threshold=0.55&chat_history=" + chatHistory + "&current_topic=" + currentTopic + "&uid=87142473&q=" + q);
+
+                connection = (HttpURLConnection)url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys");
+                connection.setReadTimeout(30*1000);
+
+                try (InputStream is = connection.getInputStream()) {
+
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
+
+                        while ((line = rd.readLine()) != null) {
+                            response.append(line);
+                        }
+                    }
+                    output = (Map) JSON.parse(response.toString());
+                }
+            }
+            catch (Exception e) {
+                // Connection potentially failed.
+            }
+
+            Map result = (Map)output.get("result");
+            String res = null;
+
+            sessionData(chatId).setT("");
+            if (result.containsKey("topic_out")) {
+                sessionData(chatId).setT((String) result.get("topic_out"));
+            }
+
+            res = "Sorry i dont have an answer for you";
+            res = (String)result.get("answer");
+
+            if (res.contains("@reset")) {
+                res = res.replace("@reset", "");
+                resetMemory();
+                results.add(res);
+            }
+            else {
+                if (res.contains("@pause")) {
+                    sessionData(chatId).setCurrentAI(1);
+                    res = res.replace("@pause", "");
+                    resetMemory();
+                    results.add(res);
+                    results.add("Nokia is informed. Your case number is NA081984827");
+                }
+                else {
+                    double sc = (double)result.get("score");
+                    try {
+                        if (sc > 0.6f && (String)result.get("score") != "0") {
+                            sessionData(chatId).setHist(((String) result.get("answer")).trim());
+                        }
+                    } catch (Exception e) {
+                        // Do nothing.
+                    }
+
+                    if (sc > 0.6f) {
+                        sessionData(chatId).setCurrentAI(0);
+                        sessionData(chatId).setNtries(0);
+                        results.add(res);
+                    }
+                    else {
+                        if (sessionData(chatId).getNtries() < 3) {
+                            sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
+                            if (sessionData(chatId).getNtries() == 1) {
+                                results.add("Can you please rephrase your question?");
+                            }
+                            else {
+                                resetMemory();
+                                sessionData(chatId).setCurrentAI(1);
+                                results.add("Sorry I dont think I have been trained to recognise this phrase. I will contact Nokia.");
+                            }
+                        } else {
+                            sessionData(chatId).setNtries(0);
+                            sessionData(chatId).setHist("");
+                            sessionData(chatId).setCurrentAI(1);
+                            results.add(AITalk(message, sessionData(chatId).getUserid()));
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            if (sessionData(chatId).getActionId() < 0 && sessionData(chatId).getAlarmId() < 0 && message != "") {
+                results.add(AITalk(message, sessionData(chatId).getUserid()));
+            }
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (String item : results) {
+            result.append(item);
+            result.append("\r\n");
+        }
+        return result.toString();
+    }
+
+    public String AITalk(String message, int userId) {
+        String answer = "";
+        HttpURLConnection connection = null;
+        Map output = null;
+
+        try {
+            String uid = URLEncoder.encode(Integer.toString(sessionData(chatId).getUserid()), "UTF-8");
+            String aid = URLEncoder.encode("384", "UTF-8");
+            String q = URLEncoder.encode(message, "UTF-8");
+            URL url = new URL("https://www.hutoma.com:8443/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
+
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setReadTimeout(30*1000);
+
+            try (InputStream is = connection.getInputStream()) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
+                    while ((line = rd.readLine()) != null) {
+                        response.append(line);
+                    }
+                }
+                String jsonp = response.toString();
+                String json = jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
+                output = (Map) JSON.parse(json);
+            }
+        }
+        catch (Exception e) {
+            // Connection potentially failed.
+        }
+
+        String response = (String)output.get("output");
+        return response.substring(response.indexOf("]") + 1);
+    }
+
+    private AssistantState sessionData(String chatId) {
+        return this.assistantSessions.sessions.get(chatId);
+    }
+    // @TODO /demo hack
 
     private ChatResult interpretSemanticResult() throws ServerConnector.AiServicesException {
 

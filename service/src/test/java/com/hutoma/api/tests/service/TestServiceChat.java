@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.ChatTelemetryLogger;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.AssistantSessions;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logic.ChatLogic;
@@ -122,6 +123,7 @@ public class TestServiceChat extends ServiceTestBase {
         this.fakeChatTelemetryLogger = mock(ChatTelemetryLogger.class);
 
         binder.bind(ChatLogic.class).to(ChatLogic.class);
+        binder.bind(AssistantSessions.class).to(AssistantSessions.class);
 
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
