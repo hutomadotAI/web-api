@@ -184,7 +184,7 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    createNewParameterRow('', 3, '', 0, '', false, node);
+    createNewParameterRow('', 3, '', 0, '', 1, node);
 }
 
 function deleteIntentVariable(element) {
