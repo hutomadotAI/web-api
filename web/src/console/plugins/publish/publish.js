@@ -50,7 +50,7 @@ function checkInput() {
     // BOT name input validation
     var bot_name = document.getElementById('bot_name');
     if (bot_name.value !== 'undefined') {
-        if (inputValidation(bot_name.value, 'bot_name')) {
+        if (isInputInvalid(bot_name.value, 'bot_name')) {
             createAlertMessage(ALERT.DANGER.value, 'The AI name can only contains letters and numbers.', 'bot_name');
             return false;
         }
@@ -59,7 +59,7 @@ function checkInput() {
     // BOT short description input validation
     var bot_description = document.getElementById('bot_description');
     if (bot_description.value != '' && bot_description.value !== 'undefined') {
-        if (inputValidation(bot_description.value, 'bot_description')) {
+        if (isInputInvalid(bot_description.value, 'bot_description')) {
             createAlertMessage(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.', 'bot_description');
             return false;
         }
@@ -68,7 +68,7 @@ function checkInput() {
     // BOT licence fee ( price ) input validation
     var bot_price = document.getElementById('bot_price');
     if (bot_price.value != '' && bot_price.value !== 'undefined') {
-        if (inputValidation(bot_price.value, 'bot_price')) {
+        if (isInputInvalid(bot_price.value, 'bot_price')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid number.', 'bot_price');
             return false;
         }
@@ -77,7 +77,7 @@ function checkInput() {
     // BOT privacy policy input validation URI
     var bot_privacyPolicy = document.getElementById('bot_privacyPolicy');
     if (bot_privacyPolicy.value != '' && bot_privacyPolicy.value !== 'undefined') {
-        if (inputValidation(bot_privacyPolicy.value, 'URI')) {
+        if (isInputInvalid(bot_privacyPolicy.value, 'URI')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'bot_privacyPolicy');
             return false;
         }

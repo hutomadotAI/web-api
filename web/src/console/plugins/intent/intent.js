@@ -36,7 +36,7 @@ function activeButtonCreateIntent() {
 function postingIntentName() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#inputIntentName").val(), 'intent_name')) {
+    if (isInputInvalid($("#inputIntentName").val(), 'intent_name')) {
         msgAlertIntent(ALERT.DANGER.value, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
         return false;
     }

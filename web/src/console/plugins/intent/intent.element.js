@@ -61,7 +61,7 @@ function saveIntent() {
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
         if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
-            if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
+            if (isInputInvalid(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
                 msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be a number between 1 and 99.');
                 msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');

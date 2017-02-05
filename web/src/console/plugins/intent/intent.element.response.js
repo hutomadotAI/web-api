@@ -37,7 +37,7 @@ function activeButtonCreateIntentResponse() {
 function addIntentResponse() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#intent-response").val(), 'intent_response')) {
+    if (isInputInvalid($("#intent-response").val(), 'intent_response')) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response need contain only the following: BLA BLA BLA BLA character');
         return;
     }

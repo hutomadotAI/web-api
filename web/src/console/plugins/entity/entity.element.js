@@ -36,7 +36,7 @@ function activeButtonCreateEntityValue() {
 function addEntityValue() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#value-entity").val(), 'entity_value')) {
+    if (isInputInvalid($("#value-entity").val(), 'entity_value')) {
         msgAlertEntityValues(ALERT.DANGER.value, 'Value name need contain only the following: A-Z, a-z, 0-9 character');
         return;
     }

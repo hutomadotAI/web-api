@@ -34,7 +34,7 @@ function activeButtonCreateIntentPrompt() {
 function addIntentPrompt() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#intent-prompt").val(), 'intent_prompt')) {
+    if (isInputInvalid($("#intent-prompt").val(), 'intent_prompt')) {
         msgAlertIntentPrompt(ALERT.DANGER.value, 'The intent prompt need contain only the following: BLA BLA BLA BLA character');
         return;
     }

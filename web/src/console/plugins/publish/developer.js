@@ -18,7 +18,7 @@ function checkDevInput(){
     // Developer email input validation
     var developer_email = document.getElementById('developer_email');
     if (developer_email.value != '' && developer_email.value !== 'undefined') {
-        if (inputValidation(developer_email.value, 'developer_email')) {
+        if (isInputInvalid(developer_email.value, 'developer_email')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid email.','developer_email');
             return false;
         }
@@ -26,7 +26,7 @@ function checkDevInput(){
     // Developer website input validation
     var developer_website = document.getElementById('developer_website');
     if (developer_website.value != '' && developer_website.value !== 'undefined') {
-        if (inputValidation(developer_website.value, 'URI')) {
+        if (isInputInvalid(developer_website.value, 'URI')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'developer_website');
             return false;
         }

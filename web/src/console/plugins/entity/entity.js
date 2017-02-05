@@ -37,7 +37,7 @@ function postingEntityName() {
     $(this).prop("disabled", true);
     document.getElementById("btnCreateEntity").removeEventListener("click", postingEntityName);
 
-    if (inputValidation($("#inputEntityName").val(), 'entity_name')) {
+    if (isInputInvalid($("#inputEntityName").val(), 'entity_name')) {
         msgAlertEntity(ALERT.DANGER.value, 'Entity name need contain only the following: A-Z, a-z, 0-9 and _ character');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;

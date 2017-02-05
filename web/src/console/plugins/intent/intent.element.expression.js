@@ -37,7 +37,7 @@ function activeButtonCreateUserExpression() {
 function addUserExpression() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#user-expression").val(), 'user_expression')) {
+    if (isInputInvalid($("#user-expression").val(), 'user_expression')) {
         msgAlertUserExpression(ALERT.DANGER.value, 'The user expression need contain only the following: BLA BLA BLA BLA character');
         return;
     }

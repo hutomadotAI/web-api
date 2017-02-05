@@ -7,7 +7,7 @@ function wizardNext() {
     document.getElementById('btnCancel').setAttribute('disabled','disabled');
 
     var value_name = document.getElementById('ai_name').value;
-    if(inputValidation(value_name,'ai_name')) {
+    if(isInputInvalid(value_name,'ai_name')) {
         msgAlertNameAI(ALERT.DANGER.value, 'Invalid name. Please enter a string that contains alphanumeric characters. No space are allowed.');
         document.getElementById('btnNext').setAttribute('disabled','disabled');
         document.getElementById('btnCancel').removeAttribute('disabled');
@@ -21,7 +21,7 @@ function wizardNext() {
     }
 
     var value_desc = document.getElementById('ai_description').value;
-    if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
+    if(isInputInvalid(value_desc,'ai_description') && value_desc.length > 0) {
         msgAlertDescriptionAI(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
         document.getElementById('btnNext').setAttribute('disabled','disabled');
         document.getElementById('btnCancel').removeAttribute('disabled');

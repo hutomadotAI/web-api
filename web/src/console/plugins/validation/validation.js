@@ -20,7 +20,7 @@ function isNameExists(name,list_name){
     return false;
 }
 
-function inputValidation(txt,field) {
+function isInputInvalid(txt,field) {
     var letters;
     switch(field){
        

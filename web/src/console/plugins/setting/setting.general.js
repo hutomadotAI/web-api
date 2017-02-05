@@ -20,7 +20,7 @@ function updateAI() {
     deactiveGeneralButtons();
 
     var value_desc = document.getElementById('ai_description').value;
-    if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
+    if(isInputInvalid(value_desc,'ai_description') && value_desc.length > 0) {
         msgAlertDescriptionAI(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
         document.getElementById('btnSave').setAttribute('disabled','disabled');
         document.getElementById('btnReset').removeAttribute('disabled');
