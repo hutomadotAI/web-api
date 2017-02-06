@@ -20,7 +20,6 @@ import com.hutoma.api.containers.sub.RateLimitStatus;
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
-import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -498,12 +497,12 @@ public class Database {
         }
     }
 
-    public InputStream getBotIcon(final int botId) throws DatabaseException {
+    public String getBotIconPath(final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotIcon", 1).add(botId);
             final ResultSet rs = call.executeQuery();
             if (rs.next()) {
-                return rs.getBinaryStream(1);
+                return rs.getString("botIcon");
             }
             return null;
         } catch (final SQLException sqle) {
@@ -511,10 +510,10 @@ public class Database {
         }
     }
 
-    public boolean saveBotIcon(final String devId, final int botId, final InputStream inputStream)
+    public boolean saveBotIconPath(final String devId, final int botId, final String filename)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("saveBotIcon", 3).add(devId).add(botId).add(inputStream);
+            call.initialise("saveBotIcon", 3).add(devId).add(botId).add(filename);
             return call.executeUpdate() > 0;
         }
     }
@@ -645,7 +644,8 @@ public class Database {
                 rs.getString("classification"),
                 rs.getString("version"),
                 rs.getString("video_link"),
-                rs.getBoolean("is_published")
+                rs.getBoolean("is_published"),
+                rs.getString("botIcon")
         );
     }
 

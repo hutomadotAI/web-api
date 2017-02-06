@@ -1,22 +1,22 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.BotHelper;
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiStreamResult;
+import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.AiBot;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -33,17 +33,21 @@ import static org.mockito.Mockito.when;
 public class TestAIBotstoreLogic {
 
     private static final String ALTERNATE_DEVID = "other_devId";
-
+    private static final String BOT_ICON_PATH = BOTID + ".png";
     private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(BotHelper.getBotIconContent());
     private Database fakeDatabase;
     private AIBotStoreLogic aiBotStoreLogic;
-    private Tools fakeTools;
+    private Config fakeConfig;
+    private FormDataContentDisposition iconContentDisp;
 
     @Before
     public void setup() {
         this.fakeDatabase = mock(Database.class);
-        this.fakeTools = mock(Tools.class);
-        this.aiBotStoreLogic = new AIBotStoreLogic(this.fakeDatabase, mock(ILogger.class), this.fakeTools);
+        this.fakeConfig = mock(Config.class);
+        this.aiBotStoreLogic = new AIBotStoreLogic(this.fakeDatabase, mock(ILogger.class), this.fakeConfig);
+        this.iconContentDisp = FormDataContentDisposition.name("file").fileName(BOT_ICON_PATH).build();
+        // Store any bot icons in the temp folder
+        when(this.fakeConfig.getBotIconStoragePath()).thenReturn(System.getProperty("java.io.tmpdir"));
     }
 
     @Test
@@ -237,60 +241,61 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testGetBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(this.botIconStream);
-        ApiStreamResult result = (ApiStreamResult) this.aiBotStoreLogic.getBotIcon(BOTID);
+        when(this.fakeDatabase.getBotIconPath(anyInt())).thenReturn(BOT_ICON_PATH);
+        ApiString result = (ApiString) this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertNotNull(result.getStream());
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        result.getStream().write(outStream);
-        Assert.assertEquals(BotHelper.getBotIconContentSize(), outStream.size());
-        byte[] icon = outStream.toByteArray();
-        byte[] expected = BotHelper.getBotIconContent();
-        for (int i = 0; i < BotHelper.getBotIconContentSize(); i++) {
-            Assert.assertEquals(expected[i], icon[i]);
-        }
+        Assert.assertEquals(BOT_ICON_PATH, result.getString());
     }
 
     @Test
     public void testGetBotIcon_invalidBotId() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(null);
+        when(this.fakeDatabase.getBotIconPath(anyInt())).thenReturn(null);
         ApiResult result = this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetBotIcon_DBException() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getBotIcon(anyInt())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getBotIconPath(anyInt())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(true);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
+        prepareBotForUpload();
+        when(this.fakeDatabase.saveBotIconPath(anyString(), anyInt(), any())).thenReturn(true);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream, this.iconContentDisp);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testUploadBotIcon_DBException() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
+        prepareBotForUpload();
+        when(this.fakeDatabase.saveBotIconPath(anyString(), anyInt(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream, this.iconContentDisp);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testUploadBotIcon_invalid_botId() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(false);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream);
+        when(this.fakeDatabase.saveBotIconPath(anyString(), anyInt(), any())).thenReturn(false);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream, this.iconContentDisp);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testUploadBotIcon_iconSize_overLimit() throws Database.DatabaseException, IOException {
+        prepareBotForUpload();
         ByteArrayInputStream bigStream = new ByteArrayInputStream(
                 new byte[(int) (AIBotStoreLogic.MAX_ICON_FILE_SIZE + 1)]);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, bigStream);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, bigStream, this.iconContentDisp);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    private void prepareBotForUpload() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setDevId(DEVID);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
     }
 }

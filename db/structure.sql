@@ -159,6 +159,7 @@ CREATE TABLE `botStore` (
   `version` varchar(25) NOT NULL,
   `video_link` varchar(1800) DEFAULT NULL,
   `is_published` tinyint(1) NOT NULL,
+  `botIcon` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `dev_id` (`dev_id`),
   KEY `aiid` (`aiid`),
@@ -1380,7 +1381,7 @@ DELIMITER ;;
 CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotIcon`(IN `param_botId` INT(11))
     NO SQL
 BEGIN
-  SELECT icon FROM botIcon;
+  SELECT botIcon FROM botStore WHERE id = param_botId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2273,11 +2274,12 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `saveBotIcon`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11), IN `param_icon` MEDIUMBLOB)
+CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `saveBotIcon`(IN `param_devId` VARCHAR(50), IN `param_botId` INT(11), IN `param_filename` VARCHAR(255))
     NO SQL
 BEGIN
-    REPLACE INTO botIcon (botId, icon)
-      SELECT param_botId, param_icon FROM botStore bs WHERE bs.dev_id = param_devId AND bs.id = param_botId;
+    UPDATE botStore
+      SET  botIcon = param_filename
+      WHERE dev_id = param_devId AND id = param_botId;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

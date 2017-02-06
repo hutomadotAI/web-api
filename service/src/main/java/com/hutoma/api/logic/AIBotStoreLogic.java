@@ -1,26 +1,31 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiStreamResult;
+import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.joda.time.DateTime;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -31,15 +36,16 @@ public class AIBotStoreLogic {
 
     public static final long MAX_ICON_FILE_SIZE = 512 * 1024; // 512Kb
     private static final String LOGFROM = "botstorelogic";
+    private static final Set<String> ALLOWED_ICON_EXT = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
     private final Database database;
     private final ILogger logger;
-    private final Tools tools;
+    private final Config config;
 
     @Inject
-    public AIBotStoreLogic(Database database, ILogger logger, final Tools tools) {
+    public AIBotStoreLogic(Database database, ILogger logger, final Config config) {
         this.database = database;
         this.logger = logger;
-        this.tools = tools;
+        this.config = config;
     }
 
     public ApiResult getPublishedBots() {
@@ -131,7 +137,7 @@ public class AIBotStoreLogic {
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
-                    videoLink, true);
+                    videoLink, true, null);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
                 return ApiError.getBadRequest("Invalid publish request");
@@ -147,11 +153,11 @@ public class AIBotStoreLogic {
 
     public ApiResult getBotIcon(final int botId) {
         try {
-            InputStream inputStream = this.database.getBotIcon(botId);
-            if (inputStream == null) {
-                return ApiError.getNotFound();
+            String iconPath = this.database.getBotIconPath(botId);
+            if (iconPath != null) {
+                return new ApiString(iconPath).setSuccessStatus();
             } else {
-                return new ApiStreamResult((outStream) -> IOUtils.copy(inputStream, outStream)).setSuccessStatus();
+                return ApiError.getNotFound();
             }
         } catch (Database.DatabaseException e) {
             this.logger.logException(LOGFROM, e);
@@ -159,12 +165,29 @@ public class AIBotStoreLogic {
         }
     }
 
-    public ApiResult uploadBotIcon(final String devId, final int botId, final InputStream inputStream) {
+    public ApiResult uploadBotIcon(final String devId, final int botId, final InputStream inputStream,
+                                   final FormDataContentDisposition fileDetail) {
         File tempFile = null;
-        InputStream inputStreamTempFile = null;
         try {
+            AiBot bot = this.database.getBotDetails(botId);
+            if (bot == null || !bot.getDevId().equals(devId)) {
+                this.logger.logInfo(LOGFROM,
+                        String.format("Request for uploading image for bot %d from devid %s who is not the owner",
+                                botId, devId));
+                return ApiError.getNotFound();
+            }
+            String extension = FilenameUtils.getExtension(fileDetail.getFileName()).toLowerCase();
+            if (!ALLOWED_ICON_EXT.contains(extension)) {
+                this.logger.logInfo(LOGFROM, String.format(
+                        "Request to upload image with not allowed extension (%s) for bot %d",
+                        extension, botId));
+                return ApiError.getBadRequest("Image extension not allowed");
+            }
+
+            // Start saving the stream to a temporary file
             tempFile = File.createTempFile("boticon", ".tmp");
             final int bufferLen = 1024;
+            // Save until the stream ends or reaches the maximum allowed size
             try (FileOutputStream out = new FileOutputStream(tempFile)) {
                 byte[] buffer = new byte[bufferLen];
                 int n1;
@@ -178,12 +201,14 @@ public class AIBotStoreLogic {
                 }
             }
 
-            inputStreamTempFile = new FileInputStream(tempFile);
-            if (this.database.saveBotIcon(devId, botId, inputStreamTempFile)) {
-                return new ApiResult().setSuccessStatus();
-            } else {
-                return ApiError.getNotFound();
-            }
+            // Copy the temp file into it's final destination
+            String destFilename = String.format("%d.%s", botId, extension);
+            File destFile = new File(this.config.getBotIconStoragePath(), destFilename);
+            Files.copy(tempFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            this.database.saveBotIconPath(devId, botId, destFilename);
+            return new ApiResult().setSuccessStatus();
+
         } catch (Database.DatabaseException | IOException e) {
             this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
@@ -191,13 +216,6 @@ public class AIBotStoreLogic {
             if (tempFile != null) {
                 if (!tempFile.delete()) {
                     this.logger.logWarning(LOGFROM, "Could not delete temp file " + tempFile.getAbsolutePath());
-                }
-            }
-            if (inputStreamTempFile != null) {
-                try {
-                    inputStreamTempFile.close();
-                } catch (IOException ex) {
-                    this.logger.logException(LOGFROM, ex);
                 }
             }
         }

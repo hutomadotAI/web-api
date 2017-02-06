@@ -143,6 +143,10 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
+    public String getBotIconStoragePath() {
+        return getConfigFromProperties("bot_icon_path", "/boticon");
+    }
+
     public void dumpApiEnvironmentVars() {
         System.getenv().entrySet().stream().forEach(e -> {
             if (e.getKey().startsWith(API_ENV_PREFIX)) {
