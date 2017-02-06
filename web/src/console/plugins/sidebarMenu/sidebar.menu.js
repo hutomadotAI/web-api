@@ -22,6 +22,7 @@ var MENU = MENU || (function () {
     }());
 
 function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
+    const MAX_LENGTH_AINAME_TEXT_VISIBLE = 18;
     var newNode = document.createElement('ul');
     newNode.className = 'sidebar-menu';
     newNode.id = 'console-menu';
@@ -32,7 +33,11 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
 
     wHTML += ('<li class="unselectable" id="level1">');
     wHTML += ('<a href="#">');
-    wHTML += ('<i class="fa fa-user text-olive"></i><span>' + ai_name + '</span><i class="fa fa-ellipsis-v pull-right"></i>');
+    if (ai_name.length > MAX_LENGTH_AINAME_TEXT_VISIBLE)
+        wHTML += ('<i class="fa fa-user text-olive"></i><span class="text-left" data-toggle="tooltip" title="'+ai_name+'">' + ai_name.substr(0,MAX_LENGTH_AINAME_TEXT_VISIBLE) + '</span><i class="fa fa-ellipsis-v pull-right"></i>');
+    else
+        wHTML += ('<i class="fa fa-user text-olive"></i><span class="text-left">'+ ai_name +'</span><i class="fa fa-ellipsis-v pull-right"></i>');
+
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
     wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>');
@@ -45,9 +50,9 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
 
     wHTML += ('<li class="unselectable" id="level2">');
     /*
-    wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-    wHTML += ('</li>');
-    */
+     wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
+     wHTML += ('</li>');
+     */
 
     if ((deep_level_name === '' || deep_level_name === undefined)) {
         wHTML += ('<li class="unselectable" id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i><span class="unselectable"> botstore</span></a></li>');

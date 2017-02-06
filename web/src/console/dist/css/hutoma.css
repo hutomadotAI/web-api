@@ -6459,11 +6459,19 @@ ul.pagination li a {
     margin: 0 0 5px 0;
 }
 
+.card-title:read-only {
+    background-color: #232426;
+}
+
 .card-description{
     font-size: 14px;
     text-align: center;
     color: #d2d6de !important;
     margin: 0 0 5px 0;
+}
+
+.card-description:read-only {
+    background-color: #232426;
 }
 
 .card-link {
