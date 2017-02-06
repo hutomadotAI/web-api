@@ -37,7 +37,6 @@ function uploadTextFile() {
                         msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded');
 
                     showAlertMessageFromUI(UI_STATE.FILE_UPLOADED.value);
-                    setUICurrentStatus(UI_STATE.FILE_UPLOADED.value);
                     startPollForStatus();
                     break;
                 case 400:
