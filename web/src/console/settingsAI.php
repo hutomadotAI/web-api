@@ -1,43 +1,44 @@
 <?php
-    require "../pages/config.php";
-    require_once "api/apiBase.php";
-    require_once "api/aiApi.php";
-    require_once "api/botApi.php";
-    require_once "common/bot.php";
+require "../pages/config.php";
+require_once "api/apiBase.php";
+require_once "api/aiApi.php";
+require_once "api/botApi.php";
+require_once "common/bot.php";
 
 
-    if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    if (!isSessionVariablesAvailable()) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
-    }
+if (!isSessionVariablesAvailable()) {
+    \hutoma\console::redirect('./error.php?err=105');
+    exit;
+}
 
-    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $puchasedBots = $botApi->getPurchasedBots();
+$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$puchasedBots = $botApi->getPurchasedBots();
 
-    $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-    unset($aiApi);
+$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($aiApi);
 
 
-    function isSessionVariablesAvailable()
-    {
-        return (
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
-        );
-    }
+function isSessionVariablesAvailable()
+{
+    return (
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
+    );
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -139,8 +140,8 @@
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, false, false]);
     </script>
     <script>
-        $( document ).ready(function() {
-            activeRightMenu("<?php if(isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
+        $(document).ready(function () {
+            activeRightMenu("<?php if (isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
         });
     </script>
 </form>
@@ -149,26 +150,7 @@
         $tmp_list = [];
         if (isset($puchasedBots) && (array_key_exists("bots", $puchasedBots))) {
             foreach ($puchasedBots['bots'] as $botDetails) {
-                $puchasedBot = new \hutoma\bot();
-                $puchasedBot->setAlertMessage($botDetails['alertMessage']);
-                $puchasedBot->setBadge($botDetails['badge']);
-                $puchasedBot->setBotId($botDetails['botId']);
-                $puchasedBot->setCategory($botDetails['category']);
-                $puchasedBot->setClassification($botDetails['classification']);
-                $puchasedBot->setDescription($botDetails['description']);
-                $puchasedBot->setLicenseType($botDetails['licenseType']);
-                $puchasedBot->setLongDescription($botDetails['longDescription']);
-                $puchasedBot->setName($botDetails['name']);
-                $puchasedBot->setPrice($botDetails['price']);
-                $puchasedBot->setPrivacyPolicy($botDetails['privacyPolicy']);
-                $puchasedBot->setSample($botDetails['sample']);
-                $puchasedBot->setVersion($botDetails['version']);
-                $puchasedBot->setVideoLink($botDetails['videoLink']);
-
-                $botIcon = $botApi->getBotIcon($botDetails['botId']);
-                $puchasedBot->setImagePath(base64_encode($botIcon));
-                unset($botIcon);
-
+                $puchasedBot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $puchasedBot->toJSON();
                 array_push($tmp_list, $tmp_bot);
             }
@@ -200,7 +182,7 @@
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        showBots(str,2);
+        showBots(str, 2);
     }
 </script>
 </body>

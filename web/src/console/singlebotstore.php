@@ -70,7 +70,6 @@ if (isset($botDetails)) {
             $bot->setLicenseType($botDetails['bot']['licenseType']);
             $bot->setUpdate($botDetails['bot']['lastUpdate']);
             $bot->setLongDescription($botDetails['bot']['longDescription']);
-            $bot->setImagePath('');
             $bot->setName($botDetails['bot']['name']);
             $bot->setPrice($botDetails['bot']['price']);
             $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
@@ -79,6 +78,7 @@ if (isset($botDetails)) {
             $bot->setActivations($bot->rangeActivation($bot->getUsers()));
             $bot->setVersion($botDetails['bot']['version']);
             $bot->setVideoLink($botDetails['bot']['videoLink']);
+            $bot->setIconFile($botDetails['bot']['botIcon']);
         }
         $tmp_bot = $bot->toJSON();
         unset($bot);
@@ -110,12 +110,12 @@ if (isset($botDetails)) {
 
                 <div class="col-md-12">
                     <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
-                    <?php
+                        <?php
                         include './dynamic/botstore.content.singleBot.card.html.php';
                         include './dynamic/botstore.content.singleBot.video.html.php';
                         include './dynamic/botstore.content.singleBot.description.html.php';
                         include './dynamic/botstore.content.singleBot.footer.html.php';
-                    ?>
+                        ?>
                     </div>
                     <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
                     <script src="./plugins/botstore/botstoreWizard.js"></script>
@@ -143,7 +143,7 @@ if (isset($botDetails)) {
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>","<?php echo $purchased; unset($purchased);?>");
+        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
         MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>

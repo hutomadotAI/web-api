@@ -39,17 +39,14 @@ function populateBotFields(bot) {
     document.getElementById('botPostCode').innerText = '08007';
     document.getElementById('botCity').innerText = 'Barcelona';
     document.getElementById('botCountry').innerText = 'Spain';
-
-    //TODO complete this field with iconPath from API call
-    //document.getElementById('botIcon').setAttribute('src','');
-    //document.getElementById('bot_aiid').value = json['aiid'];
+    document.getElementById('botIcon').setAttribute('src', json['imagePath']);
 
     document.getElementById('botNamePurchase').innerText = json['name'];
     document.getElementById('botDescriptionPurchase').innerText = json['description'];
     document.getElementById('botPricePurchase').innerText = json['price'];
     document.getElementById('bot_id').value = json['botId'];
 
-    if (json['videoLink']==null || videoLinkFilter(json['videoLink']) == '')
+    if (json['videoLink'] == null || videoLinkFilter(json['videoLink']) == '')
         document.getElementById('botVideoLinkSection').innerHTML = '';
     else
         document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(json['videoLink']));
