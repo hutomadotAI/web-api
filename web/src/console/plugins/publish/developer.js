@@ -6,6 +6,7 @@ document.getElementById("developer_address").addEventListener("keydown",function
 document.getElementById("developer_postCode").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_city").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
+document.getElementById("developer_website").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
 
 function checkDevInput(){
@@ -61,23 +62,21 @@ function requestDevPublish(){
             switch(statusCode['status']['code']){
                 case 200:
                     // UPDATED developer
-                    createAlertMessage(ALERT.PRIMARY.value, 'Request submitted!');
-                    $("#btnPublishDeveloper").prop("disabled", false);
-                    updateButton();
+                    $("#btnPublishDeveloper").prop("disabled", true);
+                    callback();
                     break;
                 case 400:
                     // UPDATED not complete
                     createAlertMessage(ALERT.DANGER.value,'At least one of the required parameters is null or empty');
                     $("#btnPublishDeveloper").prop("disabled", false);
+                    document.body.style.cursor = prevCursor;
                     break;
                 case 500:
                     // DEVELOPER JUST EXISTS
                     createAlertMessage(ALERT.WARNING.value,'Developer info sent');
+                    document.body.style.cursor = prevCursor;
                     break;
             }
-        },
-        complete: function () {
-            document.body.style.cursor = prevCursor;
         },
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
@@ -88,11 +87,15 @@ function requestDevPublish(){
 
 }
 
+function callback(){
+    location.href = "./publishAI.php";
+}
+
 function removeAlert(node){
     if( node.getAttribute("style") != null && node.getAttribute("style")!="" ) {
         node.style.border = "0px";
-        if( document.getElementById('containerMsgAlertPublish') !== null )
-            document.getElementById('containerMsgAlertPublish').remove();
+        if( document.getElementById('containerMsgAlertDeveloper') !== null )
+            document.getElementById('containerMsgAlertDeveloper').remove();
     }
 }
 
