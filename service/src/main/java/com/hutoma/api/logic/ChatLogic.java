@@ -259,6 +259,14 @@ public class ChatLogic {
     private void setAlarmId(String message) {
         message = message.toLowerCase();
 
+        if  (message.contains("7657")) {
+            sessionData(chatId).setAlarmId(7657);
+            sessionData(chatId).setActionId(1);
+        }
+        if  (message.contains("7650")) {
+            sessionData(chatId).setAlarmId(7650);
+            sessionData(chatId).setActionId(1);
+        }
         if (message.contains("70359")
                 || message.contains("fail") && message.contains("hdd")
                 || message.contains("disk") && message.contains("fail")
@@ -366,6 +374,16 @@ public class ChatLogic {
         if (sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() > 0) {
             sessionData(chatId).setTopic(sessionData(chatId).getAlarmId());
             sessionData(chatId).setT(Integer.toString(sessionData(chatId).getAlarmId()));
+
+            if ((sessionData(chatId).getAlarmId() == 7657) && (sessionData(chatId).getFlag() == 0)) {
+                sessionData(chatId).setFlag(1);
+                message = "alarm 7657 troubleshoot";
+            }
+
+            if ((sessionData(chatId).getAlarmId() == 7650) && (sessionData(chatId).getFlag() == 0)) {
+                sessionData(chatId).setFlag(1);
+                message = "alarm 7650 troubleshoot";
+            }
 
             if (sessionData(chatId).getAlarmId() == 70359 && sessionData(chatId).getFlag() == 0) {
                 sessionData(chatId).setHist("do you want to troubleshoot it or check the description?");
