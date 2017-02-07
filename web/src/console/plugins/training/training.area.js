@@ -3,12 +3,13 @@ var UI_STATE =
     ERROR: {value: -1},
     NOTHING: {value: 0},
     FILE_UPLOADED: {value: 1},
-    PHASE1_INIT: {value: 2},
-    PHASE1_QUEUE: {value: 3},
-    PHASE1_RUN: {value: 4},
-    PHASE2_INIT: {value: 5},
-    PHASE2_RUN: {value: 6},
-    STOPPED: {value: 7},
+    READY_TO_TRAIN: {value: 2},
+    PHASE1_INIT: {value: 3},
+    PHASE1_QUEUE: {value: 4},
+    PHASE1_RUN: {value: 5},
+    PHASE2_INIT: {value: 6},
+    PHASE2_RUN: {value: 7},
+    STOPPED: {value: 8},
     COMPLETED: {value: 10},
     LISTENING_MODE:{value:999}
 };
@@ -196,6 +197,9 @@ function getUIStatusCall() {
             break;
         case (status == UI_STATE.FILE_UPLOADED.value):
             hideRestartBox();
+            break;
+        case (status == UI_STATE.READY_TO_TRAIN.value):
+            hideRestartBox();
 
             phaseOneReset();
             phaseOneFlashing(true);
@@ -280,7 +284,7 @@ function setStateResponse(aiStatus) {
             break;
         case API_AI_STATE.READY_TO_TRAIN.value:
             if (status != ai_status_last)
-                setUICurrentStatus(UI_STATE.FILE_UPLOADED.value);
+                setUICurrentStatus(UI_STATE.READY_TO_TRAIN.value);
             break;
         case API_AI_STATE.TRAINING.value:
             closeMessageWarningInfoAlert();
