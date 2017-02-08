@@ -325,7 +325,7 @@ public class ChatLogic {
             return "";
         }
 
-        setAction(message);
+        // setAction(message);
         setAlarmId(message);
 
         if (sessionData(chatId).getActionId() > 0 || sessionData(chatId).getAlarmId() > 0) {
