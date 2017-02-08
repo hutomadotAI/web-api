@@ -342,14 +342,14 @@ function trainingStartCall() {
             if ((statusCode === 200 ) || (statusCode === 400 )) {
                 setUICurrentStatus(UI_STATE.PHASE1_INIT.value);
             } else {
-                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! code error ' + statusCode);
+                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! Error code ' + statusCode +'!');
                 setUICurrentStatus(UI_STATE.ERROR.value);
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(UI_STATE.ERROR.value);
-            msgAlertProgressBar(ALERT.DANGER.value, 'Unexpected error occurred during start training');
+            msgAlertProgressBar(ALERT.DANGER.value, 'Unexpected error occurred, please re-upload the training file.');
         }
     });
 }
@@ -367,17 +367,17 @@ function trainingStatusCall() {
                     setStateResponse(jsonData);
                 } else {
                     setUICurrentStatus(UI_STATE.ERROR.value);
-                    msgAlertProgressBar(ALERT.DANGER.value, 'An error has occurred while trying to get the AI\'s status');
+                    msgAlertProgressBar(ALERT.DANGER.value, 'An error has occurred while trying to get the Bot\'s status.');
                 }
             } catch (e) {
                 setUICurrentStatus(UI_STATE.ERROR.value);
-                msgAlertProgressBar(ALERT.DANGER.value, 'Unable to query AI training status');
+                msgAlertProgressBar(ALERT.DANGER.value, 'Unable to query Bots training status.');
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(UI_STATE.ERROR.value);
-            msgAlertProgressBar(ALERT.DANGER.value, 'Cannot contact server to query AI status');
+            msgAlertProgressBar(ALERT.DANGER.value, 'Cannot contact server.');
         }
     });
 }
@@ -475,7 +475,7 @@ function showAlertMessage(aiStatus){
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started.');
             break;
         case UI_TRAINING_STATE.PHASE1_INIT.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization Phase one. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase one. Please wait.');
             break;
         case UI_TRAINING_STATE.PHASE1_RUN.value:
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
@@ -483,7 +483,7 @@ function showAlertMessage(aiStatus){
         case UI_TRAINING_STATE.PHASE1_END.value:
             break;
         case UI_TRAINING_STATE.PHASE2_INIT.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization Phase two may take one minute. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase two may take a few minutes. Please wait.');
             break;
         case UI_TRAINING_STATE.PHASE2_RUN.value:
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two in progress...');
@@ -492,7 +492,7 @@ function showAlertMessage(aiStatus){
             msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training.');
             break;
         case API_AI_STATE.COMPLETED.value:
-            msgAlertProgressBar(ALERT.SUCCESS.value, 'Training completed.');
+            msgAlertProgressBar(ALERT.SUCCESS.value, 'Training complete.');
             break;
         case API_AI_STATE.ERROR.value:
             msgAlertProgressBar(ALERT.DANGER.value, 'An error has occurred.');
@@ -517,7 +517,7 @@ function showAlertMessageFromUI(status){
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
             break;
         case UI_STATE.PHASE2_INIT.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization Phase two may take one minute. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization Phase two may take a few minutes. Please wait.');
             break;
         case UI_STATE.PHASE2_RUN.value:
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two in progress...');
@@ -526,7 +526,7 @@ function showAlertMessageFromUI(status){
             msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training.');
             break;
         case UI_STATE.COMPLETED.value:
-            msgAlertProgressBar(ALERT.SUCCESS.value, 'Training completed.');
+            msgAlertProgressBar(ALERT.SUCCESS.value, 'Training complete.');
             break;
         default:
     }

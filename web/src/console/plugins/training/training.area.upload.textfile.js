@@ -63,7 +63,7 @@ function uploadTextFile() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertUploadFile(ALERT.DANGER.value, 'An unexpected error occurred during upload.');
+            msgAlertUploadFile(ALERT.DANGER.value, 'Unexpected error occurred, please re-upload the training file.');
             disableButtonUploadTextFile(false);
             disableRestartBoxButton(false);
         }

@@ -16,7 +16,7 @@
         <p></p>
 
         <div id="collapseStart" class="panel-collapse collapse">
-            <div class="box-body">
+            <div class="box-body" style="padding: 10px 0 0 0;">
                 <div class="overlay center-block">
                     <section class="content-info" >
                         <div class="box-body">
@@ -29,9 +29,7 @@
     </div>
 
     <div class="box-footer">
-        <span>
-            If you’re stuck check out our <a href='#' tabindex="-1">video tutorial </a> or email <a href='#' tabindex="-1">support@hutoma.com</a> for an invite to our community slack channel.
-        </span>
+        <span>If you’re stuck check out our <a href='#' tabindex="-1">video tutorial </a> or email <a href='#' tabindex="-1">support@hutoma.com</a> for an invite to our community slack channel.</span>
     </div>
 
 </div>
