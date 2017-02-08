@@ -23,6 +23,7 @@ var UI_TRAINING_STATE =
     PHASE2_RUN: {value: 201}
 };
 
+var ID_pool;
 var ai_status_last = "";
 
 initializeEventListeners();
@@ -33,11 +34,11 @@ function pollStatus() {
 }
 
 function startPollForStatus() {
-    setInterval(pollStatus, 2000);
+    ID_pool = setInterval(pollStatus, 2000);
 }
 
 function stopPollForStatus() {
-    clearInterval(pollStatus);
+    clearInterval(ID_pool);
 }
 
 function initializeEventListeners() {
@@ -241,7 +242,7 @@ function getUIStatusCall() {
             var error = getDeepLearningError();
 
             phaseTwoFlashing(false);
-            phaseOneStriped(true);
+            phaseOneStriped(false);
             hideChart(false);
             phaseTwoUpdate(progress);
             updateDeepLearningError(error);
@@ -249,6 +250,8 @@ function getUIStatusCall() {
             break;
         case (status == UI_STATE.STOPPED.value):
             if (!justStopped()) {
+                stopPollForStatus();
+
                 createMessageWarningInfoAlert();
                 hideChart(true);
                 hidePreTrainingBar(true);
