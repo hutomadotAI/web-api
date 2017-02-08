@@ -53,12 +53,9 @@ public class ChatLogic {
     private final IEntityRecognizer entityRecognizer;
     private final AIChatServices chatServices;
     private final ChatTelemetryLogger chatTelemetryLogger;
-
-
-    private Map<String, String> telemetryMap;
-
     // @TODO demo hack
     private final AssistantSessions assistantSessions;
+    private Map<String, String> telemetryMap;
     private String chatId;
     // @TODO /demo hack
 
@@ -213,8 +210,8 @@ public class ChatLogic {
         UUID chatUuid = UUID.fromString(chatId);
         this.chatId = chatId;
 
-        if (!assistantSessions.sessions.containsKey(chatId)) {
-            assistantSessions.sessions.put(chatId, new AssistantState());
+        if (!this.assistantSessions.sessions.containsKey(chatId)) {
+            this.assistantSessions.sessions.put(chatId, new AssistantState());
         }
 
         String answer = insertMessage(question);
@@ -255,17 +252,69 @@ public class ChatLogic {
         return apiChat.setSuccessStatus();
     }
 
+    public void setAction(String message) {
+        message = message.toLowerCase();
+
+        if (message.contains("troubleshoot")
+                || message.contains("debug")
+                || message.contains("fix")
+                || message.contains("clear")) {
+            sessionData(this.chatId).setActionId(1);
+        }
+
+        if (message.contains("read")
+                || message.contains("description")
+                || message.contains("describe")) {
+            sessionData(this.chatId).setAlarmId(2);
+        }
+    }
+
+    public String AITalk(String message, int userId) {
+        String answer = "";
+        HttpURLConnection connection = null;
+        Map output = null;
+
+        try {
+            String uid = URLEncoder.encode(Integer.toString(sessionData(this.chatId).getUserid()), "UTF-8");
+            String aid = URLEncoder.encode("384", "UTF-8");
+            String q = URLEncoder.encode(message, "UTF-8");
+            URL url = new URL("https://www.hutoma.com:8443/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
+
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setReadTimeout(30 * 1000);
+
+            try (InputStream is = connection.getInputStream()) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
+                    while ((line = rd.readLine()) != null) {
+                        response.append(line);
+                    }
+                }
+                String jsonp = response.toString();
+                String json = jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
+                output = (Map) JSON.parse(json);
+            }
+        } catch (Exception e) {
+            // Connection potentially failed.
+        }
+
+        String response = (String) output.get("output");
+        return response.substring(response.indexOf("]") + 1);
+    }
+
     // @TODO demo hack
     private void setAlarmId(String message) {
         message = message.toLowerCase();
 
         if  (message.contains("7657")) {
-            sessionData(chatId).setAlarmId(7657);
-            sessionData(chatId).setActionId(1);
+            sessionData(this.chatId).setAlarmId(7657);
+            sessionData(this.chatId).setActionId(1);
         }
         if  (message.contains("7650")) {
-            sessionData(chatId).setAlarmId(7650);
-            sessionData(chatId).setActionId(1);
+            sessionData(this.chatId).setAlarmId(7650);
+            sessionData(this.chatId).setActionId(1);
         }
         if (message.contains("70359")
                 || message.contains("fail") && message.contains("hdd")
@@ -276,7 +325,7 @@ public class ChatLogic {
                 || message.contains("disk") && message.contains("issue")
                 || message.contains("disk") && message.contains("alarm")
                 || message.contains("hdd") && message.contains("alarm")) {
-            sessionData(chatId).setAlarmId(70359);
+            sessionData(this.chatId).setAlarmId(70359);
         }
 
         if (message.contains("3159") || message.contains("3199")
@@ -287,36 +336,19 @@ public class ChatLogic {
                 || message.contains("disk") && message.contains("issue")
                 || message.contains("temperature") && message.contains("issue")
                 || message.contains("temperature") && message.contains("alarm")) {
-            sessionData(chatId).setAlarmId(3199);
-        }
-    }
-
-    public void setAction(String message) {
-        message = message.toLowerCase();
-
-        if (message.contains("troubleshoot")
-                || message.contains("debug")
-                || message.contains("fix")
-                || message.contains("clear")) {
-            sessionData(chatId).setActionId(1);
-        }
-
-        if (message.contains("read")
-                || message.contains("description")
-                || message.contains("describe")) {
-            sessionData(chatId).setAlarmId(2);
+            sessionData(this.chatId).setAlarmId(3199);
         }
     }
 
     private void resetMemory() {
-        sessionData(chatId).setCurrentAI(1);
-        sessionData(chatId).setHist("");
-        sessionData(chatId).setT("");
-        sessionData(chatId).setActionId(-1);
-        sessionData(chatId).setAlarmId(-1);
-        sessionData(chatId).setTopic(-1);
-        sessionData(chatId).setFlag(0);
-        sessionData(chatId).setNtries(0);
+        sessionData(this.chatId).setCurrentAI(1);
+        sessionData(this.chatId).setHist("");
+        sessionData(this.chatId).setT("");
+        sessionData(this.chatId).setActionId(-1);
+        sessionData(this.chatId).setAlarmId(-1);
+        sessionData(this.chatId).setTopic(-1);
+        sessionData(this.chatId).setFlag(0);
+        sessionData(this.chatId).setNtries(0);
     }
 
     private String insertMessage(String message) {
@@ -325,14 +357,15 @@ public class ChatLogic {
             return "";
         }
 
-        setAction(message);
+        // temporarely disabled as per Nokia request
+        //setAction(message);
         setAlarmId(message);
 
-        if (sessionData(chatId).getActionId() > 0 || sessionData(chatId).getAlarmId() > 0) {
-            sessionData(chatId).setCurrentAI(0);
+        if (sessionData(this.chatId).getActionId() > 0 || sessionData(this.chatId).getAlarmId() > 0) {
+            sessionData(this.chatId).setCurrentAI(0);
         }
         else {
-            sessionData(chatId).setCurrentAI(1);
+            sessionData(this.chatId).setCurrentAI(1);
         }
 
         if (message.toLowerCase().contains("new issue") || message.toLowerCase().contains("reset")
@@ -342,58 +375,58 @@ public class ChatLogic {
             message = "";
         }
 
-        if (sessionData(chatId).getActionId() < 0 && sessionData(chatId).getAlarmId() < 0) {
-            sessionData(chatId).setCurrentAI(1);
+        if (sessionData(this.chatId).getActionId() < 0 && sessionData(this.chatId).getAlarmId() < 0) {
+            sessionData(this.chatId).setCurrentAI(1);
         }
-        if (sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() < 0) {
-            sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
-            if (sessionData(chatId).getNtries() == 1){
+        if (sessionData(this.chatId).getActionId() > 0 && sessionData(this.chatId).getAlarmId() < 0) {
+            sessionData(this.chatId).setNtries(sessionData(this.chatId).getNtries() + 1);
+            if (sessionData(this.chatId).getNtries() == 1) {
                 results.add("Can you please tell me the alarm number if you are refering to? You can type 70359 or 3159.");
             }
             else {
-                sessionData(chatId).setCurrentAI(1);
+                sessionData(this.chatId).setCurrentAI(1);
                 resetMemory();
             }
         }
-        if (sessionData(chatId).getActionId() < 0 && sessionData(chatId).getAlarmId() > 0) {
-            sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
-            if (sessionData(chatId).getNtries() == 1) {
+        if (sessionData(this.chatId).getActionId() < 0 && sessionData(this.chatId).getAlarmId() > 0) {
+            sessionData(this.chatId).setNtries(sessionData(this.chatId).getNtries() + 1);
+            if (sessionData(this.chatId).getNtries() == 1) {
                 results.add("Do you want to troubleshoot the alarm or check the description?");
             }
             else {
-                sessionData(chatId).setCurrentAI(1);
+                sessionData(this.chatId).setCurrentAI(1);
                 resetMemory();
             }
         }
 
-        if (sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() > 0) {
-            sessionData(chatId).setTopic(sessionData(chatId).getAlarmId());
-            sessionData(chatId).setT(Integer.toString(sessionData(chatId).getAlarmId()));
+        if (sessionData(this.chatId).getActionId() > 0 && sessionData(this.chatId).getAlarmId() > 0) {
+            sessionData(this.chatId).setTopic(sessionData(this.chatId).getAlarmId());
+            sessionData(this.chatId).setT(Integer.toString(sessionData(this.chatId).getAlarmId()));
 
-            if ((sessionData(chatId).getAlarmId() == 7657) && (sessionData(chatId).getFlag() == 0)) {
-                sessionData(chatId).setFlag(1);
+            if ((sessionData(this.chatId).getAlarmId() == 7657) && (sessionData(this.chatId).getFlag() == 0)) {
+                sessionData(this.chatId).setFlag(1);
                 message = "alarm 7657 troubleshoot";
             }
 
-            if ((sessionData(chatId).getAlarmId() == 7650) && (sessionData(chatId).getFlag() == 0)) {
-                sessionData(chatId).setFlag(1);
+            if ((sessionData(this.chatId).getAlarmId() == 7650) && (sessionData(this.chatId).getFlag() == 0)) {
+                sessionData(this.chatId).setFlag(1);
                 message = "alarm 7650 troubleshoot";
             }
 
-            if (sessionData(chatId).getAlarmId() == 70359 && sessionData(chatId).getFlag() == 0) {
-                sessionData(chatId).setHist("do you want to troubleshoot it or check the description?");
-                sessionData(chatId).setFlag(1);
-                if (sessionData(chatId).getActionId() == 1) {
+            if (sessionData(this.chatId).getAlarmId() == 70359 && sessionData(this.chatId).getFlag() == 0) {
+                sessionData(this.chatId).setHist("do you want to troubleshoot it or check the description?");
+                sessionData(this.chatId).setFlag(1);
+                if (sessionData(this.chatId).getActionId() == 1) {
                     message = "70359 troubleshoot";
                 }
                 else {
                     message = "70359 description";
                 }
             }
-            if (sessionData(chatId).getAlarmId() == 3199 && sessionData(chatId).getFlag() == 0) {
-                sessionData(chatId).setHist("do you want to troubleshoot alarm 3199 it or to check the description?");
-                sessionData(chatId).setFlag(1);
-                if (sessionData(chatId).getActionId() == 1) {
+            if (sessionData(this.chatId).getAlarmId() == 3199 && sessionData(this.chatId).getFlag() == 0) {
+                sessionData(this.chatId).setHist("do you want to troubleshoot alarm 3199 it or to check the description?");
+                sessionData(this.chatId).setFlag(1);
+                if (sessionData(this.chatId).getActionId() == 1) {
                     message = "3199 troubleshoot";
                 }
                 else {
@@ -402,7 +435,7 @@ public class ChatLogic {
             }
         }
 
-        if (sessionData(chatId).getHist().contains("is the second field of alarm 00 or 01") &&
+        if (sessionData(this.chatId).getHist().contains("is the second field of alarm 00 or 01") &&
                 (message.toLowerCase().contains("cfpu0") ||
                 message.toLowerCase().contains("cfpu-0") ||
                 message.toLowerCase().contains("0") ||
@@ -416,23 +449,23 @@ public class ChatLogic {
             message = "";
         }
 
-        if (sessionData(chatId).getHist().contains("Can you please tell me the alarm number if you are refering to? You can type 70359 or 3199.")
+        if (sessionData(this.chatId).getHist().contains("Can you please tell me the alarm number if you are refering to? You can type 70359 or 3199.")
                 && (message.toLowerCase().contains("70359")
                 || message.toLowerCase().contains("3199")) == false) {
-            if (sessionData(chatId).getNtries() < 1) {
+            if (sessionData(this.chatId).getNtries() < 1) {
                 results.add("Sorry you need to tell me the alarm ID. You can type either 70359 or 3199.");
-                sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
+                sessionData(this.chatId).setNtries(sessionData(this.chatId).getNtries() + 1);
                 message = "";
             }
             else {
                 results.add("Ok. lets talk about something else.");
                 resetMemory();
-                sessionData(chatId).setCurrentAI(1);
+                sessionData(this.chatId).setCurrentAI(1);
                 message = "";
             }
         }
 
-        if (sessionData(chatId).getHist().contains("is it cfpu-0 or cfpu-1") &&
+        if (sessionData(this.chatId).getHist().contains("is it cfpu-0 or cfpu-1") &&
                 (message.toLowerCase().contains("cfpu0") ||
                 message.toLowerCase().contains("cfpu-0") ||
                 message.toLowerCase().contains("0") ||
@@ -442,17 +475,17 @@ public class ChatLogic {
                 message.toLowerCase().contains("first") ||
                 message.toLowerCase().contains("last")) == false) {
             results.add("is the second field of alarm 00 or 01?");
-            sessionData(chatId).setHist("is the second field of alarm 00 or 01?");
+            sessionData(this.chatId).setHist("is the second field of alarm 00 or 01?");
             message = "";
         }
 
-        if (sessionData(chatId).getCurrentAI() == 0 && sessionData(chatId).getActionId() > 0 && sessionData(chatId).getAlarmId() > 0 && message != "") {
+        if (sessionData(this.chatId).getCurrentAI() == 0 && sessionData(this.chatId).getActionId() > 0 && sessionData(this.chatId).getAlarmId() > 0 && message != "") {
             HttpURLConnection connection = null;
             Map output = null;
 
             try {
-                String chatHistory = URLEncoder.encode(sessionData(chatId).getHist(), "UTF-8");
-                String currentTopic = URLEncoder.encode(sessionData(chatId).getT(), "UTF-8");
+                String chatHistory = URLEncoder.encode(sessionData(this.chatId).getHist(), "UTF-8");
+                String currentTopic = URLEncoder.encode(sessionData(this.chatId).getT(), "UTF-8");
                 String q = URLEncoder.encode(message, "UTF-8");
                 URL url = new URL("https://api.hutoma.com/nokia/ai/8fa2a7c0-b681-4d5a-9b60-b61babfaf9ce/chat?confidence_threshold=0.55&chat_history=" + chatHistory + "&current_topic=" + currentTopic + "&uid=87142473&q=" + q);
 
@@ -481,9 +514,9 @@ public class ChatLogic {
             Map result = (Map)output.get("result");
             String res = null;
 
-            sessionData(chatId).setT("");
+            sessionData(this.chatId).setT("");
             if (result.containsKey("topic_out")) {
-                sessionData(chatId).setT((String) result.get("topic_out"));
+                sessionData(this.chatId).setT((String) result.get("topic_out"));
             }
 
             res = "Sorry i dont have an answer for you";
@@ -496,7 +529,7 @@ public class ChatLogic {
             }
             else {
                 if (res.contains("@pause")) {
-                    sessionData(chatId).setCurrentAI(1);
+                    sessionData(this.chatId).setCurrentAI(1);
                     res = res.replace("@pause", "");
                     resetMemory();
                     results.add(res);
@@ -506,41 +539,41 @@ public class ChatLogic {
                     double sc = (double)result.get("score");
                     try {
                         if (sc > 0.6f && (String)result.get("score") != "0") {
-                            sessionData(chatId).setHist(((String) result.get("answer")).trim());
+                            sessionData(this.chatId).setHist(((String) result.get("answer")).trim());
                         }
                     } catch (Exception e) {
                         // Do nothing.
                     }
 
                     if (sc > 0.6f) {
-                        sessionData(chatId).setCurrentAI(0);
-                        sessionData(chatId).setNtries(0);
+                        sessionData(this.chatId).setCurrentAI(0);
+                        sessionData(this.chatId).setNtries(0);
                         results.add(res);
                     }
                     else {
-                        if (sessionData(chatId).getNtries() < 3) {
-                            sessionData(chatId).setNtries(sessionData(chatId).getNtries() + 1);
-                            if (sessionData(chatId).getNtries() == 1) {
+                        if (sessionData(this.chatId).getNtries() < 3) {
+                            sessionData(this.chatId).setNtries(sessionData(this.chatId).getNtries() + 1);
+                            if (sessionData(this.chatId).getNtries() == 1) {
                                 results.add("Can you please rephrase your question?");
                             }
                             else {
                                 resetMemory();
-                                sessionData(chatId).setCurrentAI(1);
+                                sessionData(this.chatId).setCurrentAI(1);
                                 results.add("Sorry I dont think I have been trained to recognise this phrase. I will contact Nokia.");
                             }
                         } else {
-                            sessionData(chatId).setNtries(0);
-                            sessionData(chatId).setHist("");
-                            sessionData(chatId).setCurrentAI(1);
-                            results.add(AITalk(message, sessionData(chatId).getUserid()));
+                            sessionData(this.chatId).setNtries(0);
+                            sessionData(this.chatId).setHist("");
+                            sessionData(this.chatId).setCurrentAI(1);
+                            results.add(AITalk(message, sessionData(this.chatId).getUserid()));
                         }
                     }
                 }
             }
         }
         else {
-            if (sessionData(chatId).getActionId() < 0 && sessionData(chatId).getAlarmId() < 0 && message != "") {
-                results.add(AITalk(message, sessionData(chatId).getUserid()));
+            if (sessionData(this.chatId).getActionId() < 0 && sessionData(this.chatId).getAlarmId() < 0 && message != "") {
+                results.add(AITalk(message, sessionData(this.chatId).getUserid()));
             }
         }
 
@@ -550,42 +583,6 @@ public class ChatLogic {
             result.append("\r\n");
         }
         return result.toString();
-    }
-
-    public String AITalk(String message, int userId) {
-        String answer = "";
-        HttpURLConnection connection = null;
-        Map output = null;
-
-        try {
-            String uid = URLEncoder.encode(Integer.toString(sessionData(chatId).getUserid()), "UTF-8");
-            String aid = URLEncoder.encode("384", "UTF-8");
-            String q = URLEncoder.encode(message, "UTF-8");
-            URL url = new URL("https://www.hutoma.com:8443/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
-
-            connection = (HttpURLConnection)url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setReadTimeout(30*1000);
-
-            try (InputStream is = connection.getInputStream()) {
-                StringBuilder response = new StringBuilder();
-                String line;
-                try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
-                    while ((line = rd.readLine()) != null) {
-                        response.append(line);
-                    }
-                }
-                String jsonp = response.toString();
-                String json = jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
-                output = (Map) JSON.parse(json);
-            }
-        }
-        catch (Exception e) {
-            // Connection potentially failed.
-        }
-
-        String response = (String)output.get("output");
-        return response.substring(response.indexOf("]") + 1);
     }
 
     private AssistantState sessionData(String chatId) {
