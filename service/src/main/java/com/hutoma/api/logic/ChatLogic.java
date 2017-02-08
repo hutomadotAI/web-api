@@ -295,18 +295,13 @@ public class ChatLogic {
         message = message.toLowerCase();
 
         if (message.contains("troubleshoot")
-                || message.contains("truble")
-                || message.contains("troble")
-                || message.contains("trouble")
                 || message.contains("debug")
                 || message.contains("fix")
-                || message.contains("solve")
                 || message.contains("clear")) {
             sessionData(chatId).setActionId(1);
         }
 
         if (message.contains("read")
-                || message.contains("check")
                 || message.contains("description")
                 || message.contains("describe")) {
             sessionData(chatId).setAlarmId(2);
