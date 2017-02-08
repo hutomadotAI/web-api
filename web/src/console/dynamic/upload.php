@@ -21,15 +21,15 @@ if (!isset($_POST['tab'])) {
 switch ($_POST['tab']) {
     case 'file':
         if (!isset($_FILES['inputfile'])) {
-            echo json_encode(prepareResponse(500, 'Upload file failed'), true);
+            echo json_encode(prepareResponse(500, 'Upload file failed.'), true);
             exit;
         }
         if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK) {
-            echo json_encode(prepareResponse(500, 'Something is gone wrong'), true);
+            echo json_encode(prepareResponse(500, 'Something is gone wrong.'), true);
             exit;
         }
         if (!is_uploaded_file($_FILES['inputfile']['tmp_name'])) {
-            echo json_encode(prepareResponse(500, 'Empty file'), true);
+            echo json_encode(prepareResponse(500, 'Empty file.'), true);
             exit;
         }
 

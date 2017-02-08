@@ -91,7 +91,7 @@ function initializeAlertMessage(aiStatus) {
     parent.innerHTML = wHTML;
 
     if (aiStatus["training_file_uploaded"] != 0)
-        msgAlertUploadFile(ALERT.PRIMARY.value, 'A file is already loaded.');
+        msgAlertUploadFile(ALERT.PRIMARY.value, 'File\'s loaded already.');
 }
 
 function initializeTrainingConsole(aiStatus){

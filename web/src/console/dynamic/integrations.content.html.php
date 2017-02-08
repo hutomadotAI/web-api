@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow" id="newAiintegration">
     <div class="box-header with-border">
-        <div class="box-title"><b>Select integrations</b></div>
+        <div class="box-title"><b>Integrations</b></div>
         <a data-toggle="collapse"  href="#collapseInfoIntegrations">
             <div class=" pull-right"> <i class="fa fa-info-circle text-sm text-yellow"></i> more info
             </div>
@@ -14,7 +14,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewIntegraions" style="margin-bottom:5px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="icongAlertNewIntegrations"></i>
-            <span id="msgAlertIntegrations">Check how combine AIs wit other system.</span>
+            <span id="msgAlertIntegrations">Search for external integrations, e.g. Facebook Messenger</span>
         </div>
     </div>
 

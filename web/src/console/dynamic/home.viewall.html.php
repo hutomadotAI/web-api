@@ -8,9 +8,9 @@
             <thead>
             <tr disabled>
             <th class="text-center" style="border:0; width:35%">ID</th>
-            <th class="text-left" style="border:0; width:20%">AI Name</th>
+            <th class="text-left" style="border:0; width:20%">Bot Name</th>
             <th class="text-left" style="border:0; width:25%">Description</th>
-            <th class="text-center" style="border:0; width:15%">Training</th>
+            <th class="text-center" style="border:0; width:15%">Status</th>
             <th style="border:0; width:5%"></th>
             <th style="border:0; width:5%"></th>
             </tr>

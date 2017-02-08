@@ -4,7 +4,7 @@
 
 <div class="box-header with-border unselectable">
     <i class="fa fa-sliders text-success"></i>
-    <div class="box-title"><b>General Informations</b></div>
+    <div class="box-title"><b>General Information</b></div>
     <a data-toggle="collapse" href="#collapseInfoGeneral">
         <div class=" pull-right">more info
             <i class="fa fa-question-circle text-sm text-yellow"></i>

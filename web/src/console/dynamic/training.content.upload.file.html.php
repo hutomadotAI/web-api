@@ -2,12 +2,12 @@
 
     <div class="box-header with-border">
         <i class="fa fa-cloud-upload text-info"></i>
-        <div class="box-title"><b>Ai Training</b></div>
+        <div class="box-title"><b>Upload File</b></div>
     </div>
     <div class="box-body">
 
         <button id="btnUploadFile" class="btn btn-success btn-sm pull-right flat" style="width: 120px;" disabled>
-            <i class="fa fa-cloud-upload"></i> Upload
+            <i class="fa fa-cloud-upload"></i> upload
         </button>
 
         <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
@@ -15,7 +15,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUploadFile">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
-            <span id="msgAlertUploadFile">Upload a text file with chat examples to begin training</span>
+            <span id="msgAlertUploadFile">Upload a text file with chat examples to begin training.</span>
         </div>
 
         <!-- link video tutorial -->

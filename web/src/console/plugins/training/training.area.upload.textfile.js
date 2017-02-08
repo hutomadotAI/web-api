@@ -34,15 +34,18 @@ function uploadTextFile() {
                     if (uploadWarnings != null && uploadWarnings.length > 0)
                         msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded, but with warnings:\n' + uploadWarnings.join("\n"));
                     else
-                        msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded');
+                        msgAlertUploadFile(ALERT.PRIMARY.value, 'File uploaded.');
 
                     showAlertMessageFromUI(UI_STATE.FILE_UPLOADED.value);
                     setUICurrentStatus(UI_STATE.FILE_UPLOADED.value);
                     startPollForStatus();
                     break;
                 case 400:
-                    if (haNoContentError(JSONdata['status']['additionalInfo']))
-                        msgAlertUploadFile(ALERT.DANGER.value, 'File not uploaded. No right content was found.');
+                    if (haNoContentError(JSONdata['status']['additionalInfo'])) {
+                        $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-danger');
+                        $("#iconAlertUploadFile").attr('class', 'icon fa fa-warning');
+                        document.getElementById('msgAlertUploadFile').innerHTML = 'There was a problem reading your file. Please check that the content follows our structure. You can load a sample file  <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor=\'pointer\'">here</a>';
+                    }
                     else
                         msgAlertUploadFile(ALERT.DANGER.value, 'Something has gone wrong. File not uploaded.');
 
@@ -60,7 +63,7 @@ function uploadTextFile() {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertUploadFile(ALERT.DANGER.value, 'Unexpected error occurred during upload');
+            msgAlertUploadFile(ALERT.DANGER.value, 'An unexpected error occurred during upload.');
             disableButtonUploadTextFile(false);
             disableRestartBoxButton(false);
         }
@@ -71,7 +74,7 @@ function isTextFileSelected() {
     var elementValue = document.getElementById("inputfile").value;
     if (elementValue == null || elementValue == "") {
         disableButtonUploadTextFile(true);
-        msgAlertUploadFile(ALERT.WARNING.value, 'You need to choose a file first');
+        msgAlertUploadFile(ALERT.WARNING.value, 'You need to choose a file first.');
         return false;
     }
     return true;
@@ -81,7 +84,7 @@ function checkTextFileSize(fileID, size) {
     var input, file;
     input = document.getElementById(fileID);
     if (!window.FileReader) {
-        msgAlertUploadFile(ALERT.DANGER.value, 'The file API isn\'t supported on this browser');
+        msgAlertUploadFile(ALERT.DANGER.value, 'The file API isn\'t supported on this browser.');
         return false;
     }
     if (!input.files) {
@@ -91,7 +94,7 @@ function checkTextFileSize(fileID, size) {
 
     file = input.files[0];
     if (file.size > size * 1048476) {
-        msgAlertUploadFile(ALERT.DANGER.value, 'The file size exceeds the limit allowed and cannot be uploaded.');
+        msgAlertUploadFile(ALERT.DANGER.value, 'Sorry, the file size exceeds our limit.');
         return false;
     }
 
@@ -103,7 +106,7 @@ function enableUploadTextFile() {
         disableButtonUploadTextFile(true);
     else
         disableButtonUploadTextFile(false);
-    msgAlertUploadFile(ALERT.BASIC.value, 'You can now upload your file');
+    msgAlertUploadFile(ALERT.BASIC.value, 'You can now upload your file.');
 }
 
 function disableButtonUploadTextFile(state) {
