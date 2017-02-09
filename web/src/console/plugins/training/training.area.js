@@ -646,8 +646,7 @@ function createMessageWarningInfoAlert() {
     wHTML += ('<span id="msgAlertWarningTrainingInfo">');
     wHTML += ('<dt>Start info pre-trained neural Manipulation</dt>');
     wHTML += ('<dd>');
-    wHTML += ('The goals of the training program should relate directly to the needs determined by the assessment process outlined above.');
-    wHTML += ('Course objectives should clearly state what behavior or skill will be changed as a result of the training and should relate');
+    wHTML += ('We detected a few changes to the Bot training data and hence we recommend you restart the training.');
     wHTML += ('</dd>');
     wHTML += ('<p></p>');
     wHTML += ('<dt class="text-center">');
