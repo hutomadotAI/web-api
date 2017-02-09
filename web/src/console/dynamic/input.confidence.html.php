@@ -14,12 +14,13 @@
     </div>
 </div>
 <div id="collapseConfidence" class="panel-collapse collapse">
-    <div class="box-body">
+    <div class="box-body no-padding">
         <div class="overlay center-block">
             <section class="content-info" >
                 <div class="box-body">
-                    <dt>What does this mean?</dt>
-                    <dd>By enabling this functionality you will let the AI decide when to follow pre-packaged answers vs creating new ones based on the training data you provide.</dd>
+                    <dl class="dl-horizontal no-margin" style="text-align:justify">
+                        By enabling this functionality you will let the Bot decide when to follow pre-packaged answers vs creating new ones based on the training data you provide.
+                    </dl>
                 </div>
             </section>
         </div>

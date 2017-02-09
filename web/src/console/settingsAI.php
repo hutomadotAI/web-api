@@ -83,7 +83,7 @@ function isSessionVariablesAvailable()
             <div class="nav-tabs-custom flat no-shadow no-border">
                 <ul class="nav nav-tabs">
                     <li class="active" id="tab_general"><a href="#page_general" data-toggle="tab">General</a></li>
-                    <li id="tab_aiskill" id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">AI Skills</a></li>
+                    <li id="tab_aiskill" id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">Bot Skills</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-bottom:0px;">

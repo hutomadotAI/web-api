@@ -4,7 +4,7 @@ document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkil
 
 $(function () {
     if((purchasedBots).length==0) {
-        msgAlertAiSkill(ALERT.WARNING.value,'This list is empty. Please go to the <a href="./botstore.php">botstore</a>');
+        msgAlertAiSkill(ALERT.WARNING.value,'You don\'t appear to have created or purchased a bot, please begin training or purchase one in the <a href="./botstore.php">Botstore</a>');
         deactiveAiSkillButtons();
     }
 });
@@ -45,7 +45,7 @@ function updateAISkill() {
     var jsonString = JSON.stringify(tasks['bots']);
 
     if (jsonString.length<=2){   // character [] is empty request
-        msgAlertAiSkill(ALERT.WARNING.value, 'Nothing is change and nothing to do');
+        msgAlertAiSkill(ALERT.WARNING.value, ' No update.');
         activeAiSkillButtons();
         return;
     }
@@ -59,24 +59,24 @@ function updateAISkill() {
 
             switch(statusCode['status']['code']){
                 case 200:
-                    msgAlertAiSkill(ALERT.PRIMARY.value, 'Your AI skill has been updated');
+                    msgAlertAiSkill(ALERT.PRIMARY.value, 'Your Bot has been updated with the selected skills.');
                     activeAiSkillButtons();
                     //TODO probably make difference to refresh data on redirection ( use POST not simple for messaging and cards BOT )
                     callback(jsonString);
                     break;
                 case 404:
-                    msgAlertAiSkill(ALERT.DANGER.value,'AI or Bot not found, or not currently linked');
+                    msgAlertAiSkill(ALERT.DANGER.value,'Bot cannot be found or not currently linked. Please retry or contact support@hutoma.com.');
                     activeAiSkillButtons();
                     break;
                 case 500:
-                    msgAlertAiSkill(ALERT.DANGER.value,'Try again. If the problem persists, contact us');
+                    msgAlertAiSkill(ALERT.DANGER.value,'Please try again. If the problem persists, contact support@hutoma.com.');
                     activeAiSkillButtons();
                     break;
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertAiSkill(ALERT.DANGER.value,'Something went wrong. Your changes were not saved.');
+            msgAlertAiSkill(ALERT.DANGER.value,'Whoops, something went wrong. Your changes weren\'t saved. Please retry');
             activeAiSkillButtons();
         }
     });
