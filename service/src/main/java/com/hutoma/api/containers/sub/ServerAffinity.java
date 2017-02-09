@@ -13,25 +13,17 @@ public class ServerAffinity {
 
     @SerializedName("server_session_id")
     public UUID serverSessionID;
-    @SerializedName("server_type")
-    public String serverType;
     @SerializedName("ai_list")
     public List<UUID> aiList;
 
     /***
      * Only for use in testing
      * @param serverSessionID
-     * @param serverType
      * @param aiList
      */
-    public ServerAffinity(final UUID serverSessionID, final String serverType, final List<UUID> aiList) {
+    public ServerAffinity(final UUID serverSessionID, final List<UUID> aiList) {
         this.serverSessionID = serverSessionID;
-        this.serverType = serverType;
         this.aiList = aiList;
-    }
-
-    public String getServerType() {
-        return this.serverType;
     }
 
     public List<UUID> getAiList() {

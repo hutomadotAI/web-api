@@ -8,8 +8,6 @@ import com.hutoma.api.common.Tools;
 
 import org.glassfish.jersey.client.JerseyClient;
 
-import java.util.Collections;
-import java.util.List;
 import javax.inject.Inject;
 
 /**
@@ -24,12 +22,8 @@ public class RequestAiml extends RequestBase {
                        final Config config, final ThreadSubPool threadSubPool,
                        final ILogger logger, final JsonSerializer serializer,
                        final ControllerAiml controller) {
-        super(jerseyClient, tools, config, threadSubPool, logger, serializer);
+        super(jerseyClient, tools, config, threadSubPool, logger, serializer, controller);
         this.controller = controller;
-    }
-
-    protected List<String> getBackendEndpoints() {
-        return Collections.singletonList(this.config.getAimlChatEndpoint());
     }
 
     protected String getLogFrom() {

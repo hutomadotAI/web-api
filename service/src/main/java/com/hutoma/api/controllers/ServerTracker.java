@@ -7,10 +7,13 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,17 +27,17 @@ import javax.ws.rs.core.Response;
 public class ServerTracker implements Callable {
 
     private static final String LOGFROM = "servertracker";
+    private final HashSet<UUID> affinity;
+    protected AtomicBoolean runFlag;
+    protected UUID serverSessionID;
     private Config config;
     private Tools tools;
     private JerseyClient jerseyClient;
     private JsonSerializer jsonSerializer;
     private ILogger logger;
-
     private ServerRegistration registration;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
-    private UUID serverSessionID;
-    private AtomicBoolean runFlag;
 
     @Inject
     public ServerTracker(final Config config, final Tools tools,
@@ -42,10 +45,28 @@ public class ServerTracker implements Callable {
                          final JsonSerializer jsonSerializer, final ILogger logger) {
         this.config = config;
         this.tools = tools;
-        this.jerseyClient = jerseyClient;
         this.jsonSerializer = jsonSerializer;
         this.logger = logger;
+
         this.runFlag = new AtomicBoolean();
+        this.affinity = new HashSet<>();
+
+        this.jerseyClient = jerseyClient;
+        this.jerseyClient.property(ClientProperties.CONNECT_TIMEOUT,
+                (int) this.config.getServerHeartbeatEveryMs());
+    }
+
+    /***
+     * How loaded is this server in relation to its capacity?
+     * @return [0.0, 1.0] affinity divided by chat capacity,
+     * or NaN if there is no chat capacity at all
+     */
+    public double getChatLoadFactor() {
+        int chatCapacity = this.registration.getChatCapacity();
+        if (chatCapacity < 1) {
+            return Double.NaN;
+        }
+        return ((double) getChatAffinityCount()) / ((double) chatCapacity);
     }
 
     @Override
@@ -102,20 +123,53 @@ public class ServerTracker implements Callable {
         return null;
     }
 
+    /***
+     * Initialisation step.
+     * @param registration registration data
+     * @return a new session ID to represent this server
+     */
     public UUID trackServer(ServerRegistration registration) {
         this.registration = registration;
         this.serverSessionID = this.tools.createNewRandomUUID();
         return this.serverSessionID;
     }
 
+    /***
+     * Flag the tracker to stop the heartbeat and terminate.
+     * This causes the session to be dropped
+     */
     public void endServerSession() {
         this.runFlag.set(false);
     }
 
+    /***
+     * The endpoint for this server
+     * @return
+     */
     public String getServerUrl() {
         return this.registration.getServerUrl();
     }
 
+    public synchronized Set<UUID> getChatAffinity() {
+        return new HashSet<>(this.affinity);
+    }
+
+    public synchronized void addChatAffinityEntry(UUID aiid) {
+        this.affinity.add(aiid);
+    }
+
+    public synchronized void clearChatAffinity() {
+        this.affinity.clear();
+    }
+
+    private synchronized int getChatAffinityCount() {
+        return this.affinity.size();
+    }
+
+    /***
+     * Make a heartbeat call to the server
+     * @return true for success, false otherwise
+     */
     protected boolean beatHeart() {
         try {
             JerseyWebTarget target = this.jerseyClient
@@ -135,6 +189,10 @@ public class ServerTracker implements Callable {
         return false;
     }
 
+    /***
+     * Textual description of this tracker
+     * @return
+     */
     String describeServer() {
         return String.format("%s server id:%s cantrain:%d canchat:%d",
                 this.registration.getServerType(), this.serverSessionID.toString(),
@@ -142,4 +200,14 @@ public class ServerTracker implements Callable {
                 this.registration.getChatCapacity());
     }
 
+    /***
+     * Description of this tracker for routing
+     * @return
+     */
+    String describeServerRouting() {
+        return String.format("%s %s cantrain:%d canchat:%d",
+                this.registration.getServerType(), getServerUrl(),
+                this.registration.getTrainingCapacity(),
+                this.registration.getChatCapacity());
+    }
 }

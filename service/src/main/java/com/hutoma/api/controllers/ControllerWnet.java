@@ -7,8 +7,6 @@ import com.hutoma.api.common.Tools;
 
 import org.glassfish.hk2.api.ServiceLocator;
 
-import java.util.Collections;
-import java.util.List;
 import javax.inject.Inject;
 
 /**
@@ -22,8 +20,4 @@ public class ControllerWnet extends ControllerBase {
         super(config, tools, threadSubPool, serviceLocator, logger);
     }
 
-    @Override
-    public List<String> getFallbackBackendEndpoints() {
-        return Collections.singletonList(this.config.getWnetChatEndpoint());
-    }
 }

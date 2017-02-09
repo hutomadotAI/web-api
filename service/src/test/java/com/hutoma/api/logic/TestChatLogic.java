@@ -15,6 +15,7 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.controllers.ServerMetadata;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
@@ -516,7 +517,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException {
+    public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
                 .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
@@ -525,7 +526,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException {
+    public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
                 .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
@@ -534,7 +535,7 @@ public class TestChatLogic {
     }
 
     @Test
-    public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException {
+    public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(Exception.class)
                 .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());

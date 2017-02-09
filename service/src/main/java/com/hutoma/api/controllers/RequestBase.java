@@ -38,28 +38,29 @@ public abstract class RequestBase {
     protected final Config config;
     protected final ILogger logger;
     protected final JsonSerializer serializer;
+    protected final ControllerBase controller;
     private final ThreadSubPool threadSubPool;
 
     @Inject
     public RequestBase(final JerseyClient jerseyClient, final Tools tools, final Config config,
                        final ThreadSubPool threadSubPool,
-                       final ILogger logger, final JsonSerializer serializer) {
+                       final ILogger logger, final JsonSerializer serializer, final ControllerBase controller) {
         this.jerseyClient = jerseyClient;
         this.tools = tools;
         this.config = config;
         this.threadSubPool = threadSubPool;
         this.logger = logger;
         this.serializer = serializer;
+        this.controller = controller;
     }
 
     public List<Future<InvocationResult>> issueChatRequests(final Map<String, String> chatParams,
-                                                            final List<Pair<String, UUID>> ais) {
+                                                            final List<Pair<String, UUID>> ais) throws ServerMetadata.NoServerAvailable {
         List<Callable<InvocationResult>> callables = new ArrayList<>();
 
-        // TODO: select the appropriate backend based on affinity/load/etc. For now just pick the first one up
-        String endpoint = this.getBackendEndpoints().get(0);
         for (Pair<String, UUID> ai : ais) {
-            callables.add(createCallable(endpoint, ai.getA(), ai.getB(), chatParams));
+            callables.add(createCallable(controller.getBackendEndpoint(ai.getB()),
+                    ai.getA(), ai.getB(), chatParams));
         }
 
         return this.execute(callables);
@@ -195,7 +196,9 @@ public abstract class RequestBase {
         return futures;
     }
 
-    protected abstract List<String> getBackendEndpoints();
+    protected String getBackendEndpoints(UUID aiid) throws ServerMetadata.NoServerAvailable {
+        return this.controller.getBackendEndpoint(aiid);
+    }
 
     protected abstract String getLogFrom();
 }

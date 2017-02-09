@@ -14,6 +14,7 @@ import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
+import com.hutoma.api.controllers.ServerMetadata;
 
 import org.glassfish.jersey.client.JerseyClient;
 
@@ -67,7 +68,7 @@ public class AIChatServices extends ServerConnector {
      */
     public void startChatRequests(final String devId, final UUID aiid, final UUID chatId, final String question,
                                   final String history, final String topicIn)
-            throws AiServicesException, RequestBase.AiControllerException {
+            throws AiServicesException, RequestBase.AiControllerException, ServerMetadata.NoServerAvailable {
 
         // generate the parameters to send
         HashMap<String, String> parameters = new HashMap<String, String>() {{

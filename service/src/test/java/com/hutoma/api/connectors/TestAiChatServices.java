@@ -11,6 +11,7 @@ import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
+import com.hutoma.api.controllers.ServerMetadata;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.junit.Assert;
@@ -58,7 +59,7 @@ public class TestAiChatServices {
 
     @Test
     public void startChatRequests_noLinkedBots_aiIsTrained() throws ServerConnector.AiServicesException,
-            RequestBase.AiControllerException, Database.DatabaseException {
+            RequestBase.AiControllerException, Database.DatabaseException, ServerMetadata.NoServerAvailable {
         when(this.chatServices.getLinkedBotsAiids(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, true));
         this.issueStartChatRequests();
@@ -69,7 +70,7 @@ public class TestAiChatServices {
 
     @Test(expected = AIChatServices.AiNotReadyToChat.class)
     public void startChatRequests_noLinkedBots_aiIsNotTrained() throws ServerConnector.AiServicesException,
-            RequestBase.AiControllerException, Database.DatabaseException {
+            RequestBase.AiControllerException, Database.DatabaseException, ServerMetadata.NoServerAvailable {
         when(this.chatServices.getLinkedBotsAiids(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, true));
         this.issueStartChatRequests();
@@ -77,7 +78,7 @@ public class TestAiChatServices {
 
     @Test
     public void startChatRequests_aiIsNotTrained_onlyAimSingleBot() throws ServerConnector.AiServicesException,
-            RequestBase.AiControllerException, Database.DatabaseException {
+            RequestBase.AiControllerException, Database.DatabaseException, ServerMetadata.NoServerAvailable {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(SAMPLEBOT.getAiid().toString()));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, true));
@@ -89,7 +90,7 @@ public class TestAiChatServices {
 
     @Test
     public void startChatRequests_aiIsTrained_onlyAimSingleBot() throws ServerConnector.AiServicesException,
-            RequestBase.AiControllerException, Database.DatabaseException {
+            RequestBase.AiControllerException, Database.DatabaseException, ServerMetadata.NoServerAvailable {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID.toString()));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(TestBotHelper.getBot(DEVID, AIML_BOT_AIID, BOTID)));
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, true));
@@ -111,7 +112,7 @@ public class TestAiChatServices {
         Assert.assertFalse(this.chatServices.canChatWithAi(DEVID, AIID));
     }
 
-    private void issueStartChatRequests() throws ServerConnector.AiServicesException, RequestBase.AiControllerException {
+    private void issueStartChatRequests() throws ServerConnector.AiServicesException, RequestBase.AiControllerException, ServerMetadata.NoServerAvailable {
         this.chatServices.startChatRequests(DEVID, AIID, CHATID, "question", "history", "topic");
     }
 }

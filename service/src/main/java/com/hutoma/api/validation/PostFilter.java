@@ -231,7 +231,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 ServerAffinity serverAffinity = (ServerAffinity)
                         this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
                 checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
-                checkParameterNotNull(SERVER_TYPE, serverAffinity.getServerType());
                 checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
                 request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
             }

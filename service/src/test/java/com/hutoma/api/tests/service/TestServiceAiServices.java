@@ -78,7 +78,7 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerAffinity() {
-        ServerAffinity affinity = new ServerAffinity(DEVID, "wnet", Collections.singletonList(AIID));
+        ServerAffinity affinity = new ServerAffinity(DEVID, Collections.singletonList(AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
