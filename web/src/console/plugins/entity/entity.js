@@ -24,7 +24,7 @@ function activeButtonCreateEntity() {
             $("#btnCreateEntity").prop("disabled", false);
             return true;
         case 1:
-            msgAlertEntity(ALERT.WARNING.value, 'The entity name is too long!');
+            msgAlertEntity(ALERT.WARNING.value, 'Entity name\'s too long!');
             $("#btnCreateEntity").prop("disabled", false);
             return false;
         default:
@@ -38,13 +38,13 @@ function postingEntityName() {
     document.getElementById("btnCreateEntity").removeEventListener("click", postingEntityName);
 
     if (isInputInvalid($("#inputEntityName").val(), 'entity_name')) {
-        msgAlertEntity(ALERT.DANGER.value, 'Entity name need contain only the following: A-Z, a-z, 0-9 and _ character');
+        msgAlertEntity(ALERT.DANGER.value, 'Entity name can contain only the following: A-Z, a-z, 0-9 and _');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
     
     if(isNameExists($("#inputEntityName").val(),entities)){
-        msgAlertEntity(ALERT.DANGER.value, 'Two identical Entity names are not allowed. Please choose a different name.');
+        msgAlertEntity(ALERT.DANGER.value, 'Entity name already exists. Please choose a different name.');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
@@ -166,11 +166,11 @@ function editEntity(elem,entity) {
 function downloadEntity(name, value, flag) {
     name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
     if (flag === 0) {
-        var blob = new Blob(["this file contains entity in JSON format"], {type: "text/plain;charset=utf-8;",});
+        var blob = new Blob(["This file contains entities in JSON format"], {type: "text/plain;charset=utf-8;",});
         saveAs(blob, name + ".txt");
     }
     else {
-        var blob = new Blob(["this file is a simulaion of CVS format file"], {type: "text/plain;charset=utf-8;",});
+        var blob = new Blob(["This file contains entities in CVS format"], {type: "text/plain;charset=utf-8;",});
         saveAs(blob, name + ".csv");
     }
 }
@@ -180,7 +180,7 @@ $('#deleteEntity').on('show.bs.modal', function (e) {
     var elem = document.getElementById('delete-entity-label');
     var elemBtn = document.getElementById('modalDelete');
     var value = $('#entity-label' + esseyId).text();
-    elem.innerHTML = 'Are you sure you would like to delete the <label>' + value + '</label> entity ? ';
+    elem.innerHTML = 'Are you sure you want to delete the entity <label>' + value + '</label>?';
     elemBtn.setAttribute("value", esseyId);
 });
 
