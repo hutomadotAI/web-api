@@ -21,11 +21,11 @@ function activeButtonCreateUserExpression() {
             $("#btnAddExpression").prop("disabled", true);
             return false;
         case 0:
-            msgAlertUserExpression(ALERT.BASIC.value, ' Give the AI examples of how a user would express this intent.');
+            msgAlertUserExpression(ALERT.BASIC.value, ' Give the Bot examples of how the user would express this intent.');
             $("#btnAddExpression").prop("disabled", false);
             return true;
         case 1:
-            msgAlertUserExpression(ALERT.WARNING.value, 'The value user expression is too long!');
+            msgAlertUserExpression(ALERT.WARNING.value, 'User expression is too long!');
             $("#btnAddExpression").prop("disabled", true);
             return false
         default:
@@ -38,7 +38,7 @@ function addUserExpression() {
     $(this).prop("disabled", true);
 
     if (isInputInvalid($("#user-expression").val(), 'user_expression')) {
-        msgAlertUserExpression(ALERT.DANGER.value, 'The user expression need contain only the following: BLA BLA BLA BLA character');
+        msgAlertUserExpression(ALERT.DANGER.value, 'The user expression can contain only alphanumeric characters.');
         return;
     }
 
@@ -49,7 +49,7 @@ function addUserExpression() {
     }
 
     if(isNameExists($("#user-expression").val(),expressions)){
-        msgAlertUserExpression(ALERT.DANGER.value, 'Two identical user expressions are not allowed. Please choose a different name.');
+        msgAlertUserExpression(ALERT.DANGER.value, 'User expression already exists. Please choose a different expression.');
         return;
     }
 
@@ -58,7 +58,7 @@ function addUserExpression() {
     var parent = document.getElementById('userexpression-list');
     document.getElementById('user-expression').value = '';
     createNewUsersayRow(value, parent);
-    msgAlertUserExpression(ALERT.BASIC.value,' Give the AI examples of how a user would express this intent.');
+    msgAlertUserExpression(ALERT.BASIC.value,' Give the Bot examples of how the user would express this intent.');
 }
 
 function createNewUsersayRow(value, parent) {

@@ -1,6 +1,6 @@
-<div class="box box-solid box-clean flat no-shadow unselectable" >
+<div class="box box-solid box-clean flat no-shadow unselectable">
 
-    <div class="box-header with-border ">
+    <div class="box-header with-border">
         <div class="box-title"><span style="padding: 0 3px 0 3px;"></span><b>User Expressions</b></div>
         <a data-toggle="collapse" href="#collapseExpressionInfo">
             <div class="pull-right">more info
@@ -14,13 +14,10 @@
             <div class="overlay center-block">
                 <section class="content-info">
                     <div class="box-body">
-                        <dl class="dl-horizontal" style="text-align:justify">
+                        <dl class="dl-horizontal no-margin" style="text-align:justify">
                             User expressions are a collection of examples that help the AI understand how humans typically express an intent. When you order a coffee, for example, you might say 'id like a coffe please' or 'A tall Americano, please'. Those are examples of your Intent to order a coffe.  User expressions are used the AI to detect topics or phrases that might be interesting for you.
                         </dl>
                     </div>
-                </section>
-                <section class="content-info" style="padding-left:15px;">
-                    need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
                 </section>
             </div>
         </div>

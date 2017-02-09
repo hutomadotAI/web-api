@@ -66,7 +66,7 @@
                 <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentPrompt" style="margin-bottom:10px;">
                     <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                     <i class="icon fa fa-check" id="iconAlertIntentPrompt"></i>
-                    <span id="msgAlertIntentPrompt">Give the AI examples of prompt.</span>
+                    <span id="msgAlertIntentPrompt">Give the Bot examples of prompt.</span>
                 </div>
 
             </div>

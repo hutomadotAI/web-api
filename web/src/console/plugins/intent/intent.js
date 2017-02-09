@@ -24,7 +24,7 @@ function activeButtonCreateIntent() {
             $("#btnCreateIntent").prop("disabled", false);
             return true;
         case 1:
-            msgAlertIntent(ALERT.WARNING.value, 'The intent name is too long!');
+            msgAlertIntent(ALERT.WARNING.value, 'Intent\'s name is too long!');
             $("#btnCreateIntent").prop("disabled", false);
             return false;
         default:
@@ -37,12 +37,12 @@ function postingIntentName() {
     $(this).prop("disabled", true);
 
     if (isInputInvalid($("#inputIntentName").val(), 'intent_name')) {
-        msgAlertIntent(ALERT.DANGER.value, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
+        msgAlertIntent(ALERT.DANGER.value, 'Intent name can contain only the following: A-Z, a-z, 0-9 and _');
         return false;
     }
 
     if(isNameExists($("#inputIntentName").val(),intents)){
-        msgAlertIntent(ALERT.DANGER.value, 'Two identical Intent names are not allowed. Please choose a different name.');
+        msgAlertIntent(ALERT.DANGER.value, 'Intent name already exists. Please choose a different name.');
         return false;
     }
 
@@ -65,7 +65,7 @@ function showIntents(str) {
     var wHTML = "";
 
     if (intents.length < 1) {
-        msgAlertIntent(ALERT.BASIC.value, 'No intents yet. Create the first one');
+        msgAlertIntent(ALERT.BASIC.value, 'No intents yet. Create the first one.');
         return;
     }
     else
@@ -143,11 +143,11 @@ function editIntent(elem,intent) {
 function downloadIntent(name, value, flag) {
     name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
     if (flag === 0) {
-        var blob = new Blob(["this file contains intent in JSON format"], {type: "text/plain;charset=utf-8;",});
+        var blob = new Blob(["This file contains entities in JSON format."], {type: "text/plain;charset=utf-8;",});
         saveAs(blob, name + ".txt");
     }
     else {
-        var blob = new Blob(["this file is a simulaion of CVS format file"], {type: "text/plain;charset=utf-8;",});
+        var blob = new Blob(["This file contains entities in CSV format."], {type: "text/plain;charset=utf-8;",});
         saveAs(blob, name + ".csv");
     }
 }

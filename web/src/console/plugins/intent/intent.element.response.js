@@ -15,17 +15,17 @@ function checkIntentResponseCode(element, key) {
 
 function activeButtonCreateIntentResponse() {
     var limitTextInputSize = 50;
-    msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
+    msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what actions should be taken by your business logic.');
     switch (limitText($("#intent-response"), limitTextInputSize)) {
         case -1:
             $("#btnAddIntentResponse").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the AI examples of how a user would response this intent.');
+            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the Bot examples of how it should respond to a users intent.');
             $("#btnAddIntentResponse").prop("disabled", false);
             return true;
         case 1:
-            msgAlertIntentResponse(ALERT.WARNING.value, 'The intent resposne is too long!');
+            msgAlertIntentResponse(ALERT.WARNING.value, 'Intent\'s response is too long!');
             $("#btnAddIntentResponse").prop("disabled", true);
             return false
         default:
@@ -38,7 +38,7 @@ function addIntentResponse() {
     $(this).prop("disabled", true);
 
     if (isInputInvalid($("#intent-response").val(), 'intent_response')) {
-        msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response need contain only the following: BLA BLA BLA BLA character');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response can contain only alphanumeric characters.');
         return;
     }
 
@@ -49,7 +49,7 @@ function addIntentResponse() {
     }
 
     if(isNameExists($("#intent-response").val(),responses)){
-        msgAlertIntentResponse(ALERT.DANGER.value, 'Two identical intent responses are not allowed. Please choose a different name.');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'Response string already exists. Please choose a different string.');
         return;
     }
 
@@ -58,7 +58,7 @@ function addIntentResponse() {
     var parent = document.getElementById('intentresponse-list');
     document.getElementById('intent-response').value = '';
     createNewIntentResponseRow(value, parent);
-    msgAlertIntentResponse(ALERT.BASIC.value,' Give the AI examples of how a user would response this intent.');
+    msgAlertIntentResponse(ALERT.BASIC.value,' Give the Bot examples of how it should respond to a users intent.');
 }
 
 function createNewIntentResponseRow(value, parent) {
