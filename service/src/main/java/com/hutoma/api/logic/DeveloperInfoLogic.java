@@ -26,13 +26,20 @@ public class DeveloperInfoLogic {
         this.database = database;
     }
 
-    public ApiResult getDeveloperInfo(final String devId) {
+    public ApiResult getDeveloperInfo(final String authDevId, final String requestDevId) {
         try {
-            DeveloperInfo info = this.database.getDeveloperInfo(devId);
-            return info == null
-                    ? ApiError.getNotFound(String.format("Developer %s not found", devId))
-                    : new ApiDeveloperInfo(info).setSuccessStatus();
-        } catch (Database.DatabaseException ex) {
+            DeveloperInfo info = this.database.getDeveloperInfo(requestDevId);
+            if (info == null) {
+                return ApiError.getNotFound(String.format("Developer %s not found", requestDevId));
+            }
+            if (authDevId.equalsIgnoreCase(requestDevId)) {
+                // Developer is requesting it's own details, so all data can be sent
+                return new ApiDeveloperInfo(info).setSuccessStatus();
+            } else {
+                // Developer is requesting details from another developer, so only public info can be sent
+                return new ApiDeveloperInfo(info.getPublicInfo()).setSuccessStatus();
+            }
+        } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
@@ -56,7 +63,7 @@ public class DeveloperInfoLogic {
             } else {
                 return ApiError.getNotFound(String.format("Developer %s not found", devId));
             }
-        } catch (Database.DatabaseException ex) {
+        } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }

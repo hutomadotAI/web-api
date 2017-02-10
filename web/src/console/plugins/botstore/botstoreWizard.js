@@ -28,23 +28,25 @@ function populateBotFields(bot) {
     document.getElementById('botCategory').innerText = json['category'];
     document.getElementById('botVersion').innerText = json['version'];
     document.getElementById('botClassification').innerText = json['classification'];
-    document.getElementById('botCompany').innerText = 'hu:toma'; //json['company'];
     document.getElementById('botActivations').innerText = json['activations'];
     document.getElementById('botReport').setAttribute('href', json['report']);
     document.getElementById('botPrivacyPolicy').setAttribute('href', json['privacyPolicy']);
-    document.getElementById('botWebsite').setAttribute('href', json['website']);
-    document.getElementById('botDeveloper').innerText = 'hutoma';
-    document.getElementById('botEmail').innerText = 'support@hutoma.com';
-    document.getElementById('botAddress').innerText = 'Carrer del Consell de Cent, 341';
-    document.getElementById('botPostCode').innerText = '08007';
-    document.getElementById('botCity').innerText = 'Barcelona';
-    document.getElementById('botCountry').innerText = 'Spain';
     document.getElementById('botIcon').setAttribute('src', json['imagePath']);
 
     document.getElementById('botNamePurchase').innerText = json['name'];
     document.getElementById('botDescriptionPurchase').innerText = json['description'];
     document.getElementById('botPricePurchase').innerText = json['price'];
     document.getElementById('bot_id').value = json['botId'];
+
+    var dev = JSON.parse(devInfo);
+    document.getElementById('botCompany').innerText = dev['company'];
+    var elem = document.getElementById('developerInfo');
+    if (dev['website'] == null || dev['website'] == '') {
+        elem.style.display = 'none';
+    } else {
+        elem.style.display = 'block';
+        document.getElementById('botWebsite').setAttribute('href', dev['website']);
+    }
 
     if (json['videoLink'] == null || videoLinkFilter(json['videoLink']) == '')
         document.getElementById('botVideoLinkSection').innerHTML = '';

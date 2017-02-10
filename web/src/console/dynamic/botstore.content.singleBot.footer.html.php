@@ -28,7 +28,7 @@
     <div class="row no-margin unselectable">
         <div class="col-xs-4">
             <div class="bot-more-details">Offer by</div>
-            <div class="text-left" id="botCompany">
+            <div class="text-left">
                 <span id="botCompany"></span>
             </div>
         </div>
@@ -50,7 +50,7 @@
         <div class="col-xs-4 unselectable">
             <div class="bot-more-details">Report</div>
             <div class="text-left">
-                <a class="dev-link"  id="botReport" href="" rel="nofollow" target="_blank">Report as inappropriate</a>
+                <a class="dev-link" id="botReport" href="" rel="nofollow" target="_blank">Report as inappropriate</a>
             </div>
         </div>
         <div class="col-xs-4 unselectable">
@@ -59,15 +59,11 @@
                 <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy Policy</a>
             </div>
         </div>
-        <div class="col-xs-4">
+        <div class="col-xs-4" id="developerInfo">
             <div class="bot-more-details unselectable">Developer</div>
             <div class="text-left">
-                <a class="dev-link unselectable" id="botWebsite" href="" rel="nofollow" target="_blank">Visit Website</a>
-                <div id="botDeveloper"></div>
-                <div id="botEmail"></div>
-                <div id="botAddress"></div>
-                <div><span id="botPostCode"></span> <span id="botCity"></span></div>
-                <div class="unselectable" id="botCountry"></div>
+                <a class="dev-link unselectable" id="botWebsite" href="" rel="nofollow" target="_blank">Visit
+                    Website</a>
             </div>
         </div>
     </div>

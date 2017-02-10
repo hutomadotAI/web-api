@@ -27,11 +27,15 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnitParamsRunner.class)
 public class TestServiceDeveloperInfo extends ServiceTestBase {
 
-    private static final String DEVINFO_PATH = "/developer/" + DEVID;
+    private static final String DEVINFO_BASEPATH = "/developer/";
+    private static final String DEVINFO_PATH = DEVINFO_BASEPATH + DEVID;
 
-    private static final DeveloperInfo DEVINFO = new DeveloperInfo(
-            DEVID.toString(), "name", "company", "email@email.com", "address", "post code", "city", "country", "http://web"
-    );
+    private static final DeveloperInfo DEVINFO = getDevInfo(DEVID.toString());
+
+    private static DeveloperInfo getDevInfo(final String devId) {
+        return new DeveloperInfo(
+                devId, "name", "company", "email@email.com", "address", "post code", "city", "country", "http://web");
+    }
 
     private static MultivaluedMap<String, String> getSetDevInfoRequestParams() {
         return new MultivaluedHashMap<String, String>() {{
@@ -52,13 +56,24 @@ public class TestServiceDeveloperInfo extends ServiceTestBase {
     }
 
     @Test
-    public void testGetDeveloperInfo() throws Database.DatabaseException {
+    public void testGetDeveloperInfo_ownInfo() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
         final Response response = target(DEVINFO_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiDeveloperInfo info = deserializeResponse(response, ApiDeveloperInfo.class);
         Assert.assertNotNull(info.getInfo());
         Assert.assertEquals(DEVINFO.getDevId(), info.getInfo().getDevId());
+    }
+
+    public void testGetDeveloperInfo_otherDevInfo() throws Database.DatabaseException {
+        final DeveloperInfo info = getDevInfo("other dev");
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(info);
+        final Response response = target(DEVINFO_BASEPATH + info.getDevId()).request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiDeveloperInfo apiInfo = deserializeResponse(response, ApiDeveloperInfo.class);
+        Assert.assertNotNull(apiInfo.getInfo());
+        Assert.assertEquals(info.getDevId(), apiInfo.getInfo().getDevId());
+        Assert.assertNull(info.getDevId(), apiInfo.getInfo().getAddress());
     }
 
     @Test

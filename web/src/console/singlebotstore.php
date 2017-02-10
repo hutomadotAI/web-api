@@ -4,6 +4,7 @@ require_once "./api/apiBase.php";
 require_once "./api/entityApi.php";
 require_once "api/aiApi.php";
 require_once "api/botApi.php";
+require_once "api/developerApi.php";
 require_once "common/bot.php";
 require_once "common/developer.php";
 
@@ -28,6 +29,9 @@ $botDetails = $botApi->getBotDetails($botId);
 unset($botId);
 unset($botApi);
 
+$devInfoApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$devInfo = $devInfoApi->getDeveloperInfo($botDetails['bot']['dev_id']);
+unset($devInfoApi);
 
 if (isset($botDetails)) {
     switch ($botDetails['status']['code']) {
@@ -86,6 +90,15 @@ if (isset($botDetails)) {
         echo json_encode($tmp_bot);
         unset($tmp_bot);
         ?>;
+
+    var devInfo = <?php
+    $dev = new \hutoma\developer();
+    $dev->setCompany($devInfo['info']['company']);
+    $dev->setWebsite($devInfo['info']['website']);
+    echo json_encode($dev->toJSON());
+    unset($dev);
+    unset($devInfo);
+    ?>
 </script>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">

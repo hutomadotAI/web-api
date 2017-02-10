@@ -20,7 +20,7 @@ class developerApi extends apiBase
     public function getDeveloperInfo($devid)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$developerPath. '/' . $devid));
+            $this->curl->setUrl($this->buildRequestUrl(self::$developerPath . '/' . $devid));
             $this->curl->setVerbGet();
             $this->curl->addHeader('Content-Type', 'application/json');
             $curl_response = $this->curl->exec();
@@ -37,15 +37,15 @@ class developerApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$developerPath . '/' . $devid));
             $this->curl->setVerbPost();
 
-            $args =  array(
+            $args = array(
                 'name' => $developer['name'],
                 'email' => $developer['email'],
-                'address' =>  $developer['address'],
+                'address' => $developer['address'],
                 'postCode' => $developer['postCode'],
                 'city' => $developer['city'],
                 'country' => $developer['country'],
                 'company' => $developer['company'],
-                'website' =>$developer['website'],
+                'website' => $developer['website'],
             );
 
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
