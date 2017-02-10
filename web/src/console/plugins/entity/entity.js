@@ -14,7 +14,7 @@ function checkEntityCode(element, key) {
 }
 
 function activeButtonCreateEntity() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     switch (limitText($("#inputEntityName"), limitTextInputSize)) {
         case -1:
             $("#btnCreateEntity").prop("disabled", true);

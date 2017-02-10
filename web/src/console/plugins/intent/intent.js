@@ -14,7 +14,7 @@ function checkIntentCode(element, key) {
 }
 
 function activeButtonCreateIntent() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     switch (limitText($("#inputIntentName"), limitTextInputSize)) {
         case -1:
             $("#btnCreateIntent").prop("disabled", true);

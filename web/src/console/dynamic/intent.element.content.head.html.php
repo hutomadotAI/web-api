@@ -1,18 +1,21 @@
 <input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
 <div class="box box-solid box-clean flat no-shadow unselectable" style="padding-bottom:0px;">
 
-    <div class="box-header no-border">
-        <i class="fa fa-commenting-o text-green"></i>
-        <div class="box-title"><b>Intent</b>
-            <span class="text-sm text-gray"
-                  style="padding: 0px 3px 0px 3px;"> > </span><b><?php echo $_POST['intent'] ?></b></span>
-        </div>
-        <div class="box-tools pull-right" style="top: 8px;">
-            <button class="btn btn-success flat pull-right" id="btnSaveIntent" style="width: 130px;"
-                    alt="save intent" onclick="saveIntent();RecursiveUnbind($('#wrapper'))">Save Intent
-            </button>
+    <div class="box-header no-border" style="padding: 10px 10px 0px 10px;">
+        <div class="form-group no-margin">
+            <div class="input-group">
+                <div class="input-prefix-text">
+                    <i class="fa fa-commenting-o text-green"></i>
+                    <span><b> Intent </b></span><span class="text-md text-darkgray"> > </span>
+                </div>
+                <input type="text" class="flat no-shadow input-text-limited pull-left" value="<?= $_POST['intent'] ?>" readonly>
+                <button class="input-postfix-button btn btn-success flat pull-right" id="btnSaveEntity" style="width: 130px; "
+                        alt="save intent" onclick="saveIntent();RecursiveUnbind($('#wrapper'))">Save Intent
+                </button>
+            </div>
         </div>
     </div>
+
 
     <div class="box-body no-margin" id="boxExpression" style="padding-top:5px;padding-bottom:5px;">
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentElement"
