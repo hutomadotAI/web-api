@@ -35,9 +35,9 @@ import javax.inject.Inject;
 public class AIChatServices extends ServerConnector {
 
     private static final String LOGFROM = "aichatservices";
-    private static final int TIMEOUT_RNN_REQUESTS_MS = 5000;
-    private static final int TIMEOUT_WNET_REQUESTS_MS = 2000;
-    private static final int TIMEOUT_AIML_REQUESTS_MS = 2000;
+    private static final int TIMEOUT_RNN_REQUESTS_MS = 10000;
+    private static final int TIMEOUT_WNET_REQUESTS_MS = 10000;
+    private static final int TIMEOUT_AIML_REQUESTS_MS = 10000;
     private final RequestWnet wnetController;
     private final RequestRnn rnnController;
     private final RequestAiml aimlController;

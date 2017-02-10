@@ -7,7 +7,6 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
-import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
@@ -20,6 +19,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+
+import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+
 
 /**
  * Created by David MG on 01/02/2017.
@@ -55,8 +57,6 @@ public class ServerTracker implements Callable {
         this.affinity = new HashSet<>();
 
         this.jerseyClient = jerseyClient;
-        this.jerseyClient.property(ClientProperties.CONNECT_TIMEOUT,
-                (int) this.config.getServerHeartbeatEveryMs());
     }
 
     /***
@@ -191,11 +191,15 @@ public class ServerTracker implements Callable {
             JerseyWebTarget target = this.jerseyClient
                     .target(this.registration.getServerUrl())
                     .path("heartbeat");
-            Response response = target.request()
+
+            Response response = target
+                    .property(CONNECT_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
+                    .request()
                     .post(Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 return true;
             }
+            
             this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s %s failed with error %d",
                     this.registration.getServerType(), this.serverSessionID.toString(), response.getStatus()));
         } catch (Exception e) {
