@@ -23,6 +23,21 @@ public class ApiResult {
         return Response.status(this.status.getCode()).entity(serializer.serialize(this));
     }
 
+    public ApiResult setCreatedStatus() {
+        this.status = Status.getCreated();
+        return this;
+    }
+
+    public ApiResult setCreatedStatus(String message) {
+        return setCreatedStatus(message, null);
+    }
+
+    public ApiResult setCreatedStatus(String message, Object additionalInfo) {
+        this.status = additionalInfo == null
+                ? Status.getCreated(message) : Status.getCreated(message, additionalInfo);
+        return this;
+    }
+
     public ApiResult setSuccessStatus() {
         this.status = Status.getSuccess();
         return this;

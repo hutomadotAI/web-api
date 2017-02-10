@@ -46,8 +46,7 @@ if(isset($_POST['submit'])) {
             if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
             elseif($password != $retyped_password) $msg= $passwordmismatch;
             elseif($terms != 'True') $msg= $termsmsg;
-            # TODO: Tech Previw Hack. Need to remove it
-            elseif($invite_code!='R4d1prGQl7wJXqgj') $msg=$invalidcode;
+            elseif(\hutoma\console::inviteCodeValid($invite_code) !== 200) $msg=$invalidcode;
             else{
                 $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
@@ -58,6 +57,9 @@ if(isset($_POST['submit'])) {
                 } else {
                     // Register succeeded
                     if ($createAccount === 200) {
+                        // Redeem invite code.
+                        \hutoma\console::redeemInviteCode($invite_code, $email);
+
                         setcookie('logSyscuruser', $email);
                         $login = \hutoma\console::login($email, $password, false);
                         if ($login === false) {

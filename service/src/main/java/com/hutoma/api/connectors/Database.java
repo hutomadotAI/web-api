@@ -109,6 +109,44 @@ public class Database {
     }
 
     /**
+     * Redeems an invite code for user registration.
+     * @param code the invite code.
+     * @param username the registering user.
+     * @return true if successful, otherwise false.
+     * @throws DatabaseException database exception.
+     */
+    public boolean redeemInviteCode(final String code, final String username) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("redeemInviteCode", 2).add(code).add(username);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Determines whether a specified invite code is valid.
+     * @param code the invite code.
+     * @return true if the code is valid, otherwise false.
+     * @throws DatabaseException database exception.
+     * @throws SQLException sql exception.
+     */
+    public boolean inviteCodeValid(final String code) throws DatabaseException, SQLException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("existsInviteCode", 1).add(code);
+
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Gets the developer plan for the given developer Id.
      * @param devId the developer id
      * @return the plan, or null if there is no developer Id or not plan associated to it
