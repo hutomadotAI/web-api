@@ -88,20 +88,6 @@ function showEntities(str) {
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
-            /*
-            var unique_id = 'collapsePromptInfo_' + new Date().getTime().toString() + (entities[x].replace(/\s/g, '') + x);
-            wHTML += ('<a data-toggle="collapse" href="#' + unique_id + '">');
-            wHTML += ('<i class="fa fa-comments-o text-gray" data-toggle="tooltip" title="prompt response" style="padding-right:7px;"></i>');
-            wHTML += ('</a>');
-            */
-
-            wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1">');
-            wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download"></i>');
-            wHTML += ('</a>');
-            wHTML += ('<ul class="dropdown-menu no-border flat"">');
-            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',0)"><span class="text-white">JSON format</span></a></li>');
-            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadEntity (\'' + entities[x] + '\',' + x + ',1)"><span class="text-white">CSV table</span></a></li>');
-            wHTML += ('</ul>');
             wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
@@ -109,19 +95,6 @@ function showEntities(str) {
 
             wHTML += ('</div>');
             wHTML += ('</div>');
-            /*
-            // push VALUES inside box internal
-            wHTML += ('<div id="' + unique_id + '" class="panel-collapse collapse" >');
-            wHTML += ('<div class="row" style="padding: 10px 0px 0px 0px;">');
-            wHTML += ('<div class="col-xs-12">');
-            wHTML += ('<div class="inner-addon left-addon">');
-            wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
-            wHTML += ('<textarea class="form-control flat no-shadow" id="prompt-key" name="prompt-key" rows="2" style="padding-left: 35px; background-color: #515151; border: 1px solid #202020;" placeholder="value from server" readonly></textarea>');
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-            */
 
             wHTML += ('</div>');
             wHTML += ('</div>');
@@ -161,18 +134,6 @@ function editEntity(elem,entity) {
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
-}
-
-function downloadEntity(name, value, flag) {
-    name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
-    if (flag === 0) {
-        var blob = new Blob(["This file contains entities in JSON format"], {type: "text/plain;charset=utf-8;",});
-        saveAs(blob, name + ".txt");
-    }
-    else {
-        var blob = new Blob(["This file contains entities in CVS format"], {type: "text/plain;charset=utf-8;",});
-        saveAs(blob, name + ".csv");
-    }
 }
 
 $('#deleteEntity').on('show.bs.modal', function (e) {

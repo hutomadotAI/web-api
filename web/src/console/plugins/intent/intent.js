@@ -85,14 +85,7 @@ function showIntents(str) {
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
-
-            wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1" >');
-            wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
-            wHTML += ('</a>');
-            wHTML += ('<ul class="dropdown-menu no-border flat">');
-            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',0)"><span class="text-white">JSON format</span></a></li>');
-            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',1)"><span class="text-white">CSV table</span></a></li>');
-            wHTML += ('</ul>');
+            
             wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
@@ -138,18 +131,6 @@ function editIntent(elem,intent) {
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
-}
-
-function downloadIntent(name, value, flag) {
-    name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
-    if (flag === 0) {
-        var blob = new Blob(["This file contains entities in JSON format."], {type: "text/plain;charset=utf-8;",});
-        saveAs(blob, name + ".txt");
-    }
-    else {
-        var blob = new Blob(["This file contains entities in CSV format."], {type: "text/plain;charset=utf-8;",});
-        saveAs(blob, name + ".csv");
-    }
 }
 
 $('#deleteIntent').on('show.bs.modal', function (e) {
