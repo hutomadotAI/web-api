@@ -8,7 +8,7 @@
                 <div class="box-body bot-payment flat">
                     <div class="row no-margin">
                         <div class="col-xs-4 no-padding">
-                            <div class="bot-icon-payment bot-absolute bot-shadow-light bg-blue-gradient text-bg">
+                            <div class="bot-icon-payment bot-absolute bot-shadow-light text-bg">
                                 <img class="card-icon" style="margin-top: 0" src="" id="botIconPurchase">
                             </div>
                         </div>

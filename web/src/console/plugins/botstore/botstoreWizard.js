@@ -18,8 +18,8 @@ function populateBotFields(bot) {
     var json = JSON.parse(bot);
     document.getElementById('botTitle').innerText = json['name'];
     document.getElementById('botBadge').innerText = json['badge'];
-    document.getElementById('botDescription').innerText = json['description'];
-    document.getElementById('botMessage').innerText = json['alertMessage'];
+    document.getElementById('botDescription').value = json['description'];
+    document.getElementById('botMessage').value = json['alertMessage'];
     document.getElementById('botLicense').innerText = json['licenseType'];
     document.getElementById('botPrice').innerText = json['price'];
     document.getElementById('botLongDescription').innerText = json['longDescription'];
@@ -36,6 +36,7 @@ function populateBotFields(bot) {
     document.getElementById('botNamePurchase').innerText = json['name'];
     document.getElementById('botDescriptionPurchase').innerText = json['description'];
     document.getElementById('botPricePurchase').innerText = json['price'];
+    document.getElementById('botIconPurchase').setAttribute('src', json['imagePath']);
     document.getElementById('bot_id').value = json['botId'];
 
     var dev = JSON.parse(devInfo);
