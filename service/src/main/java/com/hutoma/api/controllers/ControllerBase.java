@@ -52,7 +52,7 @@ public abstract class ControllerBase extends ServerMetadata {
     }
 
     protected String getBackendEndpoint(UUID aiid) throws NoServerAvailable {
-        ServerTracker tracker = this.getEndpointFor(aiid);
+        ServerTracker tracker = this.getServerFor(aiid);
         return tracker.getServerUrl();
     }
 

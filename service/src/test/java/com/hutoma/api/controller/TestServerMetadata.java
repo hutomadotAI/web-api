@@ -45,7 +45,7 @@ public class TestServerMetadata {
     @Test
     public void serverMetadata_noServer() {
         try {
-            this.test.getEndpointFor(this.tools.createNewRandomUUID());
+            this.test.getServerFor(this.tools.createNewRandomUUID());
         } catch (ServerMetadata.NoServerAvailable noServerAvailable) {
             return;
         }
@@ -55,14 +55,14 @@ public class TestServerMetadata {
     @Test
     public void serverMetadata_oneServer() throws ServerMetadata.NoServerAvailable {
         ServerTracker server = makeServerTracker(1);
-        Assert.assertEquals(server, this.test.getEndpointFor(this.tools.createNewRandomUUID()));
+        Assert.assertEquals(server, this.test.getServerFor(this.tools.createNewRandomUUID()));
     }
 
     @Test
     public void serverMetadata_twoServers() throws ServerMetadata.NoServerAvailable {
         ServerTracker server1 = makeServerTracker(1);
         ServerTracker server2 = makeServerTracker(1);
-        Assert.assertEquals(server1, this.test.getEndpointFor(this.tools.createNewRandomUUID()));
+        Assert.assertEquals(server1, this.test.getServerFor(this.tools.createNewRandomUUID()));
     }
 
     @Test
@@ -71,10 +71,10 @@ public class TestServerMetadata {
         ServerTracker server2 = makeServerTracker(1);
         UUID chat1 = this.tools.createNewRandomUUID();
         UUID chat2 = this.tools.createNewRandomUUID();
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server1, this.test.getServerFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
+        Assert.assertEquals(server1, this.test.getServerFor(chat1));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class TestServerMetadata {
         ServerTracker server2 = makeServerTracker(10);
 
         UUID chat1 = this.tools.createNewRandomUUID();
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat1));
     }
 
     @Test
@@ -130,7 +130,7 @@ public class TestServerMetadata {
 
         aiids.stream().forEach(aiid -> {
             try {
-                Assert.assertEquals(server2, this.test.getEndpointFor(aiid));
+                Assert.assertEquals(server2, this.test.getServerFor(aiid));
             } catch (ServerMetadata.NoServerAvailable noServerAvailable) {
                 Assert.fail("no server available for updated affinity");
             }
@@ -152,8 +152,8 @@ public class TestServerMetadata {
         this.test.updateAffinity(server1SessionID, Collections.singletonList(chat2));
         this.test.updateAffinity(server2SessionID, Collections.singletonList(chat1));
 
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat2));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server1, this.test.getServerFor(chat2));
+        Assert.assertEquals(server2, this.test.getServerFor(chat1));
     }
 
     @Test
@@ -170,14 +170,14 @@ public class TestServerMetadata {
         this.test.updateAffinity(server1SessionID, Collections.singletonList(chat2));
         this.test.updateAffinity(server2SessionID, Collections.singletonList(chat1));
 
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat2));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server1, this.test.getServerFor(chat2));
+        Assert.assertEquals(server2, this.test.getServerFor(chat1));
 
         this.test.updateAffinity(server1SessionID, Collections.singletonList(chat1));
         this.test.updateAffinity(server2SessionID, Collections.singletonList(chat2));
 
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server1, this.test.getServerFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
     }
 
     @Test
@@ -188,14 +188,14 @@ public class TestServerMetadata {
         UUID chat1 = this.tools.createNewRandomUUID();
         UUID chat2 = this.tools.createNewRandomUUID();
 
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server1, this.test.getServerFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
 
         UUID server2SessionID = ((FakeServerTracker) server2).getSessionID();
         this.test.deleteSession(server2SessionID);
 
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server1, this.test.getServerFor(chat1));
+        Assert.assertEquals(server1, this.test.getServerFor(chat2));
     }
 
     @Test
@@ -210,8 +210,8 @@ public class TestServerMetadata {
         this.test.deleteSession(server1SessionID);
         this.test.updateAffinity(server1SessionID, Arrays.asList(chat1, chat2));
 
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server2, this.test.getServerFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
     }
 
     @Test
@@ -223,8 +223,8 @@ public class TestServerMetadata {
         UUID chat1 = this.tools.createNewRandomUUID();
         UUID chat2 = this.tools.createNewRandomUUID();
 
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server2, this.test.getServerFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
     }
 
     @Test
@@ -239,8 +239,8 @@ public class TestServerMetadata {
         UUID server1SessionID = ((FakeServerTracker) server1).getSessionID();
         this.test.updateAffinity(server1SessionID, Arrays.asList(chat1, chat2));
 
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server2, this.test.getServerFor(chat1));
+        Assert.assertEquals(server2, this.test.getServerFor(chat2));
     }
 
     @Test
@@ -257,15 +257,15 @@ public class TestServerMetadata {
 
         ((FakeServerTracker) server1).testSetEndpointVerified(true);
 
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
-        Assert.assertEquals(server1, this.test.getEndpointFor(chat2));
+        Assert.assertEquals(server1, this.test.getServerFor(chat1));
+        Assert.assertEquals(server1, this.test.getServerFor(chat2));
     }
 
     private List<ServerTracker> getEndpointsFor10Aiids() {
         List<UUID> aiids = get10Uuids();
         return aiids.stream().map(aiid -> {
             try {
-                return this.test.getEndpointFor(aiid);
+                return this.test.getServerFor(aiid);
             } catch (ServerMetadata.NoServerAvailable noServerAvailable) {
                 noServerAvailable.printStackTrace();
             }
@@ -292,8 +292,8 @@ public class TestServerMetadata {
         }
 
         @Override
-        public synchronized void updateAffinity(final UUID sessionID, final Collection<UUID> aiidList) {
-            super.updateAffinity(sessionID, aiidList);
+        public synchronized boolean updateAffinity(final UUID sessionID, final Collection<UUID> aiidList) {
+            return super.updateAffinity(sessionID, aiidList);
         }
 
         @Override
@@ -307,8 +307,8 @@ public class TestServerMetadata {
         }
 
         @Override
-        public synchronized ServerTracker getEndpointFor(final UUID aiid) throws NoServerAvailable {
-            return super.getEndpointFor(aiid);
+        public synchronized ServerTracker getServerFor(final UUID aiid) throws NoServerAvailable {
+            return super.getServerFor(aiid);
         }
 
     }

@@ -49,14 +49,16 @@ public class ServerMetadata {
      * i.e. each update obliterates whataver was there before
      * @param sessionID sessionID
      * @param aiidList list of servers
+     * @return true if the session exists for this server type
      */
-    public synchronized void updateAffinity(UUID sessionID, Collection<UUID> aiidList) {
+    public synchronized boolean updateAffinity(UUID sessionID, Collection<UUID> aiidList) {
         ServerTracker tracker = this.activeServerSessions.get(sessionID);
         if (tracker == null) {
-            return;
+            return false;
         }
         clearAffinityForServer(tracker);
         createAffinityForServer(tracker, aiidList);
+        return true;
     }
 
     /***
@@ -226,7 +228,7 @@ public class ServerMetadata {
      * @return
      * @throws NoServerAvailable
      */
-    protected synchronized ServerTracker getEndpointFor(UUID aiid) throws NoServerAvailable {
+    protected synchronized ServerTracker getServerFor(UUID aiid) throws NoServerAvailable {
         ServerTracker server = existingAffinity(aiid);
         if (server == null) {
             server = chooseServerToAssignAffinity(aiid);

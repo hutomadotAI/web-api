@@ -17,6 +17,7 @@ import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 
+import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -105,6 +106,19 @@ public class AIServicesLogic {
     }
 
     public ApiResult updateAffinity(final ServerAffinity serverAffinity) {
-        return new ApiResult().setSuccessStatus("server affinity updated");
+        UUID sid = serverAffinity.getServerSessionID();
+        List<UUID> aiList = serverAffinity.getAiList();
+
+        try {
+            if (this.controllerWnet.updateAffinity(sid, aiList) ||
+                    this.controllerRnn.updateAffinity(sid, aiList) ||
+                    this.controllerAiml.updateAffinity(sid, aiList)) {
+                return new ApiResult().setSuccessStatus("server affinity updated");
+            }
+            return ApiError.getBadRequest("nonexistent session");
+        } catch (Exception ex) {
+            this.logger.logException(LOGFROM, ex);
+            return ApiError.getInternalServerError();
+        }
     }
 }

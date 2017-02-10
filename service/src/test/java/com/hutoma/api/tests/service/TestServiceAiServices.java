@@ -77,11 +77,32 @@ public class TestServiceAiServices extends ServiceTestBase {
     }
 
     @Test
+    public void testServerRegister_WrongServerType() {
+        ServerRegistration wnet = new ServerRegistration("none", "http://test:8000/server", 2, 2);
+        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE);
+        String json = this.serializeObject(wnet);
+        final Response response = sendRegistrationRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
     public void testServerAffinity() {
+        when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(true);
         ServerAffinity affinity = new ServerAffinity(DEVID, Collections.singletonList(AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testServerAffinity_BadSession() {
+        when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeControllerRnn.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeControllerAiml.updateAffinity(any(), any())).thenReturn(false);
+        ServerAffinity affinity = new ServerAffinity(DEVID, Collections.singletonList(AIID));
+        String json = this.serializeObject(affinity);
+        final Response response = sendAffinityRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     private Response sendStatusUpdateRequest(final String statusJson) {
