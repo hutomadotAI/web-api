@@ -22,7 +22,7 @@ function showBots(str, option) {
                         wHTML += ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '","' + x + '");></div>');
                     }
                     else {
-                        wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-price="' + bot['price'] + '"style="width:130px;">');
+                        wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"style="width:130px;">');
                         wHTML += ('<b>Buy Bot </b>');
                         wHTML += ('<span class="fa fa-arrow-circle-right"></span>');
                         wHTML += ('</button>');
@@ -30,13 +30,13 @@ function showBots(str, option) {
                     break;
                 case 1:  // botstore showed in BOTSTORE
                     if ($.inArray(bot['botId'], purchasedBots) != -1) {
-                        wHTML += ('<button class="btn btn-primary center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="" data-target="" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-price="' + bot['price'] + '" style="width:130px;">');
+                        wHTML += ('<button class="btn btn-primary center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="" data-target="" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '" style="width:130px;">');
                         wHTML += ('<b>Bot purchased </b>');
                         wHTML += ('<span class="fa fa-check-circle-o"></span>');
                         wHTML += ('</button>');
                     }
                     else {
-                        wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-price="' + bot['price'] + '" style="width:130px;">');
+                        wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '" style="width:130px;">');
                         wHTML += ('<b>Buy Bot </b>');
                         wHTML += ('<span class="fa fa-arrow-circle-right"></span>');
                         wHTML += ('</button>');
@@ -143,6 +143,7 @@ $('#buyBot').on('show.bs.modal', function (e) {
     var curr_bot_name = $(e.relatedTarget).data('name');
     var curr_bot_description = $(e.relatedTarget).data('description');
     var curr_bot_price = $(e.relatedTarget).data('price');
+    var curr_bot_icon = $(e.relatedTarget).data('icon');
 
     document.getElementById('bot_id').value = curr_bot_id;
     document.getElementById('botNamePurchase').innerText = curr_bot_name;
@@ -150,6 +151,7 @@ $('#buyBot').on('show.bs.modal', function (e) {
     document.getElementById('botPricePurchase').innerText = curr_bot_price;
     document.getElementById('message').innerText = '';
     document.getElementById('btnPayment').disabled = false;
+    document.getElementById('botIconPurchase').src = curr_bot_icon;
 });
 
 $('#buyBot').on('hide.bs.modal', function (e) {

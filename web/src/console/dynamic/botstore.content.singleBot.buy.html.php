@@ -2,20 +2,19 @@
 <div class="modal fade" id="buyBot" role="dialog" style="padding-top:100px;">
     <div class="modal-dialog flat">
 
-        <div class="modal-content bot-shadow" >
+        <div class="modal-content bot-shadow">
 
-            <div class="modal-body no-padding no-shadow no-border" >
+            <div class="modal-body no-padding no-shadow no-border">
                 <div class="box-body bot-payment flat">
                     <div class="row no-margin">
                         <div class="col-xs-4 no-padding">
                             <div class="bot-icon-payment bot-absolute bot-shadow-light bg-blue-gradient text-bg">
-                                <div class=".bot-icon-payment">
-                                    <i class="fa fa-question text-white"></i>
-                                </div>
+                                <img class="card-icon" style="margin-top: 0" src="" id="botIconPurchase">
                             </div>
                         </div>
                         <div class="col-xs-8 no-padding">
-                            <button type="button" class="close text-white" id="btnModelClose" data-dismiss="modal">&times;</button>
+                            <button type="button" class="close text-white" id="btnModelClose"
+                                    data-dismiss="modal">&times;</button>
                             <div class="row no-margin">
                                 <div class="col-xs-12 bot-30">
                                     <div class="col-xs-8 bot-buy-title">
@@ -33,7 +32,8 @@
                                     <span class="text-gray" id="botDescriptionPurchase"></span>
                                 </div>
                                 <div class="col-xs-6 bot-70" style="padding-top:35px;">
-                                    <button class="btn btn-success pull-right flat" data-dismiss="modal" id="btnPayment" style="width:130px;">
+                                    <button class="btn btn-success pull-right flat" data-dismiss="modal" id="btnPayment"
+                                            style="width:130px;">
                                         <b>Buy Bot </b>
                                         <span class="fa fa-arrow-circle-right"></span>
                                     </button>
