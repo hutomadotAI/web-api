@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
     <div class="box-header with-border">
-        <div class="box-title"><b>Basic AI Settings</b></div>
+        <div class="box-title"><b>Basic Bot Settings</b></div>
     </div>
 
     <form method="POST" name="createAIform" action="./dynamic/sessionCreateAI.php">

@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow unselectable">
     <div class="box-header with-border">
-        <div class="box-title"><b>Your AIs</b></div>
+        <div class="box-title"><b>Your Bots</b></div>
     </div>
 
     <div class="box-body table-responsive no-border" style="padding-top:0px;">

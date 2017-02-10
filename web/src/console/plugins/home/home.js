@@ -37,7 +37,7 @@ function drawTableRows() {
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         if (publishedBots.indexOf(aiList[i]['aiid']) == -1) {
             wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
-            wHTML += ' Publish AI </b></button></td>';
+            wHTML += ' Publish Bot </b></button></td>';
         }
         else {
             wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="" class="btn btn-warning flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b>';
@@ -48,7 +48,7 @@ function drawTableRows() {
         wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
         wHTML += 'onClick="sendAIID(this,\'./dynamic/sessionAI.php\')" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;">';
         wHTML += '<b> <span class="fa fa-search">';
-        wHTML += '</span> View AI </b></button></td>';
+        wHTML += '</span> View Bot </b></button></td>';
 
         newNode.innerHTML = wHTML;
         document.getElementById('tableAiList').appendChild(newNode);
