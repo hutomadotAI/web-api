@@ -97,12 +97,14 @@ public class ServerMetadata {
 
         String routePickReason;
 
-        // filter out the ones that have no chat capacity at all
+        // remove the ones that have no chat capacity at all
+        // and remove the ones where ping hasn't succeeded yet
         // map into a list of pairs of (ChatCapacity, Server)
         List<Pair<Double, ServerTracker>> candidates
                 = this.activeServerSessions.values().stream()
-                .map(x -> new Pair<>(x.getChatLoadFactor(), x))
-                .filter(x -> !Double.isNaN(x.getA()))
+                .filter(server -> server.isEndpointVerified())
+                .map(server -> new Pair<>(server.getChatLoadFactor(), server))
+                .filter(pair -> !Double.isNaN(pair.getA()))
                 .collect(toList());
 
         // if there are no servers, bail now
@@ -160,7 +162,11 @@ public class ServerMetadata {
         if (affinityList == null) {
             return null;
         }
-        return affinityList.stream().findFirst().orElse(null);
+        // find the first server in the affinity list
+        // that has been verified
+        return affinityList.stream()
+                .filter(server -> server.isEndpointVerified())
+                .findFirst().orElse(null);
     }
 
     /***

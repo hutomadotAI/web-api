@@ -214,6 +214,53 @@ public class TestServerMetadata {
         Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
     }
 
+    @Test
+    public void serverMetadata_serverSunrise_DontAllocate() throws ServerMetadata.NoServerAvailable {
+        ServerTracker server1 = makeServerTracker(1);
+        ServerTracker server2 = makeServerTracker(1);
+        ((FakeServerTracker) server1).testSetEndpointVerified(false);
+
+        UUID chat1 = this.tools.createNewRandomUUID();
+        UUID chat2 = this.tools.createNewRandomUUID();
+
+        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+    }
+
+    @Test
+    public void serverMetadata_serverSunrise_IgnoreAffinity() throws ServerMetadata.NoServerAvailable {
+        ServerTracker server1 = makeServerTracker(1);
+        ServerTracker server2 = makeServerTracker(1);
+        ((FakeServerTracker) server1).testSetEndpointVerified(false);
+
+        UUID chat1 = this.tools.createNewRandomUUID();
+        UUID chat2 = this.tools.createNewRandomUUID();
+
+        UUID server1SessionID = ((FakeServerTracker) server1).getSessionID();
+        this.test.updateAffinity(server1SessionID, Arrays.asList(chat1, chat2));
+
+        Assert.assertEquals(server2, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server2, this.test.getEndpointFor(chat2));
+    }
+
+    @Test
+    public void serverMetadata_serverSunrise_RestoreAffinityWhenVerified() throws ServerMetadata.NoServerAvailable {
+        ServerTracker server1 = makeServerTracker(1);
+        ServerTracker server2 = makeServerTracker(1);
+        ((FakeServerTracker) server1).testSetEndpointVerified(false);
+
+        UUID chat1 = this.tools.createNewRandomUUID();
+        UUID chat2 = this.tools.createNewRandomUUID();
+
+        UUID server1SessionID = ((FakeServerTracker) server1).getSessionID();
+        this.test.updateAffinity(server1SessionID, Arrays.asList(chat1, chat2));
+
+        ((FakeServerTracker) server1).testSetEndpointVerified(true);
+
+        Assert.assertEquals(server1, this.test.getEndpointFor(chat1));
+        Assert.assertEquals(server1, this.test.getEndpointFor(chat2));
+    }
+
     private List<ServerTracker> getEndpointsFor10Aiids() {
         List<UUID> aiids = get10Uuids();
         return aiids.stream().map(aiid -> {
@@ -270,6 +317,11 @@ public class TestServerMetadata {
 
         public FakeServerTracker(final Config config, final Tools tools, final ILogger logger) {
             super(config, tools, mock(JerseyClient.class), null, logger);
+            testSetEndpointVerified(true);
+        }
+
+        public void testSetEndpointVerified(boolean flag) {
+            this.endpointVerified.set(flag);
         }
 
         public UUID getSessionID() {

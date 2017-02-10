@@ -30,6 +30,8 @@ public class ServerTracker implements Callable {
     private final HashSet<UUID> affinity;
     protected AtomicBoolean runFlag;
     protected UUID serverSessionID;
+    protected AtomicBoolean endpointVerified;
+
     private Config config;
     private Tools tools;
     private JerseyClient jerseyClient;
@@ -49,6 +51,7 @@ public class ServerTracker implements Callable {
         this.logger = logger;
 
         this.runFlag = new AtomicBoolean();
+        this.endpointVerified = new AtomicBoolean(false);
         this.affinity = new HashSet<>();
 
         this.jerseyClient = jerseyClient;
@@ -67,6 +70,15 @@ public class ServerTracker implements Callable {
             return Double.NaN;
         }
         return ((double) getChatAffinityCount()) / ((double) chatCapacity);
+    }
+
+    /***
+     * True if we have managed at least one ping,
+     * therefore the path to the server is correct and the server is reachable
+     * @return
+     */
+    public boolean isEndpointVerified() {
+        return this.endpointVerified.get();
     }
 
     @Override
@@ -102,6 +114,10 @@ public class ServerTracker implements Callable {
                     if (success) {
                         // and we reset the time that we got a valid response to now
                         this.lastValidHeartbeat = timeNow;
+
+                        // if the heartbeat worked then the endpoint is verified
+                        this.endpointVerified.set(true);
+
                     } else {
 
                         // if it failed, check how long ago we got the last good ping
