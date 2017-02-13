@@ -73,6 +73,14 @@ public class ServerTracker implements Callable {
     }
 
     /***
+     * Does this server support training or is it chat only?
+     * @return
+     */
+    public boolean canTrain() {
+        return this.registration.getTrainingCapacity() > 0;
+    }
+
+    /***
      * True if we have managed at least one ping,
      * therefore the path to the server is correct and the server is reachable
      * @return

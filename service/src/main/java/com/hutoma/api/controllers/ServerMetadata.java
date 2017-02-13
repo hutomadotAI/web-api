@@ -4,6 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.controllers.ControllerBase.RequestFor;
 
 import org.glassfish.hk2.api.ServiceLocator;
 
@@ -14,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 
+import static com.hutoma.api.controllers.ControllerBase.RequestFor.Chat;
 import static java.util.stream.Collectors.toList;
 
 /***
@@ -183,6 +185,19 @@ public class ServerMetadata {
     }
 
     /***
+     * Gets the first connected 
+     * @param aiid
+     * @return
+     * @throws NoServerAvailable
+     */
+    private synchronized ServerTracker getServerForTraining(final UUID aiid) throws NoServerAvailable {
+        return this.activeServerSessions.values().stream()
+                .filter(ServerTracker::canTrain)
+                .findFirst()
+                .orElseThrow(() -> new NoServerAvailable());
+    }
+
+    /***
      * When the server list is empty
      * or the server does not support what we are trying to do
      * e.g. chatcapacity=0 and we are trying to chat
@@ -228,12 +243,23 @@ public class ServerMetadata {
      * @return
      * @throws NoServerAvailable
      */
-    protected synchronized ServerTracker getServerFor(UUID aiid) throws NoServerAvailable {
+    protected synchronized ServerTracker getServerForChat(UUID aiid) throws NoServerAvailable {
         ServerTracker server = existingAffinity(aiid);
         if (server == null) {
             server = chooseServerToAssignAffinity(aiid);
         }
         return server;
+    }
+
+    /***
+     * Gets a server to service a request
+     *
+     * @param aiid
+     * @return
+     * @throws NoServerAvailable
+     */
+    protected synchronized ServerTracker getServerFor(UUID aiid, RequestFor requestFor) throws NoServerAvailable {
+        return requestFor == Chat ? getServerForChat(aiid) : getServerForTraining(aiid);
     }
 
     protected ServerTracker createNewServerTracker() {

@@ -51,9 +51,13 @@ public abstract class ControllerBase extends ServerMetadata {
         return serverSessionID;
     }
 
-    protected String getBackendEndpoint(UUID aiid) throws NoServerAvailable {
-        ServerTracker tracker = this.getServerFor(aiid);
+    public String getBackendEndpoint(UUID aiid, RequestFor requestFor) throws NoServerAvailable {
+        ServerTracker tracker = this.getServerFor(aiid, requestFor);
         return tracker.getServerUrl();
     }
 
+    public enum RequestFor {
+        Training,
+        Chat
+    }
 }

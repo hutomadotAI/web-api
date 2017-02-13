@@ -8,6 +8,9 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.ServerMetadata;
 import junitparams.JUnitParamsRunner;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -49,11 +52,13 @@ public class TestAiServices {
     private Tools fakeTools;
     private JerseyClient fakeClient;
     private AiServiceStatusLogger fakeServicesStatusLogger;
+    private ControllerWnet fakeControllerWnet;
+    private ControllerRnn fakeControllerRnn;
 
     private AIServices aiServices;
 
     @Before
-    public void setup() {
+    public void setup() throws ServerMetadata.NoServerAvailable {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
@@ -62,11 +67,14 @@ public class TestAiServices {
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
+        this.fakeControllerWnet = mock(ControllerWnet.class);
+        this.fakeControllerRnn = mock(ControllerRnn.class);
 
-        when(this.fakeConfig.getWnetTrainingEndpoint()).thenReturn(WNET_ENDPOINT);
-        when(this.fakeConfig.getRnnTrainingEndpoint()).thenReturn(RNN_ENDPOINT);
+        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(WNET_ENDPOINT);
+        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(RNN_ENDPOINT);
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, this.fakeClient, this.fakeServicesStatusLogger);
+                this.fakeTools, this.fakeConfig, this.fakeClient, this.fakeServicesStatusLogger,
+                this.fakeControllerWnet, this.fakeControllerRnn);
     }
 
     @Test

@@ -9,7 +9,11 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.controllers.ControllerBase.RequestFor;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.InvocationResult;
+import com.hutoma.api.controllers.ServerMetadata;
 
 import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
@@ -19,7 +23,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +38,20 @@ public class AIServices extends ServerConnector {
     private static final String LOGFROM = "aiservices";
     private static final String COMMAND_PARAM = "command";
     private static final String TRAINING_TIME_ALLOWED_PARAM = "training_time_allowed";
+
     private final AiServiceStatusLogger serviceStatusLogger;
+    private final ControllerWnet controllerWnet;
+    private final ControllerRnn controllerRnn;
 
     @Inject
-    public AIServices(final Database database, final ILogger logger, final JsonSerializer serializer, final Tools tools,
-                      final Config config, final JerseyClient jerseyClient,
-                      final AiServiceStatusLogger serviceStatusLogger) {
+    public AIServices(final Database database, final ILogger logger, final JsonSerializer serializer,
+                      final Tools tools, final Config config, final JerseyClient jerseyClient,
+                      final AiServiceStatusLogger serviceStatusLogger,
+                      final ControllerWnet controllerWnet, final ControllerRnn controllerRnn) {
         super(database, logger, serializer, tools, config, jerseyClient);
         this.serviceStatusLogger = serviceStatusLogger;
+        this.controllerWnet = controllerWnet;
+        this.controllerRnn = controllerRnn;
     }
 
     public void startTraining(final String devId, final UUID aiid) throws AiServicesException {
@@ -68,7 +78,7 @@ public class AIServices extends ServerConnector {
     public void deleteAI(final String devId, final UUID aiid) throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         this.logger.logDebug(LOGFROM, "Issuing \"delete AI\" command to backends for AI " + aiid.toString());
-        for (String endpoint : this.getAllEndpoints()) {
+        for (String endpoint : this.getAllEndpoints(aiid)) {
             callables.put(endpoint, () -> new InvocationResult(
                     aiid,
                     this.jerseyClient
@@ -84,7 +94,7 @@ public class AIServices extends ServerConnector {
     public void deleteDev(final String devId) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        for (String endpoint : this.getAllEndpoints()) {
+        for (String endpoint : this.getAllEndpoints(null)) {
             callables.put(endpoint, () -> new InvocationResult(
                     null,
                     this.jerseyClient
@@ -99,7 +109,7 @@ public class AIServices extends ServerConnector {
             throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
-        for (String endpoint : this.getAllEndpoints()) {
+        for (String endpoint : this.getAllEndpoints(aiid)) {
             this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
@@ -137,16 +147,16 @@ public class AIServices extends ServerConnector {
     }
 
     private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
-            final String devId, final UUID aiid, final String command) {
+            final String devId, final UUID aiid, final String command) throws AiServicesException {
         return getTrainingCallablesForCommand(devId, aiid, new HashMap<String, String>() {{
             put(AIServices.COMMAND_PARAM, command);
         }});
     }
 
     private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
-            final String devId, final UUID aiid, Map<String, String> params) {
+            final String devId, final UUID aiid, Map<String, String> params) throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        for (String endpoint : this.getAllEndpoints()) {
+        for (String endpoint : this.getAllEndpoints(aiid)) {
 
             JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString());
             for (Map.Entry<String, String> param : params.entrySet()) {
@@ -159,18 +169,16 @@ public class AIServices extends ServerConnector {
         return callables;
     }
 
-    private List<String> getAllEndpoints() {
-        List<String> list = new ArrayList<>();
-        String wnet = this.config.getWnetTrainingEndpoint();
-        if (wnet != null) {
-            list.add(wnet);
+    private List<String> getAllEndpoints(UUID aiid) throws AiServicesException {
+        try {
+            return Arrays.asList(
+                    this.controllerWnet.getBackendEndpoint(aiid, RequestFor.Training),
+                    this.controllerRnn.getBackendEndpoint(aiid, RequestFor.Training));
+        } catch (ServerMetadata.NoServerAvailable noServer) {
+            throw new AiServicesException(noServer.getMessage());
         }
-        String rnn = this.config.getRnnTrainingEndpoint();
-        if (rnn != null) {
-            list.add(rnn);
-        }
-        return list;
     }
+
 
     public static class AiInfo {
         @SerializedName("ai_id")

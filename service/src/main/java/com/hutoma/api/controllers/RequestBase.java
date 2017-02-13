@@ -9,6 +9,7 @@ import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.controllers.ControllerBase.RequestFor;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
@@ -59,7 +60,7 @@ public abstract class RequestBase {
         List<Callable<InvocationResult>> callables = new ArrayList<>();
 
         for (Pair<String, UUID> ai : ais) {
-            callables.add(createCallable(controller.getBackendEndpoint(ai.getB()),
+            callables.add(createCallable(this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
                     ai.getA(), ai.getB(), chatParams));
         }
 
@@ -194,10 +195,6 @@ public abstract class RequestBase {
         });
 
         return futures;
-    }
-
-    protected String getBackendEndpoints(UUID aiid) throws ServerMetadata.NoServerAvailable {
-        return this.controller.getBackendEndpoint(aiid);
     }
 
     protected abstract String getLogFrom();

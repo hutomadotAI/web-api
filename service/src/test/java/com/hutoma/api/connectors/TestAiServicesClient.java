@@ -8,6 +8,9 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.ServerMetadata;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -36,6 +39,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +65,8 @@ public class TestAiServicesClient {
     private Tools fakeTools;
     private AIServices aiServices;
     private AiServiceStatusLogger fakeServicesStatusLogger;
+    private ControllerWnet fakeControllerWnet;
+    private ControllerRnn fakeControllerRnn;
 
     @BeforeClass
     public static void initializeClass() {
@@ -75,7 +81,7 @@ public class TestAiServicesClient {
     }
 
     @Before
-    public void setup() {
+    public void setup() throws ServerMetadata.NoServerAvailable {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
@@ -83,10 +89,14 @@ public class TestAiServicesClient {
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
 
+        this.fakeControllerWnet = mock(ControllerWnet.class);
+        this.fakeControllerRnn = mock(ControllerRnn.class);
+
+        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
+        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger);
-        when(this.fakeConfig.getRnnTrainingEndpoint()).thenReturn(LOCAL_WEB_ENDPOINT);
-        when(this.fakeConfig.getWnetTrainingEndpoint()).thenReturn(LOCAL_WEB_ENDPOINT);
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger,
+                this.fakeControllerWnet, this.fakeControllerRnn);
     }
 
     @Test
@@ -114,7 +124,8 @@ public class TestAiServicesClient {
     public void testUploadTraining() throws AIServices.AiServicesException {
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger);
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger,
+                this.fakeControllerWnet, this.fakeControllerRnn);
         thisAiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
     }
 

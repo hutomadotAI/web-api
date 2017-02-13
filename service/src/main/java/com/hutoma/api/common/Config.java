@@ -115,26 +115,6 @@ public class Config {
         return Double.parseDouble(getConfigFromProperties("ratelimit_loadtest_frequency", "8192.5"));
     }
 
-    public String getWnetTrainingEndpoint() {
-        return getConfigFromProperties("ai_wnet_endpoint", "");
-    }
-
-    public String getRnnTrainingEndpoint() {
-        return getConfigFromProperties("ai_rnn_endpoint", "");
-    }
-
-    public String getWnetChatEndpoint() {
-        return getConfigFromProperties("ai_wnet_endpoint", "");
-    }
-
-    public String getAimlChatEndpoint() {
-        return getConfigFromProperties("ai_aiml_endpoint", "");
-    }
-
-    public String getRnnChatEndpoint() {
-        return getConfigFromProperties("ai_rnn_endpoint", "");
-    }
-
     public String getLoggingServiceUrl() {
         return getConfigFromProperties("logging_url", null);
     }
