@@ -1,10 +1,10 @@
 package com.hutoma.api.connectors;
 
 import com.google.gson.annotations.SerializedName;
-import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.DevPlan;
@@ -39,17 +39,15 @@ public class AIServices extends ServerConnector {
     private static final String COMMAND_PARAM = "command";
     private static final String TRAINING_TIME_ALLOWED_PARAM = "training_time_allowed";
 
-    private final AiServiceStatusLogger serviceStatusLogger;
     private final ControllerWnet controllerWnet;
     private final ControllerRnn controllerRnn;
 
     @Inject
     public AIServices(final Database database, final ILogger logger, final JsonSerializer serializer,
                       final Tools tools, final Config config, final JerseyClient jerseyClient,
-                      final AiServiceStatusLogger serviceStatusLogger,
+                      final ThreadSubPool threadSubPool,
                       final ControllerWnet controllerWnet, final ControllerRnn controllerRnn) {
-        super(database, logger, serializer, tools, config, jerseyClient);
-        this.serviceStatusLogger = serviceStatusLogger;
+        super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
         this.controllerWnet = controllerWnet;
         this.controllerRnn = controllerRnn;
     }

@@ -4,6 +4,8 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadPool;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -70,10 +72,14 @@ public class TestAiServices {
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerRnn = mock(ControllerRnn.class);
 
+        when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
+        when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
+        ThreadPool threadPool = new ThreadPool(this.fakeConfig);
+
         when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(WNET_ENDPOINT);
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(RNN_ENDPOINT);
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, this.fakeClient, this.fakeServicesStatusLogger,
+                this.fakeTools, this.fakeConfig, this.fakeClient, new ThreadSubPool(threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn);
     }
 

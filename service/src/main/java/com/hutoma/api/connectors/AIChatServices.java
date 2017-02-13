@@ -4,6 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiBot;
@@ -48,9 +49,10 @@ public class AIChatServices extends ServerConnector {
     @Inject
     public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
+                          final ThreadSubPool threadSubPool,
                           final RequestWnet wnetController, final RequestRnn rnnController,
                           final RequestAiml aimlController) {
-        super(database, logger, serializer, tools, config, jerseyClient);
+        super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
         this.wnetController = wnetController;
         this.rnnController = rnnController;
         this.aimlController = aimlController;

@@ -4,6 +4,8 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadPool;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -67,6 +69,7 @@ public class TestAiServicesClient {
     private AiServiceStatusLogger fakeServicesStatusLogger;
     private ControllerWnet fakeControllerWnet;
     private ControllerRnn fakeControllerRnn;
+    private ThreadPool threadPool;
 
     @BeforeClass
     public static void initializeClass() {
@@ -92,10 +95,14 @@ public class TestAiServicesClient {
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerRnn = mock(ControllerRnn.class);
 
+        when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
+        when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
+        this.threadPool = new ThreadPool(this.fakeConfig);
+
         when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger,
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn);
     }
 
@@ -124,7 +131,7 @@ public class TestAiServicesClient {
     public void testUploadTraining() throws AIServices.AiServicesException {
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), this.fakeServicesStatusLogger,
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn);
         thisAiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
     }
