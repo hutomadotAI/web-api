@@ -21,7 +21,7 @@ INSERT INTO `integrations` VALUES
 	(5,'Telegram','A new era of messaging','telegram.png',0),
 	(6,'Twilio','Programmable SMS','twilio.png',0),
 	(7,'Webhook','A way to plug a web service into your agent','webhook.png',0),
-	(8,'WeChat','A text and voice messaging communication','wechat.png',0),
+	(8,'WeChat','A text and voice messaging communication','wechat.png',0);
 /*!40000 ALTER TABLE `integrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -39,6 +39,6 @@ UNLOCK TABLES;
 
 LOCK TABLES `botStore` WRITE;
 /*!40000 ALTER TABLE `botStore` DISABLE KEYS */;
-INSERT INTO `botStore` VALUES (1,'d14b441b-e2a2-4b9f-be9b-4301647e1265','e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','Chit-Chat','Free Chit-Chat bot','Just include this bot in your AI to get instant chit-chat','','','Free',0,'','2017-01-31 00:00:00','Other','','EVERYONE','1.0','',1);
+INSERT INTO `botStore` VALUES (1,'d14b441b-e2a2-4b9f-be9b-4301647e1265','e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','Chit-Chat','Free Chit-Chat bot','Just include this bot in your AI to get instant chit-chat','','','Free',0,'','2017-01-31 00:00:00','Other','','EVERYONE','1.0','',1,null);
 /*!40000 ALTER TABLE `botStore` ENABLE KEYS */;
 UNLOCK TABLES;
