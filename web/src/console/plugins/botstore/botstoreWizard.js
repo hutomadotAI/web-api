@@ -36,6 +36,7 @@ function populateBotFields(bot) {
     document.getElementById('botNamePurchase').innerText = json['name'];
     document.getElementById('botDescriptionPurchase').innerText = json['description'];
     document.getElementById('botPricePurchase').innerText = json['price'];
+    document.getElementById('botLicensePurchase').innerText = json['licenseType'];
     document.getElementById('botIconPurchase').setAttribute('src', json['imagePath']);
     document.getElementById('bot_id').value = json['botId'];
 
