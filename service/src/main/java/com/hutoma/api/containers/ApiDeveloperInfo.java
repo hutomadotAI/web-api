@@ -3,7 +3,7 @@ package com.hutoma.api.containers;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 
 /**
- * Created by pedrotei on 03/01/17.
+ * API Developer Info container.
  */
 public class ApiDeveloperInfo extends ApiResult {
 

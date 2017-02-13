@@ -55,12 +55,6 @@ public class TestAdminLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, createDev().getStatus().getCode());
     }
 
-//    @Test
-//    public void testCreate_Valid_Devid() throws Database.DatabaseException {
-//        validKeyDBSuccess();
-//        Assert.assertEquals(DEVID, ((ApiAdmin)createDev()).getDevid());
-//    }
-
     @Test
     public void testCreate_Valid_Token() throws Database.DatabaseException {
         validKeyDBSuccess();

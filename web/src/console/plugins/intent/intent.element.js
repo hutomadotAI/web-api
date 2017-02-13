@@ -27,11 +27,11 @@ function saveIntent() {
 
     var hasErrors = false;
     if (expressions.length == 0) {
-        msgAlertUserExpression(ALERT.DANGER.value, 'At least one user expression is required');
+        msgAlertUserExpression(ALERT.DANGER.value, 'At least one user expression is required.');
         hasErrors = true;
     }
     if (responses.length == 0) {
-        msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required.');
         hasErrors = true;
     }
     if (hasErrors) {
@@ -61,9 +61,9 @@ function saveIntent() {
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
         if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
-            if (inputValidation(node_nprompt.value, 'intent_n_prompt')) {
+            if (isInputInvalid(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
-                msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be a number between 1 and 99.');
+                msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be between 1 and 99.');
                 msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved!');
                 return false;
             }

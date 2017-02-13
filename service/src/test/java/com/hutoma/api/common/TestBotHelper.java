@@ -33,14 +33,10 @@ public final class TestBotHelper {
     public static AiBot getBot(final String devId, final UUID aiid, final int botId) {
         return new AiBot(devId, aiid, botId, "name", "description", "long description", "alert message", "badge",
                 BigDecimal.valueOf(1.123), "sample", "category", "licType", DateTime.now(), "privacy policy",
-                "classification", "version", "http://video", true);
+                "classification", "version", "http://video", true, "");
     }
 
     public static byte[] getBotIconContent() {
         return BOTICON_CONTENT.clone();
-    }
-
-    public static long getBotIconContentSize() {
-        return BOTICON_CONTENT.length;
     }
 }

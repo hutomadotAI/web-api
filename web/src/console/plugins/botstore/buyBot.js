@@ -15,7 +15,7 @@ function purchaseBot(){
             var statusCode = JSON.parse(response);
             switch(statusCode['status']['code']){
                 case 200:
-                    document.getElementById('message').innerText = 'Skill succesfully added!';
+                    document.getElementById('message').innerText = 'Bot succesfully added!';
                     $('#purchase_state').val('1');
                     var $tmp = $('#btnBuyBot');;
                     if ( $tmp.length)

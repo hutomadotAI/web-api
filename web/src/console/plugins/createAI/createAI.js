@@ -7,8 +7,8 @@ function wizardNext() {
     document.getElementById('btnCancel').setAttribute('disabled','disabled');
 
     var value_name = document.getElementById('ai_name').value;
-    if(inputValidation(value_name,'ai_name')) {
-        msgAlertNameAI(ALERT.DANGER.value, 'Invalid name. Please enter a string that contains alphanumeric characters. No space are allowed.');
+    if(isInputInvalid(value_name,'ai_name')) {
+        msgAlertNameAI(ALERT.DANGER.value, 'Invalid name! Please enter a string that contains only alphanumeric characters.');
         document.getElementById('btnNext').setAttribute('disabled','disabled');
         document.getElementById('btnCancel').removeAttribute('disabled');
         inputsActiveDeactive(false);
@@ -16,13 +16,13 @@ function wizardNext() {
     }
     
     if (isNameAlreadyExists(name_list, value_name)){
-        msgAlertNameAI(ALERT.DANGER.value, 'This name is already used for another AI. Please choose another name.');
+        msgAlertNameAI(ALERT.DANGER.value, 'Name already in use. Please choose another one.');
         return;
     }
 
     var value_desc = document.getElementById('ai_description').value;
-    if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
-        msgAlertDescriptionAI(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
+    if(isInputInvalid(value_desc,'ai_description') && value_desc.length > 0) {
+        msgAlertDescriptionAI(ALERT.DANGER.value, 'Invalid description! Please enter a string that contains only alphanumeric characters.');
         document.getElementById('btnNext').setAttribute('disabled','disabled');
         document.getElementById('btnCancel').removeAttribute('disabled');
         inputsActiveDeactive(false);
@@ -61,7 +61,7 @@ function activeButtonCreate() {
             document.getElementById('ai_name').style.borderColor = "#d2d6de";
             break;
         case 1:
-            msgAlertNameAI(ALERT.WARNING.value, 'Limit AI name reached.');
+            msgAlertNameAI(ALERT.WARNING.value, 'Bot name\'s too long');
             break;
     }
 }
@@ -80,7 +80,7 @@ function getValueFromConfidence(confidence_text){
 function checkDescriptionLength() {
     var limitTextInputSize = 50;
     if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
-        msgAlertDescriptionAI(ALERT.WARNING.value, 'Limit AI description reached.');
+        msgAlertDescriptionAI(ALERT.WARNING.value, 'Bot description\'s too long');
     else {
         document.getElementById('btnNext').removeAttribute('disabled');
         document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';
@@ -115,6 +115,6 @@ $(document).ready(function(){
         setSliderValue('ai_confidence', 0.4); // default value "often"
     }
     if(err)
-        msgAlertNameAI(ALERT.DANGER.value, document.getElementById('ai_name').value+' was created with the same name.');
+        msgAlertNameAI(ALERT.DANGER.value, document.getElementById('ai_name').value+' name already in use. Please choose another one.');
 
 });

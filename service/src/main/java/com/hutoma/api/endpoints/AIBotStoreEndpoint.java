@@ -17,6 +17,7 @@ import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import java.io.InputStream;
@@ -198,10 +199,9 @@ public class AIBotStoreEndpoint {
     @GET
     @ValidateParameters({APIParameter.DevID})
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.TEXT_PLAIN)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
-            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({
@@ -231,12 +231,14 @@ public class AIBotStoreEndpoint {
     public Response uploadBotIcon(
             @Context ContainerRequestContext requestContext,
             @PathParam("botId") int botId,
+            @FormDataParam("file") FormDataContentDisposition fileDetail,
             @FormDataParam("file") InputStream uploadedInputStream
     ) {
         ApiResult result = this.aiBotStoreLogic.uploadBotIcon(
                 ParameterFilter.getDevid(requestContext),
                 botId,
-                uploadedInputStream);
+                uploadedInputStream,
+                fileDetail);
         return result.getResponse(this.serializer).build();
     }
 }

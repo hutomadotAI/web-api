@@ -20,11 +20,11 @@ function activeButtonCreateEntityValue() {
             $("#btnAddEntityValue").prop("disabled", true);
             return false;
         case 0:
-            msgAlertEntityValues(ALERT.BASIC.value, 'You can add additional values for current entity.');
+            msgAlertEntityValues(ALERT.BASIC.value, 'You can add additional values for the current entity.');
             $("#btnAddEntityValue").prop("disabled", false);
             return true;
         case 1:
-            msgAlertEntityValues(ALERT.WARNING.value, 'The value name is too long!');
+            msgAlertEntityValues(ALERT.WARNING.value, 'The value name\'s is too long!');
             $("#btnAddEntityValue").prop("disabled", true);
             return false
         default:
@@ -36,8 +36,8 @@ function activeButtonCreateEntityValue() {
 function addEntityValue() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#value-entity").val(), 'entity_value')) {
-        msgAlertEntityValues(ALERT.DANGER.value, 'Value name need contain only the following: A-Z, a-z, 0-9 character');
+    if (isInputInvalid($("#value-entity").val(), 'entity_value')) {
+        msgAlertEntityValues(ALERT.DANGER.value, 'Value name can contain only the following: A-Z, a-z, 0-9, _character');
         return;
     }
 
@@ -48,7 +48,7 @@ function addEntityValue() {
     }
 
     if(isNameExists($("#value-entity").val(),values)){
-        msgAlertEntityValues(ALERT.DANGER.value, 'Two identical values name are not allowed. Please choose a different expression.');
+        msgAlertEntityValues(ALERT.DANGER.value, 'Value name already exists. Please choose a different name.');
         return;
     }
 
@@ -57,7 +57,7 @@ function addEntityValue() {
     var parent = document.getElementById('entityValues-list');
     document.getElementById('value-entity').value = '';
     createNewValueEntityRow(value, parent);
-    msgAlertEntityValues(ALERT.BASIC.value,'You can add additional values for this entity');
+    msgAlertEntityValues(ALERT.BASIC.value,'You can add additional values for the current entity.');
 }
 
 function createNewValueEntityRow(value, parent) {
@@ -158,7 +158,7 @@ function saveEntity() {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
                 case 200:
-                    msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved!!');
+                    msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved.');
                     break;
                 case 400:
                     msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
@@ -171,7 +171,7 @@ function saveEntity() {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved');
+            msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved.');
         },
         complete: function () {
             checkListEntityValuesSize();

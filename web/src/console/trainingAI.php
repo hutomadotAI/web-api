@@ -142,7 +142,7 @@ function localeToLanguage($locale)
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./bootstrap/js/bootstrap-filestyle.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
@@ -158,11 +158,6 @@ function localeToLanguage($locale)
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
-
-<script>
-    var lang = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']); ?>;
-    var voice = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']); ?>;
-</script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">

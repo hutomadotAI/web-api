@@ -75,7 +75,7 @@ public class ServerBinder extends AbstractBinder {
         bind(IntentLogic.class).to(IntentLogic.class);
         bind(DeveloperInfoLogic.class).to(DeveloperInfoLogic.class);
         bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
-        bind(AIServicesLogic.class).to(AIServicesLogic.class);
+        bind(InviteLogic.class).to(InviteLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

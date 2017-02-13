@@ -87,7 +87,7 @@ function isAuthorizedToAccess()
 </form>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
@@ -107,26 +107,7 @@ function isAuthorizedToAccess()
         $tmp_list = [];
         if (isset($bots) && (array_key_exists("bots", $bots))) {
             foreach ($bots['bots'] as $botDetails) {
-                $bot = new \hutoma\bot();
-                $bot->setAlertMessage($botDetails['alertMessage']);
-                $bot->setBadge($botDetails['badge']);
-                $bot->setBotId($botDetails['botId']);
-                $bot->setCategory($botDetails['category']);
-                $bot->setClassification($botDetails['classification']);
-                $bot->setDescription($botDetails['description']);
-                $bot->setLicenseType($botDetails['licenseType']);
-                $bot->setLongDescription($botDetails['longDescription']);
-                $bot->setName($botDetails['name']);
-                $bot->setPrice($botDetails['price']);
-                $bot->setPrivacyPolicy($botDetails['privacyPolicy']);
-                $bot->setSample($botDetails['sample']);
-                $bot->setVersion($botDetails['version']);
-                $bot->setVideoLink($botDetails['videoLink']);
-
-                $botIcon = $botApi->getBotIcon($botDetails['botId']);
-                $bot->setImagePath(base64_encode($botIcon));
-                unset($botIcon);
-
+                $bot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $bot->toJSON();
                 if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
                     array_push($tmp_list, $tmp_bot);
@@ -150,7 +131,7 @@ function isAuthorizedToAccess()
         unset($purchasedBot);
         unset($tmp_purchased_list);
         ?>;
-    
+
 </script>
 <script>
     var newNode = document.createElement('div');
@@ -158,12 +139,12 @@ function isAuthorizedToAccess()
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        showBots(str,1);
+        showBots(str, 1);
     }
 </script>
 <script>
-    $( document ).ready(function() {
-        showBots('',1);
+    $(document).ready(function () {
+        showBots('', 1);
     });
 
 </script>

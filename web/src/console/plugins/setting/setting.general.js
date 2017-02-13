@@ -9,7 +9,7 @@ $(function () {
         keyboard: true,
         onStart: function  (data) {console.log("onStart"); },
         onChange: function (data) {console.log("onChange"); },
-        onFinish: function (data) {msgAlertUpdateAI(ALERT.BASIC.value, 'Change your AI settings here.'); },
+        onFinish: function (data) {msgAlertUpdateAI(ALERT.BASIC.value, 'This page allows you to change the basic information of your Bot.'); },
         onUpdate: function (data) {console.log("onUpdate"); },
         values: ["never", "rarely", "sometimes", "often", "always"]
     });
@@ -20,8 +20,8 @@ function updateAI() {
     deactiveGeneralButtons();
 
     var value_desc = document.getElementById('ai_description').value;
-    if(inputValidation(value_desc,'ai_description') && value_desc.length > 0) {
-        msgAlertDescriptionAI(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.');
+    if(isInputInvalid(value_desc,'ai_description') && value_desc.length > 0) {
+        msgAlertDescriptionAI(ALERT.DANGER.value, 'Description can contain only alphanumeric characters.');
         document.getElementById('btnSave').setAttribute('disabled','disabled');
         document.getElementById('btnReset').removeAttribute('disabled');
         document.getElementById('btnDelete').removeAttribute('disabled');
@@ -51,14 +51,14 @@ function updateAI() {
             var JSONdata = JSON.parse(response);
             var statusCode = JSONdata['status']['code'];
             if (statusCode === 200) {
-                msgAlertUpdateAI(ALERT.SUCCESS.value, 'Your AI has been updated');
+                msgAlertUpdateAI(ALERT.SUCCESS.value, 'Your Bot\'s information has been updated.');
                 updatePreviousDataLoaded(JSONdata);
                 activeGeneralButtons();
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
-            msgAlertUpdateAI(ALERT.DANGER.value,'Something went wrong. Your changes were not saved.');
+            msgAlertUpdateAI(ALERT.DANGER.value,'Whoops, something went wrong. Your changes weren\'t saved. Please retry');
             activeGeneralButtons();
         }
     });
@@ -67,7 +67,7 @@ function updateAI() {
 function checkDescriptionLength() {
     var limitTextInputSize = 100;
     if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
-        msgAlertDescriptionAI(ALERT.WARNING.value, 'Limit AI description reached.');
+        msgAlertDescriptionAI(ALERT.WARNING.value, 'Description is too long!');
     else {
         document.getElementById('btnSave').removeAttribute('disabled');
         document.getElementById('containerMsgAlertDescriptionAI').style.display = 'none';

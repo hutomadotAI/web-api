@@ -10,25 +10,27 @@
         </a>
     </div>
 
+    <div id="collapseIntentsListInfo" class="panel-collapse collapse">
+        <div class="box-body" style="padding-bottom: 0px;">
+            <div class="overlay center-block">
+                <section class="content-info">
+                    <div class="box-body">
+                        <dl class="dl-horizontal no-margin" style="text-align:justify">
+                            This is a list of the intents that you have created for your Bot so far. These are unique to this Bot.
+                        </dl>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    
     <div class="box-body">
 
         <div class="input-group-btn">
-            <input class="form-control flat no-shadow pull-right" onkeyup="searchIntents(this.value)" value="" placeholder="Search intents...">
+            <input class="form-control flat no-shadow pull-right" onkeyup="searchIntents(this.value)" value="" placeholder="Search...">
         </div>
 
         <p></p>
-
-        <div id="collapseIntentsListInfo" class="panel-collapse collapse">
-            <div class="box-body" style="padding-top:0px;padding-left:0;padding-right:0;">
-                <div class="overlay center-block">
-                    <section class="content-info">
-                        <div class="box-body">
-                            This is the list of all available intents that can be attached to your AI.
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </div>
 
         <div class="tab-pane" id="tab_intents">
             <p id="intentsearch"></p>

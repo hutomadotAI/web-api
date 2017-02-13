@@ -37,10 +37,8 @@ function drawTableRows() {
         var publishDisabled = aiList[i]['ai_status'] === 'ai_training_complete' ? '' : ' data-toggle="tooltip" disabled title="The AI needs to be fully trained before being published" ';
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         if (publishedBots.indexOf(aiList[i]['aiid']) == -1) {
-            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"'
-                + publishDisabled
-                + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
-            wHTML += ' Publish AI </b></button></td>';
+            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
+            wHTML += ' Publish Bot </b></button></td>';
         }
         else {
             wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="" class="btn btn-warning flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b>';
@@ -51,7 +49,7 @@ function drawTableRows() {
         wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
         wHTML += 'onClick="sendAIID(this,\'./dynamic/sessionAI.php\')" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;">';
         wHTML += '<b> <span class="fa fa-search">';
-        wHTML += '</span> View AI </b></button></td>';
+        wHTML += '</span> View Bot </b></button></td>';
 
         newNode.innerHTML = wHTML;
         document.getElementById('tableAiList').appendChild(newNode);
@@ -66,20 +64,20 @@ function decodeAIState(state) {
         case 'ai_training_stopped' :
             return ('<span class="text-red">Stopped</span>');
             break;
-        case 'ai_ready_to_train' :
-        case 'ai_undefined' :
+        case API_AI_STATE.READY_TO_TRAIN.value :
+        case API_AI_STATE.UNDEFINED.value :
             return ('<span class="text-darkgray">Not Started</span>');
             break;
-        case 'ai_training_queued' :
+        case API_AI_STATE.QUEUED.value :
             return ('<span class="text-gray">Queued</span>');
             break;
-        case 'ai_training' :
+        case API_AI_STATE.TRAINING.value :
             return ('<span class="text-orange">In Progress</span>');
             break;
-        case 'ai_training_complete' :
+        case API_AI_STATE.COMPLETED.value :
             return ('<span class="text-olive">Completed</span>');
             break;
-        case 'ai_error' :
+        case API_AI_STATE.ERROR.value :
             return ('<span class="text-red" flat>Error</span>');
             break;
         default:

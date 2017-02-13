@@ -50,6 +50,8 @@
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinNice.css">
     <link rel="stylesheet" href="./plugins/iCheck/all.css">
+    
+    
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">

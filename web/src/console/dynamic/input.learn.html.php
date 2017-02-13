@@ -8,13 +8,12 @@
     <select class="form-control select2" name="ai_personality" id="ai_personality" style="width: 100%;">
         <option selected="selected" value="0">No</option>
         <option disabled="disabled" value="1">Yes</option>
-        <option disabled="disabled" value="2">Yes but supervised</option>
     </select>
 </div>
 
 
 <div id="collapseLearn" class="panel-collapse collapse">
-    <div class="box-body">
+    <div class="box-body" style="padding: 0 0 10px 0;">
         <div class="overlay center-block">
             <section class="content-info" >
                 <div class="box-body">

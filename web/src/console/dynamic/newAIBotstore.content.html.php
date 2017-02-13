@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
     <div class="box-header with-border">
-        <div class="box-title"><b>Add Skills to your AI</b></div>
+        <div class="box-title"><b>Add skills to your Bot</b></div>
         <a data-toggle="collapse"  href="#collapseInfoNewAIBotstore">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
@@ -12,9 +12,9 @@
         <div class="alert alert-dismissable flat alert-info" id="containerMsgAlertNewAiBotstore" style="padding-bottom: 25px;">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <span id="msgAlertNewAiBotstore" >
-        <dt>Hutoma Bot Store</dt>
+        <dt>Hu:toma Bot Store</dt>
         <dd>
-           You can power up your AI by combining and mixing existing AIs from out Bot Store.
+           You can power up your Bot by combining with the functionalities of other Bots in our Botstore.
         </dd>
         </span>
         </div>

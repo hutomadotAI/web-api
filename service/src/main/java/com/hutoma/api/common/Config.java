@@ -132,6 +132,10 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
+    public String getBotIconStoragePath() {
+        return getConfigFromProperties("bot_icon_path", "/boticon");
+    }
+
     /***
      * The maximum number of active threads in the threadpool
      * after which anyone requesting a thread will get an exception

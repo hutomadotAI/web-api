@@ -11,6 +11,18 @@ public class Status {
     private String info;
     private Object additionalInfo;
 
+    public static Status getCreated() {
+        return Status.getCreated("Created");
+    }
+
+    public static Status getCreated(String message) {
+        return (new Status()).setCode(HttpURLConnection.HTTP_CREATED).setInfo(message);
+    }
+
+    public static Status getCreated(String message, Object additionalInfo) {
+        return getCreated(message).setAdditionalInfo(additionalInfo);
+    }
+
     public static Status getSuccess() {
         return Status.getSuccess("OK");
     }

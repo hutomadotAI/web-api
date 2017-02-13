@@ -187,7 +187,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/training/start'));
             $this->curl->setVerbPut();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 308);
+            //TODO - change handleApiCallError when ajax call are used -  $this->handleApiCallError($curl_response, 308);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

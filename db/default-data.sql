@@ -16,14 +16,12 @@ UNLOCK TABLES;
 LOCK TABLES `integrations` WRITE;
 /*!40000 ALTER TABLE `integrations` DISABLE KEYS */;
 INSERT INTO `integrations` VALUES 
-	(2,'Facebook Messenger','An easier way to message','messenger.png',1),
-	(3,'Siri','Virtual assistant created by Apple','siri.png',1),
-	(4,'Slack','A messaging app for teams','slack.png',1),
-	(5,'Telegram','A new era of messaging','telegram.png',1),
+	(2,'Facebook Messenger','An easier way to message','messenger.png',0),
+	(4,'Slack','A messaging app for teams','slack.png',0),
+	(5,'Telegram','A new era of messaging','telegram.png',0),
 	(6,'Twilio','Programmable SMS','twilio.png',0),
-	(7,'Webhook','A way to plug a web service into your agent','webhook.png',1),
+	(7,'Webhook','A way to plug a web service into your agent','webhook.png',0),
 	(8,'WeChat','A text and voice messaging communication','wechat.png',0),
-	(9,'WhatsApp','Cross-platform mobile messaging','whatsapp.png',0);
 /*!40000 ALTER TABLE `integrations` ENABLE KEYS */;
 UNLOCK TABLES;
 

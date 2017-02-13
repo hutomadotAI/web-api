@@ -49,6 +49,10 @@
                 </div>
             </div>
         </div>
+        <div class="alert alert-dismissable flat alert-danger hidden" id="containerMsgAlertIconUpload" style="margin-top:10px;margin-bottom:0px;">
+            <i class="icon fa fa-warning" id="iconAlertIconUpload"></i>
+            <span id="msgAlertIconUpload">Uploaded file is not a valid image. Only JPG, PNG files with 205x205 pixel are allowed.</span>
+        </div>
         <!-- end row 1 -->
         <p></p>
         <!-- row 2 TOP -->

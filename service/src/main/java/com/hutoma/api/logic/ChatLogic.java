@@ -293,7 +293,8 @@ public class ChatLogic {
             chatResult.setAnswer(chatResult.getAnswer().trim());
         } else {
             chatResult.setAnswer("");
-            this.telemetryMap.put("WNETResponseNULL", "");
+            chatResult.setScore(0.0);
+            this.telemetryMap.put("WNETResponseNULL", "true");
         }
 
         this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",

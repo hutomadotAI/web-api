@@ -1,28 +1,25 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.DeveloperInfoHelper;
-import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIBotStoreEndpoint;
 import com.hutoma.api.logic.AIBotStoreLogic;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.UUID;
@@ -46,6 +43,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     private static final String BOTSTORE_PURCHASEDPATH = BOTSTORE_BASEPATH + "/purchased";
     private static final String BOTSTORE_BOTICONPATH = BOTSTORE_BOTPATH + "/icon";
     private static final String BOTSTORE_PURCHASEBOTPATH = BOTSTORE_BASEPATH + "/purchase/" + BOTID;
+    private static final String BOT_ICON_PATH = BOTID + ".png";
 
     private static final MultivaluedMap<String, String> BOT_PUBLISH_POST = new MultivaluedHashMap<String, String>() {{
         this.put("aiid", Collections.singletonList(UUID.randomUUID().toString()));
@@ -53,6 +51,12 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         this.put("description", Collections.singletonList("bot description"));
         this.put("price", Collections.singletonList("1.0"));
     }};
+
+    @Before
+    public void setup() {
+        // Store any bot icons in the temp folder
+        when(this.fakeConfig.getBotIconStoragePath()).thenReturn(System.getProperty("java.io.tmpdir"));
+    }
 
     @Test
     public void testGetPublishedBots() throws Database.DatabaseException {
@@ -107,13 +111,13 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(true);
-        final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(defaultHeaders).post(Entity.text(""));
+        final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(defaultHeaders).post(null);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testPurchaseBot_invalid_devId() throws Database.DatabaseException {
-        final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(noDevIdHeaders).post(Entity.text(""));
+        final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(noDevIdHeaders).post(null);
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
@@ -145,15 +149,10 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testGetBotIcon() throws Database.DatabaseException, IOException {
-        final InputStream botIconStream = new ByteArrayInputStream(TestBotHelper.getBotIconContent());
-        when(this.fakeDatabase.getBotIcon(anyInt())).thenReturn(botIconStream);
-        final Response response = target(BOTSTORE_BOTICONPATH).request().headers(defaultHeaders).get();
+        when(this.fakeDatabase.getBotIconPath(anyInt())).thenReturn(BOT_ICON_PATH);
+        Response response = target(BOTSTORE_BOTICONPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
-        InputStream inputStream = (InputStream) response.getEntity();
-        Assert.assertNotNull(inputStream);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-        Assert.assertEquals(TestBotHelper.getBotIconContentSize(), outputStream.size());
+        Assert.assertEquals(BOT_ICON_PATH, response.readEntity(String.class));
     }
 
     @Test
@@ -164,7 +163,10 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.saveBotIcon(anyString(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabase.saveBotIconPath(anyString(), anyInt(), any())).thenReturn(true);
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setDevId(DEVID.toString());
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         FormDataMultiPart multipart = generateIconMultipartEntity();
         final Response response = target(BOTSTORE_BOTICONPATH)
                 .register(MultiPartFeature.class)

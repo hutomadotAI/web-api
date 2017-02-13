@@ -25,6 +25,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -65,8 +66,13 @@ public class DeveloperInfoEndpoint {
     })
     public
     @TypeHint(DeveloperInfo.class)
-    Response getDeveloperInfo(@Context final ContainerRequestContext requestContext) {
-        ApiResult result = this.developerLogic.getDeveloperInfo(ParameterFilter.getDevid(requestContext));
+    Response getDeveloperInfo(
+            @Context final ContainerRequestContext requestContext,
+            @NotNull final @PathParam("devid") String requestDevId) {
+        ApiResult result = this.developerLogic.getDeveloperInfo(
+                ParameterFilter.getDevid(requestContext),
+                requestDevId
+        );
         return result.getResponse(this.serializer).build();
     }
 

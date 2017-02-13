@@ -6272,6 +6272,11 @@ ul.pagination li a {
     color: gray;
 }
 
+.bottom{
+    position: absolute;
+    bottom: 0px;
+}
+
 .unselectable {
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -6281,6 +6286,36 @@ ul.pagination li a {
     user-select: none;
 }
 
+.input-group .input-prefix-text {
+    display: table-cell;
+    vertical-align: middle;
+    height:30px;
+    width: 1%;
+    white-space: nowrap;
+    color:#98A8BA;
+    font-size: 18px;
+    border-style: none;
+    background: #232426;
+}
+
+.input-group .input-postfix-button {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.input-text-limited{
+    width:63%;
+    background: #232426;
+    resize: none;
+    border-style: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    overflow: auto;
+    outline:none;
+    box-shadow: none !important;
+    font-size: 16px;
+    font-weight: bold;
+}
 
 /* layout.css Style */
 .upload-drop-zone {
@@ -6459,11 +6494,19 @@ ul.pagination li a {
     margin: 0 0 5px 0;
 }
 
+.card-title:read-only {
+    background-color: #232426;
+}
+
 .card-description{
     font-size: 14px;
     text-align: center;
     color: #d2d6de !important;
     margin: 0 0 5px 0;
+}
+
+.card-description:read-only {
+    background-color: #232426;
 }
 
 .card-link {
@@ -6503,21 +6546,49 @@ ul.pagination li a {
     padding:0px;
 }
 
+.drag-over-opacity{
+    background-color: rgba(255,255,255,0.9);
+    border: 2px solid #FFF;
+    opacity:0.3;
+}
+
 .bot-padding{
     padding:0px 0px 20px 0px;
 }
 
+.bot-default-style{
+    background: #232426;
+    resize: none;
+    outline:none;
+    border-style: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
 .bot-info {
     min-width: 320px;
-    min-height: 170px;
+    max-height: 205px;
+    min-height: 205px;
     padding:0px 0px 0px 10px;
 }
 
-.bot-title {
-    text-align: left;
-    font-size: 22px;
-    height:30px;
+.bot-title{
+    font-size: 20px;
     padding: 0px 10px 0px 0px;
+}
+
+.bot-description {
+    text-align: left;
+    font-size: 14px;
+    padding: 0px 10px 0px 0px;
+}
+
+.bot-close-button {
+    text-align: right;
+    font-weight: bold;
+    font-size: 14px;
+    height:30px;
+    padding: 0px 0px 0px 10px;
 }
 
 .bot-badge {
@@ -6528,17 +6599,16 @@ ul.pagination li a {
     padding: 0px 0px 0px 10px;
 }
 
-.bot-description {
-    text-align: left;
-    font-size: 14px;
-    height:40px;
-    padding: 0px 10px 0px 0px;
+.bot-description-limited{
+    width:100%;
+    text-align: justify;
+    overflow: auto;
 }
 
 .bot-msg{
     text-align: justify;
     font-size: 12px;
-    height:50px;
+    height:25px;
     padding:10px 0px 0px 0px;
 }
 
@@ -6594,7 +6664,7 @@ ul.pagination li a {
 }
 
 .bot-buy{
-    padding:5px 0px 0px 0px;
+    padding:5px 0px 0px 400px;
     height:40px;
 }
 
@@ -6628,6 +6698,8 @@ ul.pagination li a {
     max-height: 150px;
     min-width: 150px;
     max-width: 150px;
+    padding-top:20px;
+    background-color:#111111;
 }
 
 .bot-absolute{

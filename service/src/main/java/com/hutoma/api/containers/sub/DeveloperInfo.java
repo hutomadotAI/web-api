@@ -3,68 +3,72 @@ package com.hutoma.api.containers.sub;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by pedrotei on 03/01/17.
+ * Developer information (including non-public data).
  */
 public class DeveloperInfo {
 
     @SerializedName("devid")
     private final String devId;
-    private final String name;
     private final String company;
+    private final String website;
+    private final String name;
     private final String email;
     private final String address;
     private final String postCode;
     private final String city;
     private final String country;
-    private final String website;
 
     public DeveloperInfo(final String devId, final String name, final String company, final String email,
                          final String address, final String postCode, final String city, final String country,
                          final String website) {
         this.devId = devId;
-        this.name = name;
         this.company = company;
+        this.website = website;
+        this.name = name;
         this.email = email;
         this.address = address;
         this.postCode = postCode;
         this.city = city;
         this.country = country;
-        this.website = website;
-    }
-
-    public String getDevId() {
-        return devId;
     }
 
     public String getName() {
-        return name;
-    }
-
-    public String getCompany() {
-        return company;
+        return this.name;
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public String getPostCode() {
-        return postCode;
+        return this.postCode;
     }
 
     public String getCity() {
-        return city;
+        return this.city;
     }
 
     public String getCountry() {
-        return country;
+        return this.country;
+    }
+
+    public String getDevId() {
+        return this.devId;
+    }
+
+    public String getCompany() {
+        return this.company;
     }
 
     public String getWebsite() {
-        return website;
+        return this.website;
+    }
+
+    public DeveloperInfo getPublicInfo() {
+        return new DeveloperInfo(this.devId, null, this.company, null, null, null, null, null, this.getWebsite());
     }
 }

@@ -34,6 +34,7 @@ function isSessionVariablesAvailable()
         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'])
     );
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -105,27 +106,7 @@ function isSessionVariablesAvailable()
         $tmp_list = [];
         if (isset($bots) && (array_key_exists("bots", $bots))) {
             foreach ($bots['bots'] as $botDetails) {
-                $bot = new \hutoma\bot();
-                $bot->setAiid($botDetails['aiid']);
-                $bot->setAlertMessage($botDetails['alertMessage']);
-                $bot->setBadge($botDetails['badge']);
-                $bot->setBotId($botDetails['botId']);
-                $bot->setCategory($botDetails['category']);
-                $bot->setClassification($botDetails['classification']);
-                $bot->setDescription($botDetails['description']);
-                $bot->setLicenseType($botDetails['licenseType']);
-                $bot->setLongDescription($botDetails['longDescription']);
-                $bot->setName($botDetails['name']);
-                $bot->setPrice($botDetails['price']);
-                $bot->setPrivacyPolicy($botDetails['privacyPolicy']);
-                $bot->setSample($botDetails['sample']);
-                $bot->setVersion($botDetails['version']);
-                $bot->setVideoLink($botDetails['videoLink']);
-
-                $botIcon = $botApi->getBotIcon($botDetails['botId']);
-                $bot->setImagePath(base64_encode($botIcon));
-                unset($botIcon);
-                
+                $bot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $bot->toJSON();
                 if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
                     array_push($tmp_list, $tmp_bot);
@@ -160,8 +141,8 @@ function isSessionVariablesAvailable()
     }
 </script>
 <script>
-    $( document ).ready(function() {
-        showBots('',0);
+    $(document).ready(function () {
+        showBots('', 0);
     });
 </script>
 </body>

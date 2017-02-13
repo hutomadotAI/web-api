@@ -14,7 +14,7 @@ function checkIntentCode(element, key) {
 }
 
 function activeButtonCreateIntent() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     switch (limitText($("#inputIntentName"), limitTextInputSize)) {
         case -1:
             $("#btnCreateIntent").prop("disabled", true);
@@ -24,7 +24,7 @@ function activeButtonCreateIntent() {
             $("#btnCreateIntent").prop("disabled", false);
             return true;
         case 1:
-            msgAlertIntent(ALERT.WARNING.value, 'The intent name is too long!');
+            msgAlertIntent(ALERT.WARNING.value, 'Intent\'s name is too long!');
             $("#btnCreateIntent").prop("disabled", false);
             return false;
         default:
@@ -36,13 +36,13 @@ function activeButtonCreateIntent() {
 function postingIntentName() {
     $(this).prop("disabled", true);
 
-    if (inputValidation($("#inputIntentName").val(), 'intent_name')) {
-        msgAlertIntent(ALERT.DANGER.value, 'Intent name need contain only the following: A-Z, a-z, 0-9 character');
+    if (isInputInvalid($("#inputIntentName").val(), 'intent_name')) {
+        msgAlertIntent(ALERT.DANGER.value, 'Intent name can contain only the following: A-Z, a-z, 0-9 and _');
         return false;
     }
 
     if(isNameExists($("#inputIntentName").val(),intents)){
-        msgAlertIntent(ALERT.DANGER.value, 'Two identical Intent names are not allowed. Please choose a different name.');
+        msgAlertIntent(ALERT.DANGER.value, 'Intent name already exists. Please choose a different name.');
         return false;
     }
 
@@ -65,7 +65,7 @@ function showIntents(str) {
     var wHTML = "";
 
     if (intents.length < 1) {
-        msgAlertIntent(ALERT.BASIC.value, 'No intents yet. Create the first one');
+        msgAlertIntent(ALERT.BASIC.value, 'No intents yet. Create the first one.');
         return;
     }
     else
@@ -85,14 +85,7 @@ function showIntents(str) {
 
             wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
-
-            wHTML += ('<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="download options" tabindex="-1" >');
-            wHTML += ('<i class="fa fa-cloud-download text-gray" style="padding-right: 5px;" data-toggle="tooltip" title="Download "></i>');
-            wHTML += ('</a>');
-            wHTML += ('<ul class="dropdown-menu no-border flat">');
-            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',0)"><span class="text-white">JSON format</span></a></li>');
-            wHTML += ('<li onMouseOver="this.style.cursor=\'pointer\'"><a onClick="downloadIntent (\'' + intents[x] + '\',' + x + ',1)"><span class="text-white">CSV table</span></a></li>');
-            wHTML += ('</ul>');
+            
             wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
@@ -138,18 +131,6 @@ function editIntent(elem,intent) {
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
-}
-
-function downloadIntent(name, value, flag) {
-    name = name.replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
-    if (flag === 0) {
-        var blob = new Blob(["this file contains intent in JSON format"], {type: "text/plain;charset=utf-8;",});
-        saveAs(blob, name + ".txt");
-    }
-    else {
-        var blob = new Blob(["this file is a simulaion of CVS format file"], {type: "text/plain;charset=utf-8;",});
-        saveAs(blob, name + ".csv");
-    }
 }
 
 $('#deleteIntent').on('show.bs.modal', function (e) {

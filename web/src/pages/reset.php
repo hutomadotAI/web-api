@@ -17,21 +17,21 @@ include "config.php";
     <title>hutoma | password reset</title>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="keywords"
-          content="Deep learning, AI, Hutoma, Artificial Intelligence, Machine Learning, Siri, Cortana, Deep Learning API">
-    <meta name="description"
-          content="Hutoma builds emotionally evolved AIs and Digital Employees that can have intelligent conversations with you or your customers.">
+    <meta name="keywords" content="Deep learning, AI, Hutoma, Artificial Intelligence, Machine Learning, Siri, Cortana, Deep Learning API">
+    <meta name="description" content="Hutoma builds emotionally evolved AIs and Digital Employees that can have intelligent conversations with you or your customers.">
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <link rel="stylesheet" href="../console/dist/css/hutoma.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="../console/plugins/cookiePolicyBar/cookiePolicyBar.css">
-    <link rel="stylesheet" href="https://www.hutoma.com/css/main.css">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/icheck/1.0.2/icheck.min.js"></script>
 
+    <link rel="stylesheet" href="https://www.hutoma.com/css/main.css">
+
+    <script type="text/javascript" src="../console/plugins/jQuery/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript" src="../console/plugins/iCheck/icheck.min.js"></script>
 
     <style>
         .newa {
@@ -51,9 +51,12 @@ include "config.php";
             position: relative;
             min-height: 100%;
         }
+
         body {
+            background: #d2d6de;
             /* Margin bottom by footer height */
-            margin-bottom: 500px;
+            margin-bottom: 350px;
+            font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
         }
         .footer {
@@ -78,11 +81,6 @@ include "config.php";
             color: white;
         }
 
-
-        /* Custom page CSS
-        -------------------------------------------------- */
-        /* Not required for template or sticky footer method. */
-
         .container {
             width: auto;
             max-width: 100%;
@@ -93,23 +91,21 @@ include "config.php";
         }
     </style>
 </head>
-<body>
+<body id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>
 <?php include_once "./header.php"; ?>
 
-<div class="register-box">
-
-
-    <div class="register-box-body"  style="border: 1px solid #d2d6de; background-color: #202020;">
-        <p class="login-box-msg"><b>password reset</b></p>
-
-        <?php
-
-        hutoma\console::forgotPassword();
-        ?>
-
+<section>
+    <div class="register-box">
+        <div class="register-box-body"  style="border: 1px solid #d2d6de; background-color: #202020;">
+            <p class="login-box-msg"><b>password reset</b></p>
+            <?php
+            hutoma\console::forgotPassword();
+            ?>
+        </div>
     </div>
-</div>
+</section>
+
 <?php include_once "./footer.php"; ?>
 
 </body>

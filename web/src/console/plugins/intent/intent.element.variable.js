@@ -184,7 +184,7 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    createNewParameterRow('', 3, '', 0, '', false, node);
+    createNewParameterRow('', 3, '', 0, '', 1, node);
 }
 
 function deleteIntentVariable(element) {
@@ -200,8 +200,7 @@ function resetBorderHighlightError(node) {
 }
 
 function resetMsgAlertIntentVariable() {
-    msgAlertIntentVariable(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
-    msgAlertIntentVariable(ALERT.BASIC.value, 'Describe what variables you want the AI to extract from a conversation');
+    msgAlertIntentVariable(ALERT.BASIC.value, 'Use intents to map what the user says and what actions should be taken by your business logic.');
 }
 
 function isJustAddedNewRow() {
@@ -214,13 +213,13 @@ function isJustAddedNewRow() {
     var node = parent.children[0].children[0].children[0].children[0];
     var elem = $(node).find("ul").find("li.selected");
     if (elem.text() == '') {
-        msgAlertIntentVariable(ALERT.WARNING.value, 'Complete field first before add a new line');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'Complete field first before adding a new line.');
         return true;
     }
 
     var len = parent.childElementCount;
     if (len == entityListFromServer.length) { // if are reach the max number of entity
-        msgAlertIntentVariable(ALERT.WARNING.value, 'All entities are used!');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'All entities in use, create another entity first.');
         return true;
     }
     return false;

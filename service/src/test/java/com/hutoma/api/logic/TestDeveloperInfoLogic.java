@@ -33,25 +33,42 @@ public class TestDeveloperInfoLogic {
     }
 
     @Test
-    public void testGet_Valid() throws Database.DatabaseException {
+    public void testGet_Valid_requestOwnInfo() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
-        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(DEVID);
+        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(DEVID, DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, info.getStatus().getCode());
         Assert.assertEquals(DEVINFO.getDevId(), info.getInfo().getDevId());
         Assert.assertEquals(DEVINFO.getName(), info.getInfo().getName());
     }
 
     @Test
+    public void testGet_Valid_requestOthedDevInfo() throws Database.DatabaseException {
+        final String requesterDevId = "requester";
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
+        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(requesterDevId, DEVID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, info.getStatus().getCode());
+        Assert.assertEquals(DEVINFO.getDevId(), info.getInfo().getDevId());
+        Assert.assertEquals(DEVINFO.getCompany(), info.getInfo().getCompany());
+        Assert.assertEquals(DEVINFO.getWebsite(), info.getInfo().getWebsite());
+        Assert.assertNull(info.getInfo().getName());
+        Assert.assertNull(info.getInfo().getAddress());
+        Assert.assertNull(info.getInfo().getCity());
+        Assert.assertNull(info.getInfo().getCountry());
+        Assert.assertNull(info.getInfo().getPostCode());
+        Assert.assertNull(info.getInfo().getEmail());
+    }
+
+    @Test
     public void testGet_notFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(null);
-        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID);
+        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID, DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, info.getStatus().getCode());
     }
 
     @Test
     public void testGet_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenThrow(Database.DatabaseException.class);
-        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID);
+        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID, DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, info.getStatus().getCode());
     }
 

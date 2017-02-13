@@ -1,43 +1,44 @@
 <?php
-    require "../pages/config.php";
-    require_once "api/apiBase.php";
-    require_once "api/aiApi.php";
-    require_once "api/botApi.php";
-    require_once "common/bot.php";
+require "../pages/config.php";
+require_once "api/apiBase.php";
+require_once "api/aiApi.php";
+require_once "api/botApi.php";
+require_once "common/bot.php";
 
 
-    if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-        \hutoma\console::redirect('../pages/login.php');
-        exit;
-    }
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
+    \hutoma\console::redirect('../pages/login.php');
+    exit;
+}
 
-    if (!isSessionVariablesAvailable()) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
-    }
+if (!isSessionVariablesAvailable()) {
+    \hutoma\console::redirect('./error.php?err=105');
+    exit;
+}
 
-    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $puchasedBots = $botApi->getPurchasedBots();
+$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$puchasedBots = $botApi->getPurchasedBots();
 
-    $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-    unset($aiApi);
+$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($aiApi);
 
 
-    function isSessionVariablesAvailable()
-    {
-        return (
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
-            isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
-        );
-    }
+function isSessionVariablesAvailable()
+{
+    return (
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
+        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
+    );
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +48,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>hu:toma | AI Settings </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./plugins/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
@@ -82,7 +83,7 @@
             <div class="nav-tabs-custom flat no-shadow no-border">
                 <ul class="nav nav-tabs">
                     <li class="active" id="tab_general"><a href="#page_general" data-toggle="tab">General</a></li>
-                    <li id="tab_aiskill" id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">AI Skills</a></li>
+                    <li id="tab_aiskill" id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">Bot Skills</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-bottom:0px;">
@@ -112,21 +113,25 @@
 </div>
 
 <script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.js"></script>
+<script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="./plugins/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/select2/select2.min.js"></script>
+
+<script src="./plugins/inputCommon/inputCommon.js"></script>
+<script src="./plugins/validation/validation.js"></script>
+<script src="./plugins/deleteAI/deleteAI.js"></script>
+<script src="./plugins/select2/select2.full.js"></script>
 <script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
+
 <script src="./plugins/clipboard/copyToClipboard.js"></script>
 <script src="./plugins/clipboard/clipboard.min.js"></script>
-<script src="./plugins/deleteAI/deleteAI.js"></script>
-<script src="./plugins/validation/validation.js"></script>
-<script src="./plugins/inputCommon/inputCommon.js"></script>
+
 <script src="./plugins/setting/setting.linkBot.js"></script>
 <script src="./plugins/setting/setting.general.js"></script>
 <script src="./plugins/setting/setting.aiSkill.js"></script>
+
 <script src="./plugins/messaging/messaging.js"></script>
 <script src="./plugins/shared/shared.js"></script>
 <script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
@@ -135,8 +140,8 @@
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, false, false]);
     </script>
     <script>
-        $( document ).ready(function() {
-            activeRightMenu("<?php if(isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
+        $(document).ready(function () {
+            activeRightMenu("<?php if (isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
         });
     </script>
 </form>
@@ -145,26 +150,7 @@
         $tmp_list = [];
         if (isset($puchasedBots) && (array_key_exists("bots", $puchasedBots))) {
             foreach ($puchasedBots['bots'] as $botDetails) {
-                $puchasedBot = new \hutoma\bot();
-                $puchasedBot->setAlertMessage($botDetails['alertMessage']);
-                $puchasedBot->setBadge($botDetails['badge']);
-                $puchasedBot->setBotId($botDetails['botId']);
-                $puchasedBot->setCategory($botDetails['category']);
-                $puchasedBot->setClassification($botDetails['classification']);
-                $puchasedBot->setDescription($botDetails['description']);
-                $puchasedBot->setLicenseType($botDetails['licenseType']);
-                $puchasedBot->setLongDescription($botDetails['longDescription']);
-                $puchasedBot->setName($botDetails['name']);
-                $puchasedBot->setPrice($botDetails['price']);
-                $puchasedBot->setPrivacyPolicy($botDetails['privacyPolicy']);
-                $puchasedBot->setSample($botDetails['sample']);
-                $puchasedBot->setVersion($botDetails['version']);
-                $puchasedBot->setVideoLink($botDetails['videoLink']);
-
-                $botIcon = $botApi->getBotIcon($botDetails['botId']);
-                $puchasedBot->setImagePath(base64_encode($botIcon));
-                unset($botIcon);
-
+                $puchasedBot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $puchasedBot->toJSON();
                 array_push($tmp_list, $tmp_bot);
             }
@@ -196,7 +182,7 @@
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        showBots(str,2);
+        showBots(str, 2);
     }
 </script>
 </body>

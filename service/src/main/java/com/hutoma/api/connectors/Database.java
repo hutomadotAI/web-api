@@ -20,7 +20,6 @@ import com.hutoma.api.containers.sub.RateLimitStatus;
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
-import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -107,6 +106,44 @@ public class Database {
                     .add(firstName).add(lastName).add(devToken).add(planId).add(devId).add(clientToken);
             return call.executeUpdate() > 0;
         }
+    }
+
+    /**
+     * Redeems an invite code for user registration.
+     * @param code the invite code.
+     * @param username the registering user.
+     * @return true if successful, otherwise false.
+     * @throws DatabaseException database exception.
+     */
+    public boolean redeemInviteCode(final String code, final String username) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("redeemInviteCode", 2).add(code).add(username);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Determines whether a specified invite code is valid.
+     * @param code the invite code.
+     * @return true if the code is valid, otherwise false.
+     * @throws DatabaseException database exception.
+     * @throws SQLException sql exception.
+     */
+    public boolean inviteCodeValid(final String code) throws DatabaseException, SQLException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("existsInviteCode", 1).add(code);
+
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -498,12 +535,12 @@ public class Database {
         }
     }
 
-    public InputStream getBotIcon(final int botId) throws DatabaseException {
+    public String getBotIconPath(final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotIcon", 1).add(botId);
             final ResultSet rs = call.executeQuery();
             if (rs.next()) {
-                return rs.getBinaryStream(1);
+                return rs.getString("botIcon");
             }
             return null;
         } catch (final SQLException sqle) {
@@ -511,10 +548,10 @@ public class Database {
         }
     }
 
-    public boolean saveBotIcon(final String devId, final int botId, final InputStream inputStream)
+    public boolean saveBotIconPath(final String devId, final int botId, final String filename)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("saveBotIcon", 3).add(devId).add(botId).add(inputStream);
+            call.initialise("saveBotIcon", 3).add(devId).add(botId).add(filename);
             return call.executeUpdate() > 0;
         }
     }
@@ -645,7 +682,8 @@ public class Database {
                 rs.getString("classification"),
                 rs.getString("version"),
                 rs.getString("video_link"),
-                rs.getBoolean("is_published")
+                rs.getBoolean("is_published"),
+                rs.getString("botIcon")
         );
     }
 

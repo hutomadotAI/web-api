@@ -4,40 +4,8 @@
 
 <div class="box-header with-border unselectable">
     <i class="fa fa-sliders text-success"></i>
-    <div class="box-title"><b>General Informations</b></div>
-    <a data-toggle="collapse" href="#collapseInfoGeneral">
-        <div class=" pull-right">more info
-            <i class="fa fa-question-circle text-sm text-yellow"></i>
-        </div>
-    </a>
+    <div class="box-title"><b>General Info</b></div>
 </div>
-
-<div id="collapseInfoGeneral" class="panel-collapse collapse">
-    <div class="box-body">
-        <div class="overlay center-block">
-            <section class="content-info">
-                <div class="box-body">
-                    <dl class="dl-horizontal">
-                        <dt>Description General aspectog AI</dt>
-                        <dd>Before start training process, y.</dd>
-                        <dt>Euismod</dt>
-                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                        <dt>Malesuada porta</dt>
-                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                        <dt>Felis euismod semper eget lacinia</dt>
-                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa
-                            justo sit amet risus.
-                        </dd>
-                    </dl>
-                </div>
-            </section>
-            <p></p>
-            need help? check out our <a href='#'>video tutorial</a> or email us <a href='#'>hello@email.com</a>
-        </div>
-    </div>
-</div>
-
 
 <form role="form">
     <div class="box-body unselectable">
@@ -75,7 +43,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="input-group" style="padding-bottom:10px;">
-                    <span class="input-group-addon text-gray" style="width:90px;">AI ID</i></span>
+                    <span class="input-group-addon text-gray" style="width:90px;">Bot ID</i></span>
                     <input type="text" class="form-control flat no-shadow" id="aikey"
                            value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']; ?>"
                            disabled>
@@ -115,7 +83,7 @@
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUpdateAI">
             <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
-            <span id="msgAlertUpdateAI">You can change main AI parameter and save it</span>
+            <span id="msgAlertUpdateAI">This page allows you to change the basic information of your Bot.</span>
         </div>
 
     </div>
@@ -127,7 +95,7 @@
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
             value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>"
-            class="btn btn-danger flat pull-right" alt="delete">delete AI
+            class="btn btn-danger flat pull-right" alt="delete">delete Bot
     </button>
 </div>
 
@@ -139,7 +107,7 @@
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
                 <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> DELETE AI
+                <h4 class="modal-title"><i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> DELETE BOT
                 </h4>
             </div>
             <div class="modal-body">

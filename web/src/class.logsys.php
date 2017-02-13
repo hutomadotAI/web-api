@@ -456,7 +456,7 @@ class console
         } else {
             $randomSalt = self::rand_string(20);
             $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
-            $dev_token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
+            $dev_token = self::getAdminToken();
             $params = array(
                 'email' => $id,
                 'username' => $username,
@@ -481,8 +481,54 @@ class console
         }
     }
 
+    public static function inviteCodeValid($code) {
+        self::construct();
+        $dev_token = self::getAdminToken();
+        $path = "/invite/" . $code;
+
+        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
+        $curl->setVerbGet();
+        $curl_response = $curl->exec();
+
+        if (isset($curl_response) && $curl_response !== false) {
+            $res = json_decode($curl_response, true);
+            if (array_key_exists('status', $res)) {
+                $curl->close();
+                return $res['status']['code'];
+            }
+        }
+
+        $curl->close();
+        return "unknown";
+    }
+
+    public static function redeemInviteCode($code, $username) {
+        self::construct();
+        $dev_token = self::getAdminToken();
+
+        $params = array(
+            'username' => $username
+        );
+
+        $path = "/invite/" . $code . "/redeem?" . http_build_query($params);
+        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
+        $curl->setVerbPost();
+        $curl_response = $curl->exec();
+
+        if (isset($curl_response) && $curl_response !== false) {
+            $res = json_decode($curl_response, true);
+            if (array_key_exists('status', $res)) {
+                $curl->close();
+                return $res['status']['code'];
+            }
+        }
+
+        $curl->close();
+        return "unknown";
+    }
+
     /**
-     * Check if user exists with ther username/email given
+     * Check if user exists with their username/email given
      * $identification - Either email/username
      */
     public static function userExists($identification)
@@ -545,7 +591,7 @@ class console
         if (!isset($_POST['logSysForgotPass']) && !isset($_GET['resetPassToken']) && !isset($_POST['logSysForgotPassChange'])) {
             $html = '<form action="' . self::curPageURL() . '" method="POST">';
             $html .= "<div class='form-group has-feedback'>";
-            $html .= "<input  type='email' class='form-control' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
+            $html .= "<input  type='email' class='form-control flat' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
             $html .= "<span class='glyphicon glyphicon-envelope form-control-feedback'></span>";
             $html .= "</div>";
             $html .= "<p><button name='logSysForgotPass' class='btn btn-primary btn-block btn-flat' type='submit'>Reset Password</button></p>";

@@ -12,10 +12,7 @@
         <div class="alert alert-dismissable flat alert-warning" id="containerMsgAlertDomainsNewAIInfo" style="padding-bottom: 25px;">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
             <span id="msgAlertDomainsNewAIInfo" >
-                <dt>Hutoma Publish</dt>
-                <dd>
-                   This is your first publish. It needs to add a Developer infos.
-                </dd>
+                   This is your first bot. Before publishing this to our store we need to collect some developer details.
             </span>
         </div>
 
@@ -24,7 +21,9 @@
                 <div class="overlay center-block">
                     <section class="content-info" >
                         <div class="box-body">
-                            The developer infos needs to BLA BLA BLA BLA BLA BLA BLAB.
+                            <dl class="dl-horizontal no-margin" style="text-align:justify">
+                                This info is required so that we can create an ownership certificate. You cannot publish without completing this section.
+                            </dl>
                         </div>
                     </section>
                     <p></p>

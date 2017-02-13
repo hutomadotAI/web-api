@@ -12,8 +12,6 @@ import java.util.UUID;
  */
 public class AiBot {
 
-    @SerializedName("dev_id")
-    private final String devId;
     private final String name;
     private final String description;
     private final String longDescription;
@@ -28,6 +26,9 @@ public class AiBot {
     private final String classification;
     private final String version;
     private final String videoLink;
+    private final String botIcon;
+    @SerializedName("dev_id")
+    private String devId;
     private boolean isPublished;
     private UUID aiid;
     private int botId;
@@ -36,7 +37,7 @@ public class AiBot {
                  final String longDescription, final String alertMessage, final String badge, final BigDecimal price,
                  final String sample, final String category, final String licenseType, final DateTime lastUpdate,
                  final String privacyPolicy, final String classification, final String version, final String videoLink,
-                 final boolean isPublished) {
+                 final boolean isPublished, final String botIcon) {
         this.botId = botId;
         this.devId = devId;
         this.aiid = aiid;
@@ -55,6 +56,7 @@ public class AiBot {
         this.version = version;
         this.videoLink = videoLink;
         this.isPublished = isPublished;
+        this.botIcon = botIcon;
     }
 
     public AiBot(final AiBot other) {
@@ -76,6 +78,7 @@ public class AiBot {
         this.version = other.version;
         this.videoLink = other.videoLink;
         this.isPublished = other.isPublished;
+        this.botIcon = other.botIcon;
     }
 
     public int getBotId() {
@@ -88,6 +91,10 @@ public class AiBot {
 
     public String getDevId() {
         return this.devId;
+    }
+
+    public void setDevId(final String devId) {
+        this.devId = devId;
     }
 
     public UUID getAiid() {
@@ -160,5 +167,9 @@ public class AiBot {
 
     public String getLicenseType() {
         return this.licenseType;
+    }
+
+    public String getBotIcon() {
+        return this.botIcon;
     }
 }

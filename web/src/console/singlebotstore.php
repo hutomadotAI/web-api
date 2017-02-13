@@ -4,6 +4,7 @@ require_once "./api/apiBase.php";
 require_once "./api/entityApi.php";
 require_once "api/aiApi.php";
 require_once "api/botApi.php";
+require_once "api/developerApi.php";
 require_once "common/bot.php";
 require_once "common/developer.php";
 
@@ -28,6 +29,9 @@ $botDetails = $botApi->getBotDetails($botId);
 unset($botId);
 unset($botApi);
 
+$devInfoApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$devInfo = $devInfoApi->getDeveloperInfo($botDetails['bot']['dev_id']);
+unset($devInfoApi);
 
 if (isset($botDetails)) {
     switch ($botDetails['status']['code']) {
@@ -49,7 +53,7 @@ if (isset($botDetails)) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>hu:toma | Botstore - box</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
@@ -70,7 +74,6 @@ if (isset($botDetails)) {
             $bot->setLicenseType($botDetails['bot']['licenseType']);
             $bot->setUpdate($botDetails['bot']['lastUpdate']);
             $bot->setLongDescription($botDetails['bot']['longDescription']);
-            $bot->setImagePath('');
             $bot->setName($botDetails['bot']['name']);
             $bot->setPrice($botDetails['bot']['price']);
             $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
@@ -79,6 +82,7 @@ if (isset($botDetails)) {
             $bot->setActivations($bot->rangeActivation($bot->getUsers()));
             $bot->setVersion($botDetails['bot']['version']);
             $bot->setVideoLink($botDetails['bot']['videoLink']);
+            $bot->setIconFile($botDetails['bot']['botIcon']);
         }
         $tmp_bot = $bot->toJSON();
         unset($bot);
@@ -86,6 +90,15 @@ if (isset($botDetails)) {
         echo json_encode($tmp_bot);
         unset($tmp_bot);
         ?>;
+
+    var devInfo = <?php
+    $dev = new \hutoma\developer();
+    $dev->setCompany($devInfo['info']['company']);
+    $dev->setWebsite($devInfo['info']['website']);
+    echo json_encode($dev->toJSON());
+    unset($dev);
+    unset($devInfo);
+    ?>
 </script>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">
@@ -110,12 +123,12 @@ if (isset($botDetails)) {
 
                 <div class="col-md-12">
                     <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
-                    <?php
+                        <?php
                         include './dynamic/botstore.content.singleBot.card.html.php';
                         include './dynamic/botstore.content.singleBot.video.html.php';
                         include './dynamic/botstore.content.singleBot.description.html.php';
                         include './dynamic/botstore.content.singleBot.footer.html.php';
-                    ?>
+                        ?>
                     </div>
                     <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
                     <script src="./plugins/botstore/botstoreWizard.js"></script>
@@ -143,7 +156,7 @@ if (isset($botDetails)) {
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>","<?php echo $purchased; unset($purchased);?>");
+        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
         MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>

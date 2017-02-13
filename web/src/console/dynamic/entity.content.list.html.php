@@ -10,25 +10,24 @@
         </a>
     </div>
 
-    <div class="box-body">
+    <div id="collapseEntitiesListInfo" class="panel-collapse collapse">
+        <div class="box-body" style="padding-bottom:0px;">
+            <div class="overlay center-block">
+                <section class="content-info" >
+                    <div class="box-body">
+                        This is a list of the entities that you have created for your Bot so far.  These can be shared between your bots.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
 
+    <div class="box-body">
         <div class="input-group-btn">
-            <input class="form-control flat no-shadow pull-right" onkeyup="searchEntities(this.value)" value="" placeholder="Search entities...">
+            <input class="form-control flat no-shadow pull-right" onkeyup="searchEntities(this.value)" value="" placeholder="Search...">
         </div>
 
         <p></p>
-
-        <div id="collapseEntitiesListInfo" class="panel-collapse collapse">
-            <div class="box-body" style="padding-top:0px;padding-left:0;padding-right:0;">
-                <div class="overlay center-block">
-                    <section class="content-info" >
-                        <div class="box-body">
-                            bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla  bla bla bla bla bla
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </div>
 
         <div class="tab-pane" id="tab_entities">
             <p id="entsearch"></p>
