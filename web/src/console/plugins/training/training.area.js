@@ -197,7 +197,6 @@ function getUIStatusCall() {
         case (status == UI_STATE.NOTHING.value):
             break;
         case (status == UI_STATE.FILE_UPLOADED.value):
-            hideRestartBox();
             break;
         case (status == UI_STATE.READY_TO_TRAIN.value):
             hideRestartBox();
@@ -230,6 +229,7 @@ function getUIStatusCall() {
         case (status == UI_STATE.PHASE2_INIT.value):
             phaseOneFlashing(false);
             phaseOneStriped(false);
+            hidePreTrainingBar(false);
             phaseOneMaxValue();
 
             hideTrainingBar(false);
@@ -384,6 +384,7 @@ function trainingStatusCall() {
 
 function trainingRestart() {
     disableButtonUploadTextFile(true);
+    trainingStartCall();
     startPollForStatus();
 
     phaseOneReset();
@@ -393,7 +394,6 @@ function trainingRestart() {
 
     disableRestartBoxButton();
     setUICurrentStatus(UI_STATE.FILE_UPLOADED.value);
-
     disableButtonUploadTextFile(false);
 }
 
@@ -517,7 +517,7 @@ function showAlertMessageFromUI(status){
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
             break;
         case UI_STATE.PHASE2_INIT.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization Phase two may take a few minutes. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase two may take a few minutes. Please wait.');
             break;
         case UI_STATE.PHASE2_RUN.value:
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two in progress...');
