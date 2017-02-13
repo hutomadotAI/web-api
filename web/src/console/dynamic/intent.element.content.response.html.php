@@ -15,7 +15,7 @@
                 <section class="content-info">
                     <div class="box-body">
                         <dl class="dl-horizontal no-margin" style="text-align:justify">
-                            Intent responses are the pre-packaged answers that you would like your Bot to respond when given an intent by a user.
+                            Intent responses are the pre-packaged answers that you would like your bot to respond when given an intent by a user.
                         </dl>
                     </div>
                 </section>
@@ -43,7 +43,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentResponse" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertIntentResponse"></i>
-            <span id="msgAlertIntentResponse">Give the Bot examples of how it should respond to a users intent.</span>
+            <span id="msgAlertIntentResponse">Give the bot examples of how it should respond to a user’s intent.</span>
         </div>
 
         <div class="row" id="intentresponse-list"></div>

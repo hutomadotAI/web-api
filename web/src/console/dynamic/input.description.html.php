@@ -4,7 +4,7 @@
         <div class="input-group-addon">
             <i class="glyphicon glyphicon-pencil"></i>
         </div>
-        <input type="text" class="form-control flat no-shadow" name="ai_description" id="ai_description" placeholder="Enter your AI description">
+        <input type="text" class="form-control flat no-shadow" name="ai_description" id="ai_description" placeholder="Enter your bot description">
     </div>
 </div>
 

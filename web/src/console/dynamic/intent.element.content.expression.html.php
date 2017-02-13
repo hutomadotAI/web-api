@@ -15,8 +15,7 @@
                 <section class="content-info">
                     <div class="box-body">
                         <dl class="dl-horizontal no-margin" style="text-align:justify">
-                            User expressions are a collection of examples that help the AI understand how humans typically express an intent. When you order a coffee, for example, you might say 'id like a coffe please' or 'A tall Americano, please'. Those are examples of your Intent to order a coffe.  User expressions are used the AI to detect topics or phrases that might be interesting for you.
-                        </dl>
+                            User expressions are a collection of examples that help the bot understand how humans typically express an intent. When you order a coffee, for example, you might say ‘I’d like a coffee please’ or ‘a tall Americano, please’. These are examples of your intent to order a coffee. User expressions are used by the bot to detect topics or phrases that might be interesting for you.</dl>
                     </div>
                 </section>
             </div>
@@ -43,7 +42,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUserExpression" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertUserExpression"></i>
-            <span id="msgAlertUserExpression">Give the AI examples of how a user would express this intent.</span>
+            <span id="msgAlertUserExpression">Give the bot examples of how a user would express this intent.</span>
         </div>
 
         <div class="row" id="userexpression-list"></div>

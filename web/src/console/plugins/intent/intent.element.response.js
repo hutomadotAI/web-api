@@ -21,7 +21,7 @@ function activeButtonCreateIntentResponse() {
             $("#btnAddIntentResponse").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the Bot examples of how it should respond to a users intent.');
+            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the bot examples of how it should respond to a users intent.');
             $("#btnAddIntentResponse").prop("disabled", false);
             return true;
         case 1:
@@ -58,7 +58,7 @@ function addIntentResponse() {
     var parent = document.getElementById('intentresponse-list');
     document.getElementById('intent-response').value = '';
     createNewIntentResponseRow(value, parent);
-    msgAlertIntentResponse(ALERT.BASIC.value,' Give the Bot examples of how it should respond to a users intent.');
+    msgAlertIntentResponse(ALERT.BASIC.value,' Give the bot examples of how it should respond to a users intent.');
 }
 
 function createNewIntentResponseRow(value, parent) {

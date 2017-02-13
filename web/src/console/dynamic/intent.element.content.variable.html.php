@@ -17,8 +17,8 @@
                     <section class="content-info">
                         <div class="box-body">
                             <dl class="dl-horizontal no-margin" style="text-align:justify">
-                                Entities are the objects that fulfil an intent.  Imagine you are creating a Bot that takes orders in a bar,  a customer may ask "I would like to order ...."X".
-                                X here is an entity you would want the Bot to extract from a conversation. These could include "beer", "wine" or "cola" which fall into the drinks category.  You could list further entities under food.
+                                Entities are the objects that fulfil an intent. Imagine you are creating a bot that takes orders in a bar,  a customer may ask "I would like to order ...."X".
+                                X here is an entity you would want the bot to extract from a conversation. These could include "beer", "wine" or "cola" which fall into the drinks category.  You could list further entities under food.
                             </dl>
                         </div>
                     </section>
@@ -31,7 +31,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentVariable" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertIntentVariable"></i>
-            <span id="msgAlertIntentVariable">List the entities that you would like the Bot to extract from a conversation</span>
+            <span id="msgAlertIntentVariable">List the entities that you would like the bot to extract from a conversation</span>
         </div>
 
         <div class="box-body flat" style="background-color: #404446;  margin-top: -1px;">
@@ -74,7 +74,7 @@
 
     <div class="box-footer">
         <span>
-            If you’re stuck check out our <a data-toggle="collapse" href="#collapseVideoTutorialIntent">Intents variables tutorial</a> or email <a href='#' tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
+            If you’re stuck check out our <a data-toggle="collapse" href="#collapseVideoTutorialIntent">intents variables tutorial</a> or email <a href='mailto:support@hutoma.com?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
         </span>
         <p></p>
     </div>

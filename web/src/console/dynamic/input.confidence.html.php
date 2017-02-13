@@ -3,7 +3,7 @@
         <i class="fa fa-question-circle text-sm text-yellow"></i>
     </div>
 </a>
-<label for="ai_confidence">Let the AI create new answers</label>
+<label for="ai_confidence">Let the bot create new answers</label>
 <div class="box box-solid box-clean-fixed flat no-shadow" style=" background-color: #515151;">
     <div class="box-body flat">
         <div class="row margin">

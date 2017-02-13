@@ -4,7 +4,7 @@
             <i class="fa fa-question-circle text-sm text-yellow"></i>
         </div>
     </a>
-    <label for="ai_personality">Learn from Users</label>
+    <label for="ai_personality">Learn from users</label>
     <select class="form-control select2" name="ai_personality" id="ai_personality" style="width: 100%;">
         <option selected="selected" value="0">No</option>
         <option disabled="disabled" value="1">Yes</option>

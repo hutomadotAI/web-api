@@ -21,7 +21,7 @@ function activeButtonCreateUserExpression() {
             $("#btnAddExpression").prop("disabled", true);
             return false;
         case 0:
-            msgAlertUserExpression(ALERT.BASIC.value, ' Give the Bot examples of how the user would express this intent.');
+            msgAlertUserExpression(ALERT.BASIC.value, ' Give the bot examples of how the user would express this intent.');
             $("#btnAddExpression").prop("disabled", false);
             return true;
         case 1:
@@ -58,7 +58,7 @@ function addUserExpression() {
     var parent = document.getElementById('userexpression-list');
     document.getElementById('user-expression').value = '';
     createNewUsersayRow(value, parent);
-    msgAlertUserExpression(ALERT.BASIC.value,' Give the Bot examples of how the user would express this intent.');
+    msgAlertUserExpression(ALERT.BASIC.value,' Give the bot examples of how the user would express this intent.');
 }
 
 function createNewUsersayRow(value, parent) {

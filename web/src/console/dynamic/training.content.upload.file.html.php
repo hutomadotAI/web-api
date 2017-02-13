@@ -20,12 +20,12 @@
     </div>
     <div class="box-footer">
             <!-- link video tutorial -->
-            check our <a data-toggle="collapse"  href="#collapseVideoTutorialTraining">Training video tutorial</a>
+            check out our <a data-toggle="collapse"  href="#collapseVideoTutorialTraining">training video tutorial</a>
 
             <!-- link sample of training file MODAL-->
             <div class="pull-right">
                 link to
-                <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor='pointer'"> Sample training file</a>
+                <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor='pointer'"> sample training file</a>
             </div>
 
             <!-- video tutorial container -->
