@@ -21,7 +21,7 @@ INSERT INTO `integrations` VALUES
 	(5,'Telegram','A new era of messaging','telegram.png',0),
 	(6,'Twilio','Programmable SMS','twilio.png',0),
 	(7,'Webhook','A way to plug a web service into your agent','webhook.png',0),
-	(8,'WeChat','A text and voice messaging communication','wechat.png',0),
+	(8,'WeChat','A text and voice messaging communication','wechat.png',0);
 /*!40000 ALTER TABLE `integrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
