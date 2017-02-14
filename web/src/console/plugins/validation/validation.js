@@ -47,7 +47,7 @@ function isInputInvalid(txt,field) {
         case 'developer_company': letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;             break;
         case 'developer_email' :  letters = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;break;
 
-        case 'URI': letters = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/; break;
+        case 'URI': letters = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/; break;
         default:
     }
     

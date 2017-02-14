@@ -8,7 +8,7 @@ require __DIR__ . "/../class.logsys.php";
     "db" => array(
         //"host" => "52.44.215.190",
         //"port" => 3306,
-        "host" => "10.132.0.9",
+        "host" => "10.132.0.4",
         "port" => 12306,
         "username" => "hutoma_caller",
         "password" => '>YR"khuN*.gF)V4#',
