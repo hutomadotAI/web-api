@@ -151,7 +151,7 @@ public class ServerMetadata {
             routePickReason = "free-slots";
         }
 
-        this.logger.logDebug(LOGFROM, String.format("Routing to %s because %s", pick.describeServerRouting(), routePickReason));
+        this.logger.logInfo(LOGFROM, String.format("Routing to %s because %s", pick.describeServerRouting(), routePickReason));
         addAffinity(pick, aiid);
         return pick;
     }
