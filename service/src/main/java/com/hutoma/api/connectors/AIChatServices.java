@@ -36,15 +36,14 @@ import javax.inject.Inject;
 public class AIChatServices extends ServerConnector {
 
     private static final String LOGFROM = "aichatservices";
-    private static final int TIMEOUT_RNN_REQUESTS_MS = 10000;
-    private static final int TIMEOUT_WNET_REQUESTS_MS = 10000;
-    private static final int TIMEOUT_AIML_REQUESTS_MS = 10000;
-    private final RequestWnet wnetController;
-    private final RequestRnn rnnController;
-    private final RequestAiml aimlController;
+    private final RequestWnet requestWnet;
+    private final RequestRnn requestRnn;
+    private final RequestAiml requestAiml;
     private List<Future<InvocationResult>> wnetFutures;
     private List<Future<InvocationResult>> rnnFutures;
     private List<Future<InvocationResult>> aimlFutures;
+
+    private long requestDeadline;
 
     @Inject
     public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
@@ -53,9 +52,9 @@ public class AIChatServices extends ServerConnector {
                           final RequestWnet wnetController, final RequestRnn rnnController,
                           final RequestAiml aimlController) {
         super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
-        this.wnetController = wnetController;
-        this.rnnController = rnnController;
-        this.aimlController = aimlController;
+        this.requestWnet = wnetController;
+        this.requestRnn = rnnController;
+        this.requestAiml = aimlController;
     }
 
     /***
@@ -71,6 +70,9 @@ public class AIChatServices extends ServerConnector {
     public void startChatRequests(final String devId, final UUID aiid, final UUID chatId, final String question,
                                   final String history, final String topicIn)
             throws AiServicesException, RequestBase.AiControllerException, ServerMetadata.NoServerAvailable {
+
+        // calculate the exact deadline for this group of requests
+        this.requestDeadline = this.tools.getTimestamp() + this.config.getBackendCombinedRequestTimeoutMs();
 
         // generate the parameters to send
         HashMap<String, String> parameters = new HashMap<String, String>() {{
@@ -97,7 +99,7 @@ public class AIChatServices extends ServerConnector {
             if (!usedAimlAis.isEmpty()) {
                 List<Pair<String, UUID>> listAis = new ArrayList<>();
                 usedAimlAis.forEach(x -> listAis.add(new Pair<>(/* ignored at the moment */devId, x)));
-                this.aimlFutures = this.aimlController.issueChatRequests(parameters, listAis);
+                this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis);
                 usedAimlBot = true;
                 // remove the aiml bots ais from the list of ais
                 List<Pair<String, UUID>> newList = new ArrayList<>();
@@ -116,8 +118,8 @@ public class AIChatServices extends ServerConnector {
         }
 
         if (!ais.isEmpty()) {
-            this.wnetFutures = this.wnetController.issueChatRequests(parameters, ais);
-            this.rnnFutures = this.rnnController.issueChatRequests(parameters, ais);
+            this.wnetFutures = this.requestWnet.issueChatRequests(parameters, ais);
+            this.rnnFutures = this.requestRnn.issueChatRequests(parameters, ais);
         }
     }
 
@@ -128,7 +130,7 @@ public class AIChatServices extends ServerConnector {
      */
     public Map<UUID, ChatResult> awaitWnet() throws RequestBase.AiControllerException {
         if (this.wnetFutures != null) {
-            return this.wnetController.waitForAll(this.wnetFutures, TIMEOUT_WNET_REQUESTS_MS);
+            return this.requestWnet.waitForAll(this.wnetFutures, getRemainingTime());
         }
         return null;
     }
@@ -140,7 +142,7 @@ public class AIChatServices extends ServerConnector {
      */
     public Map<UUID, ChatResult> awaitAiml() throws RequestBase.AiControllerException {
         if (this.aimlFutures != null) {
-            return this.aimlController.waitForAll(this.aimlFutures, TIMEOUT_AIML_REQUESTS_MS);
+            return this.requestAiml.waitForAll(this.aimlFutures, getRemainingTime());
         }
         return null;
     }
@@ -152,15 +154,15 @@ public class AIChatServices extends ServerConnector {
      */
     public Map<UUID, ChatResult> awaitRnn() throws RequestBase.AiControllerException {
         if (this.rnnFutures != null) {
-            return this.rnnController.waitForAll(this.rnnFutures, TIMEOUT_RNN_REQUESTS_MS);
+            return this.requestRnn.waitForAll(this.rnnFutures, getRemainingTime());
         }
         return null;
     }
 
     public void abandonCalls() {
-        this.wnetController.abandonCalls();
-        this.rnnController.abandonCalls();
-        this.aimlController.abandonCalls();
+        this.requestWnet.abandonCalls();
+        this.requestRnn.abandonCalls();
+        this.requestAiml.abandonCalls();
     }
 
     public List<Pair<String, UUID>> getLinkedBotsAiids(final String devId, final UUID aiid)
@@ -186,6 +188,16 @@ public class AIChatServices extends ServerConnector {
             this.logger.logException(LOGFROM, ex);
         }
         return false;
+    }
+
+    /***
+     * Assuming that we pre-calculated the deadline when we started the chat requests,
+     * this calculates the time remaining until we reach the deadline
+     * so that it can be used as a timeout for awaiting calls
+     * @return time left, in ms
+     */
+    private int getRemainingTime() {
+        return (int) Math.max(0, this.requestDeadline - this.tools.getTimestamp());
     }
 
     public static class AiNotReadyToChat extends AiServicesException {

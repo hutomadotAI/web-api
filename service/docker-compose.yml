@@ -9,7 +9,7 @@ services:
       - "11080:8080"
       environment:
       - API_ENCODING_KEY=${API_ENCODING_KEY}
-      - ENV API_MAX_UPLOAD_SIZE_KB=16384      
+      - API_MAX_UPLOAD_SIZE_KB=16384
       - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull
       - API_DBCONNECTIONPOOL_MIN_SIZE=8
       - API_DBCONNECTIONPOOL_MAX_SIZE=64
@@ -19,6 +19,7 @@ services:
       - API_RATELIMIT_QUICKREAD_FREQUENCY=0.5
       - API_RATELIMIT_LOADTEST_BURST=32768.0
       - API_RATELIMIT_LOADTEST_FREQUENCY=8192.5
+      - API_BACKEND_REQUEST_TIMEOUT_MS=20000
       - API_LOGGING_URL=http://log-svc:8080/log
       - API_LOGGING_CADENCY=5000
 networks:

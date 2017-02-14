@@ -181,6 +181,17 @@ public class Config {
         return 5 * 1000;
     }
 
+    /***
+     * The total number of milliseconds that we wait for backend
+     * requests to complete.
+     * N.B. this value is not 'per request'.
+     * If we start the first call at t=1 then we won't wait beyond t=20001
+     * @return
+     */
+    public long getBackendCombinedRequestTimeoutMs() {
+        return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
+    }
+
     public void dumpApiEnvironmentVars() {
         System.getenv().entrySet().stream().forEach(e -> {
             if (e.getKey().startsWith(API_ENV_PREFIX)) {

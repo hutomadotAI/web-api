@@ -60,7 +60,7 @@ public abstract class RequestBase {
         List<Callable<InvocationResult>> callables = new ArrayList<>();
 
         for (Pair<String, UUID> ai : ais) {
-            callables.add(createCallable(this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
+            callables.add(createCallable(controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
                     ai.getA(), ai.getB(), chatParams));
         }
 
@@ -76,7 +76,7 @@ public abstract class RequestBase {
 
         Map<UUID, ChatResult> map = new HashMap<>();
 
-        // get and wait for the all the calls to complete
+        // get and wait for all the calls to complete
         for (Future<InvocationResult> future : futures) {
             final InvocationResult result = waitForResult(future, timeoutMs);
 
