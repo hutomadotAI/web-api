@@ -52,33 +52,29 @@
         <div class="modal-content bordered" style="background-color: #212121">
             <div class="modal-header bordered">
                 <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">   <i class="fa fa-file-text-o text-success" style="padding-right:2em"></i> Training file sample</h4>
+                <h4 class="modal-title">   <i class="fa fa-file-text-o text-success" style="padding-right:2em"></i><span class="unselectable">Training file sample</span> </h4>
             </div>
             <div class="modal-body">
                 <div class="box-body" id="example-training-file">
                     <span id="contentSampleFile"></span>
-                    <dt>hello my phone is broken</dt>
-                    <dt>oh sorry what is the problem</dt>
-                    <dt>the screen does not turn on</dt>
-                    <dt>hmmm ok. have you tried charging</dt>
-                    <dt>it is charged i think</dt>
-                    <dt>ok what happens when you press the power button</dt>
-                    <dt>nothing happens</dt>
-                    <dt>ok let me send you someone to pick up your phone</dt>
+                    <dt>What is your Name?</dt>
+                    <dt>My name is Hutoma.</dt>
                     </br>
-                    <dt>hello</dt>
-                    <dt>hi, how are you</dt>
-                    <dt>i am fine thanks! and you?</dt>
-                    <dt>I am good</dt>
-                        </br>
-                    <dt>what is your name</dt>
-                    <dt>my name is AI1</dt>
-                        </br>
-                    <dt>what does your name mean?</dt>
-                    <dt>not sure. ask maurizio</dt>
-                        </br>
-                    <dt>waht is the meaning of life</dt>
-                    <dt>the meaning of life is 42</dt>
+                    <dt>What does Hutoma means?</dt>
+                    <dt>It is a combination of two words: Human and Automata.</dt>
+                    </br>
+                    <dt>What is the meaning of life?</dt>
+                    <dt>The meaning of life is 42.</dt>
+                    </br>
+                    <dt>How old are you?</dt>
+                    <dt>I am one!</dt>
+                    </br>
+                    <dt>Can we be friends?</dt>
+                    <dt>yes of course we can be friends!</dt>
+                    </br>
+                    <dt>Good Morning</dt>
+                    <dt>Good morning to you my friend!</dt>
+                    </br>
                 </div>
             </div>
             <div class="modal-footer">
