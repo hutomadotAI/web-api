@@ -1,8 +1,18 @@
 FROM tomcat:8-jre8
+LABEL maintainer "pedrotei@hutoma.com"
 
+# Copy the certificates to the store
+RUN mkdir -p /usr/local/tomcat/ssl
+COPY config/internal.hutoma.crt /usr/local/tomcat/ssl
+COPY config/internal.hutoma.key /usr/local/tomcat/ssl
+
+# Copy the server config
+COPY config/server.xml /usr/local/tomcat/conf
+
+# Delete any existing root folder
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
+# Copy the WAR file to be expanded as the new ROOT folder (as we have set unpackWARs="true")
 COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
-
 
 # Expose the following environment variables
 ENV API_ENCODING_KEY encodingKey
@@ -22,6 +32,8 @@ ENV API_AI_AIML_ENDPOINT http://ai-aiml:8080/ai
 ENV API_LOGGING_URL http://log-svc:8080/log
 ENV API_LOGGING_CADENCY 5000
 
-EXPOSE 8080
+# Expose bothe the secure and non-secure ports
+EXPOSE 8080 8443
 
+# Start Tomcat
 CMD ["catalina.sh", "run"]
