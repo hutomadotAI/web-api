@@ -6317,6 +6317,12 @@ ul.pagination li a {
     font-weight: bold;
 }
 
+.item-row{
+    background-color: #404446;
+    border: 1px solid #202020;
+    margin: -1px 0 0 0;
+}
+
 /* layout.css Style */
 .upload-drop-zone {
     min-height: 185px;

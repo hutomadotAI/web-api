@@ -78,14 +78,14 @@ function showEntities(str) {
         if ((str != " ") && ( (str.length == 0) || (entities[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
 
             wHTML += ('<div class="col-xs-12">');
-            wHTML += ('<div class="box-body flat" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
-            wHTML += ('<div class="row">');
+            wHTML += ('<div class="box-body flat no-padding" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
+            wHTML += ('<div class="row item-row">');
 
-            wHTML += ('<div class="col-xs-9" id="obj-entity">');
-            wHTML += ('<div class="text-gray" type="submit" id="entity-label' + x + '" onClick="editEntity(this,this.innerHTML)" onMouseOver="this.style.cursor=\'pointer\'">@' + entities[x] + '</div>')
+            wHTML += ('<div class="col-xs-10 no-padding" id="obj-entity">');
+            wHTML += ('<input type="text" class="form-control flat no-shadow" id="entity-label' + x + '"  name="entity-label" onClick="editEntity(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" style="padding-left:10px; background-color: #404446; " value="@' + entities[x] + '" readonly>');
             wHTML += ('</div>');
 
-            wHTML += ('<div class="col-xs-3" id="btnEnt"  style="display:none;" >');
+            wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
             wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + x + '" style="cursor: pointer;">');

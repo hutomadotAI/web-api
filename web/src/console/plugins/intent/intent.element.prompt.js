@@ -12,7 +12,7 @@ function checkInputPromptCode(element, key) {
 }
 
 function activeButtonCreateIntentPrompt() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     switch (limitText($("#intent-prompt"), limitTextInputSize)) {
         case -1:
             $("#btnAddIntentPrompt").prop("disabled", true);

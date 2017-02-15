@@ -14,7 +14,7 @@ function checkValueCode(element, key) {
 }
 
 function activeButtonCreateEntityValue() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     switch (limitText($("#value-entity"), limitTextInputSize)) {
         case -1:
             $("#btnAddEntityValue").prop("disabled", true);
@@ -63,18 +63,18 @@ function addEntityValue() {
 function createNewValueEntityRow(value, parent) {
     var wHTML = '';
 
-    wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
+    wHTML += ('<div class="box-body flat no-padding item-row" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
     wHTML += ('<div class="row">');
 
-    wHTML += ('<div class="col-xs-9" id="obj-value-entity" >');
+    wHTML += ('<div class="col-xs-10" id="obj-value-entity" >');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-sign-out text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity-row" name="value-entity-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity-row" name="value-entity-row" style="background-color: #404446; value="' + value + '" placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
-    wHTML += ('<div class="col-xs-3" id="btnValueEntity" style="display:none;" >');
+    wHTML += ('<div class="col-xs-2" id="btnValueEntity" style="display:none;" >');
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
 
     wHTML += ('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px; cursor: pointer;" onClick="deleteValueEntity(this)">');
