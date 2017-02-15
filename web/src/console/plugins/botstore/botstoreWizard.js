@@ -71,9 +71,9 @@ function infoForBotstore(title, purchased) {
             if (purchased == 'true')
                 btnFromBuyToPurchased();
 
-            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAiBotstore.php');
+            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAIBotstore.php');
             document.getElementById('bthBackToBotstore').innerText = 'Go back';
-            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAiBotstore.php');
+            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAIBotstore.php');
 
             break;
         case 'settings' :
