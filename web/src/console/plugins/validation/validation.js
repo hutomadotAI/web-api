@@ -1,8 +1,9 @@
 /**
  * Created by Hutoma on 14/10/16.
  */
+validation = {};
 
-function limitText(limitField, limitNum) {
+function limitText (limitField, limitNum) {
     if (limitField.val().length < 1)
         return -1;
     if (limitField.val().length >= limitNum) {
@@ -11,6 +12,9 @@ function limitText(limitField, limitNum) {
     }
     return 0;
 }
+validation.limitText = function(limitField, limitNum) {
+  return limitText(limitField, limitNum);
+};
 
 function isNameExists(name,list_name){
     for (var x in list_name) {
@@ -19,11 +23,14 @@ function isNameExists(name,list_name){
     }
     return false;
 }
+validation.isNameExists = function(name, list_name) {
+    return isNameExists(name, list_name);
+};
 
 function isInputInvalid(txt,field) {
     var letters;
     switch(field){
-       
+
         case 'ai_name' :        letters = /^[a-zA-Z0-9\-_\s]+$/;                break;
         case 'ai_description' : letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
         case 'entity_name' :    letters = /^[a-zA-Z0-9_]+$/;                    break;
@@ -50,11 +57,9 @@ function isInputInvalid(txt,field) {
         case 'URI': letters = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/; break;
         default:
     }
-    
+
     if(txt.match(letters))
         return false;
 
     return true;
 }
-
-
