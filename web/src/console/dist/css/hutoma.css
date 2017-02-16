@@ -4020,8 +4020,7 @@ table.text-center th {
 @media (max-width: 768px) {
     .login-box,
     .register-box {
-        width: 90%;
-        margin-top: 20px;
+        margin-top: 50px;
     }
 }
 
