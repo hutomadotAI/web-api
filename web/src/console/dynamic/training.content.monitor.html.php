@@ -34,8 +34,8 @@
                         <dl class="dl-horizontal">
                             Training consists of two main phases:<br /><br/>
                             <ul>
-                                <li style="text-align:justify"><b>Phase 1 Learning</b><br>Phase 1 Learning teaches the AI to respond to questions using your pre-packaged answers. This phase is quicker than Phase 2 and it allows you to interact with your AI almost right away.</li><br/>
-                                <li style="text-align:justify"><b>Phase 2 Learning</b><br>Phase 2 learning teaches the AI to formulate answers that will go beyond your pre-packaged ones. This phase can sometime take days or weeks to complete and it usually produces better results with bigger training files.</li>
+                                <li style="text-align:justify"><b>Phase 1 Learning</b><br>In Phase 1 the AI learns to respond to questions using your pre-packaged answers. This phase is quicker than Phase 2 and it allows you to interact with your AI almost right away.</li><br/>
+                                <li style="text-align:justify"><b>Phase 2 Learning</b><br>In Phase 2 the AI learns to respond to questions by autonomously creating new answers that will go beyond your pre-packaged ones. This phase can take days or weeks to complete and it usually produces better results with bigger training files.</li>
                             </ul>
                         </dl>
                     </div>

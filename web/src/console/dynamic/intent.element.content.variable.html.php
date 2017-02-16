@@ -31,7 +31,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentVariable" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertIntentVariable"></i>
-            <span id="msgAlertIntentVariable">List all entities that you would like the bot to extract from a conversation.</span>
+            <span id="msgAlertIntentVariable">List all the entities that you would like the bot to extract from a conversation.</span>
         </div>
 
         <div class="box-body flat" style="background-color: #404446;  margin-top: -1px;">
