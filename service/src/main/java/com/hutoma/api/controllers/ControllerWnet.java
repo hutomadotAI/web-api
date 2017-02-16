@@ -15,9 +15,9 @@ import javax.inject.Inject;
 public class ControllerWnet extends ControllerBase {
 
     @Inject
-    public ControllerWnet(final Config config, final Tools tools, final ThreadSubPool threadSubPool,
+    public ControllerWnet(final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator, final ILogger logger) {
-        super(config, tools, threadSubPool, serviceLocator, logger);
+        super(threadSubPool, serviceLocator, logger);
     }
 
 }

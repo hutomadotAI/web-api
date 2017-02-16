@@ -25,7 +25,7 @@ public class AiServiceStatusLogger extends TelemetryCentralLogger {
 
     public void logStatusUpdate(final String tag, final AiStatus status) {
         this.addTelemetryEvent(tag, new HashMap<String, String>() {{
-            this.put("AIEngine", status.getAiEngine());
+            this.put("AIEngine", status.getAiEngine().toString());
             this.put("AIID", status.getAiid().toString());
             this.put("DEVID", status.getDevId());
             this.put("Status", status.getTrainingStatus().value());

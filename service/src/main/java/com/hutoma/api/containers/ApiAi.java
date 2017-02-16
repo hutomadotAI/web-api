@@ -2,6 +2,7 @@ package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -126,8 +127,8 @@ public class ApiAi extends ApiResult {
             this.phase1Progress = 0.0d;
             this.phase2Progress = 0.0d;
         } else {
-            BackendEngineStatus wnet = this.backendStatus.getEngineStatus(BackendStatus.ENGINE_WNET);
-            BackendEngineStatus rnn = this.backendStatus.getEngineStatus(BackendStatus.ENGINE_RNN);
+            BackendEngineStatus wnet = this.backendStatus.getEngineStatus(BackendServerType.WNET);
+            BackendEngineStatus rnn = this.backendStatus.getEngineStatus(BackendServerType.RNN);
             this.summaryStatus = getSummaryTrainingStatus(wnet.getTrainingStatus(), rnn.getTrainingStatus());
             this.phase1Progress = wnet.getTrainingProgress();
             this.phase2Progress = rnn.getTrainingProgress();

@@ -15,10 +15,10 @@ import java.util.UUID;
 public class ServerRegistration {
 
     @SerializedName("ai_list")
-    public List<ServerRegistrationAi> aiList;
+    public List<ServerAiEntry> aiList;
 
     @SerializedName("server_type")
-    public String serverType;
+    public BackendServerType serverType;
 
     @SerializedName("server_url")
     public String serverUrl;
@@ -35,7 +35,8 @@ public class ServerRegistration {
      * @param trainingCapacity
      * @param chatCapacity
      */
-    public ServerRegistration(final String serverType, final String serverUrl, final int trainingCapacity, final int chatCapacity) {
+    public ServerRegistration(final BackendServerType serverType, final String serverUrl,
+                              final int trainingCapacity, final int chatCapacity) {
         this.aiList = new ArrayList<>();
         this.serverType = serverType;
         this.serverUrl = serverUrl;
@@ -48,15 +49,15 @@ public class ServerRegistration {
      * @param uuid
      * @param trainingStatus
      */
-    public void addAI(UUID uuid, TrainingStatus trainingStatus) {
-        this.aiList.add(new ServerRegistrationAi(uuid, trainingStatus));
+    public void addAI(UUID uuid, TrainingStatus trainingStatus, String trainingHash) {
+        this.aiList.add(new ServerAiEntry(uuid, trainingStatus, trainingHash));
     }
 
-    public List<ServerRegistrationAi> getAiList() {
+    public List<ServerAiEntry> getAiList() {
         return this.aiList;
     }
 
-    public String getServerType() {
+    public BackendServerType getServerType() {
         return this.serverType;
     }
 
@@ -69,24 +70,7 @@ public class ServerRegistration {
     }
 
     public int getChatCapacity() {
-        return chatCapacity;
+        return this.chatCapacity;
     }
 
-    public static class ServerRegistrationAi {
-
-        @SerializedName("ai_id")
-        private final UUID aiid;
-        @SerializedName("training_status")
-        private final TrainingStatus trainingStatus;
-
-        /***
-         * This will only be used in unit tests
-         * @param aiid
-         * @param trainingStatus
-         */
-        public ServerRegistrationAi(final UUID aiid, final TrainingStatus trainingStatus) {
-            this.aiid = aiid;
-            this.trainingStatus = trainingStatus;
-        }
-    }
 }

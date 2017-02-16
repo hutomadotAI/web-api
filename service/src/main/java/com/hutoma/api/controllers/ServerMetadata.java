@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.hutoma.api.controllers.ControllerBase.RequestFor.Chat;
@@ -28,17 +29,11 @@ public class ServerMetadata {
     private static final String LOGFROM = "servermeta";
     private final HashMap<UUID, ServerTracker> activeServerSessions;
     private final HashMap<UUID, LinkedHashSet<ServerTracker>> serverAiAffinity;
-    protected Config config;
-    protected Tools tools;
-    protected ServiceLocator serviceLocator;
     protected ILogger logger;
     private int roundRobinIndex;
 
-    public ServerMetadata(final ILogger logger, final Config config, final Tools tools, final ServiceLocator serviceLocator) {
+    public ServerMetadata(final ILogger logger) {
         this.logger = logger;
-        this.config = config;
-        this.tools = tools;
-        this.serviceLocator = serviceLocator;
         this.activeServerSessions = new HashMap<>();
         this.serverAiAffinity = new HashMap<>();
         this.roundRobinIndex = 0;
@@ -151,7 +146,8 @@ public class ServerMetadata {
             routePickReason = "free-slots";
         }
 
-        this.logger.logInfo(LOGFROM, String.format("Routing to %s because %s", pick.describeServerRouting(), routePickReason));
+        this.logger.logInfo(LOGFROM,
+                String.format("Routing to %s because %s", pick.describeServerRouting(), routePickReason));
         addAffinity(pick, aiid);
         return pick;
     }
@@ -226,6 +222,25 @@ public class ServerMetadata {
     }
 
     /***
+     * Check whether the sessionID matches a server session
+     * that is currently tagged as the primary master,
+     * meaning that it is the earliest connected server
+     * with training_capacity >0
+     * @param serverSessionID sessionId of the connected server
+     * @return t/f
+     */
+    public boolean isPrimaryMaster(UUID serverSessionID) {
+        // lookup the current master server
+        Optional<ServerTracker> currentMaster = this.activeServerSessions.values().stream()
+                .filter(ServerTracker::canTrain)
+                .findFirst();
+
+        // is the current master what we just added?
+        return currentMaster.isPresent()
+                && currentMaster.get().getSessionID().equals(serverSessionID);
+    }
+
+    /***
      * Removes a session from the list of available servers and
      * clears any affinity that was linked to that session
      * @param serverSessionID
@@ -262,7 +277,4 @@ public class ServerMetadata {
         return requestFor == Chat ? getServerForChat(aiid) : getServerForTraining(aiid);
     }
 
-    protected ServerTracker createNewServerTracker() {
-        return this.serviceLocator.getService(ServerTracker.class);
-    }
 }

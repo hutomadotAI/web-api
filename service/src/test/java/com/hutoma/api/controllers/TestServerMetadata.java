@@ -1,13 +1,12 @@
-package com.hutoma.api.controller;
+package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
-import com.hutoma.api.controllers.ServerMetadata;
-import com.hutoma.api.controllers.ServerTracker;
 
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.client.JerseyClient;
@@ -319,15 +318,17 @@ public class TestServerMetadata {
     private ServerTracker makeServerTracker(int trainingCapacity, int chatCapacity) {
         ServerTracker server = new FakeServerTracker(this.config, this.tools, this.logger);
         UUID uuid = server.trackServer(new ServerRegistration(
-                "test", "url1", trainingCapacity, chatCapacity));
+                BackendServerType.WNET, "url1", trainingCapacity, chatCapacity));
         this.test.addNewSession(uuid, server);
         return server;
     }
 
     public class ServerMetadataUnderTest extends ServerMetadata {
 
+        protected ServiceLocator serviceLocator;
+
         public ServerMetadataUnderTest(final ILogger logger, final Config config, final Tools tools, final ServiceLocator serviceLocator) {
-            super(logger, config, tools, serviceLocator);
+            super(logger);
         }
 
         @Override

@@ -1,10 +1,11 @@
-package com.hutoma.api.controller;
+package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.controllers.ServerTracker;
 
@@ -34,7 +35,7 @@ public class TestServerTracker {
         when(this.fakeConfig.getServerHeartbeatMinimumGapMs()).thenReturn(500L);
         this.testClass = new ServerTrackerUnderTest(this.fakeConfig, this.tools,
                 mock(JerseyClient.class), mock(JsonSerializer.class), mock(ILogger.class));
-        this.testClass.trackServer(new ServerRegistration("wnet", "url", 1, 1));
+        this.testClass.trackServer(new ServerRegistration(BackendServerType.WNET, "url", 1, 1));
     }
 
     @Test

@@ -186,6 +186,10 @@ public class ServerTracker implements Callable {
         this.affinity.clear();
     }
 
+    public UUID getSessionID() {
+        return this.serverSessionID;
+    }
+
     private synchronized int getChatAffinityCount() {
         return this.affinity.size();
     }
@@ -207,7 +211,7 @@ public class ServerTracker implements Callable {
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 return true;
             }
-            
+
             this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s %s failed with error %d",
                     this.registration.getServerType(), this.serverSessionID.toString(), response.getStatus()));
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package com.hutoma.api.common;
 
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -44,9 +45,9 @@ public class TestDataHelper {
 
     private static BackendStatus setBackendEngineStatus(final TrainingStatus status) {
         BackendStatus bs = new BackendStatus();
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendStatus.ENGINE_AIML, 0.0, 1.0));
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendStatus.ENGINE_WNET, 0.0, 1.0));
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendStatus.ENGINE_RNN, 0.0, 1.0));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.RNN, 0.0, 1.0, "hash"));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.WNET, 0.0, 1.0, "hash"));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.AIML, 0.0, 1.0, "hash"));
         return bs;
     }
 

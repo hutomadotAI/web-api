@@ -34,6 +34,8 @@ import javax.ws.rs.core.Response;
  */
 public abstract class RequestBase {
 
+    private static final String AI_HASH_PARAM = "ai_hash";
+
     protected final JerseyClient jerseyClient;
     protected final Tools tools;
     protected final Config config;
@@ -56,12 +58,13 @@ public abstract class RequestBase {
     }
 
     public List<Future<InvocationResult>> issueChatRequests(final Map<String, String> chatParams,
-                                                            final List<Pair<String, UUID>> ais) throws ServerMetadata.NoServerAvailable {
+                                                            final List<Pair<String, UUID>> ais)
+            throws ServerMetadata.NoServerAvailable {
         List<Callable<InvocationResult>> callables = new ArrayList<>();
 
         for (Pair<String, UUID> ai : ais) {
             callables.add(createCallable(controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
-                    ai.getA(), ai.getB(), chatParams));
+                    ai.getA(), ai.getB(), chatParams, controller.getHashCodeFor(ai.getB())));
         }
 
         return this.execute(callables);
@@ -164,7 +167,7 @@ public abstract class RequestBase {
     }
 
     protected Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
-                                                        final Map<String, String> params) {
+                                                        final Map<String, String> params, final String aiHash) {
 
         // create call to back-end chat endpoints
         // e.g.
@@ -174,6 +177,9 @@ public abstract class RequestBase {
         for (Map.Entry<String, String> param : params.entrySet()) {
             target = target.queryParam(param.getKey(), param.getValue());
         }
+        // add the hashcode to the query string
+        target = target.queryParam(AI_HASH_PARAM, aiHash);
+
         final JerseyInvocation.Builder builder = target.request();
         return () -> {
             long startTime = RequestBase.this.tools.getTimestamp();

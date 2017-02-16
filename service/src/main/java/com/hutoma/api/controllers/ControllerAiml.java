@@ -15,9 +15,9 @@ import javax.inject.Inject;
 public class ControllerAiml extends ControllerBase {
 
     @Inject
-    public ControllerAiml(final Config config, final Tools tools, final ThreadSubPool threadSubPool,
+    public ControllerAiml(final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator, final ILogger logger) {
-        super(config, tools, threadSubPool, serviceLocator, logger);
+        super(threadSubPool, serviceLocator, logger);
     }
 
 }

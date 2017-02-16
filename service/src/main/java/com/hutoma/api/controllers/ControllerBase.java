@@ -1,13 +1,14 @@
 package com.hutoma.api.controllers;
 
-import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ThreadSubPool;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
 import org.glassfish.hk2.api.ServiceLocator;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -18,14 +19,17 @@ import java.util.UUID;
 public abstract class ControllerBase extends ServerMetadata {
 
     private static final String LOGFROM = "controller";
-
+    protected final HashMap<UUID, String> aiHashCodes;
     protected ThreadSubPool threadSubPool;
+    protected ServiceLocator serviceLocator;
 
-    public ControllerBase(final Config config, final Tools tools, final ThreadSubPool threadSubPool,
+    public ControllerBase(final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator,
                           final ILogger logger) {
-        super(logger, config, tools, serviceLocator);
+        super(logger);
+        this.serviceLocator = serviceLocator;
         this.threadSubPool = threadSubPool;
+        this.aiHashCodes = new HashMap<>();
     }
 
     public UUID registerServer(final ServerRegistration registration) {
@@ -54,6 +58,24 @@ public abstract class ControllerBase extends ServerMetadata {
     public String getBackendEndpoint(UUID aiid, RequestFor requestFor) throws NoServerAvailable {
         ServerTracker tracker = this.getServerFor(aiid, requestFor);
         return tracker.getServerUrl();
+    }
+
+    public synchronized String getHashCodeFor(UUID aiid) {
+        return this.aiHashCodes.computeIfAbsent(aiid, v -> "");
+    }
+
+    public synchronized void setHashCodeFor(UUID aiid, String hashCode) {
+        aiHashCodes.put(aiid, hashCode);
+    }
+
+    public synchronized void setAllHashCodes(final List<ServerAiEntry> aiList) {
+        this.aiHashCodes.clear();
+        aiList.stream().forEach(entry ->
+                this.aiHashCodes.put(entry.getAiid(), entry.getAiHash()));
+    }
+
+    protected ServerTracker createNewServerTracker() {
+        return this.serviceLocator.getService(ServerTracker.class);
     }
 
     public enum RequestFor {

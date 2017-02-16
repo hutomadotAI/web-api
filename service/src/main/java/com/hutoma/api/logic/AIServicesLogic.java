@@ -11,9 +11,11 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerBase;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 
@@ -59,6 +61,9 @@ public class AIServicesLogic {
     }
 
     public ApiResult updateAIStatus(final AiStatus status) {
+        // TODO: this call should include a SessionID and
+        // TODO: we should only honour it if it comes from the primary master server
+
         try {
             this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
             // Check if any of the backends sent a rogue double, as MySQL does not handle NaN
@@ -72,6 +77,11 @@ public class AIServicesLogic {
                         status.getAiEngine(), status.getAiid()));
                 return ApiError.getNotFound();
             }
+
+            // update the ai hashcode for the appropriate controller
+            ControllerBase controller = getControllerFor(status.getAiEngine());
+            controller.setHashCodeFor(status.getAiid(), status.getAiHash());
+
             return new ApiResult().setSuccessStatus();
         } catch (Exception ex) {
             this.serviceStatusLogger.logException(LOGFROM, ex);
@@ -79,29 +89,39 @@ public class AIServicesLogic {
         }
     }
 
+    private ControllerBase getControllerFor(BackendServerType server) {
+        switch (server) {
+            case WNET:
+                return controllerWnet;
+            case RNN:
+                return controllerRnn;
+            case AIML:
+                return controllerAiml;
+            default:
+        }
+        return null;
+    }
+
     public ApiResult registerServer(ServerRegistration registration) {
         UUID serverSessionID;
         try {
-            switch (registration.getServerType()) {
-                case "wnet":
-                    serverSessionID = this.controllerWnet.registerServer(registration);
-                    break;
-                case "rnn":
-                    serverSessionID = this.controllerRnn.registerServer(registration);
-                    break;
-                case "aiml":
-                    serverSessionID = this.controllerAiml.registerServer(registration);
-                    break;
-                default:
-                    this.serviceStatusLogger.logError(LOGFROM,
-                            String.format("unrecognised server type %s", registration.getServerType()));
-                    return ApiError.getBadRequest("unrecognised server type");
+            ControllerBase controller = getControllerFor(registration.getServerType());
+            if (controller != null) {
+                // create a session and make it active
+                serverSessionID = controller.registerServer(registration);
+                // if we are master then update all the hash codes from this reg-list
+                if (controller.isPrimaryMaster(serverSessionID)) {
+                    controller.setAllHashCodes(registration.getAiList());
+                }
+            } else {
+                this.serviceStatusLogger.logError(LOGFROM,
+                        String.format("unrecognised server type %s", registration.getServerType()));
+                return ApiError.getBadRequest("unrecognised server type");
             }
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
-
         return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
     }
 
@@ -110,9 +130,9 @@ public class AIServicesLogic {
         List<UUID> aiList = serverAffinity.getAiList();
 
         try {
-            if (this.controllerWnet.updateAffinity(sid, aiList) ||
-                    this.controllerRnn.updateAffinity(sid, aiList) ||
-                    this.controllerAiml.updateAffinity(sid, aiList)) {
+            if (this.controllerWnet.updateAffinity(sid, aiList)
+                    || this.controllerRnn.updateAffinity(sid, aiList)
+                    || this.controllerAiml.updateAffinity(sid, aiList)) {
                 return new ApiResult().setSuccessStatus("server affinity updated");
             }
             return ApiError.getBadRequest("nonexistent session");

@@ -34,6 +34,7 @@ public class JsonSerializer {
                         return new JsonPrimitive(ISODateTimeFormat.dateTime().print(json));
                     }
                 })
+                .enableComplexMapKeySerialization()
                 .create();
     }
 
