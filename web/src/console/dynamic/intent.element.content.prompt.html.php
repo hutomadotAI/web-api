@@ -6,7 +6,7 @@
 
             <div class="modal-header">
                 <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><i class="fa fa-tag text-md text-white" style="padding-right:2em"></i> INSERT PROMPTS</h4>
+                <h4 class="modal-title"><i class="fa fa-comments text-md text-white" style="padding-right:2em"></i> INSERT PROMPTS</h4>
             </div>
 
             <table class="table table-condensed no-padding no-margin no-border">
