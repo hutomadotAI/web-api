@@ -22,7 +22,6 @@ import static junitparams.JUnitParamsRunner.$;
  */
 @RunWith(JUnitParamsRunner.class)
 public class TestTrainingLogicParser {
-    private static final String RESET_TOKEN = "@reset";
 
     private TrainingLogic logic;
 
@@ -55,7 +54,7 @@ public class TestTrainingLogicParser {
 
     @Test
     public void testParse_TwoPair() {
-        Assert.assertEquals(String.format("H^A%s^^H^A^^", RESET_TOKEN), parse(new String[]{"H", "A", "", "H", "A"}));
+        Assert.assertEquals(String.format("H^A%s^^H^A^^", ""), parse(new String[]{"H", "A", "", "H", "A"}));
     }
 
     @Test
@@ -71,21 +70,21 @@ public class TestTrainingLogicParser {
     @Test
     public void testParse_Pair_After_EvenExchange() {
         Assert.assertEquals(
-                String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", RESET_TOKEN),
+                String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", ""),
                 parse(new String[]{"H1", "A1", "H2", "A2", "", "H10", "A11"}));
     }
 
     @Test
     public void testParse_Pair_After_OddExchange() {
         // H3 is ignored as there was no response
-        Assert.assertEquals(String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", RESET_TOKEN),
+        Assert.assertEquals(String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", ""),
                 parse(new String[]{"H1", "A1", "H2", "A2", "H3", "", "H10", "A11"}));
     }
 
     @Test
     public void testParse_Exchange_After_Pair() {
         Assert.assertEquals(
-                String.format("H10^A11%s^^H1^A1^[A1] H2^A2^^", RESET_TOKEN),
+                String.format("H10^A11%s^^H1^A1^[A1] H2^A2^^", ""),
                 parse(new String[]{"H10", "A11", "", "H1", "A1", "H2", "A2"}));
     }
 

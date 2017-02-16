@@ -33,7 +33,6 @@ import javax.ws.rs.core.SecurityContext;
 public class ChatLogic {
 
     private static final String LOGFROM = "chatlogic";
-    private static final String HISTORY_REST_DIRECTIVE = "@reset";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Tools tools;
@@ -232,15 +231,6 @@ public class ChatLogic {
         ChatResult chatResult = this.chatServices.awaitWnet();
 
         if (chatResult.getAnswer() != null) {
-            // if we receive a reset command then remove the command and flag the status
-            if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
-                chatResult.setResetConversation(true);
-                chatResult.setAnswer(chatResult.getAnswer()
-                        .replace(HISTORY_REST_DIRECTIVE, ""));
-            } else {
-                chatResult.setResetConversation(false);
-            }
-
             // remove trailing newline
             chatResult.setAnswer(chatResult.getAnswer().trim());
         } else {
