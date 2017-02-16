@@ -101,7 +101,6 @@ function isAuthorizedToAccess()
 <script src="./plugins/shared/shared.js"></script>
 
 
-
 <script>
     var bots = <?php
         $tmp_list = [];

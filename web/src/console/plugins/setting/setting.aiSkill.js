@@ -103,7 +103,7 @@ function callback(jsonString){
 
 
 function getUserActivities(){
-    var i, $list = $('.bot-linked');
+    var i, $list = $('.card-linked');
     var userActivities=[];
     for (var i = 0; i<$list.length; i++) {
         var temp_item = $list.eq(i);

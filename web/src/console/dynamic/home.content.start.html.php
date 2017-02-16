@@ -30,7 +30,7 @@
 
     <div class="box-footer">
         <span>
-            If you’re stuck check out our <a data-toggle="collapse" href="#collapseCreateBotVideoTutorial">video tutorial</a> or email <a href='#' tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
+            If you’re stuck check out our <a data-toggle="collapse" href="#collapseCreateBotVideoTutorial">video tutorial</a> or email <a href='mailto:support@hutoma.com?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
         </span>
         <p></p>
 

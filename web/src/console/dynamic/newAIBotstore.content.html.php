@@ -1,6 +1,6 @@
 <div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
     <div class="box-header with-border">
-        <div class="box-title"><b>Add skills to your Bot</b></div>
+        <div class="box-title"><b>Add skills to your bot</b></div>
         <a data-toggle="collapse"  href="#collapseInfoNewAIBotstore">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
@@ -14,7 +14,7 @@
         <span id="msgAlertNewAiBotstore" >
         <dt>Hu:toma Bot Store</dt>
         <dd>
-           You can power up your Bot by combining with the functionalities of other Bots in our Botstore.
+           You can boost your bot’s skills by combining it with other bots in our botstore.
         </dd>
         </span>
         </div>
@@ -27,7 +27,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                        Pre-trained neural networks are made available by our community and provide out of the box knowledge to your AI so you don't have to start from scratch.
+                        Pre-trained neural networks are made available by our community and provide out of the box knowledge to your bot so you don't have to start from scratch.
                     </div>
                 </section>
                 <p></p>
@@ -52,33 +52,3 @@
 <form method="POST" name="newAIbotstoreformGoBack">
     <input type="hidden" style="display:none;">
 </form>
-
-
-<!-- Modal DETAILS INFO-->
-<div class="modal fade" id="detailsDomain" role="dialog">
-    <div class="modal-dialog flat">
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">AI Info</h4>
-            </div>
-            <div class="modal-body">
-                <div class="box-body">
-                    <dl class="dl-horizontal">
-                        <dt>Description Actions</dt>
-                        <dd>Tell the AI learning ...</dd>
-                        <dt>Euismod</dt>
-                        <dd>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</dd>
-                        <dd>Donec id elit non mi porta gravida at eget metus.</dd>
-                        <dt>Malesuada porta</dt>
-                        <dd>Etiam porta sem malesuada magna mollis euismod.</dd>
-                        <dt>Felis euismod semper eget lacinia</dt>
-                        <dd>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>

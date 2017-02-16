@@ -126,7 +126,9 @@ if(isset($_POST['submit'])) {
     
     <script type="text/javascript">
         var options = {
-            declineButtonText: ''
+            declineButtonText: '',
+            policyUrl: 'privacyPolicy.php',
+            policyUrlTarget: '_blank'
         };
         $(document).ready(function () {
             $.cookiePolicyBar(options);

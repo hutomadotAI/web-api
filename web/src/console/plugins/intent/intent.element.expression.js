@@ -14,14 +14,14 @@ function checkExpressionCode(element, key) {
 }
 
 function activeButtonCreateUserExpression() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
     switch (limitText($("#user-expression"), limitTextInputSize)) {
         case -1:
             $("#btnAddExpression").prop("disabled", true);
             return false;
         case 0:
-            msgAlertUserExpression(ALERT.BASIC.value, ' Give the Bot examples of how the user would express this intent.');
+            msgAlertUserExpression(ALERT.BASIC.value, ' Give the bot examples of how the user would express this intent.');
             $("#btnAddExpression").prop("disabled", false);
             return true;
         case 1:
@@ -58,7 +58,7 @@ function addUserExpression() {
     var parent = document.getElementById('userexpression-list');
     document.getElementById('user-expression').value = '';
     createNewUsersayRow(value, parent);
-    msgAlertUserExpression(ALERT.BASIC.value,' Give the Bot examples of how the user would express this intent.');
+    msgAlertUserExpression(ALERT.BASIC.value,' Give the bot examples of how the user would express this intent.');
 }
 
 function createNewUsersayRow(value, parent) {
@@ -67,7 +67,7 @@ function createNewUsersayRow(value, parent) {
     wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="expressionOnMouseIn (this)" onmouseout="expressionOnMouseOut (this)">');
     wHTML += ('<div class="row">');
 
-    wHTML += ('<div class="col-xs-9" id="obj-userexpression">');
+    wHTML += ('<div class="col-xs-10" id="obj-userexpression">');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comment-o text-gray"></i>');
 
@@ -75,7 +75,7 @@ function createNewUsersayRow(value, parent) {
     wHTML += ('</div>');
     wHTML += ('</div>');
 
-    wHTML += ('<div class="col-xs-3" id="btnUserExpression" style="display:none;" >');
+    wHTML += ('<div class="col-xs-2" id="btnUserExpression" style="display:none;" >');
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
     
     wHTML += ('<a data-toggle="modal" data-target="#deleteUserExpression" style="padding-right:3px; cursor: pointer;" onClick="deleteUserExpression(this)">');

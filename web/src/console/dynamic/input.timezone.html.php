@@ -3,7 +3,7 @@ $zones = timezone_identifiers_list();
 
 $html = '';
 $html .= '<div class="form-group">';
-$html .= '<label for="ai_timezone">Time Zone</label>';
+$html .= '<label for="ai_timezone">Time zone</label>';
 $html .= '<select class="form-control select2" name="ai_timezone" id="ai_timezone" style="width: 100%;">';
 
 

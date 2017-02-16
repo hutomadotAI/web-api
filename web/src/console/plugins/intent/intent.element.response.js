@@ -14,14 +14,14 @@ function checkIntentResponseCode(element, key) {
 }
 
 function activeButtonCreateIntentResponse() {
-    var limitTextInputSize = 50;
+    var limitTextInputSize = 250;
     msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what actions should be taken by your business logic.');
     switch (limitText($("#intent-response"), limitTextInputSize)) {
         case -1:
             $("#btnAddIntentResponse").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the Bot examples of how it should respond to a users intent.');
+            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the bot examples of how it should respond to a users intent.');
             $("#btnAddIntentResponse").prop("disabled", false);
             return true;
         case 1:
@@ -58,7 +58,7 @@ function addIntentResponse() {
     var parent = document.getElementById('intentresponse-list');
     document.getElementById('intent-response').value = '';
     createNewIntentResponseRow(value, parent);
-    msgAlertIntentResponse(ALERT.BASIC.value,' Give the Bot examples of how it should respond to a users intent.');
+    msgAlertIntentResponse(ALERT.BASIC.value,' Give the bot examples of how it should respond to a users intent.');
 }
 
 function createNewIntentResponseRow(value, parent) {
@@ -67,7 +67,7 @@ function createNewIntentResponseRow(value, parent) {
     wHTML += ('<div class="box-body flat no-padding" style="background-color: #404446; border: 1px solid #202020; margin-top: -1px;" onmouseover="responseOnMouseIn (this)" onmouseout="responseOnMouseOut (this)">');
     wHTML += ('<div class="row">');
 
-    wHTML += ('<div class="col-xs-9" id="obj-intentresponse">');
+    wHTML += ('<div class="col-xs-10" id="obj-intentresponse">');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
 
@@ -75,7 +75,7 @@ function createNewIntentResponseRow(value, parent) {
     wHTML += ('</div>');
     wHTML += ('</div>');
 
-    wHTML += ('<div class="col-xs-3" id="btnIntentResponse" style="display:none;" >');
+    wHTML += ('<div class="col-xs-2" id="btnIntentResponse" style="display:none;" >');
     wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
     
     wHTML += ('<a data-toggle="modal" data-target="#deleteIntentResponse" style="padding-right:3px; cursor: pointer;" onClick="deleteIntentResponse(this)">');

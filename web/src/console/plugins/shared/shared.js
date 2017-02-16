@@ -19,10 +19,6 @@ var API_AI_STATE =
     ERROR: { value: 'ai_error'}
 };
 
-$(window).on('beforeunload', function(){
-    $('*').css("cursor", "progress");
-});
-
 function RecursiveUnbind($jElement) {
     // remove this element's and all of its children's click events
     $jElement.unbind();

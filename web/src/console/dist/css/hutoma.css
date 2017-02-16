@@ -6317,6 +6317,12 @@ ul.pagination li a {
     font-weight: bold;
 }
 
+.item-row{
+    background-color: #404446;
+    border: 1px solid #202020;
+    margin: -1px 0 0 0;
+}
+
 /* layout.css Style */
 .upload-drop-zone {
     min-height: 185px;
@@ -6558,6 +6564,7 @@ ul.pagination li a {
 
 .bot-default-style{
     background: #232426;
+    color:#ADADAD;
     resize: none;
     outline:none;
     border-style: none;
@@ -6584,11 +6591,11 @@ ul.pagination li a {
 }
 
 .bot-close-button {
-    text-align: right;
+    text-align: center;
     font-weight: bold;
     font-size: 14px;
     height:30px;
-    padding: 0px 0px 0px 10px;
+    padding: 10px 10px 0px 0px;
 }
 
 .bot-badge {
@@ -6668,12 +6675,38 @@ ul.pagination li a {
     height:40px;
 }
 
+.bot-buy-title{
+    padding: 10px 10px 0px 0px;
+    text-align: left;
+    font-size: 18px;
+}
+
+.bot-buy-details{
+    padding: 10px 0px 10px 40px;
+}
+
+.bot-buy-alert{
+    padding: 20px 0px 10px 0px;
+}
+
+.bot-buy-price{
+    padding: 0px 25px 0px 10px;
+    font-weight: bold;
+    font-size: 18px;
+    height:40px;
+}
+
+.bot-buy-purchase{
+    height:40px;
+    padding: 10px 20px 0px 10px;
+    font-weight: bold;
+}
+
 .bot-payment{
-    padding-top:0px;
-    padding-bottom:0px;
+    padding: 0 0 0 0;
     min-height:160px;
     min-width: 400px;
-    background-color: #212121;
+    background-color: #232426;
 }
 
 .bot-trasparent{
@@ -6714,33 +6747,3 @@ ul.pagination li a {
     -o-transform: translateX(-100%);
     transform: translateX(-100%);
 }
-
-.bot-30{
-    min-height:30px;
-    max-height:30px;
-}
-
-.bot-50{
-    min-height:50px;
-    max-height:50px;
-}
-
-.bot-70{
-    min-height:70px;
-    max-height:70px;
-}
-
-.bot-buy-title{
-    padding: 0px 10px 0px 10px;
-    text-align: left;
-    font-size: 22px;
-    height:40px;
-}
-
-.bot-buy-price{
-    padding: 5px 10px 0px 10px;
-    font-weight: bold;
-    font-size: 16px;
-    height:40px;
-}
-

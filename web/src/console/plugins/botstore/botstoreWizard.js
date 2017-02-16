@@ -36,6 +36,7 @@ function populateBotFields(bot) {
     document.getElementById('botNamePurchase').innerText = json['name'];
     document.getElementById('botDescriptionPurchase').innerText = json['description'];
     document.getElementById('botPricePurchase').innerText = json['price'];
+    document.getElementById('botLicensePurchase').innerText = json['licenseType'];
     document.getElementById('botIconPurchase').setAttribute('src', json['imagePath']);
     document.getElementById('bot_id').value = json['botId'];
 
@@ -70,9 +71,9 @@ function infoForBotstore(title, purchased) {
             if (purchased == 'true')
                 btnFromBuyToPurchased();
 
-            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAiBotstore.php');
+            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAIBotstore.php');
             document.getElementById('bthBackToBotstore').innerText = 'Go back';
-            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAiBotstore.php');
+            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAIBotstore.php');
 
             break;
         case 'settings' :
