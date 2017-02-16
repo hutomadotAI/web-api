@@ -48,12 +48,6 @@
 
     <div class="row no-margin">
         <div class="col-xs-4 unselectable">
-            <div class="bot-more-details">Report</div>
-            <div class="text-left">
-                <a class="dev-link" id="botReport" href="" rel="nofollow" target="_blank">Report as inappropriate</a>
-            </div>
-        </div>
-        <div class="col-xs-4 unselectable">
             <div class="bot-more-details">Privacy</div>
             <div class="text-left">
                 <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy Policy</a>
@@ -65,6 +59,8 @@
                 <a class="dev-link unselectable" id="botWebsite" href="" rel="nofollow" target="_blank">Visit
                     Website</a>
             </div>
+        </div>
+        <div class="col-xs-4 unselectable">
         </div>
     </div>
     <br>

@@ -29,7 +29,6 @@ function populateBotFields(bot) {
     document.getElementById('botVersion').innerText = json['version'];
     document.getElementById('botClassification').innerText = json['classification'];
     document.getElementById('botActivations').innerText = json['activations'];
-    document.getElementById('botReport').setAttribute('href', json['report']);
     document.getElementById('botPrivacyPolicy').setAttribute('href', json['privacyPolicy']);
     document.getElementById('botIcon').setAttribute('src', json['imagePath']);
 
