@@ -53,7 +53,7 @@ function addEntityValue() {
     }
 
     var element = document.getElementById('value-entity');
-    var value = $(element).val();
+    var value = element.value;
     var parent = document.getElementById('entityValues-list');
     document.getElementById('value-entity').value = '';
     createNewValueEntityRow(value, parent);
@@ -66,11 +66,10 @@ function createNewValueEntityRow(value, parent) {
     wHTML += ('<div class="box-body flat no-padding item-row" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
     wHTML += ('<div class="row">');
 
-    wHTML += ('<div class="col-xs-10" id="obj-value-entity" >');
+    wHTML += ('<div class="col-xs-10" >');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-sign-out text-gray"></i>');
-
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="value-entity-row" name="value-entity-row" style="background-color: #404446; value="' + value + '" placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="value-entity-row" style="background-color: #404446;" value="' + value + '" placeholder="' + value + '">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
