@@ -3483,7 +3483,6 @@ table.text-center th {
     right: auto;
     left: 100%;
     border-right-color: transparent;
-    border-left-color: #d2d6de;
 }
 
 .direct-chat-img {
@@ -3585,6 +3584,27 @@ table.text-center th {
 .contacts-list-msg {
     color: #999;
 }
+
+.chat-warning{
+    background: #f39c12;
+    border-color: #f39c12;
+    color: #ffffff;
+}
+
+.chat-warning:before {
+    border-left-color: #f39c12;
+}
+
+.chat-success{
+    background: #00a65a;
+    border-color: #00a65a;
+    color: #ffffff;
+}
+
+.chat-success:before {
+    border-left-color: #00a65a;
+}
+
 
 .direct-chat-danger .right > .direct-chat-text {
     background: #dd4b39;

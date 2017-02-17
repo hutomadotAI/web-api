@@ -81,9 +81,9 @@ function createRightMsg(ai_name,msg,chatId,error) {
     var height = parseInt($('#chat').scrollTop());
     var interval = window.setInterval(animate, 10);
 
-    var newLeftMsg = document.createElement('div');
-    newLeftMsg.className = 'direct-chat-msg right';
-    newLeftMsg.id = 'right_message';
+    var newRightMsg = document.createElement('div');
+    newRightMsg.className = 'direct-chat-msg right';
+    newRightMsg.id = 'right_message';
 
     var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = "";
@@ -94,14 +94,14 @@ function createRightMsg(ai_name,msg,chatId,error) {
     wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
     wHTML += ('</div>');
     wHTML += ('<img class="direct-chat-img" src="./dist/img/bot.jpg" alt="AI image">');
-    if (error)
-        wHTML += ('<div class="direct-chat-text bg-warning">');
+    if(error)
+        wHTML += ('<div class="direct-chat-text chat-warning">');
     else
-        wHTML += ('<div class="direct-chat-text bg-primary">');
+        wHTML += ('<div class="direct-chat-text chat-success">');
     wHTML += msg;
     wHTML += ('</div>');
-    newLeftMsg.innerHTML = wHTML;
-    document.getElementById('chat').appendChild(newLeftMsg);
+    newRightMsg.innerHTML = wHTML;
+    document.getElementById('chat').appendChild(newRightMsg);
 
     function animate() {
         if (parseInt($("#chat")[0].scrollHeight) < parseInt(height))
@@ -132,6 +132,7 @@ function requestAnswerAI(ai_name, question, chatId) {
             dataType: 'json',
             data: {chatId: chatId, q: question},
             success: function (response) {
+
                 // Write response in JSON message box
                 var JSONnode = document.getElementById('msgJSON');
                 JSONnode.innerHTML = JSON.stringify(response, undefined, 2);
@@ -147,9 +148,7 @@ function requestAnswerAI(ai_name, question, chatId) {
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                //alert(JSON.stringify(xhr.responseText));
-                var JSONdata = JSON.stringify(xhr.responseText);
-                createRightMsg(ai_name, 'The AI is in training. Please try later.', '', true);
+                createRightMsg(ai_name, 'Cannot contact the server.', '', true);
             }
         });
     }

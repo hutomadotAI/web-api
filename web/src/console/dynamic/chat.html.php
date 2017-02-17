@@ -33,7 +33,7 @@
     </div>
 </ul>
 
-<div class="box box-solid flat no-shadow direct-chat-success no-margin"  style="background: #212121;">
+<div class="box box-solid flat no-shadow no-margin"  style="background: #212121;">
     <div class="box-body flat" id="bodyChat"  style="margin-top: 1px">
         <input type="hidden" id="chatId" name="chatId" value=""/>
                <div class="direct-chat-messages" id="chat" style="background: #434343;">
