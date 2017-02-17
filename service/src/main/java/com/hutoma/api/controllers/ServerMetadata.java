@@ -59,6 +59,25 @@ public class ServerMetadata {
     }
 
     /***
+     * Check whether the sessionID matches a server session
+     * that is currently tagged as the primary master,
+     * meaning that it is the earliest connected server
+     * with training_capacity >0
+     * @param serverSessionID sessionId of the connected server
+     * @return t/f
+     */
+    public boolean isPrimaryMaster(UUID serverSessionID) {
+        // lookup the current master server
+        Optional<ServerTracker> currentMaster = this.activeServerSessions.values().stream()
+                .filter(ServerTracker::canTrain)
+                .findFirst();
+
+        // is the current master what we just added?
+        return currentMaster.isPresent()
+                && currentMaster.get().getSessionID().equals(serverSessionID);
+    }
+
+    /***
      * Associate a list of AIs with a server
      * @param tracker
      * @param aiidList
@@ -86,13 +105,68 @@ public class ServerMetadata {
     }
 
     /***
+     * Finds the server (if any) that was last used for this AI
+     * @param aiid
+     * @return a servertracker, or null
+     */
+    private synchronized ServerTracker existingAffinity(final UUID aiid) {
+        LinkedHashSet<ServerTracker> affinityList = this.serverAiAffinity.get(aiid);
+        if (affinityList == null) {
+            return null;
+        }
+        // find the first server in the affinity list
+        // that has been verified
+        return affinityList.stream()
+                .filter(server -> server.isEndpointVerified())
+                .findFirst().orElse(null);
+    }
+
+    /***
+     * Clear all affinity to this server
+     * @param targetServer
+     */
+    private synchronized void clearAffinityForServer(final ServerTracker targetServer) {
+        targetServer.getChatAffinity().stream()
+                .map(aiid -> this.serverAiAffinity.get(aiid))
+                .forEach(listOfSessions -> listOfSessions.remove(targetServer));
+        targetServer.clearChatAffinity();
+    }
+
+    /***
+     * Gets the first connected 
+     * @param aiid
+     * @return
+     * @throws NoServerAvailable
+     */
+    private synchronized ServerTracker getServerForTraining(final UUID aiid) throws NoServerAvailable {
+        return this.activeServerSessions.values().stream()
+                .filter(ServerTracker::canTrain)
+                .findFirst()
+                .orElseThrow(() -> new NoServerAvailable());
+    }
+
+    /***
+     * When the server list is empty
+     * or the server does not support what we are trying to do
+     * e.g. chatcapacity=0 and we are trying to chat
+     */
+    public static class NoServerAvailable extends Exception {
+        public NoServerAvailable() {
+            super("No server available to process this request");
+        }
+        public NoServerAvailable(final String message) {
+            super(message);
+        }
+    }
+
+    /***
      * If nobody is servicing this AIID then we have to pick the best server to assign it to
      * and then add this server-aiid pair to the affinity table
      * @param aiid
      * @return
      * @throws NoServerAvailable
      */
-    private synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid) throws NoServerAvailable {
+    protected synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid) throws NoServerAvailable {
 
         String routePickReason;
 
@@ -153,58 +227,6 @@ public class ServerMetadata {
     }
 
     /***
-     * Finds the server (if any) that was last used for this AI
-     * @param aiid
-     * @return a servertracker, or null
-     */
-    private synchronized ServerTracker existingAffinity(final UUID aiid) {
-        LinkedHashSet<ServerTracker> affinityList = this.serverAiAffinity.get(aiid);
-        if (affinityList == null) {
-            return null;
-        }
-        // find the first server in the affinity list
-        // that has been verified
-        return affinityList.stream()
-                .filter(server -> server.isEndpointVerified())
-                .findFirst().orElse(null);
-    }
-
-    /***
-     * Clear all affinity to this server
-     * @param targetServer
-     */
-    private synchronized void clearAffinityForServer(final ServerTracker targetServer) {
-        targetServer.getChatAffinity().stream()
-                .map(aiid -> this.serverAiAffinity.get(aiid))
-                .forEach(listOfSessions -> listOfSessions.remove(targetServer));
-        targetServer.clearChatAffinity();
-    }
-
-    /***
-     * Gets the first connected 
-     * @param aiid
-     * @return
-     * @throws NoServerAvailable
-     */
-    private synchronized ServerTracker getServerForTraining(final UUID aiid) throws NoServerAvailable {
-        return this.activeServerSessions.values().stream()
-                .filter(ServerTracker::canTrain)
-                .findFirst()
-                .orElseThrow(() -> new NoServerAvailable());
-    }
-
-    /***
-     * When the server list is empty
-     * or the server does not support what we are trying to do
-     * e.g. chatcapacity=0 and we are trying to chat
-     */
-    public static class NoServerAvailable extends Exception {
-        public NoServerAvailable() {
-            super("No server available to process this request");
-        }
-    }
-
-    /***
      * Adds a newly created session to the list of available servers
      * @param serverSessionID
      * @param tracker
@@ -219,25 +241,6 @@ public class ServerMetadata {
 
         // add this session to the list
         this.activeServerSessions.put(serverSessionID, tracker);
-    }
-
-    /***
-     * Check whether the sessionID matches a server session
-     * that is currently tagged as the primary master,
-     * meaning that it is the earliest connected server
-     * with training_capacity >0
-     * @param serverSessionID sessionId of the connected server
-     * @return t/f
-     */
-    public boolean isPrimaryMaster(UUID serverSessionID) {
-        // lookup the current master server
-        Optional<ServerTracker> currentMaster = this.activeServerSessions.values().stream()
-                .filter(ServerTracker::canTrain)
-                .findFirst();
-
-        // is the current master what we just added?
-        return currentMaster.isPresent()
-                && currentMaster.get().getSessionID().equals(serverSessionID);
     }
 
     /***
