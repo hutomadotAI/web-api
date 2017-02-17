@@ -1,5 +1,6 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.AiStatus;
@@ -111,7 +112,8 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
         String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
-                0.0, 0.0, "hash"));
+                0.0, 0.0, "hash",
+                TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
         verify(this.fakeControllerWnet, times(1)).setHashCodeFor(AIID, "hash");
         verify(this.fakeControllerRnn, never()).setHashCodeFor(AIID, "hash");
@@ -123,7 +125,8 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
         String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.RNN,
-                0.0, 0.0, "hash"));
+                0.0, 0.0, "hash",
+                TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
         verify(this.fakeControllerWnet, never()).setHashCodeFor(AIID, "hash");
         verify(this.fakeControllerRnn, times(1)).setHashCodeFor(AIID, "hash");
@@ -177,7 +180,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     private String getCommonAiStatusJson() {
         return this.serializeObject(new AiStatus(DEVID.toString(), AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
-                0.0, 0.0, "hash"));
+                0.0, 0.0, "hash",
+                TestDataHelper.SESSIONID));
     }
 
     protected Class<?> getClassUnderTest() {

@@ -61,45 +61,53 @@ public class AIServicesLogic {
     }
 
     public ApiResult updateAIStatus(final AiStatus status) {
-        // TODO: this call should include a SessionID and
-        // TODO: we should only honour it if it comes from the primary master server
 
         try {
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
+
             // Check if any of the backends sent a rogue double, as MySQL does not handle NaN
             if (Double.isNaN(status.getTrainingError()) || Double.isNaN(status.getTrainingProgress())) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent a NaN for AI %s",
                         status.getAiEngine(), status.getAiid()));
                 return ApiError.getBadRequest("Double sent is NaN");
             }
+
+            // figure out which controller this is for
+            ControllerBase controller = getControllerFor(status.getAiEngine());
+
+            // if the session is not active, log and return an error
+            if (!controller.isActiveSession(status.getServerSessionID())) {
+
+                this.serviceStatusLogger.logWarning(LOGFROM,
+                        String.format("update received from %s for AI %s using bad session ID",
+                                status.getAiEngine(), status.getAiid()));
+                return ApiError.getBadRequest("nonexistent session");
+            }
+
+            // is the update coming from the primary master?
+            if (!controller.isPrimaryMaster(status.getServerSessionID())) {
+                this.serviceStatusLogger.logWarning(LOGFROM,
+                        String.format("ignoring update received from %s for AI %s because it is not the primary master",
+                                status.getAiEngine(), status.getAiid()));
+                return ApiError.getBadRequest("only the primary master can send status updates.");
+            }
+
+            // we accept the update. log it.
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
+
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
-                this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent a an update for unknown AI %s",
+                this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",
                         status.getAiEngine(), status.getAiid()));
                 return ApiError.getNotFound();
             }
 
-            // update the ai hashcode for the appropriate controller
-            ControllerBase controller = getControllerFor(status.getAiEngine());
+            // update the ai hashcode
             controller.setHashCodeFor(status.getAiid(), status.getAiHash());
-
             return new ApiResult().setSuccessStatus();
+
         } catch (Exception ex) {
             this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
-    }
-
-    private ControllerBase getControllerFor(BackendServerType server) {
-        switch (server) {
-            case WNET:
-                return controllerWnet;
-            case RNN:
-                return controllerRnn;
-            case AIML:
-                return controllerAiml;
-            default:
-        }
-        return null;
     }
 
     public ApiResult registerServer(ServerRegistration registration) {
@@ -140,5 +148,18 @@ public class AIServicesLogic {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
+    }
+
+    private ControllerBase getControllerFor(BackendServerType server) {
+        switch (server) {
+            case WNET:
+                return this.controllerWnet;
+            case RNN:
+                return this.controllerRnn;
+            case AIML:
+                return this.controllerAiml;
+            default:
+        }
+        return null;
     }
 }

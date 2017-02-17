@@ -40,6 +40,15 @@ public class ServerMetadata {
     }
 
     /***
+     * Check whether the sessionID matches up to a valid, active session
+     * @param sessionID
+     * @return t/f
+     */
+    public synchronized boolean isActiveSession(UUID sessionID) {
+        return this.activeServerSessions.containsKey(sessionID);
+    }
+
+    /***
      * Process an affinity update request.
      * Deletes all affinity for this server
      * and then generates new affinity according to the aiid list

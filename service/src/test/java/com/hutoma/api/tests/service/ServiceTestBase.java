@@ -7,6 +7,7 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
@@ -48,8 +49,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -211,6 +211,11 @@ public abstract class ServiceTestBase extends JerseyTest {
             // this will never happen, but on the zero in a million chance that it does ....
             e.printStackTrace();
         }
+
+        when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerRnn.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerRnn.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(16);
 

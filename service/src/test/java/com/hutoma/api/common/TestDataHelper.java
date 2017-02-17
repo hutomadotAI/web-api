@@ -17,6 +17,7 @@ import java.util.UUID;
 public class TestDataHelper {
     public static final String DEVID = "devid";
     public static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
+    public static final UUID SESSIONID = UUID.fromString("e6a7d7b4-245a-44ad-8018-5c0516583713");
 
     public static ApiAi getSampleAI() {
         return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,
@@ -45,9 +46,9 @@ public class TestDataHelper {
 
     private static BackendStatus setBackendEngineStatus(final TrainingStatus status) {
         BackendStatus bs = new BackendStatus();
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.RNN, 0.0, 1.0, "hash"));
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.WNET, 0.0, 1.0, "hash"));
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.AIML, 0.0, 1.0, "hash"));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.RNN, 0.0, 1.0, "hash", SESSIONID));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.WNET, 0.0, 1.0, "hash", SESSIONID));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.AIML, 0.0, 1.0, "hash", SESSIONID));
         return bs;
     }
 
