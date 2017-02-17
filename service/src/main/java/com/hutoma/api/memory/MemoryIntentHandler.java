@@ -90,6 +90,19 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     /**
      * {@inheritDoc}
      */
+    public void clearIntents(final List<MemoryIntent> intents) {
+        try {
+            for (MemoryIntent intent : intents) {
+                this.databaseIntents.deleteMemoryIntent(intent);
+            }
+        } catch (Database.DatabaseException e) {
+            this.logger.logException(LOGFROM, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public ApiIntent getIntent(final String devid, final UUID aiid, final String intentName) {
         try {
             return this.databaseIntents.getIntent(devid, aiid, intentName);

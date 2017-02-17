@@ -19,6 +19,7 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -320,6 +321,7 @@ public class ChatLogic {
 
         // the reply that we are processing is the one to return to the user
         boolean replyConfidence = true;
+        List<MemoryIntent> fulfilledIntentsToClear = new ArrayList<>();
 
         // Now that have the chat result, we need to check if there's an intent being returned
         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
@@ -328,7 +330,9 @@ public class ChatLogic {
                 && !memoryIntent.isFulfilled()) {
             telemetryMap.put("IntentRecognized", memoryIntent.getName());
             if (memoryIntent.getUnfulfilledVariables().isEmpty()) {
+                // Intent has been fulfilled
                 notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
+                fulfilledIntentsToClear.add(memoryIntent);
             } else {
                 // Attempt to retrieve entities from the question
                 List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
@@ -343,6 +347,7 @@ public class ChatLogic {
                 List<MemoryVariable> vars = memoryIntent.getUnfulfilledVariables();
                 if (vars.isEmpty()) {
                     notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
+                    fulfilledIntentsToClear.add(memoryIntent);
                 } else {
                     // For now get the first unfulfilled variable with numPrompts < maxPrompts
                     // or we could do random just to make it a 'surprise!' :)
@@ -386,6 +391,12 @@ public class ChatLogic {
 
         // Add the current intents state to the chat response
         chatResult.setIntents(this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
+
+        // Clear fulfilled intents so they can be triggered again
+        if (!fulfilledIntentsToClear.isEmpty()) {
+            this.intentHandler.clearIntents(fulfilledIntentsToClear);
+        }
+
         return replyConfidence;
     }
 
