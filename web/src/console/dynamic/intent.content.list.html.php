@@ -16,7 +16,7 @@
                 <section class="content-info">
                     <div class="box-body">
                         <dl class="dl-horizontal no-margin" style="text-align:justify">
-                            This is a list of intents that you have created for your Bot so far. These are unique to this Bot.
+                            This is a list of intents that you have created for your bot so far. These are unique to this Bot.
                         </dl>
                     </div>
                 </section>
