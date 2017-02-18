@@ -2,7 +2,7 @@
 
     <div class="box-header with-border">
         <i class="fa fa-commenting-o text-green"></i>
-        <div class="box-title"><b>Intents List</b></div>
+        <div class="box-title"><b>Intent List</b></div>
         <a data-toggle="collapse" href="#collapseIntentsListInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-info-circle text-sm text-yellow"></i>
@@ -16,7 +16,7 @@
                 <section class="content-info">
                     <div class="box-body">
                         <dl class="dl-horizontal no-margin" style="text-align:justify">
-                            This is a list of the intents that you have created for your Bot so far. These are unique to this Bot.
+                            This is a list of intents that you have created for your bot so far. These are unique to this Bot.
                         </dl>
                     </div>
                 </section>

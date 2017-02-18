@@ -66,7 +66,7 @@ function createNewPromptRow(value, parent) {
 
     wHTML += ('<div class="col-xs-10" id="obj-prompt">');
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
-    wHTML += ('<i class="fa fa-tag text-gray"></i>');
+    wHTML += ('<i class="fa fa-comments text-gray"></i>');
 
     wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-prompt-row" name="intent-prompt-row"  style="background-color: #404446;" value="' + value + '" placeholder="' + value + '">');
     wHTML += ('</div>');
