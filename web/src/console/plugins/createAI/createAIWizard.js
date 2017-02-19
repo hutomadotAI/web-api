@@ -44,7 +44,7 @@ function switchCard(botId){
 
 function getAllBotsLinked(){
     var userActivedBots = {};
-    var i, $list = $('.bot-linked');
+    var i, $list = $("[data-linked=\"1\"]");
 
     userActivedBots.bots = new Array();
 
