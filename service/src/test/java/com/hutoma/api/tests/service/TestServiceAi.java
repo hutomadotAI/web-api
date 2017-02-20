@@ -92,6 +92,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testUpdateAI() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).post(

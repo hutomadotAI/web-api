@@ -30,7 +30,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 04/08/2016.
@@ -55,13 +54,11 @@ public class AIEndpoint {
             APIParameter.Timezone, APIParameter.Locale})
     @Produces(MediaType.APPLICATION_JSON)
     public Response createAI(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice) {
         ApiResult result = this.aiLogic.createAI(
-                securityContext,
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiName(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
@@ -82,13 +79,11 @@ public class AIEndpoint {
             APIParameter.Locale})
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateAI(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice) {
         ApiResult result = this.aiLogic.updateAI(
-                securityContext,
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getAiDescription(requestContext),
@@ -106,10 +101,8 @@ public class AIEndpoint {
     @ValidateParameters({APIParameter.DevID}) // Although this is always checked need to add it to trigger the filter
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAIs(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.aiLogic.getAIs(
-                securityContext,
                 ParameterFilter.getDevid(requestContext));
         return result.getResponse(this.serializer).build();
     }
@@ -120,10 +113,8 @@ public class AIEndpoint {
     @ValidateParameters({APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSingleAI(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.aiLogic.getSingleAI(
-                securityContext,
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();

@@ -444,9 +444,9 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(DEVID, AIID, this.fakeSerializer)).thenThrow(Database.DatabaseException.class);
         ApiError error = (ApiError) this.logic.getTrainingMaterials(DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, error.getStatus().getCode());
-        verify(this.fakeLogger).logException(anyString(), any());
+        verify(this.fakeLogger).logUserExceptionEvent(anyString(), anyString(), anyString(), any());
     }
-    
+
     @Test
     public void testUploadTraining_serviceException() throws Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, true));

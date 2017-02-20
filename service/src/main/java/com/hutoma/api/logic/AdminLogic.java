@@ -15,13 +15,13 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.util.UUID;
 import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by mauriziocibelli on 27/04/16.
  */
 public class AdminLogic {
 
+    public static final String ADMIN_DEVID_LOG = "admin";
     private static final String LOGFROM = "adminlogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
@@ -40,7 +40,6 @@ public class AdminLogic {
     }
 
     public ApiResult createDev(
-            SecurityContext securityContext,
             String securityRole,
             String username,
             String email,
@@ -55,7 +54,6 @@ public class AdminLogic {
 
             UUID devId = UUID.randomUUID();
             String encodingKey = this.config.getEncodingKey();
-            this.logger.logInfo(LOGFROM, "request to create dev " + devId);
 
             String devToken = Jwts.builder()
                     .claim("ROLE", securityRole)
@@ -73,51 +71,48 @@ public class AdminLogic {
 
             if (!this.database.createDev(username, email, password, passwordSalt, firstName, lastName,
                     devToken, planId, devId.toString(), clientToken)) {
-                this.logger.logError(LOGFROM, "db failed to create dev");
+                this.logger.logUserErrorEvent(LOGFROM, "CreateDev - failed to create", ADMIN_DEVID_LOG, "Email", email);
                 return ApiError.getInternalServerError();
             }
-
+            this.logger.logUserTraceEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, "DevId", devId.toString());
             return new ApiAdmin(devToken, devId.toString()).setSuccessStatus("created successfully");
         } catch (Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult deleteDev(
-            SecurityContext securityContext,
-            String devid) {
+    public ApiResult deleteDev(final String devId) {
 
         try {
-            this.logger.logInfo(LOGFROM, "request to delete dev " + devid);
-
             //TODO: distinguish between error condition and "failed to delete", perhaps because the dev was not found?
-            if (!this.database.deleteDev(devid)) {
-                this.logger.logInfo(LOGFROM, "db failed to delete dev");
+            if (!this.database.deleteDev(devId)) {
+                this.logger.logUserWarnEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, "DevId", devId);
                 return ApiError.getBadRequest("not found or unable to delete");
             }
-            this.aiServices.deleteDev(devid);
+            this.aiServices.deleteDev(devId);
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, "DevId", devId);
         } catch (Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "DeleveDev", ADMIN_DEVID_LOG, e);
             return ApiError.getInternalServerError();
         }
+
+        this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, "DevId", devId);
         return new ApiResult().setSuccessStatus("deleted successfully");
     }
 
-    public ApiResult getDevToken(SecurityContext securityContext, String devid) {
+    public ApiResult getDevToken(final String devid) {
         try {
-            this.logger.logInfo(LOGFROM, "request to get dev token " + devid);
             String devtoken = this.database.getDevToken(devid);
-
-            if (devtoken.isEmpty()) {
-                this.logger.logError(LOGFROM, "could not get dev token");
-                return ApiError.getInternalServerError();
+            if (devtoken == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetDevToken - not found", ADMIN_DEVID_LOG, "DevId", devid);
+                return ApiError.getNotFound();
             }
-            return new ApiAdmin(devtoken, devid).setSuccessStatus("token found");
+            this.logger.logUserTraceEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, "DevId", devid);
+            return new ApiAdmin(devtoken, devid).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, e);
             return ApiError.getInternalServerError();
         }
     }
-
 }

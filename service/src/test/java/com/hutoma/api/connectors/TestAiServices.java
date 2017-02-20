@@ -26,7 +26,6 @@ import org.mockito.Mockito;
 import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -47,7 +46,6 @@ public class TestAiServices {
     private static final String AI_ENGINE = "MOCKENGINE";
 
     private JsonSerializer fakeSerializer;
-    private SecurityContext fakeContext;
     private Database fakeDatabase;
     private Config fakeConfig;
     private ILogger fakeLogger;
@@ -64,7 +62,6 @@ public class TestAiServices {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
-        this.fakeContext = mock(SecurityContext.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);

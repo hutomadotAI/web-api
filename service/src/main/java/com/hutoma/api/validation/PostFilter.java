@@ -2,7 +2,6 @@ package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
@@ -19,8 +18,8 @@ import org.glassfish.jersey.server.ContainerRequest;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -117,11 +116,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
-            this.logger.logDebug(LOGFROM, "parameter validation failed");
-            ITelemetry.addTelemetryEvent(this.logger, "ParamValidationFailed (POST)",
-                    new HashMap<String, String>() {{
-                        this.put("parameter name", pve.getParameterName());
-                        this.put("error", pve.getMessage());
+            this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
+                    new LinkedHashMap<String, String>() {{
+                        put("Type", "Query");
+                        put("Parameter", pve.getParameterName());
+                        put("Message", pve.getMessage());
                     }});
         }
     }

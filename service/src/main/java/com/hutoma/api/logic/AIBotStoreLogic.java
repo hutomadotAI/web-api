@@ -54,69 +54,78 @@ public class AIBotStoreLogic {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ApiResult getPublishedBots() {
+    public ApiResult getPublishedBots(final String devId) {
         try {
-            this.logger.logDebug(LOGFROM, "request to get all published bots");
-            return new ApiAiBotList(this.database.getPublishedBots()).setSuccessStatus();
+            List<AiBot> bots = this.database.getPublishedBots();
+            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId, "Num Bots",
+                    Integer.toString(bots.size()));
+            return new ApiAiBotList(bots).setSuccessStatus();
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBots", devId, e);
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult getPurchasedBots(final String devId) {
         try {
-            this.logger.logDebug(LOGFROM, "request purchased bots for devId " + devId);
-            return new ApiAiBotList(this.database.getPurchasedBots(devId)).setSuccessStatus();
+            List<AiBot> bots = this.database.getPurchasedBots(devId);
+            this.logger.logUserTraceEvent(LOGFROM, "GetPurchasedBots", devId, "Num Bots",
+                    Integer.toString(bots.size()));
+            return new ApiAiBotList(bots).setSuccessStatus();
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetPurchasedBots", devId, e);
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult purchaseBot(final String devId, final int botId) {
         try {
-            this.logger.logDebug(LOGFROM, String.format("request to purchase bot %d for devId %s", botId, devId));
             // Check if the bot actually exists in the store
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null || !bot.isPublished()) {
-                this.logger.logInfo(LOGFROM, String.format("Bot %d not %s", botId,
-                        bot == null ? "found" : "published"));
+                this.logger.logUserTraceEvent(LOGFROM, String.format("PurchaseBot - Bot not %s",
+                        bot == null ? "found" : "published"), devId, "BotId", Integer.toString(botId));
                 return ApiError.getNotFound("Bot not found");
             }
             if (bot.getDevId().equals(devId)) {
-                this.logger.logInfo(LOGFROM, String.format("Dev %s attempted to purchase own bot", botId));
+                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase own bot", devId,
+                        "BotId", Integer.toString(botId));
                 return ApiError.getBadRequest("Cannot purchase own bot");
             }
             // Check if the bot has already been purchased
             List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
-                this.logger.logInfo(LOGFROM, String.format(
-                        "Could not purchase bot %d for devId %s since it's already owned", botId, devId));
+                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase already owned bot", devId,
+                        "BotId", Integer.toString(botId));
                 return ApiError.getBadRequest("Bot already purchased");
             }
             if (this.database.purchaseBot(devId, botId)) {
-                this.logger.logInfo(LOGFROM,
-                        String.format("Purchase of bot %d for devId %s was successful", botId, devId));
+                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot", devId, "BotId", Integer.toString(botId));
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logWarning(LOGFROM,
-                        String.format("Could not purchase bot %d for devId %s", botId, devId));
+                this.logger.logUserErrorEvent(LOGFROM, "PurchaseBot - could not purchase", devId,
+                        "BotId", Integer.toString(botId));
                 return ApiError.getInternalServerError();
             }
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "PurchaseBot", devId, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult getBotDetails(final int botId) {
+    public ApiResult getBotDetails(final String devId, final int botId) {
         try {
-            this.logger.logDebug(LOGFROM, "request to get details of bot " + botId);
+
             AiBot bot = this.database.getBotDetails(botId);
-            return bot == null ? ApiError.getNotFound() : new ApiAiBot(bot).setSuccessStatus();
+            if (bot == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails - not found", devId, "BotId",
+                        Integer.toString(botId));
+                return ApiError.getNotFound();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails", devId, "BotId", Integer.toString(botId));
+            return new ApiAiBot(bot).setSuccessStatus();
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetBotDetails", devId, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -127,21 +136,28 @@ public class AIBotStoreLogic {
                                 final String licenseType, final String privacyPolicy, final String classification,
                                 final String version, final String videoLink) {
         try {
-            this.logger.logDebug(LOGFROM, "request to publish bot for AI " + aiid.toString());
+
             DeveloperInfo devInfo = this.database.getDeveloperInfo(devId);
             if (devInfo == null) {
-                return ApiError.getBadRequest("Developer information hasn't been update yet");
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - DevInfo not entered", devId,
+                        "AIID", aiid.toString());
+                return ApiError.getBadRequest("Please set the developer information first");
             }
             AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
             if (bot != null) {
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot", devId,
+                        "AIID", aiid.toString());
                 return ApiError.getBadRequest("AI already has a published bot");
             }
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devId, "AIID", aiid.toString());
                 return ApiError.getBadRequest("AI needs to be fully trained before being allowed to be published");
             }
             List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
             if (!linkedBots.isEmpty()) {
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI is linked to other bots", devId,
+                        "AIID", aiid.toString());
                 return ApiError.getBadRequest(
                         "Publishing an AI that is already linked to one or more bots is not supported");
             }
@@ -150,13 +166,16 @@ public class AIBotStoreLogic {
                     videoLink, true, null);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devId, "AIID", aiid.toString());
                 return ApiError.getBadRequest("Invalid publish request");
             } else {
                 bot.setBotId(botId);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devId, "AIID", aiid.toString(),
+                        "New BotId", Integer.toString(botId));
                 return new ApiAiBot(bot).setSuccessStatus();
             }
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "PublishBot", devId, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -170,7 +189,7 @@ public class AIBotStoreLogic {
                 return ApiError.getNotFound();
             }
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetBotIcon", "", e);
             return ApiError.getInternalServerError();
         }
     }
@@ -181,16 +200,14 @@ public class AIBotStoreLogic {
         try {
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null || !bot.getDevId().equals(devId)) {
-                this.logger.logInfo(LOGFROM,
-                        String.format("Request for uploading image for bot %d from devid %s who is not the owner",
-                                botId, devId));
+                this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - request uploading for other dev's bot", devId,
+                        "BotId", Integer.toString(botId));
                 return ApiError.getNotFound();
             }
             String extension = FilenameUtils.getExtension(fileDetail.getFileName()).toLowerCase();
             if (!ALLOWED_ICON_EXT.contains(extension)) {
-                this.logger.logInfo(LOGFROM, String.format(
-                        "Request to upload image with not allowed extension (%s) for bot %d",
-                        extension, botId));
+                this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - invalid extension", devId,
+                        "Extension", extension, "BotId", Integer.toString(botId));
                 return ApiError.getBadRequest("Image extension not allowed");
             }
 
@@ -204,6 +221,8 @@ public class AIBotStoreLogic {
                 for (long count = 0L; -1 != (n1 = inputStream.read(buffer)); count += (long) n1) {
                     out.write(buffer, 0, n1);
                     if ((count + n1) > MAX_ICON_FILE_SIZE) {
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - exceeded max size", devId,
+                                "BotId", Integer.toString(botId));
                         return ApiError.getBadRequest(
                                 String.format("File is larger than the maximum allowed size (%d bytes)",
                                         MAX_ICON_FILE_SIZE));
@@ -217,15 +236,17 @@ public class AIBotStoreLogic {
             Files.copy(tempFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             this.database.saveBotIconPath(devId, botId, destFilename);
+            this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devId, "BotId", Integer.toString(botId));
             return new ApiResult().setSuccessStatus();
 
         } catch (Database.DatabaseException | IOException e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "UploadBotIcon", devId, e);
             return ApiError.getInternalServerError();
         } finally {
             if (tempFile != null) {
                 if (!tempFile.delete()) {
-                    this.logger.logWarning(LOGFROM, "Could not delete temp file " + tempFile.getAbsolutePath());
+                    this.logger.logUserWarnEvent(LOGFROM, "UploadBotIcon - could not delete temp file", "",
+                            "Path", tempFile.getAbsolutePath());
                 }
             }
         }

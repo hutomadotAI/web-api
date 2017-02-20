@@ -22,7 +22,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -46,9 +45,8 @@ public class IntentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
     public Response getIntents(
-            @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
-        ApiResult result = this.intentLogic.getIntent(securityContext,
+        ApiResult result = this.intentLogic.getIntent(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getIntentName(requestContext));
@@ -62,7 +60,6 @@ public class IntentEndpoint {
     @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @ValidatePost({APIParameter.IntentJson})
     public Response postIntent(
-            @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.intentLogic.writeIntent(
                 ParameterFilter.getDevid(requestContext),
@@ -77,7 +74,6 @@ public class IntentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
     public Response deleteIntent(
-            @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
 
         final ApiResult result = this.intentLogic.deleteIntent(

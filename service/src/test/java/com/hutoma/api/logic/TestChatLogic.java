@@ -1,6 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.ChatTelemetryLogger;
+import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
@@ -56,23 +55,21 @@ public class TestChatLogic {
     private static final String HISTORY_REST_DIRECTIVE = "@reset";
     private static final String COMPLETELY_LOST_RESULT = "Erm... What?";
 
-    private SecurityContext fakeContext;
     private AIChatServices fakeChatServices;
     private ChatLogic chatLogic;
     private IEntityRecognizer fakeRecognizer;
     private IMemoryIntentHandler fakeIntentHandler;
-    private ChatTelemetryLogger fakeChatTelemetryLogger;
+    private ChatLogger fakeChatTelemetryLogger;
     private Config fakeConfig;
 
     @Before
     public void setup() {
         Config fakeConfig = mock(Config.class);
         when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
-        this.fakeContext = mock(SecurityContext.class);
         this.fakeChatServices = mock(AIChatServices.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
-        this.fakeChatTelemetryLogger = mock(ChatTelemetryLogger.class);
+        this.fakeChatTelemetryLogger = mock(ChatLogger.class);
         this.fakeConfig = mock(Config.class);
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger);
@@ -566,7 +563,7 @@ public class TestChatLogic {
 
     private ApiResult getAssistantChat(float min_p, String
             question) {
-        return this.chatLogic.assistantChat(this.fakeContext, AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
+        return this.chatLogic.assistantChat(AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
     /***

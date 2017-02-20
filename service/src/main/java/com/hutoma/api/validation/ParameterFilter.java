@@ -44,6 +44,8 @@ public class ParameterFilter extends Validate {
     protected static final String SERVER_SESSION_ID = "server_session_id";
     protected static final String SERVER_URL = "server_url";
 
+    private static final String DEVID_HEADER_KEY = "_developer_id";
+
     protected final ILogger logger;
     protected final Tools tools;
     protected final JsonSerializer serializer;
@@ -155,4 +157,15 @@ public class ParameterFilter extends Validate {
         return ((null == list) || (list.isEmpty())) ? defaultValue : list.get(0);
     }
 
+    /**
+     * Gets the developer id (if any) from the headers in the request context.
+     * @param requestContext the request context
+     * @return the developer id for the request (if any)
+     */
+    protected String getDeveloperId(final ContainerRequestContext requestContext) {
+        if (!requestContext.getHeaders().containsKey(DEVID_HEADER_KEY)) {
+            return "";
+        }
+        return requestContext.getHeaders().getFirst(DEVID_HEADER_KEY);
+    }
 }

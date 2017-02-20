@@ -10,8 +10,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.SecurityContext;
-
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,21 +19,19 @@ import static org.mockito.Mockito.when;
  */
 public class TestInviteLogic {
 
+    private final String inviteCode = "invitecode";
+    private final String userName = "user@hutoma.com";
     private JsonSerializer fakeSerializer;
     private Config fakeConfig;
-    private SecurityContext fakeContext;
     private Database fakeDatabase;
     private ILogger fakeLogger;
     private InviteLogic fakeInviteLogic;
-    private final String inviteCode = "invitecode";
-    private final String userName = "user@hutoma.com";
 
     @Before
     public void setup() {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
-        this.fakeContext = mock(SecurityContext.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeInviteLogic = new InviteLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger);
     }
@@ -46,7 +42,7 @@ public class TestInviteLogic {
     @Test
     public void testValidInviteCode_Success() throws Database.DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.inviteCodeValid(anyString())).thenReturn(true);
-        final ApiResult result = this.fakeInviteLogic.validCode(inviteCode);
+        final ApiResult result = this.fakeInviteLogic.validCode(this.inviteCode);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
@@ -56,7 +52,7 @@ public class TestInviteLogic {
     @Test
     public void testValidInviteCode_Failure() throws Database.DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.inviteCodeValid(anyString())).thenReturn(false);
-        final ApiResult result = this.fakeInviteLogic.validCode(inviteCode);
+        final ApiResult result = this.fakeInviteLogic.validCode(this.inviteCode);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
@@ -67,7 +63,7 @@ public class TestInviteLogic {
     public void testValidInviteCodeRedeemed_Success() throws Database.DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.inviteCodeValid(anyString())).thenReturn(true);
         when(this.fakeDatabase.redeemInviteCode(anyString(), anyString())).thenReturn(true);
-        final ApiResult result = this.fakeInviteLogic.redeemCode(inviteCode, userName);
+        final ApiResult result = this.fakeInviteLogic.redeemCode(this.inviteCode, this.userName);
         Assert.assertEquals(201, result.getStatus().getCode());
     }
 
@@ -77,7 +73,7 @@ public class TestInviteLogic {
     @Test
     public void testValidInviteCodeRedeemed_InvalidCode() throws Database.DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.redeemInviteCode(anyString(), anyString())).thenReturn(false);
-        final ApiResult result = this.fakeInviteLogic.redeemCode(inviteCode, userName);
+        final ApiResult result = this.fakeInviteLogic.redeemCode(this.inviteCode, this.userName);
         Assert.assertEquals(400, result.getStatus().getCode());
     }
 }

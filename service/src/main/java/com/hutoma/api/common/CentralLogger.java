@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.Response;
  * This class allows to log all events into a central repository.
  */
 @Singleton
-class CentralLogger implements ILogger {
+public class CentralLogger implements ILogger {
 
     private static final int LOGGING_QUEUE_LENGTH = 2000;
 
@@ -74,7 +75,7 @@ class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logOutput(EventType.ERROR, fromLabel, sb.toString());
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
     }
 
     public void logWarning(String fromLabel, String logComment) {
@@ -89,8 +90,114 @@ class CentralLogger implements ILogger {
         this.startLoggingScheduler(config.getLoggingServiceUrl(), config.getLoggingUploadCadency());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserTraceEvent(final String logFrom, final String event, final String user,
+                                  final Map<String, String> properties) {
+        this.logOutput(EventType.TRACE, logFrom, event, addUserToMap(user, properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserTraceEvent(final String logFrom, final String event, final String user) {
+        this.logOutput(EventType.TRACE, logFrom, event, addUserToMap(user, null));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserTraceEvent(final String logFrom, final String event, final String user,
+                                  final String... properties) {
+        this.logUserTraceEvent(logFrom, event, user, arrayToMap(properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserExceptionEvent(final String logFrom, final String event, final String user,
+                                      final Exception exception) {
+        this.logUserExceptionEvent(logFrom, event, user, exception, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
+                                      final Exception exception,
+                                      final Map<String, String> properties) {
+        Map<String, String> map = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+        map.put("message", exception.getMessage());
+        map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
+        map.put("suppressedExceptions", exception.getSuppressed()
+                != null ? Integer.toString(exception.getSuppressed().length) : "0");
+        if (exception.getSuppressed() != null) {
+            for (int i = 0; i < exception.getSuppressed().length; i++) {
+                String key = String.format("suppressed_%d", i + 1);
+                Throwable ex = exception.getSuppressed()[i];
+                map.put(key + "_message", ex.getMessage());
+                map.put(key + "_stackTrace", getStackTraceAsString(ex.getStackTrace()));
+            }
+        }
+        this.logOutput(EventType.EXCEPTION, eventName,
+                String.format("%s: %s - %s", exception.getClass().getName(), exception.getMessage(),
+                        getStackTraceAsString(exception.getStackTrace())), addUserToMap(user, map));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserErrorEvent(String logFrom, String event, String user, String... properties) {
+        this.logUserErrorEvent(logFrom, event, user, arrayToMap(properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserErrorEvent(String logFrom, String event, String user, Map<String, String> properties) {
+        this.logOutput(EventType.ERROR, logFrom, event, addUserToMap(user, properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserWarnEvent(String logFrom, String event, String user, String... properties) {
+        this.logWarnEvent(logFrom, event, user, arrayToMap(properties));
+    }
+
+    @Override
+    public void logUserWarnEvent(final String logFrom, final String event, final String user,
+                                 final Map<String, String> properties) {
+        this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
+    }
+
+
+    public void logWarnEvent(String logFrom, String event, String user, Map<String, String> properties) {
+        this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
+    }
+
     public void shutdown() {
         this.timer.cancel();
+    }
+
+    private Map<String, String> arrayToMap(final String[] array) {
+        if (array.length % 2 != 0) {
+            throw new IllegalArgumentException("Properties need to be in the format of key1, value1, etc");
+        }
+        Map<String, String> map = new LinkedHashMap<>();
+        for (int i = 0; i < array.length; i += 2) {
+            map.put(array[i], array[i + 1]);
+        }
+        return map;
+    }
+
+    private Map<String, String> addUserToMap(final String user, final Map<String, String> map) {
+        Map<String, String> newMap = map == null
+                ? new LinkedHashMap<>()
+                : new LinkedHashMap<>(map);
+        newMap.put("user", user == null ? "" : user);
+        return newMap;
     }
 
     private void dumpToStorage() {
@@ -112,6 +219,14 @@ class CentralLogger implements ILogger {
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             LOGGER.error("Failed to upload  logs to the logging server! - " + response.getStatus());
         }
+    }
+
+    private String getStackTraceAsString(StackTraceElement[] stackTrace) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement e : stackTrace) {
+            sb.append(e.toString()).append("\n");
+        }
+        return sb.toString();
     }
 
     protected enum EventType {

@@ -10,7 +10,7 @@ import javax.inject.Inject;
 /**
  * AI Service Status Logger.
  */
-public class AiServiceStatusLogger extends TelemetryCentralLogger {
+public class AiServiceStatusLogger extends CentralLogger {
 
     // Log chat iterations every 10 seconds
     private static final int SERVICESTATUS_LOGGING_CADENCE = 8000;
@@ -23,8 +23,8 @@ public class AiServiceStatusLogger extends TelemetryCentralLogger {
         this.startLoggingScheduler(config.getLoggingServiceUrl(), SERVICESTATUS_LOGGING_CADENCE);
     }
 
-    public void logStatusUpdate(final String tag, final AiStatus status) {
-        this.addTelemetryEvent(tag, new HashMap<String, String>() {{
+    public void logStatusUpdate(final String logFrom, final String tag, final AiStatus status) {
+        this.logUserTraceEvent(logFrom, tag, null, new HashMap<String, String>() {{
             this.put("AIEngine", status.getAiEngine().toString());
             this.put("AIID", status.getAiid().toString());
             this.put("DEVID", status.getDevId());

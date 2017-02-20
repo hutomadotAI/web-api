@@ -1,12 +1,8 @@
 package com.hutoma.api.controllers;
 
-import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
-
-import org.glassfish.hk2.api.ServiceLocator;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -163,6 +159,7 @@ public class ServerMetadata {
         public NoServerAvailable() {
             super("No server available to process this request");
         }
+
         public NoServerAvailable(final String message) {
             super(message);
         }

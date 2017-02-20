@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.any;
@@ -30,7 +29,6 @@ import static org.mockito.Mockito.*;
 public class TestEntityLogic {
 
     private final String ENTNAME = "entity";
-    SecurityContext fakeContext;
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     EntityLogic entityLogic;
@@ -41,7 +39,6 @@ public class TestEntityLogic {
     public void setup() {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
-        this.fakeContext = mock(SecurityContext.class);
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
         this.entityLogic = new EntityLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);
@@ -50,14 +47,14 @@ public class TestEntityLogic {
     @Test
     public void testGetEntities_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntities(anyString())).thenReturn(getEntitiesList());
-        final ApiResult result = this.entityLogic.getEntities(this.fakeContext, DEVID);
+        final ApiResult result = this.entityLogic.getEntities(DEVID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetEntities_Success_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntities(anyString())).thenReturn(getEntitiesList());
-        final ApiResult result = this.entityLogic.getEntities(this.fakeContext, DEVID);
+        final ApiResult result = this.entityLogic.getEntities(DEVID);
         Assert.assertEquals(1, ((ApiEntityList) result).getEntities().size());
         Assert.assertEquals(this.ENTNAME, ((ApiEntityList) result).getEntities().get(0));
     }
@@ -65,28 +62,28 @@ public class TestEntityLogic {
     @Test
     public void testGetEntities_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntities(anyString())).thenReturn(new ArrayList<>());
-        final ApiResult result = this.entityLogic.getEntities(this.fakeContext, DEVID);
+        final ApiResult result = this.entityLogic.getEntities(DEVID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test
     public void testGetEntities_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntities(anyString())).thenThrow(Database.DatabaseException.class);
-        final ApiResult result = this.entityLogic.getEntities(this.fakeContext, DEVID);
+        final ApiResult result = this.entityLogic.getEntities(DEVID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetEntity_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(getEntity());
-        final ApiResult result = this.entityLogic.getEntity(this.fakeContext, DEVID, this.ENTNAME);
+        final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetEntity_Success_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(getEntity());
-        final ApiResult result = this.entityLogic.getEntity(this.fakeContext, DEVID, this.ENTNAME);
+        final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
     }
 
@@ -97,7 +94,7 @@ public class TestEntityLogic {
      */
     public void testGetEntity_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(getEntityEmpty());
-        final ApiResult result = this.entityLogic.getEntity(this.fakeContext, DEVID, this.ENTNAME);
+        final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
         Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
         Assert.assertEquals(0, ((ApiEntity) result).getEntityValueList().size());
@@ -106,7 +103,7 @@ public class TestEntityLogic {
     @Test
     public void testGetEntity_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.getEntity(anyString(), anyString())).thenThrow(Database.DatabaseException.class);
-        final ApiResult result = this.entityLogic.getEntity(this.fakeContext, DEVID, this.ENTNAME);
+        final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 

@@ -3,7 +3,6 @@ package com.hutoma.api.controllers;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
@@ -63,8 +62,8 @@ public abstract class RequestBase {
         List<Callable<InvocationResult>> callables = new ArrayList<>();
 
         for (Pair<String, UUID> ai : ais) {
-            callables.add(createCallable(controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
-                    ai.getA(), ai.getB(), chatParams, controller.getHashCodeFor(ai.getB())));
+            callables.add(createCallable(this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
+                    ai.getA(), ai.getB(), chatParams, this.controller.getHashCodeFor(ai.getB())));
         }
 
         return this.execute(callables);
@@ -105,9 +104,7 @@ public abstract class RequestBase {
                     // otherwise attempt to deserialize the chat result
                     try {
                         String content = result.getResponse().readEntity(String.class);
-                        ITelemetry.addTelemetryEvent(this.logger, "chat response", new HashMap<String, String>() {{
-                            this.put("From", result.getEndpoint());
-                        }});
+                        this.logger.logDebug("requestbase", "chat response from " + result.getEndpoint());
                         ChatResult chatResult = new ChatResult((ChatResult)
                                 this.serializer.deserialize(content, ChatResult.class));
                         chatResult.setElapsedTime(result.getDurationMs() / 1000.0);
@@ -160,11 +157,6 @@ public abstract class RequestBase {
         }
     }
 
-    public static class AiRejectedStatusException extends AiControllerException {
-        public AiRejectedStatusException(final String message) {
-            super(message);
-        }
-    }
 
     protected Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
                                                         final Map<String, String> params, final String aiHash) {

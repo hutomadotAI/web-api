@@ -92,7 +92,7 @@ public class AIServicesLogic {
             }
 
             // we accept the update. log it.
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, "UpdateAIStatus", status);
 
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",

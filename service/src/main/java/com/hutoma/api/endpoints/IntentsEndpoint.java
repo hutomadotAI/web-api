@@ -19,7 +19,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -43,9 +42,8 @@ public class IntentsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     public Response getIntents(
-            @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
-        ApiResult result = this.intentLogic.getIntents(securityContext,
+        ApiResult result = this.intentLogic.getIntents(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();

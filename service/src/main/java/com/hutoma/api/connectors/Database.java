@@ -110,7 +110,7 @@ public class Database {
 
     /**
      * Redeems an invite code for user registration.
-     * @param code the invite code.
+     * @param code     the invite code.
      * @param username the registering user.
      * @return true if successful, otherwise false.
      * @throws DatabaseException database exception.
@@ -127,7 +127,7 @@ public class Database {
      * @param code the invite code.
      * @return true if the code is valid, otherwise false.
      * @throws DatabaseException database exception.
-     * @throws SQLException sql exception.
+     * @throws SQLException      sql exception.
      */
     public boolean inviteCodeValid(final String code) throws DatabaseException, SQLException {
         try (DatabaseCall call = this.callProvider.get()) {
@@ -404,7 +404,7 @@ public class Database {
                 if (rs.next()) {
                     return rs.getString("dev_token");
                 }
-                return "";
+                return null;
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
