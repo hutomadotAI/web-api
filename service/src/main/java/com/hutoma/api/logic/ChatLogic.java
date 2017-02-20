@@ -267,6 +267,14 @@ public class ChatLogic {
             sessionData(chatId).setAlarmId(7650);
             sessionData(chatId).setActionId(1);
         }
+        if  (message.contains("2683")) {
+            sessionData(chatId).setAlarmId(2683);
+            sessionData(chatId).setActionId(1);
+        }
+        if  (message.contains("lte68")) {
+            sessionData(chatId).setAlarmId(68);
+            sessionData(chatId).setActionId(1);
+        }
         if (message.contains("70359")
                 || message.contains("fail") && message.contains("hdd")
                 || message.contains("disk") && message.contains("fail")
