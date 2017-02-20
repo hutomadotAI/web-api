@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -29,7 +31,7 @@ public class AiBot {
     private final String botIcon;
     @SerializedName("dev_id")
     private String devId;
-    private boolean isPublished;
+    private PublishingState publishingState;
     private UUID aiid;
     private int botId;
 
@@ -37,7 +39,7 @@ public class AiBot {
                  final String longDescription, final String alertMessage, final String badge, final BigDecimal price,
                  final String sample, final String category, final String licenseType, final DateTime lastUpdate,
                  final String privacyPolicy, final String classification, final String version, final String videoLink,
-                 final boolean isPublished, final String botIcon) {
+                 final PublishingState publishingState, final String botIcon) {
         this.botId = botId;
         this.devId = devId;
         this.aiid = aiid;
@@ -55,7 +57,7 @@ public class AiBot {
         this.classification = classification;
         this.version = version;
         this.videoLink = videoLink;
-        this.isPublished = isPublished;
+        this.publishingState = publishingState;
         this.botIcon = botIcon;
     }
 
@@ -77,7 +79,7 @@ public class AiBot {
         this.classification = other.classification;
         this.version = other.version;
         this.videoLink = other.videoLink;
-        this.isPublished = other.isPublished;
+        this.publishingState = other.publishingState;
         this.botIcon = other.botIcon;
     }
 
@@ -157,12 +159,12 @@ public class AiBot {
         return this.videoLink;
     }
 
-    public boolean isPublished() {
-        return this.isPublished;
+    public PublishingState getPublishingState() {
+        return this.publishingState;
     }
 
-    public void setPublished(final boolean published) {
-        this.isPublished = published;
+    public void setPublished(final PublishingState publishingState) {
+        this.publishingState = publishingState;
     }
 
     public String getLicenseType() {
@@ -171,5 +173,31 @@ public class AiBot {
 
     public String getBotIcon() {
         return this.botIcon;
+    }
+
+    public enum PublishingState {
+        NOT_PUBLISHED(0),
+        SUBMITTED(1),
+        PUBLISHED(2),
+        REMOVED(3);
+        private final int value;
+
+        PublishingState(final int value) {
+            this.value = value;
+        }
+
+        public static PublishingState from(final int value) {
+            Optional<PublishingState> state = Arrays.stream(PublishingState.values())
+                    .filter(x -> x.value == value)
+                    .findFirst();
+            if (!state.isPresent()) {
+                throw new IllegalArgumentException("Unknown publishing value");
+            }
+            return state.get();
+        }
+
+        public int value() {
+            return this.value;
+        }
     }
 }

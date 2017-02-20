@@ -126,7 +126,7 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPurchaseBot_botNotPublished() throws Database.DatabaseException {
         final AiBot bot = new AiBot(SAMPLEBOT);
-        bot.setPublished(false);
+        bot.setPublished(AiBot.PublishingState.NOT_PUBLISHED);
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiBotStoreLogic.purchaseBot(DEVID, BOTID);
@@ -192,6 +192,7 @@ public class TestAIBotstoreLogic {
         Assert.assertNotNull(result.getBot());
         Assert.assertEquals(newBotId, result.getBot().getBotId());
         Assert.assertEquals(SAMPLEBOT.getDevId(), result.getBot().getDevId());
+        Assert.assertEquals(AiBot.PublishingState.SUBMITTED, result.getBot().getPublishingState());
     }
 
     @Test

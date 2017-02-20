@@ -22,7 +22,7 @@ public final class BotHelper {
     public static final AiBot SAMPLEBOT =
             new AiBot(DEVID, AIID, BOTID, "name", "description", "long description", "alert message", "badge",
                     BigDecimal.valueOf(1.123), "sample", "category", "licType", DateTime.now(), "privacy policy",
-                    "classification", "version", "http://video", true, null);
+                    "classification", "version", "http://video", AiBot.PublishingState.PUBLISHED, null);
     private static final byte[] BOTICON_CONTENT = "this is an image!".getBytes(Charset.defaultCharset());
 
     public static ApiResult publishSampleBot(final AIBotStoreLogic aiBotStoreLogic) {

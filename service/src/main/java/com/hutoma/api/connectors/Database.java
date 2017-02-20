@@ -504,7 +504,7 @@ public class Database {
                     .add(bot.getClassification())
                     .add(bot.getVersion())
                     .add(bot.getVideoLink())
-                    .add(true);
+                    .add(bot.getPublishingState().value());
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -692,7 +692,7 @@ public class Database {
                 rs.getString("classification"),
                 rs.getString("version"),
                 rs.getString("video_link"),
-                rs.getBoolean("is_published"),
+                AiBot.PublishingState.from(rs.getInt("publishing_state")),
                 rs.getString("botIcon")
         );
     }

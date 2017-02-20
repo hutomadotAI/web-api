@@ -73,7 +73,7 @@ public class AIBotStoreLogic {
             this.logger.logDebug(LOGFROM, String.format("request to purchase bot %d for devId %s", botId, devId));
             // Check if the bot actually exists in the store
             AiBot bot = this.database.getBotDetails(botId);
-            if (bot == null || !bot.isPublished()) {
+            if (bot == null || bot.getPublishingState() != AiBot.PublishingState.PUBLISHED) {
                 this.logger.logInfo(LOGFROM, String.format("Bot %d not %s", botId,
                         bot == null ? "found" : "published"));
                 return ApiError.getNotFound("Bot not found");
@@ -137,7 +137,7 @@ public class AIBotStoreLogic {
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
-                    videoLink, true, null);
+                    videoLink, AiBot.PublishingState.SUBMITTED, null);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
                 return ApiError.getBadRequest("Invalid publish request");
