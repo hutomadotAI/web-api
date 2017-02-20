@@ -522,13 +522,10 @@ public class ChatLogic {
                 }
                 else {
                     double sc = (double)result.get("score");
-                    try {
-                        if (sc > 0.6f && (String)result.get("score") != "0") {
-                            sessionData(chatId).setHist(((String) result.get("answer")).trim());
-                        }
-                    } catch (Exception e) {
-                        throw e;
+                    if (sc > 0.6f) {
+                        sessionData(chatId).setHist(((String) result.get("answer")).trim());
                     }
+
 
                     if (sc > 0.6f) {
                         sessionData(chatId).setCurrentAI(0);
