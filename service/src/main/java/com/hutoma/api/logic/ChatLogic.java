@@ -24,6 +24,7 @@ import com.hutoma.api.memory.IMemoryIntentHandler;
 import org.mortbay.util.ajax.JSON;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -217,8 +218,6 @@ public class ChatLogic {
             assistantSessions.sessions.put(chatId, new AssistantState());
         }
 
-        String answer = insertMessage(question);
-
         // Add telemetry for the request
         this.telemetryMap = new HashMap<String, String>() {
             {
@@ -232,6 +231,17 @@ public class ChatLogic {
                 put("Q", question);
             }
         };
+
+        String answer = null;
+
+        try {
+            answer = insertMessage(question);
+        }
+        catch (Exception ex) {
+            this.logger.logError(LOGFROM, ex.toString());
+            ITelemetry.addTelemetryEvent(this.logger, "AssistantChatError", ex, this.telemetryMap);
+            return ApiError.getInternalServerError(ex.getMessage());
+        }
 
         ChatResult result = new ChatResult();
         result.setElapsedTime(this.tools.getTimestamp() - startTime);
@@ -327,7 +337,7 @@ public class ChatLogic {
         sessionData(chatId).setNtries(0);
     }
 
-    private String insertMessage(String message) {
+    private String insertMessage(String message) throws IOException {
         List<String> results = new ArrayList<String>();
         if (message == "") {
             return "";
@@ -483,7 +493,7 @@ public class ChatLogic {
                 }
             }
             catch (Exception e) {
-                // Connection potentially failed.
+                throw e;
             }
 
             Map result = (Map)output.get("result");
@@ -517,7 +527,7 @@ public class ChatLogic {
                             sessionData(chatId).setHist(((String) result.get("answer")).trim());
                         }
                     } catch (Exception e) {
-                        // Do nothing.
+                        throw e;
                     }
 
                     if (sc > 0.6f) {
@@ -560,7 +570,7 @@ public class ChatLogic {
         return result.toString();
     }
 
-    public String AITalk(String message, int userId) {
+    public String AITalk(String message, int userId) throws IOException {
         String answer = "";
         HttpURLConnection connection = null;
         Map output = null;
@@ -589,7 +599,7 @@ public class ChatLogic {
             }
         }
         catch (Exception e) {
-            // Connection potentially failed.
+            throw e;
         }
 
         String response = (String)output.get("output");
