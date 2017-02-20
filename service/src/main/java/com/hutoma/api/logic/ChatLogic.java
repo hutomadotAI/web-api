@@ -565,7 +565,7 @@ public class ChatLogic {
         StringBuilder result = new StringBuilder();
         for (String item : results) {
             result.append(item);
-            result.append("\r\n");
+            result.append(" ");
         }
         return result.toString();
     }
