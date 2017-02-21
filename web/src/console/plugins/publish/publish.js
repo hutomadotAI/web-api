@@ -282,10 +282,10 @@ function populateBotFields(bot) {
     document.getElementById('bot_description').value = json['description'];
     document.getElementById('bot_longDescription').value = json['longDescription'];
     document.getElementById('bot_name').value = json['name'];
-    document.getElementById('bot_price').value = json['price'];
+    document.getElementById('bot_price').value = 0;
     document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
     document.getElementById('bot_sample').value = json['sample'];
-    document.getElementById('bot_version').value = json['version'];
+    document.getElementById('bot_version').value = 1;
     document.getElementById('bot_videoLink').value = json['videoLink'];
 
     setSelectValue('bot_category', json['category']);
@@ -371,70 +371,70 @@ function fieldsBotValidation() {
     elem = document.getElementById('bot_name');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The name field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The name field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_description');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The description field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The description field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_longDescription');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The long description field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The long description field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_licenseType');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The licenseType field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The licenseType field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_category');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The category field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The category field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_classification');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The classification field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The classification field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_sample');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The sample field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The sample field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_price');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The price field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The price field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_version');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The version field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The version field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_privacyPolicy');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The privacy Policy field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The privacy Policy field cannot be empty!');
         return false;
     }
 
