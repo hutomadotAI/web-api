@@ -79,7 +79,7 @@ if(isset($_POST['submit'])) {
     }
     else
     {
-        $msg  ='<div class="alert alert-warning">';
+        $msg  ='<div class="alert alert-warning text-white flat">';
         $msg.='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
         $msg .='</div>';
     }

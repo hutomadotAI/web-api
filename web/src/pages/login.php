@@ -4,7 +4,7 @@ if(isset($_POST['action_login'])){
     $identification = $_POST['login'];
     $password = $_POST['password'];
 
-    $loginerror  ='<div class="alert alert-danger">';
+    $loginerror  ='<div class="alert alert-danger text-white flat">';
     $loginerror .='<i class="icon fa fa-warning"></i> The username or password you entered is incorrect';
     $loginerror .='</div>';
 
@@ -20,7 +20,7 @@ if(isset($_POST['action_login'])){
             }
         }
         catch(Exception $e){
-            $servererror  ='<div class="alert alert-danger">';
+            $servererror  ='<div class="alert alert-danger text-white flat">';
             $servererror .='<i class="icon fa fa-warning"></i> Server connection lost';
             $servererror .='</div>';
             $msg = array("Error", $servererror);
