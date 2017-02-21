@@ -46,18 +46,7 @@ function postingIntentName() {
         return false;
     }
 
-    var form = document.createElement('form');
-    var element = document.createElement('input');
-
-    form.method = 'POST';
-    form.action = './intentelement.php';
-
-    element.value = inputIntentName.value;
-    element.name = 'intent';
-    form.appendChild(element);
-    document.body.appendChild(form);
-    form.submit();
-
+    submitElementClicked(inputIntentName.value);
     RecursiveUnbind($('#wrapper'));
 }
 
@@ -118,19 +107,24 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editIntent(elem,intent) {
-    elem.setAttribute('onclick','');
+function submitElementClicked(value){
     var form = document.createElement('form');
     var element = document.createElement('input');
 
     form.method = 'POST';
     form.action = './intentelement.php';
 
-    element.value = intent;
+    element.value = value;
     element.name = 'intent';
+    element.setAttribute("type", "hidden");
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
+}
+
+function editIntent(elem,intent) {
+    elem.setAttribute('onclick','');
+    submitElementClicked(intent);
 }
 
 $('#deleteIntent').on('show.bs.modal', function (e) {

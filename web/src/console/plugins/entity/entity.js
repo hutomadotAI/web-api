@@ -49,18 +49,7 @@ function postingEntityName() {
         return false;
     }
 
-    var form = document.createElement('form');
-    var element = document.createElement('input');
-
-    form.method = 'POST';
-    form.action = './entityelement.php';
-
-    element.value = inputEntityName.value;
-    element.name = 'entity';
-    form.appendChild(element);
-    document.body.appendChild(form);
-    form.submit();
-    
+    submitElementClicked(inputEntityName.value);
     RecursiveUnbind($('#wrapper'));
 }
 
@@ -121,19 +110,24 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editEntity(elem,entity) {
-    elem.setAttribute('onclick','');
+function submitElementClicked(value){
     var form = document.createElement('form');
     var element = document.createElement('input');
 
     form.method = 'POST';
     form.action = './entityelement.php';
 
-    element.value = entity.replace(/@/g, "");
+    element.value = value;
     element.name = 'entity';
+    element.setAttribute("type", "hidden");
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();
+}
+
+function editEntity(elem,entity) {
+    elem.setAttribute('onclick','');
+    submitElementClicked(entity.replace(/@/g, ""));
 }
 
 $('#deleteEntity').on('show.bs.modal', function (e) {
