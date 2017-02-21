@@ -128,11 +128,40 @@ public class ApiAi extends ApiResult {
         } else {
             BackendEngineStatus wnet = this.backendStatus.getEngineStatus(BackendStatus.ENGINE_WNET);
             BackendEngineStatus rnn = this.backendStatus.getEngineStatus(BackendStatus.ENGINE_RNN);
-            this.summaryStatus = getSummaryTrainingStatus(wnet.getTrainingStatus(), rnn.getTrainingStatus());
-            this.phase1Progress = wnet.getTrainingProgress();
-            this.phase2Progress = rnn.getTrainingProgress();
+
+            TrainingStatus wnetStatus = wnet.getTrainingStatus();
+            TrainingStatus rnnStatus = rnn.getTrainingStatus();
+
+            this.summaryStatus = getSummaryTrainingStatus(wnetStatus, rnnStatus);
+            this.phase1Progress = clampProgress(wnetStatus, wnet.getTrainingProgress());
+            this.phase2Progress = clampProgress(rnnStatus, rnn.getTrainingProgress());
             this.deepLearningError = rnn.getTrainingError();
         }
+    }
+
+    /***
+     * Report a progress value that is consistent
+     * with the status we are reporting
+     * @param status
+     * @param reportedTrainingProgress
+     * @return
+     */
+    private double clampProgress(final TrainingStatus status, final double reportedTrainingProgress) {
+        double clampedProgress;
+        switch (status) {
+            case AI_UNDEFINED:
+            case AI_READY_TO_TRAIN:
+                clampedProgress = 0.0d;
+                break;
+            case AI_TRAINING_COMPLETE:
+                clampedProgress = 1.0d;
+                break;
+            default:
+                clampedProgress = reportedTrainingProgress;
+                break;
+        }
+        // ensure that reported value can only be in the range 0.0d to 1.0d
+        return Math.min(Math.max(clampedProgress, 0.0d), 1.0d);
     }
 
 }
