@@ -215,7 +215,7 @@ function isJustAddedNewRow() {
     var node = parent.children[0].children[0].children[0].children[0];
     var elem = $(node).find("ul").find("li.selected");
     if (elem.text() == '') {
-        msgAlertIntentVariable(ALERT.WARNING.value, 'Complete field first before adding a new line.');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'Complete all fields first before adding a new line.');
         return true;
     }
 

@@ -38,22 +38,19 @@
             <div class="row">
                 <div class="col-xs-3">
                     <div class="text-center">
-                        <i class="fa fa fa-sitemap text-md text-md text-yellow" data-toggle="tooltip"
-                           title="This parametere needs to"></i>
+                        <i class="fa fa fa-sitemap text-md text-md text-yellow"></i>
                         Entity
                     </div>
                 </div>
                 <div class="col-xs-3">
                     <div class="text-center">
-                        <i class="fa fa-sliders text-md text-red" data-toggle="tooltip"
-                           title="This parametere needs to"></i>
+                        <i class="fa fa-sliders text-md text-red"></i>
                         N°prompts
                     </div>
                 </div>
                 <div class="col-xs-4">
                     <div class="text-center">
-                        <i class="fa  fa-comments text-md text-blue" data-toggle="tooltip"
-                           title="This parametere needs to"></i>
+                        <i class="fa  fa-comments text-md text-blue"></i>
                         Prompt
                     </div>
                 </div>

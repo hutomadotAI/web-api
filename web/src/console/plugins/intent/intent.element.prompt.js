@@ -18,7 +18,7 @@ function activeButtonCreateIntentPrompt() {
             $("#btnAddIntentPrompt").prop("disabled", true);
             return false;
         case 0:
-            msgAlertIntentPrompt(ALERT.BASIC.value, 'You can add intent prompts.');
+            msgAlertIntentPrompt(ALERT.BASIC.value, 'Enter one or more prompts.');
             $("#btnAddIntentPrompt").prop("disabled", false);
             return true;
         case 1:
@@ -52,9 +52,10 @@ function addIntentPrompt() {
     document.getElementById('intent-prompt').value = '';
 
     createNewPromptRow(value, parent);
-    msgAlertIntentPrompt(ALERT.BASIC.value, 'You can add intent prompts.');
+    msgAlertIntentPrompt(ALERT.BASIC.value, 'Enter one or more prompts.');
 
     resetMsgAlertIntentVariable();
+    $(this).prop("disabled", false);
 }
 
 
@@ -90,15 +91,6 @@ function createNewPromptRow(value, parent) {
     newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
-
-    checkListPromptSize();
-}
-
-function checkListPromptSize() {
-    if (document.getElementById('prompts-list').childElementCount > 0)
-        $("#btnAddIntentPrompt").prop("disabled", false);
-    else
-        $("#btnAddIntentPrompt").prop("disabled", true);
 }
 
 function deleteRowPrompt(element) {
