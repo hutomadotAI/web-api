@@ -37,3 +37,18 @@ function getPercentualValue(error){
         error = Math.round(error);
     return error
 }
+
+$(document).ready(function(){
+    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+    var is_mac = (navigator.userAgent.indexOf('Mac OS') != -1);
+    var is_windows = !is_mac;
+    if (is_chrome && is_safari){
+        is_safari=false;
+    }
+    if (is_safari || is_windows){
+        $('body').css(
+            "font-family", "'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+        );
+    }
+});
