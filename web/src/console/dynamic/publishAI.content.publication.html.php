@@ -7,6 +7,19 @@
     $botDetails = $botApi->getAiBotDetails($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
     unset($botApi);
 ?>
+<div class="row">
+    <div class="col-md-12" id="publishInfoBox">
+        <div class="alert alert-dismissable flat alert-info unselectable" id="containerMsgAlertPublishInfo" style="padding-bottom: 25px;">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <span id="msgAlertPublishInfo" class="text-muted">
+                <dt>Information</dt>
+                <dl class="dl-horizontal no-margin" style="text-align:justify">
+                    This platform is currently under preview. As such the options and features are actively being developed and will likely change. Submitted bots will be reviewed before publishing.
+                </dl>
+            </span>
+        </div>
+    </div>
+</div>
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
         <!-- row 0 -->
