@@ -28,7 +28,12 @@ import javax.ws.rs.core.Response;
 public class ServerConnector {
 
     private static final String LOGFROM = "serverconnector";
-    private static final int TIMEOUT_SECONDS = 10;
+
+    // As a workaround to bug 1152, we need to allow more time for WNET to process
+    // training data.
+    // For a 700kB file this is around 20-25s. Reduce this timeout again once WNET
+    // processes training data in the training phase, not the upload phase.
+    private static final int TIMEOUT_SECONDS = 30;
 
     protected final JsonSerializer serializer;
     protected final Database database;
