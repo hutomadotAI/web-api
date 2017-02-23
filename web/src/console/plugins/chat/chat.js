@@ -1,7 +1,6 @@
 var isChrome = !!window.chrome;
-var continuousSpeech = '0';
 var speechResponse = 1; // voice activated true for default
-var jsonResponse   = '1'; // voice activated true for default
+var showJsonWindow   = '1'; // voice activated true for default
 var chatSemaphore = 0;
 
 if (isChrome) {
@@ -215,9 +214,10 @@ function speechOption(value){
 }
 
 function jsonOption(value){
-    jsonResponse = (value+1)%(2);
+    showJsonWindow = (value+1)%(2);
 
-    // hide json window
+    document.getElementById('json-text').innerHTML= ( showJsonWindow == 0)?'  Hide JSON Message':'  Show JSON Message';
+    // toggle json window
     $('#jsonBox').toggle();
 }
 
