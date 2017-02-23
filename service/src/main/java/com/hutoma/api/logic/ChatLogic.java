@@ -306,6 +306,7 @@ public class ChatLogic {
                 || message.contains("temperature") && message.contains("issue")
                 || message.contains("temperature") && message.contains("alarm")) {
             sessionData(chatId).setAlarmId(3199);
+            sessionData(chatId).setActionId(1);
         }
     }
 
