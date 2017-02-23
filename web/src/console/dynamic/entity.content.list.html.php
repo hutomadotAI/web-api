@@ -2,7 +2,7 @@
 
     <div class="box-header with-border">
         <i class="fa fa-sitemap text-yellow"></i>
-        <div class="box-title"><b>Entities List</b></div>
+        <div class="box-title"><b>Entity List</b></div>
         <a data-toggle="collapse" href="#collapseEntitiesListInfo">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
@@ -15,7 +15,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                        This is a list of the entities that you have created for your Bot so far.  These can be shared between your bots.
+                        This is a list of the entities that you have created for your bot so far.  These can be shared between your bots.
                     </div>
                 </section>
             </div>

@@ -158,7 +158,7 @@ CREATE TABLE `botStore` (
   `classification` varchar(50) NOT NULL,
   `version` varchar(25) NOT NULL,
   `video_link` varchar(1800) DEFAULT NULL,
-  `is_published` tinyint(1) NOT NULL,
+  `publishing_state` tinyint(1) NOT NULL,
   `botIcon` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `dev_id` (`dev_id`),
@@ -912,6 +912,28 @@ DELIMITER ;;
 CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `deleteAllMemoryIntents`(IN `param_aiid` VARCHAR(50))
 BEGIN
 	DELETE FROM memoryIntent WHERE aiid = param_aiid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteMemoryIntent` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `deleteMemoryIntent`(
+  IN `param_name` VARCHAR(50),
+  IN `param_aiid` VARCHAR(50),
+  IN `param_chatId` VARCHAR(50))
+BEGIN
+	DELETE FROM memoryIntent WHERE aiid = param_aiid AND name = param_name AND chatId = param_chatId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1991,7 +2013,7 @@ DELIMITER ;;
 CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`()
     NO SQL
 BEGIN
-  SELECT * FROM botStore WHERE is_published = 1;
+  SELECT * FROM botStore WHERE publishing_state = 2;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2214,7 +2236,7 @@ CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
   IN `param_classification` VARCHAR(50),
   IN `param_version` VARCHAR(25),
   IN `param_videoLink` VARCHAR(1800),
-  IN `param_isPublished` TINYINT(1)
+  IN `param_publishingState` TINYINT(1)
 )
     NO SQL
 BEGIN
@@ -2227,10 +2249,10 @@ BEGIN
 
     INSERT INTO botStore
     (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
-     privacy_policy, classification, version, video_link, license_type, is_published)
+     privacy_policy, classification, version, video_link, license_type, publishing_state)
     VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
                          param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
-            param_version, param_videoLink, param_licenseType, param_isPublished);
+            param_version, param_videoLink, param_licenseType, param_publishingState);
 
     SELECT LAST_INSERT_ID();
   END ;;

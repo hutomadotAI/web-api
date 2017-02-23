@@ -72,11 +72,6 @@ function setConfidenceValueBeforePosting(){
     element.value = getValueFromConfidence(confidence_text);
 }
 
-function getValueFromConfidence(confidence_text){
-    var values = {"never":0.0, "rarely":0.1, "sometimes":0.25, "often":0.4, "always":0.75};
-    return values[confidence_text];
-}
-
 function checkDescriptionLength() {
     var limitTextInputSize = 50;
     if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
@@ -87,7 +82,6 @@ function checkDescriptionLength() {
         document.getElementById('ai_description').style.borderColor = "#d2d6de";
     }
 }
-
 
 $(function () {
     $("#ai_confidence").ionRangeSlider({
@@ -112,7 +106,7 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else {
-        setSliderValue('ai_confidence', 0.4); // default value "often"
+        setSliderValue('ai_confidence', 0.2); // default value "sometimes"
     }
     if(err)
         msgAlertNameAI(ALERT.DANGER.value, document.getElementById('ai_name').value+' name already in use. Please choose another one.');

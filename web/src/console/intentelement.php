@@ -4,6 +4,7 @@ require "../pages/config.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/intentsApi.php";
 require_once "../console/api/entityApi.php";
+require_once "../console/api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -40,6 +41,10 @@ unset($entityApi);
 $intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 unset($intentsApi);
 
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($aiApi);
+
 if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 404) {
     unset($entityList);
     \hutoma\console::redirect('./error.php?err=210');
@@ -51,6 +56,13 @@ if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
     \hutoma\console::redirect('./error.php?err=211');
     exit;
 }
+
+if ($bot['status']['code'] !== 200) {
+    unset($bot);
+    \hutoma\console::redirect('./error.php?err=204');
+    exit;
+}
+
 
 function isPostInputAvailable()
 {
@@ -106,6 +118,10 @@ function echoJsonEntityListResponse($entityList)
     <div class="content-wrapper" style="margin-right:350px;">
         <section class="content">
             <div class="row">
+                <div class="col-md-12" id="intentElementBox">
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-12">
                     <?php include './dynamic/intent.element.content.head.html.php'; ?>
                     <?php include './dynamic/intent.element.content.expression.html.php'; ?>
@@ -160,6 +176,7 @@ function echoJsonEntityListResponse($entityList)
 <script>
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
+    var trainingFile = <?php if ($bot['training_file_uploaded'] == 1) echo 'true'; else echo 'false'; unset($singleAI)?>;
 </script>
 </body>
 </html>

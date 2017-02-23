@@ -6,7 +6,7 @@
 
             <div class="modal-header">
                 <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><i class="fa fa-tag text-md text-white" style="padding-right:2em"></i> INSERT PROMPTS</h4>
+                <h4 class="modal-title"><i class="fa fa-comments text-md text-white" style="padding-right:2em"></i> Insert a prompt</h4>
             </div>
 
             <table class="table table-condensed no-padding no-margin no-border">
@@ -53,10 +53,10 @@
                         <h5 class="box-title">
                             <div class="input-group no-margin">
                                 <input type="text" class="form-control flat no-shadow" id="intent-prompt" name="input-prompt"
-                                       placeholder="Add prompt text" onkeyup="checkInputPromptCode(this,event.keyCode)"
+                                       placeholder="Type a prompt..." onkeyup="checkInputPromptCode(this,event.keyCode)"
                                        style="width: 96%;">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-success flat" id="btnAddIntentPrompt" style="width: 130px;" disabled>Add Prompt</button>
+                                    <button class="btn btn-success flat" id="btnAddIntentPrompt" style="width: 130px;">Add Prompt</button>
                                 </span>
                             </div>
                         </h5>
@@ -66,7 +66,7 @@
                 <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentPrompt" style="margin-bottom:10px;">
                     <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
                     <i class="icon fa fa-check" id="iconAlertIntentPrompt"></i>
-                    <span id="msgAlertIntentPrompt">Give the Bot examples of prompt.</span>
+                    <span id="msgAlertIntentPrompt">Enter one or more prompts.</span>
                 </div>
 
             </div>

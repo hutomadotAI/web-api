@@ -387,6 +387,7 @@ public class TestChatLogic {
         Assert.assertTrue(mi.isFulfilled());
         Assert.assertEquals(1, result.getResult().getIntents().size());
         Assert.assertTrue(result.getResult().getIntents().get(0).isFulfilled());
+        verify(this.fakeIntentHandler).clearIntents(any());
     }
 
     /***
@@ -403,6 +404,7 @@ public class TestChatLogic {
         verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is incremented
         Assert.assertEquals(1, mi.getVariables().get(0).getTimesPrompted());
+        verify(this.fakeIntentHandler, never()).clearIntents(any());
     }
 
     /***
@@ -420,6 +422,7 @@ public class TestChatLogic {
         verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is not incremented
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
+        verify(this.fakeIntentHandler, never()).clearIntents(any());
     }
 
     /***
@@ -438,6 +441,7 @@ public class TestChatLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertTrue(mi.isFulfilled());
         verify(this.fakeIntentHandler).updateStatus(mi);
+        verify(this.fakeIntentHandler).clearIntents(any());
     }
 
     /***

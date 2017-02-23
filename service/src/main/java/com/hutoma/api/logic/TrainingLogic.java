@@ -46,8 +46,6 @@ public class TrainingLogic {
     private static final String PREVIOUS_AI_SUFFIX = "] ";
     private static final String EOL = "\n";
     private static final String LOGFROM = "traininglogic";
-    private static final String HISTORY_REST_DIRECTIVE = "@reset";
-
 
     private final Config config;
     private final AIServices aiServices;
@@ -355,11 +353,6 @@ public class TrainingLogic {
                         result.addEvent(UPLOAD_MISSING_RESPONSE, lastHumanSentence);
                     }
                     // New conversation
-                    // Check if the conversaton is completed and instruct the AI to reset the conversation history
-                    if (validConversation.size() > 0) {
-                        validConversation.set(validConversation.size() - 1,
-                                validConversation.get(validConversation.size() - 1) + HISTORY_REST_DIRECTIVE);
-                    }
                     validConversation.add(EMPTY_STRING);
                 }
                 humanTalkingNow = true;

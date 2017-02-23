@@ -1,4 +1,5 @@
 <input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
+<input type="hidden" id="bot-status" name="bot-status" value="0" style="display:none;"/>
 <div class="box box-solid box-clean flat no-shadow unselectable" style="padding-bottom:0px;">
 
     <div class="box-header no-border" style="padding: 10px 10px 0px 10px;">
@@ -25,5 +26,7 @@
             <span id="msgAlertIntentElement">Use intents to map what a user says and what action should be taken by your business logic.</span>
         </div>
     </div>
-
+    
 </div>
+
+

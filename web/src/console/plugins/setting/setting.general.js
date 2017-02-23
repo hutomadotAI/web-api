@@ -99,5 +99,5 @@ function updatePreviousDataLoaded(JSONdata){
 
 $(document).ready(function(){
     resetGeneralInputFields();
-    $("#ai_name").prop("disabled",true);
+    $("#ai_name").prop("readonly",true);
 });

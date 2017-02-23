@@ -504,7 +504,7 @@ public class Database {
                     .add(bot.getClassification())
                     .add(bot.getVersion())
                     .add(bot.getVideoLink())
-                    .add(true);
+                    .add(bot.getPublishingState().value());
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -632,6 +632,16 @@ public class Database {
         }
     }
 
+    public boolean deleteMemoryIntent(final MemoryIntent intent) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteMemoryIntent", 3)
+                    .add(intent.getName())
+                    .add(intent.getAiid())
+                    .add(intent.getChatId());
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public List<Integration> getAiIntegrationList() throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getIntegrations", 0);
@@ -682,7 +692,7 @@ public class Database {
                 rs.getString("classification"),
                 rs.getString("version"),
                 rs.getString("video_link"),
-                rs.getBoolean("is_published"),
+                AiBot.PublishingState.from(rs.getInt("publishing_state")),
                 rs.getString("botIcon")
         );
     }

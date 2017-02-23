@@ -64,7 +64,7 @@ if(isset($_POST['action_login'])){
     <script type="text/javascript">
         var options = {
             declineButtonText: '',
-            policyUrl: 'privacyPolicy.php',
+            policyUrl: 'https://www.hutoma.com/privacy.pdf',
             policyUrlTarget: '_blank'
         };
         $(document).ready(function () {

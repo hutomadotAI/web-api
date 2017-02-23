@@ -161,7 +161,6 @@ class aiApi extends apiBase
             ));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 330);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

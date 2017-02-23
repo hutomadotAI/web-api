@@ -82,9 +82,9 @@ public class AIBotStoreLogic {
         try {
             // Check if the bot actually exists in the store
             AiBot bot = this.database.getBotDetails(botId);
-            if (bot == null || !bot.isPublished()) {
-                this.logger.logUserTraceEvent(LOGFROM, String.format("PurchaseBot - Bot not %s",
-                        bot == null ? "found" : "published"), devId, "BotId", Integer.toString(botId));
+            if (bot == null || bot.getPublishingState() != AiBot.PublishingState.PUBLISHED) {
+                this.logger.logInfo(LOGFROM, String.format("Bot %d not %s", botId,
+                        bot == null ? "found" : "published"));
                 return ApiError.getNotFound("Bot not found");
             }
             if (bot.getDevId().equals(devId)) {
@@ -163,7 +163,7 @@ public class AIBotStoreLogic {
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
-                    videoLink, true, null);
+                    videoLink, AiBot.PublishingState.SUBMITTED, null);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devId, "AIID", aiid.toString());

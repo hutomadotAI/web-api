@@ -127,6 +127,10 @@ if (isset($_GET['err'])) {
             $msg = 'DELETE AI FAILED';
             $details = ' We could not find the data you were looking for';
             break;
+        case 204 :
+            $msg = 'GET INFO BOT FAILED';
+            $details = ' We could not find the data you were looking for';
+            break;
         case 210 :
             $msg = 'GET INFO INTENTS FAILED';
             $details = ' We could not find the data you were looking for';
