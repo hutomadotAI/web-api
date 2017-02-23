@@ -473,6 +473,9 @@ class console
                 $res = json_decode($curl_response, true);
                 if (array_key_exists('status', $res)) {
                     $curl->close();
+                    $subject = "Welcome to Hu:toma!";
+                    $body = "Congrats, you’re all set! Your Hu:toma account is confirmed. You’ll be receiving a series of emails shortly, which will guide you through using the Hu:toma platform. In the meantime you'll see the intercom chat window on every page of our platform which should be your go-to place for support. You'll also be recieving an invite to our slack channel, a place for collaboration and discussion.  We’ve sent an invite to your email address.  We aim to support all quieries within 24 hours. We’ll also be available at support@hutoma.com.\nThanks\n--The Hutoma team";
+                    sendMail($id, $subject, $body);
                     return $res['status']['code'];
                 }
             }
@@ -713,7 +716,7 @@ class console
 
                     $encodedToken = urlencode($token);
                     $subject = "Hu:toma Password Reset";
-                    $body = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
+                    $body = "Please click the following link to reset you password. Feel free to contact support within Slack or at support@hutoma.com if required.
                       <blockquote>
                         <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
