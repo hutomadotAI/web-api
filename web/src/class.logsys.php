@@ -716,7 +716,7 @@ class console
 
                     $encodedToken = urlencode($token);
                     $subject = "Hu:toma Password Reset";
-                    $body = "Please click the following link to reset you password. Feel free to contact support within Slack or at support@hutoma.com if required.
+                    $body = "Please click the following link to reset your password. Feel free to contact support within Slack or at support@hutoma.com if required.
                       <blockquote>
                         <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
