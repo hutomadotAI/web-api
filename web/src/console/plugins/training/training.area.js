@@ -179,6 +179,7 @@ function initializeTrainingConsole(aiStatus){
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
+            hideHelpBox(true);
             showAlertMessage(aiStatus['ai_status']);
             break;
         case API_AI_STATE.ERROR.value:
@@ -265,6 +266,7 @@ function getUIStatusCall() {
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
+            hideHelpBox(true);
             showAlertMessageFromUI(status);
             break;
         case (status == UI_STATE.ERROR.value):
@@ -615,6 +617,10 @@ function hideTrainingBar(state) {
 function hideChart(state) {
     $('#chart-details').prop('hidden', state);
     $('#chart-details-footer').prop('hidden', state);
+}
+
+function hideHelpBox(state) {
+    $('#containerMsgAlertTrainingInfo').prop('hidden', state);
 }
 
 function updateDeepLearningError(error){
