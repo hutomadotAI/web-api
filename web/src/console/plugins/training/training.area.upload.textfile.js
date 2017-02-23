@@ -1,11 +1,11 @@
 function uploadTextFile() {
-    var Mbyte = 2;
+    var maximumFileSize = 512 * 1024; // 512Kb
 
     disableRestartBoxButton(true);
 
     if (!isTextFileSelected())
         return;
-    if (!checkTextFileSize('inputfile', Mbyte))
+    if (!checkTextFileSize('inputfile', maximumFileSize))
         return;
 
     disableButtonUploadTextFile(true);
@@ -27,7 +27,7 @@ function uploadTextFile() {
                 case 200:
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
-                    
+
                     if (additionalInfo != null)
                         uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
 
@@ -42,7 +42,7 @@ function uploadTextFile() {
                     break;
                 case 400:
                     if (haNoContentError(JSONdata['status']['additionalInfo'])) {
-                        $("#containerMsgAlertUploadFile").attr('class','alert alert-dismissable flat alert-danger');
+                        $("#containerMsgAlertUploadFile").attr('class', 'alert alert-dismissable flat alert-danger');
                         $("#iconAlertUploadFile").attr('class', 'icon fa fa-warning');
                         document.getElementById('msgAlertUploadFile').innerHTML = 'There was a problem reading your file. Please check that the content follows our structure. You can load a sample file  <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor=\'pointer\'">here</a>';
                     }
@@ -93,7 +93,7 @@ function checkTextFileSize(fileID, size) {
     }
 
     file = input.files[0];
-    if (file.size > size * 1048476) {
+    if (file.size > size) {
         msgAlertUploadFile(ALERT.DANGER.value, 'Sorry, the file size exceeds our limit.');
         return false;
     }
