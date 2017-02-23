@@ -24,12 +24,16 @@ function populateBotFields(bot) {
     document.getElementById('botPrice').innerText = json['price'];
     document.getElementById('botLongDescription').innerText = json['longDescription'];
     document.getElementById('botSample').innerText = json['sample'];
-    document.getElementById('botLastUpdate').innerText = json['lastUpdate'];
+    var dateString = "";
+    if (json['update'] != "") {
+        var date = new Date(json['update']);
+        dateString = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    }
+    document.getElementById('botLastUpdate').innerText = dateString;
     document.getElementById('botCategory').innerText = json['category'];
     document.getElementById('botVersion').innerText = json['version'];
     document.getElementById('botClassification').innerText = json['classification'];
     document.getElementById('botActivations').innerText = json['activations'];
-    document.getElementById('botReport').setAttribute('href', json['report']);
     document.getElementById('botPrivacyPolicy').setAttribute('href', json['privacyPolicy']);
     document.getElementById('botIcon').setAttribute('src', json['imagePath']);
 

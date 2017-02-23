@@ -6,15 +6,15 @@
 
         var defaultOptions = {
             // Message to be displayed
-            message: "We use cookies to track usage, and improve the website",
+            message: "We use cookies to give you the best online experience. By using our website you agree to our use of cookies in accordance with our cookie policy.",
             // Accept button text
-            acceptButtonText: 'I Accept',
+            acceptButtonText: 'Ok',
             // Decline button text (empty for no decline button)
             declineButtonText: 'Disable Cookies',
             // Policy link text (empty for no policy link)
-            policyText: 'Privacy policy',
+            policyText: 'cookie policy',
             // Policy link
-            policyUrl: '/privacyPolicy.html',
+            policyUrl: '/cookiepolicy.pdf',
             // Policy link window target
             policyUrlTarget: '_self',
             // How many days to keep the user chosen preference (both accept or decline)
@@ -97,7 +97,7 @@
         cookieExpirationDate = cookieExpirationDate.toUTCString();
 
         // Create the bar
-        var barElement = '<div id="cookiePolicyBar">'
+        var barElement = '<div id="cookiePolicyBar" style="text-align: left; padding:4px;margin-top: -10px;">'
             + '<span class="cookiePolicyBar-message">' + options.message + '</span> '
             + '<a class="cookiePolicyBar-accept" href="">' + options.acceptButtonText + '</a> '
             + (options.declineButtonText != '' ? '<a class="cookiePolicyBar-decline" href="">' + options.declineButtonText + '</a> ' : '')

@@ -14,8 +14,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 /**
  * Endpoints for invite codes.
@@ -36,7 +38,8 @@ public class InviteEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response validToken(
-            @DefaultValue("") @PathParam("code") String code) {
+            @Context SecurityContext securityContext,
+            @DefaultValue ("") @PathParam("code") String code) {
         ApiResult result = this.inviteLogic.validCode(code);
         return result.getResponse(this.serializer).build();
     }
@@ -46,7 +49,8 @@ public class InviteEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response redeemToken(
-            @DefaultValue("") @PathParam("code") String code,
+            @Context SecurityContext securityContext,
+            @DefaultValue ("") @PathParam("code") String code,
             @DefaultValue("") @QueryParam("username") String username) {
         ApiResult result = this.inviteLogic.redeemCode(code, username);
         return result.getResponse(this.serializer).build();

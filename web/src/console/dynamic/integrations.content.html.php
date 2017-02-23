@@ -23,7 +23,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                           Integration system required bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla blablabla.
+                        Coming soon.
                     </div>
                 </section>
             </div>

@@ -35,16 +35,22 @@ function getSelectIndex(id){
 
 function setSliderValue(id,value){
     var confidence_index;
-    if (value < 0.1)
-        confidence_index = 0;
-    if (value >= 0.1 && value <0.25)
-        confidence_index = 1;
-    if (value >= 0.25 && value <0.4)
-        confidence_index = 2;
-    if (value >= 0.4 && value <0.75 )
-        confidence_index = 3;
-    if (value >= 0.75 )
-        confidence_index = 4;
+    switch(true) {
+        case (value < 0.05):
+            confidence_index = 0;
+            break;
+        case (value < 0.15):
+            confidence_index = 1;
+            break;
+        case (value < 0.25):
+            confidence_index = 2;
+            break;
+        case (value < 0.45):
+            confidence_index = 3;
+            break;
+        default:
+            confidence_index = 4;
+    }
     var slider = $('#'+id).data('ionRangeSlider');
     slider.update({
         from: confidence_index
@@ -52,7 +58,7 @@ function setSliderValue(id,value){
 }
 
 function getValueFromConfidence(confidence_text){
-    var values = {"never":0.0, "rarely":0.1, "sometimes":0.25, "often":0.4, "always":0.75};
+    var values = {"never":0.0, "rarely":0.1, "sometimes":0.2, "often":0.3, "always":0.6};
     return values[confidence_text];
 }
 

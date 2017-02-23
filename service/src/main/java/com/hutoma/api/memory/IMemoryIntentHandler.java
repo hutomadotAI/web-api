@@ -40,6 +40,12 @@ public interface IMemoryIntentHandler {
     void deleteAllIntentsForAi(UUID aiid);
 
     /**
+     * Clears the intents so that they can be used again.
+     * @param intents the list of intents to clear
+     */
+    void clearIntents(List<MemoryIntent> intents);
+
+    /**
      * Gets the original intent for this memory intent.
      * @param devid      the dev id
      * @param aiid       the AI ID

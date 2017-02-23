@@ -1,7 +1,7 @@
 <div class="box box-solid box-clean flat no-shadow unselectable">
 
     <div class="box-header with-border">
-        <div class="box-title"><b>Welcome to Hu:toma.AI - the marketplace for your bots</b></div><!-- to hu:toma -->
+        <div class="box-title"><b>Welcome to Hu:toma.ai - the marketplace for your bots</b></div><!-- to hu:toma -->
         <a data-toggle="collapse" href="#collapseStart" tabindex="-1">
             <div class=" pull-right">more info
                 <i class="fa fa-question-circle text-sm text-yellow"></i>
