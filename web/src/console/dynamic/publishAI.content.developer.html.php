@@ -122,7 +122,7 @@
                     <label for="developer_company">Company</label>
                     <div class="input-group" >
                         <div class="input-group-addon">
-                            <i class="fa fa-envelope-o"></i>
+                            <i class="fa fa-users"></i>
                         </div>
                         <input type="text" maxlength="50" class="form-control flat no-shadow" id="developer_company" name="developer_company" placeholder="Enter company...">
                     </div>
