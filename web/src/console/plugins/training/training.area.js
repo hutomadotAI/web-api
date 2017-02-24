@@ -5,8 +5,8 @@ var UI_STATE =
     FILE_UPLOADED: {value: 1},
     READY_TO_TRAIN: {value: 2},
     PHASE1_INIT: {value: 3},
-    PHASE1_QUEUE: {value: 4},
-    PHASE1_RUN: {value: 5},
+    PHASE1_RUN: {value: 4},
+    PHASE2_QUEUE: {value: 5},
     PHASE2_INIT: {value: 6},
     PHASE2_RUN: {value: 7},
     STOPPED: {value: 8},
@@ -104,9 +104,22 @@ function initializeTrainingConsole(aiStatus){
             showAlertMessage(aiStatus['ai_status']);
             break;
         case API_AI_STATE.QUEUED.value:
-            phaseOneQueue();
-            phaseOneReset();
-            hideTrainingBar(true);
+            var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);
+            switch(true) {
+                case (phaseOnePercentProgress < 0.0001 ):
+                    phaseOneFlashing(true);
+                    break;
+                case (phaseOnePercentProgress < 99.999):
+                    phaseOneStriped(true);
+                    break;
+                case (phaseOnePercentProgress > 99.999):
+                    phaseOneMaxValue();
+                    break;
+                default:
+            }
+            hidePreTrainingBar(false);
+            phaseTwoQueue();
+            hideTrainingBar(false);
             hideChart(true);
             showAlertMessage(aiStatus['ai_status']);
             startPollForStatus();
@@ -214,17 +227,34 @@ function getUIStatusCall() {
             phaseOneFlashing(true);
             showAlertMessageFromUI(status);
             break;
-        case (status == UI_STATE.PHASE1_QUEUE.value):
-            phaseOneFlashing(false);
-            phaseOneQueue();
-            phaseOneReset();
-            showAlertMessageFromUI(status);
-            break;
         case (status == UI_STATE.PHASE1_RUN.value):
             var progress = getP1Progress();
             phaseOneFlashing(false);
             phaseOneStriped(true);
             phaseOneUpdate(progress);
+            showAlertMessageFromUI(status);
+            break;
+        case (status == UI_STATE.PHASE2_QUEUE.value):
+            var phaseOnePercentProgress = getP1Progress();
+            switch(true) {
+                case (phaseOnePercentProgress < 0.0001 ):
+                    phaseOneFlashing(true);
+                    phaseOneStriped(false);
+                    break;
+                case (phaseOnePercentProgress < 99.999):
+                    phaseOneFlashing(false);
+                    phaseOneStriped(true);
+                    break;
+                case (phaseOnePercentProgress > 99.999):
+                    phaseOneFlashing(false);
+                    phaseOneStriped(false);
+                    phaseOneMaxValue();
+                    break;
+                default:
+            }
+            hidePreTrainingBar(false);
+            phaseTwoQueue();
+            hideTrainingBar(false);
             showAlertMessageFromUI(status);
             break;
         case (status == UI_STATE.PHASE2_INIT.value):
@@ -285,7 +315,9 @@ function setStateResponse(aiStatus) {
             setUICurrentStatus(UI_STATE.LISTENING_MODE.value);
             break;
         case API_AI_STATE.QUEUED.value:
-            setUICurrentStatus(UI_STATE.PHASE1_QUEUE.value);
+            var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);
+            setP1Progress(phaseOnePercentProgress);
+            setUICurrentStatus(UI_STATE.PHASE2_QUEUE.value);
             break;
         case API_AI_STATE.READY_TO_TRAIN.value:
             if (status != ai_status_last)
@@ -512,11 +544,11 @@ function showAlertMessageFromUI(status){
         case UI_STATE.PHASE1_INIT.value:
             msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait.');
             break;
-        case UI_STATE.PHASE1_QUEUE.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait. The process is queued.');
-            break;
         case UI_STATE.PHASE1_RUN.value:
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
+            break;
+        case UI_STATE.PHASE2_QUEUE.value:
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait. The process is queued.');
             break;
         case UI_STATE.PHASE2_INIT.value:
             msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase two may take a few minutes. Please wait.');
@@ -594,11 +626,6 @@ function phaseTwoStriped(flag) {
         document.getElementById('progress-training-file-action').className = 'progress progress-xs progress-striped active';
     else
         document.getElementById('progress-training-file-action').className = 'progress progress-xs active';
-}
-
-function phaseOneQueue() {
-    document.getElementById('status-upload-file').innerText = 'queued';
-    document.getElementById('status-upload-file').setAttribute('class', 'text-center');
 }
 
 function phaseTwoQueue() {
