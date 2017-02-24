@@ -95,8 +95,6 @@ function createRightMsg(ai_name,msg,chatId,error) {
     newRightMsg.className = 'direct-chat-msg right';
     newRightMsg.id = 'right_message';
 
-    msg = cutText(msg);
-
     var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = "";
     wHTML += ('<div class="direct-chat-info clearfix">');
@@ -123,7 +121,7 @@ function createRightMsg(ai_name,msg,chatId,error) {
     }
 
     if ( speechResponse == 1 && isChrome)
-        speak(msg);
+        speak(cutText(msg));
     else
         enableChat();
 
