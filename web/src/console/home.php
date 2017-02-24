@@ -101,7 +101,7 @@ unset($aiApi);
                 $publishingState = "NOT_PUBLISHED";
                 $publishedBot = $botApi->getPublishedBot($ai['aiid']);
 
-                if (isset($publishedBot)) {
+                if (isset($publishedBot) && $publishedBot['status']['code'] == 200) {
                     $publishingState = $publishedBot['bot']['publishingState'];
                 }
 
