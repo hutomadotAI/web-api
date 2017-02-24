@@ -619,13 +619,13 @@ function createMessageWarningInfoAlert() {
     wHTML += ('<div class="alert alert-dismissable flat alert-warning" id="containerMsgWarningAlertTrainingInfo">');
     wHTML += ('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>');
     wHTML += ('<span id="msgAlertWarningTrainingInfo">');
-    wHTML += ('<dt>Start info pre-trained neural Manipulation</dt>');
+    wHTML += ('<dt>Training Interrupted</dt>');
     wHTML += ('<dd>');
-    wHTML += ('We detected a few changes to the Bot training data and hence we recommend you restart the training.');
+    wHTML += ('Training has stopped. Click to resume.');
     wHTML += ('</dd>');
     wHTML += ('<p></p>');
     wHTML += ('<dt class="text-center">');
-    wHTML += ('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="trainingRestart();"> <b>Restart Training</b></button>');
+    wHTML += ('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="trainingRestart();"> <b>Resume Training</b></button>');
     wHTML += ('</dt>');
 
     wHTML += ('</span>');
