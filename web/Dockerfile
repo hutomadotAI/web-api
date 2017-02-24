@@ -3,7 +3,7 @@ LABEL maintainer "pedrotei@hutoma.com"
 
 RUN \
 	apt-get update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get -y install \
-    libcurl4-gnutls-dev curl lynx-cur wget postfix
+    libcurl4-gnutls-dev curl lynx-cur wget libsasl2-modules postfix
 
 
 # Install PHP's curl, PDO and mysql connection stuff
