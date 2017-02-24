@@ -4,8 +4,7 @@ import time
 from threading import Lock, Thread
 
 import hu_api.api
-from performance.common import get_ai_name, read_training_file, lines_to_words
-from performance.performance_config import Config
+from performance.common import get_ai_name, read_training_file, lines_to_words, de_rate_limit
 
 
 class AverageTime:
@@ -72,14 +71,24 @@ def load_test(config, requester, requesterLoad):
         print('Single Size:{0} Average:{1:.2f}'.format(size, average))
         results.append((simultaneous, size, average))
 
+    def find_in(name):
+        if find.success:
+            if "ai_list" in find.response:
+                for ai in find.response["ai_list"]:
+                    if name == ai["name"]:
+                        return (ai["aiid"], ai)
+        return ("", find.text)
+
     ai_targets = {}
     question_words = {}
     answer_words = {}
     common_words = set(config.common_words)
 
+    find = de_rate_limit(hu_api.api.get_ai, requester)
+
     for size in config.training_sizes:
         name = get_ai_name(size)
-        aiid, ai = hu_api.api.find_ai(requester, name)
+        aiid, ai = find_in(name)
         if (aiid == ""):
             print(ai)
             print("{0} not found".format(name))
