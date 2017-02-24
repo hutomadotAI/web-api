@@ -1,8 +1,5 @@
 document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
 
-if (limitText($("#inputEntityName")) == 0)
-    $("#btnCreateEntity").prop("disabled", false);
-
 function checkEntityCode(element, key) {
     if (key == 13) {
         if( activeButtonCreateEntity())
@@ -16,9 +13,6 @@ function checkEntityCode(element, key) {
 function activeButtonCreateEntity() {
     var limitTextInputSize = 250;
     switch (limitText($("#inputEntityName"), limitTextInputSize)) {
-        case -1:
-            $("#btnCreateEntity").prop("disabled", true);
-            return false;
         case 0:
             msgAlertEntity(ALERT.BASIC.value, 'In this section you can create different entities.');
             $("#btnCreateEntity").prop("disabled", false);

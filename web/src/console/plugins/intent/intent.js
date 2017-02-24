@@ -1,8 +1,5 @@
 document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
-if (limitText($("#inputIntentName")) == 0)
-    $("#btnCreateEntity").prop("disabled", false);
-
 function checkIntentCode(element, key) {
     if (key == 13) {
         if( activeButtonCreateIntent())
@@ -16,9 +13,6 @@ function checkIntentCode(element, key) {
 function activeButtonCreateIntent() {
     var limitTextInputSize = 250;
     switch (limitText($("#inputIntentName"), limitTextInputSize)) {
-        case -1:
-            $("#btnCreateIntent").prop("disabled", true);
-            return false;
         case 0:
             msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
             $("#btnCreateIntent").prop("disabled", false);

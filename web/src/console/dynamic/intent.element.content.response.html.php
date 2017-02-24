@@ -33,7 +33,7 @@
                                placeholder="Type a response here..." onkeyup="checkIntentResponseCode(this,event.keyCode)"
                                style="width: 96%;">
                         <span class="input-group-btn">
-                            <button class="btn btn-success flat" id="btnAddIntentResponse" style="width: 130px;" disabled>Add Response</button>
+                            <button class="btn btn-success flat" id="btnAddIntentResponse" style="width: 130px;">Add Response</button>
                         </span>
                     </div>
                 </h5>

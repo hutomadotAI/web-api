@@ -32,7 +32,7 @@
                                placeholder="Add a sample user expression" onkeyup="checkExpressionCode(this,event.keyCode)"
                                style="width: 96%;">
                         <span class="input-group-btn">
-                            <button class="btn btn-success flat" id="btnAddExpression" style="width: 130px;" disabled>Add Expression</button>
+                            <button class="btn btn-success flat" id="btnAddExpression" style="width: 130px;">Add Expression</button>
                         </span>
                     </div>
                 </h5>
