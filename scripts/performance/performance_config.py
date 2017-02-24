@@ -14,10 +14,10 @@ class Config:
         self.chat_auth = 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8SGuwSFKOkrFpUlAkSQTM6NEY5NE3ZTUZBNdk0TTJN0k4yQj3cTUREvDZMNU85QUA6VaAAAAAP__.eUytifp7MPitydSm1sGQ8FVlp97CtgMvAlrt0AEyoRE'
 
         # this is the list of training sizes for each target AI
-        self.training_sizes = [x for x in range(100, 1000, 200)]
+        self.training_sizes = [x for x in range(100, 3000, 500)]
 
         # this is the list of (simultaneous requests, total requests) for each load test run
-        self.request_pattern = [(x, x * 5) for x in [1, 5, 10]]
+        self.request_pattern = [(x, x * 10) for x in [1, 5, 10]]
 
         self.common_words = [word.lower() for word in
                              ['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'I', 'it', 'for',
