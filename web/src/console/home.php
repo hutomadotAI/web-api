@@ -24,10 +24,6 @@ $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::g
 $response_getAIs = $aiApi->getAIs();
 unset($aiApi);
 
-$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$publishedBots = $botApi->getPublishedBots();
-unset($botApi);
-
 ?>
 
 <!DOCTYPE html>
@@ -99,32 +95,30 @@ unset($botApi);
         // HIDE AI INFOs NOT USED
         $tmp_list = [];
         if (isset($response_getAIs) && (array_key_exists("ai_list", $response_getAIs))) {
+            $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+
             foreach ($response_getAIs['ai_list'] as $ai) {
+                $publishingState = "NOT_PUBLISHED";
+                $publishedBot = $botApi->getPublishedBot($ai['aiid']);
+
+                if (isset($publishedBot)) {
+                    $publishingState = $publishedBot['bot']['publishingState'];
+                }
+
                 $v = array(
                     'aiid' => $ai['aiid'],
                     'name' => $ai['name'],
                     'description' => $ai['description'],
-                    'ai_status' => $ai['ai_status']
+                    'ai_status' => $ai['ai_status'],
+                    'publishing_state' => $publishingState
                 );
                 array_push($tmp_list, $v);
             }
+            unset($botApi);
         }
         echo json_encode($tmp_list);
         unset($response_getAIs);
         unset($tmp_list);
-        ?>;
-
-    var publishedBots = <?php
-        $tmp_published_list = [];
-        if (isset($publishedBots) && (array_key_exists("bots", $publishedBots))) {
-            foreach ($publishedBots['bots'] as $botDetails) {
-                $publishedBot = new \hutoma\bot();
-                array_push($tmp_published_list, $botDetails['aiid']);
-            }
-        }
-        echo json_encode($tmp_published_list);
-        unset($publishedBot);
-        unset($tmp_published_list);
         ?>;
 </script>
 

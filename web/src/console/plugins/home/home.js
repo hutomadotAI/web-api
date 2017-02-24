@@ -35,13 +35,20 @@ function drawTableRows() {
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
-        if (publishedBots.indexOf(aiList[i]['aiid']) == -1) {
+        if (aiList[i]['publishing_state'] == "NOT_PUBLISHED") {
             wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
-            wHTML += ' Publish Bot </b></button></td>';
+            wHTML += ' Publish Bot</b></button></td>';
         }
-        else {
+        else if (aiList[i]['publishing_state'] == "SUBMITTED") {
             wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="" class="btn btn-warning flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b>';
             wHTML += ' Request Sent</b></button></td>';
+        }
+        else if (aiList[i]['publishing_state'] == "PUBLISHED") {
+            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="" class="btn btn-warning flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b>';
+            wHTML += ' Published</b></button></td>';
+        }
+        else {
+            // Don't show any button.
         }
 
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
