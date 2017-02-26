@@ -5,7 +5,6 @@ document.getElementById("developer_email").addEventListener("keydown",function()
 document.getElementById("developer_address").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_postCode").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_city").addEventListener("keydown",function(){removeAlert(this)}, false);
-document.getElementById("developer_country").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_website").addEventListener("keydown",function(){removeAlert(this)}, false);
 document.getElementById("developer_company").addEventListener("keydown",function(){removeAlert(this)}, false);
 
@@ -13,7 +12,6 @@ function checkDevInput(){
     // Missing - Developer name input validation
     // Missing - Developer address input validation
     // Missing - Developer city input validation
-    // Missing - Developer country input validation
     // Missing - Developer company input validation
 
     // Developer email input validation
@@ -203,12 +201,6 @@ function fieldsDevValidation(){
         return false;
     }
 
-    elem = document.getElementById('developer_country');
-    if (elem.value == '') {
-        elem.style.border ="1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The country field cannot is empty!');
-        return false;
-    }
 
     elem = document.getElementById('developer_email');
     if (elem.value == '') {
