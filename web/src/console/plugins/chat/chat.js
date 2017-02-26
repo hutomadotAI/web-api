@@ -1,16 +1,18 @@
 var isChrome = !!window.chrome;
-var speechResponse = 1; // voice activated true for default
-var showJsonWindow   = '1'; // voice activated true for default
+var speechResponse = false; // voice deactivated for default
+var showJsonWindow = true; // json window showed for default
 var chatSemaphore = 0;
 
 if (isChrome) {
     unlockSpeechOption();
-    document.getElementById('btnSpeech').addEventListener('click', start);
-    document.getElementById('btnSpeech').style.cursor = 'pointer';
+    if ( !speechResponse )
+        deactiveSpeechButton();
+    else
+        activeSpeechButton();
 }
 else{
     lockSpeechOption();
-    document.getElementById('speech-icon').className ='fa fa-bullhorn text-gray';
+    document.getElementById('speech-icon').className ='fa fa-microphone text-gray';
     document.getElementById('speech-text').className ='text-gray';
     document.getElementById('btnSpeech').setAttribute('title','Available on Chrome');
     document.getElementById('btnSpeech').style.cursor = 'not-allowed';
@@ -109,7 +111,7 @@ function createRightMsg(ai_name,msg,chatId,error) {
         $('#chat').scrollTop(height);
     }
 
-    if ( speechResponse == 1 && isChrome)
+    if ( speechResponse && isChrome)
         speak(msg);
     else
         enableChat();
@@ -170,7 +172,7 @@ function disableChat(){
 }
 
 function activeSpeechButton(){
-    if (speechResponse == 1 && isChrome) {
+    if (speechResponse && isChrome) {
         document.getElementById('btnSpeech').addEventListener('click', start);
         document.getElementById('btnSpeech').style.cursor = 'pointer';
         document.getElementById('microphone').className = ('fa fa-microphone text-red');
@@ -197,28 +199,26 @@ function lockSpeechOption(){
 
 function unlockSpeechOption(){
     document.getElementById('speech-option').setAttribute('class','');
-    document.getElementById('speech-option').setAttribute('onClick','speechOption(this.value)');
+    document.getElementById('speech-option').setAttribute('onClick','speechOption()');
 }
 
-function speechOption(value){
-    if ( speechResponse == 0) {
-        speechResponse = (speechResponse+1)%(2);
+function speechOption(){
+    speechResponse = !speechResponse;
+    if ( speechResponse ) {
         activeSpeechButton();
     }
     else {
         // deactive speech buttons
-        speechResponse = (speechResponse+1)%2;
         deactiveSpeechButton();
         stopSynthesis();
     }
 }
 
-function jsonOption(value){
-    showJsonWindow = (value+1)%(2);
-
-    document.getElementById('json-text').innerHTML= ( showJsonWindow == 0)?'  Hide JSON Message':'  Show JSON Message';
+function setOptionJsonWindow(){
+    document.getElementById('json-text').innerHTML= ( !showJsonWindow )?'  Hide JSON Message':'  Show JSON Message';
     // toggle json window
     $('#jsonBox').toggle();
+    showJsonWindow = !showJsonWindow;
 }
 
 
