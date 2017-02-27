@@ -57,23 +57,26 @@
             <div class="modal-body">
                 <div class="box-body" id="example-training-file">
                     <span id="contentSampleFile"></span>
-                    <dt>What is your Name?</dt>
-                    <dt>My name is Hutoma.</dt>
+                    <dt>What is your name?</dt>
+                    <dt>My name is Hu:toma.</dt>
                     </br>
-                    <dt>What does Hutoma means?</dt>
-                    <dt>It is a combination of two words: Human and Automata.</dt>
+                    <dt>What does Hu:toma mean?</dt>
+                    <dt>It is the combination of two words, human and automata.</dt>
                     </br>
                     <dt>What is the meaning of life?</dt>
-                    <dt>The meaning of life is 42.</dt>
+                    <dt>If you find the answer, let me know.</dt>
+                    </br>
+                    <dt>Where do you live?</dt>
+                    <dt>Barcelona & London.</dt>
                     </br>
                     <dt>How old are you?</dt>
-                    <dt>I am one!</dt>
+                    <dt>I am 8760 hours old.</dt>
                     </br>
                     <dt>Can we be friends?</dt>
-                    <dt>yes of course we can be friends!</dt>
+                    <dt>Yes of course we can be friends!</dt>
                     </br>
-                    <dt>Good Morning</dt>
-                    <dt>Good morning to you my friend!</dt>
+                    <dt>Good morning Hu:toma</dt>
+                    <dt>Good morning to you too my friend.</dt>
                     </br>
                 </div>
             </div>

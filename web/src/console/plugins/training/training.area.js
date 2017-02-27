@@ -1,28 +1,3 @@
-var UI_STATE =
-{
-    ERROR: {value: -1},
-    NOTHING: {value: 0},
-    FILE_UPLOADED: {value: 1},
-    READY_TO_TRAIN: {value: 2},
-    PHASE1_INIT: {value: 3},
-    PHASE1_RUN: {value: 4},
-    PHASE2_QUEUE: {value: 5},
-    PHASE2_INIT: {value: 6},
-    PHASE2_RUN: {value: 7},
-    STOPPED: {value: 8},
-    COMPLETED: {value: 10},
-    LISTENING_MODE:{value:999}
-};
-
-var UI_TRAINING_STATE =
-{
-    PHASE1_INIT: {value: 100},
-    PHASE1_RUN: {value: 101},
-    PHASE1_END: {value: 102},
-    PHASE2_INIT: {value: 200},
-    PHASE2_RUN: {value: 201}
-};
-
 var ID_pool;
 var ai_status_last = "";
 
@@ -46,34 +21,34 @@ function initializeEventListeners() {
     document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
 }
 
-function initializePretrainingMonitor(aiStatus){
-    var wHTML ='';
+function initializePretrainingMonitor(aiStatus) {
+    var wHTML = '';
     var parent = document.getElementById('pretrainingbar');
     var phaseOnePercentProgress = getErrorPercentProgress(aiStatus["phase_1_progress"]);
 
-    wHTML +='<td class="text-center" id="status-upload-file">phase 1</td>';
-    wHTML +='<td>';
-    wHTML +='<div class="progress progress-xs" id="progress-upload-file-action" style="margin-top:9px;">';
-    wHTML +='<div class="progress-bar progress-bar-primary" id="progress-upload-file" value="' + phaseOnePercentProgress + '" style="width:' + phaseOnePercentProgress + '%"></div>';
-    wHTML +='</div>';
-    wHTML +='</td>';
-    wHTML +='<td class="text-center"><span id="status-badge-upload" class="badge btn-primary">' + phaseOnePercentProgress + '%</span></td>';
+    wHTML += '<td class="text-center" id="status-upload-file">phase 1</td>';
+    wHTML += '<td>';
+    wHTML += '<div class="progress progress-xs" id="progress-upload-file-action" style="margin-top:9px;">';
+    wHTML += '<div class="progress-bar progress-bar-primary" id="progress-upload-file" value="' + phaseOnePercentProgress + '" style="width:' + phaseOnePercentProgress + '%"></div>';
+    wHTML += '</div>';
+    wHTML += '</td>';
+    wHTML += '<td class="text-center"><span id="status-badge-upload" class="badge btn-primary">' + phaseOnePercentProgress + '%</span></td>';
 
     parent.innerHTML = wHTML;
 }
 
-function initializeTrainingMonitor(aiStatus){
-    var wHTML ='';
+function initializeTrainingMonitor(aiStatus) {
+    var wHTML = '';
     var parent = document.getElementById('trainingbar');
     var phaseTwoPercentProgress = getErrorPercentProgress(aiStatus["phase_2_progress"]);
 
-    wHTML +='<td class="text-center" id="status-training-file">phase 2</td>';
-    wHTML +='<td>';
-    wHTML +='<div class="progress progress-xs" id="progress-training-file-action" style="margin-top:9px;">';
-    wHTML +='<div class="progress-bar progress-bar-success" id="progress-training-file" value="' + phaseTwoPercentProgress + '" style="width:' + phaseTwoPercentProgress + '%"></div>';
-    wHTML +='</div>';
-    wHTML +='</td>';
-    wHTML +='<td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">' + phaseTwoPercentProgress + '%</span></td>';
+    wHTML += '<td class="text-center" id="status-training-file">phase 2</td>';
+    wHTML += '<td>';
+    wHTML += '<div class="progress progress-xs" id="progress-training-file-action" style="margin-top:9px;">';
+    wHTML += '<div class="progress-bar progress-bar-success" id="progress-training-file" value="' + phaseTwoPercentProgress + '" style="width:' + phaseTwoPercentProgress + '%"></div>';
+    wHTML += '</div>';
+    wHTML += '</td>';
+    wHTML += '<td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">' + phaseTwoPercentProgress + '%</span></td>';
 
     parent.innerHTML = wHTML;
 
@@ -81,13 +56,13 @@ function initializeTrainingMonitor(aiStatus){
 }
 
 function initializeAlertMessage(aiStatus) {
-    var wHTML ='';
+    var wHTML = '';
     var parent = document.getElementById('msgAlertBox');
 
-    wHTML +='<div id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">';
-    wHTML +='<i id="iconAlertProgressBar"></i>';
-    wHTML +='<span id="msgAlertProgressBar"></span>';
-    wHTML +='</div>';
+    wHTML += '<div id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">';
+    wHTML += '<i id="iconAlertProgressBar"></i>';
+    wHTML += '<span id="msgAlertProgressBar"></span>';
+    wHTML += '</div>';
 
     parent.innerHTML = wHTML;
 
@@ -95,8 +70,8 @@ function initializeAlertMessage(aiStatus) {
         msgAlertUploadFile(ALERT.PRIMARY.value, 'File\'s loaded already.');
 }
 
-function initializeTrainingConsole(aiStatus){
-    switch(aiStatus['ai_status']){
+function initializeTrainingConsole(aiStatus) {
+    switch (aiStatus['ai_status']) {
         case API_AI_STATE.UNDEFINED.value:
             hidePreTrainingBar(true);
             hideTrainingBar(true);
@@ -105,14 +80,14 @@ function initializeTrainingConsole(aiStatus){
             break;
         case API_AI_STATE.QUEUED.value:
             var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);
-            switch(true) {
+            switch (true) {
                 case (phaseOnePercentProgress < 0.0001 ):
                     phaseOneFlashing(true);
                     break;
                 case (phaseOnePercentProgress < 99.999):
                     phaseOneStriped(true);
                     break;
-                case (phaseOnePercentProgress > 99.999):
+                case (phaseOnePercentProgress >= 99.999):
                     phaseOneMaxValue();
                     break;
                 default:
@@ -136,7 +111,7 @@ function initializeTrainingConsole(aiStatus){
             var phaseTwoPercentProgress = getErrorPercentProgress(aiStatus['phase_2_progress']);
             var deepLearningError = aiStatus['deep_learning_error'];
 
-            switch(true){
+            switch (true) {
                 case (phaseOnePercentProgress < 0.0001 ):
                     hideTrainingBar(true);
                     hideChart(true);
@@ -236,7 +211,7 @@ function getUIStatusCall() {
             break;
         case (status == UI_STATE.PHASE2_QUEUE.value):
             var phaseOnePercentProgress = getP1Progress();
-            switch(true) {
+            switch (true) {
                 case (phaseOnePercentProgress < 0.0001 ):
                     phaseOneFlashing(true);
                     phaseOneStriped(false);
@@ -329,7 +304,7 @@ function setStateResponse(aiStatus) {
             var phaseTwoPercentProgress = getErrorPercentProgress(aiStatus['phase_2_progress']);
             var deepLearningError = aiStatus['deep_learning_error'];
 
-            switch(true){
+            switch (true) {
                 case (phaseOnePercentProgress < 0.0001):
                     setUICurrentStatus(UI_STATE.PHASE1_INIT.value);
                     break;
@@ -376,7 +351,7 @@ function trainingStartCall() {
             if ((statusCode === 200 ) || (statusCode === 400 )) {
                 setUICurrentStatus(UI_STATE.PHASE1_INIT.value);
             } else {
-                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! Error code ' + statusCode +'!');
+                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! Error code ' + statusCode + '!');
                 setUICurrentStatus(UI_STATE.ERROR.value);
             }
         },
@@ -497,8 +472,8 @@ function haNoContentError(info) {
     return false;
 }
 
-function showAlertMessage(aiStatus){
-    switch(aiStatus){
+function showAlertMessage(aiStatus) {
+    switch (aiStatus) {
         case API_AI_STATE.UNDEFINED.value:
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started. Please upload training data.');
             break;
@@ -536,8 +511,8 @@ function showAlertMessage(aiStatus){
     }
 }
 
-function showAlertMessageFromUI(status){
-    switch(status){
+function showAlertMessageFromUI(status) {
+    switch (status) {
         case UI_STATE.FILE_UPLOADED.value:
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started.');
             break;
@@ -566,7 +541,7 @@ function showAlertMessageFromUI(status){
     }
 }
 
-function getErrorPercentProgress(progress){
+function getErrorPercentProgress(progress) {
     var percentProgress = progress * 100.0;
     if (percentProgress < 0.0) {
         percentProgress = 0.0;
@@ -650,7 +625,7 @@ function hideHelpBox(state) {
     $('#containerMsgAlertTrainingInfo').prop('hidden', state);
 }
 
-function updateDeepLearningError(error){
+function updateDeepLearningError(error) {
     document.getElementById("show-error").innerText = error;
 }
 
@@ -672,18 +647,18 @@ function phaseOneMaxValue() {
 }
 
 function createMessageWarningInfoAlert() {
-    var wHTML = ''
+    var wHTML = '';
 
     wHTML += ('<div class="alert alert-dismissable flat alert-warning" id="containerMsgWarningAlertTrainingInfo">');
     wHTML += ('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>');
     wHTML += ('<span id="msgAlertWarningTrainingInfo">');
-    wHTML += ('<dt>Start info pre-trained neural Manipulation</dt>');
+    wHTML += ('<dt>Training Interrupted</dt>');
     wHTML += ('<dd>');
-    wHTML += ('We detected a few changes to the Bot training data and hence we recommend you restart the training.');
+    wHTML += ('Training has stopped. Click to resume.');
     wHTML += ('</dd>');
     wHTML += ('<p></p>');
     wHTML += ('<dt class="text-center">');
-    wHTML += ('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="trainingRestart();"> <b>Restart Training</b></button>');
+    wHTML += ('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="trainingRestart();"> <b>Resume Training</b></button>');
     wHTML += ('</dt>');
 
     wHTML += ('</span>');
@@ -720,7 +695,7 @@ $("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function () {
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });
 
-$( document ).ready(function() {
+$(document).ready(function () {
     initializePretrainingMonitor(aiStatus);
     initializeTrainingMonitor(aiStatus);
     initializeAlertMessage(aiStatus);

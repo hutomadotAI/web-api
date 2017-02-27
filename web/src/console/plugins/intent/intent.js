@@ -2,7 +2,7 @@ document.getElementById("btnCreateIntent").addEventListener("click", postingInte
 
 function checkIntentCode(element, key) {
     if (key == 13) {
-        if( activeButtonCreateIntent())
+        if (activeButtonCreateIntent())
             postingIntentName();
     }
     else {
@@ -35,7 +35,7 @@ function postingIntentName() {
         return false;
     }
 
-    if(isNameExists($("#inputIntentName").val(),intents)){
+    if (isNameExists($("#inputIntentName").val(), intents)) {
         msgAlertIntent(ALERT.DANGER.value, 'Intent name already exists. Please choose a different name.');
         return false;
     }
@@ -68,7 +68,7 @@ function showIntents(str) {
 
             wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;"" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
-            
+
             wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
@@ -101,7 +101,7 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function submitElementClicked(value){
+function submitElementClicked(value) {
     var form = document.createElement('form');
     var element = document.createElement('input');
 
@@ -116,8 +116,8 @@ function submitElementClicked(value){
     form.submit();
 }
 
-function editIntent(elem,intent) {
-    elem.setAttribute('onclick','');
+function editIntent(elem, intent) {
+    elem.setAttribute('onclick', '');
     submitElementClicked(intent);
 }
 

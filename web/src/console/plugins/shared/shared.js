@@ -1,22 +1,47 @@
 var ALERT =
 {
-    BASIC: { value: 0},
-    WARNING: { value: 1},
-    DANGER: { value: 2},
-    SUCCESS: { value: 3},
-    INFO: { value: 4},
-    PRIMARY: { value: 5}
+    BASIC: {value: 0},
+    WARNING: {value: 1},
+    DANGER: {value: 2},
+    SUCCESS: {value: 3},
+    INFO: {value: 4},
+    PRIMARY: {value: 5}
 };
 
 var API_AI_STATE =
 {
-    UNDEFINED: { value: 'ai_undefined'},
-    QUEUED: { value: 'ai_training_queued'},
-    READY_TO_TRAIN: { value: 'ai_ready_to_train'},
-    TRAINING: { value: 'ai_training'},
-    STOPPED: { value: 'ai_training_stopped'},
-    COMPLETED: { value: 'ai_training_complete'},
-    ERROR: { value: 'ai_error'}
+    UNDEFINED: {value: 'ai_undefined'},
+    QUEUED: {value: 'ai_training_queued'},
+    READY_TO_TRAIN: {value: 'ai_ready_to_train'},
+    TRAINING: {value: 'ai_training'},
+    STOPPED: {value: 'ai_training_stopped'},
+    COMPLETED: {value: 'ai_training_complete'},
+    ERROR: {value: 'ai_error'}
+};
+
+var UI_STATE =
+{
+    ERROR: {value: -1},
+    NOTHING: {value: 0},
+    FILE_UPLOADED: {value: 1},
+    READY_TO_TRAIN: {value: 2},
+    PHASE1_INIT: {value: 3},
+    PHASE1_QUEUE: {value: 4},
+    PHASE1_RUN: {value: 5},
+    PHASE2_INIT: {value: 6},
+    PHASE2_RUN: {value: 7},
+    STOPPED: {value: 8},
+    COMPLETED: {value: 10},
+    LISTENING_MODE: {value: 999}
+};
+
+var UI_TRAINING_STATE =
+{
+    PHASE1_INIT: {value: 100},
+    PHASE1_RUN: {value: 101},
+    PHASE1_END: {value: 102},
+    PHASE2_INIT: {value: 200},
+    PHASE2_RUN: {value: 201}
 };
 
 function RecursiveUnbind($jElement) {
@@ -30,23 +55,23 @@ function RecursiveUnbind($jElement) {
     });
 }
 
-function getPercentualValue(error){
+function getPercentualValue(error) {
     error = 100 - error;
     error = error.toFixed(2);
-    if ( error % 1 === 0 )
+    if (error % 1 === 0)
         error = Math.round(error);
     return error
 }
 
-$(document).ready(function(){
+$(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
     var is_mac = (navigator.userAgent.indexOf('Mac OS') != -1);
     var is_windows = !is_mac;
-    if (is_chrome && is_safari){
-        is_safari=false;
+    if (is_chrome && is_safari) {
+        is_safari = false;
     }
-    if (is_safari || is_windows){
+    if (is_safari || is_windows) {
         $('body').css(
             "font-family", "'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif"
         );

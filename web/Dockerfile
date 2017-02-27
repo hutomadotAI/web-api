@@ -3,7 +3,7 @@ LABEL maintainer "pedrotei@hutoma.com"
 
 RUN \
 	apt-get update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get -y install \
-    libcurl4-gnutls-dev curl lynx-cur wget
+    libcurl4-gnutls-dev curl lynx-cur wget libsasl2-modules postfix
 
 
 # Install PHP's curl, PDO and mysql connection stuff
@@ -27,6 +27,9 @@ COPY config/000-default.conf /etc/apache2/sites-enabled
 COPY config/default-ssl.conf /etc/apache2/sites-enabled
 COPY config/apache2.conf /etc/apache2/
 
+# Copy the postfix configuration to enable sending out emails
+COPY config/postfix-main.cf /etc/postfix/main.cf
+
 
 # Copy the dev console code to the web root folder
 COPY src /var/www/html
@@ -39,3 +42,4 @@ ENV HUTOMA_API_DB_CONNECTION_STRING mysql:dbname=hutoma;host=localhost;port=3306
 ENV HUTOMA_API_DB_USERNAME username
 ENV HUTOMA_API_DB_PASSWORD password
 ENV HUTOMA_API_URL http://server/v1
+ENV HUTOMA_MAIL_ACCOUNT_PWD password

@@ -187,7 +187,7 @@ public class Config {
     public long getBackendCombinedRequestTimeoutMs() {
         return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
     }
-
+    
     public String getBotIconStoragePath() {
         return getConfigFromProperties("bot_icon_path", "/boticon");
     }

@@ -19,7 +19,7 @@ function activeButtonCreateIntentPrompt() {
             return true;
         case 1:
             msgAlertIntentPrompt(ALERT.WARNING.value, 'Intent prompt is too long!');
-            return false
+            return false;
         default:
     }
     return false;

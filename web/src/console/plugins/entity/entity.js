@@ -119,11 +119,6 @@ function submitElementClicked(value){
     form.submit();
 }
 
-function editEntity(elem,entity) {
-    elem.setAttribute('onclick','');
-    submitElementClicked(entity.replace(/@/g, ""));
-}
-
 $('#deleteEntity').on('show.bs.modal', function (e) {
     var $modal = $(this), esseyId = e.relatedTarget.id;
     var elem = document.getElementById('delete-entity-label');

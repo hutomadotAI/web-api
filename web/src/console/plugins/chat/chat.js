@@ -75,6 +75,16 @@ function createLeftMsg(human_name,msg){
     }
 }
 
+
+function cutText(phrase) {
+    const maximumTextLenght = 150; // characters
+    if (phrase.length > maximumTextLenght) {
+        var chunk = phrase.substr(0, maximumTextLenght);
+        return chunk;
+    }
+    return phrase;
+}
+
 function createRightMsg(ai_name,msg,chatId,error) {
     // Update chatId if needed
     if ($("#chatId").val() == '') {$("#chatId").val(chatId);}
@@ -119,8 +129,6 @@ function createRightMsg(ai_name,msg,chatId,error) {
     if (isChrome)
         unlockSpeechOption();
 }
-
-
 
 function requestAnswerAI(ai_name, question, chatId) {
     if (question == '') {
