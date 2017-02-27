@@ -11,8 +11,14 @@ import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
-import com.webcohesion.enunciate.metadata.rs.*;
+import com.webcohesion.enunciate.metadata.rs.RequestHeader;
+import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
+import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
+import com.webcohesion.enunciate.metadata.rs.ResponseCode;
+import com.webcohesion.enunciate.metadata.rs.StatusCodes;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
+import java.net.HttpURLConnection;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -22,8 +28,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.net.HttpURLConnection;
 
 /**
  * Assistant endpoint.
@@ -62,9 +66,8 @@ public class AssistantEndpoint {
     public
     @TypeHint(ChatResult.class)
     Response chat(
-            @Context SecurityContext securityContext,
             @Context ContainerRequestContext requestContext) {
-        ApiResult result = this.chatLogic.assistantChat(securityContext,
+        ApiResult result = this.chatLogic.assistantChat(
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),

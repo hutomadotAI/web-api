@@ -15,10 +15,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 28/07/2016.
@@ -41,7 +39,6 @@ public class AdminEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response adminPost(
-            @Context SecurityContext securityContext,
             @DefaultValue("ROLE_FREE") @QueryParam("role") String securityRole,
             @DefaultValue("") @QueryParam("username") String username,
             @DefaultValue("") @QueryParam("email") String email,
@@ -52,7 +49,6 @@ public class AdminEndpoint {
             @DefaultValue("1") @QueryParam("plan_id") int planId) {
 
         ApiResult result = this.adminLogic.createDev(
-                securityContext,
                 securityRole,
                 username,
                 email,
@@ -70,9 +66,8 @@ public class AdminEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteDeveloper(
-            @Context SecurityContext securityContext,
             @DefaultValue("") @QueryParam("devid") String devId) {
-        ApiResult result = this.adminLogic.deleteDev(securityContext, devId);
+        ApiResult result = this.adminLogic.deleteDev(devId);
         return result.getResponse(this.serializer).build();
     }
 
@@ -81,9 +76,8 @@ public class AdminEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getToken(
-            @Context SecurityContext securityContext,
             @DefaultValue("") @PathParam("devid") String devId) {
-        ApiResult result = this.adminLogic.getDevToken(securityContext, devId);
+        ApiResult result = this.adminLogic.getDevToken(devId);
         return result.getResponse(this.serializer).build();
     }
 }

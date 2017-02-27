@@ -21,34 +21,34 @@ function initializeEventListeners() {
     document.getElementById('btnUploadFile').addEventListener('click', uploadTextFile);
 }
 
-function initializePretrainingMonitor(aiStatus){
-    var wHTML ='';
+function initializePretrainingMonitor(aiStatus) {
+    var wHTML = '';
     var parent = document.getElementById('pretrainingbar');
     var phaseOnePercentProgress = getErrorPercentProgress(aiStatus["phase_1_progress"]);
 
-    wHTML +='<td class="text-center" id="status-upload-file">phase 1</td>';
-    wHTML +='<td>';
-    wHTML +='<div class="progress progress-xs" id="progress-upload-file-action" style="margin-top:9px;">';
-    wHTML +='<div class="progress-bar progress-bar-primary" id="progress-upload-file" value="' + phaseOnePercentProgress + '" style="width:' + phaseOnePercentProgress + '%"></div>';
-    wHTML +='</div>';
-    wHTML +='</td>';
-    wHTML +='<td class="text-center"><span id="status-badge-upload" class="badge btn-primary">' + phaseOnePercentProgress + '%</span></td>';
+    wHTML += '<td class="text-center" id="status-upload-file">phase 1</td>';
+    wHTML += '<td>';
+    wHTML += '<div class="progress progress-xs" id="progress-upload-file-action" style="margin-top:9px;">';
+    wHTML += '<div class="progress-bar progress-bar-primary" id="progress-upload-file" value="' + phaseOnePercentProgress + '" style="width:' + phaseOnePercentProgress + '%"></div>';
+    wHTML += '</div>';
+    wHTML += '</td>';
+    wHTML += '<td class="text-center"><span id="status-badge-upload" class="badge btn-primary">' + phaseOnePercentProgress + '%</span></td>';
 
     parent.innerHTML = wHTML;
 }
 
-function initializeTrainingMonitor(aiStatus){
-    var wHTML ='';
+function initializeTrainingMonitor(aiStatus) {
+    var wHTML = '';
     var parent = document.getElementById('trainingbar');
     var phaseTwoPercentProgress = getErrorPercentProgress(aiStatus["phase_2_progress"]);
 
-    wHTML +='<td class="text-center" id="status-training-file">phase 2</td>';
-    wHTML +='<td>';
-    wHTML +='<div class="progress progress-xs" id="progress-training-file-action" style="margin-top:9px;">';
-    wHTML +='<div class="progress-bar progress-bar-success" id="progress-training-file" value="' + phaseTwoPercentProgress + '" style="width:' + phaseTwoPercentProgress + '%"></div>';
-    wHTML +='</div>';
-    wHTML +='</td>';
-    wHTML +='<td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">' + phaseTwoPercentProgress + '%</span></td>';
+    wHTML += '<td class="text-center" id="status-training-file">phase 2</td>';
+    wHTML += '<td>';
+    wHTML += '<div class="progress progress-xs" id="progress-training-file-action" style="margin-top:9px;">';
+    wHTML += '<div class="progress-bar progress-bar-success" id="progress-training-file" value="' + phaseTwoPercentProgress + '" style="width:' + phaseTwoPercentProgress + '%"></div>';
+    wHTML += '</div>';
+    wHTML += '</td>';
+    wHTML += '<td class="text-center" style="width: 120px;"><span id="status-badge-training" class="badge btn-success">' + phaseTwoPercentProgress + '%</span></td>';
 
     parent.innerHTML = wHTML;
 
@@ -56,13 +56,13 @@ function initializeTrainingMonitor(aiStatus){
 }
 
 function initializeAlertMessage(aiStatus) {
-    var wHTML ='';
+    var wHTML = '';
     var parent = document.getElementById('msgAlertBox');
 
-    wHTML +='<div id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">';
-    wHTML +='<i id="iconAlertProgressBar"></i>';
-    wHTML +='<span id="msgAlertProgressBar"></span>';
-    wHTML +='</div>';
+    wHTML += '<div id="containerMsgAlertProgressBar" style="margin-bottom: 0; padding-right:0;">';
+    wHTML += '<i id="iconAlertProgressBar"></i>';
+    wHTML += '<span id="msgAlertProgressBar"></span>';
+    wHTML += '</div>';
 
     parent.innerHTML = wHTML;
 
@@ -70,8 +70,8 @@ function initializeAlertMessage(aiStatus) {
         msgAlertUploadFile(ALERT.PRIMARY.value, 'File\'s loaded already.');
 }
 
-function initializeTrainingConsole(aiStatus){
-    switch(aiStatus['ai_status']){
+function initializeTrainingConsole(aiStatus) {
+    switch (aiStatus['ai_status']) {
         case API_AI_STATE.UNDEFINED.value:
             hidePreTrainingBar(true);
             hideTrainingBar(true);
@@ -79,9 +79,22 @@ function initializeTrainingConsole(aiStatus){
             showAlertMessage(aiStatus['ai_status']);
             break;
         case API_AI_STATE.QUEUED.value:
-            phaseOneQueue();
-            phaseOneReset();
-            hideTrainingBar(true);
+            var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);
+            switch (true) {
+                case (phaseOnePercentProgress < 0.0001 ):
+                    phaseOneFlashing(true);
+                    break;
+                case (phaseOnePercentProgress < 99.999):
+                    phaseOneStriped(true);
+                    break;
+                case (phaseOnePercentProgress >= 99.999):
+                    phaseOneMaxValue();
+                    break;
+                default:
+            }
+            hidePreTrainingBar(false);
+            phaseTwoQueue();
+            hideTrainingBar(false);
             hideChart(true);
             showAlertMessage(aiStatus['ai_status']);
             startPollForStatus();
@@ -98,7 +111,7 @@ function initializeTrainingConsole(aiStatus){
             var phaseTwoPercentProgress = getErrorPercentProgress(aiStatus['phase_2_progress']);
             var deepLearningError = aiStatus['deep_learning_error'];
 
-            switch(true){
+            switch (true) {
                 case (phaseOnePercentProgress < 0.0001 ):
                     hideTrainingBar(true);
                     hideChart(true);
@@ -154,6 +167,7 @@ function initializeTrainingConsole(aiStatus){
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
+            hideHelpBox(true);
             showAlertMessage(aiStatus['ai_status']);
             break;
         case API_AI_STATE.ERROR.value:
@@ -188,17 +202,34 @@ function getUIStatusCall() {
             phaseOneFlashing(true);
             showAlertMessageFromUI(status);
             break;
-        case (status == UI_STATE.PHASE1_QUEUE.value):
-            phaseOneFlashing(false);
-            phaseOneQueue();
-            phaseOneReset();
-            showAlertMessageFromUI(status);
-            break;
         case (status == UI_STATE.PHASE1_RUN.value):
             var progress = getP1Progress();
             phaseOneFlashing(false);
             phaseOneStriped(true);
             phaseOneUpdate(progress);
+            showAlertMessageFromUI(status);
+            break;
+        case (status == UI_STATE.PHASE2_QUEUE.value):
+            var phaseOnePercentProgress = getP1Progress();
+            switch (true) {
+                case (phaseOnePercentProgress < 0.0001 ):
+                    phaseOneFlashing(true);
+                    phaseOneStriped(false);
+                    break;
+                case (phaseOnePercentProgress < 99.999):
+                    phaseOneFlashing(false);
+                    phaseOneStriped(true);
+                    break;
+                case (phaseOnePercentProgress > 99.999):
+                    phaseOneFlashing(false);
+                    phaseOneStriped(false);
+                    phaseOneMaxValue();
+                    break;
+                default:
+            }
+            hidePreTrainingBar(false);
+            phaseTwoQueue();
+            hideTrainingBar(false);
             showAlertMessageFromUI(status);
             break;
         case (status == UI_STATE.PHASE2_INIT.value):
@@ -240,6 +271,7 @@ function getUIStatusCall() {
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
+            hideHelpBox(true);
             showAlertMessageFromUI(status);
             break;
         case (status == UI_STATE.ERROR.value):
@@ -258,7 +290,9 @@ function setStateResponse(aiStatus) {
             setUICurrentStatus(UI_STATE.LISTENING_MODE.value);
             break;
         case API_AI_STATE.QUEUED.value:
-            setUICurrentStatus(UI_STATE.PHASE1_QUEUE.value);
+            var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);
+            setP1Progress(phaseOnePercentProgress);
+            setUICurrentStatus(UI_STATE.PHASE2_QUEUE.value);
             break;
         case API_AI_STATE.READY_TO_TRAIN.value:
             if (status != ai_status_last)
@@ -270,7 +304,7 @@ function setStateResponse(aiStatus) {
             var phaseTwoPercentProgress = getErrorPercentProgress(aiStatus['phase_2_progress']);
             var deepLearningError = aiStatus['deep_learning_error'];
 
-            switch(true){
+            switch (true) {
                 case (phaseOnePercentProgress < 0.0001):
                     setUICurrentStatus(UI_STATE.PHASE1_INIT.value);
                     break;
@@ -317,7 +351,7 @@ function trainingStartCall() {
             if ((statusCode === 200 ) || (statusCode === 400 )) {
                 setUICurrentStatus(UI_STATE.PHASE1_INIT.value);
             } else {
-                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! Error code ' + statusCode +'!');
+                msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! Error code ' + statusCode + '!');
                 setUICurrentStatus(UI_STATE.ERROR.value);
             }
         },
@@ -438,8 +472,8 @@ function haNoContentError(info) {
     return false;
 }
 
-function showAlertMessage(aiStatus){
-    switch(aiStatus){
+function showAlertMessage(aiStatus) {
+    switch (aiStatus) {
         case API_AI_STATE.UNDEFINED.value:
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started. Please upload training data.');
             break;
@@ -477,19 +511,19 @@ function showAlertMessage(aiStatus){
     }
 }
 
-function showAlertMessageFromUI(status){
-    switch(status){
+function showAlertMessageFromUI(status) {
+    switch (status) {
         case UI_STATE.FILE_UPLOADED.value:
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started.');
             break;
         case UI_STATE.PHASE1_INIT.value:
             msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait.');
             break;
-        case UI_STATE.PHASE1_QUEUE.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait. The process is queued.');
-            break;
         case UI_STATE.PHASE1_RUN.value:
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
+            break;
+        case UI_STATE.PHASE2_QUEUE.value:
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait. The process is queued.');
             break;
         case UI_STATE.PHASE2_INIT.value:
             msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase two may take a few minutes. Please wait.');
@@ -507,7 +541,7 @@ function showAlertMessageFromUI(status){
     }
 }
 
-function getErrorPercentProgress(progress){
+function getErrorPercentProgress(progress) {
     var percentProgress = progress * 100.0;
     if (percentProgress < 0.0) {
         percentProgress = 0.0;
@@ -569,11 +603,6 @@ function phaseTwoStriped(flag) {
         document.getElementById('progress-training-file-action').className = 'progress progress-xs active';
 }
 
-function phaseOneQueue() {
-    document.getElementById('status-upload-file').innerText = 'queued';
-    document.getElementById('status-upload-file').setAttribute('class', 'text-center');
-}
-
 function phaseTwoQueue() {
     document.getElementById('status-training-file').innerText = 'queued';
     document.getElementById('status-training-file').setAttribute('class', 'text-center');
@@ -592,7 +621,11 @@ function hideChart(state) {
     $('#chart-details-footer').prop('hidden', state);
 }
 
-function updateDeepLearningError(error){
+function hideHelpBox(state) {
+    $('#containerMsgAlertTrainingInfo').prop('hidden', state);
+}
+
+function updateDeepLearningError(error) {
     document.getElementById("show-error").innerText = error;
 }
 
@@ -662,7 +695,7 @@ $("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function () {
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });
 
-$( document ).ready(function() {
+$(document).ready(function () {
     initializePretrainingMonitor(aiStatus);
     initializeTrainingMonitor(aiStatus);
     initializeAlertMessage(aiStatus);

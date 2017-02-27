@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
@@ -15,14 +16,11 @@ import static com.hutoma.api.common.TestDataHelper.DEVID;
 /**
  * Created by pedrotei on 08/01/17.
  */
-public final class BotHelper {
+public final class TestBotHelper {
 
     public static final int BOTID = 1234;
 
-    public static final AiBot SAMPLEBOT =
-            new AiBot(DEVID, AIID, BOTID, "name", "description", "long description", "alert message", "badge",
-                    BigDecimal.valueOf(1.123), "sample", "category", "licType", DateTime.now(), "privacy policy",
-                    "classification", "version", "http://video", AiBot.PublishingState.PUBLISHED, null);
+    public static final AiBot SAMPLEBOT = getBot(DEVID, AIID, BOTID);
     private static final byte[] BOTICON_CONTENT = "this is an image!".getBytes(Charset.defaultCharset());
 
     public static ApiResult publishSampleBot(final AIBotStoreLogic aiBotStoreLogic) {
@@ -30,6 +28,12 @@ public final class BotHelper {
                 SAMPLEBOT.getDescription(), SAMPLEBOT.getLongDescription(), SAMPLEBOT.getAlertMessage(), SAMPLEBOT.getBadge(),
                 SAMPLEBOT.getPrice(), SAMPLEBOT.getSample(), SAMPLEBOT.getCategory(), SAMPLEBOT.getLicenseType(),
                 SAMPLEBOT.getPrivacyPolicy(), SAMPLEBOT.getClassification(), SAMPLEBOT.getVersion(), SAMPLEBOT.getVideoLink());
+    }
+
+    public static AiBot getBot(final String devId, final UUID aiid, final int botId) {
+        return new AiBot(devId, aiid, botId, "name", "description", "long description", "alert message", "badge",
+                BigDecimal.valueOf(1.123), "sample", "category", "licType", DateTime.now(), "privacy policy",
+                "classification", "version", "http://video", AiBot.PublishingState.PUBLISHED, "");
     }
 
     public static byte[] getBotIconContent() {

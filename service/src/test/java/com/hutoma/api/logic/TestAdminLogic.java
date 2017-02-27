@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
-import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Matchers.*;
@@ -30,7 +29,6 @@ public class TestAdminLogic {
     private static final String DEVTOKEN = "wieqejqwkjeqwejqlkejqwejwldslkfhslkdhflkshflskfh-sdfjdf";
 
     private JsonSerializer fakeSerializer;
-    private SecurityContext fakeContext;
     private Database fakeDatabase;
     private AIServices fakeAiServices;
     private Config fakeConfig;
@@ -42,7 +40,6 @@ public class TestAdminLogic {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(Database.class);
-        this.fakeContext = mock(SecurityContext.class);
         this.fakeAiServices = mock(AIServices.class);
         this.fakeLogger = mock(ILogger.class);
         this.adminLogic = new AdminLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger,
@@ -111,29 +108,29 @@ public class TestAdminLogic {
     @Test
     public void testDelete_dbException() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteDev(anyString())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.adminLogic.deleteDev(this.fakeContext, DEVID);
+        ApiResult result = this.adminLogic.deleteDev(DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetDevToken() throws Database.DatabaseException {
         when(this.fakeDatabase.getDevToken(any())).thenReturn(DEVTOKEN);
-        ApiAdmin admin = (ApiAdmin) this.adminLogic.getDevToken(this.fakeContext, DEVID);
+        ApiAdmin admin = (ApiAdmin) this.adminLogic.getDevToken(DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, admin.getStatus().getCode());
     }
 
     @Test
     public void testGetDevToken_dbException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDevToken(any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.adminLogic.getDevToken(this.fakeContext, DEVID);
+        ApiResult result = this.adminLogic.getDevToken(DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetDevToken_devTokenEmpty() throws Database.DatabaseException {
-        when(this.fakeDatabase.getDevToken(any())).thenReturn("");
-        ApiResult result = this.adminLogic.getDevToken(this.fakeContext, DEVID);
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+        when(this.fakeDatabase.getDevToken(any())).thenReturn(null);
+        ApiResult result = this.adminLogic.getDevToken(DEVID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     private void validKeyDBSuccess() throws Database.DatabaseException {
@@ -142,10 +139,10 @@ public class TestAdminLogic {
     }
 
     private ApiResult createDev() {
-        return this.adminLogic.createDev(this.fakeContext, "ROLE", "username", "email", "password", "passSalt", "firt_name", "last_time", 0);
+        return this.adminLogic.createDev("ROLE", "username", "email", "password", "passSalt", "firt_name", "last_time", 0);
     }
 
     private ApiResult deleteDev(String devid) {
-        return this.adminLogic.deleteDev(this.fakeContext, devid);
+        return this.adminLogic.deleteDev(devid);
     }
 }

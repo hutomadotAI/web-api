@@ -1,8 +1,5 @@
 document.getElementById("btnAddEntityValue").addEventListener("click", addEntityValue);
 
-if (limitText($("#value-entity")) == 0)
-    $("#btnAddEntityValue").prop("disabled", false);
-
 function checkValueCode(element, key) {
     if (key == 13) {
         if( activeButtonCreateEntityValue())
@@ -16,27 +13,19 @@ function checkValueCode(element, key) {
 function activeButtonCreateEntityValue() {
     var limitTextInputSize = 250;
     switch (limitText($("#value-entity"), limitTextInputSize)) {
-        case -1:
-            $("#btnAddEntityValue").prop("disabled", true);
-            return false;
         case 0:
             msgAlertEntityValues(ALERT.BASIC.value, 'You can add additional values for the current entity.');
-            $("#btnAddEntityValue").prop("disabled", false);
             return true;
         case 1:
             msgAlertEntityValues(ALERT.WARNING.value, 'The value name\'s is too long!');
-            $("#btnAddEntityValue").prop("disabled", true);
-            return false
+            return false;
         default:
-            $("#btnAddEntityValue").prop("disabled", true);
     }
     return false;
 }
 
 function addEntityValue() {
-    $(this).prop("disabled", true);
-
-    if (isInputInvalid($("#value-entity").val(), 'entity_value')) {
+      if (isInputInvalid($("#value-entity").val(), 'entity_value')) {
         msgAlertEntityValues(ALERT.DANGER.value, 'Value name can contain only the following: A-Z, a-z, 0-9, _character');
         return;
     }
@@ -91,15 +80,6 @@ function createNewValueEntityRow(value, parent) {
     newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
-
-    checkListEntityValuesSize();
-}
-
-function checkListEntityValuesSize() {
-    if (document.getElementById('entityValues-list').childElementCount > 0)
-        $("#btnSaveEntity").prop("disabled", false);
-    else
-        $("#btnSaveEntity").prop("disabled", true);
 }
 
 function deleteValueEntity(element) {
@@ -173,7 +153,7 @@ function saveEntity() {
             msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved.');
         },
         complete: function () {
-            checkListEntityValuesSize();
+            $("#btnSaveEntity").prop("disabled", false);
             document.body.style.cursor = prevCursor;
         }
     });

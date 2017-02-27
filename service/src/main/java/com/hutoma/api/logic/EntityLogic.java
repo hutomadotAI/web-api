@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -35,56 +34,61 @@ public class EntityLogic {
         this.trainingLogic = trainingLogic;
     }
 
-    public ApiResult getEntities(final SecurityContext securityContext, final String devid) {
+    public ApiResult getEntities(final String devid) {
         try {
-            this.logger.logDebug(LOGFROM, "request to list entities from " + devid);
+
             final List<String> entityList = this.database.getEntities(devid);
             if (entityList.isEmpty()) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid, "Num Entities", "0");
                 return ApiError.getNotFound();
             }
+            this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid,
+                    "Num Entities", Integer.toString(entityList.size()));
             return new ApiEntityList(entityList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetEntities", devid, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult getEntity(final SecurityContext securityContext, final String devid, final String entityName) {
+    public ApiResult getEntity(final String devid, final String entityName) {
         try {
-            this.logger.logDebug(LOGFROM, "request to list entity " + entityName + " from " + devid);
             final ApiEntity entity = this.database.getEntity(devid, entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devid, "Entity", entityName);
             return entity.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetEntity", devid, e);
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult writeEntity(final String devid, final String entityName, final ApiEntity entity) {
         try {
-            this.logger.logDebug(LOGFROM, "request to edit entity " + entityName + " from " + devid);
             stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devid, "Entity", entityName);
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseIntegrityViolationException dive) {
-            this.logger.logDebug(LOGFROM, "attempt to rename to existing name");
+            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name", devid,
+                    "Entity", entityName);
             return ApiError.getBadRequest("entity name already in use");
         } catch (final Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "WriteEntity", devid, e);
             return ApiError.getInternalServerError();
         }
     }
 
     public ApiResult deleteEntity(final String devid, final String entityName) {
         try {
-            this.logger.logDebug(LOGFROM, "request to delete entity " + entityName + " from " + devid);
             if (!this.database.deleteEntity(devid, entityName)) {
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devid, "Entity", entityName);
                 return ApiError.getNotFound();
             }
             stopTrainingIfEntityInUse(devid, entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devid, "Entity", entityName);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "DeleteEntity", devid, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -93,7 +97,7 @@ public class EntityLogic {
         try {
             return this.database.getAisForEntity(devid, entityName);
         } catch (final Exception e) {
-            this.logger.logException(LOGFROM, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetAisWithEntityInUse", devid, e);
         }
         return new ArrayList<>();
     }

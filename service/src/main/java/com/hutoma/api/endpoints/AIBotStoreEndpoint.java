@@ -66,8 +66,12 @@ public class AIBotStoreEndpoint {
     @RequestHeaders({
             @RequestHeader(name = "Authorization", description = "Developer token.")
     })
-    public Response getPublishedBots() {
-        ApiResult result = this.aiBotStoreLogic.getPublishedBots();
+    public Response getPublishedBots(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiBotStoreLogic.getPublishedBots(
+                ParameterFilter.getDevid(requestContext)
+        );
         return result.getResponse(this.serializer).build();
     }
 
@@ -87,9 +91,12 @@ public class AIBotStoreEndpoint {
     public
     @TypeHint(AiBot.class)
     Response getBotDetails(
+            @Context ContainerRequestContext requestContext,
             @PathParam("botId") int botId
     ) {
-        ApiResult result = this.aiBotStoreLogic.getBotDetails(botId);
+        ApiResult result = this.aiBotStoreLogic.getBotDetails(
+                ParameterFilter.getDevid(requestContext),
+                botId);
         return result.getResponse(this.serializer).build();
     }
 
@@ -149,7 +156,8 @@ public class AIBotStoreEndpoint {
             @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition =
                     "Developer information hasn't been update yet; Invalid publish information; "
                             + "AI already has a published bot; "
-                            + "Publishing an AI that is already linked to one or more bots is not supported"),
+                            + "Publishing an AI that is already linked to one or more bots is not supported"
+                            + "AI needs to be fully trained before being allowed to be published"),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })
     @RequestHeaders({

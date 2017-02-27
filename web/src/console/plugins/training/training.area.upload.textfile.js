@@ -27,7 +27,7 @@ function uploadTextFile() {
                 case 200:
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
-
+                    
                     if (additionalInfo != null)
                         uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
 

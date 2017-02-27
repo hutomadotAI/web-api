@@ -1,8 +1,5 @@
 document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
 
-if (limitText($("#inputEntityName")) == 0)
-    $("#btnCreateEntity").prop("disabled", false);
-
 function checkEntityCode(element, key) {
     if (key == 13) {
         if( activeButtonCreateEntity())
@@ -16,9 +13,6 @@ function checkEntityCode(element, key) {
 function activeButtonCreateEntity() {
     var limitTextInputSize = 250;
     switch (limitText($("#inputEntityName"), limitTextInputSize)) {
-        case -1:
-            $("#btnCreateEntity").prop("disabled", true);
-            return false;
         case 0:
             msgAlertEntity(ALERT.BASIC.value, 'In this section you can create different entities.');
             $("#btnCreateEntity").prop("disabled", false);
@@ -49,18 +43,7 @@ function postingEntityName() {
         return false;
     }
 
-    var form = document.createElement('form');
-    var element = document.createElement('input');
-
-    form.method = 'POST';
-    form.action = './entityelement.php';
-
-    element.value = inputEntityName.value;
-    element.name = 'entity';
-    form.appendChild(element);
-    document.body.appendChild(form);
-    form.submit();
-    
+    submitElementClicked(inputEntityName.value);
     RecursiveUnbind($('#wrapper'));
 }
 
@@ -121,16 +104,16 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function editEntity(elem,entity) {
-    elem.setAttribute('onclick','');
+function submitElementClicked(value){
     var form = document.createElement('form');
     var element = document.createElement('input');
 
     form.method = 'POST';
     form.action = './entityelement.php';
 
-    element.value = entity.replace(/@/g, "");
+    element.value = value;
     element.name = 'entity';
+    element.setAttribute("type", "hidden");
     form.appendChild(element);
     document.body.appendChild(form);
     form.submit();

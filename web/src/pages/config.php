@@ -31,7 +31,6 @@ require __DIR__ . "/../class.logsys.php";
         "home_page" => "/console/home.php"
     ),
     "logging" => array(
-      //"url" => "http://log-svc:18080/log"
+        //"url" => "http://log-svc:18080/log"
     )
 ));
-

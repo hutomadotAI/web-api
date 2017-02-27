@@ -16,7 +16,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.ws.rs.core.SecurityContext;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
@@ -32,7 +31,6 @@ public class TestIntentLogic {
     private final String INTENTNAME = "intent";
     private final String TOPICIN = "topicin";
     private final String TOPICOUT = "topicout";
-    SecurityContext fakeContext;
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     IntentLogic intentLogic;
@@ -43,7 +41,6 @@ public class TestIntentLogic {
     public void setup() {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
-        this.fakeContext = mock(SecurityContext.class);
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
         this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);
@@ -52,57 +49,57 @@ public class TestIntentLogic {
     @Test
     public void testGetIntents_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntents(anyString(), any())).thenReturn(getIntentsList());
-        final ApiResult result = this.intentLogic.getIntents(this.fakeContext, DEVID, AIID);
+        final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntents_Success_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntents(anyString(), any())).thenReturn(getIntentsList());
-        final ApiResult result = this.intentLogic.getIntents(this.fakeContext, DEVID, AIID);
+        final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
         Assert.assertEquals(2, ((ApiIntentList) result).getIntentNames().size());
         Assert.assertEquals(this.INTENTNAME, ((ApiIntentList) result).getIntentNames().get(0));
     }
 
     @Test
     public void testGetIntents_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntents(anyString(), any())).thenReturn(new ArrayList<String>());
-        final ApiResult result = this.intentLogic.getIntents(this.fakeContext, DEVID, AIID);
+        when(this.fakeDatabase.getIntents(anyString(), any())).thenReturn(new ArrayList<>());
+        final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntents_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntents(anyString(), any())).thenThrow(new Database.DatabaseException(new Exception("test")));
-        final ApiResult result = this.intentLogic.getIntents(this.fakeContext, DEVID, AIID);
+        when(this.fakeDatabase.getIntents(anyString(), any())).thenThrow(Database.DatabaseException.class);
+        final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(getIntent());
-        final ApiResult result = this.intentLogic.getIntent(this.fakeContext, DEVID, AIID, this.INTENTNAME);
+        final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Success_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(getIntent());
-        final ApiResult result = this.intentLogic.getIntent(this.fakeContext, DEVID, AIID, this.INTENTNAME);
+        final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(this.INTENTNAME, ((ApiIntent) result).getIntentName());
     }
 
     @Test
     public void testGetIntent_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(null);
-        final ApiResult result = this.intentLogic.getIntent(this.fakeContext, DEVID, AIID, this.INTENTNAME);
+        final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
-        final ApiResult result = this.intentLogic.getIntent(this.fakeContext, DEVID, AIID, this.INTENTNAME);
+        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenThrow(Database.DatabaseException.class);
+        final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 

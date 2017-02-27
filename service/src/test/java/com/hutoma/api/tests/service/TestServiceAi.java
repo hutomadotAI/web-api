@@ -23,8 +23,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import static com.hutoma.api.common.BotHelper.BOTID;
-import static com.hutoma.api.common.BotHelper.SAMPLEBOT;
+import static com.hutoma.api.common.TestBotHelper.BOTID;
+import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
@@ -92,6 +92,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testUpdateAI() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).post(

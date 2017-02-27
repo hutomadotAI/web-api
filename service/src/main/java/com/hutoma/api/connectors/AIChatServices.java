@@ -1,43 +1,60 @@
 package com.hutoma.api.connectors;
 
-import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.controllers.InvocationResult;
+import com.hutoma.api.controllers.RequestAiml;
+import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.controllers.RequestRnn;
+import com.hutoma.api.controllers.RequestWnet;
+import com.hutoma.api.controllers.ServerMetadata;
 
 import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyInvocation;
-import org.glassfish.jersey.client.JerseyWebTarget;
 
-import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
+
 
 /**
- * Created by David MG on 01/12/2016.
+ * AI Chat services.
  */
 public class AIChatServices extends ServerConnector {
 
-    public static final String WNET = "wnet";
-    public static final String AIML = "aiml";
-    public static final String RNN = "rnn";
-    // active requests
-    private HashMap<String, Future<InvocationResult>> requestMap;
+    private static final String LOGFROM = "aichatservices";
+    private final RequestWnet requestWnet;
+    private final RequestRnn requestRnn;
+    private final RequestAiml requestAiml;
+    private List<Future<InvocationResult>> wnetFutures;
+    private List<Future<InvocationResult>> rnnFutures;
+    private List<Future<InvocationResult>> aimlFutures;
+
+    private long requestDeadline;
 
     @Inject
     public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
-                          final Tools tools, final Config config, final JerseyClient jerseyClient) {
-        super(database, logger, serializer, tools, config, jerseyClient);
+                          final Tools tools, final Config config, final JerseyClient jerseyClient,
+                          final ThreadSubPool threadSubPool,
+                          final RequestWnet wnetController, final RequestRnn rnnController,
+                          final RequestAiml aimlController) {
+        super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
+        this.requestWnet = wnetController;
+        this.requestRnn = rnnController;
+        this.requestAiml = aimlController;
     }
 
     /***
@@ -51,10 +68,11 @@ public class AIChatServices extends ServerConnector {
      * @throws AiServicesException
      */
     public void startChatRequests(final String devId, final UUID aiid, final UUID chatId, final String question,
-                                  final String history, final String topicIn) throws AiServicesException {
+                                  final String history, final String topicIn)
+            throws AiServicesException, RequestBase.AiControllerException, ServerMetadata.NoServerAvailable {
 
-        // store the call map
-        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
+        // calculate the exact deadline for this group of requests
+        this.requestDeadline = this.tools.getTimestamp() + this.config.getBackendCombinedRequestTimeoutMs();
 
         // generate the parameters to send
         HashMap<String, String> parameters = new HashMap<String, String>() {{
@@ -63,124 +81,128 @@ public class AIChatServices extends ServerConnector {
             put("topic", topicIn);
             put("q", question);
         }};
+        List<Pair<String, UUID>> ais = this.getLinkedBotsAiids(devId, aiid);
 
-        // create the calls
-        createCallable(WNET, this.config.getWnetChatEndpoint(), devId, aiid, parameters, callables);
-        createCallable(AIML, this.config.getAimlChatEndpoint(), devId, aiid, parameters, callables);
-        createCallable(RNN, this.config.getRnnChatEndpoint(), devId, aiid, parameters, callables);
-
-        // execute the calls
-        this.requestMap = this.execute(callables);
-    }
-
-    /***
-     * Waits for WNET call to complete and returns the result
-     * @return
-     * @throws AiServicesException
-     */
-    public ChatResult awaitWnet() throws AiServicesException {
-        return this.waitForAndGet(WNET);
-    }
-
-    /***
-     * Waits for AIML call to complete and returns the result
-     * @return
-     * @throws AiServicesException
-     */
-    public ChatResult awaitAiml() throws AiServicesException {
-        return this.waitForAndGet(AIML);
-    }
-
-    /***
-     * Waits for RNN call to complete and returns the result
-     * @return
-     * @throws AiServicesException
-     */
-    public ChatResult awaitRnn() throws AiServicesException {
-        return this.waitForAndGet(RNN);
-    }
-
-    private ChatResult waitForAndGet(String label) throws AiServicesException {
-
-        // have we made the call at all?
-        if (this.requestMap == null) {
-            throw new AiServicesException("Can't await before making any calls");
+        // If the current AI is in a state that can handle chat requests, then include it
+        if (this.canChatWithAi(devId, aiid)) {
+            ais.add(new Pair<>(devId, aiid));
         }
 
-        // get and wait for the call to complete
-        InvocationResult response = null;
-        try {
-            if (!this.requestMap.get(label).isDone()) {
-                response = this.waitFor(label, this.requestMap);
-            } else {
-                response = this.requestMap.get(label).get();
+        // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
+        boolean usedAimlBot = false;
+        List<String> aimlBotIds = this.config.getAimlBotAiids();
+        if (!aimlBotIds.isEmpty()) {
+            Set<UUID> usedAimlAis = ais.stream().map(Pair::getB).collect(Collectors.toSet());
+            Set<UUID> aimlBotIdsSet = aimlBotIds.stream().map(UUID::fromString).collect(Collectors.toSet());
+            // intersect the two sets to usedAimlAis retains only the AIML ais in use
+            usedAimlAis.retainAll(aimlBotIdsSet);
+            if (!usedAimlAis.isEmpty()) {
+                List<Pair<String, UUID>> listAis = new ArrayList<>();
+                usedAimlAis.forEach(x -> listAis.add(new Pair<>(/* ignored at the moment */devId, x)));
+                this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis);
+                usedAimlBot = true;
+                // remove the aiml bots ais from the list of ais
+                List<Pair<String, UUID>> newList = new ArrayList<>();
+                for (Pair<String, UUID> ai : ais) {
+                    if (!usedAimlAis.contains(ai.getB())) {
+                        newList.add(ai);
+                    }
+                }
+                ais = newList;
             }
-        } catch (InterruptedException | TimeoutException | ExecutionException e) {
-            throw new AiServicesException(String.format("%s: %s", label, e.getMessage()));
         }
 
-        Response.StatusType statusInfo = response.getResponse().getStatusInfo();
-        switch (statusInfo.getStatusCode()) {
-            case HttpURLConnection.HTTP_OK:
-                break;
-            case HttpURLConnection.HTTP_NOT_FOUND:
-                throw new AiNotFoundException(label);
-            default:
-                // generate error text from the HTTP result only
-                // (ignores response body for now)
-                String errorText = String.format("%s http error: %d %s)",
-                        label,
-                        statusInfo.getStatusCode(),
-                        statusInfo.getReasonPhrase());
-                throw new AiServicesException(errorText);
+        // If we're issuing a chat request but there are no AIs available to serve it, just fail
+        if (ais.isEmpty() && !usedAimlBot) {
+            throw new AiNotReadyToChat("No AIs ready to chat");
         }
 
-        // otherwise attempt to deserialize the chat result
+        if (!ais.isEmpty()) {
+            this.wnetFutures = this.requestWnet.issueChatRequests(parameters, ais);
+            this.rnnFutures = this.requestRnn.issueChatRequests(parameters, ais);
+        }
+    }
+
+    /***
+     * Waits for WNET calls to complete and returns the result
+     * @return map of results, or null if there were no requests
+     * @throws RequestBase.AiControllerException
+     */
+    public Map<UUID, ChatResult> awaitWnet() throws RequestBase.AiControllerException {
+        if (this.wnetFutures != null) {
+            return this.requestWnet.waitForAll(this.wnetFutures, getRemainingTime());
+        }
+        return null;
+    }
+
+    /***
+     * Waits for AIML calls to complete and returns the result
+     * @return map of results, or null if there were no requests
+     * @throws RequestBase.AiControllerException
+     */
+    public Map<UUID, ChatResult> awaitAiml() throws RequestBase.AiControllerException {
+        if (this.aimlFutures != null) {
+            return this.requestAiml.waitForAll(this.aimlFutures, getRemainingTime());
+        }
+        return null;
+    }
+
+    /***
+     * Waits for RNN calls to complete and returns the result
+     * @return map of results, or null if there were no requests
+     * @throws RequestBase.AiControllerException
+     */
+    public Map<UUID, ChatResult> awaitRnn() throws RequestBase.AiControllerException {
+        if (this.rnnFutures != null) {
+            return this.requestRnn.waitForAll(this.rnnFutures, getRemainingTime());
+        }
+        return null;
+    }
+
+    public void abandonCalls() {
+        this.requestWnet.abandonCalls();
+        this.requestRnn.abandonCalls();
+        this.requestAiml.abandonCalls();
+    }
+
+    public List<Pair<String, UUID>> getLinkedBotsAiids(final String devId, final UUID aiid)
+            throws RequestBase.AiControllerException {
+        List<Pair<String, UUID>> ais = new ArrayList<>();
         try {
-            String content = response.getResponse().readEntity(String.class);
-            ITelemetry.addTelemetryEvent(this.logger, "chat response", new HashMap<String, String>() {{
-                this.put("From", label);
-            }});
-            ChatResult chatResult = new ChatResult((ChatResult) this.serializer.deserialize(content, ChatResult.class));
-            chatResult.setElapsedTime(response.getDurationMs() / 1000.0);
-            return chatResult;
-        } catch (JsonParseException jpe) {
-            throw new AiServicesException(jpe.getMessage());
+            List<AiBot> bots = this.database.getBotsLinkedToAi(devId, aiid);
+            for (AiBot bot : bots) {
+                ais.add(new Pair<>(bot.getDevId(), bot.getAiid()));
+            }
+        } catch (Database.DatabaseException ex) {
+            throw new RequestBase.AiControllerException("Couldn't get the list of linked bots");
         }
+        return ais;
     }
 
-    private void createCallable(final String label, final String endpoint,
-                                final String devId, final UUID aiid,
-                                final HashMap<String, String> params,
-                                final HashMap<String, Callable<InvocationResult>> callables) {
-
-        // create call to back-end chat endpoints
-        // e.g.
-        //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
-        //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae&topic=&history=
-        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString()).path("chat");
-        for (Map.Entry<String, String> param : params.entrySet()) {
-            target = target.queryParam(param.getKey(), param.getValue());
+    public boolean canChatWithAi(final String devId, final UUID aiid) {
+        try {
+            ApiAi apiAi = this.database.getAI(devId, aiid, this.serializer);
+            return apiAi.getSummaryAiStatus() == TrainingStatus.AI_TRAINING_COMPLETE
+                    || apiAi.getSummaryAiStatus() == TrainingStatus.AI_TRAINING;
+        } catch (Database.DatabaseException ex) {
+            this.logger.logException(LOGFROM, ex);
         }
-
-        final JerseyInvocation.Builder builder = target.request();
-        callables.put(label, () -> {
-            long startTime = AIChatServices.this.tools.getTimestamp();
-            Response response = builder.get();
-            return new InvocationResult(response, endpoint, AIChatServices.this.tools.getTimestamp() - startTime);
-        });
+        return false;
     }
 
-    public static class AiNotFoundException extends AiServicesException {
-        public AiNotFoundException(final String message) {
+    /***
+     * Assuming that we pre-calculated the deadline when we started the chat requests,
+     * this calculates the time remaining until we reach the deadline
+     * so that it can be used as a timeout for awaiting calls
+     * @return time left, in ms
+     */
+    private int getRemainingTime() {
+        return (int) Math.max(0, this.requestDeadline - this.tools.getTimestamp());
+    }
+
+    public static class AiNotReadyToChat extends AiServicesException {
+        public AiNotReadyToChat(final String message) {
             super(message);
         }
     }
-
-    public static class AiRejectedStatusException extends AiServicesException {
-        public AiRejectedStatusException(final String message) {
-            super(message);
-        }
-    }
-
 }

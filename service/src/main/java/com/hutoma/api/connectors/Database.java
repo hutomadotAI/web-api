@@ -404,7 +404,7 @@ public class Database {
                 if (rs.next()) {
                     return rs.getString("dev_token");
                 }
-                return "";
+                return null;
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }

@@ -19,7 +19,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -42,9 +41,8 @@ public class EntitiesEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID})
     public Response getEntities(
-            @Context final SecurityContext securityContext,
             @Context final ContainerRequestContext requestContext) {
-        final ApiResult result = this.entityLogic.getEntities(securityContext,
+        final ApiResult result = this.entityLogic.getEntities(
                 ParameterFilter.getDevid(requestContext));
         return result.getResponse(this.serializer).build();
     }

@@ -115,12 +115,9 @@ function requestPublish() {
                     buttonPublishToRequest();
                     callback(JSONdata['bot']['botId']);
                     break;
-                case 400:
-                    createAlertMessage(ALERT.DANGER.value, 'At least one of the required parameters is null or empty.');
-                    $("#btnPublishRequest").prop("disabled", false);
-                    break;
                 default:
                     createAlertMessage(ALERT.DANGER.value, JSONdata['status']['info']);
+                    $("#btnPublishRequest").prop("disabled", false);
             }
         },
         complete: function () {

@@ -3,7 +3,9 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.controllers.InvocationResult;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
@@ -14,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -41,46 +41,24 @@ public class ServerConnector {
     protected final JerseyClient jerseyClient;
     protected final ILogger logger;
     protected final Tools tools;
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    protected final ThreadSubPool threadSubPool;
 
     @Inject
     public ServerConnector(final Database database, final ILogger logger, final JsonSerializer serializer,
-                           final Tools tools, final Config config, final JerseyClient jerseyClient) {
+                           final Tools tools, final Config config, final JerseyClient jerseyClient,
+                           final ThreadSubPool threadSubPool) {
         this.database = database;
         this.logger = logger;
         this.serializer = serializer;
         this.tools = tools;
         this.config = config;
         this.jerseyClient = jerseyClient;
+        this.threadSubPool = threadSubPool;
         this.jerseyClient.register(MultiPartWriter.class);
     }
 
     public void abandonCalls() {
-        this.executor.shutdownNow();
-    }
-
-    public static class InvocationResult {
-        private final Response response;
-        private final String endpoint;
-        private final long durationMs;
-
-        public InvocationResult(final Response response, final String endpoint, final long durationMs) {
-            this.response = response;
-            this.endpoint = endpoint;
-            this.durationMs = durationMs;
-        }
-
-        public Response getResponse() {
-            return this.response;
-        }
-
-        public long getDurationMs() {
-            return this.durationMs;
-        }
-
-        public String getEndpoint() {
-            return this.endpoint;
-        }
+        this.threadSubPool.cancelAll();
     }
 
     public static class AiServicesException extends Exception {
@@ -102,10 +80,12 @@ public class ServerConnector {
 
     protected InvocationResult waitFor(String callName, HashMap<String, Future<InvocationResult>> futures)
             throws AiServicesException, ExecutionException, InterruptedException, TimeoutException {
-        if (!futures.containsKey(callName)) {
+
+        Future<InvocationResult> future = futures.get(callName);
+        if (future == null) {
             throw new AiServicesException(String.format("Call %s not found", callName));
         }
-        return futures.get(callName).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        return future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
 
     protected HashMap<String, Future<InvocationResult>> execute(
@@ -116,7 +96,7 @@ public class ServerConnector {
 
         // get a named future for a named callable response
         callables.entrySet().forEach((entry) -> {
-            futures.put(entry.getKey(), this.executor.submit(entry.getValue()));
+            futures.put(entry.getKey(), this.threadSubPool.submit(entry.getValue()));
         });
 
         return futures;

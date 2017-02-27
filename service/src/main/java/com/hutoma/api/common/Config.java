@@ -115,32 +115,77 @@ public class Config {
         return Double.parseDouble(getConfigFromProperties("ratelimit_loadtest_frequency", "8192.5"));
     }
 
-    public String getWnetTrainingEndpoint() {
-        return getConfigFromProperties("ai_wnet_endpoint", "");
-    }
-
-    public String getRnnTrainingEndpoint() {
-        return getConfigFromProperties("ai_rnn_endpoint", "");
-    }
-
-    public String getWnetChatEndpoint() {
-        return getConfigFromProperties("ai_wnet_endpoint", "");
-    }
-
-    public String getAimlChatEndpoint() {
-        return getConfigFromProperties("ai_aiml_endpoint", "");
-    }
-
-    public String getRnnChatEndpoint() {
-        return getConfigFromProperties("ai_rnn_endpoint", "");
-    }
-
     public String getLoggingServiceUrl() {
         return getConfigFromProperties("logging_url", null);
     }
 
+    public List<String> getAimlBotAiids() {
+        List<String> list = getCSList("ai_aiml_bot_aiids");
+        if (list == null) {
+            return Arrays.asList("e1bb8226-e8ce-467a-8305-bc2fcb89dd7f");
+        } else {
+            return list;
+        }
+    }
+
     public int getLoggingUploadCadency() {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
+    }
+
+    /***
+     * The maximum number of active threads in the threadpool
+     * after which anyone requesting a thread will get an exception
+     * @return
+     */
+    public int getThreadPoolMaxThreads() {
+        return 1024;
+    }
+
+    /***
+     * The time after which an idle thread in the thread pool get be closed
+     * @return
+     */
+    public long getThreadPoolIdleTimeMs() {
+        return 60 * 1000;
+    }
+
+    /***
+     * Under normal conditions the controller will ping the server every n milliseconds
+     * @return n
+     */
+    public long getServerHeartbeatEveryMs() {
+        return 2 * 1000;
+    }
+
+    /***
+     * However long the last call took, always wait a minimum of n milliseconds
+     * before issuing the next ping
+     * i.e. if we issue a ping every 2 seconds and the ping takes 2 seconds to complete
+     * we would still wait n ms between calls
+     * @return n
+     */
+    public long getServerHeartbeatMinimumGapMs() {
+        return 500;
+    }
+
+    /***
+     * If we haven't received a valid ping for n milliseconds
+     * then we write off this server and it has to re-register with us
+     * @return n
+     */
+    public long getServerHeartbeatFailureCutOffMs() {
+        return 5 * 1000;
+    }
+
+    /***
+     * The total number of milliseconds that we wait for backend
+     * requests to complete.
+     * N.B. this value is not 'per request'.
+     * If we start the first call at t=1 then we won't wait beyond t=20001
+     * @return
+     */
+    public long getBackendCombinedRequestTimeoutMs() {
+        return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
     }
 
     public String getBotIconStoragePath() {
@@ -164,7 +209,10 @@ public class Config {
 
     private List<String> getCSList(final String propertyName) {
         String instances = getConfigFromProperties(propertyName, null);
-        if (instances != null && !instances.isEmpty()) {
+        if (instances == null) {
+            return null;
+        }
+        if (!instances.isEmpty()) {
             return Arrays.asList(instances.split(","));
         }
         return new ArrayList<>();

@@ -2,7 +2,6 @@ package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ITelemetry;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
@@ -10,6 +9,8 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerRegistration;
 
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -17,8 +18,8 @@ import org.glassfish.jersey.server.ContainerRequest;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -66,6 +67,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case IntentJson:
                 case EntityJson:
                 case AiStatusJson:
+                case ServerRegistration:
+                case ServerAffinity:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -113,11 +116,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
-            this.logger.logDebug(LOGFROM, "parameter validation failed");
-            ITelemetry.addTelemetryEvent(this.logger, "ParamValidationFailed (POST)",
-                    new HashMap<String, String>() {{
-                        this.put("parameter name", pve.getParameterName());
-                        this.put("error", pve.getMessage());
+            this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
+                    new LinkedHashMap<String, String>() {{
+                        put("Type", "Query");
+                        put("Parameter", pve.getParameterName());
+                        put("Message", pve.getMessage());
                     }});
         }
     }
@@ -213,6 +216,24 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 checkParameterNotNull("ai_engine", aiStatus.getAiEngine());
                 request.setProperty(APIParameter.AiStatusJson.toString(), aiStatus);
             }
+
+            if (checkList.contains(APIParameter.ServerRegistration)) {
+                ServerRegistration serverRegistration = (ServerRegistration)
+                        this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
+                checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
+                checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
+                checkParameterNotNull(SERVER_URL, serverRegistration.getServerUrl());
+                request.setProperty(APIParameter.ServerRegistration.toString(), serverRegistration);
+            }
+
+            if (checkList.contains(APIParameter.ServerAffinity)) {
+                ServerAffinity serverAffinity = (ServerAffinity)
+                        this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
+                checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
+                checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
+                request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
+            }
+
         } catch (JsonParseException jpe) {
             throw new ParameterValidationException("error in json format", "request body");
         }

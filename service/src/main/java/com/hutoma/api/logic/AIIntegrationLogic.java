@@ -11,7 +11,6 @@ import com.hutoma.api.containers.sub.Integration;
 
 import java.util.List;
 import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Created by Andrea on 30/09/16.
@@ -32,8 +31,7 @@ public class AIIntegrationLogic {
         this.logger = logger;
     }
 
-    public ApiResult getIntegrations(
-            SecurityContext securityContext) {
+    public ApiResult getIntegrations(final String devId) {
 
         try {
             List<Integration> integrationList = this.database.getAiIntegrationList();

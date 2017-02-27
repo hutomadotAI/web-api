@@ -81,15 +81,7 @@
                 </div>
             </div>
             <div class="col-xs-5">
-                <div class="form-group">
-                    <label for="developer_country">Country</label>
-                    <div class="input-group">
-                        <div class="input-group-addon">
-                            <i class="fa fa-globe"></i>
-                        </div>
-                        <input type="text" maxlength="50" class="form-control flat no-shadow"  id="developer_country" name="developer_country" placeholder="Enter the country...">
-                    </div>
-                </div>
+                <?php include './dynamic/input.country.html.php'; ?>
             </div>
             <div class="col-xs-3">
                 <div class="form-group">
@@ -122,7 +114,7 @@
                     <label for="developer_company">Company</label>
                     <div class="input-group" >
                         <div class="input-group-addon">
-                            <i class="fa fa-envelope-o"></i>
+                            <i class="fa fa-users"></i>
                         </div>
                         <input type="text" maxlength="50" class="form-control flat no-shadow" id="developer_company" name="developer_company" placeholder="Enter company...">
                     </div>

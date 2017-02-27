@@ -1,6 +1,6 @@
 package com.hutoma.api.tests.service;
 
-import com.hutoma.api.common.ChatTelemetryLogger;
+import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -37,7 +37,7 @@ public class TestServiceAssistant extends ServiceTestBase {
     @Mock
     protected IEntityRecognizer fakeEntityRecognizer;
     @Mock
-    protected ChatTelemetryLogger fakeChatTelemetryLogger;
+    protected ChatLogger fakeChatTelemetryLogger;
 
     /***
      * Carry out pre-test set-up.
@@ -77,14 +77,6 @@ public class TestServiceAssistant extends ServiceTestBase {
     }
 
     /***
-     * Get the class under test.
-     * @return
-     */
-    protected Class<?> getClassUnderTest() {
-        return AssistantEndpoint.class;
-    }
-
-    /***
      * Apply default query parameters.
      * @param webTarget
      * @return
@@ -96,6 +88,14 @@ public class TestServiceAssistant extends ServiceTestBase {
     }
 
     /***
+     * Get the class under test.
+     * @return
+     */
+    protected Class<?> getClassUnderTest() {
+        return AssistantEndpoint.class;
+    }
+
+    /***
      * Set up additional bindings required for the tests.
      * @param binder
      * @return
@@ -103,13 +103,13 @@ public class TestServiceAssistant extends ServiceTestBase {
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeEntityRecognizer = mock(IEntityRecognizer.class);
-        this.fakeChatTelemetryLogger = mock(ChatTelemetryLogger.class);
+        this.fakeChatTelemetryLogger = mock(ChatLogger.class);
 
         binder.bind(ChatLogic.class).to(ChatLogic.class);
 
         binder.bindFactory(new InstanceFactory<>(TestServiceAssistant.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceAssistant.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
-        binder.bindFactory(new InstanceFactory<>(TestServiceAssistant.this.fakeChatTelemetryLogger)).to(ChatTelemetryLogger.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceAssistant.this.fakeChatTelemetryLogger)).to(ChatLogger.class);
 
         return binder;
     }

@@ -15,8 +15,8 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.ws.rs.core.SecurityContext;
 
+import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,14 +30,12 @@ public class TestAIIntegrationLogic {
     private final JsonSerializer fakeSerializer;
     private final Database fakeDatabase;
     private final ILogger fakeLogger;
-    private final SecurityContext fakeContext;
 
     public TestAIIntegrationLogic() {
         this.fakeConfig = mock(Config.class);
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeLogger = mock(ILogger.class);
-        this.fakeContext = mock(SecurityContext.class);
         this.integLogic = new AIIntegrationLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger);
     }
 
@@ -45,7 +43,7 @@ public class TestAIIntegrationLogic {
     public void testGetIntegrations() throws Database.DatabaseException {
         List<Integration> list = Collections.singletonList(new Integration(1, "name", "desc", "icon", true));
         when(this.fakeDatabase.getAiIntegrationList()).thenReturn(list);
-        ApiIntegrationList integ = (ApiIntegrationList) this.integLogic.getIntegrations(this.fakeContext);
+        ApiIntegrationList integ = (ApiIntegrationList) this.integLogic.getIntegrations(DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(list, integ.getIntegrationList());
     }
@@ -53,14 +51,14 @@ public class TestAIIntegrationLogic {
     @Test
     public void testGetIntegrations_emptyList() throws Database.DatabaseException {
         when(this.fakeDatabase.getAiIntegrationList()).thenReturn(new ArrayList<>());
-        ApiResult result = this.integLogic.getIntegrations(this.fakeContext);
+        ApiResult result = this.integLogic.getIntegrations(DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntegrations_dbException() throws Database.DatabaseException {
         when(this.fakeDatabase.getAiIntegrationList()).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.integLogic.getIntegrations(this.fakeContext);
+        ApiResult result = this.integLogic.getIntegrations(DEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 }

@@ -1,6 +1,5 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.BotHelper;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -15,7 +14,6 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
-import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -40,7 +38,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -447,25 +444,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(DEVID, AIID, this.fakeSerializer)).thenThrow(Database.DatabaseException.class);
         ApiError error = (ApiError) this.logic.getTrainingMaterials(DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, error.getStatus().getCode());
-        verify(this.fakeLogger).logException(anyString(), any());
-    }
-
-    @Test
-    public void testUploadTraining_includeMultipleBots() throws Database.DatabaseException, ServerConnector.AiServicesException {
-        final String bot1Contents = "bot1_q\nbot1_a";
-        final String bot2Contents = "bot2_q\nbot2_a";
-        ApiResult result = testUpladTrainingMultipleBots(SOMETEXT, bot1Contents, bot2Contents);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        StringBuilder sb = new StringBuilder();
-        sb.append(bot1Contents).append(EOL).append(EOL).append(bot2Contents).append(EOL).append(EOL).append(SOMETEXT);
-        verify(this.fakeAiServices).uploadTraining(DEVID, AIID, sb.toString());
-    }
-
-    @Test
-    public void testUploadTraining_includeNoBots() throws Database.DatabaseException, ServerConnector.AiServicesException {
-        ApiResult result = testUpladTrainingMultipleBots(SOMETEXT);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices).uploadTraining(DEVID, AIID, SOMETEXT);
+        verify(this.fakeLogger).logUserExceptionEvent(anyString(), anyString(), anyString(), any());
     }
 
     @Test
@@ -474,32 +453,6 @@ public class TestTrainingLogic {
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(anyString(), any(), anyString());
         ApiResult result = this.logic.uploadFile(DEVID, AIID, TrainingLogic.TrainingType.TEXT, null, createUpload(SOMETEXT), this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
-    }
-
-    private ApiResult testUpladTrainingMultipleBots(final String aiTraining, String... botTrainings) throws Database.DatabaseException {
-        final ByteArrayInputStream aiTrainingFile = new ByteArrayInputStream(SOMETEXT.getBytes());
-        final FormDataContentDisposition fdcd = FormDataContentDisposition
-                .name("filename")
-                .size(aiTraining.getBytes().length)
-                .creationDate(new Date())
-                .modificationDate(new Date())
-                .readDate(new Date())
-                .build();
-
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeDatabase.getAiTrainingFile(AIID)).thenReturn(aiTraining);
-
-        List<AiBot> bots = new ArrayList<>();
-        for (int i = 0; i < botTrainings.length; i++) {
-            AiBot aiBot = new AiBot(BotHelper.SAMPLEBOT);
-            aiBot.setBotId(i);
-            aiBot.setAiid(UUID.randomUUID());
-            bots.add(aiBot);
-            when(this.fakeDatabase.getAiTrainingFile(aiBot.getAiid())).thenReturn(botTrainings[i]);
-        }
-        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(bots);
-
-        return this.logic.uploadFile(DEVID, AIID, TrainingLogic.TrainingType.TEXT, null, aiTrainingFile, fdcd);
     }
 
     private void testTraining_invalidAi(Supplier<ApiResult> supplier) throws Database.DatabaseException,

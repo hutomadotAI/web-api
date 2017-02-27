@@ -1,5 +1,7 @@
 package com.hutoma.api.common;
 
+import java.util.Map;
+
 /**
  * Logger interface.
  */
@@ -45,4 +47,86 @@ public interface ILogger {
      * @param config the configuration
      */
     void initialize(Config config);
+
+    /**
+     * Logs a user-related TRACE event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties map of properties
+     */
+    void logUserTraceEvent(String logFrom, String event, String user, Map<String, String> properties);
+
+    /**
+     * Logs a user-related TRACE event.
+     * @param logFrom where it's logging from
+     * @param event   the event name
+     * @param user    the user
+     */
+    void logUserTraceEvent(String logFrom, String event, String user);
+
+    /**
+     * Logs a user-related TRACE event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties list of property key-value pairs
+     */
+    void logUserTraceEvent(String logFrom, String event, String user, String... properties);
+
+    /**
+     * Logs a user-related EXCEPTION event.
+     * @param logFrom   where it's logging from
+     * @param event     the event name
+     * @param user      the user
+     * @param exception exception
+     */
+    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception);
+
+    /**
+     * Logs a user-related EXCEPTION event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param exception  the exception
+     * @param properties map of properties
+     */
+    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception,
+                               Map<String, String> properties);
+
+    /**
+     * Logs a user-related ERROR event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties list of property key-value pairs
+     */
+    void logUserErrorEvent(String logFrom, String event, String user, String... properties);
+
+    /**
+     * Logs a user-related ERROR event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties map of properties
+     */
+    void logUserErrorEvent(String logFrom, String event, String user, Map<String, String> properties);
+
+    /**
+     * Logs a user-related WARN event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties list of property key-value pairs
+     */
+    void logUserWarnEvent(String logFrom, String event, String user, String... properties);
+
+    /**
+     * Logs a user-related WARN event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties map of properties
+     */
+    void logUserWarnEvent(String logFrom, String event, String user, Map<String, String> properties);
 }

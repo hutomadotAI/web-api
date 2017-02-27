@@ -32,7 +32,6 @@ function isAuthorizedToAccess()
     isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
     );
 }
-
 ?>
 
 <!DOCTYPE html>
