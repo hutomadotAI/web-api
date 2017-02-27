@@ -1,11 +1,16 @@
+import argparse
+import os
+import urllib
+
+from api_cli import arg_error
+
+
 class Config:
-    def __init__(self):
+    def __init__(self, url):
         self.proxies = {
             #'http': 'http://127.0.0.1:4444',
         }
-        # self.urlRoot = "https://api.hutoma.com/v1"
-        self.url_root = "http://localhost:15000/v1"
-        #self.url_root = "http://10.150.0.4:8080/v1"
+        self.url_root = url;
 
         # dev token for donkey@hutoma.com (Load Testing account)
         self.auth = 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAkSQTM6NEY5NE3ZTUZBNdk0TTJN0k4yQj3cTUREvDZMNU85QUA6VaAAAAAP__.c6zeCRsUV8Wd5X3ZjDPrHDoUoOzjnZZoWKy0tEY7rN4'
@@ -33,3 +38,24 @@ class Config:
 
         self.unused_words_filename = "set_unused_words"
         self.training_filename = "set_training"
+
+def make_config():
+    parser = argparse.ArgumentParser(description='Hutoma performance test runner')
+    parser.add_argument('--url', help='URL to API. Can also be set using the HUTOMA_API_CLI_URL environment variable.')
+    args = parser.parse_args()
+
+    url_raw = args.url
+    if url_raw is None or len(url_raw) == 0:
+        url_raw = os.environ.get('HUTOMA_API_CLI_URL')
+
+    if url_raw is None or len(url_raw) == 0:
+        arg_error(parser, "URL is not set")
+
+    url_parsed = urllib.parse.urlparse(url_raw)
+    if url_parsed.scheme != 'http':
+        url_parsed = urllib.parse.urlparse('http://' + url_raw)
+    url = url_parsed.geturl()
+    print("API URL is", url)
+
+    config = Config(url)
+    return config;
