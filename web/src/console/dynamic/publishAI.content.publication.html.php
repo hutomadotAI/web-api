@@ -331,7 +331,7 @@
                         <label class="unselectable" for="bot_developer_company">Company</label>
                         <div class="input-group" >
                             <div class="input-group-addon">
-                                <i class="fa fa-envelope-o"></i>
+                                <i class="fa fa-users"></i>
                             </div>
                             <input type="text" maxlength="50" class="form-control flat no-shadow unselectable" id="bot_developer_company" name="bot_developer_company" placeholder="Enter company..." readonly>
                         </div>

@@ -1,8 +1,5 @@
 document.getElementById("btnAddIntentResponse").addEventListener("click", addIntentResponse);
 
-if (limitText($("#intent-response")) == 0)
-    $("#addIntentResponse").prop("disabled", false);
-
 function checkIntentResponseCode(element, key) {
     if (key == 13) {
         if( activeButtonCreateIntentResponse())
@@ -17,26 +14,18 @@ function activeButtonCreateIntentResponse() {
     var limitTextInputSize = 250;
     msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what actions should be taken by your business logic.');
     switch (limitText($("#intent-response"), limitTextInputSize)) {
-        case -1:
-            $("#btnAddIntentResponse").prop("disabled", true);
-            return false;
         case 0:
-            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the bot examples of how it should respond to a users intent.');
-            $("#btnAddIntentResponse").prop("disabled", false);
+            msgAlertIntentResponse(ALERT.BASIC.value, ' Give the bot examples of how it should respond to a user\'s intent.');
             return true;
         case 1:
             msgAlertIntentResponse(ALERT.WARNING.value, 'Intent\'s response is too long!');
-            $("#btnAddIntentResponse").prop("disabled", true);
             return false
         default:
-            $("#btnAddIntentResponse").prop("disabled", true);
     }
     return false;
 }
 
 function addIntentResponse() {
-    $(this).prop("disabled", true);
-
     if (isInputInvalid($("#intent-response").val(), 'intent_response')) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response can contain only alphanumeric characters.');
         return;
@@ -58,7 +47,7 @@ function addIntentResponse() {
     var parent = document.getElementById('intentresponse-list');
     document.getElementById('intent-response').value = '';
     createNewIntentResponseRow(value, parent);
-    msgAlertIntentResponse(ALERT.BASIC.value,' Give the bot examples of how it should respond to a users intent.');
+    msgAlertIntentResponse(ALERT.BASIC.value,'Give the bot examples of how it should respond to a user\'s intent.');
 }
 
 function createNewIntentResponseRow(value, parent) {
@@ -93,15 +82,6 @@ function createNewIntentResponseRow(value, parent) {
     newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
-
-    checkListIntentResponseSize();
-}
-
-function checkListIntentResponseSize() {
-    if (document.getElementById('intentresponse-list').childElementCount > 0)
-        $("#btnAddIntentResponse").prop("disabled", false);
-    else 
-        $("#btnAddIntentResponse").prop("disabled", true);
 }
 
 function deleteIntentResponse(element) {

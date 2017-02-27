@@ -1,11 +1,8 @@
 document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
-if (limitText($("#inputIntentName")) == 0)
-    $("#btnCreateEntity").prop("disabled", false);
-
 function checkIntentCode(element, key) {
     if (key == 13) {
-        if( activeButtonCreateIntent())
+        if (activeButtonCreateIntent())
             postingIntentName();
     }
     else {
@@ -16,9 +13,6 @@ function checkIntentCode(element, key) {
 function activeButtonCreateIntent() {
     var limitTextInputSize = 250;
     switch (limitText($("#inputIntentName"), limitTextInputSize)) {
-        case -1:
-            $("#btnCreateIntent").prop("disabled", true);
-            return false;
         case 0:
             msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
             $("#btnCreateIntent").prop("disabled", false);
@@ -41,7 +35,7 @@ function postingIntentName() {
         return false;
     }
 
-    if(isNameExists($("#inputIntentName").val(),intents)){
+    if (isNameExists($("#inputIntentName").val(), intents)) {
         msgAlertIntent(ALERT.DANGER.value, 'Intent name already exists. Please choose a different name.');
         return false;
     }
@@ -74,7 +68,7 @@ function showIntents(str) {
 
             wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;"" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
-            
+
             wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
             wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
             wHTML += ('</a>');
@@ -107,7 +101,7 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
-function submitElementClicked(value){
+function submitElementClicked(value) {
     var form = document.createElement('form');
     var element = document.createElement('input');
 
@@ -122,8 +116,8 @@ function submitElementClicked(value){
     form.submit();
 }
 
-function editIntent(elem,intent) {
-    elem.setAttribute('onclick','');
+function editIntent(elem, intent) {
+    elem.setAttribute('onclick', '');
     submitElementClicked(intent);
 }
 

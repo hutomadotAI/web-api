@@ -34,8 +34,8 @@
                         <dl class="dl-horizontal">
                             Training consists of two main phases:<br /><br/>
                             <ul>
-                                <li style="text-align:justify"><b>Phase 1 (phrase level learning)</b><br>During the first phase of training, your AI will be learning to respond to end users by leveraging the pre-packaged answers that are contained in your training file. In other words, the AI will understand what of the pre-made answers wil be more appropiate to use. Phrase level learning is usually quicker than Phase 2 and it allows you to interact with your AI almost right away.</li><br/>
-                                <li style="text-align:justify"><b>Phase 2 (word level learning)</b><br>Word level learning teaches your AI to recognize the underlying rules behind the sample conversations you provided. This phase can take days or even several weeks depending on how big your training file is. However once completed, it will allow the AI to formulate completely new answers that will go beyond your pre-packaged answers. Phase 2 responses are usually available after few minutes of training but they require more time to get consistent with the training you provided.</li>
+                                <li style="text-align:justify"><b>Phase 1 Learning</b><br>In Phase 1 the AI learns to respond to questions using your pre-packaged answers. This phase is quicker than Phase 2 and it allows you to interact with your AI almost right away.</li><br/>
+                                <li style="text-align:justify"><b>Phase 2 Learning</b><br>In Phase 2 the AI learns to respond to questions by autonomously creating new answers that will go beyond your pre-packaged ones. This phase can take days or weeks to complete and it usually produces better results with bigger training files.</li>
                             </ul>
                         </dl>
                     </div>

@@ -21,10 +21,10 @@
             </a>
             <ul class="dropdown-menu no-border flat" style="margin-top:5px;margin-left: 139px;">
                 <li id="speech-option" onMouseOver="this.style.cursor='pointer'">
-                    <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn Off Speech</spam></a>
+                    <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn On Speech</spam></a>
                 </li>
-                <li class="footer" id="json-option" value ="0" onClick="jsonOption(this.value)" onMouseOver="this.style.cursor='pointer'">
-                    <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-white"></i><spam id="json-text" class="text-white"> Show Json Message</spam></a>
+                <li class="footer" id="json-option" onClick="setOptionJsonWindow()" onMouseOver="this.style.cursor='pointer'">
+                    <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-white"></i><spam id="json-text" class="text-white"> Hide JSON Message</spam></a>
                 </li>
             </ul>
         </div>
@@ -45,7 +45,7 @@
     <div class="input-group">
         <input type="text" id="message" placeholder="Type a message ..." class="form-control flat no-shadow" onkeydown="keyboardChat(event)"  tabindex="-1">
         <div class="input-group-addon" id="btnSpeech">
-            <i id="microphone" style="font-size: 18px; width:20px;" class="fa fa-microphone text-red"></i>
+            <i id="microphone" style="font-size: 18px; width:20px;"></i>
         </div>
     </div>
 </div>

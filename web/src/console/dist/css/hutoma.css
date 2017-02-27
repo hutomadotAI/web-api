@@ -23,7 +23,7 @@
     font-family: 'Muli';
     font-style: normal;
     font-weight: 400;
-    src: url('../dist/fonts/muli-v7-latin-regular.eot'); /* IE9 Compat Modes */
+    src: url('../fonts/muli-v7-latin-regular.eot'); /* IE9 Compat Modes */
     src: local('Muli'),
     url('../fonts/muli-v7-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/muli-v7-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/muli-v7-latin-regular.woff') format('woff'), /* Modern Browsers */ url('../fonts/muli-v7-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/muli-v7-latin-regular.svg#Muli') format('svg'); /* Legacy iOS */
 }
@@ -2119,7 +2119,7 @@ a:focus {
 .overlay-wrapper .overlay {
     z-index: 50;
     background: rgba(255, 255, 255, 0.7);
-    border-radius: 3px;
+    border-radius: 0px;
 }
 
 .box .overlay > .fa,
@@ -2129,7 +2129,7 @@ a:focus {
     left: 50%;
     margin-left: -15px;
     margin-top: -15px;
-    color: #000;
+    color: #adadad;
     font-size: 30px;
 }
 
@@ -3483,7 +3483,6 @@ table.text-center th {
     right: auto;
     left: 100%;
     border-right-color: transparent;
-    border-left-color: #d2d6de;
 }
 
 .direct-chat-img {
@@ -3584,6 +3583,26 @@ table.text-center th {
 
 .contacts-list-msg {
     color: #999;
+}
+
+.chat-warning{
+    background: #f39c12;
+    border-color: #f39c12;
+    color: #ffffff;
+}
+
+.chat-warning:before {
+    border-left-color: #f39c12;
+}
+
+.chat-success{
+    background: #00a65a;
+    border-color: #00a65a;
+    color: #ffffff;
+}
+
+.chat-success:before {
+    border-left-color: #00a65a;
 }
 
 .direct-chat-danger .right > .direct-chat-text {
@@ -4020,8 +4039,7 @@ table.text-center th {
 @media (max-width: 768px) {
     .login-box,
     .register-box {
-        width: 90%;
-        margin-top: 20px;
+        margin-top: 50px;
     }
 }
 
@@ -5586,7 +5604,7 @@ table.text-center th {
     font-size: 22px;
 }
 
-.jqstooltip {
+.tooltip {
     padding: 5px !important;
     width: auto !important;
     height: auto !important;

@@ -14,26 +14,18 @@ function checkInputPromptCode(element, key) {
 function activeButtonCreateIntentPrompt() {
     var limitTextInputSize = 250;
     switch (limitText($("#intent-prompt"), limitTextInputSize)) {
-        case -1:
-            $("#btnAddIntentPrompt").prop("disabled", true);
-            return false;
         case 0:
             msgAlertIntentPrompt(ALERT.BASIC.value, 'Enter one or more prompts.');
-            $("#btnAddIntentPrompt").prop("disabled", false);
             return true;
         case 1:
             msgAlertIntentPrompt(ALERT.WARNING.value, 'Intent prompt is too long!');
-            $("#btnAddIntentPrompt").prop("disabled", true);
-            return false
+            return false;
         default:
-            $("#btnAddIntentPrompt").prop("disabled", true);
     }
     return false;
 }
 
 function addIntentPrompt() {
-    $(this).prop("disabled", true);
-
     if (isInputInvalid($("#intent-prompt").val(), 'intent_prompt')) {
         msgAlertIntentPrompt(ALERT.DANGER.value, 'The intent prompt can contain only alphanumeric characters.');
         return;
@@ -50,10 +42,8 @@ function addIntentPrompt() {
     var value = $(element).val();
     var parent = document.getElementById('prompts-list');
     document.getElementById('intent-prompt').value = '';
-
     createNewPromptRow(value, parent);
     msgAlertIntentPrompt(ALERT.BASIC.value, 'Enter one or more prompts.');
-
     resetMsgAlertIntentVariable();
     $(this).prop("disabled", false);
 }

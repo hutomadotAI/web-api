@@ -1,8 +1,5 @@
 document.getElementById("btnAddExpression").addEventListener("click", addUserExpression);
 
-if (limitText($("#user-expression")) == 0)
-    $("#btnAddExpression").prop("disabled", false);
-
 function checkExpressionCode(element, key) {
     if (key == 13) {
         if( activeButtonCreateUserExpression())
@@ -17,26 +14,18 @@ function activeButtonCreateUserExpression() {
     var limitTextInputSize = 250;
     msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
     switch (limitText($("#user-expression"), limitTextInputSize)) {
-        case -1:
-            $("#btnAddExpression").prop("disabled", true);
-            return false;
         case 0:
-            msgAlertUserExpression(ALERT.BASIC.value, ' Give the bot examples of how the user would express this intent.');
-            $("#btnAddExpression").prop("disabled", false);
+            msgAlertUserExpression(ALERT.BASIC.value, ' Give the bot examples of how a user would express this intent.');
             return true;
         case 1:
             msgAlertUserExpression(ALERT.WARNING.value, 'User expression is too long!');
-            $("#btnAddExpression").prop("disabled", true);
             return false
         default:
-            $("#btnAddExpression").prop("disabled", true);
     }
     return false;
 }
 
 function addUserExpression() {
-    $(this).prop("disabled", true);
-
     if (isInputInvalid($("#user-expression").val(), 'user_expression')) {
         msgAlertUserExpression(ALERT.DANGER.value, 'The user expression can contain only alphanumeric characters.');
         return;
@@ -58,7 +47,7 @@ function addUserExpression() {
     var parent = document.getElementById('userexpression-list');
     document.getElementById('user-expression').value = '';
     createNewUsersayRow(value, parent);
-    msgAlertUserExpression(ALERT.BASIC.value,' Give the bot examples of how the user would express this intent.');
+    msgAlertUserExpression(ALERT.BASIC.value,' Give the bot examples of how a user would express this intent.');
 }
 
 function createNewUsersayRow(value, parent) {
@@ -93,15 +82,6 @@ function createNewUsersayRow(value, parent) {
     newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
     parent.insertBefore(newNode, parent.firstChild);
-
-    checkListExpressionSize();
-}
-
-function checkListExpressionSize() {
-    if (document.getElementById('userexpression-list').childElementCount > 0)
-        $("#btnAddExpression").prop("disabled", false);
-    else
-        $("#btnAddExpression").prop("disabled", true);
 }
 
 function deleteUserExpression(element) {

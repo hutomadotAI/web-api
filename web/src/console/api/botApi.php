@@ -31,6 +31,18 @@ class botApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function getPublishedBot($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bot'));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
     public function getPurchasedBots()
     {
         if ($this->isLoggedIn()) {
