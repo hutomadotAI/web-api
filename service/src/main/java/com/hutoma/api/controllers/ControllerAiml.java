@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -18,7 +19,7 @@ public class ControllerAiml extends ControllerBase {
 
     @Inject
     public ControllerAiml(final ThreadSubPool threadSubPool,
-                          final ServiceLocator serviceLocator, final ILogger logger) {
+                          final ServiceLocator serviceLocator, final AiServiceStatusLogger logger) {
         super(threadSubPool, serviceLocator, logger);
     }
 

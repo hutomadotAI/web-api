@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -25,7 +26,7 @@ public abstract class ControllerBase extends ServerMetadata {
 
     public ControllerBase(final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator,
-                          final ILogger logger) {
+                          final AiServiceStatusLogger logger) {
         super(logger);
         this.serviceLocator = serviceLocator;
         this.threadSubPool = threadSubPool;

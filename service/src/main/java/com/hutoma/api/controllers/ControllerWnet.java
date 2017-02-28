@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ThreadSubPool;
@@ -16,7 +17,7 @@ public class ControllerWnet extends ControllerBase {
 
     @Inject
     public ControllerWnet(final ThreadSubPool threadSubPool,
-                          final ServiceLocator serviceLocator, final ILogger logger) {
+                          final ServiceLocator serviceLocator, final AiServiceStatusLogger logger) {
         super(threadSubPool, serviceLocator, logger);
     }
 

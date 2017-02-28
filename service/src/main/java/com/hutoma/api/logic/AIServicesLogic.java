@@ -13,6 +13,7 @@ import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
@@ -92,7 +93,12 @@ public class AIServicesLogic {
             }
 
             // we accept the update. log it.
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, "UpdateAIStatus", status);
+            String summary = String.format("Update %s status %s progress %d%% on ai %s",
+                    status.getAiEngine().toString(),
+                    status.getTrainingStatus().value(),
+                    (int)(status.getTrainingProgress() * 100.0),
+                    status.getAiid().toString());
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, summary, status);
 
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",

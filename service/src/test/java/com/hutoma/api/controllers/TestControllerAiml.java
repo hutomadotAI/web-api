@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.mock;
  */
 public class TestControllerAiml {
 
-    ILogger logger;
+    AiServiceStatusLogger logger;
     Config config;
     FakeTimerTools tools;
     ControllerAiml test;
@@ -32,7 +33,7 @@ public class TestControllerAiml {
 
     @Before
     public void setUp() throws Exception {
-        this.logger = mock(ILogger.class);
+        this.logger = mock(AiServiceStatusLogger.class);
         this.tools = new FakeTimerTools();
         this.config = mock(Config.class);
         this.fakeThreadSubPool = mock(ThreadSubPool.class);
