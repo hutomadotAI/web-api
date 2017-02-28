@@ -357,6 +357,7 @@ public class TestChatLogic {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(miList);
         ApiResult result = getChat(0.5f);
         ChatResult r = ((ApiChat) result).getResult();
@@ -374,9 +375,7 @@ public class TestChatLogic {
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
-
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
@@ -429,7 +428,7 @@ public class TestChatLogic {
      * Memory intent is fulfilled based on variable value included in last question
      */
     @Test
-    public void testChat_IntentPrompt_unfullfileldVar_fulfillFromUserQuestion()
+    public void testChat_IntentPrompt_unfullfilledVar_fulfillFromUserQuestion()
             throws RequestBase.AiControllerException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
@@ -440,7 +439,6 @@ public class TestChatLogic {
         ApiResult result = getChat(0.5f, "nothing to see here.");
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertTrue(mi.isFulfilled());
-        verify(this.fakeIntentHandler).updateStatus(mi);
         verify(this.fakeIntentHandler).clearIntents(any());
     }
 
@@ -470,10 +468,90 @@ public class TestChatLogic {
         ChatResult r = ((ApiChat) result).getResult();
         // The answer is NOT the prompt
         Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
-        // The intent status is updated to storage
-        verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is decremented
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
+    }
+
+    /***
+     * Memory intent is fulfilled after it's prompted once
+     */
+    @Test
+    public void testChat_multiLineIntent_fulfilled()
+            throws RequestBase.AiControllerException {
+        MemoryIntent mi = getMemoryIntentForPrompt(3, "prompt");
+
+        // Make sure all variables are clean
+        for (MemoryVariable mv : mi.getVariables()) {
+            mv.setCurrentValue(null);
+        }
+        // First question, triggers the intent but without the right entity value
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        // Verify intent is triggered
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+        // Verify answer is the prompt for the first variable
+        Assert.assertEquals(mi.getVariables().get(0).getPrompts().get(0), r.getAnswer());
+        Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
+        verify(this.fakeIntentHandler).updateStatus(mi);
+        verify(this.fakeIntentHandler, never()).clearIntents(any());
+
+        // Second question, the answer to the prompt with the right entity value
+        final String varValue = "_value_";
+        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
+            this.add(new Pair<>(mi.getVariables().get(0).getName(), varValue));
+        }};
+        when(this.fakeRecognizer.retrieveEntities(anyString(), any())).thenReturn(entities);
+        result = getChat(0.5f, "nothing to see here.");
+        r = ((ApiChat) result).getResult();
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        // Is fulfilled
+        Assert.assertTrue(r.getIntents().get(0).isFulfilled());
+        // Intent has the entity with currentValue set to what we've defined
+        Assert.assertEquals(varValue, r.getIntents().get(0).getVariables().get(0).getCurrentValue());
+        Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
+        verify(this.fakeIntentHandler).updateStatus(mi);
+        verify(this.fakeIntentHandler).clearIntents(any());
+    }
+
+    /***
+     * Memory intent is not fulfilled after exhausting all prompts
+     */
+    @Test
+    public void testChat_multiLineIntent_promptsExhausted()
+            throws RequestBase.AiControllerException {
+        final int maxPrompts = 3;
+        MemoryIntent mi = getMemoryIntentForPrompt(maxPrompts, "prompt");
+        // Make sure all variables are clean
+        for (MemoryVariable mv : mi.getVariables()) {
+            mv.setCurrentValue(null);
+        }
+
+        // Exhaust prompts
+        for (int n = 1; n <= maxPrompts; n++) {
+            ApiResult result = getChat(0.5f, "nothing to see here.");
+            ChatResult r = ((ApiChat) result).getResult();
+            // Verify answer is intent prompt and intent is not fulfilled
+            Assert.assertEquals(mi.getVariables().get(0).getPrompts().get(0), r.getAnswer());
+            Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+            Assert.assertEquals(n, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
+            Assert.assertEquals(maxPrompts, r.getIntents().get(0).getVariables().get(0).getTimesToPrompt());
+        }
+
+        // Next answer should exit intent handling and go through normal chat processing
+        final String wnetAnswer = "wnet answer";
+        when(this.fakeIntentHandler.parseAiResponseForIntent(anyString(), any(), any(), anyString())).thenReturn(null);
+        ChatResult wnetResult = new ChatResult();
+        wnetResult.setScore(0.9f);
+        wnetResult.setAnswer(wnetAnswer);
+        when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertNull(r.getIntents());
+        Assert.assertEquals(wnetAnswer, r.getAnswer());
     }
 
     /***
@@ -584,6 +662,7 @@ public class TestChatLogic {
                                double aimlConfidence, String aimlResponse,
                                double rnnConfidence, String rnnResponse) throws
             RequestBase.AiControllerException {
+
         ChatResult wnetResult = new ChatResult();
         wnetResult.setScore(wnetConfidence);
         wnetResult.setAnswer(wnetResponse);
