@@ -180,28 +180,15 @@ public class ChatLogic {
             return ApiError.getNotFound("AI not found");
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, "AIID", aiid.toString());
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
             return ApiError.getBadRequest("This AI is not ready to chat. It needs to train and/or be linked to bots");
 
-        } catch (ServerConnector.AiServicesException aiException) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI services exception", devId, "AIID", aiid.toString(),
-                    "Exception", aiException.toString());
-            this.chatLogger.logChatError(LOGFROM, devId, aiException, this.telemetryMap);
-            return ApiError.getInternalServerError();
-
-        } catch (IntentException ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - intent exception", devId, "AIID", aiid.toString(),
-                    "Exception", ex.toString());
+        } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
+                    devId, ex, "AIID", aiid.toString());
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
-
-        } catch (RequestBase.AiControllerException ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI controller exception", "AIID", aiid.toString(),
-                    "Exception", ex.toString());
-            this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
-            return ApiError.getInternalServerError();
-
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat", devId, e);
             this.chatLogger.logChatError(LOGFROM, devId, e, this.telemetryMap);

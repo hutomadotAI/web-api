@@ -75,7 +75,7 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (String[]) null);
     }
 
     public void logWarning(String fromLabel, String logComment) {
@@ -118,7 +118,15 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
-        this.logUserExceptionEvent(logFrom, event, user, exception, null);
+        this.logUserExceptionEvent(logFrom, event, user, exception, (String[])null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
+                                      final Exception exception, final String... properties) {
+        this.logUserExceptionEvent(logFrom, eventName, user, exception, arrayToMap(properties));
     }
 
     /**
