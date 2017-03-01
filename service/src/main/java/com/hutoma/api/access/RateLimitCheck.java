@@ -70,6 +70,16 @@ public class RateLimitCheck implements ContainerRequestFilter {
                             this.config.getRateLimit_LoadTest_BurstRequests(),
                             this.config.getRateLimit_LoadTest_Frequency());
                     break;
+                case Botstore_Metadata:
+                    checkRateLimitReached(devid, rateKey,
+                            this.config.getRateLimit_BotstoreMetadata_BurstRequests(),
+                            this.config.getRateLimit_BotstoreMetadata_Frequency());
+                    break;
+                case Botstore_Publish:
+                    checkRateLimitReached(devid, rateKey,
+                            this.config.getRateLimit_BotstorePublish_BurstRequests(),
+                            this.config.getRateLimit_BotstorePublish_Frequency());
+                    break;
                 case None:
                 default:
                     break;

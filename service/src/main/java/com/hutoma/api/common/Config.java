@@ -115,6 +115,22 @@ public class Config {
         return Double.parseDouble(getConfigFromProperties("ratelimit_loadtest_frequency", "8192.5"));
     }
 
+    public double getRateLimit_BotstoreMetadata_BurstRequests() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_botstore_metadata_burst", "20.0"));
+    }
+
+    public double getRateLimit_BotstoreMetadata_Frequency() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_botstore_metadata_frequency", "2.0"));
+    }
+
+    public double getRateLimit_BotstorePublish_BurstRequests() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_botstore_publish_burst", "4.0"));
+    }
+
+    public double getRateLimit_BotstorePublish_Frequency() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_botstore_publish_frequency", "120.0"));
+    }
+
     public String getLoggingServiceUrl() {
         return getConfigFromProperties("logging_url", null);
     }
