@@ -34,7 +34,7 @@
                     <div class="overlay center-block">
                         <div class="embed-responsive embed-responsive-16by9" id="videoTrainingFile">
                             <iframe
-                                src="//www.youtube.com/embed/N4IMIpgUVis?controls=1&hd=1&enablejsapi=1"
+                                src="//www.youtube.com/embed/__pO6wVvBEY?controls=1&hd=1&enablejsapi=1"
                                 frameborder="0" allowfullscreen>
                             </iframe>
                         </div>
