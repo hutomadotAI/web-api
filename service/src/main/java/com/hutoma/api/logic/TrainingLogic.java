@@ -42,8 +42,6 @@ import static com.hutoma.api.connectors.Database.DatabaseException;
 public class TrainingLogic {
 
     private static final String EMPTY_STRING = "";
-    private static final String PREVIOUS_AI_PREFIX = "[";
-    private static final String PREVIOUS_AI_SUFFIX = "] ";
     private static final String EOL = "\n";
     private static final String LOGFROM = "traininglogic";
 
@@ -335,7 +333,6 @@ public class TrainingLogic {
     public TrainingFileParsingResult parseTrainingFile(final List<String> training) {
 
         TrainingFileParsingResult result = new TrainingFileParsingResult();
-        String lastAISentence = EMPTY_STRING;
         String lastHumanSentence = EMPTY_STRING;
         List<String> validConversation = new ArrayList<>();
         boolean humanTalkingNow = true;
@@ -360,20 +357,9 @@ public class TrainingLogic {
                 continue;
             }
 
-            // if it's the human's turn and there was a previous AI response
-            // then we prepend it in square brackets
-            if (humanTalkingNow && !lastAISentence.isEmpty() && !lastLineEmpty) {
-                lastHumanSentence = currentSentence;
-                validConversation.add(String.format("%s%s%s%s", PREVIOUS_AI_PREFIX,
-                        lastAISentence, PREVIOUS_AI_SUFFIX, currentSentence));
-            } else {
-                // and we list the sentence
-                validConversation.add(currentSentence);
-            }
+            validConversation.add(currentSentence);
+
             // if the AI is talking then store the response
-            if (!humanTalkingNow) {
-                lastAISentence = currentSentence;
-            }
             lastHumanSentence = currentSentence;
 
             humanTalkingNow = !humanTalkingNow;
