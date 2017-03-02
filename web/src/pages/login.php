@@ -53,13 +53,13 @@ if(isset($_POST['action_login'])){
     <link rel="stylesheet" href="../console/dist/css/hutoma.css">
     <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../console/plugins/cookiePolicyBar/cookiePolicyBar.css">
+    <link rel="stylesheet" href="../console/scripts/cookiePolicyBar/cookiePolicyBar.css">
     
     <link rel="stylesheet" href="https://www.hutoma.com/css/main.css">
 
-    <script type="text/javascript" src="../console/plugins/jQuery/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../console/plugins/cookiePolicyBar/cookiePolicyBar.js"></script>
-    <script type="text/javascript" src="../console/plugins/iCheck/icheck.min.js"></script>
+    <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript" src="../console/scripts/external/iCheck/icheck.min.js"></script>
 
     <script type="text/javascript">
         var options = {

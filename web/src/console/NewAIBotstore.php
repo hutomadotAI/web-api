@@ -50,9 +50,9 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
-    <link rel="stylesheet" href="./plugins/iCheck/all.css">
-    <link rel="stylesheet" href="./plugins/switch/switch.css">
-    <link rel="stylesheet" href="./plugins/star/star.css">
+    <link rel="stylesheet" href="scripts/external/iCheck/all.css">
+    <link rel="stylesheet" href="./scripts/switch/switch.css">
+    <link rel="stylesheet" href="./scripts/star/star.css">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -82,25 +82,25 @@ function isSessionVariablesAvailable()
 
 </div>
 
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init(["", "home", 0, true, true]);
     </script>
 </form>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="plugins/createAI/createAIWizard.js"></script>
-<script src="plugins/botstore/botstore.js"></script>
-<script src="plugins/botstore/buyBot.js"></script>
+<script src="scripts/createAI/createAIWizard.js"></script>
+<script src="scripts/botstore/botstore.js"></script>
+<script src="scripts/botstore/buyBot.js"></script>
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
 <script>
     var bots = <?php
         $tmp_list = [];

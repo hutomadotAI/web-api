@@ -45,7 +45,7 @@ function setSessionVariables($singleAI)
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./plugins/select2/select2.css">
+    <link rel="stylesheet" href="scripts/external/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
@@ -83,20 +83,20 @@ function setSessionVariables($singleAI)
     
 </div>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./bootstrap/js/bootstrap-filestyle.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./plugins/validation/validation.js"></script>
-<script src="./plugins/select2/select2.full.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="./scripts/validation/validation.js"></script>
+<script src="scripts/external/select2/select2.full.js"></script>
+<script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <script>
     $(function () {
         $('.select2').select2();

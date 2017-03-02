@@ -49,15 +49,15 @@ function isSessionVariablesAvailable()
     <title>hu:toma | AI Settings </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./plugins/select2/select2.css">
+    <link rel="stylesheet" href="scripts/external/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
-    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinNice.css">
-    <link rel="stylesheet" href="./plugins/iCheck/all.css">
-    <link rel="stylesheet" href="./plugins/switch/switch.css">
-    <link rel="stylesheet" href="./plugins/star/star.css">
+    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.css">
+    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
+    <link rel="stylesheet" href="scripts/external/iCheck/all.css">
+    <link rel="stylesheet" href="./scripts/switch/switch.css">
+    <link rel="stylesheet" href="./scripts/star/star.css">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showBots('',2)">
@@ -112,29 +112,29 @@ function isSessionVariablesAvailable()
     </footer>
 </div>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./plugins/inputCommon/inputCommon.js"></script>
-<script src="./plugins/validation/validation.js"></script>
-<script src="./plugins/deleteAI/deleteAI.js"></script>
-<script src="./plugins/select2/select2.full.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
+<script src="./scripts/inputCommon/inputCommon.js"></script>
+<script src="./scripts/validation/validation.js"></script>
+<script src="./scripts/deleteAI/deleteAI.js"></script>
+<script src="scripts/external/select2/select2.full.js"></script>
+<script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="scripts/external/ionslider/ion.rangeSlider.min.js"></script>
 
-<script src="./plugins/clipboard/copyToClipboard.js"></script>
-<script src="./plugins/clipboard/clipboard.min.js"></script>
+<script src="./scripts/clipboard/copyToClipboard.js"></script>
+<script src="./scripts/clipboard/clipboard.min.js"></script>
 
-<script src="./plugins/setting/setting.linkBot.js"></script>
-<script src="./plugins/setting/setting.general.js"></script>
-<script src="./plugins/setting/setting.aiSkill.js"></script>
+<script src="./scripts/setting/setting.linkBot.js"></script>
+<script src="./scripts/setting/setting.general.js"></script>
+<script src="./scripts/setting/setting.aiSkill.js"></script>
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, false, false]);

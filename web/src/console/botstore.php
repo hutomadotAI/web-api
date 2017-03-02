@@ -42,12 +42,12 @@ function isAuthorizedToAccess()
     <title>hu:toma | Botstore </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="./plugins/select2/select2.css">
+    <link rel="stylesheet" href="scripts/external/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./plugins/switch/switch.css">
-    <link rel="stylesheet" href="./plugins/star/star.css">
+    <link rel="stylesheet" href="./scripts/switch/switch.css">
+    <link rel="stylesheet" href="./scripts/star/star.css">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -79,26 +79,26 @@ function isAuthorizedToAccess()
 </footer>
 </div>
 
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 2, true, false]);
     </script>
 </form>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-<script src="./plugins/select2/select2.full.js"></script>
+<script src="scripts/external/select2/select2.full.js"></script>
 
-<script src="./plugins/botstore/botstoreWizard.js"></script>
-<script src="./plugins/botstore/botstore.js"></script>
-<script src="./plugins/botstore/buyBot.js"></script>
+<script src="./scripts/botstore/botstoreWizard.js"></script>
+<script src="./scripts/botstore/botstore.js"></script>
+<script src="./scripts/botstore/buyBot.js"></script>
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
 
 
 <script>
