@@ -29,6 +29,9 @@
                 <configuration>
                     <parallel>both</parallel>
                     <threadCount>10</threadCount>
+                    <excludes>
+                        <exclude>**/TestThreadPool.java</exclude>
+                    </excludes>
                 </configuration>
                 <goals>
                     <goal>test</goal>
