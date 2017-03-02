@@ -15,7 +15,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      '../console/scripts/validation/validation.js',
+      '../src/console/scripts/validation/validation.js',
       'tests/**/*.js'
     ],
 
