@@ -63,26 +63,7 @@ if (isset($botDetails)) {
     var bot = <?php
         $bot = new \hutoma\bot();
         if (isset($botDetails) && (array_key_exists('bot', $botDetails))) {
-            // TODO probably this value is hidden to client side
-            //$bot->setAiid($botDetails['bot']['aiid']);
-            $bot->setAlertMessage($botDetails['bot']['alertMessage']);
-            $bot->setBadge('Top Developer');                        //$botDetails['bot']['badge']);
-            $bot->setBotId($botDetails['bot']['botId']);
-            $bot->setCategory($botDetails['bot']['category']);
-            $bot->setClassification($botDetails['bot']['classification']);
-            $bot->setDescription($botDetails['bot']['description']);
-            $bot->setLicenseType($botDetails['bot']['licenseType']);
-            $bot->setUpdate($botDetails['bot']['lastUpdate']);
-            $bot->setLongDescription($botDetails['bot']['longDescription']);
-            $bot->setName($botDetails['bot']['name']);
-            $bot->setPrice($botDetails['bot']['price']);
-            $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
-            $bot->setSample($botDetails['bot']['sample']);
-            $bot->setUsers('103');                                  //$botDetails['bot']['users']);
-            $bot->setActivations($bot->rangeActivation($bot->getUsers()));
-            $bot->setVersion($botDetails['bot']['version']);
-            $bot->setVideoLink($botDetails['bot']['videoLink']);
-            $bot->setIconFile($botDetails['bot']['botIcon']);
+            $bot = \hutoma\bot::fromObject($botDetails['bot']);
         }
         $tmp_bot = $bot->toJSON();
         unset($bot);
