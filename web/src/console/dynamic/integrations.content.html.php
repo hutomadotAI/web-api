@@ -8,7 +8,7 @@
     </div>
 
     <div class="box-body" id="boxNewIntegrations">
-        <input class="form-control flat no-shadow" value="" placeholder="Search for a neural network..." tabindex="0" onkeyup="searchIntegration(this.value)">
+        <input class="form-control flat no-shadow" value="" placeholder="Search for chat platform..." tabindex="0" onkeyup="searchIntegration(this.value)">
         <p></p>
         
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertNewIntegraions" style="margin-bottom:5px;">

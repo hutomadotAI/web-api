@@ -83,7 +83,7 @@
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUpdateAI">
             <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
-            <span id="msgAlertUpdateAI">This page allows you to change the basic information of your Bot.</span>
+            <span id="msgAlertUpdateAI">This page allows you to change the basic information of your bot.</span>
         </div>
 
     </div>
