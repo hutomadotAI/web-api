@@ -248,9 +248,10 @@ function getUIStatusCall() {
             var error = getDeepLearningError();
 
             phaseTwoFlashing(false);
-            phaseOneStriped(false);
+            phaseTwoStriped(true);
             hideChart(false);
             phaseTwoUpdate(progress);
+
             updateDeepLearningError(error);
             showAlertMessageFromUI(status);
             break;
