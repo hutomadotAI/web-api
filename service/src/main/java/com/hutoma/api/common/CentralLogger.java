@@ -118,7 +118,7 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
-        this.logUserExceptionEvent(logFrom, event, user, exception, (String[])null);
+        this.logUserExceptionEvent(logFrom, event, user, exception, (String[]) null);
     }
 
     /**
@@ -190,6 +190,9 @@ public class CentralLogger implements ILogger {
     }
 
     private Map<String, String> arrayToMap(final String[] array) {
+        if (array == null) {
+            return new HashMap<>();
+        }
         if (array.length % 2 != 0) {
             throw new IllegalArgumentException("Properties need to be in the format of key1, value1, etc");
         }
