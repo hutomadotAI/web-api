@@ -265,6 +265,23 @@ public class CentralLogger implements ILogger {
         }
     }
 
+    public static class LogParameters extends HashMap<String, String> {
+
+        public LogParameters(String action) {
+            put("Action", action);
+        }
+
+        @Override
+        public String put(final String key, final String value) {
+            return super.put(key, (value == null ? "(null)" : value));
+        }
+
+        public String put(final String key, final Object objectValue) {
+            return super.put(key, (objectValue == null ? "(null)" : objectValue.toString()));
+        }
+
+    }
+
     protected void startLoggingScheduler(final String loggingServiceUrl, final int loggingCadence) {
         if (this.timer != null) {
             this.timer.cancel();

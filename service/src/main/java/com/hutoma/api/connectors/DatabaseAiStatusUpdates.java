@@ -22,11 +22,14 @@ public class DatabaseAiStatusUpdates extends Database {
 
     protected static final String LOGFROM = "db_status";
 
+    private final AiServiceStatusLogger aiServicesLogger;
+
     @Inject
     public DatabaseAiStatusUpdates(final AiServiceStatusLogger logger,
                                    final Provider<DatabaseCall> callProvider,
                                    final Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
+        this.aiServicesLogger = logger;
     }
 
     /***
@@ -43,6 +46,10 @@ public class DatabaseAiStatusUpdates extends Database {
                                       final Map<UUID, ServerAiEntry> serverReported)
             throws DatabaseException {
 
+        int itemsDatabase = 0;
+        int itemsServerReg = serverReported.size();
+        int itemsChangedStatus = 0;
+
         // open a transaction to hold the statuses while we update
         // this is repeatable read so we are effectively locking the AI table
         // while this operation is underway
@@ -57,6 +64,7 @@ public class DatabaseAiStatusUpdates extends Database {
                 // copies of parsed UUIDs for logging purposes if things go wrong
                 UUID logAiid = null;
                 UUID logDevid = null;
+                itemsDatabase++;
 
                 try {
                     // parse the data from the db rows
@@ -97,6 +105,7 @@ public class DatabaseAiStatusUpdates extends Database {
 
                     // if the status is not what we are expecting
                     if (statusInDb != statusOnBackend) {
+                        itemsChangedStatus++;
                         // log the difference
                         TrainingStatus finalStatusOnBackend = statusOnBackend;
                         TrainingStatus finalStatusInDb1 = statusInDb;
@@ -143,6 +152,10 @@ public class DatabaseAiStatusUpdates extends Database {
                             this.put("BackendStatus", remaining.getTrainingStatus().toString());
                         }});
             });
+
+            // log completion
+            this.aiServicesLogger.logDbSyncComplete(LOGFROM, serverType,
+                    itemsDatabase, itemsServerReg, itemsChangedStatus);
 
             // if all goes well, commit
             transaction.commit();

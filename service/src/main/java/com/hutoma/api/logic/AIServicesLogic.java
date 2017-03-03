@@ -97,12 +97,7 @@ public class AIServicesLogic {
             }
 
             // we accept the update. log it.
-            String summary = String.format("Update %s status %s progress %d%% on ai %s",
-                    status.getAiEngine().toString(),
-                    status.getTrainingStatus().value(),
-                    (int)(status.getTrainingProgress() * 100.0),
-                    status.getAiid().toString());
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, summary, status);
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
 
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",
@@ -149,12 +144,25 @@ public class AIServicesLogic {
         List<UUID> aiList = serverAffinity.getAiList();
 
         try {
-            if (this.controllerWnet.updateAffinity(sid, aiList)
-                    || this.controllerRnn.updateAffinity(sid, aiList)
-                    || this.controllerAiml.updateAffinity(sid, aiList)) {
-                return new ApiResult().setSuccessStatus("server affinity updated");
+            BackendServerType updated = null;
+            if (this.controllerWnet.updateAffinity(sid, aiList)) {
+                updated = BackendServerType.WNET;
+            } else {
+                if (this.controllerRnn.updateAffinity(sid, aiList)) {
+                    updated = BackendServerType.RNN;
+                } else {
+                    if (this.controllerAiml.updateAffinity(sid, aiList)) {
+                        updated = BackendServerType.AIML;
+                    }
+                }
             }
-            return ApiError.getBadRequest("nonexistent session");
+            if (updated == null) {
+                return ApiError.getBadRequest("nonexistent session");
+            }
+
+            this.serviceStatusLogger.logAffinityUpdate(LOGFROM, updated, serverAffinity);
+
+            return new ApiResult().setSuccessStatus("server affinity updated");
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
@@ -165,7 +173,7 @@ public class AIServicesLogic {
         Map<UUID, ServerAiEntry> result =
                 registration.getAiList().stream()
                         .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));
-        controller.synchroniseDBStatuses(database, jsonSerializer, registration.getServerType(), result);
+        controller.synchroniseDBStatuses(this.database, this.jsonSerializer, registration.getServerType(), result);
     }
 
     private ControllerBase getControllerFor(BackendServerType server) {
