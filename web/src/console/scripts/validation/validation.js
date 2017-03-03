@@ -13,7 +13,7 @@ function limitText (limitField, limitNum) {
     return 0;
 }
 validation.limitText = function(limitField, limitNum) {
-  return limitText(limitField, limitNum);
+    return limitText(limitField, limitNum);
 };
 
 function isNameExists(name,list_name){
@@ -54,7 +54,7 @@ function isInputInvalid(txt,field) {
         case 'developer_company': letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;             break;
         case 'developer_email' :  letters = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;break;
 
-        case 'URI': letters = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/; break;
+        case 'URI': letters =   /^(?:(http|https)?:\/\/)?(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/; break;
         default:
     }
 
@@ -63,3 +63,7 @@ function isInputInvalid(txt,field) {
 
     return true;
 }
+
+validation.isInputInvalid = function(txt,field) {
+    return isInputInvalid(txt,field);
+};
