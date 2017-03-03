@@ -19,7 +19,7 @@ function populateBotFields(bot) {
     document.getElementById('botTitle').innerText = json['name'];
     document.getElementById('botBadge').innerText = json['badge'];
     document.getElementById('botDescription').value = json['description'];
-    if (json['alertMessage'] == null || json['alertMessage'] == '')
+    if (json['alertMessage'] == null || json['alertMessage'].replace(/\s/g, "") == '')
         document.getElementById('botMessageBox').innerHTML = '';
     else
         document.getElementById('botMessage').value = json['alertMessage'];
