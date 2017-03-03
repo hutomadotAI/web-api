@@ -1,6 +1,6 @@
 <div class="box-header with-border unselectable">
     <i class="fa fa-shopping-cart text-green"></i>
-    <div class="box-title"><b>Selected Bots from the Store</b></div>
+    <div class="box-title"><b>Selected bots from the store</b></div>
     <a data-toggle="collapse"  href="#collapseInfoDomains">
         <div class=" pull-right">more info
             <i class="fa fa-info-circle text-sm text-yellow"></i>
@@ -14,7 +14,7 @@
             <section class="content-info">
                 <div class="box-body">
                     <dl class="dl-horizontal no-margin" style="text-align:justify">
-                        You can add new capabilities to your Bot by selecting pre-trained neural networks from our Bot Store.
+                        You can add new capabilities to your bot by selecting pre-trained bots from our botstore.
                    </dl>
                 </div>
             </section>
@@ -28,7 +28,7 @@
     <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertAiSkill" style="margin-bottom:0px;">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertAiSkill"></i>
-        <span id="msgAlertAiSkill">You can power up your Bot by combining and mixing existing Bots from out Bot Store.</span>
+        <span id="msgAlertAiSkill">You can power up your bot by combining and mixing existing bots from out botstore.</span>
     </div>
 </div>
 
