@@ -264,7 +264,6 @@ function getUIStatusCall() {
                 hidePreTrainingBar(true);
                 hideTrainingBar(true);
             }
-            showAlertMessageFromUI(status);
             break;
         case (status == UI_STATE.COMPLETED.value):
             stopPollForStatus();
