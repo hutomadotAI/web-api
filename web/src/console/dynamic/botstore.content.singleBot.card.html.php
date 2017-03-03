@@ -32,7 +32,7 @@
 
         <div class="row no-margin">
             <!--message-->
-            <div class="col-xs-12 bot-msg">
+            <div class="col-xs-12 bot-msg" id="botMessageBox">
                 <i class="fa fa-info-circle text-sm text-yellow"></i>
                 <input class="bot-default-style" id="botMessage" style="width:96%">
             </div>

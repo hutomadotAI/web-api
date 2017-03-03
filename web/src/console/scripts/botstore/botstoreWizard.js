@@ -19,7 +19,10 @@ function populateBotFields(bot) {
     document.getElementById('botTitle').innerText = json['name'];
     document.getElementById('botBadge').innerText = json['badge'];
     document.getElementById('botDescription').value = json['description'];
-    document.getElementById('botMessage').value = json['alertMessage'];
+    if (json['alertMessage'] == null || json['alertMessage'] == '')
+        document.getElementById('botMessageBox').innerHTML = '';
+    else
+        document.getElementById('botMessage').value = json['alertMessage'];
     document.getElementById('botLicense').innerText = json['licenseType'];
     document.getElementById('botPrice').innerText = json['price'];
     document.getElementById('botLongDescription').innerText = json['longDescription'];
@@ -47,6 +50,7 @@ function populateBotFields(bot) {
     var dev = JSON.parse(devInfo);
     document.getElementById('botCompany').innerText = dev['company'];
     var elem = document.getElementById('developerInfo');
+
     if (dev['website'] == null || dev['website'] == '') {
         elem.style.display = 'none';
     } else {
