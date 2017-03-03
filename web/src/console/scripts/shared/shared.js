@@ -26,8 +26,8 @@ var UI_STATE =
     FILE_UPLOADED: {value: 1},
     READY_TO_TRAIN: {value: 2},
     PHASE1_INIT: {value: 3},
-    PHASE1_QUEUE: {value: 4},
-    PHASE1_RUN: {value: 5},
+    PHASE1_RUN: {value: 4},
+    PHASE2_QUEUE: {value: 5},
     PHASE2_INIT: {value: 6},
     PHASE2_RUN: {value: 7},
     STOPPED: {value: 8},
@@ -53,14 +53,6 @@ function RecursiveUnbind($jElement) {
     $jElement.children().each(function () {
         RecursiveUnbind($(this));
     });
-}
-
-function getPercentualValue(error) {
-    error = 100 - error;
-    error = error.toFixed(2);
-    if (error % 1 === 0)
-        error = Math.round(error);
-    return error
 }
 
 $(document).ready(function () {
