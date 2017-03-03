@@ -34,7 +34,7 @@ function populateBotFields(bot) {
     document.getElementById('botVersion').innerText = json['version'];
     document.getElementById('botClassification').innerText = json['classification'];
     document.getElementById('botActivations').innerText = json['activations'];
-    document.getElementById('botPrivacyPolicy').setAttribute('href', json['privacyPolicy']);
+    document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(json['privacyPolicy']));
     document.getElementById('botIcon').setAttribute('src', json['imagePath']);
 
     document.getElementById('botNamePurchase').innerText = json['name'];
@@ -51,7 +51,7 @@ function populateBotFields(bot) {
         elem.style.display = 'none';
     } else {
         elem.style.display = 'block';
-        document.getElementById('botWebsite').setAttribute('href', dev['website']);
+        document.getElementById('botWebsite').setAttribute('href', checkLink(dev['website']));
     }
 
     if (json['videoLink'] == null || videoLinkFilter(json['videoLink']) == '')
@@ -60,6 +60,11 @@ function populateBotFields(bot) {
         document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(json['videoLink']));
 }
 
+function checkLink(link){
+    if (link.indexOf('http') == -1 )
+        link = 'http://' + link;
+    return link;
+}
 
 function infoForBotstore(title, purchased) {
     var v = [];
@@ -143,4 +148,3 @@ function btnFromBuyToPurchased() {
     nodeBtn.innerHTML = wHTML;
     nodeBtn.className = 'btn btn-primary pull-right flat';
 }
-
