@@ -9,6 +9,7 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -37,7 +38,7 @@ public class TestAIServicesLogic {
     private static final BackendServerType AI_ENGINE = BackendServerType.WNET;
 
     private JsonSerializer fakeSerializer;
-    private Database fakeDatabase;
+    private DatabaseAiStatusUpdates fakeDatabase;
     private Config fakeConfig;
     private Tools fakeTools;
     private AIServices fakeServices;
@@ -51,7 +52,7 @@ public class TestAIServicesLogic {
     public void setup() {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeServices = mock(AIServices.class);

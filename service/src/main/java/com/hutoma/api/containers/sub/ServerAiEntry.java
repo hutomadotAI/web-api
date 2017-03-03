@@ -24,6 +24,10 @@ public class ServerAiEntry {
         this.aiHash = aiHash;
     }
 
+    public TrainingStatus getTrainingStatus() {
+        return trainingStatus;
+    }
+
     public UUID getAiid() {
         return this.aiid;
     }

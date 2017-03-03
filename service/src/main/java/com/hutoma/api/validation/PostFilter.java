@@ -10,6 +10,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
 import org.glassfish.jersey.message.internal.MediaTypes;
@@ -221,8 +222,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 ServerRegistration serverRegistration = (ServerRegistration)
                         this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
                 checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
-                checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
                 checkParameterNotNull(SERVER_URL, serverRegistration.getServerUrl());
+                checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
+                for (ServerAiEntry entry : serverRegistration.getAiList()) {
+                    checkParameterNotNullInvalid("ai_id", entry.getAiid());
+                    checkParameterNotNullInvalid("training_status", entry.getTrainingStatus());
+                }
                 request.setProperty(APIParameter.ServerRegistration.toString(), serverRegistration);
             }
 
@@ -243,6 +248,20 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             throws ParameterValidationException {
         if (obj == null) {
             throw new ParameterValidationException("parameter is null", paramName);
+        }
+    }
+
+    /***
+     * For internal fields that are json deserialized, if the data does not parse
+     * then the result is a null
+     * @param paramName
+     * @param obj
+     * @throws ParameterValidationException
+     */
+    private void checkParameterNotNullInvalid(final String paramName, final Object obj)
+            throws ParameterValidationException {
+        if (obj == null) {
+            throw new ParameterValidationException("parameter is null or invalid", paramName);
         }
     }
 

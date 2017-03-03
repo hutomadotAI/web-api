@@ -34,6 +34,10 @@ public class BackendEngineStatus {
         return this.trainingStatus;
     }
 
+    void setTrainingStatus(final TrainingStatus trainingStatus) {
+        this.trainingStatus = trainingStatus;
+    }
+
     public double getTrainingError() {
         return this.trainingError;
     }

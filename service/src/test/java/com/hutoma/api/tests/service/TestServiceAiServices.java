@@ -36,14 +36,14 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testUpdateStatus() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
+        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any(), any())).thenReturn(true);
         final Response response = sendStatusUpdateRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testUpdateStatus_dbDidNotUpdate() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(false);
+        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any(), any())).thenReturn(false);
         final Response response = sendStatusUpdateRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
     }
@@ -60,8 +60,8 @@ public class TestServiceAiServices extends ServiceTestBase {
     public void testUpdateStatus_newStatus() throws Database.DatabaseException {
         String statusJson = getCommonAiStatusJson();
         statusJson = statusJson.replace(TrainingStatus.AI_READY_TO_TRAIN.value(), TrainingStatus.AI_TRAINING_QUEUED.value());
-        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(false);
-        when(this.fakeDatabase.updateAIStatus(
+        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any(), any())).thenReturn(false);
+        when(this.fakeDatabaseStatusUpdates.updateAIStatus(
                 argThat(aiStatus -> ((AiStatus) aiStatus).getTrainingStatus() == TrainingStatus.AI_TRAINING_QUEUED),
                 any())).thenReturn(true);
 
@@ -76,6 +76,42 @@ public class TestServiceAiServices extends ServiceTestBase {
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testServerRegister_nullAIID() {
+        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
+        wnet.addAI(null, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(wnet);
+        final Response response = sendRegistrationRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testServerRegister_badAIID() {
+        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
+        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(wnet).replace(AIID.toString(), "be108d4e-9aed-4876-bxdc1-cfbf9ba1146a");
+        final Response response = sendRegistrationRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testServerRegister_nullStatus() {
+        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
+        wnet.addAI(AIID, null, "hash");
+        String json = this.serializeObject(wnet);
+        final Response response = sendRegistrationRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testServerRegister_badStatus() {
+        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
+        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(wnet).replace(TrainingStatus.AI_TRAINING_COMPLETE.value(), "wrong_string");
+        final Response response = sendRegistrationRequest(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
@@ -109,7 +145,7 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testStatusUpdate_HashCode_Wnet() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
+        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any(), any())).thenReturn(true);
         String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
                 0.0, 0.0, "hash",
@@ -122,7 +158,7 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testStatusUpdate_HashCode_Rnn() throws Database.DatabaseException {
-        when(this.fakeDatabase.updateAIStatus(any(), any())).thenReturn(true);
+        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any(), any())).thenReturn(true);
         String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.RNN,
                 0.0, 0.0, "hash",

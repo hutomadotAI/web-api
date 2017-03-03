@@ -7,6 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
@@ -21,7 +22,10 @@ import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -32,7 +36,7 @@ public class AIServicesLogic {
     private static final String LOGFROM = "aiserviceslogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
-    private final Database database;
+    private final DatabaseAiStatusUpdates database;
     private final AIServices aiServices;
     private final AiServiceStatusLogger serviceStatusLogger;
     private final ILogger logger;
@@ -44,7 +48,7 @@ public class AIServicesLogic {
 
     @Inject
     public AIServicesLogic(final Config config, final JsonSerializer jsonSerializer,
-                           final Database database, final AIServices aiServices,
+                           final DatabaseAiStatusUpdates database, final AIServices aiServices,
                            final AiServiceStatusLogger serviceStatusLogger, ILogger logger,
                            final Tools tools,
                            final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
@@ -126,6 +130,7 @@ public class AIServicesLogic {
                 // if we are master then update all the hash codes from this reg-list
                 if (controller.isPrimaryMaster(serverSessionID)) {
                     controller.setAllHashCodes(registration.getAiList());
+                    synchroniseStatuses(controller, registration);
                 }
             } else {
                 this.serviceStatusLogger.logError(LOGFROM,
@@ -133,7 +138,7 @@ public class AIServicesLogic {
                 return ApiError.getBadRequest("unrecognised server type");
             }
         } catch (Exception ex) {
-            this.logger.logException(LOGFROM, ex);
+            this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
         return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
@@ -154,6 +159,13 @@ public class AIServicesLogic {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
+    }
+
+    private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration) throws Database.DatabaseException {
+        Map<UUID, ServerAiEntry> result =
+                registration.getAiList().stream()
+                        .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));
+        controller.synchroniseDBStatuses(database, jsonSerializer, registration.getServerType(), result);
     }
 
     private ControllerBase getControllerFor(BackendServerType server) {

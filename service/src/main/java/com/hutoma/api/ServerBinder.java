@@ -14,6 +14,7 @@ import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
@@ -90,6 +91,7 @@ public class ServerBinder extends AbstractBinder {
         bind(JsonSerializer.class).to(JsonSerializer.class);
         bind(Database.class).to(Database.class);
         bind(DatabaseEntitiesIntents.class).to(DatabaseEntitiesIntents.class);
+        bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);

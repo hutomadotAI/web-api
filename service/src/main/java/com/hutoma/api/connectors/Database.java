@@ -82,7 +82,7 @@ public class Database {
      * @return valid BackendStatus object
      * @throws DatabaseException if there was data it did not parse correctly
      */
-    private static BackendStatus getBackendStatus(final String statusJson, JsonSerializer jsonSerializer)
+    protected static BackendStatus getBackendStatus(final String statusJson, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         BackendStatus backendStatus = null;
         // try to deserialize

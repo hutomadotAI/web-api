@@ -14,6 +14,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
@@ -73,6 +74,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected DatabaseCall fakeDatabaseCall;
     @Mock
     protected Database fakeDatabase;
+    @Mock
+    protected DatabaseAiStatusUpdates fakeDatabaseStatusUpdates;
     @Mock
     protected DatabaseTransaction fakeDatabaseTransaction;
     @Mock
@@ -136,6 +139,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeConfig)).to(Config.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseConnectionPool)).to(DatabaseConnectionPool.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabase)).to(Database.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseStatusUpdates)).to(DatabaseAiStatusUpdates.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction)).to(DatabaseTransaction.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseCall)).to(DatabaseCall.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTransactionalDatabaseCall)).to(TransactionalDatabaseCall.class);
@@ -190,6 +194,7 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         // Mock all the external dependencies
         this.fakeDatabase = mock(Database.class);
+        this.fakeDatabaseStatusUpdates = mock(DatabaseAiStatusUpdates.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabaseConnectionPool = mock(DatabaseConnectionPool.class);
         this.fakeDatabaseTransaction = mock(DatabaseTransaction.class);

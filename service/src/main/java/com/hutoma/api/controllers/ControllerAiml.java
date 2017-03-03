@@ -1,13 +1,17 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.AiServiceStatusLogger;
-import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
+import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
 import org.glassfish.hk2.api.ServiceLocator;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -37,6 +41,15 @@ public class ControllerAiml extends ControllerBase {
                         .map(ServerAiEntry::getAiid)
                         .collect(Collectors.toList()));
         return sessionID;
+    }
+
+    @Override
+    public void synchroniseDBStatuses(final DatabaseAiStatusUpdates database,
+                                      final JsonSerializer jsonSerializer, final BackendServerType serverType,
+                                      final Map<UUID, ServerAiEntry> statusData)
+            throws Database.DatabaseException {
+        // do nothing.
+        // AIML AIs are placeholders and should not be synced
     }
 
     /***

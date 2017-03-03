@@ -22,6 +22,17 @@ public class BackendStatus {
         return (status == null) ? new BackendEngineStatus() : status;
     }
 
+    /***
+     * For a specific engine, change the training status to the one provided
+     * without affecting the other parameters
+     * @param engine
+     * @param trainingStatus
+     */
+    public void updateEngineStatus(BackendServerType engine, TrainingStatus trainingStatus) {
+        this.engines.computeIfAbsent(engine, key -> new BackendEngineStatus())
+                .setTrainingStatus(trainingStatus);
+    }
+
     public void setEngineStatus(AiStatus aiStatus) {
         this.engines.put(aiStatus.getAiEngine(), new BackendEngineStatus(aiStatus));
     }
