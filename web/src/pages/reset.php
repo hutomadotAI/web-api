@@ -32,15 +32,6 @@ include "config.php";
     <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
     <script type="text/javascript" src="../console/scripts/external/iCheck/icheck.min.js"></script>
-
-    <style>
-        /* Sticky footer styles
-        -------------------------------------------------- */
-        html {
-            position: relative;
-            min-height: 100%;
-        }
-    </style>
 </head>
 <body class="web-body" id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>

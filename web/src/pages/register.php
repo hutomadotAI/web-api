@@ -135,21 +135,6 @@ if(isset($_POST['submit'])) {
         });
     </script>
     <style>
-        /* Sticky footer styles
-        -------------------------------------------------- */
-        html {
-            position: relative;
-            min-height: 100%;
-        }
-
-        body {
-            background: #d2d6de;
-            /* Margin bottom by footer height */
-            margin-bottom: 350px;
-            font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-
-        }
-        
         .progress {
             height: 11px;
         }
@@ -169,7 +154,6 @@ if(isset($_POST['submit'])) {
         .form-control-error {
             box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(255, 100, 100, .6) !important;
         }
-
     </style>
 </head>
 <body id="body" class="hold-transition register-page">
