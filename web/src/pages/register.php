@@ -135,6 +135,13 @@ if(isset($_POST['submit'])) {
         });
     </script>
     <style>
+        /* Sticky footer styles
+        -------------------------------------------------- */
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+        
         .progress {
             height: 11px;
         }
@@ -154,9 +161,10 @@ if(isset($_POST['submit'])) {
         .form-control-error {
             box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(255, 100, 100, .6) !important;
         }
+
     </style>
 </head>
-<body id="body" class="hold-transition register-page">
+<body id="body" class="web-body hold-transition register-page">
 <?php include_once "../console/common/google_analytics.php"; ?>
 <?php include_once "./header.php"; ?>
 
