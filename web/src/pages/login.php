@@ -72,64 +72,15 @@ if(isset($_POST['action_login'])){
         });
     </script>
     <style>
-        .newa {
-            color: #3c8dbc;
-        }
-        .newa:hover,
-        .newa:active,
-        .newa:focus {
-            outline: none;
-            text-decoration: none;
-            color: #72afd2;
-        }
-
         /* Sticky footer styles
         -------------------------------------------------- */
         html {
             position: relative;
             min-height: 100%;
         }
-
-        body {
-            background: #d2d6de;
-            /* Margin bottom by footer height */
-            margin-bottom: 350px;
-            font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-
-        }
-        .footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            /* Set the fixed height of the footer here */
-            height: 350px;
-
-        }
-
-        .af {
-            color: #3c8dbc;
-            font-weight: bold;
-        }
-
-        .af:hover,
-        .af:active,
-        .af:focus {
-            outline: none;
-            text-decoration: none;
-            color: white;
-        }
-
-        .container {
-            width: auto;
-            max-width: 100%;
-            padding: 0 15px;
-        }
-        .container .text-muted {
-            margin: 20px 0;
-        }
     </style>
 </head>
-<body id="body">
+<body class="web-body" id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>
 <?php include_once "./header.php"; ?>
 
@@ -164,16 +115,8 @@ if(isset($_POST['action_login'])){
                     <!-- /.col -->
                 </div>
             </form>
-
-            <!--   <div class="social-auth-links text-center">
-                 <p>- OR -</p>
-                 <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign in using Facebook</a>
-                 <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign in using Google+</a>
-               </div>--><!-- /.social-auth-links -->
-
-            <a class="newa" href="reset.php">I forgot my password</a><br>
-            <a class="newa" href="register.php" class="text-center">Register a new account</a>
-
+            <a class="new-link" href="reset.php">I forgot my password</a><br>
+            <a class="new-link" href="register.php" class="text-center">Register a new account</a>
         </div>
         <!-- /.login-box-body -->
     </div>

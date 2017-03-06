@@ -135,17 +135,6 @@ if(isset($_POST['submit'])) {
         });
     </script>
     <style>
-        .newa {
-            color: #3c8dbc;
-        }
-        .newa:hover,
-        .newa:active,
-        .newa:focus {
-            outline: none;
-            text-decoration: none;
-            color: #72afd2;
-        }
-
         /* Sticky footer styles
         -------------------------------------------------- */
         html {
@@ -160,37 +149,7 @@ if(isset($_POST['submit'])) {
             font-family: 'Muli', 'Century Gothic', CenturyGothic, AppleGothic, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
         }
-        .footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            /* Set the fixed height of the footer here */
-            height: 350px;
-
-        }
-
-        .af {
-            color: #3c8dbc;
-            font-weight: bold;
-        }
-
-        .af:hover,
-        .af:active,
-        .af:focus {
-            outline: none;
-            text-decoration: none;
-            color: white;
-        }
-
-        .container {
-            width: auto;
-            max-width: 100%;
-            padding: 0 15px;
-        }
-        .container .text-muted {
-            margin: 20px 0;
-        }
-
+        
         .progress {
             height: 11px;
         }
@@ -271,15 +230,8 @@ if(isset($_POST['submit'])) {
                 <div class="g-recaptcha" data-sitekey="6LfUJhMUAAAAAJEn_XfTOR6tOeyecWX6o6i9jqiW"></div>
             </div>
         </form>
-
-        <!--    <div class="social-auth-links text-center">
-             <p>- OR -</p>
-             <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign up using Facebook</a>
-             <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign up using Google+</a>
-           </div>
-    -->
-        <a href="login.php" class="text-center newa">I already have an account</a><br/>
-        <a href="https://www.hutoma.com" class="text-center newa">I need an invitation code</a>
+        <a href="login.php" class="text-center new-link">I already have an account</a><br/>
+        <a href="https://www.hutoma.com" class="text-center new-link">I need an invitation code</a>
     </div><!-- /.form-box -->
     </div><!-- /.register-box -->
 </section>
