@@ -7,5 +7,7 @@ public enum RateKey {
     None,
     Chat,
     LoadTest,
-    QuickRead
+    QuickRead,
+    Botstore_Publish,
+    Botstore_Metadata
 }

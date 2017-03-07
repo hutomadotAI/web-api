@@ -55,6 +55,7 @@ public class AIBotStoreEndpoint {
         this.serializer = serializer;
     }
 
+    @RateLimit(RateKey.Botstore_Metadata)
     @GET
     @ValidateParameters({APIParameter.DevID})
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
@@ -75,6 +76,7 @@ public class AIBotStoreEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @RateLimit(RateKey.Botstore_Metadata)
     @Path("{botId}")
     @GET
     @ValidateParameters({APIParameter.DevID})
@@ -100,6 +102,7 @@ public class AIBotStoreEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @RateLimit(RateKey.Botstore_Metadata)
     @Path("purchased")
     @GET
     @ValidateParameters({APIParameter.DevID})
@@ -147,6 +150,7 @@ public class AIBotStoreEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @RateLimit(RateKey.Botstore_Publish)
     @POST
     @ValidateParameters({APIParameter.DevID})
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
@@ -202,6 +206,7 @@ public class AIBotStoreEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @RateLimit(RateKey.Botstore_Metadata)
     @Path("{botId}/icon")
     @GET
     @ValidateParameters({APIParameter.DevID})
@@ -221,6 +226,7 @@ public class AIBotStoreEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @RateLimit(RateKey.Botstore_Publish)
     @Path("{botId}/icon")
     @POST
     @ValidateParameters({APIParameter.DevID})

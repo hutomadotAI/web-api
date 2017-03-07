@@ -1,7 +1,11 @@
 package com.hutoma.api.controllers;
 
-import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.AiServiceStatusLogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
+import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
@@ -9,6 +13,7 @@ import org.glassfish.hk2.api.ServiceLocator;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -25,7 +30,7 @@ public abstract class ControllerBase extends ServerMetadata {
 
     public ControllerBase(final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator,
-                          final ILogger logger) {
+                          final AiServiceStatusLogger logger) {
         super(logger);
         this.serviceLocator = serviceLocator;
         this.threadSubPool = threadSubPool;
@@ -74,12 +79,28 @@ public abstract class ControllerBase extends ServerMetadata {
                 this.aiHashCodes.put(entry.getAiid(), entry.getAiHash()));
     }
 
-    protected ServerTracker createNewServerTracker() {
-        return this.serviceLocator.getService(ServerTracker.class);
+    /***
+     * Controller function to pass backend reported AI list with statuses
+     * to the database class to sync what is already in the DB
+     * @param database need to pass an instance of the database because the controller is a singleton
+     * @param jsonSerializer need to pass a serializer because the controller is a singleton
+     * @param serverType what server is this?
+     * @param statusData mapped data that the backe nd server has reported
+     * @throws Database.DatabaseException
+     */
+    public void synchroniseDBStatuses(final DatabaseAiStatusUpdates database,
+                                      final JsonSerializer jsonSerializer,
+                                      final BackendServerType serverType,
+                                      final Map<UUID, ServerAiEntry> statusData) throws Database.DatabaseException {
+        database.synchroniseDBStatuses(jsonSerializer, serverType, statusData);
     }
 
     public enum RequestFor {
         Training,
         Chat
+    }
+
+    protected ServerTracker createNewServerTracker() {
+        return this.serviceLocator.getService(ServerTracker.class);
     }
 }

@@ -59,32 +59,32 @@ public class TestTrainingLogicParser {
 
     @Test
     public void testParse_Exchange_TwoPairs() {
-        Assert.assertEquals("H1^A1^[A1] H2^A2^^", parse(new String[]{"H1", "A1", "H2", "A2"}));
+        Assert.assertEquals("H1^A1^H2^A2^^", parse(new String[]{"H1", "A1", "H2", "A2"}));
     }
 
     @Test
     public void testParse_Exchange_OddNumber() {
-        Assert.assertEquals("H1^A1^[A1] H2^A2^^", parse(new String[]{"H1", "A1", "H2", "A2", "H3"}));
+        Assert.assertEquals("H1^A1^H2^A2^^", parse(new String[]{"H1", "A1", "H2", "A2", "H3"}));
     }
 
     @Test
     public void testParse_Pair_After_EvenExchange() {
         Assert.assertEquals(
-                String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", ""),
+                String.format("H1^A1^H2^A2%s^^H10^A11^^", ""),
                 parse(new String[]{"H1", "A1", "H2", "A2", "", "H10", "A11"}));
     }
 
     @Test
     public void testParse_Pair_After_OddExchange() {
         // H3 is ignored as there was no response
-        Assert.assertEquals(String.format("H1^A1^[A1] H2^A2%s^^H10^A11^^", ""),
+        Assert.assertEquals(String.format("H1^A1^H2^A2%s^^H10^A11^^", ""),
                 parse(new String[]{"H1", "A1", "H2", "A2", "H3", "", "H10", "A11"}));
     }
 
     @Test
     public void testParse_Exchange_After_Pair() {
         Assert.assertEquals(
-                String.format("H10^A11%s^^H1^A1^[A1] H2^A2^^", ""),
+                String.format("H10^A11%s^^H1^A1^H2^A2^^", ""),
                 parse(new String[]{"H10", "A11", "", "H1", "A1", "H2", "A2"}));
     }
 

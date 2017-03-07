@@ -42,14 +42,14 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./plugins/select2/select2.css">
+    <link rel="stylesheet" href="scripts/external/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
 
-    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.css">
-    <link rel="stylesheet" href="./plugins/ionslider/ion.rangeSlider.skinNice.css">
-    <link rel="stylesheet" href="./plugins/iCheck/all.css">
+    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.css">
+    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
+    <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     
     
 </head>
@@ -89,22 +89,22 @@
     var err = <?php if(isset($_GET['err'])) echo($_GET['err']); else echo ('false'); ?>;
 </script>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./plugins/inputCommon/inputCommon.js"></script>
-<script src="./plugins/validation/validation.js"></script>
-<script src="./plugins/createAI/createAI.js"></script>
-<script src="./plugins/select2/select2.full.js"></script>
-<script src="./plugins/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="./plugins/ionslider/ion.rangeSlider.min.js"></script>
+<script src="./scripts/inputCommon/inputCommon.js"></script>
+<script src="./scripts/validation/validation.js"></script>
+<script src="./scripts/createAI/createAI.js"></script>
+<script src="scripts/external/select2/select2.full.js"></script>
+<script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="scripts/external/ionslider/ion.rangeSlider.min.js"></script>
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init([ "","home",0,true,true]);

@@ -27,7 +27,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                        Pre-trained neural networks are made available by our community and provide out of the box knowledge to your bot so you don't have to start from scratch.
+                        Bots are made available by our community and provide out of the box knowledge to your bot so you don't have to start from scratch.
                     </div>
                 </section>
                 <p></p>

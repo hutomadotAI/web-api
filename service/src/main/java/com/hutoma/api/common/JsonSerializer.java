@@ -49,7 +49,7 @@ public class JsonSerializer {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
             return obj;
-        } catch (JsonSyntaxException jse) {
+        } catch (NumberFormatException | JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }
     }
@@ -61,7 +61,7 @@ public class JsonSerializer {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
             return obj;
-        } catch (JsonSyntaxException jse) {
+        } catch (NumberFormatException | JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }
     }

@@ -7,12 +7,14 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
@@ -20,7 +22,10 @@ import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -31,7 +36,7 @@ public class AIServicesLogic {
     private static final String LOGFROM = "aiserviceslogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
-    private final Database database;
+    private final DatabaseAiStatusUpdates database;
     private final AIServices aiServices;
     private final AiServiceStatusLogger serviceStatusLogger;
     private final ILogger logger;
@@ -43,7 +48,7 @@ public class AIServicesLogic {
 
     @Inject
     public AIServicesLogic(final Config config, final JsonSerializer jsonSerializer,
-                           final Database database, final AIServices aiServices,
+                           final DatabaseAiStatusUpdates database, final AIServices aiServices,
                            final AiServiceStatusLogger serviceStatusLogger, ILogger logger,
                            final Tools tools,
                            final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
@@ -92,7 +97,7 @@ public class AIServicesLogic {
             }
 
             // we accept the update. log it.
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, "UpdateAIStatus", status);
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
 
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",
@@ -120,6 +125,7 @@ public class AIServicesLogic {
                 // if we are master then update all the hash codes from this reg-list
                 if (controller.isPrimaryMaster(serverSessionID)) {
                     controller.setAllHashCodes(registration.getAiList());
+                    synchroniseStatuses(controller, registration);
                 }
             } else {
                 this.serviceStatusLogger.logError(LOGFROM,
@@ -127,7 +133,7 @@ public class AIServicesLogic {
                 return ApiError.getBadRequest("unrecognised server type");
             }
         } catch (Exception ex) {
-            this.logger.logException(LOGFROM, ex);
+            this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
         return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
@@ -138,16 +144,36 @@ public class AIServicesLogic {
         List<UUID> aiList = serverAffinity.getAiList();
 
         try {
-            if (this.controllerWnet.updateAffinity(sid, aiList)
-                    || this.controllerRnn.updateAffinity(sid, aiList)
-                    || this.controllerAiml.updateAffinity(sid, aiList)) {
-                return new ApiResult().setSuccessStatus("server affinity updated");
+            BackendServerType updated = null;
+            if (this.controllerWnet.updateAffinity(sid, aiList)) {
+                updated = BackendServerType.WNET;
+            } else {
+                if (this.controllerRnn.updateAffinity(sid, aiList)) {
+                    updated = BackendServerType.RNN;
+                } else {
+                    if (this.controllerAiml.updateAffinity(sid, aiList)) {
+                        updated = BackendServerType.AIML;
+                    }
+                }
             }
-            return ApiError.getBadRequest("nonexistent session");
+            if (updated == null) {
+                return ApiError.getBadRequest("nonexistent session");
+            }
+
+            this.serviceStatusLogger.logAffinityUpdate(LOGFROM, updated, serverAffinity);
+
+            return new ApiResult().setSuccessStatus("server affinity updated");
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
+    }
+
+    private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration) throws Database.DatabaseException {
+        Map<UUID, ServerAiEntry> result =
+                registration.getAiList().stream()
+                        .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));
+        controller.synchroniseDBStatuses(this.database, this.jsonSerializer, registration.getServerType(), result);
     }
 
     private ControllerBase getControllerFor(BackendServerType server) {

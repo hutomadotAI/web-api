@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
@@ -28,7 +29,7 @@ public class ServerMetadata {
     protected ILogger logger;
     private int roundRobinIndex;
 
-    public ServerMetadata(final ILogger logger) {
+    public ServerMetadata(final AiServiceStatusLogger logger) {
         this.logger = logger;
         this.activeServerSessions = new HashMap<>();
         this.serverAiAffinity = new HashMap<>();

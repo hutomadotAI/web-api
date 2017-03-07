@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
@@ -27,7 +28,7 @@ public class TestController {
     private static final String HASH1 = "hash1";
     private static final String HASH2 = "hash2";
 
-    ILogger logger;
+    AiServiceStatusLogger logger;
     Config config;
     FakeTimerTools tools;
     ThreadPool threadPool;
@@ -38,7 +39,7 @@ public class TestController {
     @Before
     public void setUp() throws Exception {
         this.config = mock(Config.class);
-        this.logger = mock(ILogger.class);
+        this.logger = mock(AiServiceStatusLogger.class);
         this.tools = new FakeTimerTools();
         when(this.config.getThreadPoolMaxThreads()).thenReturn(16);
         when(this.config.getThreadPoolIdleTimeMs()).thenReturn(1L);
@@ -94,7 +95,7 @@ public class TestController {
     public static class ControllerUnderTest extends ControllerBase {
 
         public ControllerUnderTest(final ThreadSubPool threadSubPool,
-                                   final ILogger logger) {
+                                   final AiServiceStatusLogger logger) {
             super(threadSubPool, null, logger);
         }
 

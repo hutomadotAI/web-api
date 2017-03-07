@@ -80,7 +80,13 @@ public class ApiError extends ApiResult {
     }
 
     public static ApiError getBadRequest(Validate.ParameterValidationException pve) {
-        return ApiError.getBadRequest(pve.getMessage(), null);
+        String paramName = pve.getParameterName();
+        String message = pve.getMessage();
+        return ApiError.getBadRequest(String.format("%s%s%s",
+                (paramName == null) ? "" : paramName,
+                (paramName == null || message == null) ? "" : ": ",
+                (message == null) ? "" : message),
+                null);
     }
 
     public static ApiError getNotFound(String message) {

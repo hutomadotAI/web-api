@@ -57,32 +57,13 @@ if (isset($botDetails)) {
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./plugins/switch/switch.css">
+    <link rel="stylesheet" href="./scripts/switch/switch.css">
 </head>
 <script>
     var bot = <?php
         $bot = new \hutoma\bot();
         if (isset($botDetails) && (array_key_exists('bot', $botDetails))) {
-            // TODO probably this value is hidden to client side
-            //$bot->setAiid($botDetails['bot']['aiid']);
-            $bot->setAlertMessage($botDetails['bot']['alertMessage']);
-            $bot->setBadge('Top Developer');                        //$botDetails['bot']['badge']);
-            $bot->setBotId($botDetails['bot']['botId']);
-            $bot->setCategory($botDetails['bot']['category']);
-            $bot->setClassification($botDetails['bot']['classification']);
-            $bot->setDescription($botDetails['bot']['description']);
-            $bot->setLicenseType($botDetails['bot']['licenseType']);
-            $bot->setUpdate($botDetails['bot']['lastUpdate']);
-            $bot->setLongDescription($botDetails['bot']['longDescription']);
-            $bot->setName($botDetails['bot']['name']);
-            $bot->setPrice($botDetails['bot']['price']);
-            $bot->setPrivacyPolicy($botDetails['bot']['privacyPolicy']);
-            $bot->setSample($botDetails['bot']['sample']);
-            $bot->setUsers('103');                                  //$botDetails['bot']['users']);
-            $bot->setActivations($bot->rangeActivation($bot->getUsers()));
-            $bot->setVersion($botDetails['bot']['version']);
-            $bot->setVideoLink($botDetails['bot']['videoLink']);
-            $bot->setIconFile($botDetails['bot']['botIcon']);
+            $bot = \hutoma\bot::fromObject($botDetails['bot']);
         }
         $tmp_bot = $bot->toJSON();
         unset($bot);
@@ -131,7 +112,7 @@ if (isset($botDetails)) {
                         ?>
                     </div>
                     <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
-                    <script src="./plugins/botstore/botstoreWizard.js"></script>
+                    <script src="./scripts/botstore/botstoreWizard.js"></script>
                 </div>
             </div>
         </section>
@@ -142,17 +123,17 @@ if (isset($botDetails)) {
     </footer>
 </div>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
-<script src="./plugins/botstore/buyBot.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
+<script src="./scripts/botstore/buyBot.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">

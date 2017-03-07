@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
@@ -29,14 +30,14 @@ import static org.mockito.Mockito.mock;
  */
 public class TestServerMetadata {
 
-    ILogger logger;
+    AiServiceStatusLogger logger;
     Config config;
     FakeTimerTools tools;
     ServerMetadataUnderTest test;
 
     @Before
     public void setUp() throws Exception {
-        this.logger = mock(ILogger.class);
+        this.logger = mock(AiServiceStatusLogger.class);
         this.config = mock(Config.class);
         this.tools = new FakeTimerTools();
         this.test = new ServerMetadataUnderTest(this.logger, this.config, this.tools, null);
@@ -327,7 +328,7 @@ public class TestServerMetadata {
 
         protected ServiceLocator serviceLocator;
 
-        public ServerMetadataUnderTest(final ILogger logger, final Config config, final Tools tools, final ServiceLocator serviceLocator) {
+        public ServerMetadataUnderTest(final AiServiceStatusLogger logger, final Config config, final Tools tools, final ServiceLocator serviceLocator) {
             super(logger);
         }
 

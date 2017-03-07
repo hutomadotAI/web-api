@@ -88,6 +88,16 @@ public interface ILogger {
      * @param logFrom    where it's logging from
      * @param event      the event name
      * @param user       the user
+     * @param exception  exception
+     * @param properties list of property key-value pairs
+     */
+    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception, String... properties);
+
+    /**
+     * Logs a user-related EXCEPTION event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
      * @param exception  the exception
      * @param properties map of properties
      */

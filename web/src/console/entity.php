@@ -90,20 +90,20 @@ function echoJsonEntitiesResponse($entities)
     </footer>
 </div>
 
-<script src="./plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="./plugins/fastclick/fastclick.min.js"></script>
+<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./plugins/validation/validation.js"></script>
-<script src="./plugins/entity/entity.js"></script>
-<script src="./plugins/chat/chat.js"></script>
-<script src="./plugins/chat/voice.js"></script>
+<script src="./scripts/validation/validation.js"></script>
+<script src="./scripts/entity/entity.js"></script>
+<script src="./scripts/chat/chat.js"></script>
+<script src="./scripts/chat/voice.js"></script>
 
-<script src="./plugins/messaging/messaging.js"></script>
-<script src="./plugins/shared/shared.js"></script>
-<script src="./plugins/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/messaging/messaging.js"></script>
+<script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">

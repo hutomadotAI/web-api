@@ -1,5 +1,5 @@
 <header id="navigation" class="navbar-fixed-top navbar" >
-    <div class="container" style="font-weight: bold" >
+    <div class="web-container" style="font-weight: bold" >
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>

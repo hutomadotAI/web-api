@@ -20,6 +20,7 @@ import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,6 @@ public class ChatLogic {
     private final IEntityRecognizer entityRecognizer;
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
-
     private Map<String, String> telemetryMap;
 
     @Inject
@@ -82,83 +82,104 @@ public class ChatLogic {
             }
         };
 
+        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid);
+        // For now we should only have one active intent per chat.
+        MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
+        ChatResult result = new ChatResult();
+
         try {
-            // async start requests to all servers
-            this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history, topic);
 
-            // wait for WNET to return
-            ChatResult result = this.interpretSemanticResult();
+            // Check if we're in the middle of an intent flow and process it.
+            if (!processIntent(devId, aiid, currentIntent, question, result)) {
+                // Otherwise just go through the regular chat flow
 
-            boolean wnetConfident = false;
-            if (result != null) {
-                // are we confident enough with this reply?
-                wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
-                this.telemetryMap.put("WNETConfident", Boolean.toString(wnetConfident));
+                // async start requests to all servers
+                this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history, topic);
 
-                if (wnetConfident) {
-                    // if we are taking WNET's reply then process intents
-                    if (this.handleIntents(result, devId, aiid, chatUuid, question, this.telemetryMap)) {
-                        this.telemetryMap.put("AnsweredBy", "WNET");
-                        this.telemetryMap.put("AnsweredWithConfidence", "true");
-                    } else {
-                        // if intents processing returns false then we need to ignore WNET
-                        wnetConfident = false;
-                    }
-                }
-            }
-            this.telemetryMap.put("WNETAnswered", Boolean.toString(result != null));
+                // wait for WNET to return
+                result = this.interpretSemanticResult();
 
-            if (!wnetConfident) {
-                // otherwise,
-                // wait for the AIML server to respond
-                ChatResult aimlResult = this.interpretAimlResult();
-
-                boolean aimlConfident = false;
-                // If we don't have AIML available (not linked)
-                if (aimlResult != null) {
+                boolean wnetConfident = false;
+                if (result != null) {
                     // are we confident enough with this reply?
-                    aimlConfident = aimlResult.getScore() > 0.0d;
-                    this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
-                    if (aimlConfident) {
-                        this.telemetryMap.put("AnsweredBy", "AIML");
-                        this.telemetryMap.put("AnsweredWithConfidence", "true");
-                        result = aimlResult;
+                    wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
+                    this.telemetryMap.put("WNETConfident", Boolean.toString(wnetConfident));
+
+                    if (wnetConfident) {
+                        // if we are taking WNET's reply then process intents
+                        MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
+                                devId, aiid, chatUuid, result.getAnswer());
+                        if (memoryIntent != null // Intent was recognized
+                                && !memoryIntent.isFulfilled()) {
+
+                            this.telemetryMap.put("IntentRecognized", memoryIntent.getName());
+
+                            if (processIntent(devId, aiid, memoryIntent, question, result)) {
+                                this.telemetryMap.put("AnsweredBy", "WNET");
+                                this.telemetryMap.put("AnsweredWithConfidence", "true");
+                            } else {
+                                // if intents processing returns false then we need to ignore WNET
+                                wnetConfident = false;
+                            }
+                        }
                     }
                 }
-                this.telemetryMap.put("AIMLAnswered", Boolean.toString(aimlResult != null));
+                this.telemetryMap.put("WNETAnswered", Boolean.toString(result != null));
 
-                if (aimlResult == null || !aimlConfident) {
-                    // get a response from the RNN
-                    ChatResult rnnResult = this.interpretRnnResult();
+                if (!wnetConfident) {
+                    // otherwise,
+                    // wait for the AIML server to respond
+                    ChatResult aimlResult = this.interpretAimlResult();
 
-                    if (rnnResult != null) {
-                        // If the RNN was clueless or returned an empty response
-                        if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
-                            // Mark it as not really answered
-                            this.telemetryMap.put("AnsweredWithConfidence", "false");
-                            // Use AIML, if available, use it as it will always generate something
-                            if (aimlResult != null) {
-                                this.telemetryMap.put("AnsweredBy", "AIML");
-                                result = aimlResult;
+                    boolean aimlConfident = false;
+                    // If we don't have AIML available (not linked)
+                    if (aimlResult != null) {
+                        // are we confident enough with this reply?
+                        aimlConfident = aimlResult.getScore() > 0.0d;
+                        this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
+                        if (aimlConfident) {
+                            this.telemetryMap.put("AnsweredBy", "AIML");
+                            this.telemetryMap.put("AnsweredWithConfidence", "true");
+                            result = aimlResult;
+                        }
+                    }
+                    this.telemetryMap.put("AIMLAnswered", Boolean.toString(aimlResult != null));
+
+                    if (aimlResult == null || !aimlConfident) {
+                        // get a response from the RNN
+                        ChatResult rnnResult = this.interpretRnnResult();
+
+                        if (rnnResult != null) {
+                            // If the RNN was clueless or returned an empty response
+                            if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
+                                // Mark it as not really answered
+                                this.telemetryMap.put("AnsweredWithConfidence", "false");
+                                // Use AIML, if available, use it as it will always generate something
+                                if (aimlResult != null) {
+                                    this.telemetryMap.put("AnsweredBy", "AIML");
+                                    result = aimlResult;
+                                } else {
+                                    // TODO we need to figure out something
+                                    this.telemetryMap.put("AnsweredBy", "NONE");
+                                    result = getImCompletelyLostChatResult(chatUuid);
+                                }
                             } else {
-                                // TODO we need to figure out something
-                                this.telemetryMap.put("AnsweredBy", "NONE");
-                                result = getImCompletelyLostChatResult(chatUuid);
+                                result = rnnResult;
+                                this.telemetryMap.put("AnsweredBy", "RNN");
+                                this.telemetryMap.put("AnsweredWithConfidence", "true");
                             }
                         } else {
-                            result = rnnResult;
-                            this.telemetryMap.put("AnsweredBy", "RNN");
-                            this.telemetryMap.put("AnsweredWithConfidence", "true");
+                            // TODO we need to figure out something
+                            this.telemetryMap.put("AnsweredBy", "NONE");
+                            result = getImCompletelyLostChatResult(chatUuid);
                         }
-                    } else {
-                        // TODO we need to figure out something
-                        this.telemetryMap.put("AnsweredBy", "NONE");
-                        result = getImCompletelyLostChatResult(chatUuid);
-                    }
 
-                    this.telemetryMap.put("RNNAnswered", Boolean.toString(rnnResult != null));
+                        this.telemetryMap.put("RNNAnswered", Boolean.toString(rnnResult != null));
+                    }
                 }
             }
+
+            apiChat.setResult(result);
 
             // set the history to the answer, unless we have received a reset command,
             // in which case send an empty string
@@ -171,8 +192,6 @@ public class ChatLogic {
             result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
             this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
 
-            apiChat.setResult(result);
-
         } catch (RequestBase.AiNotFoundException notFoundException) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devId,
                     "Message", notFoundException.getMessage(), "AIID", aiid.toString());
@@ -180,28 +199,15 @@ public class ChatLogic {
             return ApiError.getNotFound("AI not found");
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, "AIID", aiid.toString());
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
             return ApiError.getBadRequest("This AI is not ready to chat. It needs to train and/or be linked to bots");
 
-        } catch (ServerConnector.AiServicesException aiException) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI services exception", devId, "AIID", aiid.toString(),
-                    "Exception", aiException.toString());
-            this.chatLogger.logChatError(LOGFROM, devId, aiException, this.telemetryMap);
-            return ApiError.getInternalServerError();
-
-        } catch (IntentException ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - intent exception", devId, "AIID", aiid.toString(),
-                    "Exception", ex.toString());
+        } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
+                    devId, ex, "AIID", aiid.toString());
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
-
-        } catch (RequestBase.AiControllerException ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI controller exception", "AIID", aiid.toString(),
-                    "Exception", ex.toString());
-            this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
-            return ApiError.getInternalServerError();
-
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat", devId, e);
             this.chatLogger.logChatError(LOGFROM, devId, e, this.telemetryMap);
@@ -257,6 +263,82 @@ public class ChatLogic {
         // log the results
         this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId, this.telemetryMap);
         return apiChat.setSuccessStatus();
+    }
+
+    private boolean processIntent(final String devId, final UUID aiid, final MemoryIntent currentIntent,
+                                  final String question, ChatResult chatResult)
+            throws IntentException {
+        if (currentIntent == null) {
+            // no intent to process
+            return false;
+        }
+
+        List<MemoryIntent> intentsToClear = new ArrayList<>();
+        boolean handledIntent = false;
+
+        // Attempt to retrieve entities from the question
+        List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
+                currentIntent.getVariables());
+        if (!entities.isEmpty()) {
+            currentIntent.fulfillVariables(entities);
+        }
+
+        // Check if there still are mandatory entities not currently fulfilled
+        List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
+        if (vars.isEmpty()) {
+            notifyIntentFulfilled(chatResult, currentIntent, devId, aiid, this.telemetryMap);
+            intentsToClear.add(currentIntent);
+            handledIntent = true;
+        } else {
+            // For now get the first unfulfilled variable with numPrompts < maxPrompts
+            // or we could do random just to make it a 'surprise!' :)
+            Optional<MemoryVariable> optVariable = vars.stream()
+                    .filter(x -> x.getTimesPrompted() < x.getTimesToPrompt()).findFirst();
+            if (optVariable.isPresent()) {
+                MemoryVariable variable = optVariable.get();
+                if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
+                    // Should not happen as this should be validated during creation
+                    this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
+                            devId, "AIID", aiid.toString(), "Intent", currentIntent.getName(),
+                            "Variable", variable.getName());
+                    throw new IntentException(
+                            String.format("Entity %s for intent %s does not specify any prompts",
+                                    currentIntent.getName(), variable.getName()));
+                } else {
+                    // And prompt the user for the value for that variable
+                    int pos = variable.getTimesPrompted() < variable.getPrompts().size()
+                            ? variable.getTimesPrompted()
+                            : 0;
+                    chatResult.setAnswer(variable.getPrompts().get(pos));
+                    // and decrement the number of prompts
+                    variable.setTimesPrompted(variable.getTimesPrompted() + 1);
+                    this.telemetryMap.put("IntentPrompt",
+                            String.format("intent:'%s' variable:'%s' currentPrompt:%d/%d",
+                                    currentIntent.getName(), variable.getName(),
+                                    variable.getTimesPrompted(),
+                                    variable.getTimesToPrompt()));
+                    handledIntent = true;
+                }
+            } else { // intent not fulfilled but no variables left to handle
+                // if we run out of n_prompts we just stop asking.
+                // the user can still answer the question ... or not
+                this.telemetryMap.put("IntentNotFulfilled", currentIntent.getName());
+            }
+        }
+
+        chatResult.setIntents(Collections.singletonList(currentIntent));
+
+
+        if (!intentsToClear.contains(currentIntent)) {
+            this.intentHandler.updateStatus(currentIntent);
+        }
+
+        // Clear fulfilled intents so they can be triggered again
+        if (!intentsToClear.isEmpty()) {
+            this.intentHandler.clearIntents(intentsToClear);
+        }
+
+        return handledIntent;
     }
 
     private Pair<UUID, ChatResult> getTopScore(Map<UUID, ChatResult> chatResults) {
@@ -367,101 +449,6 @@ public class ChatLogic {
 
     private double toOneDecimalPlace(double input) {
         return Math.round(input * 10.0d) / 10.0d;
-    }
-
-    /**
-     * Handle any intents.
-     * @param chatResult   the current chat result
-     * @param aiid         the AI ID
-     * @param chatUuid     the Chat ID
-     * @param question     the question
-     * @param telemetryMap the telemetry map
-     */
-    private boolean handleIntents(final ChatResult chatResult, final String devId, final UUID aiid, final UUID chatUuid,
-                                  final String question, final Map<String, String> telemetryMap)
-            throws IntentException {
-
-        // the reply that we are processing is the one to return to the user
-        boolean replyConfidence = true;
-        List<MemoryIntent> fulfilledIntentsToClear = new ArrayList<>();
-
-        // Now that have the chat result, we need to check if there's an intent being returned
-        MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                devId, aiid, chatUuid, chatResult.getAnswer());
-        if (memoryIntent != null // Intent was recognized
-                && !memoryIntent.isFulfilled()) {
-            telemetryMap.put("IntentRecognized", memoryIntent.getName());
-            if (memoryIntent.getUnfulfilledVariables().isEmpty()) {
-                // Intent has been fulfilled
-                notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
-                fulfilledIntentsToClear.add(memoryIntent);
-            } else {
-                // Attempt to retrieve entities from the question
-                List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
-                        memoryIntent.getVariables());
-                if (!entities.isEmpty()) {
-                    memoryIntent.fulfillVariables(entities);
-                }
-
-                // We've now fulfilled any variables present on the user's question.
-                // Need to determine if there are still any unfulfilled variable
-                // and prompt for it
-                List<MemoryVariable> vars = memoryIntent.getUnfulfilledVariables();
-                if (vars.isEmpty()) {
-                    notifyIntentFulfilled(chatResult, memoryIntent, devId, aiid, telemetryMap);
-                    fulfilledIntentsToClear.add(memoryIntent);
-                } else {
-                    // For now get the first unfulfilled variable with numPrompts < maxPrompts
-                    // or we could do random just to make it a 'surprise!' :)
-                    Optional<MemoryVariable> optVariable = vars.stream()
-                            .filter(x -> x.getTimesPrompted() < x.getTimesToPrompt()).findFirst();
-                    if (optVariable.isPresent()) {
-                        MemoryVariable variable = optVariable.get();
-                        if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
-                            // Should not happen as this should be validated during creation
-                            this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
-                                    devId, "AIID", aiid.toString(), "Intent", memoryIntent.getName(),
-                                    "Variable", variable.getName());
-                            throw new IntentException(
-                                    String.format("Entity %s for intent %s does not specify any prompts",
-                                            memoryIntent.getName(), variable.getName()));
-                        } else {
-
-                            // And prompt the user for the value for that variable
-                            int pos = variable.getTimesPrompted() < variable.getPrompts().size()
-                                    ? variable.getTimesPrompted()
-                                    : 0;
-                            chatResult.setAnswer(variable.getPrompts().get(pos));
-                            // and decrement the number of prompts
-                            variable.setTimesPrompted(variable.getTimesPrompted() + 1);
-                            telemetryMap.put("IntentPrompt",
-                                    String.format("intent:'%s' variable:'%s' currentPrompt:%d/%d",
-                                            memoryIntent.getName(), variable.getName(),
-                                            variable.getTimesPrompted(),
-                                            variable.getTimesToPrompt()));
-
-                        }
-                    } else { // intent not fulfilled but no variables left to handle
-                        // if we run out of n_prompts we just stop asking.
-                        // the user can still answer the question ... or not
-                        telemetryMap.put("IntentNotFulfilled", memoryIntent.getName());
-                        replyConfidence = false;
-                    }
-
-                }
-            }
-            this.intentHandler.updateStatus(memoryIntent);
-        }
-
-        // Add the current intents state to the chat response
-        chatResult.setIntents(this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid));
-
-        // Clear fulfilled intents so they can be triggered again
-        if (!fulfilledIntentsToClear.isEmpty()) {
-            this.intentHandler.clearIntents(fulfilledIntentsToClear);
-        }
-
-        return replyConfidence;
     }
 
     private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid,

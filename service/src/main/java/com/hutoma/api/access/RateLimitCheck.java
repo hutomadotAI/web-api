@@ -10,6 +10,8 @@ import com.hutoma.api.validation.ParameterFilter;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -25,10 +27,10 @@ import javax.ws.rs.ext.Provider;
 public class RateLimitCheck implements ContainerRequestFilter {
 
     private static final String LOGFROM = "ratelimitcheck";
-    Database database;
-    ILogger logger;
-    Config config;
-    JsonSerializer serializer;
+    private final Database database;
+    private final ILogger logger;
+    private final Config config;
+    private final JsonSerializer serializer;
     @Context
     private ResourceInfo resourceInfo;
 
@@ -45,7 +47,14 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
         // retrieve a validated devid, or bundle ratelimiting with anonymous
         String devid = ParameterFilter.getDevid(requestContext);
+        Map<String, String> logParams = new LinkedHashMap<String, String>() {{
+            put("Method", requestContext.getMethod());
+            put("Path", requestContext.getUriInfo().getPath());
+        }};
 
+        double burst = 0.0;
+        double frequency = 0.0;
+        boolean skipRateLimit = false;
         try {
             if ((null == devid) || (devid.isEmpty())) {
                 devid = "{null or empty}";
@@ -57,32 +66,50 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
             switch (rateKey) {
                 case Chat:
-                    checkRateLimitReached(devid, rateKey,
-                            this.config.getRateLimit_Chat_BurstRequests(), this.config.getRateLimit_Chat_Frequency());
+                    burst = this.config.getRateLimit_Chat_BurstRequests();
+                    frequency = this.config.getRateLimit_Chat_Frequency();
                     break;
                 case QuickRead:
-                    checkRateLimitReached(devid, rateKey,
-                            this.config.getRateLimit_QuickRead_BurstRequests(),
-                            this.config.getRateLimit_QuickRead_Frequency());
+                    burst = this.config.getRateLimit_QuickRead_BurstRequests();
+                    frequency = this.config.getRateLimit_QuickRead_Frequency();
                     break;
                 case LoadTest:
+                    burst = this.config.getRateLimit_LoadTest_BurstRequests();
+                    frequency = this.config.getRateLimit_LoadTest_Frequency();
+                    break;
+                case Botstore_Metadata:
                     checkRateLimitReached(devid, rateKey,
-                            this.config.getRateLimit_LoadTest_BurstRequests(),
-                            this.config.getRateLimit_LoadTest_Frequency());
+                            this.config.getRateLimit_BotstoreMetadata_BurstRequests(),
+                            this.config.getRateLimit_BotstoreMetadata_Frequency());
+                    break;
+                case Botstore_Publish:
+                    checkRateLimitReached(devid, rateKey,
+                            this.config.getRateLimit_BotstorePublish_BurstRequests(),
+                            this.config.getRateLimit_BotstorePublish_Frequency());
                     break;
                 case None:
+                    skipRateLimit = true;
+                    break;
                 default:
                     break;
             }
+
+            if (!skipRateLimit) {
+                logParams.put("RateKey", rateKey.toString());
+                checkRateLimitReached(devid, rateKey, burst, frequency);
+            }
+
         } catch (AccountDisabledException ade) {
             requestContext.abortWith(ApiError.getAccountDisabled().getResponse(this.serializer).build());
-            this.logger.logInfo(LOGFROM, String.format("denying access to invalid account for devid %s", devid));
+            this.logger.logUserTraceEvent(LOGFROM, "Account not valid", devid, logParams);
         } catch (RateLimitedException rle) {
             requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
-            this.logger.logInfo(LOGFROM, rle.getMessage());
+            logParams.put("Burst", Double.toString(burst));
+            logParams.put("Frequency", Double.toString(frequency));
+            this.logger.logUserTraceEvent(LOGFROM, rle.getMessage(), devid, logParams);
         } catch (Exception e) {
             requestContext.abortWith(ApiError.getInternalServerError().getResponse(this.serializer).build());
-            this.logger.logError(LOGFROM, e.toString());
+            this.logger.logUserExceptionEvent(LOGFROM, e.toString(), devid, e);
         }
     }
 
@@ -109,16 +136,18 @@ public class RateLimitCheck implements ContainerRequestFilter {
      * @throws RateLimitedException if we should fail the call due to limiting
      * @throws AccountDisabledException if the devid was not recognised or the account was disabled
      */
-    private void checkRateLimitReached(String devid, RateKey rateKey, double burst, double frequency)
+    private void checkRateLimitReached(final String devid, final RateKey rateKey, final double burst,
+                                       final double frequency)
             throws Database.DatabaseException, RateLimitedException, AccountDisabledException {
         RateLimitStatus rateLimitStatus = this.database.checkRateLimit(devid, rateKey.toString(), burst, frequency);
+
         if (!rateLimitStatus.isAccountValid()) {
             throw new AccountDisabledException();
         }
         if (rateLimitStatus.isRateLimited()) {
             long blockedFor = Math.round(1000.0d * (1.0d - rateLimitStatus.getTokens()) * frequency);
-            throw new RateLimitedException(devid + " hit limit on " + rateKey.toString() + ". BLOCKED for the next "
-                    + blockedFor + "ms.");
+            throw new RateLimitedException(String.format("Limit hit for %s. Blocked for %d ms",
+                    rateKey.toString(), blockedFor));
         }
         this.logger.logDebug(LOGFROM, "OK for " + rateKey.toString() + " with " + rateLimitStatus.getTokens()
                 + " tokens remaining.");

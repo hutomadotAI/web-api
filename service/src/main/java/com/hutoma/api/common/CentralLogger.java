@@ -75,7 +75,7 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (Map<String, String>) null);
     }
 
     public void logWarning(String fromLabel, String logComment) {
@@ -118,7 +118,15 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
-        this.logUserExceptionEvent(logFrom, event, user, exception, null);
+        this.logUserExceptionEvent(logFrom, event, user, exception, (String[]) null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
+                                      final Exception exception, final String... properties) {
+        this.logUserExceptionEvent(logFrom, eventName, user, exception, arrayToMap(properties));
     }
 
     /**
@@ -182,6 +190,9 @@ public class CentralLogger implements ILogger {
     }
 
     private Map<String, String> arrayToMap(final String[] array) {
+        if (array == null) {
+            return new HashMap<>();
+        }
         if (array.length % 2 != 0) {
             throw new IllegalArgumentException("Properties need to be in the format of key1, value1, etc");
         }
@@ -252,6 +263,23 @@ public class CentralLogger implements ILogger {
             String date = df.format(new Date(this.timestamp));
             return String.format("%s HU:API %s [%s] %s", date, this.type, this.tag, this.message);
         }
+    }
+
+    public static class LogParameters extends HashMap<String, String> {
+
+        public LogParameters(String action) {
+            put("Action", action);
+        }
+
+        @Override
+        public String put(final String key, final String value) {
+            return super.put(key, (value == null ? "(null)" : value));
+        }
+
+        public String put(final String key, final Object objectValue) {
+            return super.put(key, (objectValue == null ? "(null)" : objectValue.toString()));
+        }
+
     }
 
     protected void startLoggingScheduler(final String loggingServiceUrl, final int loggingCadence) {

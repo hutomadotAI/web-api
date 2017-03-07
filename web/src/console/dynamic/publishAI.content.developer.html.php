@@ -138,4 +138,4 @@
     </div>
 </div>
 
-<script src="./plugins/publish/developer.js"></script>
+<script src="./scripts/publish/developer.js"></script>
