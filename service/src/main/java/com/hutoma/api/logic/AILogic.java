@@ -185,7 +185,7 @@ public class AILogic {
         try {
 
             if (!this.database.deleteAi(devid, aiid)) {
-                this.logger.logUserTraceEvent("DeleteAI - not found", devid, "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, "AIID", aiid.toString());
                 return ApiError.getNotFound();
             }
             try {
@@ -213,7 +213,7 @@ public class AILogic {
 
     public ApiResult getLinkedBots(final String devId, final UUID aiid) {
         try {
-            this.logger.logUserTraceEvent("GetLinkedBots", devId, "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "GetLinkedBots", devId, "AIID", aiid.toString());
             return new ApiAiBotList(this.database.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetLinkedBots", devId, ex);
