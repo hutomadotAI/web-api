@@ -264,6 +264,7 @@ function getUIStatusCall() {
                 hideChart(true);
                 hidePreTrainingBar(true);
                 hideTrainingBar(true);
+                msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training');
             }
             break;
         case (status == UI_STATE.COMPLETED.value):
