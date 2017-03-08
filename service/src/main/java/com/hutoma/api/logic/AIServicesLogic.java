@@ -169,7 +169,8 @@ public class AIServicesLogic {
         }
     }
 
-    private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration) throws Database.DatabaseException {
+    private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration)
+            throws Database.DatabaseException {
         Map<UUID, ServerAiEntry> result =
                 registration.getAiList().stream()
                         .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));

@@ -13,8 +13,8 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
@@ -28,6 +28,7 @@ import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
 import com.hutoma.api.controllers.ServerTracker;
 import com.hutoma.api.logic.*;
+import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -99,6 +100,7 @@ public class ServerBinder extends AbstractBinder {
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
+        bind(ChatStateHandler.class).to(ChatStateHandler.class);
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);

@@ -12,22 +12,27 @@ import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -60,6 +65,7 @@ public class TestChatLogic {
     private IEntityRecognizer fakeRecognizer;
     private IMemoryIntentHandler fakeIntentHandler;
     private ChatLogger fakeChatTelemetryLogger;
+    private ChatStateHandler fakeChatStateHandler;
     private Config fakeConfig;
 
     @Before
@@ -70,9 +76,13 @@ public class TestChatLogic {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeChatTelemetryLogger = mock(ChatLogger.class);
+        this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
-                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger);
+                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger,
+                this.fakeChatStateHandler);
+
+        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
     }
 
     /***
@@ -599,7 +609,7 @@ public class TestChatLogic {
     public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
+                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -608,7 +618,7 @@ public class TestChatLogic {
     public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
+                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -617,9 +627,114 @@ public class TestChatLogic {
     public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(Exception.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), anyString());
+                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_botAffinity_noBots_wnetWins() throws RequestBase.AiControllerException {
+        final String response = "wnet";
+        setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
+        ApiChat result = (ApiChat) getChat(0.1f);
+        Assert.assertEquals(response, result.getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException {
+        final String response = "wnet";
+        setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
+        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID()));
+        ApiChat result = (ApiChat) getChat(0.1f);
+        // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
+        Assert.assertEquals(response, result.getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_botAffinity_bots_noPreviousLock_lockToHighestBot() throws RequestBase.AiControllerException {
+        ChatResult cr1 = new ChatResult();
+        cr1.setScore(0.6);
+        ChatResult cr2 = new ChatResult();
+        cr2.setScore(0.4);
+        UUID cr1Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1);
+            put(UUID.randomUUID(), cr2);
+        }};
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        validateStateSaved(cr1, cr1Uuid);
+    }
+
+    @Test
+    public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws RequestBase.AiControllerException {
+        ChatResult cr1 = new ChatResult();
+        cr1.setScore(0.6);
+        ChatResult cr2 = new ChatResult();
+        cr2.setScore(0.9);
+        UUID cr1Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1);
+            put(UUID.randomUUID(), cr2);
+        }};
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
+        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        validateStateSaved(cr1, cr1Uuid);
+    }
+
+    @Test
+    public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws RequestBase.AiControllerException {
+        ChatResult cr1 = new ChatResult();
+        cr1.setScore(0.2);
+        ChatResult cr2 = new ChatResult();
+        cr2.setScore(0.9);
+        UUID cr1Uuid = UUID.randomUUID();
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1);
+            put(cr2Uuid, cr2);
+        }};
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
+        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        validateStateSaved(cr2, cr2Uuid);
+    }
+
+    @Test
+    public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException {
+        ChatResult cr1 = new ChatResult();
+        cr1.setScore(0.2);
+        ChatResult cr2 = new ChatResult();
+        cr2.setScore(0.3);
+        UUID cr1Uuid = UUID.randomUUID();
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1);
+            put(cr2Uuid, cr2);
+        }};
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
+        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        ChatResult cr1Aiml = new ChatResult();
+        cr1Aiml.setScore(0.6);
+        ChatResult cr2Aiml = new ChatResult();
+        cr2Aiml.setScore(0.7);
+        when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1Aiml);
+            put(cr2Uuid, cr2Aiml);
+        }});
+        // We now expect to get the AIML one with the highest score
+        validateStateSaved(cr2Aiml, cr2Uuid);
+    }
+
+    private void validateStateSaved(final ChatResult returnedResult, final UUID usedAiid) {
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertEquals(returnedResult.getScore(), result.getResult().getScore(), 0.0001);
+        ArgumentCaptor<ChatState> argumentCaptor = ArgumentCaptor.forClass(ChatState.class);
+        verify(this.fakeChatStateHandler).saveState(anyString(), any(), argumentCaptor.capture());
+        // And that the contains the lockedAiid value for the aiid with the highest score
+        Assert.assertEquals(usedAiid, argumentCaptor.getValue().getLockedAiid());
+
     }
 
     private void historySemanticReset(String resetCommand) throws
@@ -668,7 +783,7 @@ public class TestChatLogic {
         wnetResult.setAnswer(wnetResponse);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
 
-        when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID.toString()));
+        when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeChatServices.getLinkedBotsAiids(anyString(), any())).thenReturn(Collections.singletonList(new Pair<>(DEVID, AIML_BOT_AIID)));
         ChatResult aimlResult = new ChatResult();
         aimlResult.setScore(aimlConfidence);

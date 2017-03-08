@@ -37,7 +37,7 @@ public class TestControllerAiml {
         this.tools = new FakeTimerTools();
         this.config = mock(Config.class);
         this.fakeThreadSubPool = mock(ThreadSubPool.class);
-        this.test = new ControllerAiml(this.fakeThreadSubPool, null, this.logger) {
+        this.test = new ControllerAiml(TestControllerAiml.this.config, this.fakeThreadSubPool, null, this.logger) {
             @Override
             protected ServerTracker createNewServerTracker() {
                 return new FakeServerTracker(TestControllerAiml.this.config, TestControllerAiml.this.tools, this.logger);

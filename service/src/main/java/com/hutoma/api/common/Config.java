@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -135,13 +137,14 @@ public class Config {
         return getConfigFromProperties("logging_url", null);
     }
 
-    public List<String> getAimlBotAiids() {
-        List<String> list = getCSList("ai_aiml_bot_aiids");
-        if (list == null) {
-            return Arrays.asList("e1bb8226-e8ce-467a-8305-bc2fcb89dd7f");
-        } else {
-            return list;
+    public List<UUID> getAimlBotAiids() {
+        List<String> stringList = getCSList("ai_aiml_bot_aiids");
+        if (stringList == null) {
+            stringList = Arrays.asList("e1bb8226-e8ce-467a-8305-bc2fcb89dd7f");
         }
+        return stringList.stream()
+                .map(UUID::fromString)
+                .collect(Collectors.toList());
     }
 
     public int getLoggingUploadCadency() {

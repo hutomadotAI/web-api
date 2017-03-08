@@ -525,6 +525,24 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `chatState`
+--
+
+DROP TABLE IF EXISTS `chatState`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chatState` (
+  `dev_id` varchar(50) NOT NULL,
+  `chat_id` varchar(50) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `topic` varchar(250) NULL,
+  `locked_aiid` varchar(50) NULL,
+  PRIMARY KEY (`dev_id`, `chat_id`),
+  UNIQUE KEY `chat_id_UNIQUE` (`chat_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping events for database 'hutoma'
 --
 /*!50106 SET @save_time_zone= @@TIME_ZONE */ ;
@@ -2571,6 +2589,53 @@ BEGIN
     VALUES(param_aiid, param_chatId, param_name, param_variables, NOW(), param_isFulFilled)
 
   ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW(), isFulfilled = param_isFulFilled;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getChatState` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `getChatState`(
+  IN `param_devId` VARCHAR(50),
+  IN `param_chatId` VARCHAR(50))
+BEGIN
+    SELECT * FROM chatState WHERE dev_id = param_devId AND chat_id = param_chatId;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `setChatState` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
+  IN `param_devId` VARCHAR(50),
+  IN `param_chatId` VARCHAR(50),
+  IN `param_timestamp` TIMESTAMP,
+  IN `param_topic` VARCHAR(250),
+  IN `param_locked_aiid` VARCHAR(50))
+BEGIN
+    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, locked_aiid)
+    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_locked_aiid)
+      ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, locked_aiid = param_locked_aiid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

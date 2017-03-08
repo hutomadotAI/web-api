@@ -20,13 +20,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Provider;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class TestSyncDatabase {
 
@@ -60,7 +62,8 @@ public class TestSyncDatabase {
     @Test
     public void noAIs__noBackend_noChanges() throws Exception {
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(Arrays.asList());
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, new HashMap<>());
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                new HashMap<>(), new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
 
@@ -71,8 +74,30 @@ public class TestSyncDatabase {
         List<FakeRecord> records = new ArrayList<>();
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, registration);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
+        verify(this.logger, times(1)).logDbSyncUnknownAi(any(), any(), any());
+    }
+
+    @Test
+    public void excludedAI_not_matched() throws Exception {
+
+        // one AI reported from the backend and the db, but the AI is in the excluded list
+        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_TRAINING_COMPLETE);
+        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1,
+                TrainingStatus.AI_TRAINING_COMPLETE);
+
+        DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                registration, new HashSet<UUID>() {{
+                    add(TestSyncDatabase.this.aiid1);
+                }});
+        Assert.assertTrue(this.parameterList.isEmpty());
+
+        // so we expect one ai to be flagged as unknown
+        verify(this.logger, times(1)).logDbSyncUnknownAi(any(), any(), any());
     }
 
     @Test
@@ -82,7 +107,8 @@ public class TestSyncDatabase {
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, null);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, registration);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
 
@@ -93,7 +119,8 @@ public class TestSyncDatabase {
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_UNDEFINED);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, registration);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
 
@@ -104,7 +131,8 @@ public class TestSyncDatabase {
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, registration);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
 
@@ -115,7 +143,8 @@ public class TestSyncDatabase {
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, regData);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                regData, new HashSet<UUID>());
 
         Assert.assertEquals(1, this.parameterList.size());
         Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("0"));
@@ -136,7 +165,8 @@ public class TestSyncDatabase {
         addDatabaseData(records, devid2, aiid2, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET, regData);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                regData, new HashSet<UUID>());
 
         Assert.assertEquals(2, this.parameterList.size());
 

@@ -3,6 +3,7 @@ package com.hutoma.api.common;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerAiEntry;
 
 import org.glassfish.jersey.client.JerseyClient;
 
@@ -52,7 +53,8 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.logUserTraceEvent(logFrom, narrative, null, logParameters);
     }
 
-    public void logAffinityUpdate(final String logFrom, final BackendServerType updated, final ServerAffinity serverAffinity) {
+    public void logAffinityUpdate(final String logFrom, final BackendServerType updated,
+                                  final ServerAffinity serverAffinity) {
         LogParameters logParameters = new LogParameters("Affinity") {{
             this.put(AIENGINE, updated);
             this.put("SessionID", serverAffinity.getServerSessionID());
@@ -76,6 +78,18 @@ public class AiServiceStatusLogger extends CentralLogger {
                 logParameters.get(AIENGINE),
                 logParameters.get(AICOUNTUPDATED));
         this.logUserTraceEvent(logFrom, narrative, null, logParameters);
+    }
+
+    public void logDbSyncUnknownAi(String logFrom, BackendServerType serverType, ServerAiEntry aiEntry) {
+        LogParameters logParameters = new LogParameters("DbSyncStatus") {{
+            this.put(AIENGINE, serverType.toString());
+            this.put(AIID, aiEntry.getAiid().toString());
+            this.put("BackendStatus", aiEntry.getTrainingStatus().toString());
+        }};
+        this.logUserWarnEvent(logFrom, String.format("%s reports ai %s that is unknown to us",
+                logParameters.get(AIENGINE),
+                logParameters.get(AIID)),
+                null, logParameters);
     }
 
     @Override
