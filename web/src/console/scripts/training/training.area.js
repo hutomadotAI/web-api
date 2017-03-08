@@ -238,6 +238,7 @@ function getUIStatusCall() {
             hidePreTrainingBar(false);
             phaseOneMaxValue();
 
+            phaseTwoReset();
             hideTrainingBar(false);
             phaseTwoFlashing(true);
             hideChart(true);
