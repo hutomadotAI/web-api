@@ -53,7 +53,7 @@ public class RateLimitCheck implements ContainerRequestFilter {
         }};
 
         double burst = 0.0;
-        double frequency = 0.0;
+        double frequency = 1.0;
         boolean skipRateLimit = false;
         try {
             if ((null == devid) || (devid.isEmpty())) {
@@ -78,14 +78,12 @@ public class RateLimitCheck implements ContainerRequestFilter {
                     frequency = this.config.getRateLimit_LoadTest_Frequency();
                     break;
                 case Botstore_Metadata:
-                    checkRateLimitReached(devid, rateKey,
-                            this.config.getRateLimit_BotstoreMetadata_BurstRequests(),
-                            this.config.getRateLimit_BotstoreMetadata_Frequency());
+                    burst = this.config.getRateLimit_BotstoreMetadata_BurstRequests();
+                    frequency = this.config.getRateLimit_BotstoreMetadata_Frequency();
                     break;
                 case Botstore_Publish:
-                    checkRateLimitReached(devid, rateKey,
-                            this.config.getRateLimit_BotstorePublish_BurstRequests(),
-                            this.config.getRateLimit_BotstorePublish_Frequency());
+                    burst = this.config.getRateLimit_BotstorePublish_BurstRequests();
+                    frequency = this.config.getRateLimit_BotstorePublish_Frequency();
                     break;
                 case None:
                     skipRateLimit = true;
@@ -139,6 +137,9 @@ public class RateLimitCheck implements ContainerRequestFilter {
     private void checkRateLimitReached(final String devid, final RateKey rateKey, final double burst,
                                        final double frequency)
             throws Database.DatabaseException, RateLimitedException, AccountDisabledException {
+        if (frequency == 0.0d) {
+            throw new IllegalArgumentException("Frequency cannot be zero");
+        }
         RateLimitStatus rateLimitStatus = this.database.checkRateLimit(devid, rateKey.toString(), burst, frequency);
 
         if (!rateLimitStatus.isAccountValid()) {

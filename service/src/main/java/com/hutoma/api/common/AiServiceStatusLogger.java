@@ -52,7 +52,8 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.logUserTraceEvent(logFrom, narrative, null, logParameters);
     }
 
-    public void logAffinityUpdate(final String logFrom, final BackendServerType updated, final ServerAffinity serverAffinity) {
+    public void logAffinityUpdate(final String logFrom, final BackendServerType updated,
+                                  final ServerAffinity serverAffinity) {
         LogParameters logParameters = new LogParameters("Affinity") {{
             this.put(AIENGINE, updated);
             this.put("SessionID", serverAffinity.getServerSessionID());
