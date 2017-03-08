@@ -2,7 +2,7 @@ import random
 from pathlib import Path
 
 import hu_api.api
-from performance.common import get_ai_name, read_lines, write_file_lines, de_rate_limit
+from performance.common import get_ai_name, read_lines, write_file_lines, de_rate_limit, check_api_available
 from performance.performance_config import Config, make_config
 
 def main():
@@ -115,6 +115,8 @@ def main():
 
 
     requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
+
+    check_api_available(requester)
 
     # if files are missing then recreate from scratch
     if not have_we_got_the_files():

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 import hu_api
 from api_cli import arg_error
+from performance.common import check_api_available
 from performance.load_test import load_test
 from performance.performance_config import Config, make_config
 
@@ -15,6 +16,8 @@ def main():
 
     requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
     requesterLoad = hu_api.api.ApiRequester(config.url_root, config.chat_auth, [])
+
+    check_api_available(requester)
 
     results = load_test(config, requester, requesterLoad)
     results.sort(key=lambda tup: tup[1])
