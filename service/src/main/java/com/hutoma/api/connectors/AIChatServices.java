@@ -21,6 +21,7 @@ import org.glassfish.jersey.client.JerseyClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,10 +91,9 @@ public class AIChatServices extends ServerConnector {
 
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;
-        List<String> aimlBotIds = this.config.getAimlBotAiids();
-        if (!aimlBotIds.isEmpty()) {
+        HashSet<UUID> aimlBotIdsSet = new HashSet<>(this.config.getAimlBotAiids());
+        if (!aimlBotIdsSet.isEmpty()) {
             Set<UUID> usedAimlAis = ais.stream().map(Pair::getB).collect(Collectors.toSet());
-            Set<UUID> aimlBotIdsSet = aimlBotIds.stream().map(UUID::fromString).collect(Collectors.toSet());
             // intersect the two sets to usedAimlAis retains only the AIML ais in use
             usedAimlAis.retainAll(aimlBotIdsSet);
             if (!usedAimlAis.isEmpty()) {

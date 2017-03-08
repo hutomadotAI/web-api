@@ -3,7 +3,6 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
-import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -45,7 +44,7 @@ public class TestController {
         when(this.config.getThreadPoolIdleTimeMs()).thenReturn(1L);
         this.threadPool = new ThreadPool(this.config);
         this.subPool = new ThreadSubPool(this.threadPool);
-        this.controllerUnderTest = new ControllerUnderTest(this.subPool, this.logger);
+        this.controllerUnderTest = new ControllerUnderTest(this.config, this.subPool, this.logger);
     }
 
     @Test
@@ -94,9 +93,9 @@ public class TestController {
 
     public static class ControllerUnderTest extends ControllerBase {
 
-        public ControllerUnderTest(final ThreadSubPool threadSubPool,
+        public ControllerUnderTest(Config config, final ThreadSubPool threadSubPool,
                                    final AiServiceStatusLogger logger) {
-            super(threadSubPool, null, logger);
+            super(config, threadSubPool, null, logger);
         }
 
         @Override

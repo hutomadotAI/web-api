@@ -1,6 +1,7 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.AiServiceStatusLogger;
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.connectors.Database;
@@ -22,9 +23,9 @@ import javax.inject.Inject;
 public class ControllerAiml extends ControllerBase {
 
     @Inject
-    public ControllerAiml(final ThreadSubPool threadSubPool,
+    public ControllerAiml(final Config config, final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator, final AiServiceStatusLogger logger) {
-        super(threadSubPool, serviceLocator, logger);
+        super(config, threadSubPool, serviceLocator, logger);
     }
 
     /***

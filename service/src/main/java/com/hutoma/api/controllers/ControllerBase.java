@@ -1,6 +1,7 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.AiServiceStatusLogger;
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.connectors.Database;
@@ -12,6 +13,7 @@ import com.hutoma.api.containers.sub.ServerRegistration;
 import org.glassfish.hk2.api.ServiceLocator;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,14 +29,19 @@ public abstract class ControllerBase extends ServerMetadata {
     protected final HashMap<UUID, String> aiHashCodes;
     protected ThreadSubPool threadSubPool;
     protected ServiceLocator serviceLocator;
+    protected HashSet<UUID> botExclusionList;
+    Config config;
 
-    public ControllerBase(final ThreadSubPool threadSubPool,
+    public ControllerBase(final Config config,
+                          final ThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator,
                           final AiServiceStatusLogger logger) {
         super(logger);
+        this.config = config;
         this.serviceLocator = serviceLocator;
         this.threadSubPool = threadSubPool;
         this.aiHashCodes = new HashMap<>();
+        this.botExclusionList = new HashSet<>(config.getAimlBotAiids());
     }
 
     public UUID registerServer(final ServerRegistration registration) {
@@ -70,7 +77,7 @@ public abstract class ControllerBase extends ServerMetadata {
     }
 
     public synchronized void setHashCodeFor(UUID aiid, String hashCode) {
-        aiHashCodes.put(aiid, hashCode);
+        this.aiHashCodes.put(aiid, hashCode);
     }
 
     public synchronized void setAllHashCodes(final List<ServerAiEntry> aiList) {
@@ -92,7 +99,7 @@ public abstract class ControllerBase extends ServerMetadata {
                                       final JsonSerializer jsonSerializer,
                                       final BackendServerType serverType,
                                       final Map<UUID, ServerAiEntry> statusData) throws Database.DatabaseException {
-        database.synchroniseDBStatuses(jsonSerializer, serverType, statusData);
+        database.synchroniseDBStatuses(jsonSerializer, serverType, statusData, this.botExclusionList);
     }
 
     public enum RequestFor {

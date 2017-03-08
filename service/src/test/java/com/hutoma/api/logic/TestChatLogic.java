@@ -783,7 +783,7 @@ public class TestChatLogic {
         wnetResult.setAnswer(wnetResponse);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
 
-        when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID.toString()));
+        when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeChatServices.getLinkedBotsAiids(anyString(), any())).thenReturn(Collections.singletonList(new Pair<>(DEVID, AIML_BOT_AIID)));
         ChatResult aimlResult = new ChatResult();
         aimlResult.setScore(aimlConfidence);
