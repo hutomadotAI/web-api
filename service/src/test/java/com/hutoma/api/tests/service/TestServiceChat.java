@@ -3,9 +3,11 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import junitparams.JUnitParamsRunner;
@@ -25,6 +27,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import static junitparams.JUnitParamsRunner.$;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +45,8 @@ public class TestServiceChat extends ServiceTestBase {
     protected IEntityRecognizer fakeEntityRecognizer;
     @Mock
     protected ChatLogger fakeChatTelemetryLogger;
+    @Mock
+    protected ChatStateHandler fakeChatStateHandler;
 
     private static Object[] invalidMinPDataProvider() {
         return $(
@@ -54,6 +60,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Before
     public void setup() {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
+        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
     }
 
     @Test
@@ -123,12 +130,14 @@ public class TestServiceChat extends ServiceTestBase {
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeEntityRecognizer = mock(IEntityRecognizer.class);
         this.fakeChatTelemetryLogger = mock(ChatLogger.class);
+        this.fakeChatStateHandler = mock(ChatStateHandler.class);
 
         binder.bind(ChatLogic.class).to(ChatLogic.class);
 
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatTelemetryLogger)).to(ChatLogger.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(ChatStateHandler.class);
 
         return binder;
     }

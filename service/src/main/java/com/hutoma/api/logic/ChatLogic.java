@@ -13,9 +13,11 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
@@ -43,12 +45,16 @@ public class ChatLogic {
     private final IEntityRecognizer entityRecognizer;
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
+    private final ChatStateHandler chatStateHandler;
     private Map<String, String> telemetryMap;
+    private float minP;
+    private ChatState chatState;
 
     @Inject
-    public ChatLogic(Config config, JsonSerializer jsonSerializer, AIChatServices chatServices,
-                     Tools tools, ILogger logger, IMemoryIntentHandler intentHandler,
-                     IEntityRecognizer entityRecognizer, ChatLogger chatLogger) {
+    public ChatLogic(final Config config, final JsonSerializer jsonSerializer, final AIChatServices chatServices,
+                     final Tools tools, final ILogger logger, final IMemoryIntentHandler intentHandler,
+                     final IEntityRecognizer entityRecognizer, final ChatLogger chatLogger,
+                     final ChatStateHandler chatStateHandler) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.chatServices = chatServices;
@@ -57,13 +63,18 @@ public class ChatLogic {
         this.intentHandler = intentHandler;
         this.entityRecognizer = entityRecognizer;
         this.chatLogger = chatLogger;
+        this.chatStateHandler = chatStateHandler;
     }
 
-    public ApiResult chat(UUID aiid, String devId, String question, String chatId,
-                          String history, String topic, float minP) {
+    public ApiResult chat(final UUID aiid, final String devId, final String question, final String chatId,
+                          final String history, final String topic, final float minP) {
+
+        // TODO: Bug#1349 - topic is now ignored if passed from the caller
 
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
+        this.minP = minP;
+        this.chatState = this.chatStateHandler.getState(devId, chatUuid);
 
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
@@ -73,7 +84,7 @@ public class ChatLogic {
             {
                 put("DevId", devId);
                 put("AIID", aiid.toString());
-                put("Topic", topic);
+                put("Topic", ChatLogic.this.chatState.getTopic());
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 put("ChatId", chatUuid.toString());
@@ -94,7 +105,8 @@ public class ChatLogic {
                 // Otherwise just go through the regular chat flow
 
                 // async start requests to all servers
-                this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history, topic);
+                this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history,
+                        this.chatState.getTopic());
 
                 // wait for WNET to return
                 result = this.interpretSemanticResult();
@@ -217,6 +229,11 @@ public class ChatLogic {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
         }
+
+        this.chatState.setTopic(apiChat.getResult().getTopicOut());
+        this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
+        this.telemetryMap.put("LockedToAi",
+                this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
 
         // log the results
         this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devId, this.telemetryMap);
@@ -341,7 +358,14 @@ public class ChatLogic {
         return handledIntent;
     }
 
-    private Pair<UUID, ChatResult> getTopScore(Map<UUID, ChatResult> chatResults) {
+    private Pair<UUID, ChatResult> getTopScore(final Map<UUID, ChatResult> chatResults) {
+        // Check if the currently locked bot still has an acceptable response
+        if (this.chatState.getLockedAiid() != null && chatResults.containsKey(this.chatState.getLockedAiid())) {
+            ChatResult result = chatResults.get(this.chatState.getLockedAiid());
+            if (result.getScore() >= this.minP) {
+                return new Pair<>(this.chatState.getLockedAiid(), result);
+            }
+        }
         UUID responseFromAi = null;
         ChatResult chatResult = new ChatResult();
         for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
@@ -350,6 +374,8 @@ public class ChatLogic {
                 responseFromAi = entry.getKey();
             }
         }
+        // lock to this AI
+        this.chatState.setLockedAiid(responseFromAi);
         return new Pair<>(responseFromAi, chatResult);
     }
 

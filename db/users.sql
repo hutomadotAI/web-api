@@ -47,6 +47,8 @@ GRANT INSERT ON `hutoma`.`botPurchase` TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`botStore` TO 'aiWriter'@'127.0.0.1';
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`chatState` TO 'aiWriter'@'127.0.0.1';
+
 
 # Privileges for `chatlogReader`@`127.0.0.1`
 

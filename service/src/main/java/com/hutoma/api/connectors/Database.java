@@ -7,15 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendStatus;
-import com.hutoma.api.containers.sub.DevPlan;
-import com.hutoma.api.containers.sub.DeveloperInfo;
-import com.hutoma.api.containers.sub.Integration;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.*;
 
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
@@ -608,6 +600,36 @@ public class Database {
                 throw new DatabaseException(sqle);
             }
             return intents;
+        }
+    }
+
+    public ChatState getChatState(final String devId, final UUID chatId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getChatState", 2).add(devId).add(chatId);
+            ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return new ChatState(
+                        new DateTime(rs.getTimestamp("timestamp")),
+                        rs.getString("topic"),
+                        UUID.fromString(rs.getString("locked_aiid"))
+                );
+            }
+            return ChatState.getEmpty();
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
+    public boolean saveChatState(final String devId, final UUID chatId, final ChatState chatState)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setChatState", 5)
+                    .add(devId)
+                    .add(chatId)
+                    .add(chatState.getTimestamp())
+                    .add(chatState.getTopic())
+                    .add(chatState.getLockedAiid().toString());
+            return call.executeUpdate() > 0;
         }
     }
 
