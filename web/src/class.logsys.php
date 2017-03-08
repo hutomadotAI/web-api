@@ -476,6 +476,9 @@ class console
                 $res = json_decode($curl_response, true);
                 if (array_key_exists('status', $res)) {
                     $curl->close();
+                    $subject = "Welcome to Hu:toma!";
+                    $body = "Congrats, you’re all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.\nThanks\n--The Hutoma team";
+                    sendMail($id, $subject, $body);
                     return $res['status']['code'];
                 }
             }
