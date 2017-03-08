@@ -243,7 +243,7 @@ public class AILogic {
             }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.linkBotToAi(devId, aiid, botId)) {
-                this.logger.logUserTraceEvent("LinkBotToAI", devId, "AIID", map);
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devId, map);
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, map);
@@ -264,7 +264,7 @@ public class AILogic {
                         "BotId", Integer.toString(botId));
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linkes", devId,
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked", devId,
                         "AIID", aiid.toString(),
                         "BotId", Integer.toString(botId));
                 return ApiError.getNotFound("AI or Bot not found, or not currently linked");
