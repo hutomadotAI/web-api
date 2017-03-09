@@ -91,59 +91,68 @@ public class ServerTracker implements Callable {
 
     @Override
     public Void call() {
-        // start in run state
-        this.runFlag.set(true);
 
-        while (this.runFlag.get()) {
-            // how long since we last pinged?
-            long timeSinceLastHeartBeatAttempt = this.tools.getTimestamp() - this.lastHeartbeatAttempt;
+        try {
+            // start in run state
+            this.runFlag.set(true);
 
-            // how long should we wait before issuing the next ping?
-            long waitTimeForNextHeartbeat = Math.max(this.config.getServerHeartbeatMinimumGapMs(),
-                    this.config.getServerHeartbeatEveryMs() - timeSinceLastHeartBeatAttempt);
+            while (this.runFlag.get()) {
+                // how long since we last pinged?
+                long timeSinceLastHeartBeatAttempt = this.tools.getTimestamp() - this.lastHeartbeatAttempt;
 
-            try {
-                // wait until it is time
-                this.tools.threadSleep(waitTimeForNextHeartbeat);
+                // how long should we wait before issuing the next ping?
+                long waitTimeForNextHeartbeat = Math.max(this.config.getServerHeartbeatMinimumGapMs(),
+                        this.config.getServerHeartbeatEveryMs() - timeSinceLastHeartBeatAttempt);
 
-                // we've just come out of sleep; check the run flag again
-                if (this.runFlag.get()) {
+                try {
+                    // wait until it is time
+                    this.tools.threadSleep(waitTimeForNextHeartbeat);
 
-                    // log the start of this attempt
-                    this.lastHeartbeatAttempt = this.tools.getTimestamp();
+                    // we've just come out of sleep; check the run flag again
+                    if (this.runFlag.get()) {
 
-                    // ping now
-                    boolean success = beatHeart();
+                        // log the start of this attempt
+                        this.lastHeartbeatAttempt = this.tools.getTimestamp();
 
-                    // note the time of the response
-                    long timeNow = this.tools.getTimestamp();
+                        // ping now
+                        boolean success = beatHeart();
 
-                    // if it worked then everything is ok
-                    if (success) {
-                        // and we reset the time that we got a valid response to now
-                        this.lastValidHeartbeat = timeNow;
+                        // note the time of the response
+                        long timeNow = this.tools.getTimestamp();
 
-                        // if the heartbeat worked then the endpoint is verified
-                        this.endpointVerified.set(true);
+                        // if it worked then everything is ok
+                        if (success) {
+                            // and we reset the time that we got a valid response to now
+                            this.lastValidHeartbeat = timeNow;
 
-                    } else {
+                            // if the heartbeat worked then the endpoint is verified
+                            this.endpointVerified.set(true);
 
-                        // if it failed, check how long ago we got the last good ping
-                        if ((timeNow - this.lastValidHeartbeat) > this.config.getServerHeartbeatFailureCutOffMs()) {
+                        } else {
 
-                            // flag the outer loop to end
-                            this.runFlag.set(false);
+                            // if it failed, check how long ago we got the last good ping
+                            if ((timeNow - this.lastValidHeartbeat) > this.config.getServerHeartbeatFailureCutOffMs()) {
+
+                                // flag the outer loop to end
+                                this.runFlag.set(false);
+                            }
                         }
                     }
-                }
 
-            } catch (InterruptedException e) {
-                this.logger.logError(LOGFROM, "heartbeat interval wait interrupted");
-                // just go round again and recalculate the wait time
+                } catch (InterruptedException e) {
+                    this.logger.logError(LOGFROM, "heartbeat interval wait interrupted");
+                    // just go round again and recalculate the wait time
+                }
             }
+            this.logger.logDebug(LOGFROM, String.format("ending session %s for %s server",
+                    this.serverSessionID.toString(), this.registration.getServerType()));
+        } catch (Exception e) {
+            String fromServer = (this.registration == null) ? "(reg is null)" :
+                    (this.registration.getServerType() == null) ?
+                            "(servertype is null)" : this.registration.getServerType().toString();
+            this.logger.logUserExceptionEvent(LOGFROM,
+                    String.format("ServerTracker exception on %s server", fromServer), "", e);
         }
-        this.logger.logDebug(LOGFROM, String.format("ending session %s for %s server",
-                this.serverSessionID.toString(), this.registration.getServerType()));
         return null;
     }
 
