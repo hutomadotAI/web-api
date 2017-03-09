@@ -11,6 +11,7 @@ import requests
 class ApiResponse:
     def __init__(self, callResult):
         self.success = False
+        self.status_code = callResult.status_code
         try:
             # decode from json if possible
             result = callResult.json()
@@ -191,3 +192,10 @@ def chat(api: ApiRequester, aiid, say_what, history="", chat_id="", min_p=0.4):
     if chat_id != "":
         query['chatId'] = chat_id
     return api.get("ai/" + aiid + "/chat", query=query)
+
+
+def load_test_chat(api: ApiRequester, aiid, say_what, history="", chat_id="", min_p=0.4):
+    query = {'q': say_what, 'confidence_threshold': min_p, 'chat_history': history}
+    if chat_id != "":
+        query['chatId'] = chat_id
+    return api.get("ai/load/" + aiid + "/chat", query=query)
