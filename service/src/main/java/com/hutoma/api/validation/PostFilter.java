@@ -127,7 +127,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         } catch (Exception ex) {
             requestContext.abortWith(ApiError.getInternalServerError(ex.getMessage())
                     .getResponse(this.serializer).build());
-            this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
+            this.logger.logUserExceptionEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext), ex,
                     new LinkedHashMap<String, String>() {{
                         put("Type", "Post");
                         put("Parameters", Strings.join(checkList.stream().map(APIParameter::toString).iterator(), ','));
@@ -251,6 +251,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
 
         } catch (JsonParseException jpe) {
+            this.logger.logUserErrorEvent(LOGFROM, jpe.getMessage(), getDeveloperId(request));
             throw new ParameterValidationException("error in json format", "request body");
         }
     }
