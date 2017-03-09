@@ -13,6 +13,7 @@ import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
+import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
@@ -103,7 +104,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
             final ContainerRequest request = (ContainerRequest) requestContext;
             // if there is a body to decode
-            if (!requestContext.hasEntity()) {
+            if (requestContext.getLength() <= 0 || !requestContext.hasEntity()) {
                 throw new ParameterValidationException("no form body found", "request context");
             }
 
@@ -119,9 +120,19 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
                     new LinkedHashMap<String, String>() {{
-                        put("Type", "Query");
+                        put("Type", "Post");
                         put("Parameter", pve.getParameterName());
                         put("Message", pve.getMessage());
+                    }});
+        } catch (Exception ex) {
+            requestContext.abortWith(ApiError.getInternalServerError(ex.getMessage())
+                    .getResponse(this.serializer).build());
+            this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
+                    new LinkedHashMap<String, String>() {{
+                        put("Type", "Post");
+                        put("Parameters", Strings.join(checkList.stream().map(APIParameter::toString).iterator(), ','));
+                        put("RequestLength", Integer.toString(requestContext.getLength()));
+                        put("Path", requestContext.getUriInfo().getPath());
                     }});
         }
     }
