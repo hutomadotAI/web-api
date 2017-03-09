@@ -21,10 +21,6 @@ def read_words_from_file(fileName):
         return [word for word in lines if word != ""]
 
 
-def get_ai_name(size):
-    return "Load-Test-" + str(size)
-
-
 def read_training_file(filename):
     lines = read_lines(filename)
     questions = []

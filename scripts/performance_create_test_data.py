@@ -1,25 +1,26 @@
 import random
 from pathlib import Path
 
+import time
+
 import hu_api.api
-from performance.common import get_ai_name, read_lines, write_file_lines, de_rate_limit, check_api_available
+from performance.common import read_lines, write_file_lines, de_rate_limit, check_api_available
 from performance.performance_config import Config, make_config
 
 def main():
 
-    def delete_load_test_ais():
-        for aiid in hu_api.api.find_ais(requester, "Load-Test"):
+    def delete_test_ais(ai_defs):
+        for aiid in hu_api.api.find_ais(requester, ai_defs.ai_prefix):
             print('Deleting AI {0}'.format(aiid))
             response = de_rate_limit(hu_api.api.delete_ai, requester, aiid)
             if not response.success:
                 print('Failed to delete: {0}'.format(response.text))
 
-
-    def create_upload_ai(size, filename):
-        name = get_ai_name(size)
+    def create_upload_ai(size, tag, filename, ai_prefix):
+        name = "{0}-{1}".format(ai_prefix, str(tag))
 
         print('Creating {0} AI '.format(name))
-        creation = de_rate_limit(hu_api.api.create_ai, requester, name, "Perf testing with {0} lines of training data".format(size))
+        creation = de_rate_limit(hu_api.api.create_ai, requester, name, "Testing with {0} lines of training data".format(size))
         if not creation.success:
             print("Error creating AI: {0}".format(creation.text))
         aiid = creation.response["aiid"]
@@ -42,6 +43,7 @@ def main():
                 break
             else:
                 print("Waiting for status to flip ...")
+                time.sleep(1)
 
         train = de_rate_limit(hu_api.api.start_training, requester, aiid)
         if not train.success:
@@ -76,81 +78,59 @@ def main():
             training_data.append((question, answer))
         return training_data
 
-    def create_new_test_data():
+    def create_new_ai_files(ai_defs):
         filtered = load_word_list()
-        training_data = create_test_bot_lines(filtered, config.training_sizes[-1])
+        for size, tag, filename in ai_defs.defs:
+            create_new_ai_pairs(filtered, size, filename)
 
-        print("Generated {0} pairs, {1} words left over."
-              .format(len(training_data), len(filtered)))
+    def create_new_ai_pairs(word_set, line_count, filename):
+        training_data = create_test_bot_lines(word_set, line_count);
+        print("Generated {0} pairs, {1} words left over: into {2}"
+              .format(len(training_data), len(word_set), filename))
 
-        write_file_lines(config.unused_words_filename, filtered)
-
-        for size in config.training_sizes:
-            text = []
-            for pair in training_data[:size // 2]:
-                text.append(pair[0])
-                text.append(pair[1])
-                text.append('')
-            filename = config.training_filename + "_" + str(size)
-            write_file_lines(filename, text)
-
-    def create_new_chat_test_data():
-
-        how_many = 10
-        filtered = load_word_list()
-        training_data = create_test_bot_lines(filtered, 2000 * how_many)
-
-        print("Generated {0} pairs, {1} words left over."
-              .format(len(training_data), len(filtered)))
-
-        text_files = [[] for i in range(how_many)]
-
-        which = 0
+        text = []
         for q, a in training_data:
-            text = text_files[which]
             text.append(q)
             text.append(a)
             text.append('')
-            which = (which + 1) % how_many
 
-        for i in range(how_many):
-            filename = config.chat_filename + "_" + str(how_many + 1)
-            write_file_lines(filename, text_files[how_many])
+        write_file_lines(filename, text)
 
-    def create_and_train_new_ais():
-
+    def create_and_train_new_ais(ai_defs):
         aiids = []
-        for size in config.training_sizes:
-            filename = config.training_filename + "_" + str(size)
-            aiids.append(create_upload_ai(size, filename))
-
+        for size, tag, filename in ai_defs.defs:
+            aiids.append(create_upload_ai(size, tag, filename, ai_defs.ai_prefix))
         for aiid in aiids:
             train_start_ai(aiid)
 
-
-    def have_we_got_the_files():
+    def have_we_got_the_files(ai_defs):
         missing_files = False
-        for size in config.training_sizes:
-            filename = config.training_filename + "_" + str(size)
+        for size, tag, filename in ai_defs.defs:
             if not Path(filename).is_file():
                 missing_files = True
                 print("Missing {0}; recreating all data files".format(filename))
         return not missing_files
 
-
     requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
 
     check_api_available(requester)
 
+    load_test_defs = config.load_test_ais
+    chat_test_defs = config.chat_test_ais
+
     # if files are missing then recreate from scratch
-    if not have_we_got_the_files():
-        create_new_test_data()
+    if not have_we_got_the_files(load_test_defs):
+        create_new_ai_files(load_test_defs)
+    if not have_we_got_the_files(chat_test_defs):
+        create_new_ai_files(chat_test_defs)
 
     # delete all the old load test AIs
-    delete_load_test_ais()
+    delete_test_ais(load_test_defs)
+    delete_test_ais(chat_test_defs)
 
     # upload new training data
-    create_and_train_new_ais()
+    create_and_train_new_ais(load_test_defs)
+    create_and_train_new_ais(chat_test_defs)
 
 
 if __name__ == "__main__":
