@@ -6,16 +6,6 @@ from performance.common import get_ai_name, read_lines, write_file_lines, de_rat
 from performance.performance_config import Config, make_config
 
 def main():
-    def create_sentence(source_word_set, common_words, used_words):
-        big_word_count = random.randint(1, 3)
-        small_word_count = 2 * big_word_count + random.randint(-1, 3)
-        using_big_words = random.sample(source_word_set, big_word_count)
-        used_words += set(using_big_words)
-        source_word_set -= set(using_big_words)
-        question = using_big_words + random.sample(common_words, small_word_count)
-        random.shuffle(question)
-        return ' '.join(question)
-
 
     def delete_load_test_ais():
         for aiid in hu_api.api.find_ais(requester, "Load-Test"):
@@ -57,8 +47,16 @@ def main():
         if not train.success:
             print("Error starting training: {0}".format(train.text))
 
+    def create_sentence(source_word_set, common_words):
+        big_word_count = random.randint(1, 3)
+        small_word_count = 2 * big_word_count + random.randint(-1, 3)
+        using_big_words = random.sample(source_word_set, big_word_count)
+        source_word_set -= set(using_big_words)
+        question = using_big_words + random.sample(common_words, small_word_count)
+        random.shuffle(question)
+        return ' '.join(question)
 
-    def create_new_test_data():
+    def load_word_list():
         # load the full word list
         filtered = set([line.strip() for line in read_lines("wordlist.txt")
                         if "'" not in line and line == line.lower()])
@@ -68,18 +66,22 @@ def main():
             filtered.discard(word)
 
         print('Unique words ', len(filtered))
+        return filtered
 
-        used_question_words = []
-        used_answer_words = []
+    def create_test_bot_lines(wordset, line_count):
         training_data = []
-
-        for a in range(config.training_sizes[-1] // 2):
-            question = create_sentence(filtered, config.common_words, used_question_words)
-            answer = create_sentence(filtered, config.common_words, used_answer_words)
+        for a in range(line_count // 2):
+            question = create_sentence(wordset, config.common_words)
+            answer = create_sentence(wordset, config.common_words)
             training_data.append((question, answer))
+        return training_data
 
-        print("Generated {0} pairs, using {1} unique Q words, {2} unique A words. {3} words left over."
-              .format(len(training_data), len(used_question_words), len(used_answer_words), len(filtered)))
+    def create_new_test_data():
+        filtered = load_word_list()
+        training_data = create_test_bot_lines(filtered, config.training_sizes[-1])
+
+        print("Generated {0} pairs, {1} words left over."
+              .format(len(training_data), len(filtered)))
 
         write_file_lines(config.unused_words_filename, filtered)
 
@@ -92,6 +94,28 @@ def main():
             filename = config.training_filename + "_" + str(size)
             write_file_lines(filename, text)
 
+    def create_new_chat_test_data():
+
+        how_many = 10
+        filtered = load_word_list()
+        training_data = create_test_bot_lines(filtered, 2000 * how_many)
+
+        print("Generated {0} pairs, {1} words left over."
+              .format(len(training_data), len(filtered)))
+
+        text_files = [[] for i in range(how_many)]
+
+        which = 0
+        for q, a in training_data:
+            text = text_files[which]
+            text.append(q)
+            text.append(a)
+            text.append('')
+            which = (which + 1) % how_many
+
+        for i in range(how_many):
+            filename = config.chat_filename + "_" + str(how_many + 1)
+            write_file_lines(filename, text_files[how_many])
 
     def create_and_train_new_ais():
 
