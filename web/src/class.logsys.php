@@ -51,10 +51,10 @@ class console
             "table" => 'users',
             "token_table" => "resetTokens"
         ),
-        
+
         /** Intercom ID acquired */
         "intercom_app_id" => "ts64euf8",
-        
+
         /**
          * Keys used for encryption
          * DONT MAKE THIS PUBLIC
@@ -478,7 +478,9 @@ class console
                     $curl->close();
                     $subject = "Welcome to Hu:toma!";
                     $body = "Congrats, you’re all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.\nThanks\n--The Hutoma team";
-                    sendMail($id, $subject, $body);
+                    if (!self::sendMail($id, $subject, $body)) {
+                        self::log_error("registration", "Could not send welcome email to " . $id);
+                    }
                     return $res['status']['code'];
                 }
             }
@@ -604,6 +606,67 @@ class console
             return $trackerObject;
         }
         return null;
+    }
+
+    /**
+     * Any mails need to be sent by logSys goes to here
+     */
+    public static function sendMail($email, $subject, $body)
+    {
+        $headers = array();
+        $headers[] = "MIME-Version: 1.0";
+        $headers[] = "Content-type: text/html; charset=iso-8859-1";
+        $headers[] = "From: " . self::$config['basic']['email'];
+        $headers[] = "Reply-To: " . self::$config['basic']['email'];
+        return mail($email, $subject, $body, implode("\r\n", $headers));
+    }
+
+    public static function inviteCodeValid($code)
+    {
+        self::construct();
+        $dev_token = self::getAdminToken();
+        $path = "/invite/" . $code;
+
+        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
+        $curl->setVerbGet();
+        $curl_response = $curl->exec();
+
+        if (isset($curl_response) && $curl_response !== false) {
+            $res = json_decode($curl_response, true);
+            if (array_key_exists('status', $res)) {
+                $curl->close();
+                return $res['status']['code'];
+            }
+        }
+
+        $curl->close();
+        return "unknown";
+    }
+
+    public static function redeemInviteCode($code, $username)
+    {
+        self::construct();
+        $dev_token = self::getAdminToken();
+
+        $params = array(
+            'username' => $username
+        );
+
+        $path = "/invite/" . $code . "/redeem?" . http_build_query($params);
+        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
+        $curl->setVerbPost();
+        $curl_response = $curl->exec();
+
+        if (isset($curl_response) && $curl_response !== false) {
+            $res = json_decode($curl_response, true);
+            if (array_key_exists('status', $res)) {
+                $curl->close();
+                return $res['status']['code'];
+            }
+        }
+
+        $curl->close();
+        return "unknown";
     }
 
     /**
@@ -775,28 +838,6 @@ class console
             echo "<h3>Error : Not Logged In</h3>";
             return "notLoggedIn";
         }
-    }
-
-    /**
-     * Any mails need to be sent by logSys goes to here
-     */
-    public static function sendMail($email, $subject, $body)
-    {
-        /**
-         * If there is a callback for email sending, use it else PHP's mail()
-         */
-        if (is_callable(self::$config['basic']['email_callback'])) {
-            call_user_func_array(self::$config['basic']['email_callback'], array($email, $subject, $body));
-        } else {
-            $headers = array();
-            $headers[] = "MIME-Version: 1.0";
-            $headers[] = "Content-type: text/html; charset=iso-8859-1";
-            $headers[] = "From: " . self::$config['basic']['email'];
-            $headers[] = "Reply-To: " . self::$config['basic']['email'];
-            $res = mail($email, $subject, $body, implode("\r\n", $headers));
-        }
-        return $res;
-
     }
 
     /**
