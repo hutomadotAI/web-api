@@ -487,6 +487,70 @@ class console
         }
     }
 
+    /**
+     * Check if user exists with their username/email given
+     * $identification - Either email/username
+     */
+    public static function userExists($identification)
+    {
+        self::construct();
+
+        $query = "CALL getUserId(:userName, :checkEmail)";
+        $sql = self::$dbh->prepare($query);
+        $sql->execute(array(
+            ":userName" => $identification,
+            ":checkEmail" => (self::$config['features']['email_login'] === true)
+        ));
+        $rowCount = $sql->rowCount();
+
+        // finally fetch the additional sql row for stored proc calls
+        $sql->nextRowset();
+
+        return $rowCount == 0 ? false : true;
+    }
+
+    /**
+     * Generate a Random String
+     * $int - Whether numeric string should be output
+     */
+    public static function rand_string($length, $int = false)
+    {
+        $random_str = "";
+        $chars = $int ? "0516243741506927589" : "subinsblogabcdefghijklmanopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $size = strlen($chars) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $random_str .= $chars[rand(0, $size)];
+        }
+        return $random_str;
+    }
+
+    /**
+     * -------------------------
+     * End Extra Tools/Functions
+     * -------------------------
+     */
+
+    public static function getAdminToken()
+    {
+        return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
+
+    }
+
+    /**
+     * -------------------------
+     * End Extra Tools/Functions
+     * -------------------------
+     */
+
+    public static function getApiRequestUrl()
+    {
+        $url = getenv("HUTOMA_API_URL");
+        if (isset($url) && $url != "") {
+            return $url;
+        }
+        return self::$config["api"]["request_url"];
+    }
+
     public static function inviteCodeValid($code) {
         self::construct();
         $dev_token = self::getAdminToken();
@@ -533,56 +597,13 @@ class console
         return "unknown";
     }
 
-    /**
-     * Check if user exists with their username/email given
-     * $identification - Either email/username
-     */
-    public static function userExists($identification)
+    public static function getGoogleAnalyticsTrackerObject()
     {
-        self::construct();
-
-        $query = "CALL getUserId(:userName, :checkEmail)";
-        $sql = self::$dbh->prepare($query);
-        $sql->execute(array(
-            ":userName" => $identification,
-            ":checkEmail" => (self::$config['features']['email_login'] === true)
-        ));
-        $rowCount = $sql->rowCount();
-
-        // finally fetch the additional sql row for stored proc calls
-        $sql->nextRowset();
-
-        return $rowCount == 0 ? false : true;
-    }
-
-    /**
-     * Generate a Random String
-     * $int - Whether numeric string should be output
-     */
-    public static function rand_string($length, $int = false)
-    {
-        $random_str = "";
-        $chars = $int ? "0516243741506927589" : "subinsblogabcdefghijklmanopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        $size = strlen($chars) - 1;
-        for ($i = 0; $i < $length; $i++) {
-            $random_str .= $chars[rand(0, $size)];
+        $trackerObject = getenv("GOOGLE_ANALYTICS_TRACKER");
+        if (isset($trackerObject) && $trackerObject != "") {
+            return $trackerObject;
         }
-        return $random_str;
-    }
-
-    /**
-     * -------------------------
-     * End Extra Tools/Functions
-     * -------------------------
-     */
-
-    public static function getApiRequestUrl()
-    {
-        $url = getenv("HUTOMA_API_URL");
-        if (isset($url) && $url != "") {
-            return $url;
-        }
-        return self::$config["api"]["request_url"];
+        return null;
     }
 
     /**
@@ -824,6 +845,12 @@ class console
     }
 
     /**
+     * ---------------------
+     * Extra Tools/Functions
+     * ---------------------
+     */
+
+    /**
      * Fetches data of user in database. Returns a single value or an
      * array of value according to parameteres given to the function
      */
@@ -860,12 +887,6 @@ class console
 
         return $data;
     }
-
-    /**
-     * ---------------------
-     * Extra Tools/Functions
-     * ---------------------
-     */
 
     /**
      * 2 Step Verification Login Process
@@ -1194,7 +1215,6 @@ class console
         return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
-
     /**
      * ---------------------
      * NEW CONSOLE FUNCTIONS
@@ -1228,18 +1248,6 @@ class console
     public static function isLoggedIn()
     {
         return self::$loggedIn;
-    }
-
-    /**
-     * -------------------------
-     * End Extra Tools/Functions
-     * -------------------------
-     */
-
-    public static function getAdminToken()
-    {
-        return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-
     }
 
     public static function isSessionActive()

@@ -51,6 +51,7 @@ ENV HUTOMA_API_DB_CONNECTION_STRING mysql:dbname=hutoma;host=localhost;port=3306
 ENV HUTOMA_API_DB_USERNAME username
 ENV HUTOMA_API_DB_PASSWORD password
 ENV HUTOMA_API_URL http://server/v1
+ENV GOOGLE_ANALYTICS_TRACKER
 
 # Copy the script that launches all the required services
 COPY config/start_services.sh /usr/local/bin/
