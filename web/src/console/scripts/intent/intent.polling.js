@@ -31,7 +31,7 @@ function removeWarningIntentAlert() {
     }
 }
 function getIntentAction(){
-    return document.getElementById('btnRestart').value;
+    return JSON.parse(document.getElementById('btnRestart').value);
 }
 
 function hideOverlay(state){

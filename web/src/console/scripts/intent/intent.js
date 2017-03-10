@@ -137,6 +137,7 @@ $("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
 });
 
 $( document ).ready(function() {
-    if ( (trainingFile && intent_deleted) || ai_state == API_AI_STATE.STOPPED )
+    if ( (trainingFile && intent_deleted) || ai_state == API_AI_STATE.STOPPED.value)
         createWarningIntentAlert(INTENT_ACTION.DELETE_INTENT.value);
+    
 });
