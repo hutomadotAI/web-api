@@ -238,6 +238,7 @@ function getUIStatusCall() {
             hidePreTrainingBar(false);
             phaseOneMaxValue();
 
+            phaseTwoReset();
             hideTrainingBar(false);
             phaseTwoFlashing(true);
             hideChart(true);
@@ -263,6 +264,7 @@ function getUIStatusCall() {
                 hideChart(true);
                 hidePreTrainingBar(true);
                 hideTrainingBar(true);
+                showAlertMessageFromUI(status);
             }
             break;
         case (status == UI_STATE.COMPLETED.value):
