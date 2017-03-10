@@ -52,6 +52,13 @@ public class TestDataHelper {
         return bs;
     }
 
+    public static BackendStatus getBackendStatus(final TrainingStatus wnetStatus, final TrainingStatus rnnStatus) {
+        BackendStatus bs = new BackendStatus();
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, rnnStatus, BackendServerType.RNN, 0.0, 1.0, "hash", SESSIONID));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, wnetStatus, BackendServerType.WNET, 0.0, 1.0, "hash", SESSIONID));
+        return bs;
+    }
+
     public static BackendStatus getTrainingCompleted() {
         return setBackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE);
     }

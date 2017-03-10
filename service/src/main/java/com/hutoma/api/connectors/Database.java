@@ -303,6 +303,24 @@ public class Database {
         }
     }
 
+    public BackendStatus getAIStatus(final String devId, final UUID aiid, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            ResultSet rs = call.initialise("getAiStatus", 2)
+                    .add(aiid).add(devId).executeQuery();
+
+            // return null if the AI was not found
+            if (!rs.next()) {
+                return null;
+            }
+
+            // retrieve the status
+            return getBackendStatus(rs.getString("backend_status"), jsonSerializer);
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     public boolean updateAIStatus(final AiStatus status, final JsonSerializer jsonSerializer)
             throws DatabaseException {
 
