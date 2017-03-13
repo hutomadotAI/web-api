@@ -553,61 +553,6 @@ class console
         return self::$config["api"]["request_url"];
     }
 
-    public static function inviteCodeValid($code) {
-        self::construct();
-        $dev_token = self::getAdminToken();
-        $path = "/invite/" . $code;
-
-        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
-        $curl->setVerbGet();
-        $curl_response = $curl->exec();
-
-        if (isset($curl_response) && $curl_response !== false) {
-            $res = json_decode($curl_response, true);
-            if (array_key_exists('status', $res)) {
-                $curl->close();
-                return $res['status']['code'];
-            }
-        }
-
-        $curl->close();
-        return "unknown";
-    }
-
-    public static function redeemInviteCode($code, $username) {
-        self::construct();
-        $dev_token = self::getAdminToken();
-
-        $params = array(
-            'username' => $username
-        );
-
-        $path = "/invite/" . $code . "/redeem?" . http_build_query($params);
-        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
-        $curl->setVerbPost();
-        $curl_response = $curl->exec();
-
-        if (isset($curl_response) && $curl_response !== false) {
-            $res = json_decode($curl_response, true);
-            if (array_key_exists('status', $res)) {
-                $curl->close();
-                return $res['status']['code'];
-            }
-        }
-
-        $curl->close();
-        return "unknown";
-    }
-
-    public static function getGoogleAnalyticsTrackerObject()
-    {
-        $trackerObject = getenv("GOOGLE_ANALYTICS_TRACKER");
-        if (isset($trackerObject) && $trackerObject != "") {
-            return $trackerObject;
-        }
-        return null;
-    }
-
     /**
      * Any mails need to be sent by logSys goes to here
      */
@@ -667,6 +612,15 @@ class console
 
         $curl->close();
         return "unknown";
+    }
+
+    public static function getGoogleAnalyticsTrackerObject()
+    {
+        $trackerObject = getenv("GOOGLE_ANALYTICS_TRACKER");
+        if (isset($trackerObject) && $trackerObject != "") {
+            return $trackerObject;
+        }
+        return null;
     }
 
     /**
