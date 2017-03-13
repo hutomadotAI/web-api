@@ -40,6 +40,10 @@ if(isset($_POST['submit'])) {
             $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
             $invalidcode .='</div>';
 
+            $unknown  ='<div class="alert alert-danger text-white flat">';
+            $unknown .='<i class="icon fa fa-exclamation"></i> Unspecified error code.';
+            $unknown .='</div>';
+
 
             $msg= $missingfields;
 
@@ -53,7 +57,7 @@ if(isset($_POST['submit'])) {
                 if($createAccount === "exists") {
                     $msg= $userexists;
                 } elseif ($createAccount === "unknown") {
-                    $msg = array("Error", "Unspecified error code");
+                    $msg = $unknown;
                 } else {
                     // Register succeeded
                     if ($createAccount === 200) {
