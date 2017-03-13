@@ -37,8 +37,35 @@ function getIntentAction(){
 function hideOverlay(state){
     document.getElementById('alert-overlay').style.display = (state)?'none':'';
 }
+function showAlertMessage(code,intent_action){
+    switch (intent_action) {
+        case INTENT_ACTION.DELETE_INTENT.value:
+            if (code == 200) {
+                msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
+                removeWarningIntentAlert();
+            }
+            else {
+                msgAlertIntent(ALERT.DANGER.value, 'Could not start training.');
+                deactiveRestartButton(false);
+                hideOverlay(true);
+            }
+            break;
+        case INTENT_ACTION.SAVE_INTENT.value:
+            if ( code == 200){
+                msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
+                removeWarningIntentAlert();
+            }else{
+                msgAlertIntentElement(ALERT.DANGER.value, 'Could not start training.');
+                deactiveRestartButton(false);
+                hideOverlay(true);
+            }
+            deactiveSaveButton(false);
+            break;
+        default:
+    }
+}
 
-function startTraining(intent_action) {
+function startTraining() {
     jQuery.ajax({
         url: './dynamic/trainingStart.php',
         type: 'GET',
@@ -46,26 +73,7 @@ function startTraining(intent_action) {
         processData: false,
         contentType: "application/json; charset=utf-8",
         success: function (response) {
-            if (response['status']['code'] == 200 ) {
-                if ( getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
-                    msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
-                else {
-                    deactiveSaveButton(false);
-                    msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
-                }
-                removeWarningIntentAlert();
-            }
-            else {
-                if ( getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
-                    msgAlertIntent(ALERT.DANGER.value, 'Could not start training.');
-                else {
-                    msgAlertIntentElement(ALERT.DANGER.value, 'Could not start training.');
-                    deactiveSaveButton(false);
-                }
-                deactiveRestartButton(false);
-                hideOverlay(true);
-            }
-
+            showAlertMessage(response['status']['code'],getIntentAction());
         },
         error: function (xhr, ajaxOptions, thrownError) {
             if ( getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
