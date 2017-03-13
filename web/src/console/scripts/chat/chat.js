@@ -85,7 +85,7 @@ function cutText(phrase) {
     return phrase;
 }
 
-function createRightMsg(ai_name, msg, chatId, error) {
+function createRightMsg(ai_name, msg, chatId, score, error) {
     // Update chatId if needed
     if ($("#chatId").val() == '') {
         $("#chatId").val(chatId);
@@ -113,6 +113,8 @@ function createRightMsg(ai_name, msg, chatId, error) {
         wHTML += ('<div class="direct-chat-text chat-success">');
     wHTML += msg;
     wHTML += ('</div>');
+    if (score != -1 )
+        wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">confidence score: ' + score + '</span>');
     newRightMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newRightMsg);
 
@@ -149,17 +151,17 @@ function requestAnswerAI(ai_name, question, chatId) {
                 JSONnode.innerHTML = JSON.stringify(response, undefined, 2);
                 var JSONdata = response;
                 if (JSONdata['chatId'] === '') {
-                    createRightMsg(ai_name, 'no chat id returned', '', true);
+                    createRightMsg(ai_name, 'no chat id returned', '', -1, true);
                 } else {
                     var chatId = JSONdata['chatId'];
                     if (JSONdata['status']['code'] === 200)
-                        createRightMsg(ai_name, JSONdata['result']['answer'], chatId, false);
+                        createRightMsg(ai_name, JSONdata['result']['answer'], chatId, JSONdata['result']['score'], false);
                     else
-                        createRightMsg(ai_name, JSONdata['status']['info'], chatId, true);
+                        createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                createRightMsg(ai_name, 'Cannot contact the server.', '', true);
+                createRightMsg(ai_name, 'Cannot contact the server.', '', -1, true);
             }
         });
     }
