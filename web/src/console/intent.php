@@ -3,6 +3,8 @@ require "../pages/config.php";
 
 require_once "../console/api/apiBase.php";
 require_once "../console/api/intentsApi.php";
+require_once "../console/api/aiApi.php";
+
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
     \hutoma\console::redirect('../pages/login.php');
@@ -11,9 +13,11 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 
 $intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 
+$intent_deleted = false;
 if (isset($_REQUEST['deleteintent'])) {
     $intentName = $_REQUEST['deleteintent'];
     $result = $intentsApi->deleteIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+    $intent_deleted = true;
 }
 
 $intents = $intentsApi->getIntents($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
@@ -22,6 +26,16 @@ unset($intentsApi);
 if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
     unset($intents);
     \hutoma\console::redirect('./error.php?err=210');
+    exit;
+}
+
+$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($aiApi);
+
+if ($bot['status']['code'] !== 200) {
+    unset($bot);
+    \hutoma\console::redirect('./error.php?err=204');
     exit;
 }
 
@@ -68,6 +82,10 @@ function echoJsonIntentsResponse($intents)
     <div class="content-wrapper" style="margin-right:350px;">
         <section class="content">
             <div class="row">
+                <div class="col-md-12" id="intentElementBox">
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-12">
                     <?php include './dynamic/intent.content.create.html.php'; ?>
                     <?php include './dynamic/intent.content.list.html.php'; ?>
@@ -95,6 +113,7 @@ function echoJsonIntentsResponse($intents)
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/validation/validation.js"></script>
+<script src="./scripts/intent/intent.polling.js"></script>
 <script src="./scripts/intent/intent.js"></script>
 <script src="./scripts/chat/chat.js"></script>
 <script src="./scripts/chat/voice.js"></script>
@@ -114,6 +133,10 @@ function echoJsonIntentsResponse($intents)
     var newNode = document.createElement('div');
     newNode.className = 'row';
     newNode.id = 'intents_list';
+    
+    var intent_deleted = <?php if ($intent_deleted) echo 'true'; else echo 'false'; unset($intent_deleted)?>;
+    var ai_state = <?php echo json_encode($bot['ai_status'])?>;
+    var trainingFile = <?php if ($bot['training_file_uploaded'] == 1) echo 'true'; else echo 'false'; unset($bot)?>;
 </script>
 <script>
     function searchIntents(str) {
