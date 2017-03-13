@@ -108,13 +108,14 @@ function botStatusCall() {
         contentType: "application/json; charset=utf-8",
         success: function (response) {
             var jsonData = JSON.parse(response);
-            if (jsonData['api_status']['code'] === 200) {
+            var msg = 'An error has occurred while trying to get the bot\'s status.';
+            if (jsonData['api_status']['code'] === 200)
                 setBotStatus(jsonData["ai_status"]);
-            } else {
+            else {
                 if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
-                    msgAlertIntent(ALERT.DANGER.value, 'An error has occurred while trying to get the Bot\'s status.');
+                    msgAlertIntent(ALERT.DANGER.value, msg);
                 else
-                    msgAlertIntentElement(ALERT.DANGER.value, 'An error has occurred while trying to get the Bot\'s status.');
+                    msgAlertIntentElement(ALERT.DANGER.value, msg);
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
