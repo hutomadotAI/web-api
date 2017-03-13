@@ -78,6 +78,8 @@ public class ChatLogic {
 
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
+        // Set the timestamp of the request
+        apiChat.setTimestamp(startTime);
 
         // Add telemetry for the request
         this.telemetryMap = new LinkedHashMap<String, String>() {
@@ -191,8 +193,9 @@ public class ChatLogic {
                 }
             }
 
-            apiChat.setResult(result);
-
+            // add the question
+            result.setQuery(question);
+            
             // set the history to the answer, unless we have received a reset command,
             // in which case send an empty string
             result.setHistory(result.isResetConversation() ? "" : result.getAnswer());
@@ -203,6 +206,8 @@ public class ChatLogic {
             // set the chat response time to the whole duration since the start of the request until now
             result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
             this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
+
+            apiChat.setResult(result);
 
         } catch (RequestBase.AiNotFoundException notFoundException) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devId,
