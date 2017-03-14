@@ -12,6 +12,7 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiBot;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -326,11 +327,24 @@ public class TestAILogic {
     }
 
     @Test
-    public void testLinkBotToAi_botNotPurchased() throws Database.DatabaseException {
-        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+    public void testLinkBotToAi_botNotPurchased_notOwned() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setDevId("other dev id");
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testLinkBotToAi_botNotPurchased_Owned() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setDevId(DEVID);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(true);
+        ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test

@@ -227,14 +227,18 @@ public class AILogic {
                 put("AIID", aiid.toString());
                 put("BotId", Integer.toString(botId));
             }};
-            if (this.database.getBotDetails(botId) == null) {
+            AiBot botDetails = this.database.getBotDetails(botId);
+            if (botDetails == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, map);
                 return ApiError.getBadRequest(String.format("Bot %d not found", botId));
             }
-            List<AiBot> purchased = this.database.getPurchasedBots(devId);
-            if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devId, map);
-                return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
+            // If bot is now owned (purchased or built by the dev) then it can't be linked
+            if (!botDetails.getDevId().equals(devId)) {
+                List<AiBot> purchased = this.database.getPurchasedBots(devId);
+                if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
+                    this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devId, map);
+                    return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
+                }
             }
             List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
             if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
