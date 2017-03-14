@@ -81,9 +81,9 @@ def main():
     def create_new_ai_files(ai_defs):
         filtered = load_word_list()
         for size, tag, filename in ai_defs.defs:
-            create_new_ai_pairs(filtered, size, filename)
+            create_new_ai_pairs(filtered, size, filename, ai_defs.response_prefix + str(tag))
 
-    def create_new_ai_pairs(word_set, line_count, filename):
+    def create_new_ai_pairs(word_set, line_count, filename, response_prefix):
         training_data = create_test_bot_lines(word_set, line_count);
         print("Generated {0} pairs, {1} words left over: into {2}"
               .format(len(training_data), len(word_set), filename))
@@ -91,7 +91,7 @@ def main():
         text = []
         for q, a in training_data:
             text.append(q)
-            text.append(a)
+            text.append("{0}: {1}".format(response_prefix, a))
             text.append('')
 
         write_file_lines(filename, text)
