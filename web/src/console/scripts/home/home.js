@@ -34,10 +34,10 @@ function drawTableRows() {
         wHTML += '<td style="padding-top: 15px;">' + aiList[i]['description'] + '</td>';
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
 
-        var publishDisabled = aiList[i]['ai_status'] === 'ai_training_complete' ? '' : ' data-toggle="tooltip" disabled title="The AI needs to be fully trained before being published" ';
+        var publishDisabled = aiList[i]['ai_status'] === 'ai_training_complete' ? '' : ' data-toggle="tooltip" disabled title="The bot needs to be fully trained before being published" ';
         wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
         if (aiList[i]['publishing_state'] == "NOT_PUBLISHED") {
-            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
+            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + publishDisabled + 'onClick="sendAIID(this,\'./publishAI.php\')" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
             wHTML += ' Publish Bot</b></button></td>';
         }
         else if (aiList[i]['publishing_state'] == "SUBMITTED") {
