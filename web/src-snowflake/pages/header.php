@@ -7,7 +7,7 @@
             </button>
             <a class="navbar-brand" href="./login.php">
                 <h1 style="padding: 5px;margin-left: 115px;" >
-                    <img src="../console/dist/img/logo-white.png" alt="hutoma logo" height="40">
+                    <img src="../console/dist/img/nokia-logo.png" alt="hutoma logo" height="40">
                 </h1>
             </a>
         </div>
