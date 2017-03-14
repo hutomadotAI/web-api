@@ -2824,6 +2824,13 @@ a:focus {
     border-color: #464747;
 }
 
+.btn-info:disabled,
+.btn-info:disabled:hover {
+    background-color: #a3a3a3;
+    border: 1px solid #a3a3a3;
+}
+
+
 .btn-info:hover,
 .btn-info:active,
 .btn-info.hover {
