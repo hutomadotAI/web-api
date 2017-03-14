@@ -53,8 +53,8 @@
     </div>
     <div class="box-footer" id="chart-details-footer" hidden>
         <div class="alert alert-dismissable flat alert-info no-margin no-padding">
-            <div class="text-muted text-center no-margin no-padding" >
-                Your bot is trained, when the learning error reaches a number that is close to 0
+            <div class="text-muted text-center no-margin no-padding">
+                <span class="text-white">Your bot is trained, when the learning error reaches a number that is close to 0</span>
             </div>
         </div>
     </div>
