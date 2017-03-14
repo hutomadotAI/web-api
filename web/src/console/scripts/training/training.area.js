@@ -480,7 +480,7 @@ function showAlertMessage(aiStatus) {
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started. Please upload training data.');
             break;
         case API_AI_STATE.QUEUED.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait. The process is queued.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Your bot is in the queue. But you don\'t need to wait... Start chatting with it in the chat window.');
             break;
         case API_AI_STATE.READY_TO_TRAIN.value:
             msgAlertProgressBar(ALERT.BASIC.value, 'Training not started.');
@@ -494,10 +494,10 @@ function showAlertMessage(aiStatus) {
         case UI_TRAINING_STATE.PHASE1_END.value:
             break;
         case UI_TRAINING_STATE.PHASE2_INIT.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase two may take a few minutes. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising phase two. No need to wait... Start chatting with it in the chat window.');
             break;
         case UI_TRAINING_STATE.PHASE2_RUN.value:
-            msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two in progress...');
+            msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two training in progress. What are you waiting for? Start chatting with it in the chat window.');
             break;
         case API_AI_STATE.STOPPED.value:
             msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training.');
@@ -525,13 +525,13 @@ function showAlertMessageFromUI(status) {
             msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase one in progress...');
             break;
         case UI_STATE.PHASE2_QUEUE.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising. Please wait. The process is queued.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Your bot is in the queue. But you don\'t need to wait... Start chatting with it in the chat window.');
             break;
         case UI_STATE.PHASE2_INIT.value:
-            msgAlertProgressBar(ALERT.WARNING.value, 'Initialization phase two may take a few minutes. Please wait.');
+            msgAlertProgressBar(ALERT.WARNING.value, 'Initialising phase two. No need to wait... Start chatting with it in the chat window.');
             break;
         case UI_STATE.PHASE2_RUN.value:
-            msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two in progress...');
+            msgAlertProgressBar(ALERT.PRIMARY.value, 'Phase two training in progress. What are you waiting for? Start chatting with it in the chat window.');
             break;
         case UI_STATE.STOPPED.value:
             msgAlertProgressBar(ALERT.WARNING.value, 'Training stopped. Please restart training.');
