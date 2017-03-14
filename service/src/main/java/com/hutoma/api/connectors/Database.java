@@ -303,7 +303,7 @@ public class Database {
         }
     }
 
-    public BackendStatus getAIStatus(final String devId, final UUID aiid, final JsonSerializer jsonSerializer)
+    public BackendStatus getAIStatusReadOnly(final String devId, final UUID aiid, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             ResultSet rs = call.initialise("getAiStatus", 2)
@@ -327,8 +327,9 @@ public class Database {
         // open a transaction since this is a read/modify/write operation and we need consistency
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
+
             // read the status json for all the servers
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatus", 2)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatusForUpdate", 2)
                     .add(status.getAiid()).add(status.getDevId()).executeQuery();
 
             // if there is nothing then end here (not found)

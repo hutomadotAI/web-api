@@ -23,7 +23,7 @@ function showBots(str, option) {
                     }
                     else {
                         wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"style="width:130px;">');
-                        wHTML += ('<b>Buy Bot </b>');
+                        wHTML += ('<b>Use Bot </b>');
                         wHTML += ('<span class="fa fa-arrow-circle-right"></span>');
                         wHTML += ('</button>');
                     }
@@ -37,7 +37,7 @@ function showBots(str, option) {
                     }
                     else {
                         wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '" style="width:130px;">');
-                        wHTML += ('<b>Buy Bot </b>');
+                        wHTML += ('<b>Use Bot </b>');
                         wHTML += ('<span class="fa fa-arrow-circle-right"></span>');
                         wHTML += ('</button>');
                     }

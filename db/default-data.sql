@@ -32,9 +32,9 @@ INSERT INTO `users` VALUES ('hutoma@hutoma.com','hutoma@hutoma.com','none','none
 UNLOCK TABLES;
 
 LOCK TABLES `developerInfo` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `developerInfo` DISABLE KEYS */;
 INSERT INTO developerInfo VALUES('d14b441b-e2a2-4b9f-be9b-4301647e1265', 'Hutoma', 'Hu:toma','support@hutoma.com','Davidson House, The Forbury,','RG1 3EU','Reading','United Kingdom','http://www.hutoma.com');
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+/*!40000 ALTER TABLE `developerInfo` ENABLE KEYS */;
 UNLOCK TABLES;
 
 LOCK TABLES `ai` WRITE;

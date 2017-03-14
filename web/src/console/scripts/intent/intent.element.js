@@ -1,11 +1,11 @@
 var variables = [];
 var ID_pool;
 
-function getMultipleElementValues(elementName, attributeName) {
+function getMultipleElementValues(elementName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
-        values.push(addEscapeCharacter(elements[i].getAttribute(attributeName)));
+        values.push(addEscapeCharacter(elements[i].value));
     }
     return values;
 }
@@ -22,8 +22,8 @@ function saveIntent() {
     $(this).prop("disabled", true);
 
     var intentName = document.getElementById('intent-name').value;
-    var expressions = getMultipleElementValues('user-expression-row', 'placeholder');
-    var responses = getMultipleElementValues('intent-response-row', 'placeholder');
+    var expressions = getMultipleElementValues('user-expression-row');
+    var responses = getMultipleElementValues('intent-response-row');
     var variables = [];
 
     var hasErrors = false;
