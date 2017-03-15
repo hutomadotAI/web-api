@@ -18,7 +18,7 @@ if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma |ERROR PAGE</title>
+    <title>Nokia |ERROR PAGE</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">

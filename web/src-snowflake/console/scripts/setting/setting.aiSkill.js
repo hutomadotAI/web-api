@@ -116,10 +116,9 @@ function getUserActivities(){
 }
 
 function cancelAISkill(){
-    document.getElementById('tab_aiskill').className = "";
-    document.getElementById('tab_general').className = "active";
-    document.getElementById('page_aiskill').className = "tab-pane";
-    document.getElementById('page_general').className = "tab-pane active";
+    deactiveAiSkillButtons();
+    document.getElementById('btnAiSkillCancel').removeEventListener('click', cancelAISkill);
+    window.location.href='./settingsAI.php';
 }
 
 function activeAiSkillButtons(){
