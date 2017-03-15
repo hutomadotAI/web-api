@@ -40,6 +40,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
 
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
+    wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>');
     wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>settings</span></a></li>');
     wHTML += ('</ul>');
     wHTML += ('</li>');
