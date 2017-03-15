@@ -40,16 +40,12 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
 
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
-    wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>');
-    wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>settings</span></a></li>');
+    wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-commenting-o text-aqua "></i> <span>chat</span></a></li>');
+    wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>bot skills</span></a></li>');
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
     wHTML += ('<li class="unselectable" id="level2">');
-    /*
-     wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-     wHTML += ('</li>');
-     */
 
     if ((deep_level_name === '' || deep_level_name === undefined)) {
         wHTML += ('<li class="unselectable" id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i><span class="unselectable"> botstore</span></a></li>');

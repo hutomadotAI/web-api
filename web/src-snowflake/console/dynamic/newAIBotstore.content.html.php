@@ -12,7 +12,7 @@
         <div class="alert alert-dismissable flat alert-info" id="containerMsgAlertNewAiBotstore" style="padding-bottom: 25px;">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <span id="msgAlertNewAiBotstore" >
-        <dt>Hu:toma Bot Store</dt>
+        <dt>Bot Store</dt>
         <dd>
            You can boost your bot’s skills by combining it with other bots in our botstore.
         </dd>

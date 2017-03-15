@@ -76,7 +76,7 @@ function localeToLanguage($locale)
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Training AI</title>
+    <title>hu:toma | Chat bot</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
