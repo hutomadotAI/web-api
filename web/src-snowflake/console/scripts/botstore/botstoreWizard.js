@@ -99,7 +99,7 @@ function infoForBotstore(title, purchased) {
             v['menu_active'] = false;
             v['menu_deep'] = 0;
 
-            document.getElementById('btnBuyBotBack').setAttribute('href', './settingsAI.php?botstore=1');
+            document.getElementById('btnBuyBotBack').setAttribute('href', './settingsAI.php');
 
 
             btnFromBuyToPurchased();
