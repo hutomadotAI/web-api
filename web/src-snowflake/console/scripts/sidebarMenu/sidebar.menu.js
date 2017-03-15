@@ -40,18 +40,12 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
 
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
-    wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>');
-    wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-    wHTML += ('<li id="menu_intents"><a href="./intent.php" id="link_intents"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>');
-    wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>settings</span></a></li>');
+    wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-commenting-o text-aqua "></i> <span>chat</span></a></li>');
+    wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>bot skills</span></a></li>');
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
     wHTML += ('<li class="unselectable" id="level2">');
-    /*
-     wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-     wHTML += ('</li>');
-     */
 
     if ((deep_level_name === '' || deep_level_name === undefined)) {
         wHTML += ('<li class="unselectable" id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i><span class="unselectable"> botstore</span></a></li>');
@@ -70,17 +64,6 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
         label_menu = 'bot';
     }
 
-
-    wHTML += ('<li class="unselectable" id="level4">');
-    wHTML += ('<a href="#">');
-    wHTML += ('<i class="fa fa-book text-purple"></i><span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
-    wHTML += ('</a>');
-    wHTML += ('<ul class="treeview-menu">');
-    wHTML += ('<li id="menu_integrations"><a href="./integrationsAI.php" id="link_integrations"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>');
-    wHTML += ('</ul>');
-    wHTML += ('</li>');
-
-
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);
 
@@ -97,15 +80,6 @@ function buildLimitedConsoleMenu(label_menu) {
     var wHTML = "";
     wHTML += ('<li class="header unselectable" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
     wHTML += ('<li id="menu_home"><a href="./home.php"><i class="fa fa-home text-light-blue"></i><span>home</span></a></li>');
-
-    wHTML += ('<li class="unselectable" id="level3">');
-    wHTML += ('<a href="#">');
-    wHTML += ('<i class="fa fa-book text-purple"></i><span>documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
-    wHTML += ('</a>');
-    wHTML += ('<ul class="treeview-menu">');
-    wHTML += ('<li id="menu_integrations"><a href="./integrationsAI.php" id="link_integrations"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>');
-    wHTML += ('</ul>');
-    wHTML += ('</li>');
 
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);

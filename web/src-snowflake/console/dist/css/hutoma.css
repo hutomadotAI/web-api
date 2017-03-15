@@ -6829,3 +6829,7 @@ ul.pagination li a {
     text-decoration: none;
     color: #72afd2;
 }
+
+.content-json{
+    height:350px;
+}

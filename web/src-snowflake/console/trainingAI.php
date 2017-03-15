@@ -76,7 +76,7 @@ function localeToLanguage($locale)
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Training AI</title>
+    <title>Nokia | Chat bot</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
@@ -115,28 +115,20 @@ function localeToLanguage($locale)
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
-            <div class="row">
-                <div class="col-md-12" id="trainingBox">
-                    <?php include './dynamic/training.content.info.html.php'; ?>
+            <div class="row no-margin">
+                <div class="col-lg-8 col-md-7 col-sm-6" id="chat-area">
+                    <?php include './dynamic/chat.html.php'; ?>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <?php include './dynamic/training.content.upload.file.html.php'; ?>
-                    <?php include './dynamic/training.content.monitor.html.php'; ?>
+                <div class="col-lg-4 col-md-5 col-sm-6">
+                    <?php include './dynamic/training.content.json.html.php'; ?>
                 </div>
             </div>
         </section>
     </div>
     <!-- ================ CHAT CONTENT ================= -->
-    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
-    </aside>
-    <footer class="main-footer" style="margin-right:350px;">
+    <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 </div>
@@ -151,8 +143,6 @@ function localeToLanguage($locale)
 <script src="./scripts/shared/shared.js"></script>
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="scripts/external/iCheck/icheck.min.js"></script>
-<script src="./scripts/training/training.area.upload.textfile.js"></script>
-<script src="./scripts/training/training.area.js"></script>
 <script src="./scripts/chat/chat.js"></script>
 <script src="./scripts/chat/voice.js"></script>
 <script src="./scripts/clipboard/copyToClipboard.js"></script>
