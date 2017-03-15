@@ -140,8 +140,6 @@ function localeToLanguage($locale)
 <script src="./scripts/shared/shared.js"></script>
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="scripts/external/iCheck/icheck.min.js"></script>
-<script src="./scripts/training/training.area.upload.textfile.js"></script>
-<script src="./scripts/training/training.area.js"></script>
 <script src="./scripts/chat/chat.js"></script>
 <script src="./scripts/chat/voice.js"></script>
 <script src="./scripts/clipboard/copyToClipboard.js"></script>
