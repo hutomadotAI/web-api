@@ -35,7 +35,7 @@
     </div>
 
     <div class="box-footer unselectable">
-        <button style="width:100px" type="submit" id="btnAiSkillCancel" class="btn btn-primary flat pull-left">cancel</button>
+        <a href="#" style="width:100px" class="btn btn-primary flat" id="btnAiSkillCancel" onClick="window.location.href='./settingsAI.php';"><b>cancel</b></a>
         <button style="width:100px" type="submit" id="btnAiSkillSave" class="btn btn-success flat pull-right">save</button>
     </div>
 
