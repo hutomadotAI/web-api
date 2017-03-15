@@ -61,6 +61,7 @@ class bot
         $theBot->setVersion($botDetails['version']);
         $theBot->setVideoLink($botDetails['videoLink']);
         $theBot->setIconFile($botDetails['botIcon']);
+        $theBot->setUpdate(isset($botDetails['lastUpdate']) ? date("Y-m-d H:i:s", strtotime($botDetails['lastUpdate'])) : "");
         return $theBot;
     }
 

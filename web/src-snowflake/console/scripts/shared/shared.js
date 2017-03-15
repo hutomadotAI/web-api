@@ -44,6 +44,12 @@ var UI_TRAINING_STATE =
     PHASE2_RUN: {value: 201}
 };
 
+var INTENT_ACTION =
+{
+    DELETE_INTENT: {value: false},
+    SAVE_INTENT: {value: true}
+};
+
 function RecursiveUnbind($jElement) {
     // remove this element's and all of its children's click events
     $jElement.unbind();
