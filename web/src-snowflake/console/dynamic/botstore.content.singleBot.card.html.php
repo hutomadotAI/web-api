@@ -61,7 +61,7 @@
             </div>
             <div class="col-xs-9 bot-buy bottom">
                 <button class="btn btn-success pull-right flat" id="btnBuyBot" data-toggle="modal" data-target="#buyBot" style="width:135px;">
-                    <b>Buy Bot </b>
+                    <b>Use Bot </b>
                     <span class="fa fa-arrow-circle-right"></span>
                 </button>
             </div>

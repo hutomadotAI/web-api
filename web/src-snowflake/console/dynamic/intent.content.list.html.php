@@ -1,3 +1,5 @@
+<input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
+<input type="hidden" id="bot-status" name="bot-status" value="0" style="display:none;"/>
 <div class="box box-solid box-clean flat no-shadow unselectable">
 
     <div class="box-header with-border">
@@ -23,7 +25,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="box-body">
 
         <div class="input-group-btn">

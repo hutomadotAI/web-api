@@ -1,5 +1,5 @@
 function uploadTextFile() {
-    var maximumFileSize = 512 * 1024; // 512Kb
+    var maximumFileSize = 4 * 1024 * 1024; // 4Mb
 
     disableRestartBoxButton(true);
 
@@ -27,7 +27,7 @@ function uploadTextFile() {
                 case 200:
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
-                    
+
                     if (additionalInfo != null)
                         uploadWarnings = getUploadWarnings(JSONdata['status']['additionalInfo']);
 

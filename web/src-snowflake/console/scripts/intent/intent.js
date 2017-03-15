@@ -135,3 +135,9 @@ $("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });
+
+$( document ).ready(function() {
+    if ( (trainingFile && intent_deleted) || ai_state == API_AI_STATE.STOPPED.value)
+        createWarningIntentAlert(INTENT_ACTION.DELETE_INTENT.value);
+    
+});

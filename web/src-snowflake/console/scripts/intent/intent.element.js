@@ -1,11 +1,11 @@
 var variables = [];
 var ID_pool;
 
-function getMultipleElementValues(elementName, attributeName) {
+function getMultipleElementValues(elementName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
-        values.push(addEscapeCharacter(elements[i].getAttribute(attributeName)));
+        values.push(addEscapeCharacter(elements[i].value));
     }
     return values;
 }
@@ -22,8 +22,8 @@ function saveIntent() {
     $(this).prop("disabled", true);
 
     var intentName = document.getElementById('intent-name').value;
-    var expressions = getMultipleElementValues('user-expression-row', 'placeholder');
-    var responses = getMultipleElementValues('intent-response-row', 'placeholder');
+    var expressions = getMultipleElementValues('user-expression-row');
+    var responses = getMultipleElementValues('intent-response-row');
     var variables = [];
 
     var hasErrors = false;
@@ -126,7 +126,7 @@ function saveIntent() {
                 case 200:
                     msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
                     if (trainingFile)
-                        createWarningIntentAlert();
+                        createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
                     break;
                 case 400:
                     msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
@@ -148,144 +148,6 @@ function saveIntent() {
         }
     });
 }
-
-function createWarningIntentAlert() {
-    var wHTML = '';
-    wHTML += ('<div class="box flat no-padding no-shadow no-margin">');
-    wHTML += ('<div class="alert alert-dismissable flat alert-warning" id="containerWarningIntentAlert">');
-    wHTML += ('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>');
-    wHTML += ('<span id="msgAlertWarningIntentAlert">');
-    wHTML += ('<dd class="text-center">');
-    wHTML += ('Training must be restarted to incorporate your new changes.');
-    wHTML += ('</dd>');
-    wHTML += ('<p></p>');
-    wHTML += ('<dt class="text-center">');
-    wHTML += ('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="restartTraining();"> <b>Restart Training</b></button>');
-    wHTML += ('</dt>');
-
-    wHTML += ('</span>');
-    wHTML += ('</div>');
-    wHTML += ('<div class="overlay dark" id="alert-overlay" style="display: none;">');
-    wHTML += ('<i class="fa fa-refresh fa-spin"></i>');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-
-    var parent = document.getElementById('intentElementBox');
-    parent.innerHTML = wHTML;
-}
-
-function removeWarningIntentAlert() {
-    var element = document.getElementById('containerWarningIntentAlert');
-    if (element !== null) {
-        hideOverlay(true);
-        element.parentNode.removeChild(element);
-    }
-}
-
-function startTraining() {
-    jQuery.ajax({
-        url: './dynamic/trainingStart.php',
-        type: 'GET',
-        dataType: 'json',
-        processData: false,
-        contentType: "application/json; charset=utf-8",
-        success: function (response) {
-            if (response['status']['code'] == 200 ) {
-                removeWarningIntentAlert();
-                msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
-            }
-            else {
-                deactiveRestartButton(false);
-                hideOverlay(true);
-                msgAlertIntentElement(ALERT.DANGER.value, 'Could not start training.');
-            }
-
-        },
-        complete: function(){
-            deactiveSaveButton(false);
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            deactiveRestartButton(false);
-            hideOverlay(true);
-            msgAlertIntentElement(ALERT.DANGER.value, 'Unexpected error occurred. Could not start training.');
-        }
-    });
-}
-
-function restartTraining() {
-    deactiveSaveButton(true);
-    deactiveRestartButton(true);
-    msgAlertIntentElement(ALERT.WARNING.value, 'Please wait...');
-    hideOverlay(false);
-    startPollForStatus();
-}
-
-function botStatusCall() {
-    jQuery.ajax({
-        url: './dynamic/trainingStatusAI.php',
-        type: 'GET',
-        processData: false,
-        contentType: "application/json; charset=utf-8",
-        success: function (response) {
-            var jsonData = JSON.parse(response);
-            if (jsonData['api_status']['code'] === 200) {
-                setBotStatus(jsonData["ai_status"]);
-            } else {
-                updateWarningIntentAlertButton(false);
-                msgAlertIntentElement(ALERT.DANGER.value, 'An error has occurred while trying to get the Bot\'s status.');
-            }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            updateWarningIntentAlertButton(false);
-            msgAlertIntentElement(ALERT.DANGER.value, 'Cannot contact server.');
-        }
-    });
-}
-
-function pollStatus() {
-    botStatusCall();
-    isBotStopped();
-}
-
-function startPollForStatus() {
-    ID_pool = setInterval(pollStatus, 1000);
-}
-
-function stopPollForStatus() {
-    clearInterval(ID_pool);
-}
-
-function isBotStopped() {
-    var status = document.getElementById('bot-status').value;
-    setBotStatus(UI_STATE.LISTENING_MODE.value); // listening mode only for UI polling
-    
-    if( status == API_AI_STATE.STOPPED.value) {
-        stopPollForStatus();
-        startTraining();
-    }
-}
-
-function setBotStatus(status) {
-    document.getElementById('bot-status').value = status;
-}
-
-function deactiveRestartButton(state) {
-    document.getElementById('restart-button').disabled = state;
-}
-
-function deactiveSaveButton(state) {
-    document.getElementById('btnSaveEntity').disabled = state;
-}
-
-
-function hideOverlay(state){
-    if (state)
-        document.getElementById('alert-overlay').style.display ='none';
-    else
-        document.getElementById('alert-overlay').style.display ='';
-}
-
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
     var parent = $(e.relatedTarget).parent().parent().parent();

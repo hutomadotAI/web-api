@@ -107,7 +107,7 @@ function addSepatator(arr, len, separator) {
 function setNewListPrompts() {
     var entity_selected = false;
     var curr_entity = document.getElementById('curr_entity').value;
-    var intentNewPromptList = getMultipleElementValues('intent-prompt-row', 'placeholder');
+    var intentNewPromptList = getMultipleElementValues('intent-prompt-row');
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
