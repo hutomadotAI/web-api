@@ -49,13 +49,9 @@ function isSessionVariablesAvailable()
     <title>Nokia | Bot skills </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.css">
-    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
-    <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
 </head>
@@ -78,32 +74,12 @@ function isSessionVariablesAvailable()
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-
-            <!-- Custom Tabs -->
-            <div class="nav-tabs-custom flat no-shadow no-border">
-                <ul class="nav nav-tabs">
-                    <li class="active" id="tab_general"><a href="#page_general" data-toggle="tab">General</a></li>
-                    <li id="tab_aiskill" id="tab_aiskill"><a href="#page_aiskill" data-toggle="tab">Bot Skills</a></li>
-                </ul>
-
-                <div class="tab-content" style="padding-bottom:0px;">
-                    <!-- GENERAL TAB -->
-                    <div class="tab-pane active" id="page_general">
-                        <?php include './dynamic/settings.content.general.html.php'; ?>
-                    </div>
-
-                    <!-- BOT LINK TAB -->
-                    <div class="tab-pane" id="page_aiskill">
-                        <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
-                        <div class="row" style="background-color: #434343;">
-                            <div class="col-lg-12" style="background-color: #434343; padding:5px;">
-                                <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
-                            </div>
-                        </div>
-                    </div>
-
+            <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
+            <div class="row" style="background-color: #434343;">
+                <div class="col-lg-12" style="background-color: #434343; padding:15px;">
+                    <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                 </div>
-
+            </div>
         </section>
     </div>
 
@@ -118,10 +94,6 @@ function isSessionVariablesAvailable()
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./scripts/inputCommon/inputCommon.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/deleteAI/deleteAI.js"></script>
-<script src="scripts/external/select2/select2.full.js"></script>
 <script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="scripts/external/ionslider/ion.rangeSlider.min.js"></script>
 
@@ -129,7 +101,6 @@ function isSessionVariablesAvailable()
 <script src="./scripts/clipboard/clipboard.min.js"></script>
 
 <script src="./scripts/setting/setting.linkBot.js"></script>
-<script src="./scripts/setting/setting.general.js"></script>
 <script src="./scripts/setting/setting.aiSkill.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
