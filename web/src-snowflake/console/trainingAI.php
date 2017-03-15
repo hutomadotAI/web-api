@@ -115,17 +115,18 @@ function localeToLanguage($locale)
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
-
+            <div class="col-lg-8 col-md-7 col-sm-6">
+                <?php include './dynamic/chat.html.php'; ?>
+            </div>
+            <div class="col-lg-4 col-md-5 col-sm-6">
+                <?php include './dynamic/training.content.json.html.php'; ?>
+            </div>
         </section>
     </div>
     <!-- ================ CHAT CONTENT ================= -->
-    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
-    </aside>
-    <footer class="main-footer" style="margin-right:350px;">
+    <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 </div>
