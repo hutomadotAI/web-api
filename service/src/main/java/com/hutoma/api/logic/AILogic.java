@@ -183,11 +183,27 @@ public class AILogic {
 
     public ApiResult deleteAI(final String devid, final UUID aiid) {
         try {
+            // Only delete the AI when it doesn't have a bot that has been purchased already
+            AiBot bot = this.database.getPublishedBotForAI(devid, aiid);
+            if (bot != null) {
+                if (this.database.hasBotBeenPurchased(bot.getBotId())) {
+                    this.logger.logUserTraceEvent(LOGFROM,
+                            "DeleteAI - cannot delete due to bot having been purchased by others",
+                            devid, "AIID", aiid.toString(), "BotId", Integer.toString(bot.getBotId()));
+                    return ApiError.getBadRequest("Bot has been purchased already, cannot delete it.");
+                }
+
+                // Un-publish the bot
+                this.database.updateBotPublishingState(bot.getBotId(), AiBot.PublishingState.REMOVED);
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - unpublished bot", devid, "AIID", aiid.toString(),
+                        "BotId", Integer.toString(bot.getBotId()));
+            }
 
             if (!this.database.deleteAi(devid, aiid)) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, "AIID", aiid.toString());
                 return ApiError.getNotFound();
             }
+
             try {
                 this.aiServices.deleteAI(devid, aiid);
             } catch (ServerConnector.AiServicesException ex) {

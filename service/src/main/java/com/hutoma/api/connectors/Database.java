@@ -527,6 +527,15 @@ public class Database {
         }
     }
 
+    public boolean updateBotPublishingState(final int botId, final AiBot.PublishingState state) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateBotPublishingState", 2)
+                    .add(botId)
+                    .add(state.value());
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public List<AiBot> getPurchasedBots(final String devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPurchasedBots", 1).add(devId);
@@ -565,6 +574,19 @@ public class Database {
             call.initialise("saveBotIcon", 3).add(devId).add(botId).add(filename);
             return call.executeUpdate() > 0;
         }
+    }
+
+    public boolean hasBotBeenPurchased(final int botId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("hasBotBeenPurchased", 1).add(botId);
+            final ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(0) != 0;
+            }
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+        return false;
     }
 
     public RateLimitStatus checkRateLimit(final String devId, final String rateKey, final double burst,

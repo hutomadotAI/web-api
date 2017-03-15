@@ -104,5 +104,4 @@ public class ApiError extends ApiResult {
     public static ApiError getAccountDisabled() {
         return ApiError.getError(HttpURLConnection.HTTP_FORBIDDEN, "Account Not Valid");
     }
-
 }
