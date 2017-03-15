@@ -134,7 +134,7 @@ public class ServerConnector {
                 throw ex;
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new AiServicesException(e.getMessage());
+            throw new AiServicesException(e.toString());
         }
         this.logger.logDebug(LOGFROM, String.format("All %d calls executed successfully", callables.size()));
     }
