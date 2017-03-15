@@ -117,11 +117,13 @@ function localeToLanguage($locale)
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <div class="col-lg-8 col-md-7 col-sm-6">
-                <?php include './dynamic/chat.html.php'; ?>
-            </div>
-            <div class="col-lg-4 col-md-5 col-sm-6">
-                <?php include './dynamic/training.content.json.html.php'; ?>
+            <div class="row no-margin">
+                <div class="col-lg-8 col-md-7 col-sm-6" id="chat-area">
+                    <?php include './dynamic/chat.html.php'; ?>
+                </div>
+                <div class="col-lg-4 col-md-5 col-sm-6">
+                    <?php include './dynamic/training.content.json.html.php'; ?>
+                </div>
             </div>
         </section>
     </div>

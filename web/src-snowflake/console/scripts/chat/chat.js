@@ -228,8 +228,13 @@ function speechOption() {
 
 function setOptionJsonWindow() {
     document.getElementById('json-text').innerHTML = ( !showJsonWindow ) ? '  Hide JSON Message' : '  Show JSON Message';
+
     // toggle json window
     $('#jsonBox').toggle();
+    if (showJsonWindow)
+        document.getElementById('chat-area').className = 'col-lg-12';
+    else
+        document.getElementById('chat-area').className = 'col-lg-8 col-md-7 col-sm-6';
     showJsonWindow = !showJsonWindow;
 }
 

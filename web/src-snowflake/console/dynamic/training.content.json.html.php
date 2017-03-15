@@ -1,4 +1,4 @@
-<div class="box box-solid box-clean flat no-shadow no-margin"  id="jsonBox">
+<div class="box box-solid box-clean flat no-shadow no-margin" id="jsonBox">
     <div class="box-header with-border">
         <div class="box-title"><b>JSON Message</b></div>
     </div>
