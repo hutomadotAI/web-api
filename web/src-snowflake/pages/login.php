@@ -108,7 +108,6 @@ if(isset($_POST['action_login'])){
                 </div>
             </form>
             <a class="new-link" href="reset.php">I forgot my password</a><br>
-            <a class="new-link" href="register.php" class="text-center">Register a new account</a>
         </div>
         <!-- /.login-box-body -->
     </div>
