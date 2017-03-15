@@ -1,4 +1,6 @@
+document.getElementById("btnAiSkillCancel").addEventListener("click", cancelAISkill);
 document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkill);
+
 
 $(function () {
     if((purchasedBots).length==0) {
@@ -111,6 +113,12 @@ function getUserActivities(){
         userActivities.push(v);
     }
     return userActivities;
+}
+
+function cancelAISkill(){
+    deactiveAiSkillButtons();
+    document.getElementById('btnAiSkillCancel').removeEventListener('click', cancelAISkill);
+    window.location.href='./settingsAI.php';
 }
 
 function activeAiSkillButtons(){
