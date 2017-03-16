@@ -2491,6 +2491,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `hasBotBeenPurchased`(IN `param_
   BEGIN
     SELECT EXISTS (SELECT botId FROM botPurchase WHERE botId = param_botId);
   END ;;
+DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;

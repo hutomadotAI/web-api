@@ -212,10 +212,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         // the value
                         this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
                     }
-                    // the list of user_says strings
-                    intent.setUserSays(this.validateOptionalDescriptionList(INTENT_USERSAYS, intent.getUserSays()));
-                    // the list of responses
-                    intent.setResponses(this.validateOptionalDescriptionList(INTENT_RESPONSES, intent.getResponses()));
                 }
                 request.setProperty(APIParameter.IntentJson.toString(), intent);
             }

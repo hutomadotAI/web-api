@@ -280,6 +280,7 @@ function getUIStatusCall() {
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
+            showAlertMessageFromUI(status);
             break;
         default:
     }
@@ -538,6 +539,9 @@ function showAlertMessageFromUI(status) {
             break;
         case UI_STATE.COMPLETED.value:
             msgAlertProgressBar(ALERT.SUCCESS.value, 'Training complete.');
+            break;
+        case UI_STATE.ERROR.value:
+            msgAlertProgressBar(ALERT.DANGER.value, 'An error has occurred.');
             break;
         default:
     }

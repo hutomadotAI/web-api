@@ -87,11 +87,6 @@ public class AIBotStoreLogic {
                         bot == null ? "found" : "published"));
                 return ApiError.getNotFound("Bot not found");
             }
-            if (bot.getDevId().equals(devId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase own bot", devId,
-                        "BotId", Integer.toString(botId));
-                return ApiError.getBadRequest("Cannot purchase own bot");
-            }
             // Check if the bot has already been purchased
             List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
@@ -159,7 +154,8 @@ public class AIBotStoreLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI is linked to other bots", devId,
                         "AIID", aiid.toString());
                 return ApiError.getBadRequest(
-                        "Publishing an bot that is already linked to one or more bots is not yet supported (coming soon!)");
+                        "Publishing an bot that is already linked to one or more bots is not yet supported "
+                                + "(coming soon!)");
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
