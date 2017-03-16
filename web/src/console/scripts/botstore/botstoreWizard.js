@@ -39,7 +39,6 @@ function populateBotFields(bot) {
     document.getElementById('botCategory').innerText = json['category'];
     document.getElementById('botVersion').innerText = json['version'];
     document.getElementById('botClassification').innerText = json['classification'];
-    document.getElementById('botActivations').innerText = json['activations'];
     document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(json['privacyPolicy']));
     document.getElementById('botIcon').setAttribute('src', json['imagePath']);
 

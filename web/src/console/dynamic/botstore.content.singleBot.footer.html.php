@@ -38,21 +38,15 @@
                 <span id="botClassification"></span>
             </div>
         </div>
-        <div class="col-xs-4">
-            <div class="bot-more-details">Activations</div>
-            <div class="text-left">
-                <span id="botActivations"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="row no-margin">
         <div class="col-xs-4 unselectable">
             <div class="bot-more-details">Privacy</div>
             <div class="text-left">
                 <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy Policy</a>
             </div>
         </div>
+    </div>
+
+    <div class="row no-margin">
         <div class="col-xs-4" id="developerInfo">
             <div class="bot-more-details unselectable">Developer</div>
             <div class="text-left">
