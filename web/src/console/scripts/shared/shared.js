@@ -61,6 +61,30 @@ function RecursiveUnbind($jElement) {
     });
 }
 
+function toggleAddBotSkill(node, botId) {
+    var MAX_LINKED_BOTS = 5;
+    var parent = node.parentNode;
+
+    var listActive = document.getElementById('botsSearch').children[0].getElementsByClassName('borderActive');
+
+    if (!node.classList.contains('switchOn') && listActive.length >= MAX_LINKED_BOTS) {
+        alert("You can only combine up to " + MAX_LINKED_BOTS + " bots.");
+        return;
+    }
+
+    $(node).toggleClass('switchOn');
+    if ($(node).attr('data-link') == '0') {
+        $(node).attr('data-link', 1);
+        parent.setAttribute('data-linked', '1');
+        document.getElementById('card' + botId).children[0].children[0].classList.add("borderActive");
+    }
+    else {
+        $(node).attr('data-link', 0);
+        parent.setAttribute('data-linked', '0');
+        document.getElementById('card' + botId).children[0].children[0].classList.remove("borderActive");
+    }
+}
+
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
