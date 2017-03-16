@@ -39,12 +39,16 @@ UNLOCK TABLES;
 
 LOCK TABLES `ai` WRITE;
 /*!40000 ALTER TABLE `ai` DISABLE KEYS */;
-INSERT INTO `ai` VALUES (1,'e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','AIML','','2017-01-31 18:10:17','d14b441b-e2a2-4b9f-be9b-4301647e1265',0,'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNocijEKwzAMAP-iuQLZUhypW2kyGEwCpUunEtnpB0qn0L_XdDqOuwNua5nh_MfzWvK83NelPOAEl5ynHppH8tEZnbShmBFuMURsQ5K98qbCr36_P95nNe4eAlKyhCLGqFUTEqt5lXF3GeD7AwAA__8.vLFd5SSUH37G5aFq7byG5ZBDZiX5XHs2RJLS_MfWLhg','{\"engines\": {}}','en-US','Europe/London',0.4000000059604645,0,0,0);
+INSERT INTO `ai` VALUES (1,'e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','AIML Chit-chat','','2017-01-31 18:10:17','d14b441b-e2a2-4b9f-be9b-4301647e1265',0,'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNocijEKwzAMAP-iuQLZUhypW2kyGEwCpUunEtnpB0qn0L_XdDqOuwNua5nh_MfzWvK83NelPOAEl5ynHppH8tEZnbShmBFuMURsQ5K98qbCr36_P95nNe4eAlKyhCLGqFUTEqt5lXF3GeD7AwAA__8.vLFd5SSUH37G5aFq7byG5ZBDZiX5XHs2RJLS_MfWLhg','{\"engines\": {}}','en-US','Europe/London',0.4000000059604645,0,0,0);
+INSERT INTO `ai` VALUES (2,'491091b1-5458-4d87-b7e9-0ccf3002970c','AIML Concept-net','','2017-01-31 18:10:17','d14b441b-e2a2-4b9f-be9b-4301647e1265',0,'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNocijEKwzAMAP-iuQLZUhypW2kyGEwCpUunEtnpB0qn0L_XdDqOuwNua5nh_MfzWvK83NelPOAEl5ynHppH8tEZnbShmBFuMURsQ5K98qbCr36_P95nNe4eAlKyhCLGqFUTEqt5lXF3GeD7AwAA__8.vLFd5SSUH37G5aFq7byG5ZBDZiX5XHs2RJLS_MfWLhg','{\"engines\": {}}','en-US','Europe/London',0.4000000059604645,0,0,0);
+INSERT INTO `ai` VALUES (3,'9a7a3376-e872-463e-aaa5-9f7e0e8c3380','AIML Jokes','','2017-01-31 18:10:17','d14b441b-e2a2-4b9f-be9b-4301647e1265',0,'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNocijEKwzAMAP-iuQLZUhypW2kyGEwCpUunEtnpB0qn0L_XdDqOuwNua5nh_MfzWvK83NelPOAEl5ynHppH8tEZnbShmBFuMURsQ5K98qbCr36_P95nNe4eAlKyhCLGqFUTEqt5lXF3GeD7AwAA__8.vLFd5SSUH37G5aFq7byG5ZBDZiX5XHs2RJLS_MfWLhg','{\"engines\": {}}','en-US','Europe/London',0.4000000059604645,0,0,0);
 /*!40000 ALTER TABLE `ai` ENABLE KEYS */;
 UNLOCK TABLES;
 
 LOCK TABLES `botStore` WRITE;
 /*!40000 ALTER TABLE `botStore` DISABLE KEYS */;
 INSERT INTO `botStore` VALUES (1,'d14b441b-e2a2-4b9f-be9b-4301647e1265','e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','Chit-Chat','Free Chit-Chat bot','Just include this bot in your AI to get instant chit-chat','','','Free',0,'','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',2,null);
+INSERT INTO `botStore` VALUES (2,'d14b441b-e2a2-4b9f-be9b-4301647e1265','491091b1-5458-4d87-b7e9-0ccf3002970c','General Knowledge','Free general knowledge bot','Include this bot and your AI will be able to answer simple general knowledge questions','','','Free',0,'','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',2,null);
+INSERT INTO `botStore` VALUES (3,'d14b441b-e2a2-4b9f-be9b-4301647e1265','9a7a3376-e872-463e-aaa5-9f7e0e8c3380','Jokes','Free jokes dispenser','Ask for a joke','','','Free',0,'','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',2,null);
 /*!40000 ALTER TABLE `botStore` ENABLE KEYS */;
 UNLOCK TABLES;
