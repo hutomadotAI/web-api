@@ -43,6 +43,7 @@
             <div class="text-left">
                 <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy Policy</a>
             </div>
+        </div>
     </div>
 
     <div class="row no-margin">
