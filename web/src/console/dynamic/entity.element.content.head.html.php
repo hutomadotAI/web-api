@@ -6,7 +6,7 @@
             <div class="input-group">
                 <div class="input-prefix-text">
                     <i class="fa fa-sitemap text-yellow"></i>
-                    <span><b> Entity </b></span><span class="text-md text-darkgray"> > </span>
+                    <span><b> Entity </b></span><span class="text-md text-darkgray" style="padding-right:3px;">:</span>
                 </div>
                 <input type="text" class="flat no-shadow input-text-limited pull-left" value="@<?= $_POST['entity'] ?>" readonly>
                 <button class="input-postfix-button btn btn-success flat pull-right" id="btnSaveEntity" style="width: 130px; "
