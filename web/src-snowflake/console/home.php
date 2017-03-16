@@ -62,7 +62,6 @@ unset($aiApi);
             <?php
 
             if (!isset($response_getAIs) || !(array_key_exists("ai_list", $response_getAIs))) {
-                include './dynamic/home.content.first.html.php';
                 include './dynamic/home.content.start.html.php';
             }
             else {
