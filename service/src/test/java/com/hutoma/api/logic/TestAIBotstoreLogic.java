@@ -143,7 +143,8 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(true);
         ApiResult result = this.aiBotStoreLogic.purchaseBot(SAMPLEBOT.getDevId(), BOTID);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        // For now this should succeed to allow users to combine their own bots
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test

@@ -87,11 +87,6 @@ public class AIBotStoreLogic {
                         bot == null ? "found" : "published"));
                 return ApiError.getNotFound("Bot not found");
             }
-            if (bot.getDevId().equals(devId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase own bot", devId,
-                        "BotId", Integer.toString(botId));
-                return ApiError.getBadRequest("Cannot purchase own bot");
-            }
             // Check if the bot has already been purchased
             List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
