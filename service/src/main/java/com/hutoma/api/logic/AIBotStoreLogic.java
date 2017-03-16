@@ -159,7 +159,8 @@ public class AIBotStoreLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI is linked to other bots", devId,
                         "AIID", aiid.toString());
                 return ApiError.getBadRequest(
-                        "Publishing an bot that is already linked to one or more bots is not yet supported (coming soon!)");
+                        "Publishing an bot that is already linked to one or more bots is not yet supported "
+                                + "(coming soon!)");
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,

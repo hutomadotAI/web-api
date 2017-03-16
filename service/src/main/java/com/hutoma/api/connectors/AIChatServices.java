@@ -219,9 +219,9 @@ public class AIChatServices extends ServerConnector {
                 chatSet.add(BackendServerType.WNET);
             }
             // rnn can chat if training is complete, stopped or in progress
-            if (rnnStatus == TrainingStatus.AI_TRAINING_COMPLETE ||
-                    rnnStatus == TrainingStatus.AI_TRAINING_STOPPED ||
-                    rnnStatus == TrainingStatus.AI_TRAINING) {
+            if (rnnStatus == TrainingStatus.AI_TRAINING_COMPLETE
+                    || rnnStatus == TrainingStatus.AI_TRAINING_STOPPED
+                    || rnnStatus == TrainingStatus.AI_TRAINING) {
                 chatSet.add(BackendServerType.RNN);
             }
         }

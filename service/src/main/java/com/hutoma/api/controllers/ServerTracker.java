@@ -30,15 +30,14 @@ public class ServerTracker implements Callable {
 
     private static final String LOGFROM = "servertracker";
     private final HashSet<UUID> affinity;
+    private final Config config;
+    private final Tools tools;
+    private final JerseyClient jerseyClient;
+    private final JsonSerializer jsonSerializer;
+    private final ILogger logger;
     protected AtomicBoolean runFlag;
     protected UUID serverSessionID;
     protected AtomicBoolean endpointVerified;
-
-    private Config config;
-    private Tools tools;
-    private JerseyClient jerseyClient;
-    private JsonSerializer jsonSerializer;
-    private ILogger logger;
     private ServerRegistration registration;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
@@ -148,8 +147,8 @@ public class ServerTracker implements Callable {
                     this.serverSessionID.toString(), this.registration.getServerType()));
         } catch (Exception e) {
             String fromServer = (this.registration == null) ? "(reg is null)" :
-                    (this.registration.getServerType() == null) ?
-                            "(servertype is null)" : this.registration.getServerType().toString();
+                    (this.registration.getServerType() == null)
+                            ? "(servertype is null)" : this.registration.getServerType().toString();
             this.logger.logUserExceptionEvent(LOGFROM,
                     String.format("ServerTracker exception on %s server", fromServer), "", e);
         }

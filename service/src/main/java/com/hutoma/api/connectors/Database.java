@@ -527,7 +527,8 @@ public class Database {
         }
     }
 
-    public boolean updateBotPublishingState(final int botId, final AiBot.PublishingState state) throws DatabaseException {
+    public boolean updateBotPublishingState(final int botId, final AiBot.PublishingState state)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("updateBotPublishingState", 2)
                     .add(botId)
@@ -581,7 +582,7 @@ public class Database {
             call.initialise("hasBotBeenPurchased", 1).add(botId);
             final ResultSet rs = call.executeQuery();
             if (rs.next()) {
-                return rs.getInt(0) != 0;
+                return rs.getInt(1) != 0;
             }
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
