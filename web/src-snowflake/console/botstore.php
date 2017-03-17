@@ -39,7 +39,7 @@ function isAuthorizedToAccess()
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Nokia | Botstore </title>
+    <title>hu:toma | Botstore </title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="scripts/external/select2/select2.css">
@@ -108,8 +108,7 @@ function isAuthorizedToAccess()
             foreach ($bots['bots'] as $botDetails) {
                 $bot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $bot->toJSON();
-                if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
-                    array_push($tmp_list, $tmp_bot);
+                array_push($tmp_list, $tmp_bot);
             }
         }
         echo json_encode($tmp_list);
