@@ -44,6 +44,12 @@ var UI_TRAINING_STATE =
     PHASE2_RUN: {value: 201}
 };
 
+var INTENT_ACTION =
+{
+    DELETE_INTENT: {value: false},
+    SAVE_INTENT: {value: true}
+};
+
 function RecursiveUnbind($jElement) {
     // remove this element's and all of its children's click events
     $jElement.unbind();
@@ -53,6 +59,30 @@ function RecursiveUnbind($jElement) {
     $jElement.children().each(function () {
         RecursiveUnbind($(this));
     });
+}
+
+function toggleAddBotSkill(node, botId) {
+    var MAX_LINKED_BOTS = 5;
+    var parent = node.parentNode;
+
+    var listActive = document.getElementById('botsSearch').children[0].getElementsByClassName('borderActive');
+
+    if (!node.classList.contains('switchOn') && listActive.length >= MAX_LINKED_BOTS) {
+        alert("You can only combine up to " + MAX_LINKED_BOTS + " bots.");
+        return;
+    }
+
+    $(node).toggleClass('switchOn');
+    if ($(node).attr('data-link') == '0') {
+        $(node).attr('data-link', 1);
+        parent.setAttribute('data-linked', '1');
+        document.getElementById('card' + botId).children[0].children[0].classList.add("borderActive");
+    }
+    else {
+        $(node).attr('data-link', 0);
+        parent.setAttribute('data-linked', '0');
+        document.getElementById('card' + botId).children[0].children[0].classList.remove("borderActive");
+    }
 }
 
 $(document).ready(function () {

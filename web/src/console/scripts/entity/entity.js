@@ -104,6 +104,11 @@ function OnMouseOut(elem) {
     btn.style.display = 'none';
 }
 
+function editEntity(elem, entity) {
+    elem.setAttribute('onclick', '');
+    submitElementClicked(entity.replace(/@/g, ""));
+}
+
 function submitElementClicked(value){
     var form = document.createElement('form');
     var element = document.createElement('input');

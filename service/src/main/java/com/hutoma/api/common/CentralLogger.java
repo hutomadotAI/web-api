@@ -75,7 +75,7 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (Map<String, String>) null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (String[]) null);
     }
 
     public void logWarning(String fromLabel, String logComment) {

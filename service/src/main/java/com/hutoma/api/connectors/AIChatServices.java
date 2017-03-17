@@ -6,8 +6,9 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.InvocationResult;
@@ -84,11 +85,6 @@ public class AIChatServices extends ServerConnector {
         }};
         List<Pair<String, UUID>> ais = this.getLinkedBotsAiids(devId, aiid);
 
-        // If the current AI is in a state that can handle chat requests, then include it
-        if (this.canChatWithAi(devId, aiid)) {
-            ais.add(new Pair<>(devId, aiid));
-        }
-
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;
         HashSet<UUID> aimlBotIdsSet = new HashSet<>(this.config.getAimlBotAiids());
@@ -112,14 +108,31 @@ public class AIChatServices extends ServerConnector {
             }
         }
 
+        // find out which servers can chat with this AI
+        Set<BackendServerType> canChatWith = canChatWithAi(devId, aiid);
+
+        // make copies of the AI lists
+        List<Pair<String, UUID>> wnetAIs = new ArrayList<>(ais);
+        List<Pair<String, UUID>> rnnAIs = new ArrayList<>(ais);
+
+        // add the AI to the list if the server can chat
+        if (canChatWith.contains(BackendServerType.WNET)) {
+            wnetAIs.add(new Pair<String, UUID>(devId, aiid));
+        }
+        if (canChatWith.contains(BackendServerType.RNN)) {
+            rnnAIs.add(new Pair<String, UUID>(devId, aiid));
+        }
+
         // If we're issuing a chat request but there are no AIs available to serve it, just fail
-        if (ais.isEmpty() && !usedAimlBot) {
+        if (wnetAIs.isEmpty() && rnnAIs.isEmpty() && !usedAimlBot) {
             throw new AiNotReadyToChat("No AIs ready to chat");
         }
 
-        if (!ais.isEmpty()) {
-            this.wnetFutures = this.requestWnet.issueChatRequests(parameters, ais);
-            this.rnnFutures = this.requestRnn.issueChatRequests(parameters, ais);
+        if (!wnetAIs.isEmpty()) {
+            this.wnetFutures = this.requestWnet.issueChatRequests(parameters, wnetAIs);
+        }
+        if (!rnnAIs.isEmpty()) {
+            this.rnnFutures = this.requestRnn.issueChatRequests(parameters, rnnAIs);
         }
     }
 
@@ -179,15 +192,40 @@ public class AIChatServices extends ServerConnector {
         return ais;
     }
 
-    public boolean canChatWithAi(final String devId, final UUID aiid) {
+    /***
+     * Determine whether the AI is in a state where the user can interact with it
+     * @param devId dev owner
+     * @param aiid id
+     * @return a set of servers that can interact with the AI (empty set if none)
+     */
+    public Set<BackendServerType> canChatWithAi(final String devId, final UUID aiid) {
+        // by default chat with nothing
+        HashSet<BackendServerType> chatSet = new HashSet<>();
+        BackendStatus result = null;
         try {
-            ApiAi apiAi = this.database.getAI(devId, aiid, this.serializer);
-            return apiAi.getSummaryAiStatus() == TrainingStatus.AI_TRAINING_COMPLETE
-                    || apiAi.getSummaryAiStatus() == TrainingStatus.AI_TRAINING;
+            // try to get the real status from the database
+            result = this.database.getAIStatusReadOnly(devId, aiid, this.serializer);
         } catch (Database.DatabaseException ex) {
+            // if it fails, log the error and keep the set null
             this.logger.logException(LOGFROM, ex);
         }
-        return false;
+        if (result != null) {
+            // get the status of each backend server for this ai
+            TrainingStatus wnetStatus = result.getEngineStatus(BackendServerType.WNET).getTrainingStatus();
+            TrainingStatus rnnStatus = result.getEngineStatus(BackendServerType.RNN).getTrainingStatus();
+
+            // wnet can only chat if training is complete
+            if (wnetStatus == TrainingStatus.AI_TRAINING_COMPLETE) {
+                chatSet.add(BackendServerType.WNET);
+            }
+            // rnn can chat if training is complete, stopped or in progress
+            if (rnnStatus == TrainingStatus.AI_TRAINING_COMPLETE
+                    || rnnStatus == TrainingStatus.AI_TRAINING_STOPPED
+                    || rnnStatus == TrainingStatus.AI_TRAINING) {
+                chatSet.add(BackendServerType.RNN);
+            }
+        }
+        return chatSet;
     }
 
     /***

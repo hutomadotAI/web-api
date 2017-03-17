@@ -41,9 +41,9 @@ public class AIServicesLogic {
     private final AiServiceStatusLogger serviceStatusLogger;
     private final ILogger logger;
     private final Tools tools;
-    ControllerWnet controllerWnet;
-    ControllerRnn controllerRnn;
-    ControllerAiml controllerAiml;
+    private final ControllerWnet controllerWnet;
+    private final ControllerRnn controllerRnn;
+    private final ControllerAiml controllerAiml;
 
 
     @Inject
@@ -78,6 +78,11 @@ public class AIServicesLogic {
 
             // figure out which controller this is for
             ControllerBase controller = getControllerFor(status.getAiEngine());
+            if (controller == null) {
+                this.serviceStatusLogger.logError(LOGFROM,
+                        "No registered controller for engine " + status.getAiEngine());
+                return ApiError.getBadRequest("No registered controller for engine");
+            }
 
             // if the session is not active, log and return an error
             if (!controller.isActiveSession(status.getServerSessionID())) {
@@ -127,6 +132,7 @@ public class AIServicesLogic {
                     controller.setAllHashCodes(registration.getAiList());
                     synchroniseStatuses(controller, registration);
                 }
+                return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
             } else {
                 this.serviceStatusLogger.logError(LOGFROM,
                         String.format("unrecognised server type %s", registration.getServerType()));
@@ -136,7 +142,6 @@ public class AIServicesLogic {
             this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
-        return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
     }
 
     public ApiResult updateAffinity(final ServerAffinity serverAffinity) {

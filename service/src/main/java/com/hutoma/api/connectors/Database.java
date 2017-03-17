@@ -303,14 +303,33 @@ public class Database {
         }
     }
 
+    public BackendStatus getAIStatusReadOnly(final String devId, final UUID aiid, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            ResultSet rs = call.initialise("getAiStatus", 2)
+                    .add(aiid).add(devId).executeQuery();
+
+            // return null if the AI was not found
+            if (!rs.next()) {
+                return null;
+            }
+
+            // retrieve the status
+            return getBackendStatus(rs.getString("backend_status"), jsonSerializer);
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     public boolean updateAIStatus(final AiStatus status, final JsonSerializer jsonSerializer)
             throws DatabaseException {
 
         // open a transaction since this is a read/modify/write operation and we need consistency
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
+
             // read the status json for all the servers
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatus", 2)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatusForUpdate", 2)
                     .add(status.getAiid()).add(status.getDevId()).executeQuery();
 
             // if there is nothing then end here (not found)
@@ -508,6 +527,16 @@ public class Database {
         }
     }
 
+    public boolean updateBotPublishingState(final int botId, final AiBot.PublishingState state)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateBotPublishingState", 2)
+                    .add(botId)
+                    .add(state.value());
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public List<AiBot> getPurchasedBots(final String devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPurchasedBots", 1).add(devId);
@@ -546,6 +575,19 @@ public class Database {
             call.initialise("saveBotIcon", 3).add(devId).add(botId).add(filename);
             return call.executeUpdate() > 0;
         }
+    }
+
+    public boolean hasBotBeenPurchased(final int botId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("hasBotBeenPurchased", 1).add(botId);
+            final ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) != 0;
+            }
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+        return false;
     }
 
     public RateLimitStatus checkRateLimit(final String devId, final String rateKey, final double burst,

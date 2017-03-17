@@ -19,11 +19,11 @@ function showBots(str, option) {
             switch (option) {
                 case 0:  // botstore showed during creation AI wizard
                     if ($.inArray(bot['botId'], purchasedBots) != -1) {
-                        wHTML += ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '","' + x + '");></div>');
+                        wHTML += ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '");></div>');
                     }
                     else {
                         wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"style="width:130px;">');
-                        wHTML += ('<b>Buy Bot </b>');
+                        wHTML += ('<b>Use Bot </b>');
                         wHTML += ('<span class="fa fa-arrow-circle-right"></span>');
                         wHTML += ('</button>');
                     }
@@ -37,7 +37,7 @@ function showBots(str, option) {
                     }
                     else {
                         wHTML += ('<button class="btn btn-success center-block flat" id="btnBuyBot' + bot['botId'] + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name'] + '" data-description="' + bot['description'] + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '" style="width:130px;">');
-                        wHTML += ('<b>Buy Bot </b>');
+                        wHTML += ('<b>Use Bot </b>');
                         wHTML += ('<span class="fa fa-arrow-circle-right"></span>');
                         wHTML += ('</button>');
                     }
@@ -118,24 +118,6 @@ function openSingleBot(elem, option, botId, purchased) {
 
     form.submit();
 }
-
-function switchClick(node, botId, pos) {
-    var parent = node.parentNode;
-
-    $(node).toggleClass('switchOn');
-    if ($(node).attr('data-link') == '0') {
-
-        $(node).attr('data-link', 1);
-        parent.setAttribute('data-linked', '1');
-        document.getElementById('card' + botId).children[0].children[0].classList.add("borderActive");
-    }
-    else {
-        $(node).attr('data-link', 0);
-        parent.setAttribute('data-linked', '0');
-        document.getElementById('card' + botId).children[0].children[0].classList.remove("borderActive");
-    }
-}
-
 
 // on show Modal pass info to tiny purchsed process
 $('#buyBot').on('show.bs.modal', function (e) {

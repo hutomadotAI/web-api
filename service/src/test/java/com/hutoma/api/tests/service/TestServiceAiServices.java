@@ -195,6 +195,24 @@ public class TestServiceAiServices extends ServiceTestBase {
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 
+    @Test
+    public void testServerRegister_noBody() {
+        final Response response = sendRegistrationRequest(null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testStatusUpdate_noBody() {
+        final Response response = sendStatusUpdateRequest(null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateAffinityRequest_noBody() {
+        final Response response = sendAffinityRequest(null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
     private Response sendStatusUpdateRequest(final String statusJson) {
         return sendRequest(AI_SERVICES_STATUS_PATH, statusJson);
     }

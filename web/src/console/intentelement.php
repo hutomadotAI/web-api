@@ -154,6 +154,7 @@ function echoJsonEntityListResponse($entityList)
 <script src="scripts/external/saveFile/FileSaver.js"></script>
 <script src="./scripts/validation/validation.js"></script>
 <script src="./scripts/button-select/buttonSelect.js"></script>
+<script src="./scripts/intent/intent.polling.js"></script>
 <script src="./scripts/intent/intent.element.response.js"></script>
 <script src="./scripts/intent/intent.element.expression.js"></script>
 <script src="./scripts/intent/intent.element.js"></script>

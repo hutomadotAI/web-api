@@ -183,11 +183,27 @@ public class AILogic {
 
     public ApiResult deleteAI(final String devid, final UUID aiid) {
         try {
+            // Only delete the AI when it doesn't have a bot that has been purchased already
+            AiBot bot = this.database.getPublishedBotForAI(devid, aiid);
+            if (bot != null) {
+                if (this.database.hasBotBeenPurchased(bot.getBotId())) {
+                    this.logger.logUserTraceEvent(LOGFROM,
+                            "DeleteAI - cannot delete due to bot having been purchased by others",
+                            devid, "AIID", aiid.toString(), "BotId", Integer.toString(bot.getBotId()));
+                    return ApiError.getBadRequest("Bot has been purchased already, cannot delete it.");
+                }
+
+                // Un-publish the bot
+                this.database.updateBotPublishingState(bot.getBotId(), AiBot.PublishingState.REMOVED);
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - unpublished bot", devid, "AIID", aiid.toString(),
+                        "BotId", Integer.toString(bot.getBotId()));
+            }
 
             if (!this.database.deleteAi(devid, aiid)) {
-                this.logger.logUserTraceEvent("DeleteAI - not found", devid, "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, "AIID", aiid.toString());
                 return ApiError.getNotFound();
             }
+
             try {
                 this.aiServices.deleteAI(devid, aiid);
             } catch (ServerConnector.AiServicesException ex) {
@@ -213,7 +229,7 @@ public class AILogic {
 
     public ApiResult getLinkedBots(final String devId, final UUID aiid) {
         try {
-            this.logger.logUserTraceEvent("GetLinkedBots", devId, "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "GetLinkedBots", devId, "AIID", aiid.toString());
             return new ApiAiBotList(this.database.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetLinkedBots", devId, ex);
@@ -227,14 +243,18 @@ public class AILogic {
                 put("AIID", aiid.toString());
                 put("BotId", Integer.toString(botId));
             }};
-            if (this.database.getBotDetails(botId) == null) {
+            AiBot botDetails = this.database.getBotDetails(botId);
+            if (botDetails == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, map);
                 return ApiError.getBadRequest(String.format("Bot %d not found", botId));
             }
-            List<AiBot> purchased = this.database.getPurchasedBots(devId);
-            if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devId, map);
-                return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
+            // If bot is now owned (purchased or built by the dev) then it can't be linked
+            if (!botDetails.getDevId().equals(devId)) {
+                List<AiBot> purchased = this.database.getPurchasedBots(devId);
+                if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
+                    this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devId, map);
+                    return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
+                }
             }
             List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
             if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
@@ -243,7 +263,7 @@ public class AILogic {
             }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.linkBotToAi(devId, aiid, botId)) {
-                this.logger.logUserTraceEvent("LinkBotToAI", devId, "AIID", map);
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devId, map);
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, map);
@@ -264,7 +284,7 @@ public class AILogic {
                         "BotId", Integer.toString(botId));
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linkes", devId,
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked", devId,
                         "AIID", aiid.toString(),
                         "BotId", Integer.toString(botId));
                 return ApiError.getNotFound("AI or Bot not found, or not currently linked");

@@ -22,6 +22,10 @@ RUN \
 RUN \
 	mkdir -p /etc/apache2/ssl
 
+
+# Copy the PHP configuration
+COPY config/php.ini /usr/local/etc/php/php.ini
+
 # Copy the certificates to the store
 COPY config/internal.hutoma.crt /etc/apache2/ssl
 COPY config/internal.hutoma.key /etc/apache2/ssl
