@@ -19,6 +19,7 @@ function CallGetSingleAI($aiid)
 {
     $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $singleAI = $aiApi->getSingleAI($aiid);
+    
     unset($aiApi);
     if ($singleAI['status']['code'] === 200) {
         setSessionVariables($singleAI);
