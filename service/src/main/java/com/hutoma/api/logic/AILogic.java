@@ -257,6 +257,12 @@ public class AILogic {
                 }
             }
             List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
+            if (linked.size() >= this.config.getMaxLinkedBotsPerAi()) {
+                this.logger.logUserTraceEvent(LOGFROM,
+                        "LinkBotToAI - reached maximum allowed number of bots to be linked", devId, map);
+                return ApiError.getBadRequest(String.format("Maximum number of linked bots reached: %d",
+                        this.config.getMaxLinkedBotsPerAi()));
+            }
             if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot already linked to AI", devId, map);
                 return ApiError.getBadRequest(String.format("Bot %d already linked to AI", botId));

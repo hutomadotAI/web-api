@@ -151,6 +151,10 @@ public class Config {
         return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
+    public int getMaxLinkedBotsPerAi() {
+        return Integer.parseInt(getConfigFromProperties("max_linked_bots_per_ai", "5"));
+    }
+
     /***
      * The maximum number of active threads in the threadpool
      * after which anyone requesting a thread will get an exception

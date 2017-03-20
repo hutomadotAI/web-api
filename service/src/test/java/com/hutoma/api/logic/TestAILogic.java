@@ -64,6 +64,7 @@ public class TestAILogic {
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(ILogger.class);
 
+        when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeAiServices,
                 this.fakeLogger, this.fakeTools);
@@ -384,6 +385,16 @@ public class TestAILogic {
     @Test
     public void testLinkBotToAi_botNotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(null);
+        ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testLinkBotToAi_maximumBotsReached() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        // Limit the maximum number of bots to 1, so that we're already at the limit
+        when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(1);
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
