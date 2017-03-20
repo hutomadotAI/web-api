@@ -66,7 +66,7 @@ function initializeAlertMessage(aiStatus) {
 
     parent.innerHTML = wHTML;
 
-    if (aiStatus["training_file_uploaded"] == true)
+    if (aiStatus["training_file_uploaded"])
         msgAlertUploadFile(ALERT.PRIMARY.value, 'File\'s loaded already.');
 }
 
@@ -76,7 +76,7 @@ function initializeTrainingConsole(aiStatus) {
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
-            if (aiStatus["training_file_uploaded"] == true)
+            if (aiStatus["training_file_uploaded"])
                 showAlertMessageFromUI(UI_STATE.FILE_UPLOADED.value);
             else
                 showAlertMessage(aiStatus['ai_status']);
