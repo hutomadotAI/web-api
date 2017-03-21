@@ -66,7 +66,7 @@ function initializeAlertMessage(aiStatus) {
 
     parent.innerHTML = wHTML;
 
-    if (aiStatus["training_file_uploaded"] != 0)
+    if (aiStatus["training_file_uploaded"])
         msgAlertUploadFile(ALERT.PRIMARY.value, 'File\'s loaded already.');
 }
 
@@ -76,7 +76,10 @@ function initializeTrainingConsole(aiStatus) {
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
-            showAlertMessage(aiStatus['ai_status']);
+            if (aiStatus["training_file_uploaded"])
+                showAlertMessageFromUI(UI_STATE.FILE_UPLOADED.value);
+            else
+                showAlertMessage(aiStatus['ai_status']);
             break;
         case API_AI_STATE.QUEUED.value:
             var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);

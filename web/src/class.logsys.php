@@ -714,10 +714,14 @@ class console
                          */
                         //TODO: move this to a stored procedure - at the moment this code is not being used.
                         $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
-                        $sql->execute(array($reset_pass_token));
-
-                        echo "<h3>Success : Password Reset Successful</h3><p>You may now login with your new password.</p>";
-                        $curStatus = "passwordChanged"; // The password was successfully changed
+                        $result = $sql->execute(array($reset_pass_token));
+                        if (!$result) {
+                            self::log_error("ChangePassword", print_r($sql->errorInfo(), true));
+                            echo "<h3>Error</h3><p>There was a problem resetting your password.</p>";
+                        } else {
+                            echo "<h3>Success : Password Reset Successful</h3><p>You may now login with your new password.</p>";
+                            $curStatus = "passwordChanged"; // The password was successfully changed
+                        }
                     }
                 }
             }
@@ -786,7 +790,10 @@ class console
             $saltedPass = hash('sha256', $newpass . self::$config['keys']['salt'] . $randomSalt);
             //TODO: move this to a stored procedure - at the moment this code is not being used.
             $sql = self::$dbh->prepare("UPDATE `" . self::$config['db']['table'] . "` SET `password` = ?, `password_salt` = ? WHERE `id` = ?");
-            $sql->execute(array($saltedPass, $randomSalt, self::$user));
+            $result = $sql->execute(array($saltedPass, $randomSalt, self::$user));
+            if (!$result) {
+                self::log_error("ChangePassword", print_r($sql->errorInfo(), true));
+            }
             return true;
         } else {
             echo "<h3>Error : Not Logged In</h3>";

@@ -177,7 +177,7 @@ function echoJsonEntityListResponse($entityList)
 <script>
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
-    var trainingFile = <?php if ($bot['training_file_uploaded'] == 1) echo 'true'; else echo 'false'; unset($singleAI)?>;
+    var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
 </script>
 </body>
 </html>

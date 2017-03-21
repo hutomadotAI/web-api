@@ -136,7 +136,7 @@ function echoJsonIntentsResponse($intents)
     
     var intent_deleted = <?php if ($intent_deleted) echo 'true'; else echo 'false'; unset($intent_deleted)?>;
     var ai_state = <?php echo json_encode($bot['ai_status'])?>;
-    var trainingFile = <?php if ($bot['training_file_uploaded'] == 1) echo 'true'; else echo 'false'; unset($bot)?>;
+    var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
 </script>
 <script>
     function searchIntents(str) {
