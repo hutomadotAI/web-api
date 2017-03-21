@@ -477,7 +477,7 @@ class console
                 if (array_key_exists('status', $res)) {
                     $curl->close();
                     $subject = "Welcome to Hu:toma!";
-                    $body = "Congrats, you’re all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.\nThanks\n--The Hutoma team";
+                    $body = "Congrats, you are all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.<br/>Thanks<br/>--The Hu:toma team";
                     if (!self::sendMail($id, $subject, $body)) {
                         self::log_error("registration", "Could not send welcome email to " . $id);
                     }
