@@ -64,7 +64,7 @@ function showBots(str, option,bots, purchasedBots,linkedBots) {
         var bot = JSON.parse(bots[x]);
         if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
 
-            var openBotDetails = 'onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');';
+            var openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');';
             wHTML += ('<span id="card' + bot['botId'] + '" data-pos="' + x + '">');
             if ($.inArray(bot['botId'], linkedBots) != -1)
                 wHTML += ('<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1 borderActive">');
@@ -150,13 +150,13 @@ function openSingleBot(elem, option, botId, purchased) {
     element.type = 'hidden';
     form.appendChild(element);
 
-    var element = document.createElement("INPUT");
+    element = document.createElement("INPUT");
     element.name = "purchased";
     element.value = purchased;
     element.type = 'hidden';
     form.appendChild(element);
 
-    var element = document.createElement("INPUT");
+    element = document.createElement("INPUT");
     element.name = "menu_title";
     switch(option){
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
