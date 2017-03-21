@@ -42,7 +42,7 @@ public class IntentLogic {
                 return ApiError.getNotFound();
             }
             this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devid, "AIID", aiid.toString(), "Num Intents",
-                    Integer.toString(intentList.size()));
+                    intentList.size());
             return new ApiIntentList(aiid, intentList).setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetIntents", devid, e);

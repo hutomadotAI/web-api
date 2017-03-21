@@ -21,7 +21,7 @@ public class ChatLogger extends CentralLogger {
     }
 
     public void logChatError(final String logFrom, final String devId, final Exception exception,
-                             final Map<String, String> properties) {
+                             final Map<String, Object> properties) {
         this.logUserExceptionEvent(logFrom, "ApiChatError", devId, exception, properties);
     }
 

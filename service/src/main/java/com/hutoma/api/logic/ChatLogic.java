@@ -46,7 +46,7 @@ public class ChatLogic {
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
     private final ChatStateHandler chatStateHandler;
-    private Map<String, String> telemetryMap;
+    private Map<String, Object> telemetryMap;
     private float minP;
     private ChatState chatState;
 
@@ -82,7 +82,7 @@ public class ChatLogic {
         apiChat.setTimestamp(startTime);
 
         // Add telemetry for the request
-        this.telemetryMap = new LinkedHashMap<String, String>() {
+        this.telemetryMap = new LinkedHashMap<String, Object>() {
             {
                 put("DevId", devId);
                 put("AIID", aiid.toString());
@@ -205,7 +205,7 @@ public class ChatLogic {
 
             // set the chat response time to the whole duration since the start of the request until now
             result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
-            this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
+            this.telemetryMap.put("RequestDuration", result.getElapsedTime());
 
             apiChat.setResult(result);
 
@@ -253,7 +253,7 @@ public class ChatLogic {
         UUID chatUuid = UUID.fromString(chatId);
 
         // Add telemetry for the request
-        this.telemetryMap = new LinkedHashMap<String, String>() {
+        this.telemetryMap = new LinkedHashMap<String, Object>() {
             {
                 put("DevId", devId);
                 put("AIID", aiid.toString());
@@ -276,7 +276,7 @@ public class ChatLogic {
 
         // set the chat response time to the whole duration since the start of the request until now
         result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
-        this.telemetryMap.put("RequestDuration", Double.toString(result.getElapsedTime()));
+        this.telemetryMap.put("RequestDuration", result.getElapsedTime());
 
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
@@ -418,7 +418,7 @@ public class ChatLogic {
 
         this.telemetryMap.put("WNETAnswer", chatResult.getAnswer());
         this.telemetryMap.put("WNETTopicOut", chatResult.getTopicOut());
-        this.telemetryMap.put("WNETElapsedTime", Double.toString(chatResult.getElapsedTime()));
+        this.telemetryMap.put("WNETElapsedTime", chatResult.getElapsedTime());
         return chatResult;
     }
 
@@ -443,7 +443,7 @@ public class ChatLogic {
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
         this.telemetryMap.put("AIMLAnswer", chatResult.getAnswer());
-        this.telemetryMap.put("AIMLElapsedTime", Double.toString(chatResult.getElapsedTime()));
+        this.telemetryMap.put("AIMLElapsedTime", chatResult.getElapsedTime());
         return chatResult;
     }
 
@@ -471,7 +471,7 @@ public class ChatLogic {
         this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
-        this.telemetryMap.put("RNNElapsedTime", Double.toString(chatResult.getElapsedTime()));
+        this.telemetryMap.put("RNNElapsedTime", chatResult.getElapsedTime());
         this.telemetryMap.put("RNNAnswer", chatResult.getAnswer());
         this.telemetryMap.put("RNNTopicOut", chatResult.getTopicOut());
 
@@ -483,7 +483,7 @@ public class ChatLogic {
     }
 
     private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid,
-                                       Map<String, String> telemetryMap) {
+                                       Map<String, Object> telemetryMap) {
         memoryIntent.setIsFulfilled(true);
         ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
         if (intent != null) {

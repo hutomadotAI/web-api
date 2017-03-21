@@ -128,10 +128,10 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             requestContext.abortWith(ApiError.getInternalServerError(ex.getMessage())
                     .getResponse(this.serializer).build());
             this.logger.logUserExceptionEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext), ex,
-                    new LinkedHashMap<String, String>() {{
+                    new LinkedHashMap<String, Object>() {{
                         put("Type", "Post");
                         put("Parameters", Strings.join(checkList.stream().map(APIParameter::toString).iterator(), ','));
-                        put("RequestLength", Integer.toString(requestContext.getLength()));
+                        put("RequestLength", requestContext.getLength());
                         put("Path", requestContext.getUriInfo().getPath());
                     }});
         }

@@ -75,7 +75,7 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (String[]) null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (Object[]) null);
     }
 
     public void logWarning(String fromLabel, String logComment) {
@@ -94,7 +94,7 @@ public class CentralLogger implements ILogger {
      * {@inheritDoc}
      */
     public void logUserTraceEvent(final String logFrom, final String event, final String user,
-                                  final Map<String, String> properties) {
+                                  final Map<String, Object> properties) {
         this.logOutput(EventType.TRACE, logFrom, event, addUserToMap(user, properties));
     }
 
@@ -109,7 +109,7 @@ public class CentralLogger implements ILogger {
      * {@inheritDoc}
      */
     public void logUserTraceEvent(final String logFrom, final String event, final String user,
-                                  final String... properties) {
+                                  final Object... properties) {
         this.logUserTraceEvent(logFrom, event, user, arrayToMap(properties));
     }
 
@@ -118,14 +118,14 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
-        this.logUserExceptionEvent(logFrom, event, user, exception, (String[]) null);
+        this.logUserExceptionEvent(logFrom, event, user, exception, (Object[]) null);
     }
 
     /**
      * {@inheritDoc}
      */
     public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
-                                      final Exception exception, final String... properties) {
+                                      final Exception exception, final Object... properties) {
         this.logUserExceptionEvent(logFrom, eventName, user, exception, arrayToMap(properties));
     }
 
@@ -134,8 +134,8 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
                                       final Exception exception,
-                                      final Map<String, String> properties) {
-        Map<String, String> map = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+                                      final Map<String, Object> properties) {
+        Map<String, Object> map = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
         map.put("message", exception.getMessage());
         map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
         map.put("suppressedExceptions", exception.getSuppressed()
@@ -156,32 +156,31 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
-    public void logUserErrorEvent(String logFrom, String event, String user, String... properties) {
+    public void logUserErrorEvent(String logFrom, String event, String user, Object... properties) {
         this.logUserErrorEvent(logFrom, event, user, arrayToMap(properties));
     }
 
     /**
      * {@inheritDoc}
      */
-    public void logUserErrorEvent(String logFrom, String event, String user, Map<String, String> properties) {
+    public void logUserErrorEvent(String logFrom, String event, String user, Map<String, Object> properties) {
         this.logOutput(EventType.ERROR, logFrom, event, addUserToMap(user, properties));
     }
 
     /**
      * {@inheritDoc}
      */
-    public void logUserWarnEvent(String logFrom, String event, String user, String... properties) {
+    public void logUserWarnEvent(String logFrom, String event, String user, Object... properties) {
         this.logWarnEvent(logFrom, event, user, arrayToMap(properties));
     }
 
     @Override
     public void logUserWarnEvent(final String logFrom, final String event, final String user,
-                                 final Map<String, String> properties) {
+                                 final Map<String, Object> properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
-
-    public void logWarnEvent(String logFrom, String event, String user, Map<String, String> properties) {
+    public void logWarnEvent(String logFrom, String event, String user, Map<String, Object> properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
@@ -189,22 +188,22 @@ public class CentralLogger implements ILogger {
         this.timer.cancel();
     }
 
-    private Map<String, String> arrayToMap(final String[] array) {
+    private Map<String, Object> arrayToMap(final Object[] array) {
         if (array == null) {
             return new HashMap<>();
         }
         if (array.length % 2 != 0) {
             throw new IllegalArgumentException("Properties need to be in the format of key1, value1, etc");
         }
-        Map<String, String> map = new LinkedHashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         for (int i = 0; i < array.length; i += 2) {
-            map.put(array[i], array[i + 1]);
+            map.put(array[i].toString(), array[i + 1]);
         }
         return map;
     }
 
-    private Map<String, String> addUserToMap(final String user, final Map<String, String> map) {
-        Map<String, String> newMap = map == null
+    private Map<String, Object> addUserToMap(final String user, final Map<String, Object> map) {
+        Map<String, Object> newMap = map == null
                 ? new LinkedHashMap<>()
                 : new LinkedHashMap<>(map);
         newMap.put("user", user == null ? "" : user);
@@ -255,7 +254,7 @@ public class CentralLogger implements ILogger {
         private String type;
         private String tag;
         private String message;
-        private Map<String, String> params;
+        private Map<String, Object> params;
 
         @Override
         public String toString() {
@@ -265,19 +264,15 @@ public class CentralLogger implements ILogger {
         }
     }
 
-    public static class LogParameters extends HashMap<String, String> {
+    public static class LogParameters extends HashMap<String, Object> {
 
         public LogParameters(String action) {
             put("Action", action);
         }
 
-        @Override
-        public String put(final String key, final String value) {
-            return super.put(key, (value == null ? "(null)" : value));
-        }
 
-        public String put(final String key, final Object objectValue) {
-            return super.put(key, (objectValue == null ? "(null)" : objectValue.toString()));
+        public Object put(final String key, final Object objectValue) {
+            return super.put(key, objectValue);
         }
 
     }
@@ -304,7 +299,7 @@ public class CentralLogger implements ILogger {
         this.logOutput(level, fromLabel, logComment, null);
     }
 
-    void logOutput(EventType level, String fromLabel, String logComment, Map<String, String> params) {
+    void logOutput(EventType level, String fromLabel, String logComment, Map<String, Object> params) {
         LogEvent event = new LogEvent();
         event.type = level.name();
         event.timestamp = System.currentTimeMillis();
