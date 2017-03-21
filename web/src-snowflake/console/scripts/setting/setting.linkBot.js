@@ -18,10 +18,10 @@ function showBots(str, option) {
             wHTML += ('<div class="card-link unselectable" onClick=openSingleBot(this,"' + option + '","' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + '); >more info</div>');
             if ($.inArray(bot['botId'], linkedBots) != -1) {
                 wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
-                wHTML += ('<div class="switch switchOn" data-link="1" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '","' + x + '");></div>');
+                wHTML += ('<div class="switch switchOn" data-link="1" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '");></div>');
             } else {
                 wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="0">');
-                wHTML += ('<div class="switch"  data-link="0" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=switchClick(this,"' + bot['botId'] + '");></div>');
+                wHTML += ('<div class="switch"  data-link="0" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '");></div>');
             }
             wHTML += ('</span>');
             wHTML += ('</div>');
@@ -32,24 +32,6 @@ function showBots(str, option) {
     }
     newNode.innerHTML = wHTML;
     document.getElementById('botsSearch').appendChild(newNode);
-}
-
-
-function switchClick(node, botId, pos) {
-    var parent = node.parentNode;
-
-    $(node).toggleClass('switchOn');
-    if ($(node).attr('data-link') == '0') {
-
-        $(node).attr('data-link', 1);
-        parent.setAttribute('data-linked', '1');
-        document.getElementById('card' + botId).children[0].children[0].classList.add("borderActive");
-    }
-    else {
-        $(node).attr('data-link', 0);
-        parent.setAttribute('data-linked', '0');
-        document.getElementById('card' + botId).children[0].children[0].classList.remove("borderActive");
-    }
 }
 
 
