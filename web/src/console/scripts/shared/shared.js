@@ -57,12 +57,12 @@ var DRAW_BOTCARDS =
     ADD_SKILL_FLOW: {value: 2}
 };
 
-function showBots(str, option,bots, purchasedBots,linkedBots) {
+function showBots(str, option, bots, purchasedBots,linkedBots) {
     var wHTML = "";
-
+    str = str.toLowerCase();
     for (var x in bots) {
         var bot = JSON.parse(bots[x]);
-        if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
+        if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str) != -1 )) {
 
             var openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');';
             wHTML += ('<span id="card' + bot['botId'] + '" data-pos="' + x + '">');
