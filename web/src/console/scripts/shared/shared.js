@@ -77,22 +77,24 @@ function showBots(str, option,bots, purchasedBots,linkedBots) {
             wHTML += ('</div>');
 
             wHTML += ('<div class="card-author unselectable">');
-            wHTML += ('<p>by ' + bot['name'] + '</p>');
+            // TODO when API in ready we can add this infos
+            //wHTML += ('<p>by ' + bot['name'] + '</p>');
             wHTML += ('</div>');
 
             wHTML += ('<div class="card-footer flat unselectable">');
             wHTML += ('<div class="row no-margin">');
 
             wHTML += ('<div class="pull-left">');
-            wHTML += ('<i class="fa fa-star card-star"></i>');
-            wHTML += ('<span class="card-users text-left">'+ bot['activations']+'</span>');
+            // TODO when API in ready we can add this infos
+            //wHTML += ('<i class="fa fa-star card-star"></i>');
+            //wHTML += ('<span class="card-users text-left">'+ bot['activations']+'</span>');
             wHTML += ('</div>');
 
             switch (option) {
-                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizar
+                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
                     if ($.inArray(bot['botId'], purchasedBots) != -1) {
-                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link=""></div>');
+                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
                     }
                     else {
                         wHTML += ('<div class="card-price pull-right">');
