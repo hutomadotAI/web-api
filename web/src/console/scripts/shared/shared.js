@@ -201,12 +201,12 @@ function toggleAddBotSkill(node, botId) {
     if ($(node).attr('data-link') == '0') {
         $(node).attr('data-link', 1);
         parent.setAttribute('data-linked', '1');
-        document.getElementById('card' + botId).children[0].children[0].classList.add("borderActive");
+        document.getElementById('card' + botId).children[0].classList.add("borderActive");
     }
     else {
         $(node).attr('data-link', 0);
         parent.setAttribute('data-linked', '0');
-        document.getElementById('card' + botId).children[0].children[0].classList.remove("borderActive");
+        document.getElementById('card' + botId).children[0].classList.remove("borderActive");
     }
 }
 
