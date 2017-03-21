@@ -133,16 +133,16 @@ function isSessionVariablesAvailable()
 </script>
 <script>
     var newNode = document.createElement('div');
-    newNode.className = 'row';
+    newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        showBots(str, 0);
+        showBots(str, DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value,bots,purchasedBots,'');
     }
 </script>
 <script>
     $(document).ready(function () {
-        showBots('', 0);
+        showBots('', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value,bots,purchasedBots,'');
     });
 </script>
 </body>
