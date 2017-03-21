@@ -78,7 +78,6 @@ if(isset($_POST['action_login'])){
         }
     </style>
 </head>
-</head>
 <body class="web-body" id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>
 <?php include_once "./header.php"; ?>
