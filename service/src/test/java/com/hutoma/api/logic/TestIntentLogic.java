@@ -8,14 +8,18 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.WebHook;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.HttpURLConnection;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
@@ -50,7 +54,7 @@ public class TestIntentLogic {
     public void testGetIntents_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntents(anyString(), any())).thenReturn(getIntentsList());
         final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
@@ -65,21 +69,21 @@ public class TestIntentLogic {
     public void testGetIntents_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntents(anyString(), any())).thenReturn(new ArrayList<>());
         final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntents_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntents(anyString(), any())).thenThrow(Database.DatabaseException.class);
         final ApiResult result = this.intentLogic.getIntents(DEVID, AIID);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(getIntent());
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
@@ -93,62 +97,62 @@ public class TestIntentLogic {
     public void testGetIntent_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(null);
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenThrow(Database.DatabaseException.class);
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_Success() throws Database.DatabaseException {
         final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_NonExistentEntity() throws Database.DatabaseException {
         doThrow(new DatabaseEntitiesIntents.DatabaseEntityException("test")).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
         final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
-        Assert.assertEquals(400, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_DuplicateName() throws Database.DatabaseException {
         doThrow(new Database.DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
         final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
-        Assert.assertEquals(400, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_InternalError() throws Database.DatabaseException {
         doThrow(new Database.DatabaseException("test")).when(this.fakeDatabase).writeIntent(anyString(), any(), anyString(), any());
         final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteIntent_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(true);
         final ApiResult result = this.intentLogic.deleteIntent(DEVID, AIID, this.INTENTNAME);
-        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteIntent_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenThrow(new Database.DatabaseException(new Exception("test")));
         final ApiResult result = this.intentLogic.deleteIntent(DEVID, AIID, this.INTENTNAME);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteIntent_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(false);
         final ApiResult result = this.intentLogic.deleteIntent(DEVID, AIID, this.INTENTNAME);
-        Assert.assertEquals(404, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
@@ -162,6 +166,32 @@ public class TestIntentLogic {
     public void testUpdateIntent_triggersTrainingStop() throws Database.DatabaseException {
         this.intentLogic.writeIntent(DEVID, AIID, getIntent());
         verify(this.trainingLogic).stopTraining(any(), any());
+    }
+
+    @Test
+    public void testIntentWebhook_createWebhook() throws Database.DatabaseException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
+
+        when(this.fakeDatabase.createWebHook(AIID, this.INTENTNAME, wh.getEndpoint(), wh.getEnabled())).thenReturn(true);
+
+        final ApiResult result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testIntentWebhook_updateWebhook() throws Database.DatabaseException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
+
+        when(this.fakeDatabase.createWebHook(AIID, this.INTENTNAME, wh.getEndpoint(), wh.getEnabled())).thenReturn(true);
+        when(this.fakeDatabase.updateWebHook(AIID, this.INTENTNAME, wh.getEndpoint(), wh.getEnabled())).thenReturn(true);
+
+        ApiResult result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+
+        // Update the webhook.
+        wh = new WebHook(wh.getAiid(), wh.getIntentName(), wh.getEndpoint(), false);
+        result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     private List<String> getIntentsList() {

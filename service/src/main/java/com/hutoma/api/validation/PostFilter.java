@@ -71,6 +71,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case AiStatusJson:
                 case ServerRegistration:
                 case ServerAffinity:
+                case WebhookJson:
                     expectingJson = true;
                     break;
                 case AIName:

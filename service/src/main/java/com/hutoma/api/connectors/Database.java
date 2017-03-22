@@ -7,7 +7,17 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.DevPlan;
+import com.hutoma.api.containers.sub.DeveloperInfo;
+import com.hutoma.api.containers.sub.Integration;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.containers.sub.WebHook;
 
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
@@ -726,6 +736,43 @@ public class Database {
             } catch (SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        }
+    }
+
+    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("addWebhook", 4)
+                    .add(aiid)
+                    .add(intentName)
+                    .add(endpoint)
+                    .add(enabled);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public WebHook getWebHook(final UUID aiid, final String intentName) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getWebhook", 2).add(aiid).add(intentName);
+            ResultSet rs = call.executeQuery();
+
+            try {
+                if (rs.next()) {
+                    return new WebHook(UUID.fromString(rs.getString("aiid")),
+                            rs.getString("intent_name"),
+                            rs.getString("endpoint"),
+                            rs.getBoolean("enabled"));
+                }
+                return null;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateWebhook", 4).add(aiid).add(intentName).add(endpoint).add(enabled);
+            return call.executeUpdate() > 0;
         }
     }
 

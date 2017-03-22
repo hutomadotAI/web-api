@@ -68,6 +68,22 @@ public class IntentEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @POST
+    @Path("{aiid}/webhook")
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
+    @ValidatePost({APIParameter.WebhookJson})
+    public Response updateIntentWebhook(
+            @Context final ContainerRequestContext requestContext) {
+        final ApiResult result = this.intentLogic.updateWebHook(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getIntentName(requestContext),
+                ParameterFilter.getWebHook(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
     @DELETE
     @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})

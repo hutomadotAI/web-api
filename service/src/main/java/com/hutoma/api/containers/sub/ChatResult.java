@@ -13,6 +13,7 @@ public class ChatResult {
     @SerializedName("topicIn")
     private final String topicIn = "";
     private double score;
+    @SerializedName("query")
     private String query = "";
     private String answer = "";
     private String history = "";

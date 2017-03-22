@@ -16,6 +16,7 @@ import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -102,6 +103,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected ControllerWnet fakeControllerWnet;
     @Mock
     protected ControllerRnn fakeControllerRnn;
+    @Mock
+    protected WebHooks fakeWebHooks;
 
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -152,6 +155,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerRnn)).to(ControllerRnn.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeWebHooks)).to(WebHooks.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -207,6 +211,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeControllerAiml = mock(ControllerAiml.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerRnn = mock(ControllerRnn.class);
+        this.fakeWebHooks = mock(WebHooks.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {

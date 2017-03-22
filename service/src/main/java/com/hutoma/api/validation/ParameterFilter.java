@@ -8,6 +8,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
+import com.hutoma.api.containers.sub.WebHook;
 
 import java.util.List;
 import java.util.Locale;
@@ -136,6 +137,10 @@ public class ParameterFilter extends Validate {
 
     public static ServerAffinity getServerAffinity(final ContainerRequestContext requestContext) {
         return (ServerAffinity) requestContext.getProperty(APIParameter.ServerAffinity.toString());
+    }
+
+    public static WebHook getWebHook(final ContainerRequestContext requestContext) {
+        return (WebHook) requestContext.getProperty(APIParameter.IntentJson.toString());
     }
 
     /***

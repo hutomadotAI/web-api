@@ -7,7 +7,9 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -16,11 +18,14 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.WebHookPayload;
+import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -45,6 +50,7 @@ public class ChatLogic {
     private final IEntityRecognizer entityRecognizer;
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
+    private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
     private Map<String, Object> telemetryMap;
     private float minP;
@@ -53,7 +59,7 @@ public class ChatLogic {
     @Inject
     public ChatLogic(final Config config, final JsonSerializer jsonSerializer, final AIChatServices chatServices,
                      final Tools tools, final ILogger logger, final IMemoryIntentHandler intentHandler,
-                     final IEntityRecognizer entityRecognizer, final ChatLogger chatLogger,
+                     final IEntityRecognizer entityRecognizer, final ChatLogger chatLogger, final WebHooks webHooks,
                      final ChatStateHandler chatStateHandler) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
@@ -63,6 +69,7 @@ public class ChatLogic {
         this.intentHandler = intentHandler;
         this.entityRecognizer = entityRecognizer;
         this.chatLogger = chatLogger;
+        this.webHooks = webHooks;
         this.chatStateHandler = chatStateHandler;
     }
 
@@ -317,6 +324,23 @@ public class ChatLogic {
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
         if (vars.isEmpty()) {
             notifyIntentFulfilled(chatResult, currentIntent, devId, aiid, this.telemetryMap);
+
+            // If the webhook returns a text response, overwrite the answer.
+            if (this.webHooks.activeWebhookExists(currentIntent, devId)) {
+                WebHookResponse response = this.webHooks.executeWebHook(currentIntent, chatResult, devId);
+
+                if (response == null) {
+                    this.logger.logUserErrorEvent(LOGFROM,
+                            "Error occured executing WebHook for intent %s for aiid %s.",
+                            devId,
+                            currentIntent.getName(),
+                            aiid.toString());
+                }
+                else if (response.getText() != "") {
+                    chatResult.setAnswer(response.getText());
+                }
+            }
+
             intentsToClear.add(currentIntent);
             handledIntent = true;
         } else {
