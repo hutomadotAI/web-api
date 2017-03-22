@@ -60,7 +60,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="./scripts/star/star.css">
 </head>
 
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showBots('',2)">
+<body class="hold-transition skin-blue fixed sidebar-mini">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
@@ -178,12 +178,16 @@ function isSessionVariablesAvailable()
 
 <script>
     var newNode = document.createElement('div');
-    newNode.className = 'row';
+    newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
-
     function searchBots(str) {
-        showBots(str, 2);
+        showBots(str, DRAW_BOTCARDS.ADD_SKILL_FLOW.value,purchasedBots,linkedBots);
     }
+</script>
+<script>
+    $(document).ready(function () {
+        showBots('',  DRAW_BOTCARDS.ADD_SKILL_FLOW.value,purchasedBots,linkedBots);
+    });
 </script>
 </body>
 </html>
