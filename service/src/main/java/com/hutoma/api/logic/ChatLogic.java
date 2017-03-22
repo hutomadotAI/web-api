@@ -133,15 +133,17 @@ public class ChatLogic {
 
                             if (processIntent(devId, aiid, memoryIntent, question, result)) {
                                 this.telemetryMap.put("AnsweredBy", "WNET");
-                                this.telemetryMap.put("AnsweredWithConfidence", "true");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
                                 wnetConfident = false;
                             }
+                        } else {
+                            this.telemetryMap.put("AnsweredBy", "WNET");
                         }
                     }
                 }
-                this.telemetryMap.put("WNETAnswered", Boolean.toString(result != null));
+                this.telemetryMap.put("AnsweredWithConfidence", wnetConfident);
+                this.telemetryMap.put("WNETAnswered", result != null);
 
                 if (!wnetConfident) {
                     // otherwise,
@@ -153,14 +155,14 @@ public class ChatLogic {
                     if (aimlResult != null) {
                         // are we confident enough with this reply?
                         aimlConfident = aimlResult.getScore() > 0.0d;
-                        this.telemetryMap.put("AIMLConfident", Boolean.toString(aimlConfident));
+                        this.telemetryMap.put("AIMLConfident", aimlConfident);
                         if (aimlConfident) {
                             this.telemetryMap.put("AnsweredBy", "AIML");
-                            this.telemetryMap.put("AnsweredWithConfidence", "true");
+                            this.telemetryMap.put("AnsweredWithConfidence", true);
                             result = aimlResult;
                         }
                     }
-                    this.telemetryMap.put("AIMLAnswered", Boolean.toString(aimlResult != null));
+                    this.telemetryMap.put("AIMLAnswered", aimlResult != null);
 
                     if (aimlResult == null || !aimlConfident) {
                         // get a response from the RNN
@@ -170,7 +172,7 @@ public class ChatLogic {
                             // If the RNN was clueless or returned an empty response
                             if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
                                 // Mark it as not really answered
-                                this.telemetryMap.put("AnsweredWithConfidence", "false");
+                                this.telemetryMap.put("AnsweredWithConfidence", false);
                                 // Use AIML, if available, use it as it will always generate something
                                 if (aimlResult != null) {
                                     this.telemetryMap.put("AnsweredBy", "AIML");
@@ -183,7 +185,7 @@ public class ChatLogic {
                             } else {
                                 result = rnnResult;
                                 this.telemetryMap.put("AnsweredBy", "RNN");
-                                this.telemetryMap.put("AnsweredWithConfidence", "true");
+                                this.telemetryMap.put("AnsweredWithConfidence", true);
                             }
                         } else {
                             // TODO we need to figure out something
@@ -191,7 +193,7 @@ public class ChatLogic {
                             result = getImCompletelyLostChatResult(chatUuid);
                         }
 
-                        this.telemetryMap.put("RNNAnswered", Boolean.toString(rnnResult != null));
+                        this.telemetryMap.put("RNNAnswered", rnnResult != null);
                     }
                 }
             }
@@ -208,7 +210,6 @@ public class ChatLogic {
 
             // set the chat response time to the whole duration since the start of the request until now
             result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
-            this.telemetryMap.put("RequestDuration", result.getElapsedTime());
 
             apiChat.setResult(result);
 
@@ -240,6 +241,10 @@ public class ChatLogic {
 
         this.chatState.setTopic(apiChat.getResult().getTopicOut());
         this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
+
+        this.telemetryMap.put("RequestDuration", result.getElapsedTime());
+        this.telemetryMap.put("ResponseSent", result.getAnswer());
+        this.telemetryMap.put("Score", result.getScore());
         this.telemetryMap.put("LockedToAi",
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
 
