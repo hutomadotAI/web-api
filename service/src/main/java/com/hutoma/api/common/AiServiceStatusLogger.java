@@ -32,7 +32,8 @@ public class AiServiceStatusLogger extends CentralLogger {
     public AiServiceStatusLogger(final JerseyClient jerseyClient, final JsonSerializer serializer,
                                  final Config config) {
         super(jerseyClient, serializer);
-        this.startLoggingScheduler(config.getLoggingServiceUrl(), SERVICESTATUS_LOGGING_CADENCE);
+        this.startLoggingScheduler(config.getLoggingServiceUrl(), config.getElasticSearchLoggingUrl(),
+                SERVICESTATUS_LOGGING_CADENCE);
     }
 
     public void logStatusUpdate(final String logFrom, final AiStatus status) {

@@ -215,6 +215,10 @@ public class Config {
         return getConfigFromProperties("bot_icon_path", "/boticon");
     }
 
+    public String getElasticSearchLoggingUrl() {
+        return getConfigFromProperties("logging_es_url", "http://log-es:9200");
+    }
+
     public void dumpApiEnvironmentVars() {
         System.getenv().entrySet().stream().forEach(e -> {
             if (e.getKey().startsWith(API_ENV_PREFIX)) {

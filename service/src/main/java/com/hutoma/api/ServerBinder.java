@@ -64,14 +64,16 @@ public class ServerBinder extends AbstractBinder {
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
+        bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
+        bind(ThreadSubPool.class).to(ThreadSubPool.class);
+        bind(ServerTracker.class).to(ServerTracker.class);
+
+        // logging
         bind(CentralLogger.class).to(ILogger.class).in(Singleton.class);
         // Chat requires specialized logging to support analytics
         bind(ChatLogger.class).to(ChatLogger.class).in(Singleton.class);
         // AI Services Status specialized logger
         bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
-        bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
-        bind(ThreadSubPool.class).to(ThreadSubPool.class);
-        bind(ServerTracker.class).to(ServerTracker.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
