@@ -57,19 +57,21 @@ var DRAW_BOTCARDS =
     ADD_SKILL_FLOW: {value: 2}
 };
 
-function showBots(str, option, bots, purchasedBots,linkedBots) {
+function showBots(str, option, bots, botSubSet ) {
     var wHTML = "";
     str = str.toLowerCase();
     for (var x in bots) {
         var bot = JSON.parse(bots[x]);
         if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str) != -1 )) {
 
-            var openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + bot['botId'] + '",' + ($.inArray(bot['botId'], purchasedBots) != -1) + ');';
+            var openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + bot['botId'] + '",' + ($.inArray(bot['botId'], botSubSet) != -1) + ');';
             wHTML += ('<span id="card' + bot['botId'] + '" data-pos="' + x + '">');
-            if ($.inArray(bot['botId'], linkedBots) != -1)
+
+            if ( (option == DRAW_BOTCARDS.ADD_SKILL_FLOW.value) && ($.inArray(bot['botId'], botSubSet) != -1) )
                 wHTML += ('<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1 borderActive">');
             else
                 wHTML += ('<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">');
+
             wHTML += ('<img class="card-icon unselectable" src="' + bot['imagePath'] + '"' + openBotDetails +'>');
 
             wHTML += ('<div class="card-title unselectable"' + openBotDetails +'>');
@@ -93,7 +95,7 @@ function showBots(str, option, bots, purchasedBots,linkedBots) {
             switch (option) {
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
-                    if ($.inArray(bot['botId'], purchasedBots) != -1) {
+                    if ($.inArray(bot['botId'], botSubSet) != -1) {
                         wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
                     }
                     else {
@@ -104,7 +106,7 @@ function showBots(str, option, bots, purchasedBots,linkedBots) {
                     break;
                 case DRAW_BOTCARDS.BOTSTORE_FLOW.value:  // botstore showed in BOTSTORE
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
-                    if ($.inArray(bot['botId'], purchasedBots) != -1) {
+                    if ($.inArray(bot['botId'], botSubSet) != -1) {
                         wHTML += ('<div class="card-purchased pull-right">');
                         wHTML += ('purchased');
                         wHTML += ('</div>');
@@ -116,7 +118,7 @@ function showBots(str, option, bots, purchasedBots,linkedBots) {
                     }
                     break;
                 default:
-                    if ($.inArray(bot['botId'], linkedBots) != -1) {
+                    if ($.inArray(bot['botId'], botSubSet) != -1) {
                         wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
                         wHTML += ('<div class="switch switchOn" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="1"></div>');
                     } else {
