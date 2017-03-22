@@ -508,6 +508,8 @@ public class TestChatLogic {
         verify(this.fakeIntentHandler).updateStatus(mi);
         verify(this.fakeIntentHandler, never()).clearIntents(any());
 
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
         // Second question, the answer to the prompt with the right entity value
         final String varValue = "_value_";
         List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
@@ -523,6 +525,8 @@ public class TestChatLogic {
         // Intent has the entity with currentValue set to what we've defined
         Assert.assertEquals(varValue, r.getIntents().get(0).getVariables().get(0).getCurrentValue());
         Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
+        // Score is 1.0
+        Assert.assertEquals(1.0d, r.getScore(), 0.00000001d);
         verify(this.fakeIntentHandler).updateStatus(mi);
         verify(this.fakeIntentHandler).clearIntents(any());
     }

@@ -103,7 +103,10 @@ public class ChatLogic {
         try {
 
             // Check if we're in the middle of an intent flow and process it.
-            if (!processIntent(devId, aiid, currentIntent, question, result)) {
+            if (processIntent(devId, aiid, currentIntent, question, result)) {
+                // Intent was handled, confidence is high
+                result.setScore(1.0d);
+            } else {
                 // Otherwise just go through the regular chat flow
 
                 // async start requests to all servers
@@ -195,7 +198,7 @@ public class ChatLogic {
 
             // add the question
             result.setQuery(question);
-            
+
             // set the history to the answer, unless we have received a reset command,
             // in which case send an empty string
             result.setHistory(result.isResetConversation() ? "" : result.getAnswer());
