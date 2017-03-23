@@ -107,7 +107,7 @@ class aiApi extends apiBase
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
 
-            
+
             // TODO: remove hardcode depends how many language are supported
             $locales = array(
                 'Deutsch' => 'de-DE',
@@ -193,6 +193,18 @@ class aiApi extends apiBase
         return null;
     }
 
+    public function trainingUpdate($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/training/update'));
+            $this->curl->setVerbPut();
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return null;
+    }
+
     public function trainingStop($aiid)
     {
         if ($this->isLoggedIn()) {
@@ -217,7 +229,7 @@ class aiApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
-            
+
             //$this->handleApiCallError($curl_response, 350);
             $json_response = json_decode($curl_response, true);
             return $json_response;
@@ -240,7 +252,7 @@ class aiApi extends apiBase
     }
 
 
-    public function linkBotToAI($aiid,$botId)
+    public function linkBotToAI($aiid, $botId)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bot/' . $botId));
@@ -252,7 +264,7 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function unlinkBotFromAI($aiid,$botId)
+    public function unlinkBotFromAI($aiid, $botId)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/bot/' . $botId));

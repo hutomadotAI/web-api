@@ -27,22 +27,25 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String TRAININGPROGRESS = "TrainingProgress";
     private static final String AICOUNT = "AiCount";
     private static final String AICOUNTUPDATED = "AiCountUpdated";
+    private static final String SERVER = "Server";
 
     @Inject
     public AiServiceStatusLogger(final JerseyClient jerseyClient, final JsonSerializer serializer,
                                  final Config config) {
         super(jerseyClient, serializer);
-        this.startLoggingScheduler(config.getLoggingServiceUrl(), SERVICESTATUS_LOGGING_CADENCE);
+        this.startLoggingScheduler(config.getLoggingServiceUrl(), config.getElasticSearchLoggingUrl(),
+                SERVICESTATUS_LOGGING_CADENCE);
     }
 
-    public void logStatusUpdate(final String logFrom, final AiStatus status) {
+    public void logStatusUpdate(final String logFrom, final AiStatus status, final String serverIdentifier) {
         LogParameters logParameters = new LogParameters("UpdateAIStatus") {{
             this.put(AIENGINE, status.getAiEngine());
             this.put(AIID, status.getAiid());
             this.put(DEVID, status.getDevId());
             this.put(STATUS, status.getTrainingStatus());
-            this.put(ERROR, Double.toString(status.getTrainingError()));
-            this.put(TRAININGPROGRESS, Double.toString(status.getTrainingProgress()));
+            this.put(ERROR, status.getTrainingError());
+            this.put(TRAININGPROGRESS, status.getTrainingProgress());
+            this.put(SERVER, serverIdentifier);
             this.put("AIHash", status.getAiHash());
         }};
         String narrative = String.format("Update %s status %s progress %d%% on ai %s",
@@ -58,7 +61,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         LogParameters logParameters = new LogParameters("Affinity") {{
             this.put(AIENGINE, updated);
             this.put("SessionID", serverAffinity.getServerSessionID());
-            this.put(AICOUNT, Integer.toString(serverAffinity.getAiList().size()));
+            this.put(AICOUNT, serverAffinity.getAiList().size());
         }};
         String narrative = String.format("%s affinity list update with %s items",
                 logParameters.get(AIENGINE),
@@ -69,14 +72,14 @@ public class AiServiceStatusLogger extends CentralLogger {
     public void logDbSyncComplete(final String logFrom, final BackendServerType serverType,
                                   final int itemsDatabase, final int itemsServerReg, final int itemsChangedStatus) {
         LogParameters logParameters = new LogParameters("DbSyncStatus") {{
-            this.put("AiCountDatabase", Integer.toString(itemsDatabase));
-            this.put("AiCountServer", Integer.toString(itemsServerReg));
-            this.put(AICOUNTUPDATED, Integer.toString(itemsChangedStatus));
+            this.put("AiCountDatabase", itemsDatabase);
+            this.put("AiCountServer", itemsServerReg);
+            this.put(AICOUNTUPDATED, itemsChangedStatus);
             this.put(AIENGINE, serverType);
         }};
         String narrative = String.format("%s server db-sync complete. %s items updated.",
                 logParameters.get(AIENGINE),
-                logParameters.get(AICOUNTUPDATED));
+                logParameters.get(AICOUNTUPDATED).toString());
         this.logUserTraceEvent(logFrom, narrative, null, logParameters);
     }
 

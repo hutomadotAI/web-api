@@ -6,13 +6,27 @@ services:
         context: .
         dockerfile: Dockerfile
       ports: 
-      - "10080:80"
+      - "8080:80"
       environment:
       - HUTOMA_API_DB_CONNECTION_STRING=mysql:dbname=hutoma;host=api-db;port=3306;charset=utf8
       - HUTOMA_API_DB_USERNAME=hutoma_caller
       - HUTOMA_API_DB_PASSWORD=>YR"khuN*.gF)V4#
       - HUTOMA_API_URL=http://api:8080/v1
       - LOG_SERVICE_ANALYTICS_URL=http://log-svc:8080/log
+
+   dev-console-snowflake:
+      container_name: dev-console-snowflake
+      build:
+        context: .
+        dockerfile: Dockerfile.snowflake
+      ports: 
+      - "8083:80"
+      environment:
+      - HUTOMA_API_DB_CONNECTION_STRING=mysql:dbname=hutoma;host=api-db;port=3306;charset=utf8
+      - HUTOMA_API_DB_USERNAME=hutoma_caller
+      - HUTOMA_API_DB_PASSWORD=>YR"khuN*.gF)V4#
+      - HUTOMA_API_URL=http://api:8080/v1
+      - LOG_SERVICE_ANALYTICS_URL=http://log-svc:8080/log      
 networks:
   default:
     external:

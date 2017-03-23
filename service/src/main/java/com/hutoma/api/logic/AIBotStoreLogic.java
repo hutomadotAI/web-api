@@ -57,8 +57,7 @@ public class AIBotStoreLogic {
     public ApiResult getPublishedBots(final String devId) {
         try {
             List<AiBot> bots = this.database.getPublishedBots();
-            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId, "Num Bots",
-                    Integer.toString(bots.size()));
+            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId, "Num Bots", bots.size());
             return new ApiAiBotList(bots).setSuccessStatus();
         } catch (Database.DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBots", devId, e);
@@ -69,8 +68,7 @@ public class AIBotStoreLogic {
     public ApiResult getPurchasedBots(final String devId) {
         try {
             List<AiBot> bots = this.database.getPurchasedBots(devId);
-            this.logger.logUserTraceEvent(LOGFROM, "GetPurchasedBots", devId, "Num Bots",
-                    Integer.toString(bots.size()));
+            this.logger.logUserTraceEvent(LOGFROM, "GetPurchasedBots", devId, "Num Bots", bots.size());
             return new ApiAiBotList(bots).setSuccessStatus();
         } catch (Database.DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPurchasedBots", devId, e);
@@ -91,15 +89,15 @@ public class AIBotStoreLogic {
             List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase already owned bot", devId,
-                        "BotId", Integer.toString(botId));
+                        "BotId", botId);
                 return ApiError.getBadRequest("Bot already purchased");
             }
             if (this.database.purchaseBot(devId, botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot", devId, "BotId", Integer.toString(botId));
+                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot", devId, "BotId", botId);
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserErrorEvent(LOGFROM, "PurchaseBot - could not purchase", devId,
-                        "BotId", Integer.toString(botId));
+                        "BotId", botId);
                 return ApiError.getInternalServerError();
             }
         } catch (Database.DatabaseException e) {
@@ -110,14 +108,12 @@ public class AIBotStoreLogic {
 
     public ApiResult getBotDetails(final String devId, final int botId) {
         try {
-
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails - not found", devId, "BotId",
-                        Integer.toString(botId));
+                this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails - not found", devId, "BotId", botId);
                 return ApiError.getNotFound();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails", devId, "BotId", Integer.toString(botId));
+            this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails", devId, "BotId", botId);
             return new ApiAiBot(bot).setSuccessStatus();
         } catch (Database.DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetBotDetails", devId, e);
@@ -167,7 +163,7 @@ public class AIBotStoreLogic {
             } else {
                 bot.setBotId(botId);
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devId, "AIID", aiid.toString(),
-                        "New BotId", Integer.toString(botId));
+                        "New BotId", botId);
                 return new ApiAiBot(bot).setSuccessStatus();
             }
         } catch (Database.DatabaseException e) {
@@ -197,13 +193,13 @@ public class AIBotStoreLogic {
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null || !bot.getDevId().equals(devId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - request uploading for other dev's bot", devId,
-                        "BotId", Integer.toString(botId));
+                        "BotId", botId);
                 return ApiError.getNotFound();
             }
             String extension = FilenameUtils.getExtension(fileDetail.getFileName()).toLowerCase();
             if (!ALLOWED_ICON_EXT.contains(extension)) {
                 this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - invalid extension", devId,
-                        "Extension", extension, "BotId", Integer.toString(botId));
+                        "Extension", extension, "BotId", botId);
                 return ApiError.getBadRequest("Image extension not allowed");
             }
 
@@ -218,7 +214,7 @@ public class AIBotStoreLogic {
                     out.write(buffer, 0, n1);
                     if ((count + n1) > MAX_ICON_FILE_SIZE) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - exceeded max size", devId,
-                                "BotId", Integer.toString(botId));
+                                "BotId", botId);
                         return ApiError.getBadRequest(
                                 String.format("File is larger than the maximum allowed size (%d bytes)",
                                         MAX_ICON_FILE_SIZE));
@@ -232,7 +228,7 @@ public class AIBotStoreLogic {
             Files.copy(tempFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             this.database.saveBotIconPath(devId, botId, destFilename);
-            this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devId, "BotId", Integer.toString(botId));
+            this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devId, "BotId", botId);
             return new ApiResult().setSuccessStatus();
 
         } catch (Database.DatabaseException | IOException e) {

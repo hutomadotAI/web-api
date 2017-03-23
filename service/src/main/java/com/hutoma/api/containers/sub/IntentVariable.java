@@ -15,6 +15,7 @@ public class IntentVariable {
     private final boolean required;
     @SerializedName("n_prompts")
     private final int numberOfPrompts;
+    @SerializedName("value")
     private String value;
     private int id;
 

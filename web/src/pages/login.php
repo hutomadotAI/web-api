@@ -71,6 +71,12 @@ if(isset($_POST['action_login'])){
             $.cookiePolicyBar(options);
         });
     </script>
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+    </style>
 </head>
 <body class="web-body" id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>

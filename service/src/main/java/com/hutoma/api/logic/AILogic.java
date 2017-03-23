@@ -239,9 +239,9 @@ public class AILogic {
 
     public ApiResult linkBotToAI(final String devId, final UUID aiid, final int botId) {
         try {
-            Map<String, String> map = new LinkedHashMap<String, String>() {{
+            Map<String, Object> map = new LinkedHashMap<String, Object>() {{
                 put("AIID", aiid.toString());
-                put("BotId", Integer.toString(botId));
+                put("BotId", botId);
             }};
             AiBot botDetails = this.database.getBotDetails(botId);
             if (botDetails == null) {
@@ -287,12 +287,12 @@ public class AILogic {
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.unlinkBotFromAi(devId, aiid, botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devId, "AIID", aiid.toString(),
-                        "BotId", Integer.toString(botId));
+                        "BotId", botId);
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked", devId,
                         "AIID", aiid.toString(),
-                        "BotId", Integer.toString(botId));
+                        "BotId", botId);
                 return ApiError.getNotFound("AI or Bot not found, or not currently linked");
             }
         } catch (Database.DatabaseException ex) {

@@ -34,6 +34,9 @@ class telemetry
                 }
             }
         }
+        if (isset($this->loggingUrl)) {
+            $this->loggingUrl .= "/" . self::APPID . "/log/_bulk";
+        }
     }
 
     public static function getInstance()
@@ -54,6 +57,7 @@ class telemetry
 
         $event = array(
             "timestamp" => round(microtime(true) * 1000), // need to convert to milliseconds
+            "dateTime" => date('c'),
             "type" => $type,
             "tag" => $tag,
             "message" => $message,
@@ -63,20 +67,25 @@ class telemetry
         // Store it in case we can't upload right now
         array_push($GLOBALS["devconsole_telemetry"], $event);
 
+        // Build bulk data
+        $bulkData = "";
+        foreach ($GLOBALS["devconsole_telemetry"] as $log) {
+            $bulkData .= "{\"index\":{}}\n";
+            $bulkData .= json_encode($log) . "\n";
+        }
+
         // send to logging server
-        $jsonArray = json_encode($GLOBALS["devconsole_telemetry"]);
-        $this->curl->setUrl($this->loggingUrl . "?appId=" . self::APPID);
-        $this->curl->addHeader('Content-Type', 'application/json');
-        $this->curl->post($jsonArray);
-        $this->curl->exec();
+        $this->curl->setUrl($this->loggingUrl);
+        //$this->curl->addHeader('Content-Type', 'application/json');
+        $this->curl->addHeader('Content-Type', 'text/plain');
+        $this->curl->post($bulkData);
+        $response = $this->curl->exec();
         $code = $this->curl->getResultCode();
         if ($code == 200) {
             // clear the events
             unset($GLOBALS["devconsole_telemetry"]);
         } else {
-            error_log("Failed to save telemetry events to server. Error code: " . $code);
+            error_log("Failed to save telemetry events to server. Error code: " . $code . "  " . $response);
         }
     }
-
-
 }

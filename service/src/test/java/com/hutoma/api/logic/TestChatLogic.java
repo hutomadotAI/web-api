@@ -7,7 +7,9 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -15,6 +17,8 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.ServerMetadata;
 import com.hutoma.api.memory.ChatStateHandler;
@@ -27,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +70,8 @@ public class TestChatLogic {
     private IEntityRecognizer fakeRecognizer;
     private IMemoryIntentHandler fakeIntentHandler;
     private ChatLogger fakeChatTelemetryLogger;
+    private WebHooks fakeWebHooks;
+    private Database fakeDatabase;
     private ChatStateHandler fakeChatStateHandler;
     private Config fakeConfig;
 
@@ -76,10 +83,12 @@ public class TestChatLogic {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeChatTelemetryLogger = mock(ChatLogger.class);
+        this.fakeDatabase = mock(Database.class);
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
+        this.fakeWebHooks = mock(WebHooks.class);
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
-                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger,
+                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
                 this.fakeChatStateHandler);
 
         when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
@@ -487,7 +496,7 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_multiLineIntent_fulfilled()
-            throws RequestBase.AiControllerException {
+            throws RequestBase.AiControllerException, Database.DatabaseException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -508,6 +517,8 @@ public class TestChatLogic {
         verify(this.fakeIntentHandler).updateStatus(mi);
         verify(this.fakeIntentHandler, never()).clearIntents(any());
 
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
         // Second question, the answer to the prompt with the right entity value
         final String varValue = "_value_";
         List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
@@ -523,6 +534,8 @@ public class TestChatLogic {
         // Intent has the entity with currentValue set to what we've defined
         Assert.assertEquals(varValue, r.getIntents().get(0).getVariables().get(0).getCurrentValue());
         Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
+        // Score is 1.0
+        Assert.assertEquals(1.0d, r.getScore(), 0.00000001d);
         verify(this.fakeIntentHandler).updateStatus(mi);
         verify(this.fakeIntentHandler).clearIntents(any());
     }
@@ -725,6 +738,99 @@ public class TestChatLogic {
         }});
         // We now expect to get the AIML one with the highest score
         validateStateSaved(cr2Aiml, cr2Uuid);
+    }
+
+    /***
+     * Test that if an active WebHook exists, it is executed.
+     */
+    @Test
+    public void testChat_webHookTriggered()
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+        final String intentName = "intent1";
+        final String webHookResponse = "webhook executed";
+
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setCurrentValue("a value"); // to fulfill
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
+        WebHookResponse wr = new WebHookResponse(webHookResponse);
+        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+        when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(true);
+        when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
+
+        setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+
+        Assert.assertFalse(mi.isFulfilled());
+
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertEquals(webHookResponse, result.getResult().getAnswer());
+        Assert.assertTrue(mi.isFulfilled());
+    }
+
+    /***
+     * Test that if an inactive WebHook exists, it is not executed.
+     */
+    @Test
+    public void testChat_inactiveWebHookIgnored()
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+        final String intentName = "intent1";
+        final String webHookResponse = "webhook executed";
+
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setCurrentValue("a value"); // to fulfill
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+
+        WebHookResponse wr = new WebHookResponse(webHookResponse);
+        when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(false);
+        when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
+
+        setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+
+        Assert.assertFalse(mi.isFulfilled());
+
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertNotEquals(webHookResponse, result.getResult().getAnswer());
+        Assert.assertTrue(mi.isFulfilled());
+    }
+
+    /***
+     * Test that if an invalid webhook is executed, it is handled.
+     */
+    @Test
+    public void testChat_badWebHookHandled()
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+        final String intentName = "intent1";
+
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setCurrentValue("a value"); // to fulfill
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+
+        when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(true);
+        when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(null);
+
+        setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+
+        Assert.assertFalse(mi.isFulfilled());
+
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertEquals("response", result.getResult().getAnswer());
+        Assert.assertTrue(mi.isFulfilled());
     }
 
     private void validateStateSaved(final ChatResult returnedResult, final UUID usedAiid) {

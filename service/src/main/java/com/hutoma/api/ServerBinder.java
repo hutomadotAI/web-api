@@ -16,6 +16,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -64,14 +65,16 @@ public class ServerBinder extends AbstractBinder {
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
+        bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
+        bind(ThreadSubPool.class).to(ThreadSubPool.class);
+        bind(ServerTracker.class).to(ServerTracker.class);
+
+        // logging
         bind(CentralLogger.class).to(ILogger.class).in(Singleton.class);
         // Chat requires specialized logging to support analytics
         bind(ChatLogger.class).to(ChatLogger.class).in(Singleton.class);
         // AI Services Status specialized logger
         bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
-        bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
-        bind(ThreadSubPool.class).to(ThreadSubPool.class);
-        bind(ServerTracker.class).to(ServerTracker.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
@@ -101,6 +104,7 @@ public class ServerBinder extends AbstractBinder {
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
         bind(ChatStateHandler.class).to(ChatStateHandler.class);
+        bind(WebHooks.class).to(WebHooks.class);
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);

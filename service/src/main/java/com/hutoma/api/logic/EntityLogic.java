@@ -43,7 +43,7 @@ public class EntityLogic {
                 return ApiError.getNotFound();
             }
             this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid,
-                    "Num Entities", Integer.toString(entityList.size()));
+                    "Num Entities", entityList.size());
             return new ApiEntityList(entityList).setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetEntities", devid, e);

@@ -2,7 +2,7 @@ function createWarningIntentAlert(intent_action) {
     var wHTML = '';
     wHTML += ('<div class="box flat no-padding no-shadow no-margin">');
     wHTML += ('<div class="alert alert-dismissable flat alert-warning" id="containerWarningIntentAlert">');
-    wHTML += ('<button type="button" class="close" id="btnRestart" data-dismiss="alert" aria-hidden="true" value="'+intent_action+'">×</button>');
+    wHTML += ('<button type="button" class="close" id="btnRestart" data-dismiss="alert" aria-hidden="true" value="' + intent_action + '">×</button>');
     wHTML += ('<span id="msgAlertWarningIntentAlert">');
     wHTML += ('<dd class="text-center">');
     wHTML += ('Training must be restarted to incorporate your new changes.');
@@ -30,14 +30,14 @@ function removeWarningIntentAlert() {
         element.parentNode.removeChild(element);
     }
 }
-function getIntentAction(){
+function getIntentAction() {
     return JSON.parse(document.getElementById('btnRestart').value);
 }
 
-function hideOverlay(state){
-    document.getElementById('alert-overlay').style.display = (state)?'none':'';
+function hideOverlay(state) {
+    document.getElementById('alert-overlay').style.display = (state) ? 'none' : '';
 }
-function showAlertMessage(code,intent_action){
+function showAlertMessage(code, intent_action) {
     switch (intent_action) {
         case INTENT_ACTION.DELETE_INTENT.value:
             if (code == 200) {
@@ -51,10 +51,10 @@ function showAlertMessage(code,intent_action){
             }
             break;
         case INTENT_ACTION.SAVE_INTENT.value:
-            if ( code == 200){
+            if (code == 200) {
                 msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
                 removeWarningIntentAlert();
-            }else{
+            } else {
                 msgAlertIntentElement(ALERT.DANGER.value, 'Could not start training.');
                 deactiveRestartButton(false);
                 hideOverlay(true);
@@ -66,6 +66,7 @@ function showAlertMessage(code,intent_action){
 }
 
 function startTraining() {
+    var ERROR_MESSAGE = 'Unexpected error occurred. Could not start training.';
     jQuery.ajax({
         url: './dynamic/trainingStart.php',
         type: 'GET',
@@ -73,13 +74,38 @@ function startTraining() {
         processData: false,
         contentType: "application/json; charset=utf-8",
         success: function (response) {
-            showAlertMessage(response['status']['code'],getIntentAction());
+            showAlertMessage(response['status']['code'], getIntentAction());
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            if ( getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
-                msgAlertIntent(ALERT.DANGER.value, 'Unexpected error occurred. Could not start training.');
+            if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+                msgAlertIntent(ALERT.DANGER.value, ERROR_MESSAGE);
             else {
-                msgAlertIntentElement(ALERT.DANGER.value, 'Unexpected error occurred. Could not start training.');
+                msgAlertIntentElement(ALERT.DANGER.value, ERROR_MESSAGE);
+                deactiveSaveButton(false);
+            }
+            deactiveRestartButton(false);
+            hideOverlay(true);
+        }
+    });
+}
+
+function updateTraining() {
+    var ERROR_MESSAGE = 'Unexpected error occurred. Could not start training.';
+    jQuery.ajax({
+        url: './dynamic/trainingUpdate.php',
+        type: 'GET',
+        dataType: 'json',
+        processData: false,
+        contentType: "application/json; charset=utf-8",
+        success: function (response) {
+            showAlertMessage(response['status']['code'], getIntentAction());
+            startTraining();
+        },
+        error: function () {
+            if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+                msgAlertIntent(ALERT.DANGER.value, ERROR_MESSAGE);
+            else {
+                msgAlertIntentElement(ALERT.DANGER.value, ERROR_MESSAGE);
                 deactiveSaveButton(false);
             }
             deactiveRestartButton(false);
@@ -90,7 +116,7 @@ function startTraining() {
 
 function restartTraining() {
     deactiveRestartButton(true);
-    if ( getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+    if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
         msgAlertIntent(ALERT.WARNING.value, 'Please wait...');
     else {
         deactiveSaveButton(true);
@@ -144,9 +170,11 @@ function isBotStopped() {
     var status = document.getElementById('bot-status').value;
     setBotStatus(UI_STATE.LISTENING_MODE.value); // listening mode only for UI polling
 
-    if( status == API_AI_STATE.STOPPED.value) {
+    if (status == API_AI_STATE.STOPPED.value ||
+        status == API_AI_STATE.READY_TO_TRAIN.value ||
+        status == API_AI_STATE.COMPLETED.value) {
         stopPollForStatus();
-        startTraining();
+        updateTraining();
     }
 }
 

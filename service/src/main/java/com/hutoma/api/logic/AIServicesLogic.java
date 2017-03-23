@@ -84,8 +84,10 @@ public class AIServicesLogic {
                 return ApiError.getBadRequest("No registered controller for engine");
             }
 
+            String serverIdentifier = controller.getSessionServerIdentifier(status.getServerSessionID());
+
             // if the session is not active, log and return an error
-            if (!controller.isActiveSession(status.getServerSessionID())) {
+            if (serverIdentifier == null) {
 
                 this.serviceStatusLogger.logWarning(LOGFROM,
                         String.format("update received from %s for AI %s using bad session ID",
@@ -97,16 +99,16 @@ public class AIServicesLogic {
             if (!controller.isPrimaryMaster(status.getServerSessionID())) {
                 this.serviceStatusLogger.logWarning(LOGFROM,
                         String.format("ignoring update received from %s for AI %s because it is not the primary master",
-                                status.getAiEngine(), status.getAiid()));
+                                serverIdentifier, status.getAiid()));
                 return ApiError.getBadRequest("only the primary master can send status updates.");
             }
 
             // we accept the update. log it.
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status, serverIdentifier);
 
             if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",
-                        status.getAiEngine(), status.getAiid()));
+                        serverIdentifier, status.getAiid()));
                 return ApiError.getNotFound();
             }
 

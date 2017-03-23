@@ -8,6 +8,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.WebHook;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public class IntentLogic {
                 return ApiError.getNotFound();
             }
             this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devid, "AIID", aiid.toString(), "Num Intents",
-                    Integer.toString(intentList.size()));
+                    intentList.size());
             return new ApiIntentList(aiid, intentList).setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetIntents", devid, e);
@@ -102,6 +103,23 @@ public class IntentLogic {
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devid, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult updateWebHook(final String devid, final UUID aiid, final String intentName, final WebHook webHook) {
+        try {
+            if (this.database.getWebHook(aiid, intentName) != null) {
+                this.database.updateWebHook(aiid, intentName, webHook.getEndpoint(), webHook.getEnabled());
+                this.logger.logInfo(LOGFROM, String.format("Updating webhook for aiid: %s and intent name: %s", aiid.toString(), intentName));
+                return new ApiResult().setSuccessStatus();
+            } else {
+                this.database.createWebHook(aiid, intentName, webHook.getEndpoint(), webHook.getEnabled());
+                this.logger.logInfo(LOGFROM, String.format("Creating webhook for intent %s and aiid: %s", intentName, aiid.toString()));
+                return new ApiResult().setSuccessStatus();
+            }
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "UpdateWebHook", devid, e);
             return ApiError.getInternalServerError();
         }
     }

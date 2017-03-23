@@ -1,13 +1,17 @@
 package com.hutoma.api.common;
 
+import com.google.gson.JsonParseException;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.JerseyClient;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,6 +51,7 @@ public class CentralLogger implements ILogger {
     private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(LOGGING_QUEUE_LENGTH);
     private Timer timer;
     private String loggingUrl;
+    private String esLoggingUrl;
 
     @Inject
     public CentralLogger(final JerseyClient jerseyClient, final JsonSerializer serializer) {
@@ -75,7 +80,7 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (String[]) null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (Object[]) null);
     }
 
     public void logWarning(String fromLabel, String logComment) {
@@ -87,14 +92,17 @@ public class CentralLogger implements ILogger {
     }
 
     public void initialize(final Config config) {
-        this.startLoggingScheduler(config.getLoggingServiceUrl(), config.getLoggingUploadCadency());
+        this.startLoggingScheduler(
+                config.getLoggingServiceUrl(),
+                config.getElasticSearchLoggingUrl(),
+                config.getLoggingUploadCadency());
     }
 
     /**
      * {@inheritDoc}
      */
     public void logUserTraceEvent(final String logFrom, final String event, final String user,
-                                  final Map<String, String> properties) {
+                                  final Map<String, Object> properties) {
         this.logOutput(EventType.TRACE, logFrom, event, addUserToMap(user, properties));
     }
 
@@ -109,7 +117,7 @@ public class CentralLogger implements ILogger {
      * {@inheritDoc}
      */
     public void logUserTraceEvent(final String logFrom, final String event, final String user,
-                                  final String... properties) {
+                                  final Object... properties) {
         this.logUserTraceEvent(logFrom, event, user, arrayToMap(properties));
     }
 
@@ -118,14 +126,14 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
-        this.logUserExceptionEvent(logFrom, event, user, exception, (String[]) null);
+        this.logUserExceptionEvent(logFrom, event, user, exception, (Object[]) null);
     }
 
     /**
      * {@inheritDoc}
      */
     public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
-                                      final Exception exception, final String... properties) {
+                                      final Exception exception, final Object... properties) {
         this.logUserExceptionEvent(logFrom, eventName, user, exception, arrayToMap(properties));
     }
 
@@ -134,8 +142,8 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
                                       final Exception exception,
-                                      final Map<String, String> properties) {
-        Map<String, String> map = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+                                      final Map<String, Object> properties) {
+        Map<String, Object> map = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
         map.put("message", exception.getMessage());
         map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
         map.put("suppressedExceptions", exception.getSuppressed()
@@ -156,32 +164,31 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
-    public void logUserErrorEvent(String logFrom, String event, String user, String... properties) {
+    public void logUserErrorEvent(String logFrom, String event, String user, Object... properties) {
         this.logUserErrorEvent(logFrom, event, user, arrayToMap(properties));
     }
 
     /**
      * {@inheritDoc}
      */
-    public void logUserErrorEvent(String logFrom, String event, String user, Map<String, String> properties) {
+    public void logUserErrorEvent(String logFrom, String event, String user, Map<String, Object> properties) {
         this.logOutput(EventType.ERROR, logFrom, event, addUserToMap(user, properties));
     }
 
     /**
      * {@inheritDoc}
      */
-    public void logUserWarnEvent(String logFrom, String event, String user, String... properties) {
+    public void logUserWarnEvent(String logFrom, String event, String user, Object... properties) {
         this.logWarnEvent(logFrom, event, user, arrayToMap(properties));
     }
 
     @Override
     public void logUserWarnEvent(final String logFrom, final String event, final String user,
-                                 final Map<String, String> properties) {
+                                 final Map<String, Object> properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
-
-    public void logWarnEvent(String logFrom, String event, String user, Map<String, String> properties) {
+    public void logWarnEvent(String logFrom, String event, String user, Map<String, Object> properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
@@ -189,22 +196,22 @@ public class CentralLogger implements ILogger {
         this.timer.cancel();
     }
 
-    private Map<String, String> arrayToMap(final String[] array) {
+    private Map<String, Object> arrayToMap(final Object[] array) {
         if (array == null) {
             return new HashMap<>();
         }
         if (array.length % 2 != 0) {
             throw new IllegalArgumentException("Properties need to be in the format of key1, value1, etc");
         }
-        Map<String, String> map = new LinkedHashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         for (int i = 0; i < array.length; i += 2) {
-            map.put(array[i], array[i + 1]);
+            map.put(array[i].toString(), array[i + 1]);
         }
         return map;
     }
 
-    private Map<String, String> addUserToMap(final String user, final Map<String, String> map) {
-        Map<String, String> newMap = map == null
+    private Map<String, Object> addUserToMap(final String user, final Map<String, Object> map) {
+        Map<String, Object> newMap = map == null
                 ? new LinkedHashMap<>()
                 : new LinkedHashMap<>(map);
         newMap.put("user", user == null ? "" : user);
@@ -222,13 +229,29 @@ public class CentralLogger implements ILogger {
             this.logQueue.clear();
         }
 
-        String json = this.serializer.serialize(events);
-        Response response = this.jerseyClient.target(this.loggingUrl)
-                .queryParam("appId", this.getAppId())
-                .request()
-                .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
-        if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-            LOGGER.error("Failed to upload  logs to the logging server! - " + response.getStatus());
+        try {
+            String json = this.serializer.serialize(events);
+            Response response = this.jerseyClient.target(this.loggingUrl)
+                    .queryParam("appId", this.getAppId())
+                    .request()
+                    .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
+            if (response.getStatus() != HttpURLConnection.HTTP_OK) {
+                LOGGER.error("Failed to upload logs to the logging server! - " + response.getStatus());
+            }
+
+            List<String> docs = new ArrayList<>();
+            for (LogEvent event : events) {
+                docs.add(this.serializer.serialize(event));
+            }
+            ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
+            response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
+            if (response.getStatus() != HttpURLConnection.HTTP_OK) {
+                response.bufferEntity();
+                LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",
+                        response.getStatus(), response.readEntity(String.class)));
+            }
+        } catch (JsonParseException ex) {
+            LOGGER.error(ex.getMessage());
         }
     }
 
@@ -252,37 +275,35 @@ public class CentralLogger implements ILogger {
 
     private static class LogEvent {
         private long timestamp;
+        private DateTime dateTime;
         private String type;
         private String tag;
         private String message;
-        private Map<String, String> params;
+        private Map<String, Object> params;
 
         @Override
         public String toString() {
             SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            String date = df.format(new Date(this.timestamp));
+            String date = df.format(this.dateTime);
             return String.format("%s HU:API %s [%s] %s", date, this.type, this.tag, this.message);
         }
     }
 
-    public static class LogParameters extends HashMap<String, String> {
+    public static class LogParameters extends HashMap<String, Object> {
 
         public LogParameters(String action) {
             put("Action", action);
         }
 
-        @Override
-        public String put(final String key, final String value) {
-            return super.put(key, (value == null ? "(null)" : value));
-        }
 
-        public String put(final String key, final Object objectValue) {
-            return super.put(key, (objectValue == null ? "(null)" : objectValue.toString()));
+        public Object put(final String key, final Object objectValue) {
+            return super.put(key, objectValue);
         }
 
     }
 
-    protected void startLoggingScheduler(final String loggingServiceUrl, final int loggingCadence) {
+    protected void startLoggingScheduler(final String loggingServiceUrl, final String esLoggingUrl,
+                                         final int loggingCadence) {
         if (this.timer != null) {
             this.timer.cancel();
         }
@@ -294,6 +315,7 @@ public class CentralLogger implements ILogger {
             }
         }, loggingCadence, loggingCadence);
         this.loggingUrl = loggingServiceUrl;
+        this.esLoggingUrl = esLoggingUrl;
     }
 
     protected String getAppId() {
@@ -304,10 +326,11 @@ public class CentralLogger implements ILogger {
         this.logOutput(level, fromLabel, logComment, null);
     }
 
-    void logOutput(EventType level, String fromLabel, String logComment, Map<String, String> params) {
+    void logOutput(EventType level, String fromLabel, String logComment, Map<String, Object> params) {
         LogEvent event = new LogEvent();
         event.type = level.name();
         event.timestamp = System.currentTimeMillis();
+        event.dateTime = new DateTime(DateTimeZone.UTC);;
         event.tag = (fromLabel == null || fromLabel.isEmpty()) ? "none" : fromLabel;
         event.message = logComment == null ? "" : logComment;
         event.params = params;

@@ -108,8 +108,7 @@ function isSessionVariablesAvailable()
             foreach ($bots['bots'] as $botDetails) {
                 $bot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $bot->toJSON();
-                if ($botDetails['dev_id'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'])
-                    array_push($tmp_list, $tmp_bot);
+                array_push($tmp_list, $tmp_bot);
             }
         }
         echo json_encode($tmp_list);
@@ -133,16 +132,16 @@ function isSessionVariablesAvailable()
 </script>
 <script>
     var newNode = document.createElement('div');
-    newNode.className = 'row';
+    newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        showBots(str, 0);
+        showBots(str, DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value,bots,purchasedBots);
     }
 </script>
 <script>
     $(document).ready(function () {
-        showBots('', 0);
+        showBots('', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value,bots,purchasedBots);
     });
 </script>
 </body>

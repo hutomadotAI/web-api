@@ -17,11 +17,12 @@ public class ChatLogger extends CentralLogger {
     @Inject
     public ChatLogger(final JerseyClient jerseyClient, final JsonSerializer serializer, final Config config) {
         super(jerseyClient, serializer);
-        this.startLoggingScheduler(config.getLoggingServiceUrl(), CHAT_LOGGING_CADENCE);
+        this.startLoggingScheduler(config.getLoggingServiceUrl(), config.getElasticSearchLoggingUrl(),
+                CHAT_LOGGING_CADENCE);
     }
 
     public void logChatError(final String logFrom, final String devId, final Exception exception,
-                             final Map<String, String> properties) {
+                             final Map<String, Object> properties) {
         this.logUserExceptionEvent(logFrom, "ApiChatError", devId, exception, properties);
     }
 

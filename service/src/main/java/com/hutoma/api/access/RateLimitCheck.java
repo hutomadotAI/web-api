@@ -47,7 +47,7 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
         // retrieve a validated devid, or bundle ratelimiting with anonymous
         String devid = ParameterFilter.getDevid(requestContext);
-        Map<String, String> logParams = new LinkedHashMap<String, String>() {{
+        Map<String, Object> logParams = new LinkedHashMap<String, Object>() {{
             put("Method", requestContext.getMethod());
             put("Path", requestContext.getUriInfo().getPath());
         }};
@@ -102,8 +102,8 @@ public class RateLimitCheck implements ContainerRequestFilter {
             this.logger.logUserTraceEvent(LOGFROM, "Account not valid", devid, logParams);
         } catch (RateLimitedException rle) {
             requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
-            logParams.put("Burst", Double.toString(burst));
-            logParams.put("Frequency", Double.toString(frequency));
+            logParams.put("Burst", burst);
+            logParams.put("Frequency", frequency);
             this.logger.logUserTraceEvent(LOGFROM, rle.getMessage(), devid, logParams);
         } catch (Exception e) {
             requestContext.abortWith(ApiError.getInternalServerError().getResponse(this.serializer).build());

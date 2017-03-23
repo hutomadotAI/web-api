@@ -6458,77 +6458,147 @@ ul.pagination li a {
 }
 
 /*   BOX botstore  */
-.box.box-solid.card {
-    border: 1px solid #515151;
-    height: 320px;
-    border-top-left-radius: 3;
-    border-top-right-radius: 3;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
+
+
+.box-card {
+    width: 172px;
+    height: 245px;
+    margin: 0 10px 10px 0;
 }
 
-.box.box-solid.card.borderActive {
-    border: 1px solid #ffffff;
+.box-card.card {
+    background: #ffffff;
+    border: 1px solid #626262;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
-.box.box-solid.card.flat {
+.box-card.card.borderActive {
+    outline: 3px solid #000000;
+}
+
+.box-card.card.flat {
     border-radius: 0;
+    box-shadow: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
-    box-shadow: none;
 }
 
 .card-icon {
-
+    width: 170px;
+    height: 150px;
     display: block;
     margin: auto;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    height: 110px;
-    width: 110px;
-    text-align: center;
-    font-size: 55px;
-    line-height: 100px;
     background: rgba(0, 0, 0, 0.2);
     cursor: pointer;
-
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    border-radius: 50%;
 }
 
 .card-icon > img {
     max-width: 100%;
 }
 
+.card-title {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    height:30px;
+    color: #000000; !important;
+    padding-top: 10px;
+    margin:0 3px 0 3px;
+    white-space: nowrap ;
+    overflow: hidden;
+    cursor: pointer;
+    text-overflow: clip;
+}
+
+.card-title:after {
+    top:160px;
+    left:0;
+    height:20px;
+    width:167px;
+    background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
+    position: absolute;
+    content: '';
+}
+
+.card-author {
+    font-size: 10px;
+    text-align: center;
+    color: #626262; !important;
+    white-space: nowrap ;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.card-author:after {
+    top:190px;
+    left:0;
+    height:15px;
+    width:100%;
+    background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
+    position: absolute;
+    content: '';
+}
+
 .card-footer {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    bottom: 10px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     border-bottom-right-radius: 3px;
     border-bottom-left-radius: 3px;
-    position: absolute;
-    text-align: center;
-    width: 100%;
-    bottom: 15px;
 }
 
 .card-footer.flat {
     border-radius: 0;
+    box-shadow: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
-    box-shadow: none;
 }
 
-.card-title {
-    font-size: 18px;
+.card-star {
+    font-size: 12px;
     text-align: center;
-    color: #999;
-!important;
-    margin: 0 0 5px 0;
+    color: #a2a2a2; !important;
+    bottom:5px;
+    margin:15px 0 0 10px;
 }
 
-.card-title:read-only {
-    background-color: #232426;
+.card-users {
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    color: #a2a2a2; !important;
+    bottom:5px;
+    margin:15px 0 0 5px;
+}
+
+.card-price {
+    width: 40px;
+    height: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 25px;
+    color: #ffffff; !important;
+    background: #7cc841;
+    margin:5px 10px 0 0;
+    letter-spacing: -1px;
+}
+
+.card-purchased {
+    width: 80px;
+    height: 25px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 25px;
+    color: deepskyblue; !important;
+    padding:8px 10px 0 0;
 }
 
 .card-description {

@@ -97,7 +97,7 @@ public class DatabaseAiStatusUpdates extends Database {
                         if (serverEntry == null) {
                             TrainingStatus finalStatusInDb = statusInDb;
                             this.logger.logUserWarnEvent(LOGFROM, String.format("%s did not report ai %s",
-                                    serverType.toString(), aiid.toString()), null, new HashMap<String, String>() {{
+                                    serverType.toString(), aiid.toString()), null, new HashMap<String, Object>() {{
                                 this.put("AIEngine", serverType.toString());
                                 this.put("AIID", aiid.toString());
                                 this.put("DEVID", devid.toString());
@@ -120,7 +120,7 @@ public class DatabaseAiStatusUpdates extends Database {
                                     String.format("%s status mismatch. Updating from %s to %s for ai %s",
                                             serverType.toString(), statusInDb.toString(),
                                             statusOnBackend.toString(), aiid.toString()),
-                                    null, new HashMap<String, String>() {{
+                                    null, new HashMap<String, Object>() {{
                                         this.put("AIEngine", serverType.toString());
                                         this.put("AIID", aiid.toString());
                                         this.put("DEVID", devid.toString());

@@ -55,7 +55,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties map of properties
      */
-    void logUserTraceEvent(String logFrom, String event, String user, Map<String, String> properties);
+    void logUserTraceEvent(String logFrom, String event, String user, Map<String, Object> properties);
 
     /**
      * Logs a user-related TRACE event.
@@ -72,7 +72,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties list of property key-value pairs
      */
-    void logUserTraceEvent(String logFrom, String event, String user, String... properties);
+    void logUserTraceEvent(String logFrom, String event, String user, Object... properties);
 
     /**
      * Logs a user-related EXCEPTION event.
@@ -91,7 +91,7 @@ public interface ILogger {
      * @param exception  exception
      * @param properties list of property key-value pairs
      */
-    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception, String... properties);
+    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception, Object... properties);
 
     /**
      * Logs a user-related EXCEPTION event.
@@ -102,7 +102,7 @@ public interface ILogger {
      * @param properties map of properties
      */
     void logUserExceptionEvent(String logFrom, String event, String user, Exception exception,
-                               Map<String, String> properties);
+                               Map<String, Object> properties);
 
     /**
      * Logs a user-related ERROR event.
@@ -111,7 +111,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties list of property key-value pairs
      */
-    void logUserErrorEvent(String logFrom, String event, String user, String... properties);
+    void logUserErrorEvent(String logFrom, String event, String user, Object... properties);
 
     /**
      * Logs a user-related ERROR event.
@@ -120,7 +120,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties map of properties
      */
-    void logUserErrorEvent(String logFrom, String event, String user, Map<String, String> properties);
+    void logUserErrorEvent(String logFrom, String event, String user, Map<String, Object> properties);
 
     /**
      * Logs a user-related WARN event.
@@ -129,7 +129,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties list of property key-value pairs
      */
-    void logUserWarnEvent(String logFrom, String event, String user, String... properties);
+    void logUserWarnEvent(String logFrom, String event, String user, Object... properties);
 
     /**
      * Logs a user-related WARN event.
@@ -138,5 +138,5 @@ public interface ILogger {
      * @param user       the user
      * @param properties map of properties
      */
-    void logUserWarnEvent(String logFrom, String event, String user, Map<String, String> properties);
+    void logUserWarnEvent(String logFrom, String event, String user, Map<String, Object> properties);
 }
