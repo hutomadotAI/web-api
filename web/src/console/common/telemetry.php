@@ -12,11 +12,10 @@ include "TelemetryEvent.php";
 
 class telemetry
 {
-    const APPID = "devconsole-v1";
     private static $instance;
     private $curl;
     private $loggingUrl;
-
+    
     private function __construct()
     {
         $this->curl = new curl();
@@ -35,7 +34,16 @@ class telemetry
             }
         }
         if (isset($this->loggingUrl)) {
-            $this->loggingUrl .= "/" . self::APPID . "/log/_bulk";
+            $this->loggingUrl .= "/" . $this->getAppId() . "/log/_bulk";
+        }
+    }
+
+    private function getAppId() {
+        $envUrl = getenv("LOG_SERVICE_ANALYTICS_APPID");
+        if (isset($envUrl) && $envUrl != "") {
+            $this->loggingUrl = $envUrl;
+        } else {
+            unset($this->loggingUrl);
         }
     }
 
@@ -46,7 +54,6 @@ class telemetry
         }
         return self::$instance;
     }
-
 
     public function log($type, $tag, $message, $params = null)
     {
