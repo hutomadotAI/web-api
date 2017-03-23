@@ -14,8 +14,8 @@ import org.glassfish.jersey.client.JerseyClient;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -28,6 +28,7 @@ public class WebHooks {
     private final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
 
+    @Inject
     public WebHooks(final Database database, final ILogger logger, final JsonSerializer serializer, final JerseyClient jerseyClient) {
         this.database = database;
         this.logger = logger;

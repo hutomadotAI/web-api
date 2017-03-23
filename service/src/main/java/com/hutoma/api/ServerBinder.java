@@ -16,6 +16,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -103,6 +104,7 @@ public class ServerBinder extends AbstractBinder {
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
         bind(ChatStateHandler.class).to(ChatStateHandler.class);
+        bind(WebHooks.class).to(WebHooks.class);
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
