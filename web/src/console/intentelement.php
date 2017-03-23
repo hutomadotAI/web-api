@@ -39,6 +39,19 @@ $entityList = $entityApi->getEntities();
 unset($entityApi);
 
 $intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+$webHook= $intentsApi->getWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+
+if ($webHook==NULL) {
+    $v = array(
+        'intent_name' => $intentName,
+        'endpoint' => 'prova-com',
+        'enabled' => true
+    );
+    var_dump('Inizio');
+    $hook = $intentsApi->createWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $v);
+    var_dump($hook);
+    exit;
+}
 unset($intentsApi);
 
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
@@ -63,6 +76,11 @@ if ($bot['status']['code'] !== 200) {
     exit;
 }
 
+if ($webHook['status']['code'] !== 200) {
+    unset($bot);
+    \hutoma\console::redirect('./error.php?err=205');
+    exit;
+}
 
 function isPostInputAvailable()
 {
@@ -127,6 +145,7 @@ function echoJsonEntityListResponse($entityList)
                     <?php include './dynamic/intent.element.content.expression.html.php'; ?>
                     <?php include './dynamic/intent.element.content.variable.html.php'; ?>
                     <?php include './dynamic/intent.element.content.response.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.webhook.html.php'; ?>
                     <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
                 </div>
             </div>
@@ -156,6 +175,7 @@ function echoJsonEntityListResponse($entityList)
 <script src="./scripts/button-select/buttonSelect.js"></script>
 <script src="./scripts/intent/intent.polling.js"></script>
 <script src="./scripts/intent/intent.element.response.js"></script>
+<script src="./scripts/intent/intent.element.webhook.js"></script>
 <script src="./scripts/intent/intent.element.expression.js"></script>
 <script src="./scripts/intent/intent.element.js"></script>
 <script src="./scripts/intent/intent.element.prompt.js"></script>
