@@ -152,7 +152,8 @@ function isSessionVariablesAvailable()
             foreach ($puchasedBots['bots'] as $botDetails) {
                 $puchasedBot = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $puchasedBot->toJSON();
-                array_push($tmp_list, $tmp_bot);
+                if ($botDetails['aiid'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
+                    array_push($tmp_list, $tmp_bot);
             }
         }
         echo json_encode($tmp_list);

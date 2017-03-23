@@ -48,6 +48,7 @@ class bot
         $theBot = new bot();
         $theBot->setAlertMessage($botDetails['alertMessage']);
         $theBot->setBadge($botDetails['badge']);
+        $theBot->setAiid($botDetails['aiid']);
         $theBot->setBotId($botDetails['botId']);
         $theBot->setCategory($botDetails['category']);
         $theBot->setClassification($botDetails['classification']);
