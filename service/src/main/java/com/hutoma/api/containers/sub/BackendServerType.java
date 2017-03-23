@@ -2,15 +2,35 @@ package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum BackendServerType {
 
     @SerializedName("wnet")
-    WNET,
+    WNET("wnet"),
 
     @SerializedName("rnn")
-    RNN,
+    RNN("rnn"),
 
     @SerializedName("aiml")
-    AIML;
+    AIML("aiml");
+
+    private final String value;
+
+    BackendServerType(final String value) {
+        this.value = value;
+    }
+
+    public static BackendServerType forValue(final String value) {
+        Optional<BackendServerType> serverType = Arrays.stream(BackendServerType.values())
+                .filter(x -> x.value.equals(value))
+                .findFirst();
+        return serverType.isPresent() ? serverType.get() : null;
+    }
+
+    public String value() {
+        return this.value;
+    }
 
 }

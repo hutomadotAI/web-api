@@ -27,6 +27,7 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String TRAININGPROGRESS = "TrainingProgress";
     private static final String AICOUNT = "AiCount";
     private static final String AICOUNTUPDATED = "AiCountUpdated";
+    private static final String SERVER = "Server";
 
     @Inject
     public AiServiceStatusLogger(final JerseyClient jerseyClient, final JsonSerializer serializer,
@@ -36,7 +37,7 @@ public class AiServiceStatusLogger extends CentralLogger {
                 SERVICESTATUS_LOGGING_CADENCE);
     }
 
-    public void logStatusUpdate(final String logFrom, final AiStatus status) {
+    public void logStatusUpdate(final String logFrom, final AiStatus status, final String serverIdentifier) {
         LogParameters logParameters = new LogParameters("UpdateAIStatus") {{
             this.put(AIENGINE, status.getAiEngine());
             this.put(AIID, status.getAiid());
@@ -44,6 +45,7 @@ public class AiServiceStatusLogger extends CentralLogger {
             this.put(STATUS, status.getTrainingStatus());
             this.put(ERROR, status.getTrainingError());
             this.put(TRAININGPROGRESS, status.getTrainingProgress());
+            this.put(SERVER, serverIdentifier);
             this.put("AIHash", status.getAiHash());
         }};
         String narrative = String.format("Update %s status %s progress %d%% on ai %s",

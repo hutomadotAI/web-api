@@ -223,8 +223,10 @@ public abstract class ServiceTestBase extends JerseyTest {
         }
 
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");
         when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerRnn.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerRnn.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("rnn@fake");
         when(this.fakeControllerRnn.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(16);

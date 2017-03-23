@@ -41,6 +41,7 @@ public class ServerTracker implements Callable {
     private ServerRegistration registration;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
+    private String serverIdentity = "(uninitialised)";
 
     @Inject
     public ServerTracker(final Config config, final Tools tools,
@@ -88,6 +89,14 @@ public class ServerTracker implements Callable {
         return this.endpointVerified.get();
     }
 
+    /***
+     * Uniquely identifies a server across sessions.
+     * @return
+     */
+    public String getServerIdentifier() {
+        return this.serverIdentity;
+    }
+
     @Override
     public Void call() {
 
@@ -125,7 +134,10 @@ public class ServerTracker implements Callable {
                             this.lastValidHeartbeat = timeNow;
 
                             // if the heartbeat worked then the endpoint is verified
-                            this.endpointVerified.set(true);
+                            if (this.endpointVerified.compareAndSet(false, true)) {
+                                this.logger.logDebug(LOGFROM, String.format("endpoint verified for session %s on %s",
+                                        this.serverSessionID.toString(), this.serverIdentity));
+                            }
 
                         } else {
 
@@ -143,14 +155,11 @@ public class ServerTracker implements Callable {
                     // just go round again and recalculate the wait time
                 }
             }
-            this.logger.logDebug(LOGFROM, String.format("ending session %s for %s server",
-                    this.serverSessionID.toString(), this.registration.getServerType()));
+            this.logger.logDebug(LOGFROM, String.format("ending session %s on %s",
+                    this.serverSessionID.toString(), this.serverIdentity));
         } catch (Exception e) {
-            String fromServer = (this.registration == null) ? "(reg is null)" :
-                    (this.registration.getServerType() == null)
-                            ? "(servertype is null)" : this.registration.getServerType().toString();
             this.logger.logUserExceptionEvent(LOGFROM,
-                    String.format("ServerTracker exception on %s server", fromServer), "", e);
+                    String.format("ServerTracker exception on %s tracker", this.serverIdentity), "", e);
         }
         return null;
     }
@@ -162,6 +171,9 @@ public class ServerTracker implements Callable {
      */
     public UUID trackServer(ServerRegistration registration) {
         this.registration = registration;
+        this.serverIdentity = String.format("%s@%s",
+                this.registration.getServerType().value(),
+                this.registration.getServerUrl().trim());
         this.serverSessionID = this.tools.createNewRandomUUID();
         return this.serverSessionID;
     }
@@ -220,11 +232,11 @@ public class ServerTracker implements Callable {
                 return true;
             }
 
-            this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s %s failed with error %d",
-                    this.registration.getServerType(), this.serverSessionID.toString(), response.getStatus()));
+            this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
+                    this.serverIdentity, response.getStatus()));
         } catch (Exception e) {
-            this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s %s failed with error %s",
-                    this.registration.getServerType(), this.serverSessionID.toString(), e.toString()));
+            this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %s",
+                    this.serverIdentity, e.toString()));
         }
         return false;
     }
@@ -234,20 +246,10 @@ public class ServerTracker implements Callable {
      * @return
      */
     String describeServer() {
-        return String.format("%s server id:%s cantrain:%d canchat:%d",
-                this.registration.getServerType(), this.serverSessionID.toString(),
+        return String.format("%s cantrain:%d canchat:%d",
+                this.serverIdentity,
                 this.registration.getTrainingCapacity(),
                 this.registration.getChatCapacity());
     }
 
-    /***
-     * Description of this tracker for routing
-     * @return
-     */
-    String describeServerRouting() {
-        return String.format("%s %s cantrain:%d canchat:%d",
-                this.registration.getServerType(), getServerUrl(),
-                this.registration.getTrainingCapacity(),
-                this.registration.getChatCapacity());
-    }
 }

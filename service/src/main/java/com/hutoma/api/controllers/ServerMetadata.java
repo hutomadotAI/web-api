@@ -46,6 +46,19 @@ public class ServerMetadata {
     }
 
     /***
+     * Returns a descriptive string, unique to the endpoint
+     * that persists across sessions
+     * in the format servertype@endpoint
+     * e.g. wnet@http://ai-wnet:8080/ai
+     * @param sessionID
+     * @return
+     */
+    public synchronized String getSessionServerIdentifier(UUID sessionID) {
+        ServerTracker tracker = this.activeServerSessions.get(sessionID);
+        return (tracker == null) ? null : tracker.getServerIdentifier();
+    }
+
+    /***
      * Process an affinity update request.
      * Deletes all affinity for this server
      * and then generates new affinity according to the aiid list
@@ -228,7 +241,7 @@ public class ServerMetadata {
         }
 
         this.logger.logInfo(LOGFROM,
-                String.format("Routing to %s because %s", pick.describeServerRouting(), routePickReason));
+                String.format("Routing to %s because %s", pick.describeServer(), routePickReason));
         addAffinity(pick, aiid);
         return pick;
     }

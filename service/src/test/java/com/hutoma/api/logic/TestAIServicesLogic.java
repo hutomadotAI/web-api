@@ -61,6 +61,7 @@ public class TestAIServicesLogic {
         this.aiServicesLogic = new AIServicesLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase,
                 this.fakeServices, this.fakeServicesStatusLogger, this.fakeLogger, this.fakeTools,
                 this.fakeControllerWnet, mock(ControllerRnn.class), mock(ControllerAiml.class));
+        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("fake");
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
     }
@@ -137,7 +138,7 @@ public class TestAIServicesLogic {
     public void testUpdateAiStatus_updateFromWrongServer() throws Database.DatabaseException {
 
         UUID session = this.fakeTools.createNewRandomUUID();
-        when(this.fakeControllerWnet.isActiveSession(eq(session))).thenReturn(true);
+        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(session))).thenReturn("fake");
         when(this.fakeControllerWnet.isPrimaryMaster(eq(session))).thenReturn(false);
 
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
