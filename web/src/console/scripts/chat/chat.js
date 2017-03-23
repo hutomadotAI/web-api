@@ -5,9 +5,8 @@ var chatSemaphore = 0;
 
 if (isChrome) {
     unlockSpeechOption();
-    if (!speechResponse) {
+    if (!speechResponse)
         deactiveSpeechButton();
-    }
     else
         activeSpeechButton();
 }
