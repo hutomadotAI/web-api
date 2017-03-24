@@ -7,6 +7,7 @@ import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiWebHook;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 
@@ -176,6 +177,23 @@ public class TestIntentLogic {
 
         final ApiResult result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testIntentWebhook_getWebhook() throws Database.DatabaseException {
+        WebHook wh = new WebHook(UUID.randomUUID(), INTENTNAME, "https://fakewebhookaddress/webhook", true);
+        when(this.fakeDatabase.getWebHook(AIID, INTENTNAME)).thenReturn(wh);
+
+        final ApiResult result = this.intentLogic.getWebHook(DEVID, AIID, INTENTNAME);
+        Assert.assertEquals(this.INTENTNAME, ((ApiWebHook) result).getWebHook().getIntentName());
+    }
+
+    @Test
+    public void testIntentWebhook_getWebHookNotFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getWebHook(AIID, INTENTNAME)).thenReturn(null);
+
+        final ApiResult result = this.intentLogic.getWebHook(DEVID, AIID, INTENTNAME);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test

@@ -2257,18 +2257,16 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getWebhook`(
-	IN `aiid` INT(50), IN `intent_name` INT(250))
+	IN `param_aiid` VARCHAR(50), IN `param_intent_name` VARCHAR(250))
     READS SQL DATA
 BEGIN
-
-	SELECT
-		`aiid`,
+  SELECT
+	`aiid`,
     `intent_name`,
     `endpoint`,
     `enabled`
   FROM `webhooks`
-  WHERE `webhooks`.`intent_id`=`intent_id`;
-
+  WHERE `webhooks`.`intent_name`=`param_intent_name`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

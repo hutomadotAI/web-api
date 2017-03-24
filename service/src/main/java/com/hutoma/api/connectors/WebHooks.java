@@ -93,14 +93,26 @@ public class WebHooks {
             return null;
         }
 
+        webHookResponse = this.deserializeResponse(response);
+
+        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s", intent.getAiid(), intent.getName()));
+        return webHookResponse;
+    }
+
+    /***
+     * Deserializes the json response to a WebHookResponse.
+     * @param response the Response to deserialize.
+     * @return The deserialized WebHookResponse or null.
+     */
+    public WebHookResponse deserializeResponse(final Response response) {
+        WebHookResponse webHookResponse = null;
         try {
-            webHookResponse = (WebHookResponse) this.serializer.deserialize((String) response.getEntity(), WebHookResponse.class);
+            webHookResponse = (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class), WebHookResponse.class);
         } catch (JsonParseException e) {
             this.logger.logException(LOGFROM, e);
             return null;
         }
 
-        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s", intent.getAiid(), intent.getName()));
         return webHookResponse;
     }
 

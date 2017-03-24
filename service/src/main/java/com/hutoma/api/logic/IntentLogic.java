@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiWebHook;
 import com.hutoma.api.containers.sub.WebHook;
 
 import java.util.List;
@@ -100,6 +101,21 @@ public class IntentLogic {
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devid, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getWebHook(final String devid, final UUID aiid, final String intentName) {
+        try {
+            WebHook webHook = this.database.getWebHook(aiid, intentName);
+
+            if (webHook == null) {
+                return ApiError.getNotFound();
+            }
+            return new ApiWebHook(webHook).setSuccessStatus();
+
+        } catch (Database.DatabaseException e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetWebHook", devid, e);
             return ApiError.getInternalServerError();
         }
     }
