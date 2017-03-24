@@ -21,8 +21,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -49,7 +47,6 @@ public class CentralLogger implements ILogger {
     private final JerseyClient jerseyClient;
     private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(LOGGING_QUEUE_LENGTH);
     private Timer timer;
-    private String loggingUrl;
     private String esLoggingUrl;
 
     @Inject
@@ -92,7 +89,6 @@ public class CentralLogger implements ILogger {
 
     public void initialize(final Config config) {
         this.startLoggingScheduler(
-                config.getLoggingServiceUrl(),
                 config.getElasticSearchLoggingUrl(),
                 config.getLoggingUploadCadency());
     }
@@ -170,7 +166,7 @@ public class CentralLogger implements ILogger {
     }
 
     private void dumpToStorage() {
-        if (this.logQueue.isEmpty() || this.loggingUrl == null) {
+        if (this.logQueue.isEmpty() || this.esLoggingUrl == null) {
             return;
         }
 
@@ -181,21 +177,12 @@ public class CentralLogger implements ILogger {
         }
 
         try {
-            String json = this.serializer.serialize(events);
-            Response response = this.jerseyClient.target(this.loggingUrl)
-                    .queryParam("appId", this.getAppId())
-                    .request()
-                    .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
-            if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                LOGGER.error("Failed to upload logs to the logging server! - " + response.getStatus());
-            }
-
             List<String> docs = new ArrayList<>();
             for (LogEvent event : events) {
                 docs.add(this.serializer.serialize(event));
             }
             ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
-            response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
+            Response response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
                 LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",
@@ -253,8 +240,7 @@ public class CentralLogger implements ILogger {
 
     }
 
-    protected void startLoggingScheduler(final String loggingServiceUrl, final String esLoggingUrl,
-                                         final int loggingCadence) {
+    protected void startLoggingScheduler(final String esLoggingUrl, final int loggingCadence) {
         if (this.timer != null) {
             this.timer.cancel();
         }
@@ -265,7 +251,6 @@ public class CentralLogger implements ILogger {
                 CentralLogger.this.dumpToStorage();
             }
         }, loggingCadence, loggingCadence);
-        this.loggingUrl = loggingServiceUrl;
         this.esLoggingUrl = esLoggingUrl;
     }
 

@@ -133,10 +133,6 @@ public class Config {
         return Double.parseDouble(getConfigFromProperties("ratelimit_botstore_publish_frequency", "120.0"));
     }
 
-    public String getLoggingServiceUrl() {
-        return getConfigFromProperties("logging_url", null);
-    }
-
     public List<UUID> getAimlBotAiids() {
         List<String> stringList = getCSList("ai_aiml_bot_aiids");
         if (stringList == null) {
@@ -216,7 +212,7 @@ public class Config {
     }
 
     public String getElasticSearchLoggingUrl() {
-        return getConfigFromProperties("logging_es_url", "http://log-es:9200");
+        return getConfigFromProperties("logging_es_url", "");
     }
 
     public void dumpApiEnvironmentVars() {
