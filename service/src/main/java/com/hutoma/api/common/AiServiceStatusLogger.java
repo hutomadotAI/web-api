@@ -53,7 +53,7 @@ public class AiServiceStatusLogger extends CentralLogger {
                 logParameters.get(STATUS),
                 (int) (status.getTrainingProgress() * 100.0),
                 logParameters.get(AIID));
-        this.logUserTraceEvent(logFrom, narrative, null, logParameters);
+        this.logUserTraceEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
     public void logAffinityUpdate(final String logFrom, final BackendServerType updated,
@@ -66,7 +66,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         String narrative = String.format("%s affinity list update with %s items",
                 logParameters.get(AIENGINE),
                 logParameters.get(AICOUNT));
-        this.logUserTraceEvent(logFrom, narrative, null, logParameters);
+        this.logUserTraceEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
     public void logDbSyncComplete(final String logFrom, final BackendServerType serverType,
@@ -80,7 +80,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         String narrative = String.format("%s server db-sync complete. %s items updated.",
                 logParameters.get(AIENGINE),
                 logParameters.get(AICOUNTUPDATED).toString());
-        this.logUserTraceEvent(logFrom, narrative, null, logParameters);
+        this.logUserTraceEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
     public void logDbSyncUnknownAi(String logFrom, BackendServerType serverType, ServerAiEntry aiEntry) {
@@ -92,7 +92,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.logUserWarnEvent(logFrom, String.format("%s reports ai %s that is unknown to us",
                 logParameters.get(AIENGINE),
                 logParameters.get(AIID)),
-                null, logParameters);
+                null, new LogMap(logParameters));
     }
 
     @Override

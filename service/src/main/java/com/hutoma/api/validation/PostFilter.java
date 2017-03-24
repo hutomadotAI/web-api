@@ -3,6 +3,7 @@ package com.hutoma.api.validation;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -120,21 +120,18 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
-                    new LinkedHashMap<String, String>() {{
-                        put("Type", "Post");
-                        put("Parameter", pve.getParameterName());
-                        put("Message", pve.getMessage());
-                    }});
+                    LogMap.map("Type", "Post")
+                            .put("Parameter", pve.getParameterName())
+                            .put("Message", pve.getMessage()));
         } catch (Exception ex) {
             requestContext.abortWith(ApiError.getInternalServerError(ex.getMessage())
                     .getResponse(this.serializer).build());
             this.logger.logUserExceptionEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext), ex,
-                    new LinkedHashMap<String, Object>() {{
-                        put("Type", "Post");
-                        put("Parameters", Strings.join(checkList.stream().map(APIParameter::toString).iterator(), ','));
-                        put("RequestLength", requestContext.getLength());
-                        put("Path", requestContext.getUriInfo().getPath());
-                    }});
+                    LogMap.map("Type", "Post")
+                            .put("Parameters", Strings.join(
+                                    checkList.stream().map(APIParameter::toString).iterator(), ','))
+                            .put("RequestLength", requestContext.getLength())
+                            .put("Path", requestContext.getUriInfo().getPath()));
         }
     }
 
@@ -248,7 +245,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
 
         } catch (JsonParseException jpe) {
-            this.logger.logUserErrorEvent(LOGFROM, jpe.getMessage(), getDeveloperId(request));
+            this.logger.logUserErrorEvent(LOGFROM, jpe.getMessage(), getDeveloperId(request), null);
             throw new ParameterValidationException("error in json format", "request body");
         }
     }

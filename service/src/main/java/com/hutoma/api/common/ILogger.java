@@ -1,7 +1,5 @@
 package com.hutoma.api.common;
 
-import java.util.Map;
-
 /**
  * Logger interface.
  */
@@ -55,7 +53,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties map of properties
      */
-    void logUserTraceEvent(String logFrom, String event, String user, Map<String, Object> properties);
+    void logUserTraceEvent(String logFrom, String event, String user, LogMap properties);
 
     /**
      * Logs a user-related TRACE event.
@@ -64,15 +62,6 @@ public interface ILogger {
      * @param user    the user
      */
     void logUserTraceEvent(String logFrom, String event, String user);
-
-    /**
-     * Logs a user-related TRACE event.
-     * @param logFrom    where it's logging from
-     * @param event      the event name
-     * @param user       the user
-     * @param properties list of property key-value pairs
-     */
-    void logUserTraceEvent(String logFrom, String event, String user, Object... properties);
 
     /**
      * Logs a user-related EXCEPTION event.
@@ -88,30 +77,10 @@ public interface ILogger {
      * @param logFrom    where it's logging from
      * @param event      the event name
      * @param user       the user
-     * @param exception  exception
-     * @param properties list of property key-value pairs
-     */
-    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception, Object... properties);
-
-    /**
-     * Logs a user-related EXCEPTION event.
-     * @param logFrom    where it's logging from
-     * @param event      the event name
-     * @param user       the user
      * @param exception  the exception
      * @param properties map of properties
      */
-    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception,
-                               Map<String, Object> properties);
-
-    /**
-     * Logs a user-related ERROR event.
-     * @param logFrom    where it's logging from
-     * @param event      the event name
-     * @param user       the user
-     * @param properties list of property key-value pairs
-     */
-    void logUserErrorEvent(String logFrom, String event, String user, Object... properties);
+    void logUserExceptionEvent(String logFrom, String event, String user, Exception exception, LogMap properties);
 
     /**
      * Logs a user-related ERROR event.
@@ -120,16 +89,7 @@ public interface ILogger {
      * @param user       the user
      * @param properties map of properties
      */
-    void logUserErrorEvent(String logFrom, String event, String user, Map<String, Object> properties);
-
-    /**
-     * Logs a user-related WARN event.
-     * @param logFrom    where it's logging from
-     * @param event      the event name
-     * @param user       the user
-     * @param properties list of property key-value pairs
-     */
-    void logUserWarnEvent(String logFrom, String event, String user, Object... properties);
+    void logUserErrorEvent(String logFrom, String event, String user, LogMap properties);
 
     /**
      * Logs a user-related WARN event.
@@ -138,5 +98,5 @@ public interface ILogger {
      * @param user       the user
      * @param properties map of properties
      */
-    void logUserWarnEvent(String logFrom, String event, String user, Map<String, Object> properties);
+    void logUserWarnEvent(String logFrom, String event, String user, LogMap properties);
 }

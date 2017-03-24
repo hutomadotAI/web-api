@@ -2,7 +2,6 @@ package com.hutoma.api.common;
 
 import org.glassfish.jersey.client.JerseyClient;
 
-import java.util.Map;
 import javax.inject.Inject;
 
 /**
@@ -22,7 +21,7 @@ public class ChatLogger extends CentralLogger {
     }
 
     public void logChatError(final String logFrom, final String devId, final Exception exception,
-                             final Map<String, Object> properties) {
+                             final LogMap properties) {
         this.logUserExceptionEvent(logFrom, "ApiChatError", devId, exception, properties);
     }
 
