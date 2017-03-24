@@ -95,7 +95,6 @@ function showBots(str, option, bots, botSubSet ) {
             var dataBuyBot = 'id="btnBuyBot' + bot['botId']
                 + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name']
                 + '" data-description="' + bot['description']
-                + '" data-flow="' + option
                 + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"';
             switch (option) {
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
