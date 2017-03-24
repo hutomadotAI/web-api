@@ -150,7 +150,6 @@ function switchCard(botId,optionFlow) {
     var btnClassName = 'card-price pull-right'
     var pos = node.getAttribute('data-pos');
     var targetDiv = node.getElementsByClassName(btnClassName)[0];
-
     switch (optionFlow) {
         case DRAW_BOTCARDS.BOTSTORE_FLOW.value:
             targetDiv.classList.remove('card-price');
@@ -159,11 +158,14 @@ function switchCard(botId,optionFlow) {
             targetDiv.setAttribute('data-target', '');
             targetDiv.innerHTML = ('purchased');
             break;
-        default:
+        case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
             var wHTML = ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + botId + '");></div>');
             var parent = targetDiv.parentNode;
             parent.setAttribute('data-linked', '0');
             parent.innerHTML = wHTML;
+            break;
+        default:
+            console.log("Option flow has a wrong value")
     }
 }
 
