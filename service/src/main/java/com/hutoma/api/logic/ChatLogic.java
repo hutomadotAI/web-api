@@ -7,7 +7,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
@@ -18,14 +17,12 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.WebHookPayload;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -175,11 +172,14 @@ public class ChatLogic {
                         // get a response from the RNN
                         ChatResult rnnResult = this.interpretRnnResult();
 
+                        // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
+                        this.telemetryMap.put("AnsweredWithConfidence", false);
+
                         if (rnnResult != null) {
                             // If the RNN was clueless or returned an empty response
                             if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
                                 // Mark it as not really answered
-                                this.telemetryMap.put("AnsweredWithConfidence", false);
+
                                 // Use AIML, if available, use it as it will always generate something
                                 if (aimlResult != null) {
                                     this.telemetryMap.put("AnsweredBy", "AIML");
@@ -192,7 +192,6 @@ public class ChatLogic {
                             } else {
                                 result = rnnResult;
                                 this.telemetryMap.put("AnsweredBy", "RNN");
-                                this.telemetryMap.put("AnsweredWithConfidence", true);
                             }
                         } else {
                             // TODO we need to figure out something
@@ -335,8 +334,7 @@ public class ChatLogic {
                             devId,
                             currentIntent.getName(),
                             aiid.toString());
-                }
-                else if (response.getText() != "") {
+                } else if (response.getText() != "") {
                     chatResult.setAnswer(response.getText());
                 }
             }
