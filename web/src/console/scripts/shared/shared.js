@@ -95,6 +95,7 @@ function showBots(str, option, bots, botSubSet ) {
             var dataBuyBot = 'id="btnBuyBot' + bot['botId']
                 + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name']
                 + '" data-description="' + bot['description']
+                + '" data-flow="' + option
                 + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"';
             switch (option) {
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
@@ -142,6 +143,28 @@ function showBots(str, option, bots, botSubSet ) {
     }
     newNode.innerHTML = wHTML;
     document.getElementById('botsSearch').appendChild(newNode);
+}
+
+function switchCard(botId,optionFlow) {
+    var node = document.getElementById('card' + botId);
+    var btnClassName = 'card-price pull-right'
+    var pos = node.getAttribute('data-pos');
+    var targetDiv = node.getElementsByClassName(btnClassName)[0];
+
+    switch (optionFlow) {
+        case DRAW_BOTCARDS.BOTSTORE_FLOW.value:
+            targetDiv.classList.remove('card-price');
+            targetDiv.classList.add('card-purchased');
+            targetDiv.setAttribute('data-toggle', '');
+            targetDiv.setAttribute('data-target', '');
+            targetDiv.innerHTML = ('purchased');
+            break;
+        default:
+            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + botId + '");></div>');
+            var parent = targetDiv.parentNode;
+            parent.setAttribute('data-linked', '0');
+            parent.innerHTML = wHTML;
+    }
 }
 
 function openSingleBot(elem, option, botId, purchased) {

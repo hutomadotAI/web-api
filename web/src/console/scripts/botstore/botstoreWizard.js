@@ -1,19 +1,3 @@
-function switchCard(botId) {
-    var node = document.getElementById('card' + botId);
-    var btnClassName = 'btn btn-success center-block flat'
-    var pos = node.getAttribute('data-pos');
-    var targetDiv = node.getElementsByClassName(btnClassName)[0];
-
-    targetDiv.classList.remove("btn-success");
-    targetDiv.classList.add("btn-primary");
-
-    targetDiv.setAttribute('data-toggle', '');
-    targetDiv.setAttribute('data-target', '');
-    targetDiv.innerHTML = ('<b>Bot purchased </b><span class="fa fa-check-circle-o"></span>');
-
-    //node.children[0].children[0].classList.add("borderActive");
-}
-
 function populateBotFields(bot) {
     var json = JSON.parse(bot);
     document.getElementById('botTitle').innerText = json['name'];
@@ -154,3 +138,11 @@ function btnFromBuyToPurchased() {
     nodeBtn.innerHTML = wHTML;
     nodeBtn.className = 'btn btn-primary pull-right flat';
 }
+
+
+$('#buyBot').on('hide.bs.modal', function (e) {
+    var purchase_state = document.getElementById('purchase_state').value;
+    if (purchase_state == 1)
+        switchCard(document.getElementById('bot_id').value,DRAW_BOTCARDS.BOTSTORE_FLOW.value);
+
+});
