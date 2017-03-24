@@ -6821,12 +6821,6 @@ ul.pagination li a {
     font-size: 85px;
     line-height: 100px;
     margin-left: 180px;
-    padding-top: 25px;
-    min-height: 150px;
-    max-height: 150px;
-    min-width: 150px;
-    max-width: 150px;
-    padding-top: 20px;
     background-color: #111111;
 }
 
