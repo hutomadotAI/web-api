@@ -12,7 +12,6 @@ include "TelemetryEvent.php";
 
 class telemetry
 {
-    const APPID = "devconsole-v1";
     private static $instance;
     private $curl;
     private $loggingUrl;
@@ -35,8 +34,19 @@ class telemetry
             }
         }
         if (isset($this->loggingUrl)) {
-            $this->loggingUrl .= "/" . self::APPID . "/log/_bulk";
+            $this->loggingUrl .= "/" . $this->getAppId() . "/log/_bulk";
         }
+    }
+
+    private function getAppId()
+    {
+        $appId = getenv("LOG_SERVICE_ANALYTICS_APPID");
+        if (isset($appId) && $appId != "") {
+            return $appId;
+        } else {
+            error_log("Telemetry - Could not obtain the APPID for this service");
+        }
+        return null;
     }
 
     public static function getInstance()
@@ -46,7 +56,6 @@ class telemetry
         }
         return self::$instance;
     }
-
 
     public function log($type, $tag, $message, $params = null)
     {

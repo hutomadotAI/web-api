@@ -4,6 +4,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
@@ -62,8 +63,7 @@ public class WebHooks {
             this.logger.logUserErrorEvent(LOGFROM,
                     "WebHook not found at execution for intent %s in aiid %s",
                     devId,
-                    intent.getName(),
-                    intent.getAiid().toString());
+                    LogMap.map("Intent", intent.getName()).put("AIID", intent.getAiid()));
             return null;
         }
 
@@ -88,10 +88,8 @@ public class WebHooks {
             this.logger.logUserWarnEvent(LOGFROM,
                     "WebHook Failed (%s): intent %s for aiid %s at %s",
                     devId,
-                    String.valueOf(response.getStatus()),
-                    intent.getName(),
-                    intent.getAiid().toString(),
-                    webHook.getEndpoint());
+                    LogMap.map("ResponseStatus", response.getStatus()).put("Intent", intent.getName())
+                            .put("AIID", intent.getAiid()).put("Endpoint", webHook.getEndpoint()));
             return null;
         }
 
@@ -112,7 +110,7 @@ public class WebHooks {
      * @return true if an active WebHook exists, else false.
      * @throws Database.DatabaseException if the WebHook cannot be retrieved.
      */
-    public boolean activeWebhookExists(final MemoryIntent intent, final String devId)  {
+    public boolean activeWebhookExists(final MemoryIntent intent, final String devId) {
         WebHook webHook = null;
         try {
             webHook = this.database.getWebHook(intent.getAiid(), intent.getName());

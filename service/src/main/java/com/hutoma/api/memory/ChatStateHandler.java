@@ -1,6 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.ChatState;
 
@@ -37,7 +38,8 @@ public class ChatStateHandler {
         try {
             chatState.setTimestamp(DateTime.now());
             if (!this.database.saveChatState(devId, chatId, chatState)) {
-                this.logger.logUserErrorEvent(LOGFROM, "Could not save state for chat " + chatId, devId);
+                this.logger.logUserErrorEvent(LOGFROM, "Could not save state for chat " + chatId,
+                        devId, LogMap.map("ChatId", chatId));
             }
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId, ex);

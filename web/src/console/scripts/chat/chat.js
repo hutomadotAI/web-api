@@ -113,7 +113,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         wHTML += ('<div class="direct-chat-text chat-success">');
     wHTML += msg;
     wHTML += ('</div>');
-    if (error == false )
+    if (error == false)
         wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">confidence score: ' + score + '</span>');
     newRightMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newRightMsg);
@@ -135,9 +135,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
 }
 
 function requestAnswerAI(ai_name, question, chatId) {
-    if (question == '') {
-        return;
-    } else {
+    if (question != '') {
         jQuery.ajax({
             url: 'chat.php',
             contentType: "application/json; charset=utf-8",
@@ -161,7 +159,12 @@ function requestAnswerAI(ai_name, question, chatId) {
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                createRightMsg(ai_name, 'Cannot contact the server.', '', -1, true);
+                if (xhr.status == 200) {
+                    // We're most likely being redirected to the login page due to session having expired
+                    window.location.href = "/";
+                } else {
+                    createRightMsg(ai_name, 'Cannot contact the server.', '', -1, true);
+                }
             }
         });
     }

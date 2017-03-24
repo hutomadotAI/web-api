@@ -3,6 +3,7 @@ package com.hutoma.api.access;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.RateLimitStatus;
@@ -10,8 +11,6 @@ import com.hutoma.api.validation.ParameterFilter;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -47,10 +46,8 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
         // retrieve a validated devid, or bundle ratelimiting with anonymous
         String devid = ParameterFilter.getDevid(requestContext);
-        Map<String, Object> logParams = new LinkedHashMap<String, Object>() {{
-            put("Method", requestContext.getMethod());
-            put("Path", requestContext.getUriInfo().getPath());
-        }};
+        LogMap logMap = LogMap.map("Method", requestContext.getMethod())
+                .put("Path", requestContext.getUriInfo().getPath());
 
         double burst = 0.0;
         double frequency = 1.0;
@@ -93,18 +90,17 @@ public class RateLimitCheck implements ContainerRequestFilter {
             }
 
             if (!skipRateLimit) {
-                logParams.put("RateKey", rateKey.toString());
+                logMap.add("RateKey", rateKey.toString());
                 checkRateLimitReached(devid, rateKey, burst, frequency);
             }
 
         } catch (AccountDisabledException ade) {
             requestContext.abortWith(ApiError.getAccountDisabled().getResponse(this.serializer).build());
-            this.logger.logUserTraceEvent(LOGFROM, "Account not valid", devid, logParams);
+            this.logger.logUserTraceEvent(LOGFROM, "Account not valid", devid, logMap);
         } catch (RateLimitedException rle) {
             requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
-            logParams.put("Burst", burst);
-            logParams.put("Frequency", frequency);
-            this.logger.logUserTraceEvent(LOGFROM, rle.getMessage(), devid, logParams);
+            this.logger.logUserTraceEvent(LOGFROM, rle.getMessage(), devid,
+                    logMap.put("Burst", burst).put("Frequency", frequency));
         } catch (Exception e) {
             requestContext.abortWith(ApiError.getInternalServerError().getResponse(this.serializer).build());
             this.logger.logUserExceptionEvent(LOGFROM, e.toString(), devid, e);

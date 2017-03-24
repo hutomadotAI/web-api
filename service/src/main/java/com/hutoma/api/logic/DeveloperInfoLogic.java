@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiDeveloperInfo;
 import com.hutoma.api.containers.ApiError;
@@ -31,21 +32,19 @@ public class DeveloperInfoLogic {
 
     public ApiResult getDeveloperInfo(final String authDevId, final String requestDevId) {
         try {
+            LogMap logMap = LogMap.map("DevId", requestDevId);
             DeveloperInfo info = this.database.getDeveloperInfo(requestDevId);
             if (info == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetDeveloperInfo - dev not found", authDevId,
-                        "DevId", requestDevId);
+                this.logger.logUserTraceEvent(LOGFROM, "GetDeveloperInfo - dev not found", authDevId, logMap);
                 return ApiError.getNotFound(String.format("Developer %s not found", requestDevId));
             }
             if (authDevId.equalsIgnoreCase(requestDevId)) {
                 // Developer is requesting it's own details, so all data can be sent
-                this.logger.logUserTraceEvent(LOGFROM, "GetDeveloperInfo - own details", authDevId,
-                        "DevId", requestDevId);
+                this.logger.logUserTraceEvent(LOGFROM, "GetDeveloperInfo - own details", authDevId, logMap);
                 return new ApiDeveloperInfo(info).setSuccessStatus();
             } else {
                 // Developer is requesting details from another developer, so only public info can be sent
-                this.logger.logUserTraceEvent(LOGFROM, "GetDeveloperInfo - other dev details", authDevId,
-                        "DevId", requestDevId);
+                this.logger.logUserTraceEvent(LOGFROM, "GetDeveloperInfo - other dev details", authDevId, logMap);
                 return new ApiDeveloperInfo(info.getPublicInfo()).setSuccessStatus();
             }
         } catch (Exception ex) {
@@ -64,7 +63,7 @@ public class DeveloperInfoLogic {
                     .collect(Collectors.toList());
             String emptyParamAsString = String.join(",", emptyParams);
             this.logger.logUserTraceEvent(LOGFROM, "SetDeveloperInfo - null or empty params", devId,
-                    "Params", emptyParamAsString);
+                    LogMap.map("Params", emptyParamAsString));
             return ApiError.getBadRequest(String.format("Parameters %s cannot be null or empty", emptyParamAsString));
         }
 
