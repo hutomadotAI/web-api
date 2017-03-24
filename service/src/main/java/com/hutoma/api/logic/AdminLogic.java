@@ -4,6 +4,7 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAdmin;
@@ -71,10 +72,12 @@ public class AdminLogic {
 
             if (!this.database.createDev(username, email, password, passwordSalt, firstName, lastName,
                     devToken, planId, devId.toString(), clientToken)) {
-                this.logger.logUserErrorEvent(LOGFROM, "CreateDev - failed to create", ADMIN_DEVID_LOG, "Email", email);
+                this.logger.logUserErrorEvent(LOGFROM, "CreateDev - failed to create", ADMIN_DEVID_LOG,
+                        LogMap.map("Email", email));
                 return ApiError.getInternalServerError();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, "DevId", devId.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG,
+                    LogMap.map("DevId", devId));
             return new ApiAdmin(devToken, devId.toString()).setSuccessStatus("created successfully");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, e);
@@ -83,32 +86,33 @@ public class AdminLogic {
     }
 
     public ApiResult deleteDev(final String devId) {
-
+        LogMap logMap = LogMap.map("DevId", devId);
         try {
             //TODO: distinguish between error condition and "failed to delete", perhaps because the dev was not found?
             if (!this.database.deleteDev(devId)) {
-                this.logger.logUserWarnEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, "DevId", devId);
+                this.logger.logUserWarnEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, logMap);
                 return ApiError.getBadRequest("not found or unable to delete");
             }
             this.aiServices.deleteDev(devId);
-            this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, "DevId", devId);
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, logMap);
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleveDev", ADMIN_DEVID_LOG, e);
             return ApiError.getInternalServerError();
         }
 
-        this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, "DevId", devId);
+        this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, logMap);
         return new ApiResult().setSuccessStatus("deleted successfully");
     }
 
     public ApiResult getDevToken(final String devid) {
+        LogMap logMap = LogMap.map("DevId", devid);
         try {
             String devtoken = this.database.getDevToken(devid);
             if (devtoken == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetDevToken - not found", ADMIN_DEVID_LOG, "DevId", devid);
+                this.logger.logUserTraceEvent(LOGFROM, "GetDevToken - not found", ADMIN_DEVID_LOG, logMap);
                 return ApiError.getNotFound();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, "DevId", devid);
+            this.logger.logUserTraceEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, logMap);
             return new ApiAdmin(devtoken, devid).setSuccessStatus();
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, e);

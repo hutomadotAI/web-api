@@ -4,6 +4,7 @@ import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
@@ -25,7 +26,6 @@ import com.hutoma.api.memory.IMemoryIntentHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class ChatLogic {
     private final ChatLogger chatLogger;
     private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
-    private Map<String, Object> telemetryMap;
+    private LogMap telemetryMap;
     private float minP;
     private ChatState chatState;
 
@@ -86,18 +86,14 @@ public class ChatLogic {
         apiChat.setTimestamp(startTime);
 
         // Add telemetry for the request
-        this.telemetryMap = new LinkedHashMap<String, Object>() {
-            {
-                put("DevId", devId);
-                put("AIID", aiid.toString());
-                put("Topic", ChatLogic.this.chatState.getTopic());
+        this.telemetryMap = LogMap.map("DevId", devId)
+                .put("AIID", aiid)
+                .put("Topic", this.chatState.getTopic())
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
-                put("ChatId", chatUuid.toString());
-                put("History", history);
-                put("Q", question);
-            }
-        };
+                .put("ChatId", chatUuid)
+                .put("History", history)
+                .put("Q", question);
 
         List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid);
         // For now we should only have one active intent per chat.
@@ -124,7 +120,7 @@ public class ChatLogic {
                 if (result != null) {
                     // are we confident enough with this reply?
                     wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
-                    this.telemetryMap.put("WNETConfident", Boolean.toString(wnetConfident));
+                    this.telemetryMap.add("WNETConfident", Boolean.toString(wnetConfident));
 
                     if (wnetConfident) {
                         // if we are taking WNET's reply then process intents
@@ -133,21 +129,21 @@ public class ChatLogic {
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
-                            this.telemetryMap.put("IntentRecognized", memoryIntent.getName());
+                            this.telemetryMap.add("IntentRecognized", memoryIntent.getName());
 
                             if (processIntent(devId, aiid, memoryIntent, question, result)) {
-                                this.telemetryMap.put("AnsweredBy", "WNET");
+                                this.telemetryMap.add("AnsweredBy", "WNET");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
                                 wnetConfident = false;
                             }
                         } else {
-                            this.telemetryMap.put("AnsweredBy", "WNET");
+                            this.telemetryMap.add("AnsweredBy", "WNET");
                         }
                     }
                 }
-                this.telemetryMap.put("AnsweredWithConfidence", wnetConfident);
-                this.telemetryMap.put("WNETAnswered", result != null);
+                this.telemetryMap.add("AnsweredWithConfidence", wnetConfident);
+                this.telemetryMap.add("WNETAnswered", result != null);
 
                 if (!wnetConfident) {
                     // otherwise,
@@ -159,47 +155,45 @@ public class ChatLogic {
                     if (aimlResult != null) {
                         // are we confident enough with this reply?
                         aimlConfident = aimlResult.getScore() > 0.0d;
-                        this.telemetryMap.put("AIMLConfident", aimlConfident);
+                        this.telemetryMap.add("AIMLConfident", aimlConfident);
                         if (aimlConfident) {
-                            this.telemetryMap.put("AnsweredBy", "AIML");
-                            this.telemetryMap.put("AnsweredWithConfidence", true);
+                            this.telemetryMap.add("AnsweredBy", "AIML");
+                            this.telemetryMap.add("AnsweredWithConfidence", true);
                             result = aimlResult;
                         }
                     }
-                    this.telemetryMap.put("AIMLAnswered", aimlResult != null);
+                    this.telemetryMap.add("AIMLAnswered", aimlResult != null);
 
                     if (aimlResult == null || !aimlConfident) {
                         // get a response from the RNN
                         ChatResult rnnResult = this.interpretRnnResult();
 
                         // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
-                        this.telemetryMap.put("AnsweredWithConfidence", false);
+                        this.telemetryMap.add("AnsweredWithConfidence", false);
 
                         if (rnnResult != null) {
                             // If the RNN was clueless or returned an empty response
                             if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
-                                // Mark it as not really answered
-
                                 // Use AIML, if available, use it as it will always generate something
                                 if (aimlResult != null) {
-                                    this.telemetryMap.put("AnsweredBy", "AIML");
+                                    this.telemetryMap.add("AnsweredBy", "AIML");
                                     result = aimlResult;
                                 } else {
                                     // TODO we need to figure out something
-                                    this.telemetryMap.put("AnsweredBy", "NONE");
+                                    this.telemetryMap.add("AnsweredBy", "NONE");
                                     result = getImCompletelyLostChatResult(chatUuid);
                                 }
                             } else {
                                 result = rnnResult;
-                                this.telemetryMap.put("AnsweredBy", "RNN");
+                                this.telemetryMap.add("AnsweredBy", "RNN");
                             }
                         } else {
                             // TODO we need to figure out something
-                            this.telemetryMap.put("AnsweredBy", "NONE");
+                            this.telemetryMap.add("AnsweredBy", "NONE");
                             result = getImCompletelyLostChatResult(chatUuid);
                         }
 
-                        this.telemetryMap.put("RNNAnswered", rnnResult != null);
+                        this.telemetryMap.add("RNNAnswered", rnnResult != null);
                     }
                 }
             }
@@ -221,18 +215,18 @@ public class ChatLogic {
 
         } catch (RequestBase.AiNotFoundException notFoundException) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devId,
-                    "Message", notFoundException.getMessage(), "AIID", aiid.toString());
+                    LogMap.map("Message", notFoundException.getMessage()).put("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devId, notFoundException, this.telemetryMap);
             return ApiError.getNotFound("AI not found");
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
             return ApiError.getBadRequest("This AI is not ready to chat. It needs to train and/or be linked to bots");
 
         } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
-                    devId, ex, "AIID", aiid.toString());
+                    devId, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
         } catch (Exception e) {
@@ -248,15 +242,15 @@ public class ChatLogic {
         this.chatState.setTopic(apiChat.getResult().getTopicOut());
         this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
 
-        this.telemetryMap.put("RequestDuration", result.getElapsedTime());
-        this.telemetryMap.put("ResponseSent", result.getAnswer());
-        this.telemetryMap.put("Score", result.getScore());
-        this.telemetryMap.put("LockedToAi",
+        this.telemetryMap.add("RequestDuration", result.getElapsedTime());
+        this.telemetryMap.add("ResponseSent", result.getAnswer());
+        this.telemetryMap.add("Score", result.getScore());
+        this.telemetryMap.add("LockedToAi",
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
 
         // log the results
         this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devId, this.telemetryMap);
-        this.logger.logUserTraceEvent(LOGFROM, "Chat", devId, "AIID", aiid.toString(), "SessionId", chatId);
+        this.logger.logUserTraceEvent(LOGFROM, "Chat", devId, LogMap.map("AIID", aiid).put("SessionId", chatId));
         return apiChat.setSuccessStatus();
     }
 
@@ -267,18 +261,14 @@ public class ChatLogic {
         UUID chatUuid = UUID.fromString(chatId);
 
         // Add telemetry for the request
-        this.telemetryMap = new LinkedHashMap<String, Object>() {
-            {
-                put("DevId", devId);
-                put("AIID", aiid.toString());
-                put("Topic", topic);
+        this.telemetryMap = LogMap.map("DevId", devId)
+                .put("AIID", aiid)
+                .put("Topic", topic)
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
-                put("ChatId", chatUuid.toString());
-                put("History", history);
-                put("Q", question);
-            }
-        };
+                .put("ChatId", chatUuid.toString())
+                .put("History", history)
+                .put("Q", question);
 
         ChatResult result = new ChatResult();
         result.setElapsedTime(this.tools.getTimestamp() - startTime);
@@ -290,7 +280,7 @@ public class ChatLogic {
 
         // set the chat response time to the whole duration since the start of the request until now
         result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
-        this.telemetryMap.put("RequestDuration", result.getElapsedTime());
+        this.telemetryMap.add("RequestDuration", result.getElapsedTime());
 
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
@@ -332,8 +322,7 @@ public class ChatLogic {
                     this.logger.logUserErrorEvent(LOGFROM,
                             "Error occured executing WebHook for intent %s for aiid %s.",
                             devId,
-                            currentIntent.getName(),
-                            aiid.toString());
+                            LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
                 } else if (!response.getText().isEmpty()) {
                     chatResult.setAnswer(response.getText());
                 }
@@ -351,8 +340,8 @@ public class ChatLogic {
                 if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                     // Should not happen as this should be validated during creation
                     this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
-                            devId, "AIID", aiid.toString(), "Intent", currentIntent.getName(),
-                            "Variable", variable.getName());
+                            devId, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
+                                    .put("Variable", variable.getName()));
                     throw new IntentException(
                             String.format("Entity %s for intent %s does not specify any prompts",
                                     currentIntent.getName(), variable.getName()));
@@ -364,7 +353,7 @@ public class ChatLogic {
                     chatResult.setAnswer(variable.getPrompts().get(pos));
                     // and decrement the number of prompts
                     variable.setTimesPrompted(variable.getTimesPrompted() + 1);
-                    this.telemetryMap.put("IntentPrompt",
+                    this.telemetryMap.add("IntentPrompt",
                             String.format("intent:'%s' variable:'%s' currentPrompt:%d/%d",
                                     currentIntent.getName(), variable.getName(),
                                     variable.getTimesPrompted(),
@@ -374,7 +363,7 @@ public class ChatLogic {
             } else { // intent not fulfilled but no variables left to handle
                 // if we run out of n_prompts we just stop asking.
                 // the user can still answer the question ... or not
-                this.telemetryMap.put("IntentNotFulfilled", currentIntent.getName());
+                this.telemetryMap.add("IntentNotFulfilled", currentIntent.getName());
             }
         }
 
@@ -422,7 +411,7 @@ public class ChatLogic {
         }
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
         ChatResult chatResult = result.getB();
         if (chatResult.getAnswer() != null) {
@@ -440,15 +429,15 @@ public class ChatLogic {
         } else {
             chatResult.setAnswer("");
             chatResult.setScore(0.0);
-            this.telemetryMap.put("WNETResponseNULL", "true");
+            this.telemetryMap.add("WNETResponseNULL", "true");
         }
 
         this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
-        this.telemetryMap.put("WNETAnswer", chatResult.getAnswer());
-        this.telemetryMap.put("WNETTopicOut", chatResult.getTopicOut());
-        this.telemetryMap.put("WNETElapsedTime", chatResult.getElapsedTime());
+        this.telemetryMap.add("WNETAnswer", chatResult.getAnswer());
+        this.telemetryMap.add("WNETTopicOut", chatResult.getTopicOut());
+        this.telemetryMap.add("WNETElapsedTime", chatResult.getElapsedTime());
         return chatResult;
     }
 
@@ -474,8 +463,8 @@ public class ChatLogic {
         this.logger.logDebug(LOGFROM, String.format("AIML response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
-        this.telemetryMap.put("AIMLAnswer", chatResult.getAnswer());
-        this.telemetryMap.put("AIMLElapsedTime", chatResult.getElapsedTime());
+        this.telemetryMap.add("AIMLAnswer", chatResult.getAnswer());
+        this.telemetryMap.add("AIMLElapsedTime", chatResult.getElapsedTime());
         return chatResult;
     }
 
@@ -487,7 +476,7 @@ public class ChatLogic {
         }
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
         ChatResult chatResult = result.getB();
         if (chatResult.getAnswer() != null) {
@@ -497,15 +486,15 @@ public class ChatLogic {
             chatResult.setAnswer(chatResult.getAnswer().trim());
         } else {
             chatResult.setAnswer("");
-            this.telemetryMap.put("RNNResponseNULL", "");
+            this.telemetryMap.add("RNNResponseNULL", "");
         }
 
         this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
                 toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
 
-        this.telemetryMap.put("RNNElapsedTime", chatResult.getElapsedTime());
-        this.telemetryMap.put("RNNAnswer", chatResult.getAnswer());
-        this.telemetryMap.put("RNNTopicOut", chatResult.getTopicOut());
+        this.telemetryMap.add("RNNElapsedTime", chatResult.getElapsedTime());
+        this.telemetryMap.add("RNNAnswer", chatResult.getAnswer());
+        this.telemetryMap.add("RNNTopicOut", chatResult.getTopicOut());
 
         return chatResult;
     }
@@ -515,7 +504,7 @@ public class ChatLogic {
     }
 
     private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid,
-                                       Map<String, Object> telemetryMap) {
+                                       LogMap telemetryMap) {
         memoryIntent.setIsFulfilled(true);
         ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
         if (intent != null) {
