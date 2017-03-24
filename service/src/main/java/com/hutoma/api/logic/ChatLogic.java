@@ -334,7 +334,7 @@ public class ChatLogic {
                             devId,
                             currentIntent.getName(),
                             aiid.toString());
-                } else if (response.getText() != "") {
+                } else if (!response.getText().isEmpty()) {
                     chatResult.setAnswer(response.getText());
                 }
             }
@@ -461,6 +461,8 @@ public class ChatLogic {
 
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(allResults);
+        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+
         ChatResult chatResult = result.getB();
 
         // always reset the conversation if we have gone with a non-wnet result
