@@ -92,6 +92,10 @@ function showBots(str, option, bots, botSubSet ) {
             //wHTML += ('<span class="card-users text-left">'+ bot['activations']+'</span>');
             wHTML += ('</div>');
 
+            var dataBuyBot = 'id="btnBuyBot' + bot['botId']
+                + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name']
+                + '" data-description="' + bot['description']
+                + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"';
             switch (option) {
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
@@ -99,7 +103,7 @@ function showBots(str, option, bots, botSubSet ) {
                         wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
                     }
                     else {
-                        wHTML += ('<div class="card-price pull-right">');
+                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
                         wHTML += (bot['price']+ ' &#8364');
                         wHTML += ('</div>');
                     }
@@ -112,7 +116,7 @@ function showBots(str, option, bots, botSubSet ) {
                         wHTML += ('</div>');
                     }
                     else {
-                        wHTML += ('<div class="card-price pull-right">');
+                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
                         wHTML += (bot['price']+ ' &#8364');
                         wHTML += ('</div>');
                     }
