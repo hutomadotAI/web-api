@@ -92,6 +92,10 @@ function showBots(str, option, bots, botSubSet ) {
             //wHTML += ('<span class="card-users text-left">'+ bot['activations']+'</span>');
             wHTML += ('</div>');
 
+            var dataBuyBot = 'id="btnBuyBot' + bot['botId']
+                + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name']
+                + '" data-description="' + bot['description']
+                + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"';
             switch (option) {
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
@@ -99,7 +103,7 @@ function showBots(str, option, bots, botSubSet ) {
                         wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
                     }
                     else {
-                        wHTML += ('<div class="card-price pull-right">');
+                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
                         wHTML += (bot['price']+ ' &#8364');
                         wHTML += ('</div>');
                     }
@@ -112,7 +116,7 @@ function showBots(str, option, bots, botSubSet ) {
                         wHTML += ('</div>');
                     }
                     else {
-                        wHTML += ('<div class="card-price pull-right">');
+                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
                         wHTML += (bot['price']+ ' &#8364');
                         wHTML += ('</div>');
                     }
@@ -138,6 +142,30 @@ function showBots(str, option, bots, botSubSet ) {
     }
     newNode.innerHTML = wHTML;
     document.getElementById('botsSearch').appendChild(newNode);
+}
+
+function switchCard(botId,optionFlow) {
+    var node = document.getElementById('card' + botId);
+    var btnClassName = 'card-price pull-right'
+    var pos = node.getAttribute('data-pos');
+    var targetDiv = node.getElementsByClassName(btnClassName)[0];
+    switch (optionFlow) {
+        case DRAW_BOTCARDS.BOTSTORE_FLOW.value:
+            targetDiv.classList.remove('card-price');
+            targetDiv.classList.add('card-purchased');
+            targetDiv.setAttribute('data-toggle', '');
+            targetDiv.setAttribute('data-target', '');
+            targetDiv.innerHTML = ('purchased');
+            break;
+        case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
+            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + botId + '");></div>');
+            var parent = targetDiv.parentNode;
+            parent.setAttribute('data-linked', '0');
+            parent.innerHTML = wHTML;
+            break;
+        default:
+            console.log("Option flow has a wrong value")
+    }
 }
 
 function openSingleBot(elem, option, botId, purchased) {

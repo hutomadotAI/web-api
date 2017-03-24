@@ -6588,6 +6588,7 @@ ul.pagination li a {
     background: #7cc841;
     margin:5px 10px 0 0;
     letter-spacing: -1px;
+    cursor: pointer;
 }
 
 .card-purchased {
