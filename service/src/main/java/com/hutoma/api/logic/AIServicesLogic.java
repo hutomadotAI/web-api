@@ -106,7 +106,7 @@ public class AIServicesLogic {
             // we accept the update. log it.
             this.serviceStatusLogger.logStatusUpdate(LOGFROM, status, serverIdentifier);
 
-            if (!this.database.updateAIStatus(status, this.jsonSerializer)) {
+            if (!this.database.updateAIStatus(status)) {
                 this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",
                         serverIdentifier, status.getAiid()));
                 return ApiError.getNotFound();

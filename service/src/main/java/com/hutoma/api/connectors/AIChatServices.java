@@ -204,7 +204,7 @@ public class AIChatServices extends ServerConnector {
         BackendStatus result = null;
         try {
             // try to get the real status from the database
-            result = this.database.getAIStatusReadOnly(devId, aiid, this.serializer);
+            result = this.database.getAIStatusReadOnly(devId, aiid);
         } catch (Database.DatabaseException ex) {
             // if it fails, log the error and keep the set null
             this.logger.logException(LOGFROM, ex);

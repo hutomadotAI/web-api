@@ -140,7 +140,7 @@ public class AIBotStoreLogic {
                         "AIID", aiid.toString());
                 return ApiError.getBadRequest("AI already has a published bot");
             }
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.database.getAI(devId, aiid);
             if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devId, "AIID", aiid.toString());
                 return ApiError.getBadRequest("AI needs to be fully trained before being allowed to be published");

@@ -74,7 +74,7 @@ public class TrainingLogic {
         ArrayList<String> source;
 
         long maxUploadFileSize = 1024L * this.config.getMaxUploadSizeKb();
-        Map<String, String> logMap = new LinkedHashMap<>();
+        Map<String, Object> logMap = new LinkedHashMap<>();
         logMap.put("AIID", aiid.toString());
 
         try {
@@ -186,7 +186,7 @@ public class TrainingLogic {
         Map<String, String> logMap = new LinkedHashMap<>();
         logMap.put("AIID", aiid.toString());
         try {
-            ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ai = this.database.getAI(devid, aiid);
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devid, ex);
             return ApiError.getInternalServerError();
@@ -236,7 +236,7 @@ public class TrainingLogic {
 
     public ApiResult stopTraining(final String devid, final UUID aiid) {
         try {
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.database.getAI(devid, aiid);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devid, "AIID", aiid.toString());
                 return ApiError.getNotFound();
@@ -267,7 +267,7 @@ public class TrainingLogic {
 
     public ApiResult updateTraining(final String devId, final UUID aiid) {
         try {
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.database.getAI(devId, aiid);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devId, "AIID", aiid.toString());
                 return ApiError.getNotFound();
@@ -392,7 +392,7 @@ public class TrainingLogic {
 
     private String getTrainingMaterialsCommon(final String devId, final UUID aiid) throws DatabaseException {
         StringBuilder sb = new StringBuilder();
-        ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+        ApiAi ai = this.database.getAI(devId, aiid);
         if (ai == null) {
             this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterialsCommon - AI not found", devId,
                     "AIID", aiid.toString());

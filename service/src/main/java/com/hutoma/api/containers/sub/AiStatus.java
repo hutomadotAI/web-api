@@ -23,10 +23,13 @@ public class AiStatus {
 
     @SerializedName("training_progress")
     private final double trainingProgress;
+
     @SerializedName("server_session_id")
     public UUID serverSessionID;
+
     @SerializedName("training_error")
     private double trainingError;
+
     @SerializedName("ai_hash")
     private String aiHash;
 
@@ -78,5 +81,9 @@ public class AiStatus {
 
     public UUID getServerSessionID() {
         return this.serverSessionID;
+    }
+
+    public String getEndpoint() {
+        return "unknown";
     }
 }

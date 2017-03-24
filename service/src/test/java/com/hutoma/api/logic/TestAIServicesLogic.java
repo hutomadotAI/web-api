@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import java.net.HttpURLConnection;
 import java.util.UUID;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 
@@ -72,7 +71,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -83,7 +82,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(false);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(false);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -94,7 +93,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -105,7 +104,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(Database.DatabaseException.class);
         status.setTrainingError(Double.NaN);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -117,7 +116,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         verify(this.fakeControllerWnet, times(1)).setHashCodeFor(TestDataHelper.AIID, "hash");
@@ -129,7 +128,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 this.fakeTools.createNewRandomUUID());
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -145,7 +144,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 session);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }

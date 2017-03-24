@@ -6,9 +6,10 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
+
+import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +60,8 @@ public class DatabaseAiStatusUpdates extends Database {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
             // read the status json for all the servers
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatusAll", 0)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAIsServerStatus", 1)
+                    .add(serverType.value())
                     .executeQuery();
 
             while (rs.next()) {
@@ -79,12 +81,10 @@ public class DatabaseAiStatusUpdates extends Database {
 
                         UUID devid = UUID.fromString(rs.getString("dev_id"));
                         logDevid = devid;
-                        BackendStatus statusBlockInDB = getBackendStatus(
-                                rs.getString("backend_status"), jsonSerializer);
+
                         // get the status for the ai that we have in the db
-                        TrainingStatus statusInDb = statusBlockInDB
-                                .getEngineStatus(serverType)
-                                .getTrainingStatus();
+                        TrainingStatus statusInDb = TrainingStatus.forValue(
+                                rs.getString("training_status"));
                         // no status is the equivalent of UNDEFINED
                         statusInDb = (statusInDb == null) ? TrainingStatus.AI_UNDEFINED : statusInDb;
 
@@ -118,7 +118,7 @@ public class DatabaseAiStatusUpdates extends Database {
                             TrainingStatus finalStatusInDb1 = statusInDb;
                             this.logger.logUserWarnEvent(LOGFROM,
                                     String.format("%s status mismatch. Updating from %s to %s for ai %s",
-                                            serverType.toString(), statusInDb.toString(),
+                                            serverType.value(), statusInDb.toString(),
                                             statusOnBackend.toString(), aiid.toString()),
                                     null, new HashMap<String, Object>() {{
                                         this.put("AIEngine", serverType.toString());
@@ -128,14 +128,20 @@ public class DatabaseAiStatusUpdates extends Database {
                                         this.put("BackendStatus", finalStatusOnBackend.toString());
                                     }});
 
-                            // keep everything but update the status
-                            statusBlockInDB.updateEngineStatus(serverType, statusOnBackend);
+                            // load the last queue time
+                            // if this is null then we have to be sure to keep it null
+                            java.sql.Date oldQueueDate = rs.getDate("queue_time");
 
-                            // write the json block back to the AI table
-                            transaction.getDatabaseCall().initialise("updateAiStatus", 3)
+                            // keep everything but update the status
+                            transaction.getDatabaseCall().initialise("updateAiStatus", 8)
+                                    .add(serverType.value())
                                     .add(aiid)
-                                    .add(devid)
-                                    .add(jsonSerializer.serialize(statusBlockInDB))
+                                    .add(statusOnBackend.value())
+                                    .add(rs.getString("server_endpoint"))
+                                    .add(rs.getDouble("training_progress"))
+                                    .add(rs.getDouble("training_error"))
+                                    .add(oldQueueDate != null)
+                                    .add((oldQueueDate == null) ? DateTime.now() : new DateTime(oldQueueDate))
                                     .executeUpdate();
                         }
                     }

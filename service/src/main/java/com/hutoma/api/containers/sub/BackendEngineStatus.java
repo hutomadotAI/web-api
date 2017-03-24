@@ -16,10 +16,14 @@ public class BackendEngineStatus {
     @SerializedName("ai_hash")
     private String aiHash;
 
+    public BackendEngineStatus(final TrainingStatus trainingStatus, final double trainingError, final double trainingProgress) {
+        this.trainingStatus = trainingStatus;
+        this.trainingError = trainingError;
+        this.trainingProgress = trainingProgress;
+    }
+
     public BackendEngineStatus() {
-        this.trainingStatus = TrainingStatus.AI_UNDEFINED;
-        this.trainingError = 0.0d;
-        this.trainingProgress = 0.0d;
+        this(TrainingStatus.AI_UNDEFINED, 0.0d, 0.0d);
         this.aiHash = "";
     }
 
@@ -32,10 +36,6 @@ public class BackendEngineStatus {
 
     public TrainingStatus getTrainingStatus() {
         return this.trainingStatus;
-    }
-
-    void setTrainingStatus(final TrainingStatus trainingStatus) {
-        this.trainingStatus = trainingStatus;
     }
 
     public double getTrainingError() {

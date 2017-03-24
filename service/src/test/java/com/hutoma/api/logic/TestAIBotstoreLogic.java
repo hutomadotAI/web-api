@@ -191,7 +191,7 @@ public class TestAIBotstoreLogic {
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 987654;
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
         ApiAiBot result = (ApiAiBot) TestBotHelper.publishSampleBot(this.aiBotStoreLogic);
@@ -205,7 +205,7 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot_errorInsert() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(-1);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
@@ -223,7 +223,7 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
@@ -233,7 +233,7 @@ public class TestAIBotstoreLogic {
     @Test
     public void testPublishBot_aiNotTrained() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, false));
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());

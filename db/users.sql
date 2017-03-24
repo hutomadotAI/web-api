@@ -13,6 +13,8 @@ GRANT EXECUTE ON `hutoma`.* TO 'aiDeleter'@'127.0.0.1';
 
 GRANT SELECT, UPDATE, DELETE ON `hutoma`.`ai` TO 'aiDeleter'@'127.0.0.1';
 
+GRANT SELECT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiDeleter'@'127.0.0.1';
+
 
 # Privileges for `aiReader`@`127.0.0.1`
 
@@ -31,6 +33,8 @@ GRANT SELECT ON `hutoma`.`botStore` TO 'aiReader'@'127.0.0.1';
 GRANT SELECT ON `hutoma`.`bot_ai` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`webhooks` TO `aiReader`@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiReader'@'127.0.0.1';
 
 
 # Privileges for `aiWriter`@`127.0.0.1`

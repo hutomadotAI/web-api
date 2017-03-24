@@ -125,7 +125,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 76832;
         when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
         final Response response = target(BOTSTORE_BASEPATH)
