@@ -15,7 +15,7 @@ class telemetry
     private static $instance;
     private $curl;
     private $loggingUrl;
-    
+
     private function __construct()
     {
         $this->curl = new curl();
@@ -38,13 +38,15 @@ class telemetry
         }
     }
 
-    private function getAppId() {
-        $envUrl = getenv("LOG_SERVICE_ANALYTICS_APPID");
-        if (isset($envUrl) && $envUrl != "") {
-            $this->loggingUrl = $envUrl;
+    private function getAppId()
+    {
+        $appId = getenv("LOG_SERVICE_ANALYTICS_APPID");
+        if (isset($appId) && $appId != "") {
+            return $appId;
         } else {
-            unset($this->loggingUrl);
+            error_log("Telemetry - Could not obtain the APPID for this service");
         }
+        return null;
     }
 
     public static function getInstance()
