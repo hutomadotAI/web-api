@@ -40,19 +40,7 @@ unset($entityApi);
 
 $intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 $webHook= $intentsApi->getWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
-
-if ($webHook==NULL) {
-    $v = array(
-        'intent_name' => $intentName,
-        'endpoint' => 'prova-com',
-        'enabled' => true
-    );
-    var_dump('Inizio');
-    $hook = $intentsApi->createWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $v);
-    var_dump($hook);
-    exit;
-}
-unset($intentsApi);
+//unset($intentsApi);
 
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
@@ -76,11 +64,23 @@ if ($bot['status']['code'] !== 200) {
     exit;
 }
 
-if ($webHook['status']['code'] !== 200) {
-    unset($bot);
+if ($webHook['status']['code'] !== 200 && $webHook['status']['code'] !== 400) {
+    unset($webHook);
     \hutoma\console::redirect('./error.php?err=205');
     exit;
 }
+
+$v = array(
+    'intent_name' => $intentName,
+    'endpoint' => 'hutoma.com',
+    'enabled' => true
+);
+var_dump('intent name: '. $intentName);
+var_dump('intent name: '. $v['intent_name']);
+$hook = $intentsApi->createWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $v);
+var_dump('response: '.$hook['status']['info']);
+exit;
+
 
 function isPostInputAvailable()
 {
@@ -103,6 +103,14 @@ function echoJsonEntityListResponse($entityList)
         echo '""'; // return empty string
 }
 
+function echoJsonWebHook($webHook)
+{
+    if ($webHook['status']['code'] !== 400)
+        echo json_encode($webHook);
+    else {
+        echo '""'; // return empty string
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -198,6 +206,7 @@ function echoJsonEntityListResponse($entityList)
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
     var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
+    var webhook = <?php echoJsonWebHook($webHook); unset($webHook);?>;
 </script>
 </body>
 </html>
