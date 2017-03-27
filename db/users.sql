@@ -209,3 +209,10 @@ GRANT EXECUTE ON `hutoma`.* TO 'botStoreWriter'@'127.0.0.1';
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botStore` TO 'botStoreWriter'@'127.0.0.1';
 
 GRANT INSERT, DELETE ON `hutoma`.`botIcon` TO 'botStoreWriter'@'127.0.0.1';
+
+
+# Privileges for `analytics`@`%`
+
+CREATE USER 'analytics'@'%' IDENTIFIED BY '*2F308CADE7BCAFDE8273D8DA24246FFC892588AF';
+
+GRANT SELECT,CREATE TEMPORARY TABLES  ON hutoma.* to 'analytics'@'%';
