@@ -140,7 +140,7 @@ public class ParameterFilter extends Validate {
     }
 
     public static WebHook getWebHook(final ContainerRequestContext requestContext) {
-        return (WebHook) requestContext.getProperty(APIParameter.IntentJson.toString());
+        return (WebHook) requestContext.getProperty(APIParameter.WebhookJson.toString());
     }
 
     /***

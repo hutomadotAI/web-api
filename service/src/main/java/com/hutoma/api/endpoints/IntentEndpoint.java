@@ -89,7 +89,6 @@ public class IntentEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
-    @ValidatePost({APIParameter.WebhookJson})
     public Response getIntentWebhook(
             @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.intentLogic.getWebHook(

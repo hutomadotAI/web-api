@@ -13,6 +13,7 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
+import com.hutoma.api.containers.sub.WebHook;
 
 import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.message.internal.MediaTypes;
@@ -191,6 +192,15 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
                 this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
+            }
+
+            if (checkList.contains(APIParameter.WebhookJson)) {
+                WebHook webHook = (WebHook) this.serializer.deserialize(request.getEntityStream(), WebHook.class);
+                this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+                this.checkParameterNotNull(AIID, webHook.getAiid());
+                this.checkParameterNotNull("endpoint", webHook.getEndpoint());
+                this.checkParameterNotNull("enabled", webHook.getEnabled());
+                request.setProperty(APIParameter.WebhookJson.toString(), webHook);
             }
 
             // verify an intent object delivered in json
