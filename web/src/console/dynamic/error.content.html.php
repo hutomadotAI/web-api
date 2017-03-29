@@ -195,18 +195,6 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - GET INTENT INFORMATION FAILED';
             $details = ' We could not find the data you were looking for';
             break;
-        case 312 :
-            $msg = 'INTERNAL ERROR - CREATION WEBHOOK FAILED';
-            $details = ' We could not find the data you were looking for';
-            break;
-        case 313 :
-            $msg = 'INTERNAL ERROR - GET WEBHOOK INFORMATION FAILED';
-            $details = ' We could not find the data you were looking for';
-            break;
-        case 314 :
-            $msg = 'INTERNAL ERROR - UPDATE WEBHOOK FAILED';
-            $details = ' We could not find the data you were looking for';
-            break;
         case 315 :
             $msg = 'INTERNAL ERROR - GET INTENT EXPRESSIONS FAILED';
             $details = ' We could not find the data you were looking for';
