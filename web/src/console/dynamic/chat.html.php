@@ -9,6 +9,7 @@
     var AI = <?php echo json_encode( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] ); ?>;
     var lang = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']); ?>;
     var gender = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']); ?>;
+    var speech = <?php if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['speech'])) echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['speech']); else echo 'false' ?>;
 </script>
 
 <ul class="sidebar-menu" id="console-menu">
@@ -28,8 +29,7 @@
                 </li>
             </ul>
         </div>
-
-
+        
     </div>
 </ul>
 

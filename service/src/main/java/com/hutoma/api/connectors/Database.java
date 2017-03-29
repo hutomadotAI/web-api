@@ -752,6 +752,13 @@ public class Database {
         }
     }
 
+    public boolean deleteWebHook(final UUID aiid, final String intentName) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteWebhook", 2).add(aiid).add(intentName);
+            return call.executeUpdate() > 0;
+        }
+    }
+
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
         final ArrayList<AiBot> bots = new ArrayList<>();
         while (rs.next()) {

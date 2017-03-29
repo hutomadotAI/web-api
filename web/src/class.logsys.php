@@ -534,8 +534,13 @@ class console
 
     public static function getAdminToken()
     {
-        return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-
+        $token = getenv("API_ADMIN_DEVTOKEN");
+        if (isset($token) && $token != "") {
+            return $token;
+        } else {
+            self::log_error("getAdminToken", "Admin token not found");
+        }
+        return null;
     }
 
     /**
@@ -1263,12 +1268,6 @@ class console
         $sid = session_id();
         return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
     }
-
-    function debug($data)
-    {
-        echo 'console.log(' . $data . ');';
-    }
-
 
 }
 

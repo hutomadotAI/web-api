@@ -217,12 +217,13 @@ public class ChatLogic {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devId,
                     LogMap.map("Message", notFoundException.getMessage()).put("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devId, notFoundException, this.telemetryMap);
-            return ApiError.getNotFound("AI not found");
+            return ApiError.getNotFound("Bot not found");
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
-            return ApiError.getBadRequest("This AI is not ready to chat. It needs to train and/or be linked to bots");
+            return ApiError.getBadRequest(
+                    "This bot is not ready to chat. It needs to train and/or be linked to other bots");
 
         } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),

@@ -78,11 +78,17 @@ public class WebHooks {
             return null;
         }
 
-        Response response = this.jerseyClient.target(webHook.getEndpoint())
-                .property("Content-Type", "application/json")
-                .property("Content-Length", String.valueOf(jsonPayload.length()))
-                .request()
-                .post(Entity.json(jsonPayload));
+        Response response = null;
+        try {
+            response = this.jerseyClient.target(webHook.getEndpoint())
+                    .property("Content-Type", "application/json")
+                    .property("Content-Length", String.valueOf(jsonPayload.length()))
+                    .request()
+                    .post(Entity.json(jsonPayload));
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Execution Failed", devId, e);
+            return null;
+        }
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
@@ -93,14 +99,26 @@ public class WebHooks {
             return null;
         }
 
+        webHookResponse = this.deserializeResponse(response);
+
+        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s", intent.getAiid(), intent.getName()));
+        return webHookResponse;
+    }
+
+    /***
+     * Deserializes the json response to a WebHookResponse.
+     * @param response the Response to deserialize.
+     * @return The deserialized WebHookResponse or null.
+     */
+    public WebHookResponse deserializeResponse(final Response response) {
+        WebHookResponse webHookResponse = null;
         try {
-            webHookResponse = (WebHookResponse) this.serializer.deserialize((String) response.getEntity(), WebHookResponse.class);
+            webHookResponse = (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class), WebHookResponse.class);
         } catch (JsonParseException e) {
             this.logger.logException(LOGFROM, e);
             return null;
         }
 
-        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s", intent.getAiid(), intent.getName()));
         return webHookResponse;
     }
 
@@ -118,6 +136,6 @@ public class WebHooks {
             this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId, e);
         }
 
-        return webHook != null && webHook.getEnabled();
+        return webHook != null && webHook.isEnabled();
     }
 }
