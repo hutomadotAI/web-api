@@ -214,10 +214,10 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
                 WebHook webHook = intent.getWebHook();
                 if (webHook != null) {
-                    this.checkParameterNotNull("enabled", webHook.getEnabled());
+                    this.checkParameterNotNull("enabled", webHook.isEnabled());
                     this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
 
-                    if (webHook.getEnabled()) {
+                    if (webHook.isEnabled()) {
                         this.checkParameterNotNull("endpoint", webHook.getEndpoint());
                         this.checkParameterNotNull(AIID, webHook.getAiid());
                     }

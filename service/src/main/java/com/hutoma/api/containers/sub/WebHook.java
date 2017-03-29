@@ -2,7 +2,6 @@ package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.net.URL;
 import java.util.UUID;
 
 /**
@@ -27,6 +26,6 @@ public class WebHook {
 
     public UUID getAiid() { return this.aiid; }
     public String getIntentName() { return this.intentName; }
-    public boolean getEnabled() { return this.enabled; }
+    public boolean isEnabled() { return this.enabled; }
     public String getEndpoint() { return this.endpoint; }
 }

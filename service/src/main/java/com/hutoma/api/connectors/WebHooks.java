@@ -136,6 +136,6 @@ public class WebHooks {
             this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId, e);
         }
 
-        return webHook != null && webHook.getEnabled();
+        return webHook != null && webHook.isEnabled();
     }
 }
