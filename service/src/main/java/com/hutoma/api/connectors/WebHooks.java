@@ -78,11 +78,17 @@ public class WebHooks {
             return null;
         }
 
-        Response response = this.jerseyClient.target(webHook.getEndpoint())
-                .property("Content-Type", "application/json")
-                .property("Content-Length", String.valueOf(jsonPayload.length()))
-                .request()
-                .post(Entity.json(jsonPayload));
+        Response response = null;
+        try {
+            response = this.jerseyClient.target(webHook.getEndpoint())
+                    .property("Content-Type", "application/json")
+                    .property("Content-Length", String.valueOf(jsonPayload.length()))
+                    .request()
+                    .post(Entity.json(jsonPayload));
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Execution Failed", devId, e);
+            return null;
+        }
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
@@ -130,6 +136,6 @@ public class WebHooks {
             this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId, e);
         }
 
-        return webHook != null && webHook.getEnabled();
+        return webHook != null && webHook.isEnabled();
     }
 }

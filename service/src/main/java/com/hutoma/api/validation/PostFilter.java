@@ -72,7 +72,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case AiStatusJson:
                 case ServerRegistration:
                 case ServerAffinity:
-                case WebhookJson:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -194,15 +193,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
             }
 
-            if (checkList.contains(APIParameter.WebhookJson)) {
-                WebHook webHook = (WebHook) this.serializer.deserialize(request.getEntityStream(), WebHook.class);
-                this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
-                this.checkParameterNotNull(AIID, webHook.getAiid());
-                this.checkParameterNotNull("endpoint", webHook.getEndpoint());
-                this.checkParameterNotNull("enabled", webHook.getEnabled());
-                request.setProperty(APIParameter.WebhookJson.toString(), webHook);
-            }
-
             // verify an intent object delivered in json
             if (checkList.contains(APIParameter.IntentJson)) {
                 // decode
@@ -219,6 +209,17 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                                 variable.getPrompts()));
                         // the value
                         this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
+                    }
+                }
+
+                WebHook webHook = intent.getWebHook();
+                if (webHook != null) {
+                    this.checkParameterNotNull("enabled", webHook.isEnabled());
+                    this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+
+                    if (webHook.isEnabled()) {
+                        this.checkParameterNotNull("endpoint", webHook.getEndpoint());
+                        this.checkParameterNotNull(AIID, webHook.getAiid());
                     }
                 }
                 request.setProperty(APIParameter.IntentJson.toString(), intent);
