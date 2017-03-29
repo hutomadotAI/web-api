@@ -131,10 +131,6 @@ if (isset($_GET['err'])) {
             $msg = 'GET INFO BOT FAILED';
             $details = ' We could not find the data you were looking for';
             break;
-        case 205 :
-            $msg = 'GET INFO WEBHOOK FAILED';
-            $details = ' We could not find the data you were looking for';
-            break;
         case 210 :
             $msg = 'GET INFO INTENTS FAILED';
             $details = ' We could not find the data you were looking for';
