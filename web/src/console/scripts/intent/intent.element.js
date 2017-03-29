@@ -10,6 +10,15 @@ function getMultipleElementValues(elementName) {
     return values;
 }
 
+function getWebHookValues() {
+    var webhook = {};
+    webhook['aiid'] = aiid;
+    webhook['intent_name'] = document.getElementById('intent-name').value;
+    webhook['endpoint'] = document.getElementById('webhook').value;
+    webhook['enabled'] = (document.getElementById('btnWebHook').value =='false');
+    return webhook;
+}
+
 function addEscapeCharacter(value) {
     return value.replace(/,/g, "||#44;");
 }
@@ -24,6 +33,7 @@ function saveIntent() {
     var intentName = document.getElementById('intent-name').value;
     var expressions = getMultipleElementValues('user-expression-row');
     var responses = getMultipleElementValues('intent-response-row');
+    var webhook = getWebHookValues();
     var variables = [];
 
     var hasErrors = false;
@@ -33,6 +43,10 @@ function saveIntent() {
     }
     if (responses.length == 0) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required.');
+        hasErrors = true;
+    }
+    if ( (webhook['enabled'] == true) && webhook['endpoint'].trim()=="") {
+        msgAlertWebHook(ALERT.DANGER.value, 'WebHook endpoint cannot be empty.');
         hasErrors = true;
     }
     if (hasErrors) {
@@ -109,7 +123,6 @@ function saveIntent() {
     document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
-
     msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
     $.ajax({
         url: './dynamic/updateIntent.php',
@@ -117,7 +130,8 @@ function saveIntent() {
             intent_name: intentName,
             intent_expressions: expressions,
             intent_responses: responses,
-            variables: variables
+            variables: variables,
+            webhook: webhook
         },
         type: 'POST',
         success: function (response) {

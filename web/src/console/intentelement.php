@@ -16,31 +16,18 @@ if (!isPostInputAvailable()) {
     exit;
 }
 
-$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-
-if (isset($_POST['intent_name'])) {
-    // This is an intent update
-    $result = $intentsApi->updateIntent(
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
-        $_POST['intent_name'], $_POST['intent_responses'],
-        $_POST['intent_prompts'], $_POST['variables']);
-    if ($result['status']['code'] != 200) {
-        http_response_code($result['status']['code']);
-        exit;
-    }
-
+if (isset($_POST['intent_name']))
     $intentName = $_POST['intent_name'];
-} else {
+else
     $intentName = $_POST['intent'];
-}
 
 $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $entityList = $entityApi->getEntities();
 unset($entityApi);
 
+$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
-$webHook= $intentsApi->getWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
-//unset($intentsApi);
+unset($intentsApi);
 
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
@@ -64,24 +51,6 @@ if ($bot['status']['code'] !== 200) {
     exit;
 }
 
-if ($webHook['status']['code'] !== 200 && $webHook['status']['code'] !== 400) {
-    unset($webHook);
-    \hutoma\console::redirect('./error.php?err=205');
-    exit;
-}
-
-$v = array(
-    'intent_name' => $intentName,
-    'endpoint' => 'hutoma.com',
-    'enabled' => true
-);
-var_dump('intent name: '. $intentName);
-var_dump('intent name: '. $v['intent_name']);
-$hook = $intentsApi->createWebHook($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $v);
-var_dump('response: '.$hook['status']['info']);
-exit;
-
-
 function isPostInputAvailable()
 {
     return (isset($_POST['intent']) || isset($_POST['intent_name']));
@@ -103,14 +72,6 @@ function echoJsonEntityListResponse($entityList)
         echo '""'; // return empty string
 }
 
-function echoJsonWebHook($webHook)
-{
-    if ($webHook['status']['code'] !== 400)
-        echo json_encode($webHook);
-    else {
-        echo '""'; // return empty string
-    }
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -206,7 +167,7 @@ function echoJsonWebHook($webHook)
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
     var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
-    var webhook = <?php echoJsonWebHook($webHook); unset($webHook);?>;
+    var aiid = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])?>;
 </script>
 </body>
 </html>

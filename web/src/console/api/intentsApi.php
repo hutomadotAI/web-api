@@ -59,7 +59,7 @@ class intentsApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function updateIntent($aiid, $intentName, $expressions, $responses, $variables)
+    public function updateIntent($aiid, $intentName, $expressions, $responses, $variables, $webhook)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid,
@@ -71,7 +71,8 @@ class intentsApi extends apiBase
                     'intent_name' => $intentName,
                     'user_says' => $expressions,
                     'responses' => $responses,
-                    'variables' => $variables
+                    'variables' => $variables,
+                    'webhook' => $webhook
                 )
             ));
             $curl_response = $this->curl->exec();
@@ -91,9 +92,10 @@ class intentsApi extends apiBase
             $this->curl->addHeader('Content-Type', 'application/json');
             $this->curl->setOpt(CURLOPT_POSTFIELDS, json_encode(
                 array(
-                    'intent_name' => $webHook['intent_name'],
-                    'endpoint' => $webHook['endpoint'],
+                    'aiid' => $aiid,
+                    'intentName' => $webHook['intent_name'],
                     'enabled' => $webHook['enabled'],
+                    'endpoint' => $webHook['endpoint']
                 )
             ));
             $curl_response = $this->curl->exec();
@@ -106,8 +108,10 @@ class intentsApi extends apiBase
 
     public function getWebHook($aiid, $intentName)
     {
+
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid . self::$webHookPath, array('aiid' => $aiid, 'intent_name' => $intentName)));
+            $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid . self::$webHookPath,
+                array('aiid' => $aiid, 'intent_name' => $intentName)));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
             $this->handleApiCallError($curl_response, 313);

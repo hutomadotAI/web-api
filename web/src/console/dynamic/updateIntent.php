@@ -27,7 +27,8 @@ $response = $intentsApi->updateIntent(
     $_POST['intent_name'],
     $_POST['intent_expressions'],
     $_POST['intent_responses'],
-    $_POST['variables']
+    $_POST['variables'],
+    $_POST['webhook']
 );
 
 unset($intentsApi);
@@ -41,7 +42,8 @@ function isPostInputAvailable()
     return (
         isset($_POST['intent_name']) &&
         isset($_POST['intent_expressions']) &&
-        isset($_POST['intent_responses'])
+        isset($_POST['intent_responses']) &&
+        isset($_POST['webhook'])
     );
 }
 

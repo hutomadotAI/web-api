@@ -30,7 +30,7 @@
                 <h5 class="box-title">
                     <div class="input-group no-margin">
                         <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook"
-                               placeholder="Type endpoint address..." onkeyup="checkIntentResponseCode(this,event.keyCode)"
+                               placeholder="Type endpoint address..." onkeyup="msgAlertWebHook(ALERT.BASIC.value, 'Give the bot the webhook endpoint.');"
                                style="width: 96%;" readonly>
                         <span class="input-group-btn">
                             <button class="btn btn-success flat" id="btnWebHook" style="width: 130px;" value="true" onclick="changeWebHookState(this);">Active</button>
@@ -43,10 +43,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertWebHook" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertWebHook"></i>
-            <span id="msgAlertWebHook">Give the bot the WebHook address to bla bla bla bla.</span>
+            <span id="msgAlertWebHook">Give the bot the webhook endpoint</span>
         </div>
-
-        <div class="row" id="intentresponse-list"></div>
     </div>
-
 </div>
