@@ -9,7 +9,6 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiWebHook;
 import com.hutoma.api.containers.sub.WebHook;
 
 import java.util.List;
@@ -80,7 +79,7 @@ public class IntentLogic {
             WebHook webHook = intent.getWebHook();
             if (webHook != null) {
                 if (this.database.getWebHook(aiid, intent.getIntentName()) != null) {
-                    this.updateWebHook(devid, aiid, intent.getIntentName(), webHook);
+                    this.database.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(), webHook.getEnabled());
                     this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devid, logMap);
                 }
                 else {
@@ -119,41 +118,6 @@ public class IntentLogic {
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devid, e);
-            return ApiError.getInternalServerError();
-        }
-    }
-
-    public ApiResult getWebHook(final String devid, final UUID aiid, final String intentName) {
-        try {
-            WebHook webHook = this.database.getWebHook(aiid, intentName);
-
-            if (webHook == null) {
-                return ApiError.getNotFound();
-            }
-            return new ApiWebHook(webHook).setSuccessStatus();
-
-        } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetWebHook", devid, e);
-            return ApiError.getInternalServerError();
-        }
-    }
-
-    public ApiResult updateWebHook(final String devid, final UUID aiid, final String intentName,
-                                   final WebHook webHook) {
-        try {
-            if (this.database.getWebHook(aiid, intentName) != null) {
-                this.database.updateWebHook(aiid, intentName, webHook.getEndpoint(), webHook.getEnabled());
-                this.logger.logInfo(LOGFROM, String.format("Updating webhook for aiid: %s and intent name: %s",
-                        aiid.toString(), intentName));
-                return new ApiResult().setSuccessStatus();
-            } else {
-                this.database.createWebHook(aiid, intentName, webHook.getEndpoint(), webHook.getEnabled());
-                this.logger.logInfo(LOGFROM, String.format("Creating webhook for intent %s and aiid: %s",
-                        intentName, aiid.toString()));
-                return new ApiResult().setSuccessStatus();
-            }
-        } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UpdateWebHook", devid, e);
             return ApiError.getInternalServerError();
         }
     }
