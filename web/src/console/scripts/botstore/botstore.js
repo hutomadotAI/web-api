@@ -14,10 +14,3 @@ $('#buyBot').on('show.bs.modal', function (e) {
     document.getElementById('btnPayment').disabled = false;
     document.getElementById('botIconPurchase').src = curr_bot_icon;
 });
-
-$('#buyBot').on('hide.bs.modal', function (e) {
-    var purchase_state = document.getElementById('purchase_state').value;
-    if (purchase_state == 1)
-        switchCard(document.getElementById('bot_id').value);
-
-});

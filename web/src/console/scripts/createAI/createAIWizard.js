@@ -24,21 +24,6 @@ function deactiveButtons() {
     document.getElementById('botSearch').setAttribute('disabled', 'disabled');
 }
 
-
-function switchCard(botId) {
-    var node = document.getElementById('card' + botId);
-    var btnClassName = 'btn btn-success center-block flat'; //class button to change in switch
-
-    // remove button to  and switch button
-    var pos = node.getAttribute('data-pos');
-    var wHTML = ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + botId + '");></div>');
-    var targetDiv = node.getElementsByClassName(btnClassName)[0];
-    var parent = targetDiv.parentNode;
-    parent.setAttribute('data-linked', '0');
-    parent.innerHTML = wHTML;
-}
-
-
 function getAllBotsLinked() {
     var userActivedBots = {};
     var i, $list = $("[data-linked=\"1\"]");
@@ -55,3 +40,10 @@ function getAllBotsLinked() {
     }
     return userActivedBots;
 }
+
+$('#buyBot').on('hide.bs.modal', function (e) {
+    var purchase_state = document.getElementById('purchase_state').value;
+    if (purchase_state == 1)
+        switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
+});
+

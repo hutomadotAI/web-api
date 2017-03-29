@@ -292,9 +292,15 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testUploadBotIcon_DBException() throws Database.DatabaseException, IOException {
-        prepareBotForUpload();
+        // We need to use a different botId from the one used in testUploadBotIcon to avoid write
+        // contention due to using the same final filename.
+        final int botId = BOTID + 1;
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setDevId(DEVID);
+        bot.setBotId(botId);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         when(this.fakeDatabase.saveBotIconPath(anyString(), anyInt(), any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, BOTID, this.botIconStream, this.iconContentDisp);
+        ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID, botId, this.botIconStream, this.iconContentDisp);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 

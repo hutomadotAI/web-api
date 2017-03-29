@@ -60,7 +60,11 @@ public class IntentLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
+            WebHook webHook = this.database.getWebHook(aiid, intentName);
+            intent.setWebHook(webHook);
+
             this.logger.logUserTraceEvent(LOGFROM, "GetIntent", devid, logMap);
+
             return intent.setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetIntent", devid, e);
@@ -72,16 +76,27 @@ public class IntentLogic {
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
         try {
             this.database.writeIntent(devid, aiid, intent.getIntentName(), intent);
+            WebHook webHook = intent.getWebHook();
+            if (webHook != null) {
+                if (this.database.getWebHook(aiid, intent.getIntentName()) != null) {
+                    this.database.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(), webHook.isEnabled());
+                    this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devid, logMap);
+                }
+                else {
+                    this.database.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(), webHook.isEnabled());
+                    this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devid, logMap);
+                }
+            }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devid, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - entity duplicate or non existent", devid,
                     logMap.put("Message", dmee.getMessage()));
-            return ApiError.getBadRequest("duplicate or missing entity_name");
+            return ApiError.getBadRequest("Duplicate or missing entity_name");
         } catch (Database.DatabaseIntegrityViolationException dive) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - attempt to rename existing name", devid, logMap);
-            return ApiError.getBadRequest("intent name already in use");
+            return ApiError.getBadRequest("Intent name already in use");
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WriteIntent", devid, e);
             return ApiError.getInternalServerError();
@@ -95,31 +110,14 @@ public class IntentLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
+            if (this.database.getWebHook(aiid, intentName) != null) {
+                this.database.deleteWebHook(aiid, intentName);
+            }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent", devid, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devid, e);
-            return ApiError.getInternalServerError();
-        }
-    }
-
-    public ApiResult updateWebHook(final String devid, final UUID aiid, final String intentName,
-                                   final WebHook webHook) {
-        try {
-            if (this.database.getWebHook(aiid, intentName) != null) {
-                this.database.updateWebHook(aiid, intentName, webHook.getEndpoint(), webHook.getEnabled());
-                this.logger.logInfo(LOGFROM, String.format("Updating webhook for aiid: %s and intent name: %s",
-                        aiid.toString(), intentName));
-                return new ApiResult().setSuccessStatus();
-            } else {
-                this.database.createWebHook(aiid, intentName, webHook.getEndpoint(), webHook.getEnabled());
-                this.logger.logInfo(LOGFROM, String.format("Creating webhook for intent %s and aiid: %s",
-                        intentName, aiid.toString()));
-                return new ApiResult().setSuccessStatus();
-            }
-        } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UpdateWebHook", devid, e);
             return ApiError.getInternalServerError();
         }
     }

@@ -1,5 +1,5 @@
 var isChrome = !!window.chrome;
-var speechResponse = false; // voice deactivated for default
+var speechResponse = JSON.parse(speech);
 var showJsonWindow = true; // json window showed for default
 var chatSemaphore = 0;
 
@@ -227,6 +227,21 @@ function speechOption() {
         deactiveSpeechButton();
         stopSynthesis();
     }
+    updateVoiceSessionVariable(speechResponse);
+}
+
+function updateVoiceSessionVariable(voiceOption){
+    jQuery.ajax({
+        url: "./dynamic/sessionChat.php",
+        type: "POST",
+        data: {speech: voiceOption},
+        cache: false,
+        success: function(response) {
+        },
+        error: function () {
+            console.log('Cannot update speech session variable.');
+        }
+    });
 }
 
 function setOptionJsonWindow() {
@@ -235,7 +250,6 @@ function setOptionJsonWindow() {
     $('#jsonBox').toggle();
     showJsonWindow = !showJsonWindow;
 }
-
 
 function copyJsonToClipboard(elementId) {
     var node = document.getElementById('msgJSON');
