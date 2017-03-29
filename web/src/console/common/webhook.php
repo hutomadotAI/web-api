@@ -4,6 +4,7 @@ namespace hutoma;
 
 class webHook
 {
+    private $aiid;
     private $intentname;
     private $endpoint;
     private $enabled;
@@ -11,6 +12,16 @@ class webHook
     public function __construct()
     {
 
+    }
+
+    public function getAiid()
+    {
+        return $this->aiid;
+    }
+
+    public function setAiid($aiid)
+    {
+        $this->aiid = $aiid;
     }
 
     public function getIntentName()
@@ -47,6 +58,7 @@ class webHook
     public static function fromObject($botWebHook)
     {
         $webHook = new webHook();
+        $webHook->setAiid($botWebHook['aiid']);
         $webHook->setIntentName($botWebHook['intent_name']);
         $webHook->setEndpoint($botWebHook['endpoint']);
         $webHook->enableWebHook($botWebHook['enabled']);
@@ -56,6 +68,7 @@ class webHook
     public function toJSON()
     {
         $json = array(
+            'aiid' => $this->getAiid(),
             'intent_name' => $this->getIntentName(),
             'endpoint' => $this->getEndpoint(),
             'enabled' => $this->isEnabled()
