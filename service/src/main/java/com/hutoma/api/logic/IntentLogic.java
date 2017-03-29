@@ -61,7 +61,11 @@ public class IntentLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
+            WebHook webHook = this.database.getWebHook(aiid, intentName);
+            intent.setWebHook(webHook);
+
             this.logger.logUserTraceEvent(LOGFROM, "GetIntent", devid, logMap);
+
             return intent.setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetIntent", devid, e);
@@ -73,6 +77,17 @@ public class IntentLogic {
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
         try {
             this.database.writeIntent(devid, aiid, intent.getIntentName(), intent);
+            WebHook webHook = intent.getWebHook();
+            if (webHook != null) {
+                if (this.database.getWebHook(aiid, intent.getIntentName()) != null) {
+                    this.updateWebHook(devid, aiid, intent.getIntentName(), webHook);
+                    this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devid, logMap);
+                }
+                else {
+                    this.database.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(), webHook.getEnabled());
+                    this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devid, logMap);
+                }
+            }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devid, logMap);
             return new ApiResult().setSuccessStatus();
@@ -95,6 +110,9 @@ public class IntentLogic {
             if (!this.database.deleteIntent(devid, aiid, intentName)) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - not found", devid, logMap);
                 return ApiError.getNotFound();
+            }
+            if (this.database.getWebHook(aiid, intentName) != null) {
+                this.database.deleteWebHook(aiid, intentName);
             }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent", devid, logMap);

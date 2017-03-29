@@ -221,6 +221,17 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
                     }
                 }
+
+                WebHook webHook = intent.getWebHook();
+                if (webHook != null) {
+                    this.checkParameterNotNull("enabled", webHook.getEnabled());
+                    this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+
+                    if (webHook.getEnabled()) {
+                        this.checkParameterNotNull("endpoint", webHook.getEndpoint());
+                        this.checkParameterNotNull(AIID, webHook.getAiid());
+                    }
+                }
                 request.setProperty(APIParameter.IntentJson.toString(), intent);
             }
 
