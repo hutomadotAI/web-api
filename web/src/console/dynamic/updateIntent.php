@@ -22,6 +22,7 @@ if (!isPostInputAvailable()) {
 }
 
 $intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$_POST['webhook']['aiid'] = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 $response = $intentsApi->updateIntent(
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
     $_POST['intent_name'],

@@ -12,7 +12,6 @@ function getMultipleElementValues(elementName) {
 
 function getWebHookValues() {
     var webhook = {};
-    webhook['aiid'] = aiid;
     webhook['intent_name'] = document.getElementById('intent-name').value;
     webhook['endpoint'] = document.getElementById('webhook').value;
     webhook['enabled'] = (document.getElementById('btnWebHook').value =='false');

@@ -13,7 +13,7 @@ class webHook
     {
 
     }
-
+    
     public function getAiid()
     {
         return $this->aiid;
