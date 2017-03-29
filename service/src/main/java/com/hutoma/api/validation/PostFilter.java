@@ -72,7 +72,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case AiStatusJson:
                 case ServerRegistration:
                 case ServerAffinity:
-                case WebhookJson:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -192,15 +191,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
                 this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
-            }
-
-            if (checkList.contains(APIParameter.WebhookJson)) {
-                WebHook webHook = (WebHook) this.serializer.deserialize(request.getEntityStream(), WebHook.class);
-                this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
-                this.checkParameterNotNull(AIID, webHook.getAiid());
-                this.checkParameterNotNull("endpoint", webHook.getEndpoint());
-                this.checkParameterNotNull("enabled", webHook.getEnabled());
-                request.setProperty(APIParameter.WebhookJson.toString(), webHook);
             }
 
             // verify an intent object delivered in json

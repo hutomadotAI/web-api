@@ -139,10 +139,6 @@ public class ParameterFilter extends Validate {
         return (ServerAffinity) requestContext.getProperty(APIParameter.ServerAffinity.toString());
     }
 
-    public static WebHook getWebHook(final ContainerRequestContext requestContext) {
-        return (WebHook) requestContext.getProperty(APIParameter.WebhookJson.toString());
-    }
-
     /***
      * Avoids null pointers when the list is null or empty
      * @param list
