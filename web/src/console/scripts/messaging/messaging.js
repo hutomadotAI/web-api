@@ -378,6 +378,29 @@ function msgAlertIntentPrompt(alarm,msg){
     document.getElementById('msgAlertIntentPrompt').innerText = msg;
 }
 
+function msgAlertWebHook(alarm,msg){
+    switch (alarm){
+        case ALERT.BASIC.value:
+            $("#containerMsgAlertWebHook").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertWebHook").attr('class', 'icon fa fa-check');
+            break;
+        case ALERT.WARNING.value:
+            $("#containerMsgAlertWebHook").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertWebHook").attr('class', 'icon fa fa-check');
+            break;
+        case ALERT.DANGER.value:
+            $("#containerMsgAlertWebHook").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertWebHook").attr('class', 'icon fa fa-warning');
+            break;
+        case ALERT.PRIMARY.value:
+            $("#containerMsgAlertIntentElement").attr('class','alert alert-dismissable flat alert-primary');
+            $("#iconAlertWebHook").attr('class', 'icon fa fa-check');
+            break;
+    }
+    document.getElementById('msgAlertWebHook').innerText = msg;
+}
+
+
 function msgAlertMarketplace(alarm,msg){
     switch (alarm){
         case ALERT.BASIC.value:

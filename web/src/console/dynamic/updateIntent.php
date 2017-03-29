@@ -22,12 +22,14 @@ if (!isPostInputAvailable()) {
 }
 
 $intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$_POST['webhook']['aiid'] = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 $response = $intentsApi->updateIntent(
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
     $_POST['intent_name'],
     $_POST['intent_expressions'],
     $_POST['intent_responses'],
-    $_POST['variables']
+    $_POST['variables'],
+    $_POST['webhook']
 );
 
 unset($intentsApi);
@@ -41,7 +43,8 @@ function isPostInputAvailable()
     return (
         isset($_POST['intent_name']) &&
         isset($_POST['intent_expressions']) &&
-        isset($_POST['intent_responses'])
+        isset($_POST['intent_responses']) &&
+        isset($_POST['webhook'])
     );
 }
 

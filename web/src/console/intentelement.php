@@ -16,28 +16,16 @@ if (!isPostInputAvailable()) {
     exit;
 }
 
-$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-
-if (isset($_POST['intent_name'])) {
-    // This is an intent update
-    $result = $intentsApi->updateIntent(
-        $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'],
-        $_POST['intent_name'], $_POST['intent_responses'],
-        $_POST['intent_prompts'], $_POST['variables']);
-    if ($result['status']['code'] != 200) {
-        http_response_code($result['status']['code']);
-        exit;
-    }
-
+if (isset($_POST['intent_name']))
     $intentName = $_POST['intent_name'];
-} else {
+else
     $intentName = $_POST['intent'];
-}
 
 $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $entityList = $entityApi->getEntities();
 unset($entityApi);
 
+$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
 unset($intentsApi);
 
@@ -62,7 +50,6 @@ if ($bot['status']['code'] !== 200) {
     \hutoma\console::redirect('./error.php?err=204');
     exit;
 }
-
 
 function isPostInputAvailable()
 {
@@ -127,6 +114,7 @@ function echoJsonEntityListResponse($entityList)
                     <?php include './dynamic/intent.element.content.expression.html.php'; ?>
                     <?php include './dynamic/intent.element.content.variable.html.php'; ?>
                     <?php include './dynamic/intent.element.content.response.html.php'; ?>
+                    <?php include './dynamic/intent.element.content.webhook.html.php'; ?>
                     <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
                 </div>
             </div>
@@ -156,6 +144,7 @@ function echoJsonEntityListResponse($entityList)
 <script src="./scripts/button-select/buttonSelect.js"></script>
 <script src="./scripts/intent/intent.polling.js"></script>
 <script src="./scripts/intent/intent.element.response.js"></script>
+<script src="./scripts/intent/intent.element.webhook.js"></script>
 <script src="./scripts/intent/intent.element.expression.js"></script>
 <script src="./scripts/intent/intent.element.js"></script>
 <script src="./scripts/intent/intent.element.prompt.js"></script>
@@ -178,6 +167,7 @@ function echoJsonEntityListResponse($entityList)
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
     var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
+    var aiid = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])?>;
 </script>
 </body>
 </html>
