@@ -82,66 +82,7 @@ class intentsApi extends apiBase
         }
         return $this->getDefaultResponse();
     }
-
-    public function createWebHook($aiid, $webHook)
-    {
-        if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid . self::$webHookPath,
-                array('aiid' => $aiid, 'intent_name' => $webHook['intent_name'])));
-            $this->curl->setVerbPost();
-            $this->curl->addHeader('Content-Type', 'application/json');
-            $this->curl->setOpt(CURLOPT_POSTFIELDS, json_encode(
-                array(
-                    'aiid' => $aiid,
-                    'intentName' => $webHook['intent_name'],
-                    'enabled' => $webHook['enabled'],
-                    'endpoint' => $webHook['endpoint']
-                )
-            ));
-            $curl_response = $this->curl->exec();
-            //$this->handleApiCallError($curl_response, 313);
-            $json_response = json_decode($curl_response, true);
-            return $json_response;
-        }
-        return $this->getDefaultResponse();
-    }
-
-    public function getWebHook($aiid, $intentName)
-    {
-
-        if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid . self::$webHookPath,
-                array('aiid' => $aiid, 'intent_name' => $intentName)));
-            $this->curl->setVerbGet();
-            $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 313);
-            $json_response = json_decode($curl_response, true);
-            return $json_response;
-        }
-        return $this->getDefaultResponse();
-    }
-
-    public function updateWebHook($aiid, $webHook)
-    {
-        if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid . self::$webHookPath));
-            $this->curl->setVerbPost();
-
-            $args = array(
-                'intent_name' => $webHook['intent_name'],
-                'endpoint' => $webHook['endpoint'],
-                'enabled' => $webHook['enabled'],
-            );
-
-            $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
-            $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 314);
-            $json_response = json_decode($curl_response, true);
-            return $json_response;
-        }
-        return $this->getDefaultResponse();
-    }
-
+    
     public function __destruct()
     {
         parent::__destruct();
