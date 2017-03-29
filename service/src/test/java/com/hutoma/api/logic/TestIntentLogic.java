@@ -87,6 +87,16 @@ public class TestIntentLogic {
     }
 
     @Test
+    public void testGetIntent_SuccessWithWebHook() throws Database.DatabaseException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhook", true);
+        ApiIntent intent = this.getIntent();
+        intent.setWebHook(wh);
+        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(intent);
+        final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
     public void testGetIntent_Success_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(getIntent());
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
@@ -110,6 +120,15 @@ public class TestIntentLogic {
     @Test
     public void testWriteIntent_Success() throws Database.DatabaseException {
         final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, this.getIntent());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_WebHookWritten() throws Database.DatabaseException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhook", true);
+        ApiIntent intent = this.getIntent();
+        intent.setWebHook(wh);
+        final ApiResult result = this.intentLogic.writeIntent(DEVID, AIID, intent);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
@@ -156,6 +175,16 @@ public class TestIntentLogic {
     }
 
     @Test
+    public void testDeleteIntent_WebHookDeleted() throws Database.DatabaseException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhook", true);
+        when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(true);
+        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+
+        this.intentLogic.deleteIntent(DEVID, AIID, this.INTENTNAME);
+        verify(this.fakeDatabase).deleteWebHook(any(), any());
+    }
+
+    @Test
     public void testDeleteIntent_triggersTrainingStop() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteIntent(anyString(), any(), anyString())).thenReturn(true);
         this.intentLogic.deleteIntent(DEVID, AIID, this.INTENTNAME);
@@ -167,49 +196,6 @@ public class TestIntentLogic {
         this.intentLogic.writeIntent(DEVID, AIID, getIntent());
         verify(this.trainingLogic).stopTraining(any(), any());
     }
-
-    /*@Test
-    public void testIntentWebhook_createWebhook() throws Database.DatabaseException {
-        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
-
-        when(this.fakeDatabase.createWebHook(AIID, this.INTENTNAME, wh.getEndpoint(), wh.getEnabled())).thenReturn(true);
-
-        final ApiResult result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testIntentWebhook_getWebhook() throws Database.DatabaseException {
-        WebHook wh = new WebHook(UUID.randomUUID(), INTENTNAME, "https://fakewebhookaddress/webhook", true);
-        when(this.fakeDatabase.getWebHook(AIID, INTENTNAME)).thenReturn(wh);
-
-        final ApiResult result = this.intentLogic.getWebHook(DEVID, AIID, INTENTNAME);
-        Assert.assertEquals(this.INTENTNAME, ((ApiWebHook) result).getWebHook().getIntentName());
-    }
-
-    @Test
-    public void testIntentWebhook_getWebHookNotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getWebHook(AIID, INTENTNAME)).thenReturn(null);
-
-        final ApiResult result = this.intentLogic.getWebHook(DEVID, AIID, INTENTNAME);
-        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testIntentWebhook_updateWebhook() throws Database.DatabaseException {
-        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
-
-        when(this.fakeDatabase.createWebHook(AIID, this.INTENTNAME, wh.getEndpoint(), wh.getEnabled())).thenReturn(true);
-        when(this.fakeDatabase.updateWebHook(AIID, this.INTENTNAME, wh.getEndpoint(), wh.getEnabled())).thenReturn(true);
-
-        ApiResult result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-
-        // Update the webhook.
-        wh = new WebHook(wh.getAiid(), wh.getIntentName(), wh.getEndpoint(), false);
-        result = this.intentLogic.updateWebHook(DEVID, AIID, this.INTENTNAME, wh);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-    }*/
 
     private List<String> getIntentsList() {
         return Arrays.asList(this.INTENTNAME, "intent2");
