@@ -5,7 +5,7 @@ function changeWebHookState(elem){
     state = !state;
     elem.value = state;
     node.attr('readonly', !node.attr('readonly'));
-    msgAlertWebHook(ALERT.BASIC.value, 'Give the bot the webhook endpoint.');
+    msgAlertWebHook(ALERT.BASIC.value, 'Provide the WebHook endpoint');
 }
 
 $(document).ready(function () {

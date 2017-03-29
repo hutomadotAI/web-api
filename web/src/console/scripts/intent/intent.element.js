@@ -45,7 +45,7 @@ function saveIntent() {
         hasErrors = true;
     }
     if ( (webhook['enabled'] == true) && webhook['endpoint'].trim()=="") {
-        msgAlertWebHook(ALERT.DANGER.value, 'WebHook endpoint cannot be empty.');
+        msgAlertWebHook(ALERT.DANGER.value, 'Enabled WebHook endpoint cannot be empty.');
         hasErrors = true;
     }
     if (hasErrors) {
