@@ -279,9 +279,9 @@ public class TrainingLogic {
                 case AI_TRAINING_STOPPED:   // fallthrough
                 case AI_TRAINING_COMPLETE:  // fallthrough
                 case AI_TRAINING_QUEUED:
-                    String trainingFile = this.database.getAiTrainingFile(aiid);
                     try {
-                        this.aiServices.uploadTraining(devId, aiid, trainingFile);
+                        String trainingMaterials = this.getTrainingMaterialsCommon(devId, aiid);
+                        this.aiServices.uploadTraining(devId, aiid, trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                         this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devId, logMap);
@@ -398,13 +398,15 @@ public class TrainingLogic {
             return null;
         }
         String userTrainingFile = this.database.getAiTrainingFile(aiid);
-        if (userTrainingFile != null) {
+        if (userTrainingFile != null && !userTrainingFile.isEmpty()) {
             sb.append(userTrainingFile);
         }
         for (String intentName : this.database.getIntents(devId, aiid)) {
             ApiIntent intent = this.database.getIntent(devId, aiid, intentName);
             for (String userSays : intent.getUserSays()) {
-                sb.append(EOL);
+                if (sb.length() > 0) {
+                    sb.append(EOL);
+                }
                 sb.append(userSays).append(EOL);
                 sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentName).append(EOL);
             }
