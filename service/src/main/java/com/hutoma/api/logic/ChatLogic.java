@@ -324,7 +324,7 @@ public class ChatLogic {
                             "Error occured executing WebHook for intent %s for aiid %s.",
                             devId,
                             LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
-                } else if (!response.getText().isEmpty()) {
+                } else if (response.getText() != null && !response.getText().isEmpty()) {
                     chatResult.setAnswer(response.getText());
                 }
             }

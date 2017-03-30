@@ -113,7 +113,8 @@ public class WebHooks {
     public WebHookResponse deserializeResponse(final Response response) {
         WebHookResponse webHookResponse = null;
         try {
-            webHookResponse = (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class), WebHookResponse.class);
+            String jsonResponse = response.readEntity(String.class);
+            webHookResponse = (WebHookResponse) this.serializer.deserialize(jsonResponse, WebHookResponse.class);
         } catch (JsonParseException e) {
             this.logger.logException(LOGFROM, e);
             return null;
