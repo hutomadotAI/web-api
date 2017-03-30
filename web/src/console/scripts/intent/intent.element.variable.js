@@ -221,7 +221,7 @@ function isJustAddedNewRow() {
 
     var len = parent.childElementCount;
     if (len == entityListFromServer.length) { // if are reach the max number of entity
-        msgAlertIntentVariable(ALERT.WARNING.value, 'All entities in use, create another entity first.');
+        msgAlertIntentVariable(ALERT.WARNING.value, 'All available entities are already added to this intent.');
         return true;
     }
     return false;
