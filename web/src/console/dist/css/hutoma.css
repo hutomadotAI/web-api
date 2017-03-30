@@ -6352,10 +6352,10 @@ ul.pagination li a {
 
 /* layout.css Style */
 .upload-drop-zone {
-    min-height: 185px;
-    max-height: 185px;
-    min-width: 185px;
-    max-width: 185px;
+    min-height: 165px;
+    max-height: 165px;
+    min-width: 190px;
+    max-width: 190px;
     border-width: 2px;
     padding: 10px;
 }
@@ -6374,10 +6374,10 @@ ul.pagination li a {
 }
 
 .drag-icon {
-    min-height: 205px;
-    max-height: 205px;
-    min-width: 205px;
-    max-width: 205px;
+    max-width: 210px;
+    min-width: 210px;
+    max-height: 185px;
+    min-height: 185px;
     text-align: center;
     font-size: 65px;
     background: #515181;
@@ -6400,14 +6400,13 @@ ul.pagination li a {
 }
 
 .drop-zone {
-    min-width: 205px;
-    max-width: 205px;
+    min-width: 210px;
+    max-width: 210px;
     margin: 0px;
     padding: 0px;
 }
 
 .drop-zone1 {
-
     min-width: 460px;
     width: auto;
     padding: 0px 0px 0px 235px;
@@ -6415,8 +6414,8 @@ ul.pagination li a {
 }
 
 .drop-zone2 {
-    min-width: 205px;
-    max-width: 205px;
+    min-width: 210px;
+    max-width: 210px;
     margin: 0px;
     padding: 10px 0px 0px 0px;
 }
