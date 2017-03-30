@@ -6337,7 +6337,7 @@ ul.pagination li a {
     border-style: none;
     box-shadow: none;
     -webkit-box-shadow: none;
-    overflow: auto;
+    overflow:hidden;
     outline: none;
     box-shadow: none !important;
     font-size: 16px;
@@ -6628,23 +6628,35 @@ ul.pagination li a {
 /*  BOTSTORE DETAILS CARD  */
 
 .bot-box {
-    max-width: 640px;
-    min-width: 640px;
+    min-width: 720px;
+    max-width: 720px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .bot-card {
     padding: 10px 10px 0px 10px;
+    overflow: hidden;
+    background-color: #232426;
 }
 
-.bot-icon {
-    max-width: 205px;
-    min-width: 205px;
-    max-height: 205px;
-    min-height: 205px;
+.bot-card-area {
+    overflow: hidden;
+    height: 185px;
+}
+
+.bot-card-icon {
+    max-width: 210px;
+    min-width: 210px;
+    max-height: 185px;
+    min-height: 185px;
     margin: 0px;
     padding: 0px;
+}
+
+.bot-card-icon.left {
+    float: left;
+    overflow: hidden;
 }
 
 .drag-over-opacity {
@@ -6676,21 +6688,22 @@ ul.pagination li a {
 
 .bot-title {
     font-size: 20px;
-    padding: 0px 10px 0px 0px;
+    color:white;
+    padding: 0px 0px 0px 10px;
 }
 
 .bot-description {
     text-align: left;
     font-size: 14px;
-    padding: 0px 10px 0px 0px;
+    padding: 0px 10px 0px 10px;
 }
 
 .bot-close-button {
-    text-align: center;
+    text-align: right;
     font-weight: bold;
     font-size: 14px;
     height: 30px;
-    padding: 10px 10px 0px 0px;
+    padding: 10px 0px 0px 0px;
 }
 
 .bot-badge {
@@ -6703,19 +6716,21 @@ ul.pagination li a {
 
 .bot-description-limited {
     width: 100%;
-    text-align: justify;
-    overflow: auto;
+    text-align: left;
+    overflow:hidden;
+
+    color: #dddddd;
 }
 
 .bot-msg {
     text-align: justify;
     font-size: 12px;
     height: 25px;
-    padding: 10px 0px 0px 0px;
+    padding: 10px 0px 0px 10px;
 }
 
 .bot-other {
-    height: 45px;
+    height: 40px;
 }
 
 .bot-star {
@@ -6727,7 +6742,7 @@ ul.pagination li a {
 }
 
 .bot-licence {
-    padding: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 10px;
     font-size: 12px;
 }
 
@@ -6735,14 +6750,21 @@ ul.pagination li a {
     font-weight: bold;
     font-size: 16px;
     height: 20px;
-    padding: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 10px;
+}
+
+.bot-button {
+    height: 42px;
+    padding: 8px 0px 0px 0px;
 }
 
 .bot-video {
     margin-left: auto;
     margin-right: auto;
     backgroud: #212121;
+    max-width: 800px;
     display: block;
+    padding: 0px 10px 0px 10px;
 }
 
 .bot-detail {
