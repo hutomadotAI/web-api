@@ -2289,7 +2289,7 @@ BEGIN
     `endpoint`,
     `enabled`
   FROM `webhooks`
-  WHERE `webhooks`.`intent_name`=`param_intent_name`;
+  WHERE `webhooks`.`intent_name`=`param_intent_name` AND `webhooks`.`aiid`=`param_aiid`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
