@@ -167,7 +167,6 @@ function echoJsonEntityListResponse($entityList)
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
     var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
-    var aiid = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])?>;
 </script>
 </body>
 </html>
