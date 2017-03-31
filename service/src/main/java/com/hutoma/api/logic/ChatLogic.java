@@ -451,7 +451,7 @@ public class ChatLogic {
 
         // Get the top score
         Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.put("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
         ChatResult chatResult = result.getB();
 
