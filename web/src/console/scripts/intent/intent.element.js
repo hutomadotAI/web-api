@@ -14,7 +14,7 @@ function getWebHookValues() {
     var webhook = {};
     webhook['intent_name'] = document.getElementById('intent-name').value;
     webhook['endpoint'] = document.getElementById('webhook').value;
-    webhook['enabled'] = (document.getElementById('btnWebHook').value =='false');
+    webhook['enabled'] = !(webhook['endpoint'].trim()=="");
     return webhook;
 }
 
@@ -42,10 +42,6 @@ function saveIntent() {
     }
     if (responses.length == 0) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required.');
-        hasErrors = true;
-    }
-    if ( (webhook['enabled'] == true) && webhook['endpoint'].trim()=="") {
-        msgAlertWebHook(ALERT.DANGER.value, 'Enabled WebHook endpoint cannot be empty.');
         hasErrors = true;
     }
     if (hasErrors) {

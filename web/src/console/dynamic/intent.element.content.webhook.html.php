@@ -28,13 +28,8 @@
         <div class="row">
             <div class="col-md-12">
                 <h5 class="box-title">
-                    <div class="input-group no-margin">
-                        <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook"
-                               placeholder="Type endpoint address..." onkeyup="msgAlertWebHook(ALERT.BASIC.value, 'Provide the WebHook endpoint.');"
-                               style="width: 96%;" readonly>
-                        <span class="input-group-btn">
-                            <button class="btn btn-success flat" id="btnWebHook" style="width: 130px;" value="true" onclick="changeWebHookState(this);">Active</button>
-                        </span>
+                    <div class="col-lg-12 no-margin no-padding">
+                        <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook" placeholder="Type endpoint address..." onkeyup="msgAlertWebHook(ALERT.BASIC.value, 'Provide the WebHook endpoint.');">
                     </div>
                 </h5>
             </div>
