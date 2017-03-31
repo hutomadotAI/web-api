@@ -42,17 +42,36 @@ public class AuthFilter implements ContainerRequestFilter {
         this.config = config;
     }
 
+    private static String getTokenFromAuthBearer(final ContainerRequestContext requestContext) {
+        String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring("Bearer".length()).trim();
+        }
+        return null;
+    }
+
+    private static Claims getClaimsFromToken(final String token, final Config config) {
+        // get the encoding key to decode the token
+        String encodingKey = config.getEncodingKey();
+        // decode the token
+        return Jwts.parser().setSigningKey(encodingKey).parseClaimsJws(token).getBody();
+    }
+
+    public static String getDevIdFromHeader(final ContainerRequestContext requestContext, final Config config) {
+        String token = getTokenFromAuthBearer(requestContext);
+        if (token != null) {
+            return getClaimsFromToken(token, config).getSubject();
+        }
+        return null;
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
         try {
 
-            // try to get the auth header
-            String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-
-            // Check if the HTTP Authorization header is present and formatted correctly
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-
+            String token = getTokenFromAuthBearer(requestContext);
+            if (token == null) {
                 // not valid; tell the user to authenticate
                 this.logger.logDebug(LOGFROM, "missing or invalid auth header");
                 requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
@@ -62,14 +81,8 @@ public class AuthFilter implements ContainerRequestFilter {
             // get the path parameters
             MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
 
-            // Extract the token from the HTTP Authorization header
-            String token = authorizationHeader.substring("Bearer".length()).trim();
-
-            // get the encoding key to decode the token
-            String encodingKey = this.config.getEncodingKey();
-
             // decode the token
-            Claims claims = Jwts.parser().setSigningKey(encodingKey).parseClaimsJws(token).getBody();
+            Claims claims = getClaimsFromToken(token, this.config);
 
             // get the owner devid
             String devID = claims.getSubject();

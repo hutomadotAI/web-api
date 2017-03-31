@@ -32,6 +32,8 @@ GRANT SELECT ON `hutoma`.`bot_ai` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`webhooks` TO `aiReader`@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`developerInfo` TO `aiReader`@'127.0.0.1';
+
 
 # Privileges for `aiWriter`@`127.0.0.1`
 

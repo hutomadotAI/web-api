@@ -15,6 +15,7 @@ import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.DatabaseUI;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -115,6 +116,10 @@ public class ServerBinder extends AbstractBinder {
         bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
         bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
+
+        // UI
+        bind(UILogic.class).to(UILogic.class);
+        bind(DatabaseUI.class).to(DatabaseUI.class);
 
         // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);
