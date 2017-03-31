@@ -93,7 +93,8 @@ public class ChatLogic {
                 // development purposes log this
                 .put("ChatId", chatUuid)
                 .put("History", history)
-                .put("Q", question);
+                .put("Q", question)
+                .put("MinP", minP);
 
         List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid);
         // For now we should only have one active intent per chat.
@@ -120,7 +121,8 @@ public class ChatLogic {
                 if (result != null) {
                     // are we confident enough with this reply?
                     wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
-                    this.telemetryMap.add("WNETConfident", Boolean.toString(wnetConfident));
+                    this.telemetryMap.add("WNETScore", result.getScore());
+                    this.telemetryMap.add("WNETConfident", wnetConfident);
 
                     if (wnetConfident) {
                         // if we are taking WNET's reply then process intents
@@ -155,6 +157,7 @@ public class ChatLogic {
                     if (aimlResult != null) {
                         // are we confident enough with this reply?
                         aimlConfident = aimlResult.getScore() > 0.0d;
+                        this.telemetryMap.add("AIMLScore", aimlResult.getScore());
                         this.telemetryMap.add("AIMLConfident", aimlConfident);
                         if (aimlConfident) {
                             this.telemetryMap.add("AnsweredBy", "AIML");
@@ -172,10 +175,12 @@ public class ChatLogic {
                         this.telemetryMap.add("AnsweredWithConfidence", false);
 
                         if (rnnResult != null) {
+                            this.telemetryMap.add("RNNScore", rnnResult.getScore());
                             // If the RNN was clueless or returned an empty response
                             if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
                                 // Use AIML, if available, use it as it will always generate something
                                 if (aimlResult != null) {
+                                    this.telemetryMap.add("FellBackToAIML", "true");
                                     this.telemetryMap.add("AnsweredBy", "AIML");
                                     result = aimlResult;
                                 } else {
