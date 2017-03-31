@@ -57,14 +57,14 @@
                 <div class="row no-margin">
                     <div class="form-group">
                         <label class="unselectable" for="bot_longDescription">Long Description</label>
-                        <textarea rows="9" maxlength="5000" class="form-control flat textarea-justify" placeholder="Enter long description..." id="bot_longDescription" name="bot_longDescription"style="height:204px;"></textarea>
+                        <textarea rows="9" maxlength="5000" class="form-control flat textarea-justify" placeholder="Enter long description..." id="bot_longDescription" name="bot_longDescription"style="height:184px;"></textarea>
                     </div>
                 </div>
             </div>
         </div>
         <div class="alert alert-dismissable flat alert-danger hidden" id="containerMsgAlertIconUpload" style="margin-top:10px;margin-bottom:0px;">
             <i class="icon fa fa-warning" id="iconAlertIconUpload"></i>
-            <span id="msgAlertIconUpload">Uploaded file is not a valid image. Only JPG, PNG files with 205x205 pixel are allowed.</span>
+            <span id="msgAlertIconUpload">Uploaded file is not a valid image. Only JPG, PNG files with 210 x 185 pixel are allowed.</span>
         </div>
         <!-- end row 1 -->
         <p></p>
