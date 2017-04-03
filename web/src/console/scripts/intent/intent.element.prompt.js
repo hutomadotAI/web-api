@@ -46,6 +46,7 @@ function addIntentPrompt() {
     msgAlertIntentPrompt(ALERT.BASIC.value, 'Enter one or more prompts.');
     resetMsgAlertIntentVariable();
     $(this).prop("disabled", false);
+    enableSaving(true);
 }
 
 
@@ -59,7 +60,7 @@ function createNewPromptRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comments text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-prompt-row" name="intent-prompt-row"  style="background-color: #404446;" value="' + value + '" placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-prompt-row" name="intent-prompt-row"  style="background-color: #404446;" value="' + value + '" placeholder="' + value + '" onkeydown="enableSaving(true);">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -87,6 +88,7 @@ function deleteRowPrompt(element) {
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     var elem = $(parent.parentNode).find('input').attr('placeholder');
     parent.parentNode.removeChild(parent);
+    enableSaving(true);
 }
 
 function promptOnMouseInRow(elem) {

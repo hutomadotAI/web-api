@@ -18,6 +18,14 @@ function getWebHookValues() {
     return webhook;
 }
 
+function enableSaving(state){
+    data_changed = state;
+}
+
+function isDataChanged(){
+    return data_changed;
+}
+
 function addEscapeCharacter(value) {
     return value.replace(/,/g, "||#44;");
 }
@@ -114,6 +122,11 @@ function saveIntent() {
         variables.push(v);
     }
 
+    if (!isDataChanged()) {
+        msgAlertIntentElement(ALERT.PRIMARY.value, 'No data changed');
+        return false;
+    }
+
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
@@ -134,6 +147,7 @@ function saveIntent() {
             switch (JSONdata['status']['code']) {
                 case 200:
                     msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
+                    enableSaving(false);
                     if (trainingFile)
                         createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
                     break;
