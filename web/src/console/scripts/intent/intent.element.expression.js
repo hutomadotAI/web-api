@@ -48,6 +48,7 @@ function addUserExpression() {
     document.getElementById('user-expression').value = '';
     createNewUsersayRow(value, parent);
     msgAlertUserExpression(ALERT.BASIC.value,' Give the bot examples of how a user would express this intent.');
+    enableSaving(true);
 }
 
 function createNewUsersayRow(value, parent) {
@@ -60,7 +61,7 @@ function createNewUsersayRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comment-o text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression-row" name="user-expression-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression-row" name="user-expression-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '" onkeydown="enableSaving(true);">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -88,6 +89,7 @@ function deleteUserExpression(element) {
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     var elem =  $(parent.parentNode).find('input').attr('placeholder');
     parent.parentNode.removeChild(parent);
+    enableSaving(true);
 }
 
 function expressionOnMouseIn(elem) {

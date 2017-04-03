@@ -23,13 +23,15 @@
         </div>
     </div>
 
-    <div class="box-body no-margin" id="boxWebHook"  style="padding-top: 0;">
+    <div class="box-body no-margin" id="boxWebHook" style="padding-top: 0;">
 
         <div class="row">
             <div class="col-md-12">
                 <h5 class="box-title">
-                    <div class="col-lg-12 no-margin no-padding">
-                        <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook" placeholder="Type endpoint address..." onkeyup="msgAlertWebHook(ALERT.BASIC.value, 'Provide the WebHook endpoint.');">
+                    <div class="input-group-addon no-padding no-border">
+                        <div class="col-lg-12 no-margin no-padding">
+                            <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook" placeholder="Type endpoint address..." onkeydown="enableSaving(true);">
+                        </div>
                     </div>
                 </h5>
             </div>

@@ -51,7 +51,7 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
 
     wHTML += ('<div class="col-xs-3">');
     wHTML += ('<div class="text-center" >');
-    wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onkeydown="resetBorderHighlightError(this)">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="' + n_prompts + '" onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -79,9 +79,9 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('<div class="col-xs-7 text-gray no-padding">');
 
     if (required == 0)
-        wHTML += ('<input class="pull-right" type="checkbox" name="action-required"> ');
+        wHTML += ('<input class="pull-right" type="checkbox" name="action-required" onclick="enableSaving(true)"> ');
     else
-        wHTML += ('<input class="pull-right" type="checkbox" name="action-required" checked> ');
+        wHTML += ('<input class="pull-right" type="checkbox" name="action-required" onclick="enableSaving(true)" checked> ');
 
     wHTML += ('</div>');
     wHTML += ('<div class="col-xs-5 text-gray no-padding">');
@@ -168,6 +168,8 @@ function pushEntitiesList(node) {
             // if elem was selected, maintain this selection on new list
             if (selected.text().replace(/[@]/g, "") == entityListFromServer[x])
                 elem.className = 'selected';
+            else
+                elem.setAttribute('onClick','enableSaving(true)');
             elem.innerHTML = '@' + entityListFromServer[x];
             container.append(elem);
         }
@@ -194,6 +196,7 @@ function deleteIntentVariable(element) {
     var parent = (((element.parentNode).parentNode).parentNode).parentNode;
     parent.parentNode.removeChild(parent);
     resetMsgAlertIntentVariable();
+    enableSaving(true);
 }
 
 function resetBorderHighlightError(node) {
@@ -208,7 +211,7 @@ function resetMsgAlertIntentVariable() {
 function isJustAddedNewRow() {
     var parent = document.getElementById('parameter-list');
     // if parameter list is empty then you can ADD new empty row
-    if (!parent.hasChildNodes())
+    if (!parent.hasChildNodes()) 
         return false;
 
     // if entity field value is default value it means you just add a new row

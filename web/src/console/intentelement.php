@@ -167,6 +167,7 @@ function echoJsonEntityListResponse($entityList)
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;
     var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
+    var data_changed = false;
 </script>
 </body>
 </html>
