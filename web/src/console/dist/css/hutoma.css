@@ -6342,6 +6342,7 @@ ul.pagination li a {
     box-shadow: none !important;
     font-size: 16px;
     font-weight: bold;
+    padding-top:5px;
 }
 
 .item-row {
