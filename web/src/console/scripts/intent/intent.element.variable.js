@@ -211,10 +211,8 @@ function resetMsgAlertIntentVariable() {
 function isJustAddedNewRow() {
     var parent = document.getElementById('parameter-list');
     // if parameter list is empty then you can ADD new empty row
-    if (!parent.hasChildNodes()) {
-        //enableSaving(true);
+    if (!parent.hasChildNodes()) 
         return false;
-    }
 
     // if entity field value is default value it means you just add a new row
     var node = parent.children[0].children[0].children[0].children[0];
