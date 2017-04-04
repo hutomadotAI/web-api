@@ -4,8 +4,7 @@ require_once "api/apiBase.php";
 require_once "api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());

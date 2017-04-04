@@ -6,7 +6,6 @@ require_once "api/botApi.php";
 require_once "common/bot.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
     exit;
 }
 

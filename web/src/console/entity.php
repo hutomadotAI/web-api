@@ -4,8 +4,7 @@ require_once "../console/api/apiBase.php";
 require_once "../console/api/entityApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());

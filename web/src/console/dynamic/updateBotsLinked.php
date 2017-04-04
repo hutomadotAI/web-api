@@ -10,13 +10,11 @@ require_once "../api/apiBase.php";
 require_once "../api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 if (!isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])){
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 if (!isset($_POST['aiSkill'])) {

@@ -7,8 +7,7 @@ require_once "common/bot.php";
 require_once "common/developer.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 // TODO temporary removed - it block the visualization of Botstore during creation Ai processs

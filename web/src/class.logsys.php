@@ -1264,6 +1264,7 @@ class console
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
+            self::redirect('/');
         }
         self::$sessionObj->setLastActivity(time());
         $sid = session_id();

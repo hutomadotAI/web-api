@@ -10,8 +10,7 @@ require_once "common/developer.php";
 
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'])) {

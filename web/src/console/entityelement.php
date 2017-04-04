@@ -5,8 +5,7 @@ require_once "api/entityApi.php";
 
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 if (!isPostInputAvailable()) {

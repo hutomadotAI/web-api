@@ -4,8 +4,7 @@ require_once "../api/apiBase.php";
 require_once "../api/developerApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 if (!isset($_POST['developer'])) {

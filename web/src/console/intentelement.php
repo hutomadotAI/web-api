@@ -7,8 +7,7 @@ require_once "../console/api/entityApi.php";
 require_once "../console/api/aiApi.php";
 
 if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     \hutoma\console::redirect('/');
-    exit;
+     exit;
 }
 
 if (!isPostInputAvailable()) {
