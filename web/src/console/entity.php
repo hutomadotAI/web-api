@@ -3,8 +3,8 @@ require "../pages/config.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/entityApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     exit;
+if(!\hutoma\console::checkSessionIsActive()){
+    exit;
 }
 
 $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());

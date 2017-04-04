@@ -4,8 +4,8 @@ require_once "api/apiBase.php";
 require_once "api/entityApi.php";
 
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     exit;
+if(!\hutoma\console::checkSessionIsActive()){
+    exit;
 }
 
 if (!isPostInputAvailable()) {

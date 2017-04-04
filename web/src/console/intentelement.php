@@ -6,8 +6,8 @@ require_once "../console/api/intentsApi.php";
 require_once "../console/api/entityApi.php";
 require_once "../console/api/aiApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     exit;
+if(!\hutoma\console::checkSessionIsActive()){
+    exit;
 }
 
 if (!isPostInputAvailable()) {

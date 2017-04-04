@@ -6,7 +6,7 @@ require_once "api/botApi.php";
 require_once "common/bot.php";
 require_once "common/developer.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
+if(!\hutoma\console::checkSessionIsActive()){
      exit;
 }
 

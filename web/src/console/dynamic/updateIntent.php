@@ -11,7 +11,7 @@ require_once "../api/aiApi.php";
 require_once "../api/intentsApi.php";
 require_once "../api/entityApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
+if(!\hutoma\console::checkSessionIsActive()){
      exit;
 }
 

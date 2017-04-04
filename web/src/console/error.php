@@ -7,8 +7,8 @@ require "../pages/config.php";
         "errorObject" => isset($_GET['errObj']) ? $_GET['errObj'] : ""
     ));
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
-     exit;
+if(!\hutoma\console::checkSessionIsActive()){
+    exit;
 }
 
 ?>

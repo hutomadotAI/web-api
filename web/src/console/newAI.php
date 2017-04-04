@@ -3,7 +3,7 @@
     require_once "../console/api/apiBase.php";
     require_once "../console/api/aiApi.php";
 
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::checkSessionIsActive())) {
+    if(!\hutoma\console::checkSessionIsActive()){
         exit;
     }
 
