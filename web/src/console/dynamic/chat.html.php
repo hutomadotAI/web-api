@@ -1,5 +1,5 @@
 <?php
-    if((!\hutoma\console::$loggedIn)||(!\hutoma\console::checkSessionIsActive())) {
+    if(!\hutoma\console::checkSessionIsActive()){
      exit;
     }
 ?>

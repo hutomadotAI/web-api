@@ -1260,7 +1260,7 @@ class console
     public static function checkSessionIsActive()
     {
         define('TIMEOUT', 24 * 60 * 60); // 1 day, in seconds
-        if (self::$sessionObj->getLastActivity() != null && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) {
+        if (!self::$loggedIn  || (self::$sessionObj->getLastActivity() != null && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) ) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session

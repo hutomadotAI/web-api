@@ -3,8 +3,9 @@ require '../../pages/config.php';
 require_once "../api/apiBase.php";
 require_once "../api/aiApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive()))
-     exit;
+if(!\hutoma\console::checkSessionIsActive()) {
+    exit;
+}
 
 if (!isPostInputAvailable()) {
     \hutoma\console::redirect('./error.php?err=106');
