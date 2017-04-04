@@ -1265,10 +1265,11 @@ class console
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
             self::redirect('/');
+            return false;
         }
         self::$sessionObj->setLastActivity(time());
         $sid = session_id();
-        return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
+        return true;
     }
 
 }
