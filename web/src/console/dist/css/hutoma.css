@@ -3424,6 +3424,7 @@ table.text-center th {
 .direct-chat-text {
     display: block;
     color: #444444;
+    word-wrap: break-word;
 }
 
 .direct-chat-msg {
