@@ -3,8 +3,8 @@ require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/aiApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
+if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::checkSessionIsActive())) {
+     \hutoma\console::redirect('/');
     exit;
 }
 
