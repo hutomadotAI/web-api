@@ -1257,17 +1257,21 @@ class console
         return self::$loggedIn;
     }
 
-    public static function isSessionActive()
+    public static function checkSessionIsActive()
     {
         define('TIMEOUT', 24 * 60 * 60); // 1 day, in seconds
-        if (self::$sessionObj->getLastActivity() != null && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) {
+        if (!self::$loggedIn
+            || PHP_SESSION_ACTIVE != session_status()
+            || (self::$sessionObj->getLastActivity() != null
+                && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) ) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
+            self::redirect('/');
+            return false;
         }
         self::$sessionObj->setLastActivity(time());
-        $sid = session_id();
-        return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
+        return true;
     }
 
 }
