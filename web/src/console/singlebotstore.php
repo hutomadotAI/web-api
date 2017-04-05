@@ -99,17 +99,8 @@ if (isset($botDetails)) {
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
-
                 <div class="col-md-12">
-                    <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
-                        <?php
-                        include './dynamic/botstore.content.singleBot.card.html.php';
-                        include './dynamic/botstore.content.singleBot.video.html.php';
-                        include './dynamic/botstore.content.singleBot.description.html.php';
-                        include './dynamic/botstore.content.singleBot.footer.html.php';
-                        ?>
-                    </div>
-                    <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
+                    <?php include './dynamic/botstore.content.botcard.html.php'; ?>
                     <script src="./scripts/botcard/botcard.js"></script>
                     <script src="./scripts/botstore/botstoreWizard.js"></script>
                 </div>
