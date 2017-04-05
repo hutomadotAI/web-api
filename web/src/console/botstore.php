@@ -94,6 +94,7 @@ function isAuthorizedToAccess()
 
 <script src="./scripts/botstore/botstoreWizard.js"></script>
 <script src="./scripts/botstore/botstore.js"></script>
+<script src="./scripts/botcard/botcard.js"></script>
 <script src="./scripts/botcard/buyBot.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
