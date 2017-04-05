@@ -94,9 +94,9 @@ function isSessionVariablesAvailable()
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="scripts/createAI/createAIWizard.js"></script>
-<script src="scripts/botstore/botstore.js"></script>
-<script src="scripts/botstore/buyBot.js"></script>
+<script src="./scripts/createAI/createAIWizard.js"></script>
+<script src="./scripts/botstore/botstore.js"></script>
+<script src="./scripts/botcard/buyBot.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
