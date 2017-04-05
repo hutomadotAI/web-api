@@ -80,6 +80,30 @@ function videoLinkFilter(url) {
     return '';
 }
 
+function setButtonParameter(title, purchased) {
+    switch (title) {
+        case 'home' :
+            if (purchased == 'true')
+                btnFromBuyToPurchased();
+            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAIBotstore.php');
+            document.getElementById('bthBackToBotstore').innerText = 'Go back';
+            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAIBotstore.php');
+            break;
+        case 'settings' :
+            document.getElementById('btnBuyBotBack').setAttribute('href', './settingsAI.php?botstore=1');
+            btnFromBuyToPurchased();
+            break;
+        case 'botstore' :
+            if (purchased == 'true')
+                btnFromBuyToPurchased();
+            document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
+            break;
+        default:
+        // TODO set the static address when the access to details page came from external ( user not logged )
+        //document.getElementById('btnBuyBotBack').setAttribute('href', '');
+    }
+}
+
 function btnFromBuyToPurchased() {
     var wHTML = '';
     var nodeBtn = document.getElementById('btnBuyBot');

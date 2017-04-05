@@ -1,6 +1,5 @@
-function infoForBotstore(title, purchased) {
+function infoSidebarMenu(title) {
     var v = [];
-
     switch (title) {
         case 'home' :
             v['menu_title'] = title;
@@ -8,14 +7,6 @@ function infoForBotstore(title, purchased) {
             v['menu_block'] = false;
             v['menu_active'] = false;
             v['menu_deep'] = 0;
-
-            if (purchased == 'true')
-                btnFromBuyToPurchased();
-
-            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAIBotstore.php');
-            document.getElementById('bthBackToBotstore').innerText = 'Go back';
-            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAIBotstore.php');
-
             break;
         case 'settings' :
             v['menu_title'] = title;
@@ -23,12 +14,6 @@ function infoForBotstore(title, purchased) {
             v['menu_block'] = false;
             v['menu_active'] = false;
             v['menu_deep'] = 0;
-
-            document.getElementById('btnBuyBotBack').setAttribute('href', './settingsAI.php?botstore=1');
-
-
-            btnFromBuyToPurchased();
-
             break;
         case 'botstore' :
 
@@ -37,11 +22,8 @@ function infoForBotstore(title, purchased) {
             v['menu_block'] = false;
             v['menu_active'] = false;
             v['menu_deep'] = 0;
-
-            if (purchased == 'true')
-                btnFromBuyToPurchased();
-
-            document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
+            break;
+        default:
     }
     return v;
 }
