@@ -127,12 +127,14 @@ if (isset($botDetails)) {
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
+        var info = infoSidebarMenu("<?php echo $menu_title;?>");
+
         MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>
 <script>
     populateBotFields(bot);
+    setButtonParameter("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
 </script>
 </body>
 </html>
