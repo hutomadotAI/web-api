@@ -110,6 +110,7 @@ if (isset($botDetails)) {
                         ?>
                     </div>
                     <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
+                    <script src="./scripts/botcard/botcard.js"></script>
                     <script src="./scripts/botstore/botstoreWizard.js"></script>
                 </div>
             </div>
