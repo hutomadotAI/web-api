@@ -6704,7 +6704,7 @@ ul.pagination li a {
     font-weight: bold;
     font-size: 14px;
     height: 30px;
-    padding: 10px 0px 0px 0px;
+    padding: 10px 10px 0px 0px;
 }
 
 .bot-badge {
@@ -6808,6 +6808,11 @@ ul.pagination li a {
     padding: 20px 0px 10px 0px;
 }
 
+.bot-buy-licence {
+    padding: 0px 0px 0px 00px;
+    font-size: 12px;
+}
+
 .bot-buy-price {
     padding: 0px 25px 0px 10px;
     font-weight: bold;
@@ -6817,7 +6822,7 @@ ul.pagination li a {
 
 .bot-buy-purchase {
     height: 40px;
-    padding: 10px 20px 0px 10px;
+    padding: 10px 13px 0px 10px;
     font-weight: bold;
 }
 
