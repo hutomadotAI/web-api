@@ -3,20 +3,21 @@ require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/aiApi.php";
 require_once "api/botApi.php";
+require_once "api/botstoreApi.php";
 require_once "common/bot.php";
 require_once "common/developer.php";
+require_once "common/botstoreItem.php";
+require_once "common/botstoreListParam.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
-
-// TODO temporary removed - it block the visualization of Botstore during creation Ai processs
-/*
-if (!isAuthorizedToAccess()) {
-    \hutoma\console::redirect('./error.php?err=105');
     exit;
 }
-*/
+
+$botstoreListParam = new \hutoma\botstoreListParam();
+// TODO set params values into $botstoreListParam when filter/paging support is done - now the UI used the API default values to show all bots in one time
+
+$botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botstoreItems = $botstoreApi->getBotstoreList($botstoreListParam->toArray());
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $bots = $botApi->getPublishedBots();
@@ -102,6 +103,22 @@ function isAuthorizedToAccess()
 
 
 <script>
+    var botstoreItems = <?php
+        $tmp_botstoreList = [];
+        if (isset($botstoreItems) && (array_key_exists("items", $botstoreItems))) {
+            foreach ($botstoreItems['items'] as $botstoreItem) {
+                $botItem = \hutoma\botstoreItem::fromObject($botstoreItem);
+                $tmp_botItem = $botItem->toJSON();
+                array_push($tmp_botstoreList, $tmp_botItem);
+
+            }
+        }
+        echo json_encode($tmp_botstoreList);
+        unset($botstoreItems);
+        unset($tmp_botstoreList);
+        unset($botstoreApi);
+        ?>;
+
     var bots = <?php
         $tmp_list = [];
         if (isset($bots) && (array_key_exists("bots", $bots))) {
