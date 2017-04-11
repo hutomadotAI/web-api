@@ -190,8 +190,6 @@ body.hold-transition .main-header .logo {
     padding: 15px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 15px;
-    padding-right: 15px;
 }
 
 .content-small {
@@ -201,8 +199,6 @@ body.hold-transition .main-header .logo {
     padding: 15px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 15px;
-    padding-right: 15px;
     border: 1px solid #d2d6de;
 }
 
@@ -210,22 +206,18 @@ body.hold-transition .main-header .logo {
     min-height: 30px;
     height: 100%;
     background: #2F333C;
-    padding: 10px;
+    padding: 10px 5px 10px 5px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 5px;
-    padding-right: 5px;
 }
 
 .content-value {
     min-height: 10px;
     height: 100%;
     background: #ffffff;
-    padding: 10px;
+    padding: 10px 5px 10px 5px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 5px;
-    padding-right: 5px;
     border: 1px solid #ffffff;
 }
 
@@ -236,8 +228,6 @@ body.hold-transition .main-header .logo {
     padding: 15px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 15px;
-    padding-right: 15px;
     border: 1px solid #d2d6de;
 }
 
@@ -6458,9 +6448,39 @@ ul.pagination li a {
     cursor: move;
 }
 
-/*   BOX botstore  */
+/* ========== BOT CAROUSEL ============*/
+.carousel-content {
+    padding: 15px 0 15px 15px;
+    margin-right: auto;
+    margin-left: auto;
+    color: #ADADAD;
+}
 
+.carousel-box{
+    height: 300px;
+    padding: 0px;
+}
 
+.carousel-row{
+    max-height: 245px;
+    min-height: 245px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.carousel-title{
+    font-size: 18px;
+    height: 45px;
+    color: lightgray;
+    padding: 10px  0px 10px 0px;
+}
+
+.carousel-see-more{
+    padding-right: 10px;
+}
+
+/* ========== BOT CARD ============*/
 .box-card {
     width: 172px;
     height: 245px;
@@ -6524,6 +6544,12 @@ ul.pagination li a {
     content: '';
 }
 
+.card-title > p{
+    font-size: 15px;
+    font-weight: bold;
+    color: #000000; !important;
+}
+
 .card-author {
     font-size: 10px;
     text-align: center;
@@ -6541,6 +6567,14 @@ ul.pagination li a {
     background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
     position: absolute;
     content: '';
+}
+
+.card-author > p{
+    font-size: 10px;
+    color: #626262; !important;
+    white-space: nowrap ;
+    overflow: hidden;
+    text-overflow: clip;
 }
 
 .card-footer {
@@ -6719,7 +6753,6 @@ ul.pagination li a {
     width: 100%;
     text-align: left;
     overflow:hidden;
-
     color: #dddddd;
 }
 
