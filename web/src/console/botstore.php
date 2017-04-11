@@ -68,7 +68,7 @@ function isAuthorizedToAccess()
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <p id="botsCarousel"></p>
+            <?php include './dynamic/botstore.content.html.php'; ?>
             <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
@@ -155,13 +155,13 @@ function isAuthorizedToAccess()
     newNode.id = 'bot_list';
 
     function searchBots(str) {
-        //showBots(str, DRAW_BOTCARDS.BOTSTORE_FLOW.value,bots,purchasedBots);
+        showBots(str, DRAW_BOTCARDS.BOTSTORE_FLOW.value,bots,purchasedBots);
     }
 </script>
 <script>
     $(document).ready(function () {
-        //showBots('',  DRAW_BOTCARDS.BOTSTORE_FLOW.value,bots,purchasedBots);
-        showCarousel(botstoreItems);
+        showBots('',  DRAW_BOTCARDS.BOTSTORE_FLOW.value,bots,purchasedBots);
+        // TODO use showCarousel(botstoreItems) here to show the new carousel features
     });
 </script>
 </body>

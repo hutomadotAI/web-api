@@ -15,13 +15,13 @@ function showCarousel(botstoreItems) {
         var botImagePath = bot['metadata']['imagePath'];
         var botPrice = bot['metadata']['price'];
         var botAuthor = bot['developer']['company'];
-        var openBotDetails = 'onClick=openCardDetails(this,"' + botId + '");';
         var botOwned = bot['owned'];
+        var openBotDetails = 'onClick=openCardDetails(this,"' + botId + '");';
 
         wHTML += '<span id="card' + botId + '" data-pos="' + x + '">';
         wHTML += '<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">';
         wHTML += '<img class="card-icon unselectable" src="img\\icons\\' +  botImagePath + '"' + openBotDetails +'>';
-        wHTML += '<div class="card-title unselectable no-shadow"' + openCardDetails +'>';
+        wHTML += '<div class="card-title unselectable no-shadow"' + openBotDetails +'>';
         wHTML += botName;
         wHTML += '</div>';
         wHTML += '<div class="card-author unselectable no-shadow">';
@@ -63,16 +63,5 @@ function showCarousel(botstoreItems) {
 
 
 function openCardDetails(elem, botId) {
-    elem.setAttribute('onClick', '');
-    var form = document.createElement("form");
-    document.body.appendChild(form);
-    form.method = "POST";
-    form.action = "./botcardDetail.php";
-
-    var element = document.createElement("INPUT");
-    element.name = "botId";
-    element.value = botId;
-    element.type = 'hidden';
-    form.appendChild(element);
-    form.submit();
+   // TODO open card details passing the botId - using new API features
 }
