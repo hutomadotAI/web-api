@@ -833,6 +833,7 @@ public class Database {
                 AiBot.PublishingState.from(rs.getInt("publishing_state")),
                 rs.getString("botIcon")
         );
+    }
         
     /***
      * Interpret a row from the ai_status table

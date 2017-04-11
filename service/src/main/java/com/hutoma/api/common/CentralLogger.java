@@ -183,7 +183,7 @@ public class CentralLogger implements ILogger {
                 docs.add(this.serializer.serialize(event));
             }
             ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
-            Response response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
+            response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
                 LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",

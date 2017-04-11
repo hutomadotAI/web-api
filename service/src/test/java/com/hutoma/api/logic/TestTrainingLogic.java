@@ -476,7 +476,8 @@ public class TestTrainingLogic {
 
     private void verifyUpdateTraining_noIntents(final String fileToUpload)
             throws Database.DatabaseException, AIServices.AiServicesException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
+                getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(Collections.emptyList());
         ApiResult result = this.logic.updateTraining(DEVID, AIID);
@@ -496,7 +497,8 @@ public class TestTrainingLogic {
 
         when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(0))).thenReturn(intent1);
         when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(1))).thenReturn(intent2);
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
+                getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(intentNames);
         ApiResult result = this.logic.updateTraining(DEVID, AIID);
