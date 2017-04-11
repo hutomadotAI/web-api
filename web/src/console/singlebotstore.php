@@ -8,10 +8,8 @@ require_once "api/developerApi.php";
 require_once "common/bot.php";
 require_once "common/developer.php";
 
-
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
+if(!\hutoma\console::checkSessionIsActive()){
+     exit;
 }
 
 if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'])) {
@@ -101,17 +99,10 @@ if (isset($botDetails)) {
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
-
                 <div class="col-md-12">
-                    <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
-                        <?php
-                        include './dynamic/botstore.content.singleBot.card.html.php';
-                        include './dynamic/botstore.content.singleBot.video.html.php';
-                        include './dynamic/botstore.content.singleBot.description.html.php';
-                        include './dynamic/botstore.content.singleBot.footer.html.php';
-                        ?>
-                    </div>
+                    <?php include './dynamic/botstore.content.botcard.html.php'; ?>
                     <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
+                    <script src="./scripts/botcard/botcard.js"></script>
                     <script src="./scripts/botstore/botstoreWizard.js"></script>
                 </div>
             </div>
@@ -127,9 +118,9 @@ if (isset($botDetails)) {
 <script src="./bootstrap/js/bootstrap.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./scripts/botstore/buyBot.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
+<script src="./scripts/botcard/buyBot.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
@@ -137,12 +128,14 @@ if (isset($botDetails)) {
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
+        var info = infoSidebarMenu("<?php echo $menu_title;?>");
+
         MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>
 <script>
     populateBotFields(bot);
+    setButtonParameter("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
 </script>
 </body>
 </html>

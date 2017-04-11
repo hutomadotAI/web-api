@@ -2,7 +2,7 @@
 
     <div class="box-header with-border">
         <i class="fa fa-cloud-upload text-info"></i>
-        <div class="box-title"><b>Upload a text File</b></div>
+        <div class="box-title"><b>Upload a text file</b></div>
     </div>
     <div class="box-body">
 

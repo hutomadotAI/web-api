@@ -1,20 +1,13 @@
 package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
-import com.hutoma.api.common.AiServiceStatusLogger;
-import com.hutoma.api.common.CentralLogger;
-import com.hutoma.api.common.ChatLogger;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.ThreadPool;
-import com.hutoma.api.common.ThreadSubPool;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.DatabaseUI;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -36,8 +29,12 @@ import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.apache.connector.ApacheClientProperties;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 
@@ -51,7 +48,18 @@ public class ServerBinder extends AbstractBinder {
     private static class JerseyClientFactory implements Factory<JerseyClient> {
         @Override
         public JerseyClient provide() {
-            return JerseyClientBuilder.createClient();
+            // Set the connection pooling configuration
+            ClientConfig clientConfig = new ClientConfig();
+            PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+            // Max total connections
+            connectionManager.setMaxTotal(100);
+            // Max connections per destination host
+            connectionManager.setDefaultMaxPerRoute(20);
+
+            clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
+            clientConfig.connectorProvider(new ApacheConnectorProvider());
+
+            return JerseyClientBuilder.createClient(clientConfig);
         }
 
         @Override
@@ -75,6 +83,8 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatLogger.class).to(ChatLogger.class).in(Singleton.class);
         // AI Services Status specialized logger
         bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
+        // API Access specialized logger
+        bind(AccessLogger.class).to(AccessLogger.class).in(Singleton.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
@@ -115,6 +125,10 @@ public class ServerBinder extends AbstractBinder {
         bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
         bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
+
+        // UI
+        bind(UILogic.class).to(UILogic.class);
+        bind(DatabaseUI.class).to(DatabaseUI.class);
 
         // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);

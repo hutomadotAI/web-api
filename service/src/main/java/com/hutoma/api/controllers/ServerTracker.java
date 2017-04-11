@@ -229,6 +229,7 @@ public class ServerTracker implements Callable {
                     .request()
                     .post(Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                this.logger.logInfo(LOGFROM, String.format("heartbeat ping to %s succeeded", this.serverIdentity));
                 return true;
             }
 

@@ -774,6 +774,34 @@ public class TestChatLogic {
     }
 
     /***
+     * Test WebHook null response is handled.
+     */
+    @Test
+    public void testChat_webHookNullResponseHandled()
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+        final String intentName = "intent1";
+        final String webHookResponse = null;
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setCurrentValue("a value"); // to fulfill
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
+        WebHookResponse wr = new WebHookResponse(webHookResponse);
+        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+        when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(true);
+        when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
+        setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        Assert.assertFalse(mi.isFulfilled());
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertEquals("response", result.getResult().getAnswer());
+        Assert.assertTrue(mi.isFulfilled());
+    }
+
+    /***
      * Test that if an inactive WebHook exists, it is not executed.
      */
     @Test

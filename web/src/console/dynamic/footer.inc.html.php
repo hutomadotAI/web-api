@@ -1,7 +1,7 @@
 <div class="unselectable" id="footer">
   <div class="pull-right hidden-xs"></div>
-  <strong>Copyright &copy; 2015-<?php echo date("Y"); ?>
-    <a href="http://hutoma.com" tabindex="-1">Hu:toma Limited</a>.</strong> All rights reserved.
+  <strong>Copyright &copy; <?php echo date("Y"); ?>
+    <a href="http://hutoma.com" tabindex="-1">Hu:toma</a>.</strong> All rights reserved.
 </div>
 <?php $app_id  = \hutoma\console::$config['intercom_app_id']; ?>
 <script>

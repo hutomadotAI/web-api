@@ -13,6 +13,7 @@ class intentsApi extends apiBase
 {
     private static $intentsPath = "/intents";
     private static $intentPath = "/intent";
+    private static $webHookPath = "/webhook";
 
     function __construct($sessionObject, $devToken)
     {
@@ -58,7 +59,7 @@ class intentsApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function updateIntent($aiid, $intentName, $expressions, $responses, $variables)
+    public function updateIntent($aiid, $intentName, $expressions, $responses, $variables, $webhook)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid,
@@ -70,7 +71,8 @@ class intentsApi extends apiBase
                     'intent_name' => $intentName,
                     'user_says' => $expressions,
                     'responses' => $responses,
-                    'variables' => $variables
+                    'variables' => $variables,
+                    'webhook' => $webhook
                 )
             ));
             $curl_response = $this->curl->exec();
@@ -80,7 +82,7 @@ class intentsApi extends apiBase
         }
         return $this->getDefaultResponse();
     }
-
+    
     public function __destruct()
     {
         parent::__destruct();

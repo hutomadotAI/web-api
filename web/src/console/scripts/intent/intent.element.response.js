@@ -48,6 +48,7 @@ function addIntentResponse() {
     document.getElementById('intent-response').value = '';
     createNewIntentResponseRow(value, parent);
     msgAlertIntentResponse(ALERT.BASIC.value,'Give the bot examples of how it should respond to a user\'s intent.');
+    enableSaving(true);
 }
 
 function createNewIntentResponseRow(value, parent) {
@@ -60,7 +61,7 @@ function createNewIntentResponseRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-response-row" name="intent-response-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '">');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-response-row" name="intent-response-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '" onkeydown="enableSaving(true);">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -88,6 +89,7 @@ function deleteIntentResponse(element) {
     var parent = ((((element.parentNode).parentNode).parentNode).parentNode).parentNode;
     var elem =  $(parent.parentNode).find('input').attr('placeholder');
     parent.parentNode.removeChild(parent)
+    enableSaving(true);
 }
 
 function responseOnMouseIn(elem) {

@@ -767,30 +767,6 @@ public class Database {
         return bots;
     }
 
-    private AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
-        return new AiBot(
-                rs.getString("dev_id"),
-                UUID.fromString(rs.getString("aiid")),
-                rs.getInt("id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getString("long_description"),
-                rs.getString("alert_message"),
-                rs.getString("badge"),
-                rs.getBigDecimal("price"),
-                rs.getString("sample"),
-                rs.getString("category"),
-                rs.getString("license_type"),
-                new DateTime(rs.getTimestamp("last_update")),
-                rs.getString("privacy_policy"),
-                rs.getString("classification"),
-                rs.getString("version"),
-                rs.getString("video_link"),
-                AiBot.PublishingState.from(rs.getInt("publishing_state")),
-                rs.getString("botIcon")
-        );
-    }
-
     private ApiAi getAiFromResultset(final ResultSet rs, BackendStatus backendStatus)
             throws SQLException, DatabaseException {
         String localeString = rs.getString("ui_ai_language");
@@ -835,6 +811,30 @@ public class Database {
         }
     }
 
+    protected AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
+        return new AiBot(
+                rs.getString("dev_id"),
+                UUID.fromString(rs.getString("aiid")),
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("long_description"),
+                rs.getString("alert_message"),
+                rs.getString("badge"),
+                rs.getBigDecimal("price"),
+                rs.getString("sample"),
+                rs.getString("category"),
+                rs.getString("license_type"),
+                new DateTime(rs.getTimestamp("last_update")),
+                rs.getString("privacy_policy"),
+                rs.getString("classification"),
+                rs.getString("version"),
+                rs.getString("video_link"),
+                AiBot.PublishingState.from(rs.getInt("publishing_state")),
+                rs.getString("botIcon")
+        );
+    }
+        
     /***
      * Interpret a row from the ai_status table
      * @param rs resultset
