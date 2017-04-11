@@ -2,6 +2,7 @@ package com.hutoma.api.access;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Priority;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -35,6 +38,8 @@ public class AuthFilter implements ContainerRequestFilter {
     private final Config config;
     @Context
     private ResourceInfo resourceInfo;
+    @Context
+    private HttpServletRequest servletRequest;
 
     @Inject
     public AuthFilter(final ILogger logger, final Config config) {
@@ -145,12 +150,28 @@ public class AuthFilter implements ContainerRequestFilter {
                 return;
             }
 
-            this.logger.logDebug(LOGFROM, "authorized request from dev " + devID + " in role " + devRole);
+            String pathClass = resourceClass.getAnnotation(Path.class) != null
+                    ? resourceClass.getAnnotation(Path.class).value() : "";
+            String pathMethod = resourceMethod.getAnnotation(Path.class) != null
+                    ? resourceMethod.getAnnotation(Path.class).value() : "";
+            String forwardedHeader = this.servletRequest.getHeader("X-Forwarded-For");
+            LogMap logMap = LogMap
+                    .map("Role", devRole)
+                    .put("Method", this.servletRequest.getMethod())
+                    .put("QueryString", this.servletRequest.getQueryString() != null
+                            ? this.servletRequest.getQueryString() : "")
+                    .put("URI", this.servletRequest.getRequestURI())
+                    .put("RemoteAddr", this.servletRequest.getRemoteAddr())
+                    .put("PathClass", pathClass)
+                    .put("PathMethod", pathMethod)
+                    .put("Path", pathClass + pathMethod)
+                    .put("X-Forwarded-For", forwardedHeader != null ? forwardedHeader : "");
+
+            this.logger.logUserTraceEvent(LOGFROM, "apiCall", devID, logMap);
 
         } catch (Exception e) {
             this.logger.logInfo(LOGFROM, "auth verification error: " + e.toString());
             requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-            return;
         }
     }
 

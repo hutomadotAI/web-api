@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.UUID;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -166,6 +167,8 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(JerseyClient.class).to(JerseyClient.class);
                 bind(ThreadPool.class).to(ThreadPool.class);
                 bind(ThreadSubPool.class).to(ThreadSubPool.class);
+                // Bind a mock of HttpServletRequest
+                bind(mock(HttpServletRequest.class)).to(HttpServletRequest.class);
 
                 ServiceTestBase.this.addAdditionalBindings(this);
             }
