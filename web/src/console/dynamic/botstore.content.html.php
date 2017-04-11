@@ -16,34 +16,12 @@
             <span id="msgAlertMarketplace">You can power up your AI by combining and mixing existing AIs from out Bot Store.</span>
         </div>
     </div>
-    <!--
-        <div class="box-footer">
-            <a style="width:100px" class="btn btn-primary flat" id="btnBack" onClick="window.history.back();"><b>Back</b></a>
-            <!--<button style="width:100px" type="submit" id="btnMarketplaceSave" class="btn btn-success flat pull-right"><b>save</b>
-            </button>
-    </div>
-    -->
 </div>
-<!--
-<div class="box-body no-padding" id="filter">
-    <div class="row no-margin">
-        <div class="col-xs-12 no-padding">
+   
+<p></p>
+<h2></h2>
+<p id="botsSearch"></p>
 
-        <div class="label-ghost" id="botcard" style="background: transparent;">
-    werwerwerew
-</div>
-
-            <?php //include './dynamic/input.category.html.php'; ?>
-        </div>
-    </div>
-</div>
--->
-
-
-
-    <p></p>
-    <h2></h2>
-    <p id="botsSearch"></p>
 <form method="POST" name="botsNewAIform">
     <input type="hidden" name="userActivedDomains" id="userActivedDomains" val="" style="display:none;">
 </form>
