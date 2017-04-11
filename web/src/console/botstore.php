@@ -161,7 +161,6 @@ function isAuthorizedToAccess()
 <script>
     $(document).ready(function () {
         showBots('',  DRAW_BOTCARDS.BOTSTORE_FLOW.value,bots,purchasedBots);
-        // TODO use showCarousel(botstoreItems) here to show the new carousel features
     });
 </script>
 </body>

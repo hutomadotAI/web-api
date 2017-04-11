@@ -63,5 +63,5 @@ function showCarousel(botstoreItems) {
 
 
 function openCardDetails(elem, botId) {
-   // TODO open card details passing the botId - using new API features
+  
 }
