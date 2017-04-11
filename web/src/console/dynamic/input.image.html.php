@@ -4,7 +4,7 @@
         <div class="upload-drop-zone" id="drop-zone">
             <i class="fa fa-file-image-o"></i>
             <div class="text-sm unselectable" id="drag-info">Drag and drop a picture</div>
-            <div class="text-sm unselectable">205 x 205 pixel</div>
+            <div class="text-sm unselectable">210 x 185 pixel</div>
               <div class="text-sm unselectable" id="message"></div>
         </div>
     </div>

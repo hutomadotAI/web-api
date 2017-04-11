@@ -112,6 +112,20 @@ class developer
         return $this->company;
     }
 
+    
+    public static function fromObject($developerDetails)
+    {
+        $theDeveloper = new developer();
+        $theDeveloper->setName($developerDetails['name']);
+        $theDeveloper->setEmail($developerDetails['email']);
+        $theDeveloper->setAddress($developerDetails['address']);
+        $theDeveloper->setPostCode($developerDetails['postCode']);
+        $theDeveloper->setCity($developerDetails['city']);
+        $theDeveloper->setCountry($developerDetails['country']);
+        $theDeveloper->setWebsite($developerDetails['website']);
+        $theDeveloper->setCompany($developerDetails['company']);
+        return $theDeveloper;
+    }
 
     public function toJSON()
     {
@@ -127,8 +141,7 @@ class developer
         );
         return json_encode($json);
     }
-
-
+    
     public function __destruct()
     {
 

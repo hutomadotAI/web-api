@@ -3,9 +3,8 @@ require '../../pages/config.php';
 require_once "../api/apiBase.php";
 require_once "../api/developerApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
+if(!\hutoma\console::checkSessionIsActive()){
+     exit;
 }
 
 if (!isset($_POST['developer'])) {

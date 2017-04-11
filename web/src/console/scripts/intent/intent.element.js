@@ -10,6 +10,22 @@ function getMultipleElementValues(elementName) {
     return values;
 }
 
+function getWebHookValues() {
+    var webhook = {};
+    webhook['intent_name'] = document.getElementById('intent-name').value;
+    webhook['endpoint'] = document.getElementById('webhook').value;
+    webhook['enabled'] = !(webhook['endpoint'].trim()=="");
+    return webhook;
+}
+
+function enableSaving(state){
+    data_changed = state;
+}
+
+function isDataChanged(){
+    return data_changed;
+}
+
 function addEscapeCharacter(value) {
     return value.replace(/,/g, "||#44;");
 }
@@ -24,6 +40,7 @@ function saveIntent() {
     var intentName = document.getElementById('intent-name').value;
     var expressions = getMultipleElementValues('user-expression-row');
     var responses = getMultipleElementValues('intent-response-row');
+    var webhook = getWebHookValues();
     var variables = [];
 
     var hasErrors = false;
@@ -105,11 +122,15 @@ function saveIntent() {
         variables.push(v);
     }
 
+    if (!isDataChanged()) {
+        msgAlertIntentElement(ALERT.PRIMARY.value, 'No data changed');
+        return false;
+    }
+
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
-
     msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
     $.ajax({
         url: './dynamic/updateIntent.php',
@@ -117,7 +138,8 @@ function saveIntent() {
             intent_name: intentName,
             intent_expressions: expressions,
             intent_responses: responses,
-            variables: variables
+            variables: variables,
+            webhook: webhook
         },
         type: 'POST',
         success: function (response) {
@@ -125,6 +147,7 @@ function saveIntent() {
             switch (JSONdata['status']['code']) {
                 case 200:
                     msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
+                    enableSaving(false);
                     if (trainingFile)
                         createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
                     break;

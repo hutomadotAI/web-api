@@ -37,7 +37,7 @@
                     <div class="row no-margin">
                         <div class="col-xs-4 bot-buy-details">
                                 <!--licence-->
-                                <div class="row no-margin bot-licence">
+                                <div class="row no-margin bot-licence-purchase" style="visibility:hidden;">
                                     licence <span id="botLicensePurchase"></span>
                                 </div>
                                 <!--price-->

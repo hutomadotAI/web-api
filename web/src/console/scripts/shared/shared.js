@@ -93,9 +93,12 @@ function showBots(str, option, bots, botSubSet ) {
             wHTML += ('</div>');
 
             var dataBuyBot = 'id="btnBuyBot' + bot['botId']
-                + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] + '" data-name="' + bot['name']
+                + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] 
+                + '" data-name="' + bot['name']
                 + '" data-description="' + bot['description']
-                + '" data-icon="' + bot['imagePath'] + '" data-price="' + bot['price'] + '"';
+                + '" data-icon="' + bot['imagePath'] 
+                + '" data-price="' + bot['price'] 
+                + '" data-license="' + bot['licenseType'] + '"';
             switch (option) {
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');

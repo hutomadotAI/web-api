@@ -176,6 +176,7 @@ public class CentralLogger implements ILogger {
             this.logQueue.clear();
         }
 
+        Response response = null;
         try {
             List<String> docs = new ArrayList<>();
             for (LogEvent event : events) {
@@ -190,6 +191,11 @@ public class CentralLogger implements ILogger {
             }
         } catch (JsonParseException ex) {
             LOGGER.error(ex.getMessage());
+        } finally {
+            if (response != null) {
+                response.bufferEntity();
+                response.close();
+            }
         }
     }
 

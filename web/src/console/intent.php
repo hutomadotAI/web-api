@@ -5,9 +5,7 @@ require_once "../console/api/apiBase.php";
 require_once "../console/api/intentsApi.php";
 require_once "../console/api/aiApi.php";
 
-
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
+if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 

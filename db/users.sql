@@ -36,6 +36,8 @@ GRANT SELECT ON `hutoma`.`webhooks` TO `aiReader`@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`developerInfo` TO `aiReader`@'127.0.0.1';
+
 
 # Privileges for `aiWriter`@`127.0.0.1`
 

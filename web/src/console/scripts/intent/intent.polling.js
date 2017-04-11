@@ -98,7 +98,6 @@ function updateTraining() {
         processData: false,
         contentType: "application/json; charset=utf-8",
         success: function (response) {
-            showAlertMessage(response['status']['code'], getIntentAction());
             startTraining();
         },
         error: function () {
