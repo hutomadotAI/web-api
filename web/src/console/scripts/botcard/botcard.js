@@ -1,39 +1,39 @@
-function populateBotFields(bot) {
-    var json = JSON.parse(bot);
-    document.getElementById('botTitle').innerText = json['name'];
-    document.getElementById('botBadge').innerText = json['badge'];
-    document.getElementById('botDescription').value = json['description'];
-    if (json['alertMessage'] == null || json['alertMessage'].replace(/\s/g, "") == ''){
+function populateBotFields(botstoreItem, menu_title) {
+    var bot = JSON.parse(botstoreItem)['metadata'];
+    document.getElementById('botTitle').innerText = bot['name'];
+    document.getElementById('botBadge').innerText = bot['badge'];
+    document.getElementById('botDescription').value = bot['description'];
+    if (bot['alertMessage'] == null || bot['alertMessage'].replace(/\s/g, "") == ''){
         document.getElementById('botMessageIcon').style.display = 'none';
         document.getElementById('botMessage').style.display = 'none';
     }
     else {
-        document.getElementById('botMessage').value = json['alertMessage'];
+        document.getElementById('botMessage').value = bot['alertMessage'];
     }
-    document.getElementById('botLicense').innerText = json['licenseType'];
-    document.getElementById('botPrice').innerText = json['price'];
-    document.getElementById('botLongDescription').innerText = json['longDescription'];
-    document.getElementById('botSample').innerText = json['sample'];
+    document.getElementById('botLicense').innerText = bot['licenseType'];
+    document.getElementById('botPrice').innerText = bot['price'];
+    document.getElementById('botLongDescription').innerText = bot['longDescription'];
+    document.getElementById('botSample').innerText = bot['sample'];
     var dateString = "";
-    if (json['update'] != "") {
-        var date = new Date(json['update']);
+    if (bot['update'] != "") {
+        var date = new Date(bot['update']);
         dateString = date.toLocaleDateString() + " " + date.toLocaleTimeString();
     }
     document.getElementById('botLastUpdate').innerText = dateString;
-    document.getElementById('botCategory').innerText = json['category'];
-    document.getElementById('botVersion').innerText = json['version'];
-    document.getElementById('botClassification').innerText = json['classification'];
-    document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(json['privacyPolicy']));
-    document.getElementById('botIcon').setAttribute('src', json['imagePath']);
+    document.getElementById('botCategory').innerText = bot['category'];
+    document.getElementById('botVersion').innerText = bot['version'];
+    document.getElementById('botClassification').innerText = bot['classification'];
+    document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(bot['privacyPolicy']));
+    document.getElementById('botIcon').setAttribute('src', ICON_PATH + bot['botIcon']);
 
-    document.getElementById('botNamePurchase').innerText = json['name'];
-    document.getElementById('botDescriptionPurchase').innerText = json['description'];
-    document.getElementById('botPricePurchase').innerText = json['price'];
-    document.getElementById('botLicensePurchase').innerText = json['licenseType'];
-    document.getElementById('botIconPurchase').setAttribute('src', json['imagePath']);
-    document.getElementById('bot_id').value = json['botId'];
+    document.getElementById('botNamePurchase').innerText = bot['name'];
+    document.getElementById('botDescriptionPurchase').innerText = bot['description'];
+    document.getElementById('botPricePurchase').innerText = bot['price'];
+    document.getElementById('botLicensePurchase').innerText = bot['licenseType'];
+    document.getElementById('botIconPurchase').setAttribute('src', ICON_PATH + bot['botIcon']);
+    document.getElementById('bot_id').value = bot['botId'];
 
-    var dev = JSON.parse(devInfo);
+    var dev = JSON.parse(botstoreItem)['developer'];
     document.getElementById('botCompany').innerText = dev['company'];
     var elem = document.getElementById('developerInfo');
 
@@ -44,10 +44,12 @@ function populateBotFields(bot) {
         document.getElementById('botWebsite').setAttribute('href', checkLink(dev['website']));
     }
 
-    if (json['videoLink'] == null || videoLinkFilter(json['videoLink']) == '')
+    if (bot['videoLink'] == null || videoLinkFilter(bot['videoLink']) == '')
         document.getElementById('botVideoLinkSection').innerHTML = '';
     else
-        document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(json['videoLink']));
+        document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(bot['videoLink']));
+
+    setButtonParameter(menu_title, JSON.parse(botstoreItem)['owned'])
 }
 
 function checkLink(link){
@@ -80,10 +82,10 @@ function videoLinkFilter(url) {
     return '';
 }
 
-function setButtonParameter(title, purchased) {
+function setButtonParameter(title, owned) {
     switch (title) {
         case 'home' :
-            if (purchased == 'true')
+            if (owned)
                 btnFromBuyToPurchased();
             document.getElementById('btnBuyBotBack').setAttribute('href', './NewAIBotstore.php');
             document.getElementById('bthBackToBotstore').innerText = 'Go back';
@@ -94,13 +96,14 @@ function setButtonParameter(title, purchased) {
             btnFromBuyToPurchased();
             break;
         case 'botstore' :
-            if (purchased == 'true')
+            if (owned)
                 btnFromBuyToPurchased();
             document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
             break;
         default:
-        // TODO set the static address when the access to details page came from external ( user not logged )
-        //document.getElementById('btnBuyBotBack').setAttribute('href', '');
+            document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
+            document.getElementById('bthBackToBotstore').innerText = 'Go back';
+            document.getElementById('bthBackToBotstore').setAttribute('href', '././botstore.php');
     }
 }
 

@@ -26,6 +26,19 @@ class botstoreApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function getBotstoreBot($botId)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath . '/' . $botId));
+            $this->curl->setVerbGet();
+
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
     public function __destruct()
     {
         parent::__destruct();
