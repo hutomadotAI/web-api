@@ -15,8 +15,8 @@ function populateBotFields(botstoreItem, menu_title) {
     document.getElementById('botLongDescription').innerText = bot['longDescription'];
     document.getElementById('botSample').innerText = bot['sample'];
     var dateString = "";
-    if (bot['update'] != "") {
-        var date = new Date(bot['update']);
+    if (bot['lastUpdate'] != "") {
+        var date = new Date(bot['lastUpdate']);
         dateString = date.toLocaleDateString() + " " + date.toLocaleTimeString();
     }
     document.getElementById('botLastUpdate').innerText = dateString;
