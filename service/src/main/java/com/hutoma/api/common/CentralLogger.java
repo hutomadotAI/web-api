@@ -55,14 +55,30 @@ public class CentralLogger implements ILogger {
         this.serializer = serializer;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void logDebug(String fromLabel, String logComment) {
-        logOutput(EventType.DEBUG, fromLabel, logComment);
+        logDebug(fromLabel, logComment, null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void logDebug(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.DEBUG, fromLabel, logComment, properties);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logInfo(String fromLabel, String logComment) {
         logOutput(EventType.INFO, fromLabel, logComment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void logException(String fromLabel, final Exception ex) {
         StringBuilder sb = new StringBuilder();
         sb.append(ex.getMessage());
@@ -79,10 +95,23 @@ public class CentralLogger implements ILogger {
         logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
     }
 
-    public void logWarning(String fromLabel, String logComment) {
-        logOutput(EventType.WARNING, fromLabel, logComment);
+    /**
+     * {@inheritDoc}
+     */
+    public void logWarning(final String fromLabel, final String logComment) {
+        logWarning(fromLabel, logComment, null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void logWarning(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.WARNING, fromLabel, logComment, properties);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logError(String fromLabel, String logComment) {
         logOutput(EventType.ERROR, fromLabel, logComment);
     }
