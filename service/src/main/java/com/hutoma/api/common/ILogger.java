@@ -13,6 +13,14 @@ public interface ILogger {
     void logDebug(String fromLabel, String logComment);
 
     /**
+     * Adds a DEBUG log.
+     * @param fromLabel  the origin of the log
+     * @param logComment the comment
+     * @param properties map of properties
+     */
+    void logDebug(String fromLabel, String logComment, LogMap properties);
+
+    /**
      * Adds a INFO log.
      * @param fromLabel  the origin of the log
      * @param logComment the comment
@@ -34,11 +42,27 @@ public interface ILogger {
     void logWarning(String fromLabel, String logComment);
 
     /**
+     * Adds a WARNING log.
+     * @param fromLabel  the origin of the log
+     * @param logComment the comment
+     * @param properties map of properties
+     */
+    void logWarning(String fromLabel, String logComment, LogMap properties);
+
+    /**
      * Adds an ERROR log.
      * @param fromLabel  the origin of the log
      * @param logComment the comment
      */
     void logError(String fromLabel, String logComment);
+
+    /**
+     * Logs a performance-related entry.
+     * @param fromLabel  where it's logging from
+     * @param logComent  the event name
+     * @param properties map of properties
+     */
+    void logPerf(String fromLabel, String logComent, LogMap properties);
 
     /**
      * Initializes the logger from configuration

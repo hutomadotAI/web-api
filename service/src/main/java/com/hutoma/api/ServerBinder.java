@@ -29,12 +29,8 @@ import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.glassfish.jersey.apache.connector.ApacheClientProperties;
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
-import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 
@@ -46,20 +42,10 @@ import javax.inject.Singleton;
 public class ServerBinder extends AbstractBinder {
 
     private static class JerseyClientFactory implements Factory<JerseyClient> {
+
         @Override
         public JerseyClient provide() {
-            // Set the connection pooling configuration
-            ClientConfig clientConfig = new ClientConfig();
-            PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-            // Max total connections
-            connectionManager.setMaxTotal(100);
-            // Max connections per destination host
-            connectionManager.setDefaultMaxPerRoute(20);
-
-            clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
-            clientConfig.connectorProvider(new ApacheConnectorProvider());
-
-            return JerseyClientBuilder.createClient(clientConfig);
+            return JerseyClientBuilder.createClient();
         }
 
         @Override

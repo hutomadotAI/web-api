@@ -182,7 +182,7 @@ public class AuthFilter implements ContainerRequestFilter {
                     .put("RemoteAddr", this.servletRequest.getRemoteAddr())
                     .put("PathClass", pathClass)
                     .put("PathMethod", pathMethod)
-                    .put("Path", pathClass + pathMethod)
+                    .put("Path", String.format("%s/%s", pathClass, pathMethod).replaceAll("(\\/)\\/+", "/"))
                     .put("X-Forwarded-For", forwardedHeader != null ? forwardedHeader : "");
 
             this.logger.logUserTraceEvent(LOGFROM, "apiCall", devID, logMap);
