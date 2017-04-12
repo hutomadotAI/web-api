@@ -1,5 +1,4 @@
 function populateBotFields(botstoreItem, menu_title) {
-    var pathIcon =  'dist/img/boticon/';
     var bot = JSON.parse(botstoreItem)['metadata'];
     document.getElementById('botTitle').innerText = bot['name'];
     document.getElementById('botBadge').innerText = bot['badge'];
@@ -25,13 +24,13 @@ function populateBotFields(botstoreItem, menu_title) {
     document.getElementById('botVersion').innerText = bot['version'];
     document.getElementById('botClassification').innerText = bot['classification'];
     document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(bot['privacyPolicy']));
-    document.getElementById('botIcon').setAttribute('src', pathIcon + bot['botIcon']);
+    document.getElementById('botIcon').setAttribute('src', ICON_PATH + bot['botIcon']);
 
     document.getElementById('botNamePurchase').innerText = bot['name'];
     document.getElementById('botDescriptionPurchase').innerText = bot['description'];
     document.getElementById('botPricePurchase').innerText = bot['price'];
     document.getElementById('botLicensePurchase').innerText = bot['licenseType'];
-    document.getElementById('botIconPurchase').setAttribute('src', pathIcon + bot['botIcon']);
+    document.getElementById('botIconPurchase').setAttribute('src', ICON_PATH + bot['botIcon']);
     document.getElementById('bot_id').value = bot['botId'];
 
     var dev = JSON.parse(botstoreItem)['developer'];
