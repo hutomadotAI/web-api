@@ -46,6 +46,7 @@ import javax.inject.Singleton;
 public class ServerBinder extends AbstractBinder {
 
     private static class JerseyClientFactory implements Factory<JerseyClient> {
+
         @Override
         public JerseyClient provide() {
             // Set the connection pooling configuration

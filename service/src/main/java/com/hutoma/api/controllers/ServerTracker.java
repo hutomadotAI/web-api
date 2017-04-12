@@ -3,6 +3,7 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -219,6 +220,11 @@ public class ServerTracker implements Callable {
      * @return true for success, false otherwise
      */
     protected boolean beatHeart() {
+        LogMap logMap = LogMap.map("Op", "heartbeat")
+                .put("Url", this.registration.getServerUrl())
+                .put("Type", this.registration.getServerType())
+                .put("Server", this.serverIdentity)
+                .put("SessionId", this.serverSessionID);
         try {
             JerseyWebTarget target = this.jerseyClient
                     .target(this.registration.getServerUrl())
@@ -229,15 +235,17 @@ public class ServerTracker implements Callable {
                     .request()
                     .post(Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
-                this.logger.logInfo(LOGFROM, String.format("heartbeat ping to %s succeeded", this.serverIdentity));
+                this.logger.logDebug(LOGFROM,
+                        String.format("heartbeat ping to %s succeeded", this.serverIdentity),
+                        logMap.put("Status", "success"));
                 return true;
             }
 
             this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
-                    this.serverIdentity, response.getStatus()));
+                    this.serverIdentity, response.getStatus()), logMap.put("Status", response.getStatus()));
         } catch (Exception e) {
             this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %s",
-                    this.serverIdentity, e.toString()));
+                    this.serverIdentity, e.toString()), logMap.put("Status", e.toString()));
         }
         return false;
     }
