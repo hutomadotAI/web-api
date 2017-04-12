@@ -182,6 +182,10 @@ public class CentralLogger implements ILogger {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
+    public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
+        logOutput(EventType.PERF, fromLabel, logComment, logMap);
+    }
+
     public void logWarnEvent(String logFrom, String event, String user, LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
@@ -243,7 +247,8 @@ public class CentralLogger implements ILogger {
         ERROR,
         TRACE,
         EXCEPTION,
-        COUNT
+        COUNT,
+        PERF
     }
 
     private static class LogEvent {
