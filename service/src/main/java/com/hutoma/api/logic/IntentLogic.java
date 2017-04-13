@@ -79,11 +79,12 @@ public class IntentLogic {
             WebHook webHook = intent.getWebHook();
             if (webHook != null) {
                 if (this.database.getWebHook(aiid, intent.getIntentName()) != null) {
-                    this.database.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(), webHook.isEnabled());
+                    this.database.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(),
+                            webHook.isEnabled());
                     this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devid, logMap);
-                }
-                else {
-                    this.database.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(), webHook.isEnabled());
+                } else {
+                    this.database.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(),
+                            webHook.isEnabled());
                     this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devid, logMap);
                 }
             }
