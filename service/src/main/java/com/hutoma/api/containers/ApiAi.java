@@ -121,6 +121,10 @@ public class ApiAi extends ApiResult {
         return this.summaryStatus;
     }
 
+    public BackendStatus getBackendStatus() {
+        return backendStatus;
+    }
+
     private void populateExtendedStatus() {
         if (this.backendStatus == null) {
             this.summaryStatus = TrainingStatus.AI_UNDEFINED;

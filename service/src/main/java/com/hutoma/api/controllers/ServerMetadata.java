@@ -10,10 +10,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static com.hutoma.api.controllers.ControllerBase.RequestFor.Chat;
 import static java.util.stream.Collectors.toList;
 
 /***
@@ -97,6 +99,17 @@ public class ServerMetadata {
     }
 
     /***
+     * Gets a map of active, verified servers that are training-capable
+     * @return
+     */
+    public synchronized Map<String, ServerTracker> getEndpointTrainingMap() {
+        return this.activeServerSessions.values().stream()
+                .filter(ServerTracker::isEndpointVerified)
+                .filter(ServerTracker::canTrain)
+                .collect(Collectors.toMap(ServerTracker::getServerIdentifier, Function.identity()));
+    }
+
+    /***
      * Associate a list of AIs with a server
      * @param tracker
      * @param aiidList
@@ -152,12 +165,12 @@ public class ServerMetadata {
     }
 
     /***
-     * Gets the first connected 
+     * Gets the first connected
      * @param aiid
      * @return
      * @throws NoServerAvailable
      */
-    private synchronized ServerTracker getServerForTraining(final UUID aiid) throws NoServerAvailable {
+    private synchronized ServerTracker getServerForUpload(final UUID aiid) throws NoServerAvailable {
         return this.activeServerSessions.values().stream()
                 .filter(ServerTracker::canTrain)
                 .findFirst()
@@ -297,7 +310,14 @@ public class ServerMetadata {
      * @throws NoServerAvailable
      */
     protected synchronized ServerTracker getServerFor(UUID aiid, RequestFor requestFor) throws NoServerAvailable {
-        return requestFor == Chat ? getServerForChat(aiid) : getServerForTraining(aiid);
+        switch (requestFor) {
+            case Chat:
+                return getServerForChat(aiid);
+            case Training:
+                return getServerForUpload(aiid);
+            default:
+        }
+        return null;
     }
 
 }

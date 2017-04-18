@@ -294,21 +294,19 @@ public class Database {
         }
     }
 
-    public boolean updateAIStatus(final AiStatus status)
-            throws DatabaseException {
+    public boolean updateAIStatus(BackendServerType serverType, UUID aiid, TrainingStatus trainingStatus,
+                                  String endpoint, double trainingProgress, double trainingError) throws DatabaseException {
 
         // open a transaction since this is a read/modify/write operation and we need consistency
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            transaction.getDatabaseCall().initialise("updateAiStatus", 8)
-                    .add(status.getAiEngine().value())
-                    .add(status.getAiid())
-                    .add(status.getTrainingStatus().value())
-                    .add(status.getEndpoint())
-                    .add(status.getTrainingProgress())
-                    .add(status.getTrainingError())
-                    .add(false)
-                    .add(DateTime.now())
+            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
+                    .add(serverType.value())
+                    .add(aiid)
+                    .add(trainingStatus)
+                    .add(endpoint)
+                    .add(trainingProgress)
+                    .add(trainingError)
                     .executeUpdate();
 
             // if all goes well, commit
@@ -317,6 +315,13 @@ public class Database {
 
         // flag success
         return true;
+
+    }
+
+    public boolean updateAIStatus(final AiStatus status)
+            throws DatabaseException {
+        return updateAIStatus(status.getAiEngine(), status.getAiid(), status.getTrainingStatus(),
+                status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
     }
 
     /***
@@ -855,8 +860,17 @@ public class Database {
             if (trainingStatus == null) {
                 throw new DatabaseException("bad trainingstatus");
             }
-            BackendEngineStatus status = new BackendEngineStatus(trainingStatus, trainingError, trainingProgress);
-            return new Pair<BackendServerType, BackendEngineStatus>(serverType, status);
+            UUID aiid = UUID.fromString(rs.getString("aiid"));
+
+            // queue status
+            QueueAction action = QueueAction.forValue(rs.getString("queue_action"));
+            String serverIdentifier = rs.getString("server_endpoint");
+            Object updateTimeObject = rs.getDate("update_time");
+            DateTime updateTime = (updateTimeObject == null) ? null : new DateTime(updateTimeObject);
+
+            BackendEngineStatus status = new BackendEngineStatus(aiid, trainingStatus, trainingError,
+                    trainingProgress, action, serverIdentifier, updateTime);
+            return new Pair<>(serverType, status);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

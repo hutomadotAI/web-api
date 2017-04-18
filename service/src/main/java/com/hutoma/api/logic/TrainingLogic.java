@@ -12,6 +12,8 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -76,6 +78,12 @@ public class TrainingLogic {
         LogMap logMap = LogMap.map("AIID", aiid);
 
         try {
+            ApiAi ai = this.database.getAI(devid, aiid);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devid, logMap);
+                return ApiError.getNotFound();
+            }
+
             switch (type) {
 
                 // 0 = training file is text chat
@@ -109,9 +117,7 @@ public class TrainingLogic {
                                 devid, logMap);
                         return ApiError.getInternalServerError();
                     }
-
-                    this.aiServices.stopTrainingIfNeeded(devid, aiid);
-                    return uploadTrainingFile(devid, aiid, trainingMaterials, result);
+                    return uploadTrainingFile(ai, devid, aiid, trainingMaterials, result);
 
                 // 1 = training file is a document
                 case DOCUMENT:
@@ -193,12 +199,13 @@ public class TrainingLogic {
             this.logger.logUserTraceEvent(LOGFROM, "StartTraining - AI not found", devid, logMap);
             return ApiError.getNotFound();
         }
+
         TrainingStatus trainingStatus = ai.getSummaryAiStatus();
         logMap.add("Start from state", trainingStatus.name());
         if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
                 || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
-                this.aiServices.startTraining(devid, aiid);
+                this.aiServices.startTraining(ai.getBackendStatus(), devid, aiid);
             } catch (AIServices.AiServicesException | RuntimeException ex) {
                 this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devid, ex);
                 return ApiError.getInternalServerError();
@@ -222,7 +229,6 @@ public class TrainingLogic {
                     return ApiError.getBadRequest("Malformed training file. Training could not be started.");
             }
         }
-
     }
 
     /**
@@ -241,8 +247,12 @@ public class TrainingLogic {
                 return ApiError.getNotFound();
             }
             TrainingStatus trainingStatus = ai.getSummaryAiStatus();
-            if (trainingStatus == TrainingStatus.AI_TRAINING) {
-                this.aiServices.stopTraining(devid, aiid);
+            BackendStatus backendStatus = ai.getBackendStatus();
+            TrainingStatus statusWnet = backendStatus.getEngineStatus(BackendServerType.WNET).getTrainingStatus();
+            TrainingStatus statusRnn = backendStatus.getEngineStatus(BackendServerType.RNN).getTrainingStatus();
+            if (statusWnet == TrainingStatus.AI_TRAINING_QUEUED || statusWnet == TrainingStatus.AI_TRAINING
+                    || statusRnn == TrainingStatus.AI_TRAINING_QUEUED || statusRnn == TrainingStatus.AI_TRAINING) {
+                this.aiServices.stopTraining(backendStatus, devid, aiid);
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devid, logMap);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             } else {
@@ -281,7 +291,7 @@ public class TrainingLogic {
                 case AI_TRAINING_QUEUED:
                     try {
                         String trainingMaterials = this.getTrainingMaterialsCommon(devId, aiid);
-                        this.aiServices.uploadTraining(devId, aiid, trainingMaterials);
+                        this.aiServices.uploadTraining(ai.getBackendStatus(), devId, aiid, trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                         this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devId, logMap);
@@ -498,11 +508,11 @@ public class TrainingLogic {
         return source;
     }
 
-    private ApiResult uploadTrainingFile(final String devId, final UUID aiid, final String trainingMaterials,
+    private ApiResult uploadTrainingFile(final ApiAi ai, final String devId, final UUID aiid, final String trainingMaterials,
                                          final TrainingFileParsingResult result)
             throws DatabaseException {
         try {
-            this.aiServices.uploadTraining(devId, aiid, trainingMaterials);
+            this.aiServices.uploadTraining(ai.getBackendStatus(), devId, aiid, trainingMaterials);
         } catch (AIServices.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadTrainingFile", devId, ex);
             return ApiError.getInternalServerError("Could not upload training data");

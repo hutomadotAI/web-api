@@ -12,15 +12,19 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.QueueAction;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -94,28 +98,25 @@ public class AIServicesLogic {
                                 status.getAiEngine(), status.getAiid()));
                 return ApiError.getBadRequest("nonexistent session");
             }
+            status.setServerIdentifier(serverIdentifier);
 
-            // is the update coming from the primary master?
-            if (!controller.isPrimaryMaster(status.getServerSessionID())) {
-                this.serviceStatusLogger.logWarning(LOGFROM,
-                        String.format("ignoring update received from %s for AI %s because it is not the primary master",
-                                serverIdentifier, status.getAiid()));
-                return ApiError.getBadRequest("only the primary master can send status updates.");
+            // does the new status make sense?
+            if (!checkIfStatusTransitionIsValid(status)) {
+                return ApiError.getNotFound();
             }
 
             // we accept the update. log it.
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status, serverIdentifier);
+            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
 
-            if (!this.database.updateAIStatus(status)) {
-                this.serviceStatusLogger.logError(LOGFROM, String.format("%s sent an update for unknown AI %s",
-                        serverIdentifier, status.getAiid()));
-                return ApiError.getNotFound();
-            }
+            // commit the update
+            this.database.updateAIStatus(status);
 
             // update the ai hashcode
             controller.setHashCodeFor(status.getAiid(), status.getAiHash());
             return new ApiResult().setSuccessStatus();
 
+        } catch (StatusTransitionRejectedException rejected) {
+            return ApiError.getBadRequest(rejected.getMessage());
         } catch (Exception ex) {
             this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
@@ -176,6 +177,116 @@ public class AIServicesLogic {
         }
     }
 
+    /***
+     * Load the old state and make sure the new one makes sense
+     * @param status
+     * @return whether AI was found or not
+     * @throws Database.DatabaseException
+     * @throws StatusTransitionRejectedException
+     */
+    private boolean checkIfStatusTransitionIsValid(final AiStatus status)
+            throws Database.DatabaseException, StatusTransitionRejectedException {
+
+        // load the status
+        BackendEngineStatus botStatus = this.database.getAiQueueStatus(status.getAiEngine(), status.getAiid());
+        if ((botStatus == null) || botStatus.isDeleted()) {
+            this.logger.logError(LOGFROM, String.format("received update %s for bot %s that no longer exists",
+                    status.getTrainingStatus().value(), status.getAiid().toString()));
+            // return false if the AI was not found, or was found to have been deleted
+            return false;
+        }
+
+        // pull out the previous status
+        TrainingStatus previousStatus = botStatus.getTrainingStatus();
+        previousStatus = (previousStatus == null) ? TrainingStatus.AI_UNDEFINED : previousStatus;
+
+        switch (status.getTrainingStatus()) {
+            case AI_TRAINING_QUEUED:
+                // if the backend is telling us to queue training
+                // then it means that a bot has finished its training timeslice
+                rejectIfPreviousStatusWasNot(previousStatus, status,
+                        new TrainingStatus[]{
+                                TrainingStatus.AI_TRAINING,
+                                TrainingStatus.AI_TRAINING_QUEUED});
+                // so queue it again for another one
+                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                        true, 0, QueueAction.TRAIN);
+                break;
+            case AI_UNDEFINED:
+                // there is no valid reason for the backend to tell us that
+                // a bot should become undefined
+                rejectIfPreviousStatusWasNot(previousStatus, status,
+                        new TrainingStatus[]{});
+                break;
+            case AI_TRAINING:
+                // we should only get a training callback
+                // if we had previously queued something to train
+                // or it was training already
+                rejectIfPreviousStatusWasNot(previousStatus, status,
+                        new TrainingStatus[]{
+                                TrainingStatus.AI_TRAINING,
+                                TrainingStatus.AI_TRAINING_QUEUED});
+                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                        false, 0, QueueAction.NONE);
+                break;
+            case AI_TRAINING_STOPPED:
+                // backend acknowledges that we have halted training for a bot
+                rejectIfPreviousStatusWasNot(previousStatus, status,
+                        new TrainingStatus[]{
+                                TrainingStatus.AI_TRAINING,
+                                TrainingStatus.AI_READY_TO_TRAIN,
+                                TrainingStatus.AI_TRAINING_QUEUED,
+                                TrainingStatus.AI_TRAINING_STOPPED});
+                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                        false, 0, QueueAction.NONE);
+                break;
+            case AI_TRAINING_COMPLETE:
+                // we only accept COMPLETE if the ai was either recently queued or training
+                // any other state means that we never told the backend to train in the first place
+                rejectIfPreviousStatusWasNot(previousStatus, status,
+                        new TrainingStatus[]{
+                                TrainingStatus.AI_TRAINING,
+                                TrainingStatus.AI_TRAINING_QUEUED});
+                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                        false, 0, QueueAction.NONE);
+                break;
+            // other states are always valid
+            case AI_ERROR:
+            case AI_READY_TO_TRAIN:
+            default:
+                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                        false, 0, QueueAction.NONE);
+        }
+        return true;
+    }
+
+    /***
+     * Compare previous state to a given list of valid states
+     * Throw an exception if there is no match
+     * @param previousStatus
+     * @param newStatus
+     * @param trainingStatuses
+     * @throws StatusTransitionRejectedException
+     */
+    private void rejectIfPreviousStatusWasNot(final TrainingStatus previousStatus,
+                                              final AiStatus newStatus,
+                                              final TrainingStatus[] trainingStatuses)
+            throws StatusTransitionRejectedException {
+        // stream the list and look for a match
+        if (!Arrays.stream(trainingStatuses).anyMatch(x -> x == previousStatus)) {
+            // if not match
+            // log the transition attempt
+            this.logger.logWarning(LOGFROM,
+                    String.format("ignoring unexpected status transition from %s to %s for bot %s",
+                            previousStatus.value(), newStatus.getTrainingStatus().value(),
+                            newStatus.getAiid()));
+            // and throw an exception
+            throw new StatusTransitionRejectedException(
+                    String.format("unexpected status transition from %s to %s",
+                            previousStatus.value(), newStatus.getTrainingStatus().value()));
+        }
+    }
+
     private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration)
             throws Database.DatabaseException {
         Map<UUID, ServerAiEntry> result =
@@ -195,5 +306,11 @@ public class AIServicesLogic {
             default:
         }
         return null;
+    }
+
+    public class StatusTransitionRejectedException extends Exception {
+        public StatusTransitionRejectedException(final String message) {
+            super(message);
+        }
     }
 }

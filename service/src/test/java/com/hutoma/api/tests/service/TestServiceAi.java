@@ -74,6 +74,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testDeleteAI() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAi(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(TestDataHelper.getAI());
         final Response response = target(AI_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }

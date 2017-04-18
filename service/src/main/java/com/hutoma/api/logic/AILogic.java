@@ -194,13 +194,15 @@ public class AILogic {
                         logMap.put("BotId", bot.getBotId()));
             }
 
-            if (!this.database.deleteAi(devid, aiid)) {
+            ApiAi ai = this.database.getAI(devid, aiid);
+            if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
+            this.database.deleteAi(devid, aiid);
 
             try {
-                this.aiServices.deleteAI(devid, aiid);
+                this.aiServices.deleteAI(ai.getBackendStatus(), devid, aiid);
             } catch (ServerConnector.AiServicesException ex) {
                 if (Stream.of(ex.getSuppressed())
                         .filter(c -> c instanceof ServerConnector.AiServicesException)

@@ -2,6 +2,7 @@ package com.hutoma.api.common;
 
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -26,13 +27,11 @@ public class TestDataHelper {
     }
 
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {
-        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, new BackendStatus(), true,
-                0, 0.0, 1, Locale.getDefault(), "UTC") {
-            @Override
-            public TrainingStatus getSummaryAiStatus() {
-                return status;
-            }
-        };
+        BackendStatus result = new BackendStatus();
+        result.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(status, 0.0, 0.0));
+        result.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(status, 0.0, 0.0));
+        return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, result, true,
+                0, 0.0, 1, Locale.getDefault(), "UTC");
     }
 
     public static ApiAi getAI() {

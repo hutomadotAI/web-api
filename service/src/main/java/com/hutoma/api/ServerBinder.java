@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AIQueueServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
@@ -17,6 +18,7 @@ import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.QueueProcessor;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
@@ -104,6 +106,7 @@ public class ServerBinder extends AbstractBinder {
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
+        bind(AIQueueServices.class).to(AIQueueServices.class);
         bind(AIChatServices.class).to(AIChatServices.class);
         bind(RequestWnet.class).to(RequestWnet.class);
         bind(RequestRnn.class).to(RequestRnn.class);
@@ -111,6 +114,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
         bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
+        bind(QueueProcessor.class).to(QueueProcessor.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);

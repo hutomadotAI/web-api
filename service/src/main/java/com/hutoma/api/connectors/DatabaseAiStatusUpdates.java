@@ -6,14 +6,17 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.QueueAction;
 import com.hutoma.api.containers.sub.ServerAiEntry;
+import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
-
-import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +35,133 @@ public class DatabaseAiStatusUpdates extends Database {
                                    final Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
         this.aiServicesLogger = logger;
+    }
+
+    /***
+     * Update the queue status for(servertype, aiid) without affecting AI status values
+     * @param serverType
+     * @param aiid
+     * @param setQueued
+     * @param queueOffsetSeconds
+     * @param action
+     * @throws DatabaseException
+     */
+    public void queueUpdate(BackendServerType serverType, UUID aiid, boolean setQueued,
+                            int queueOffsetSeconds, QueueAction action) throws DatabaseException {
+
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            transaction.getDatabaseCall().initialise("queueUpdate", 5)
+                    .add(serverType.value())
+                    .add(aiid)
+                    .add(setQueued)
+                    .add(queueOffsetSeconds)
+                    .add(action.value())
+                    .executeUpdate();
+
+            // if all goes well, commit
+            transaction.commit();
+        }
+    }
+
+    /***
+     * Gets a summary of training slot status
+     * i.e. for each individual server endpoint a count of active used training slots
+     * and a count of used training slots that have not been updated in a while
+     * @param serverType
+     * @return
+     * @throws DatabaseException
+     */
+    public List<ServerEndpointTrainingSlots> getQueueSlotCounts(BackendServerType serverType) throws DatabaseException {
+
+        List<ServerEndpointTrainingSlots> slots = new ArrayList<>();
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            ResultSet rs = transaction.getDatabaseCall().initialise("queueCountSlots", 2)
+                    .add(serverType.value())
+                    .add(TrainingStatus.AI_TRAINING.value())
+                    .executeQuery();
+
+            while (rs.next()) {
+                String endpoint = rs.getString("server_endpoint");
+                int training = rs.getInt("training");
+                int lapsed = rs.getInt("lapsed");
+                slots.add(new ServerEndpointTrainingSlots(endpoint, training, lapsed));
+            }
+
+            transaction.commit();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+        return slots;
+    }
+
+    /***
+     * Takes the next queued item off the queue and returns it
+     * @param serverType
+     * @return
+     * @throws DatabaseException
+     */
+    public BackendEngineStatus queueTakeNext(BackendServerType serverType) throws DatabaseException {
+
+        BackendEngineStatus backendEngineStatus = null;
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            ResultSet rs = transaction.getDatabaseCall().initialise("queueTakeNext", 1)
+                    .add(serverType.value())
+                    .executeQuery();
+
+            if (rs.next()) {
+                backendEngineStatus = this.getBackendEngineStatus(rs).getB();
+            }
+
+            transaction.commit();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+        return backendEngineStatus;
+    }
+
+    /***
+     * Gets the full status of an item in the status table
+     * Including its devid and whether the AI was deleted or not
+     * @param serverType
+     * @param aiid
+     * @return
+     * @throws DatabaseException
+     */
+    public BackendEngineStatus getAiQueueStatus(BackendServerType serverType, UUID aiid) throws DatabaseException {
+
+        BackendEngineStatus backendEngineStatus = null;
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAIQueueStatus", 2)
+                    .add(serverType.value())
+                    .add(aiid)
+                    .executeQuery();
+            if (rs.next()) {
+                backendEngineStatus = getBackendEngineStatus(rs).getB();
+                // also read the devid and the deleted flag from the ai table
+                backendEngineStatus.setDevId(rs.getString("dev_id"));
+                backendEngineStatus.setDeleted(rs.getBoolean("deleted"));
+            }
+            // if all goes well, commit
+            transaction.commit();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+        return backendEngineStatus;
+    }
+
+    public void deleteAiStatus(BackendServerType serverType, UUID aiid) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            transaction.getDatabaseCall().initialise("deleteAIStatus", 2)
+                    .add(serverType.value())
+                    .add(aiid)
+                    .executeUpdate();
+            // if all goes well, commit
+            transaction.commit();
+        }
     }
 
     /***
@@ -125,20 +255,14 @@ public class DatabaseAiStatusUpdates extends Database {
                                             .put("ApiStatus", finalStatusInDb1.toString())
                                             .put("BackendStatus", finalStatusOnBackend.toString()));
 
-                            // load the last queue time
-                            // if this is null then we have to be sure to keep it null
-                            java.sql.Date oldQueueDate = rs.getDate("queue_time");
-
                             // keep everything but update the status
-                            transaction.getDatabaseCall().initialise("updateAiStatus", 8)
+                            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
                                     .add(serverType.value())
                                     .add(aiid)
                                     .add(statusOnBackend.value())
                                     .add(rs.getString("server_endpoint"))
                                     .add(rs.getDouble("training_progress"))
                                     .add(rs.getDouble("training_error"))
-                                    .add(oldQueueDate != null)
-                                    .add((oldQueueDate == null) ? DateTime.now() : new DateTime(oldQueueDate))
                                     .executeUpdate();
                         }
                     }
@@ -169,4 +293,5 @@ public class DatabaseAiStatusUpdates extends Database {
             throw new DatabaseException(e);
         }
     }
+
 }

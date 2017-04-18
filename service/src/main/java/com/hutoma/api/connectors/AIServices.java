@@ -7,8 +7,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.DevPlan;
-import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
@@ -17,8 +17,6 @@ import com.hutoma.api.controllers.ServerMetadata;
 
 import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyInvocation;
-import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -26,7 +24,6 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
@@ -36,63 +33,74 @@ import javax.ws.rs.core.MediaType;
 public class AIServices extends ServerConnector {
 
     private static final String LOGFROM = "aiservices";
-    private static final String COMMAND_PARAM = "command";
-    private static final String TRAINING_TIME_ALLOWED_PARAM = "training_time_allowed";
-
     private final ControllerWnet controllerWnet;
     private final ControllerRnn controllerRnn;
+    private final AIQueueServices queueServices;
 
     @Inject
     public AIServices(final Database database, final ILogger logger, final JsonSerializer serializer,
                       final Tools tools, final Config config, final JerseyClient jerseyClient,
                       final ThreadSubPool threadSubPool,
-                      final ControllerWnet controllerWnet, final ControllerRnn controllerRnn) {
+                      final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
+                      final AIQueueServices queueServices) {
         super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
         this.controllerWnet = controllerWnet;
         this.controllerRnn = controllerRnn;
+        this.queueServices = queueServices;
     }
 
-    public void startTraining(final String devId, final UUID aiid) throws AiServicesException {
-        DevPlan devPlan;
+    /***
+     * Queue a command to start training
+     * @param status
+     * @param devId
+     * @param aiid
+     * @throws AiServicesException
+     */
+    public void startTraining(BackendStatus status, final String devId, final UUID aiid) throws AiServicesException {
         try {
-            devPlan = this.database.getDevPlan(devId);
-        } catch (Database.DatabaseException ex) {
-            throw new AiServicesException("Could not get plan for devId " + devId);
+            this.queueServices.userActionStartTraining(status, BackendServerType.WNET, devId, aiid);
+            this.queueServices.userActionStartTraining(status, BackendServerType.RNN, devId, aiid);
+        } catch (Database.DatabaseException e) {
+            AiServicesException.throwWithSuppressed("failed to start training", e);
         }
-        this.logger.logDebug(LOGFROM, "Issuing \"start training\" command to backends for AI " + aiid.toString());
-        HashMap<String, Callable<InvocationResult>> callables = getTrainingCallablesForCommand(devId, aiid,
-                new HashMap<String, String>() {{
-                    put(COMMAND_PARAM, "start");
-                    put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(devPlan.getMaxTrainingMins()));
-                }});
-        executeAndWait(callables);
     }
 
-    public void stopTraining(final String devId, final UUID aiid) throws AiServicesException {
-        HashMap<String, Callable<InvocationResult>> callables = getTrainingCallablesForCommand(devId, aiid, "stop");
-        executeAndWait(callables);
+    /***
+     * Stop training (direct, not queued)
+     * @param backendStatus
+     * @param devId
+     * @param aiid
+     * @throws AiServicesException
+     */
+    public void stopTraining(final BackendStatus backendStatus, final String devId, final UUID aiid) throws AiServicesException {
+        try {
+            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
+            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
+        } catch (Database.DatabaseException e) {
+            AiServicesException.throwWithSuppressed("failed to stop training", e);
+        }
     }
 
-    public void deleteAI(final String devId, final UUID aiid) throws AiServicesException {
-        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        this.logger.logDebug(LOGFROM, "Issuing \"delete AI\" command to backends for AI " + aiid.toString());
-        for (String endpoint : this.getAllEndpoints(aiid)) {
-            callables.put(endpoint, () -> new InvocationResult(
-                    aiid,
-                    this.jerseyClient
-                            .target(endpoint).path(devId).path(aiid.toString())
-                            .request()
-                            .delete(),
-                    endpoint,
-                    0));
+    /***
+     * Delet an AI (stop training now and queue the delete for later)
+     * @param backendStatus
+     * @param devId
+     * @param aiid
+     * @throws AiServicesException
+     */
+    public void deleteAI(final BackendStatus backendStatus, final String devId, final UUID aiid) throws AiServicesException {
+        try {
+            this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
+            this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
+        } catch (Database.DatabaseException e) {
+            AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
-        executeAndWait(callables);
     }
 
     public void deleteDev(final String devId) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        for (String endpoint : this.getAllEndpoints(null)) {
+        for (String endpoint : this.getListOfPrimaryEndpoints(null)) {
             callables.put(endpoint, () -> new InvocationResult(
                     null,
                     this.jerseyClient
@@ -103,11 +111,30 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
-    public void uploadTraining(final String devId, final UUID aiid, final String trainingMaterials)
+    /***
+     * Upload training materials for an AI
+     * @param backendStatus
+     * @param devId
+     * @param aiid
+     * @param trainingMaterials
+     * @throws AiServicesException
+     */
+    public void uploadTraining(final BackendStatus backendStatus, final String devId, final UUID aiid, final String trainingMaterials)
             throws AiServicesException {
+
+        // for each type of server, send a stop command (if needed),
+        // set the status and the queue state
+        try {
+            this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
+            this.queueServices.userActionUpload(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
+        } catch (Database.DatabaseException e) {
+            AiServicesException.throwWithSuppressed("failed to upload training materials", e);
+        }
+
+        // upload the file to each backend server (one of each kind)
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
-        for (String endpoint : this.getAllEndpoints(aiid)) {
+        for (String endpoint : this.getListOfPrimaryEndpoints(aiid)) {
             this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
@@ -131,52 +158,40 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
+    /***
+     * Stop the training if the AI was likely to have been training
+     * @param devId
+     * @param aiid
+     * @throws Database.DatabaseException
+     */
     public void stopTrainingIfNeeded(final String devId, final UUID aiid)
             throws Database.DatabaseException {
         try {
             ApiAi ai = this.database.getAI(devId, aiid);
-            TrainingStatus status = ai.getSummaryAiStatus();
-            if (status == TrainingStatus.AI_TRAINING || status == TrainingStatus.AI_TRAINING_QUEUED) {
-                this.stopTraining(devId, aiid);
+            if (ai != null) {
+                stopTraining(ai.getBackendStatus(), devId, aiid);
             }
         } catch (ServerConnector.AiServicesException ex) {
             this.logger.logWarning(LOGFROM, "Could not stop training for ai " + aiid);
         }
     }
 
-    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
-            final String devId, final UUID aiid, final String command) throws AiServicesException {
-        return getTrainingCallablesForCommand(devId, aiid, new HashMap<String, String>() {{
-            put(AIServices.COMMAND_PARAM, command);
-        }});
-    }
-
-    private HashMap<String, Callable<InvocationResult>> getTrainingCallablesForCommand(
-            final String devId, final UUID aiid, Map<String, String> params) throws AiServicesException {
-        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        for (String endpoint : this.getAllEndpoints(aiid)) {
-
-            JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString());
-            for (Map.Entry<String, String> param : params.entrySet()) {
-                target = target.queryParam(param.getKey(), param.getValue());
-            }
-
-            final JerseyInvocation.Builder builder = target.request();
-            callables.put(endpoint, () -> new InvocationResult(aiid, builder.post(null), endpoint, 0));
-        }
-        return callables;
-    }
-
-    private List<String> getAllEndpoints(UUID aiid) throws AiServicesException {
+    /***
+     * Get a list containing the primary endpoints (i.e. one of each backend type)
+     * @param aiid
+     * @return
+     * @throws AiServicesException
+     */
+    private List<String> getListOfPrimaryEndpoints(UUID aiid) throws AiServicesException {
         try {
             return Arrays.asList(
                     this.controllerWnet.getBackendEndpoint(aiid, RequestFor.Training),
                     this.controllerRnn.getBackendEndpoint(aiid, RequestFor.Training));
         } catch (ServerMetadata.NoServerAvailable noServer) {
-            throw new AiServicesException(noServer.getMessage());
+            AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);
         }
+        return null; // this will never happen because the throwsWithSuppressed always throws
     }
-
 
     public static class AiInfo {
         @SerializedName("ai_id")

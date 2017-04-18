@@ -30,6 +30,7 @@ public abstract class ControllerBase extends ServerMetadata {
     protected ThreadSubPool threadSubPool;
     protected ServiceLocator serviceLocator;
     protected HashSet<UUID> botExclusionList;
+    protected QueueProcessor queueProcessor;
     Config config;
 
     public ControllerBase(final Config config,
@@ -110,4 +111,5 @@ public abstract class ControllerBase extends ServerMetadata {
     protected ServerTracker createNewServerTracker() {
         return this.serviceLocator.getService(ServerTracker.class);
     }
+
 }

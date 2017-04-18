@@ -6,6 +6,7 @@ CREATE TABLE `ai_status` (
   `training_progress` FLOAT DEFAULT 0.0,
   `training_error` FLOAT DEFAULT 10000.0,  
   `server_endpoint` VARCHAR(256) NOT NULL,
+  `queue_action` VARCHAR(50),
   `queue_time` DATETIME DEFAULT NULL,
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
@@ -25,21 +26,8 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateAiStatus`(
   IN `in_training_status` VARCHAR(45),
   IN `in_server_endpoint` VARCHAR(256),
   IN `in_training_progress` FLOAT,
-  IN `in_training_error` FLOAT,
-  IN `flag_queue` TINYINT,
-  IN `in_queue_time` DATETIME)
+  IN `in_training_error` FLOAT)
 BEGIN
-
-DECLARE v_queue_time DATETIME;
-IF (`flag_queue` = 0) THEN
-	SET v_queue_time = NULL;
-ELSE
-	IF (`in_queue_time` IS NULL) THEN
-		SET v_queue_time = now();
-	ELSE 
-		SET v_queue_time = `in_queue_time`;
-	END IF;
-END IF;
 
 INSERT INTO `ai_status` 
 ( `server_type`,
@@ -47,60 +35,110 @@ INSERT INTO `ai_status`
   `training_status`,
   `training_progress`,
   `training_error`,
-  `server_endpoint`,
-  `queue_time`) 
+  `server_endpoint`)
 VALUES 
 ( `in_server_type`,
   `in_aiid`,
   `in_training_status`,
   `in_training_progress`,
   `in_training_error`,
-  `in_server_endpoint`,
-  v_queue_time)
+  `in_server_endpoint`)
 ON DUPLICATE KEY UPDATE 
 	`training_status`=`in_training_status`,	
     `training_progress`=`in_training_progress`,	
     `training_error`=`in_training_error`,
 	`server_endpoint`=`in_server_endpoint`,
-    `update_time`=now(),
-	`queue_time`=v_queue_time;
+    `update_time`=now();
   END$$
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS `takeNextQueued`;
+DROP PROCEDURE IF EXISTS `deleteAIStatus`;
 DELIMITER $$
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `takeNextQueued`(
+CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAiStatus`(
   IN `in_server_type` VARCHAR(10),
-  IN `in_training_status` VARCHAR(45))
+  IN `in_aiid` VARCHAR(50))
+    MODIFIES SQL DATA
+BEGIN
+    DELETE FROM `ai_status` 
+		WHERE `ai_status`.`server_type`=`in_server_type`
+        AND `ai_status`.`aiid` = `in_aiid`;
+  END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `queueTakeNext`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueTakeNext`(
+  IN `in_server_type` VARCHAR(10))
 BEGIN
 
 DECLARE v_aiid VARCHAR(50);
-DECLARE v_server_endpoint VARCHAR(256);
+SELECT MIN(`ai_status`.`aiid`) INTO v_aiid 
+	FROM `ai_status` 
+	WHERE `server_type` = `in_server_type` 
+	AND `queue_time`<now()
+	ORDER BY `queue_time`
+	LIMIT 1 FOR UPDATE;
+
+IF NOT v_aiid IS NULL THEN
+    UPDATE `ai_status` SET `queue_time`=NULL 
+		WHERE `aiid` = v_aiid
+        AND `in_server_type`=`server_type`;
+END IF;        
+SELECT * FROM `ai_status` 
+	WHERE v_aiid IS NOT NULL
+	AND `aiid`=v_aiid
+	AND `in_server_type`=`server_type`;
+
+
+  END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `queueUpdate`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueUpdate`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_set_queued` TINYINT,
+  IN `in_queue_offset` INT,
+  IN `in_queue_action` VARCHAR(50)
+  )
+BEGIN
+ 
 DECLARE v_queue_time DATETIME;
-
-SELECT 
-	`aiid`,
-	`server_endpoint`,
-	`queue_time`
-INTO 
-	v_aiid,
-	v_server_endpoint,
-	v_queue_time
-FROM `ai_status` 
-WHERE `server_type` = `in_server_type` 
-AND `training_status`=`in_training_status`
-ORDER BY `queue_time`
-LIMIT 1 FOR UPDATE;
-
-IF v_aiid THEN
-    UPDATE `ai_status` 
-    SET `queue_time`=NULL 
-    WHERE `aiid` = v_aiid;
-    SELECT 
-		v_aiid as `aiid`,
-		v_server_endpoint as `server_endpoint`,
-		v_queue_time as `queue_time`;
+IF (`in_set_queued` = 0) THEN
+	SET v_queue_time = NULL;
+ELSE
+	SET v_queue_time = now() + INTERVAL `in_queue_offset` SECOND;
 END IF;
+
+UPDATE `ai_status` SET 	
+	`queue_time`=v_queue_time,
+    `queue_action`=`in_queue_action`,
+    `update_time`=now()
+WHERE `server_type` = `in_server_type` 
+	AND `aiid` = `in_aiid`;
+
+  END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `queueCountSlots`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueCountSlots`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_training_status` VARCHAR(50))
+BEGIN
+
+DECLARE v_cutoff DATETIME;
+SET v_cutoff = DATE_SUB(NOW(), INTERVAL 5 MINUTE);
+
+SELECT `ai_status`.`server_endpoint`,
+ sum(case when `ai_status`.`update_time` > v_cutoff then 1 else 0 end) training,
+ sum(case when `ai_status`.`update_time` <= v_cutoff then 1 else 0 end) lapsed
+FROM `ai_status`
+WHERE `server_type` = `in_server_type`
+AND `ai_status`.`queue_time` IS NULL
+AND `ai_status`.`training_status` = `in_training_status`
+GROUP BY `ai_status`.`server_endpoint`;
 
   END$$
 DELIMITER ;
@@ -116,7 +154,10 @@ BEGIN
 		`ai_status`.`aiid`,
 		`ai_status`.`training_status`,
 		`ai_status`.`training_progress`,
-        `ai_status`.`training_error`
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai`.`dev_id` = `in_dev_id`
@@ -137,14 +178,40 @@ BEGIN
 		`ai_status`.`training_progress`,
         `ai_status`.`training_error`,
         `ai_status`.`queue_time`,
-        `ai_status`.`server_endpoint`
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai`.`deleted` = 0;
   END$$
 DELIMITER ;
 
-
+DROP PROCEDURE IF EXISTS `getAIQueueStatus`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIQueueStatus`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50))
+    READS SQL DATA
+BEGIN
+    SELECT 
+		`ai_status`.`server_type`,
+		`ai_status`.`aiid`,
+        `ai`.`dev_id`,
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_time`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`,
+        `ai`.`deleted`
+        FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai_status`.`aiid` = `in_aiid`
+    AND `ai_status`.`server_type` = `in_server_type`;
+  END$$
+DELIMITER ;
 
 
 DROP PROCEDURE `addAi`;
@@ -268,7 +335,10 @@ BEGIN
         `ai_status`.`aiid`,
 		`ai_status`.`training_status`, 
 		`ai_status`.`training_progress`, 
-        `ai_status`.`training_error`
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`        
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai_status`.`aiid`=`param_aiid`
@@ -287,7 +357,10 @@ BEGIN
 		`ai_status`.`aiid`,
 		`ai_status`.`training_status`,
 		`ai_status`.`training_progress`,
-        `ai_status`.`training_error`
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`        
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai`.`deleted` = 0;
@@ -306,7 +379,10 @@ BEGIN
         `ai_status`.`aiid`,
 		`ai_status`.`training_status`, 
 		`ai_status`.`training_progress`, 
-        `ai_status`.`training_error`
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`        
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai_status`.`aiid`=param_aiid 
@@ -323,8 +399,6 @@ CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAi`(
   IN `in_aiid` VARCHAR(50))
     MODIFIES SQL DATA
 BEGIN
-	DELETE FROM `ai_status` WHERE `aiid` IN 
-		(SELECT `aiid` FROM `ai` WHERE `aiid`=`in_aiid` AND `dev_id`=`in_dev_id` FOR UPDATE);
     UPDATE `ai` SET `deleted` = 1
 		WHERE `dev_id`=`in_dev_id` AND `aiid`=`in_aiid`;
   END$$
@@ -335,8 +409,6 @@ DELIMITER $$
 CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAllAIs`(IN `param_devid` varchar(50))
     MODIFIES SQL DATA
 BEGIN
-	DELETE FROM `ai_status` WHERE `aiid` IN 
-		(SELECT `aiid` FROM `ai` WHERE `dev_id`=param_devid FOR UPDATE);
     UPDATE `ai` SET `deleted` = 1 WHERE `dev_id`=param_devid;
   END$$
 DELIMITER ;

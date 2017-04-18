@@ -4,6 +4,7 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -36,14 +37,16 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testUpdateStatus() throws Database.DatabaseException {
+        when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
+                new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0));
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
         final Response response = sendStatusUpdateRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testUpdateStatus_dbDidNotUpdate() throws Database.DatabaseException {
-        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(false);
+    public void testUpdateStatus_dbnotfound() throws Database.DatabaseException {
+        when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(null);
         final Response response = sendStatusUpdateRequest(getCommonAiStatusJson());
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
     }
@@ -60,6 +63,8 @@ public class TestServiceAiServices extends ServiceTestBase {
     public void testUpdateStatus_newStatus() throws Database.DatabaseException {
         String statusJson = getCommonAiStatusJson();
         statusJson = statusJson.replace(TrainingStatus.AI_READY_TO_TRAIN.value(), TrainingStatus.AI_TRAINING_QUEUED.value());
+        when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
+                new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0));
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(false);
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(
                 argThat(aiStatus -> ((AiStatus) aiStatus).getTrainingStatus() == TrainingStatus.AI_TRAINING_QUEUED)
@@ -146,6 +151,8 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testStatusUpdate_HashCode_Wnet() throws Database.DatabaseException {
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
+        when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
+                new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0));
         String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
                 0.0, 0.0, "hash",
@@ -159,6 +166,8 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testStatusUpdate_HashCode_Rnn() throws Database.DatabaseException {
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
+        when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
+                new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0));
         String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.RNN,
                 0.0, 0.0, "hash",
