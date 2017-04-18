@@ -30,7 +30,8 @@ public class WebHooks {
     private final JerseyClient jerseyClient;
 
     @Inject
-    public WebHooks(final Database database, final ILogger logger, final JsonSerializer serializer, final JerseyClient jerseyClient) {
+    public WebHooks(final Database database, final ILogger logger, final JsonSerializer serializer,
+                    final JerseyClient jerseyClient) {
         this.database = database;
         this.logger = logger;
         this.serializer = serializer;
@@ -68,7 +69,6 @@ public class WebHooks {
         }
 
         WebHookPayload payload = new WebHookPayload(intent, chatResult);
-        WebHookResponse webHookResponse = null;
 
         String jsonPayload = null;
         try {
@@ -99,9 +99,10 @@ public class WebHooks {
             return null;
         }
 
-        webHookResponse = this.deserializeResponse(response);
+        WebHookResponse webHookResponse = this.deserializeResponse(response);
 
-        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s", intent.getAiid(), intent.getName()));
+        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s",
+                intent.getAiid(), intent.getName()));
         return webHookResponse;
     }
 
@@ -113,13 +114,12 @@ public class WebHooks {
     public WebHookResponse deserializeResponse(final Response response) {
         WebHookResponse webHookResponse = null;
         try {
-            webHookResponse = (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class), WebHookResponse.class);
+            return (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class),
+                    WebHookResponse.class);
         } catch (JsonParseException e) {
             this.logger.logException(LOGFROM, e);
             return null;
         }
-
-        return webHookResponse;
     }
 
     /***

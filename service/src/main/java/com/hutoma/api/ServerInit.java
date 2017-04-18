@@ -74,6 +74,8 @@ public class ServerInit implements ApplicationEventListener {
                                 .put("Method", invocable.getDefinitionMethod().getName());
                         ServerInit.this.logger.logPerf("perfrequestlistener", "APICall", logMap);
                         break;
+                    default: // empty
+                        break;
                 }
             }
         };

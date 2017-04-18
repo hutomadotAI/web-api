@@ -57,6 +57,8 @@ var DRAW_BOTCARDS =
     ADD_SKILL_FLOW: {value: 2}
 };
 
+const ICON_PATH = 'dist/img/boticon/';
+
 function showBots(str, option, bots, botSubSet ) {
     var wHTML = "";
     str = str.toLowerCase();

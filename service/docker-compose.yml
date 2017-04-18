@@ -22,7 +22,7 @@ services:
       - API_BACKEND_REQUEST_TIMEOUT_MS=20000
       - API_LOGGING_URL=http://log-svc:8080/log
       - API_LOGGING_CADENCY=5000
-      - API_AI_AIML_BOT_AIIDS=e1bb8226-e8ce-467a-8305-bc2fcb89dd7f,491091b1-5458-4d87-b7e9-0ccf3002970c,9a7a3376-e872-463e-aaa5-9f7e0e8c3380
+      - API_AI_AIML_BOT_AIIDS=e1bb8226-e8ce-467a-8305-bc2fcb89dd7f,491091b1-5458-4d87-b7e9-0ccf3002970c,9a7a3376-e872-463e-aaa5-9f7e0e8c3380,873e61b9-9b75-449b-9532-821fcea6f864
 networks:
   default:
     external:
