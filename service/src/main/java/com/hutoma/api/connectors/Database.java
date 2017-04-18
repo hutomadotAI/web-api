@@ -720,7 +720,8 @@ public class Database {
         }
     }
 
-    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) throws DatabaseException {
+    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addWebhook", 4)
                     .add(aiid)
@@ -750,7 +751,8 @@ public class Database {
         }
     }
 
-    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) throws DatabaseException {
+    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("updateWebhook", 4).add(aiid).add(intentName).add(endpoint).add(enabled);
             return call.executeUpdate() > 0;

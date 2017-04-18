@@ -80,7 +80,11 @@ public class ApiIntent extends ApiResult {
         return this.topicOut;
     }
 
-    public WebHook getWebHook() { return this.webHook; }
+    public WebHook getWebHook() {
+        return this.webHook;
+    }
 
-    public void setWebHook(final WebHook webHook) { this.webHook = webHook; }
+    public void setWebHook(final WebHook webHook) {
+        this.webHook = webHook;
+    }
 }

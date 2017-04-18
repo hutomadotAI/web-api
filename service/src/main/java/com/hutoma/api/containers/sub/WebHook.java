@@ -9,13 +9,13 @@ import java.util.UUID;
  */
 public class WebHook {
     @SerializedName("aiid")
-    private UUID aiid;
+    private final UUID aiid;
     @SerializedName("intent_name")
-    private String intentName;
+    private final String intentName;
     @SerializedName("enabled")
-    private boolean enabled;
+    private final boolean enabled;
     @SerializedName("endpoint")
-    private String endpoint;
+    private final String endpoint;
 
     public WebHook(UUID aiid, String intentName, String endpoint, boolean enabled) {
         this.aiid = aiid;
@@ -24,8 +24,19 @@ public class WebHook {
         this.enabled = enabled;
     }
 
-    public UUID getAiid() { return this.aiid; }
-    public String getIntentName() { return this.intentName; }
-    public boolean isEnabled() { return this.enabled; }
-    public String getEndpoint() { return this.endpoint; }
+    public UUID getAiid() {
+        return this.aiid;
+    }
+
+    public String getIntentName() {
+        return this.intentName;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public String getEndpoint() {
+        return this.endpoint;
+    }
 }

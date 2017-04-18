@@ -98,7 +98,7 @@ public class TrainingLogic {
                     // Bail out if there are fatal events during the parsing
                     if (result.hasFatalEvents()) {
                         for (int i = 0; i < result.getEvents().size(); i++) {
-                            logMap.put(String.format("event%d", i),
+                            logMap.add(String.format("event%d", i),
                                     String.format("%s - %s",
                                             result.getEvents().get(i).getKey().name(),
                                             result.getEvents().get(i).getValue()));
@@ -157,7 +157,7 @@ public class TrainingLogic {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devid, ioe);
             return ApiError.getInternalServerError();
         } catch (HTMLExtractor.HtmlExtractionException ht) {
-            logMap.put("Cause", ht.getCause().toString());
+            logMap.add("Cause", ht.getCause().toString());
             this.logger.logUserTraceEvent(LOGFROM, "UploadFile - html extraction error", devid, logMap);
             return ApiError.getBadRequest("HTML extraction error");
         } catch (UploadTooLargeException tooLarge) {

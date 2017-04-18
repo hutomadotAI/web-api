@@ -318,7 +318,7 @@ public class ChatLogic {
         // Check if there still are mandatory entities not currently fulfilled
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
         if (vars.isEmpty()) {
-            notifyIntentFulfilled(chatResult, currentIntent, devId, aiid, this.telemetryMap);
+            notifyIntentFulfilled(chatResult, currentIntent, devId, aiid);
 
             // If the webhook returns a text response, overwrite the answer.
             if (this.webHooks.activeWebhookExists(currentIntent, devId)) {
@@ -509,15 +509,14 @@ public class ChatLogic {
         return Math.round(input * 10.0d) / 10.0d;
     }
 
-    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid,
-                                       LogMap telemetryMap) {
+    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid) {
         memoryIntent.setIsFulfilled(true);
         ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
         if (intent != null) {
             List<String> responses = intent.getResponses();
             chatResult.setAnswer(responses.get((int) (Math.random() * responses.size())));
         }
-        telemetryMap.put("IntentFulfilled", memoryIntent.getName());
+        this.telemetryMap.add("IntentFulfilled", memoryIntent.getName());
 
     }
 
