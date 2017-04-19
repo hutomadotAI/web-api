@@ -13,15 +13,16 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.core.Response;
 
 import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by pedrotei on 28/03/17.
@@ -52,6 +53,21 @@ public class TestServiceUI extends ServiceTestBase {
     @Test
     public void testGetBotstoreItem_unAuthenticated() throws Database.DatabaseException {
         testCallingGetBotStoreItem(false);
+    }
+
+    @Test
+    public void testGetBotstoreItems_commaSeparatedFilterList() throws Database.DatabaseException {
+        when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any()))
+                .thenReturn(new ApiBotstoreItemList(Collections.emptyList(), 0, 1, 1));
+        final Response response = target(UI_PATH_BOTSTORE).queryParam("filter", "a,b").request().headers(noDevIdHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        List<String> expectedFilters = Arrays.asList("a", "b");
+        verify(this.fakeDatabaseUi).getBotstoreList(
+                Integer.valueOf(UIEndpoint.DEFAULT_START_FROM),
+                Integer.valueOf(UIEndpoint.DEFAULT_PAGE_SIZE),
+                expectedFilters,
+                UIEndpoint.DEFAULT_ORDER_FIELD,
+                UIEndpoint.DEFAULT_ORDER_DIR);
     }
 
     private void testCallingGetBotStoreItem(final boolean isAuthenticated) throws Database.DatabaseException {

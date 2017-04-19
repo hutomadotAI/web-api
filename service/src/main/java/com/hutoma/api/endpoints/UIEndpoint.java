@@ -14,6 +14,8 @@ import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -34,6 +36,10 @@ import javax.ws.rs.core.Response;
  */
 @Path("/ui/")
 public class UIEndpoint {
+    public static final String DEFAULT_START_FROM = "0";
+    public static final String DEFAULT_PAGE_SIZE = "100";
+    public static final String DEFAULT_ORDER_FIELD = "";
+    public static final String DEFAULT_ORDER_DIR = "DESC";
     private final JsonSerializer serializer;
     private final UILogic uiLogic;
     private final Config config;
@@ -43,6 +49,19 @@ public class UIEndpoint {
         this.uiLogic = uiLogic;
         this.serializer = serializer;
         this.config = config;
+    }
+
+    private static List<String> getListFromMultipeValuedParam(final List<String> values) {
+        // JAX-RS doesnt's support params with multiple values comma separated
+        List<String> list = new ArrayList<>();
+        if (values != null && !values.isEmpty()) {
+            values.forEach(x -> {
+                if (!x.isEmpty()) {
+                    list.addAll(Arrays.asList(x.split(",")));
+                }
+            });
+        }
+        return list;
     }
 
     @GET
@@ -62,17 +81,18 @@ public class UIEndpoint {
     )
     public Response getBotstoreList(
             @Context ContainerRequestContext requestContext,
-            @DefaultValue("0") @QueryParam("startFrom") int startFrom,
-            @DefaultValue("100") @QueryParam("pageSize") int pageSize,
+            @DefaultValue(DEFAULT_START_FROM) @QueryParam("startFrom") int startFrom,
+            @DefaultValue(DEFAULT_PAGE_SIZE) @QueryParam("pageSize") int pageSize,
             @DefaultValue("") @QueryParam("filter") List<String> filters,
-            @DefaultValue("") @QueryParam("orderField") String orderField,
-            @DefaultValue("DESC") @QueryParam("orderDir") String orderDirection
+            @DefaultValue(DEFAULT_ORDER_FIELD) @QueryParam("orderField") String orderField,
+            @DefaultValue(DEFAULT_ORDER_DIR) @QueryParam("orderDir") String orderDirection
     ) {
+
         ApiResult result = this.uiLogic.getBotstoreList(
                 AuthFilter.getDevIdFromHeader(requestContext, this.config),
                 startFrom,
                 pageSize,
-                filters,
+                getListFromMultipeValuedParam(filters),
                 orderField,
                 orderDirection);
         return result.getResponse(this.serializer).build();
