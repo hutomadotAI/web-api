@@ -3716,6 +3716,7 @@ table.text-center th {
     margin-top: -20px;
 }
 
+
 /*
  * Component: modal
  * ----------------
@@ -6450,15 +6451,18 @@ ul.pagination li a {
 
 /* ========== BOT CAROUSEL ============*/
 .carousel-content {
-    padding: 15px 0 15px 15px;
+    height: 350px;
+    padding-bottom: 10px;
     margin-right: auto;
     margin-left: auto;
     color: #ADADAD;
+    display: inline-block;
 }
 
 .carousel-box{
-    height: 300px;
+    height: 290px;
     padding: 0px;
+    display: inline-block;
 }
 
 .carousel-row{
@@ -6472,19 +6476,29 @@ ul.pagination li a {
 .carousel-title{
     font-size: 18px;
     height: 45px;
+    min-width: 180px;
     color: lightgray;
-    padding: 10px  0px 10px 0px;
+    padding: 10px  0px 10px 10px;
 }
 
 .carousel-see-more{
-    padding-right: 10px;
+    height: 45px;
+    padding-top: 5px;
+}
+
+.carousel-ovelay{
+    font-size: 50px;
+    position: relative;
+    top: 200px;
+    left: 50%;
+    z-index: 999;
 }
 
 /* ========== BOT CARD ============*/
 .box-card {
     width: 172px;
     height: 245px;
-    margin: 0 10px 10px 0;
+    margin: 0 0 10px 10px;
 }
 
 .box-card.card {

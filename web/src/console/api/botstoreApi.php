@@ -14,8 +14,12 @@ class botstoreApi extends apiBase
 
     public function getBotstoreList($botstoreQueryParam)
     {
+        $query = http_build_query($botstoreQueryParam, null, '&');
+        $query = str_replace('%25', '%', $query);
+        $query = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $query);
+
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath, $botstoreQueryParam));
+            $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath).'?'.$query);
             $this->curl->setVerbGet();
 
             $this->curl->addHeader('Content-Type', 'application/json');
