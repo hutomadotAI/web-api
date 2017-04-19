@@ -14,8 +14,10 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
         var bot = JSON.parse(botstoreCategorizedItems[x]);
         var botId = bot['metadata']['botId'];
         var botName = bot['metadata']['name'];
+        var botDescription = bot['metadata']['description'];
         var botPrice = bot['metadata']['price'];
         var botCategory = bot['metadata']['category'];
+        var botLicenseType = bot['metadata']['licenseType'];
         var botAuthor = bot['developer']['company'];
         var botOwned = bot['owned'];
 
@@ -50,6 +52,14 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
             //wHTML += '<span class="card-users text-left">'+ bot['metadata']['activations']+'</span>';
             wHTML += '</div>';
 
+            var dataBuyBot = 'id="btnBuyBot' + botId
+                + '" data-toggle="modal" data-target="#buyBot" data-botid="' + botId
+                + '" data-name="' + botName
+                + '" data-description="' + botDescription
+                + '" data-icon="' + botIconPath
+                + '" data-price="' + botPrice
+                + '" data-license="' + botLicenseType + '"';
+
             wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
             if (botOwned) {
                 wHTML += ('<div class="card-purchased pull-right">');
@@ -57,7 +67,7 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
                 wHTML += ('</div>');
             }
             else {
-                wHTML += ('<div class="card-price pull-right">');
+                wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
                 wHTML += (botPrice + ' &#8364');
                 wHTML += ('</div>');
             }
