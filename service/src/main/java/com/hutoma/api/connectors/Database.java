@@ -346,7 +346,21 @@ public class Database {
                 while (rs.next()) {
                     // combine status data with AI
                     UUID aiid = UUID.fromString(rs.getString("aiid"));
-                    res.add(getAiFromResultset(rs, backendStatuses.get(aiid)));
+                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid));
+                    int publishingStateOnDb = rs.getInt("publishing_state");
+                    // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
+                    // we always get it right regardless of the default value
+                    AiBot.PublishingState state;
+                    try {
+                        state = rs.wasNull()
+                                ? AiBot.PublishingState.NOT_PUBLISHED
+                                : AiBot.PublishingState.from(publishingStateOnDb);
+                    } catch (IllegalArgumentException ex) {
+                        // Default to NOT_PUBLISHED if for some reason we can't understand what is in the db
+                        state = AiBot.PublishingState.NOT_PUBLISHED;
+                    }
+                    bot.setPublishingState(state);
+                    res.add(bot);
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -841,7 +855,7 @@ public class Database {
                 rs.getString("botIcon")
         );
     }
-        
+
     /***
      * Interpret a row from the ai_status table
      * @param rs resultset

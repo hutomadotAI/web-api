@@ -1,6 +1,7 @@
 package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
@@ -56,6 +57,9 @@ public class ApiAi extends ApiResult {
     // true if the user has already successfully uploaded a training file for this ai
     @SerializedName("training_file_uploaded")
     private boolean trainingFileUploaded;
+
+    @SerializedName("publishing_state")
+    private AiBot.PublishingState publishingState;
 
     public ApiAi(String aiid, String clientToken) {
         this.aiid = aiid;
@@ -119,6 +123,10 @@ public class ApiAi extends ApiResult {
 
     public TrainingStatus getSummaryAiStatus() {
         return this.summaryStatus;
+    }
+
+    public void setPublishingState(final AiBot.PublishingState publishingState) {
+        this.publishingState = publishingState;
     }
 
     public BackendStatus getBackendStatus() {
