@@ -6,12 +6,14 @@ public class ServerEndpointTrainingSlots {
     private int slotsInUse;
     private int slotsLapsed;
     private int trainingCapacity;
+    private int chatCapacity;
 
     public ServerEndpointTrainingSlots(final String endpoint, final int slotsInUse, final int slotsLapsed) {
         this.endpoint = endpoint;
         this.slotsInUse = slotsInUse;
         this.slotsLapsed = slotsLapsed;
         this.trainingCapacity = 0;
+        this.chatCapacity = 0;
     }
 
     /***
@@ -45,5 +47,13 @@ public class ServerEndpointTrainingSlots {
 
     public void setTrainingCapacity(final int trainingCapacity) {
         this.trainingCapacity = trainingCapacity;
+    }
+
+    public int getChatCapacity() {
+        return this.chatCapacity;
+    }
+
+    public void setChatCapacity(final int chatCapacity) {
+        this.chatCapacity = chatCapacity;
     }
 }

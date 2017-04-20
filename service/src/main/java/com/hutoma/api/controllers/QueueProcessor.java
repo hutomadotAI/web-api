@@ -2,6 +2,7 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
 import com.hutoma.api.connectors.Database;
@@ -20,6 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -45,6 +47,11 @@ public class QueueProcessor extends TimerTask {
     private AtomicBoolean runQueueProcessor;
     // how long to wait until checking the queue again
     private AtomicLong runAgainAfterMs;
+
+    // store the last state so that we know when it has changed
+    private AtomicReference<String> lastKnownControllerState;
+
+    // only used for logging
     private long lastRun = 0;
     private long lastKicked = 0;
 
@@ -60,6 +67,7 @@ public class QueueProcessor extends TimerTask {
         this.queueServices = queueServices;
         this.runQueueProcessor = new AtomicBoolean(true);
         this.runAgainAfterMs = new AtomicLong(0);
+        this.lastKnownControllerState = new AtomicReference<>("");
         this.timer = new Timer();
     }
 
@@ -85,7 +93,7 @@ public class QueueProcessor extends TimerTask {
 
                     this.logger.logDebug(this.logFrom, String.format("queue check: last check was %.1fs ago%s",
                             sinceLastRun / 1000.0,
-                            (sinceLastRun < sinceLastKick) ? "" :
+                            (sinceLastRun <= sinceLastKick) ? "" :
                                     String.format(", kicked %.1fs ago", sinceLastKick / 1000.0)));
                     this.lastRun = timeNow;
 
@@ -121,6 +129,56 @@ public class QueueProcessor extends TimerTask {
 
     private void queueCheckAgainAfter(long milliseconds) {
         this.runAgainAfterMs.set(this.tools.getTimestamp() + milliseconds);
+    }
+
+    private void storeServerStats(final int serverCount,
+                                  final int totalTrainingCapacity, final int availableTrainingSlots,
+                                  final int totalChatCapacity) {
+
+        // create a string that represents the controller state completely
+        String stateNow = String.format("servers:%d train_capacity:%d train_free:%d chat_capacity:%d",
+                serverCount, totalTrainingCapacity, availableTrainingSlots, totalChatCapacity);
+
+        // compare this state with the last state. was there a change? (update anyway)
+        boolean changes = !this.lastKnownControllerState.getAndSet(stateNow).equals(stateNow);
+
+        // ask the controller if we need to log a regular error if there is no capacity
+        boolean errorIfNoTrainingCapacity = this.controller.logErrorIfNoTrainingCapacity();
+
+        // if we detected a change ...
+        if (changes) {
+            // log the new state
+            LogMap logMap = LogMap.map("Op", "heartbeat")
+                    .put("Type", this.serverType)
+                    .put("ServerCount", serverCount)
+                    .put("TrainingCapacity", totalTrainingCapacity)
+                    .put("TrainingSlotsAvailable", availableTrainingSlots)
+                    .put("ChatCapacity", totalChatCapacity);
+            this.logger.logInfo(this.logFrom, String.format("Controller state - %s", stateNow), logMap);
+
+            // try to update the database with this state
+            try {
+                this.database.updateControllerState(this.serverType, serverCount,
+                        totalTrainingCapacity, availableTrainingSlots, totalChatCapacity);
+            } catch (Database.DatabaseException e) {
+                this.logger.logException(this.logFrom, e);
+                // if we didn't manage to update the db then change the string
+                // so that it will come up as changed=true next time
+                this.lastKnownControllerState.set("update failed");
+            }
+        }
+
+        // if there is no training capacity log errors regularly (for some servers)
+        if (errorIfNoTrainingCapacity && (totalTrainingCapacity < 1)) {
+            this.logger.logError(this.logFrom, String.format("%s has zero training %scapacity",
+                    this.serverType.value(), (totalChatCapacity < 1) ? "and chat " : ""));
+        } else {
+            // if there is no chat capacity then log errors regularly
+            if (totalChatCapacity < 1) {
+                this.logger.logError(this.logFrom, String.format("%s has zero chat capacity",
+                        this.serverType.value()));
+            }
+        }
     }
 
     /***
@@ -241,7 +299,7 @@ public class QueueProcessor extends TimerTask {
                 .collect(Collectors.toMap(ServerEndpointTrainingSlots::getEndpoint, Function.identity()));
 
         // get a map of connected endpoints
-        Map<String, ServerTracker> serverMap = this.controller.getEndpointTrainingMap();
+        Map<String, ServerTracker> serverMap = this.controller.getVerifiedEndpointMap();
 
         // for each connected server, set the capacity
         // and set the number of slots in use
@@ -249,33 +307,29 @@ public class QueueProcessor extends TimerTask {
             ServerEndpointTrainingSlots endpoint = slotLookup.computeIfAbsent(name,
                     key -> new ServerEndpointTrainingSlots(key, 0, 0));
             endpoint.setTrainingCapacity(tracker.getTrainingCapacity());
+            endpoint.setChatCapacity(tracker.getChatCapacity());
         });
 
         // count slots
-        int availableSlots = 0;
-        int totalCapacity = 0;
+        int availableTrainingSlots = 0;
+        int totalTrainingCapacity = 0;
+        int totalChatCapacity = 0;
         int serverCount = 0;
 
         // count available, capacity and training-capable servers
         for (ServerEndpointTrainingSlots endpoint : slotLookup.values()) {
-            availableSlots += endpoint.getAvailableSlotCount();
-            totalCapacity += endpoint.getTrainingCapacity();
-            serverCount += (endpoint.getTrainingCapacity() > 0) ? 1 : 0;
+            availableTrainingSlots += endpoint.getAvailableSlotCount();
+            totalTrainingCapacity += endpoint.getTrainingCapacity();
+            totalChatCapacity += endpoint.getChatCapacity();
+            serverCount++;
         }
 
+        storeServerStats(serverCount, totalTrainingCapacity, availableTrainingSlots, totalChatCapacity);
+
         // if there are no available slots
-        if (availableSlots < 1) {
+        if (availableTrainingSlots < 1) {
             // if there was no capacity to begin with
-            if (totalCapacity < 1) {
-                // log it
-                this.logger.logInfo(this.logFrom, "training capacity is zero");
-            } else {
-                // we're at capacity, so log the stats
-                this.logger.logInfo(this.logFrom,
-                        String.format("max training capacity: %d training slot%s on %d server%s in use",
-                                totalCapacity, totalCapacity == 1 ? "" : "s",
-                                serverCount, serverCount == 1 ? "" : "s"));
-            }
+            queueCheckAgainAfter(this.config.getProcessQueueIntervalLong());
             return;
         }
 

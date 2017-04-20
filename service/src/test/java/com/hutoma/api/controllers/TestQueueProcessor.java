@@ -44,7 +44,7 @@ public class TestQueueProcessor {
         this.fakeData = create(null, ENDPOINT1, 1, 2, true);
         this.fakeData = create(this.fakeData, ENDPOINT2, 0, 2, true);
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
-        when(this.fakeController.getEndpointTrainingMap()).thenReturn(this.fakeData.getB());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
         this.qproc.processQueue();
         Assert.assertEquals(ENDPOINT2, this.qproc.getChosenServer());
     }
@@ -53,7 +53,7 @@ public class TestQueueProcessor {
     public void testQueue_FreeSlot() throws Database.DatabaseException {
         this.fakeData = create(null, ENDPOINT1, 0, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
-        when(this.fakeController.getEndpointTrainingMap()).thenReturn(this.fakeData.getB());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
         this.qproc.processQueue();
         Assert.assertEquals(ENDPOINT1, this.qproc.getChosenServer());
     }
@@ -62,7 +62,7 @@ public class TestQueueProcessor {
     public void testQueue_NoFreeSlots() throws Database.DatabaseException {
         this.fakeData = create(null, ENDPOINT1, 1, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
-        when(this.fakeController.getEndpointTrainingMap()).thenReturn(this.fakeData.getB());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
     }
@@ -70,14 +70,14 @@ public class TestQueueProcessor {
     @Test
     public void testQueue_NoSlotsNoServers() throws Database.DatabaseException {
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(new ArrayList<>());
-        when(this.fakeController.getEndpointTrainingMap()).thenReturn(new HashMap<>());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(new HashMap<>());
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
     }
 
     @Test
     public void testQueue_NoServers() throws Database.DatabaseException {
-        when(this.fakeController.getEndpointTrainingMap()).thenReturn(new HashMap<>());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(new HashMap<>());
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
     }
@@ -94,7 +94,7 @@ public class TestQueueProcessor {
 
         this.fakeData = create(null, ENDPOINT1, 0, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
-        when(this.fakeController.getEndpointTrainingMap()).thenReturn(this.fakeData.getB());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
 
         BackendEngineStatus fakeStatus = mock(BackendEngineStatus.class);
         when(fakeStatus.getQueueAction()).thenReturn(QueueAction.DELETE);

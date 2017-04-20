@@ -230,6 +230,24 @@ CREATE TABLE `chatState` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `controller_state`
+--
+
+DROP TABLE IF EXISTS `controller_state`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `controller_state` (
+  `server_type` varchar(10) NOT NULL,
+  `verified_server_count` int(11) DEFAULT NULL,
+  `training_capacity` int(11) DEFAULT NULL,
+  `training_slots_available` int(11) DEFAULT NULL,
+  `chat_capacity` int(11) DEFAULT NULL,
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`server_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `debug`
 --
 
@@ -3057,6 +3075,49 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `updateControllerState` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateControllerState`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_verified_server_count` INT,
+  IN `in_training_capacity` INT,
+  IN `in_training_slots_available` INT,
+  IN `in_chat_capacity` INT)
+BEGIN
+INSERT INTO `controller_state` 
+  (`server_type`,
+  `verified_server_count`,
+  `training_capacity`,
+  `training_slots_available`,
+  `chat_capacity`,
+  `update_time`)
+VALUES 
+  (`in_server_type`,
+  `in_verified_server_count`,
+  `in_training_capacity`,
+  `in_training_slots_available`,
+  `in_chat_capacity`,
+  now())
+ON DUPLICATE KEY UPDATE 
+  `verified_server_count`=`in_verified_server_count`, 
+  `training_capacity`=`in_training_capacity`,
+  `training_slots_available`=`in_training_slots_available`,
+  `chat_capacity`=`in_chat_capacity`,
+  `update_time`=now();
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `updateMemoryIntent` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -3205,4 +3266,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-11 13:52:19
+-- Dump completed on 2017-04-19 15:29:36

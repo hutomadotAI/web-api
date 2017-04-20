@@ -102,10 +102,9 @@ public class ServerMetadata {
      * Gets a map of active, verified servers that are training-capable
      * @return
      */
-    public synchronized Map<String, ServerTracker> getEndpointTrainingMap() {
+    public synchronized Map<String, ServerTracker> getVerifiedEndpointMap() {
         return this.activeServerSessions.values().stream()
                 .filter(ServerTracker::isEndpointVerified)
-                .filter(ServerTracker::canTrain)
                 .collect(Collectors.toMap(ServerTracker::getServerIdentifier, Function.identity()));
     }
 

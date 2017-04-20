@@ -27,4 +27,9 @@ public class ControllerWnet extends ControllerBase {
     public void kickQueueProcessor() {
         this.queueProcessor.kickQueueProcessor();
     }
+
+    @Override
+    public boolean logErrorIfNoTrainingCapacity() {
+        return true;
+    }
 }

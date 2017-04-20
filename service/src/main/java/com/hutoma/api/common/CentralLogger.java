@@ -116,6 +116,10 @@ public class CentralLogger implements ILogger {
         logOutput(EventType.ERROR, fromLabel, logComment);
     }
 
+    public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
+        logOutput(EventType.PERF, fromLabel, logComment, logMap);
+    }
+
     public void initialize(final Config config) {
         this.startLoggingScheduler(
                 config.getElasticSearchLoggingUrl(),
@@ -182,15 +186,18 @@ public class CentralLogger implements ILogger {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
-    public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
-        logOutput(EventType.PERF, fromLabel, logComment, logMap);
+    /**
+     * {@inheritDoc}
+     */
+    public void logInfo(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.INFO, fromLabel, logComment, properties);
     }
 
     /**
      * {@inheritDoc}
      */
     public void logUserInfoEvent(final String logFrom, final String event, final String user,
-                                  final LogMap properties) {
+                                 final LogMap properties) {
         this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, properties));
     }
 

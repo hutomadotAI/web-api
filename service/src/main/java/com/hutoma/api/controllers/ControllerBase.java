@@ -110,6 +110,12 @@ public abstract class ControllerBase extends ServerMetadata {
     public void kickQueueProcessor() {
     }
 
+    /***
+     * Does this flavour of server require training capacity to operate?
+     * @return
+     */
+    public abstract boolean logErrorIfNoTrainingCapacity();
+
     public enum RequestFor {
         Training,
         Chat

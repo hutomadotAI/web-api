@@ -53,7 +53,7 @@ public class AIQueueServices extends ServerConnector {
     public void deleteAIDirect(final String devId, final UUID aiid,
                                final String endpoint, final String serverIdentifier) throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        this.logger.logDebug(LOGFROM, String.format("Sending \"delete\" %s to %s", aiid.toString(), serverIdentifier));
+        this.logger.logInfo(LOGFROM, String.format("Sending \"delete\" %s to %s", aiid.toString(), serverIdentifier));
         callables.put(endpoint, () -> new InvocationResult(
                 aiid,
                 this.jerseyClient
@@ -82,7 +82,7 @@ public class AIQueueServices extends ServerConnector {
         } catch (Database.DatabaseException ex) {
             throw new AiServicesException("Could not get plan for devId " + devId);
         }
-        this.logger.logDebug(LOGFROM, String.format("Sending \"start\" %s to %s", aiid.toString(), serverIdentifier));
+        this.logger.logInfo(LOGFROM, String.format("Sending \"start\" %s to %s", aiid.toString(), serverIdentifier));
         HashMap<String, Callable<InvocationResult>> callables = getTrainingCallableForEndpoint(devId, aiid, serverUrl,
                 new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "start");
@@ -101,7 +101,7 @@ public class AIQueueServices extends ServerConnector {
      */
     private void stopTrainingDirect(final String devId, final UUID aiid, final String serverEndpoint, final String serverIdentifier)
             throws AiServicesException {
-        this.logger.logDebug(LOGFROM, String.format("Sending \"stop\" %s to %s", aiid.toString(), serverIdentifier));
+        this.logger.logInfo(LOGFROM, String.format("Sending \"stop\" %s to %s", aiid.toString(), serverIdentifier));
         HashMap<String, Callable<InvocationResult>> callables =
                 getTrainingCallableForEndpoint(devId, aiid, serverEndpoint, new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "stop");
@@ -150,7 +150,7 @@ public class AIQueueServices extends ServerConnector {
                                       boolean setDbStatus) throws Database.DatabaseException, AiServicesException {
 
         // get an endpoint map, i.e. a map from serverIdentifier to the actual servertracker object
-        Map<String, ServerTracker> map = controller.getEndpointTrainingMap();
+        Map<String, ServerTracker> map = controller.getVerifiedEndpointMap();
         // get the status of the AI for the backend server we are dealing with
         BackendEngineStatus status = backendStatus.getEngineStatus(serverType);
 

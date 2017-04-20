@@ -294,4 +294,29 @@ public class DatabaseAiStatusUpdates extends Database {
         }
     }
 
+    /***
+     * Log the controller state to the database
+     * so that it can be picked up by monitoring tools
+     * @param serverType
+     * @param serverCount how many verified servers
+     * @param totalTrainingCapacity how many total training slots
+     * @param availableTrainingSlots how many slots are available for use
+     * @param totalChatCapacity how many total chat slots
+     * @throws DatabaseException
+     */
+    public void updateControllerState(final BackendServerType serverType, final int serverCount,
+                                      final int totalTrainingCapacity, final int availableTrainingSlots,
+                                      final int totalChatCapacity) throws DatabaseException {
+
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            transaction.getDatabaseCall().initialise("updateControllerState", 5)
+                    .add(serverType.value())
+                    .add(serverCount)
+                    .add(totalTrainingCapacity)
+                    .add(availableTrainingSlots)
+                    .add(totalChatCapacity)
+                    .executeUpdate();
+            transaction.commit();
+        }
+    }
 }

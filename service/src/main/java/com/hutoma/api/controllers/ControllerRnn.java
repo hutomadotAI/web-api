@@ -28,4 +28,9 @@ public class ControllerRnn extends ControllerBase {
         this.queueProcessor.kickQueueProcessor();
     }
 
+    @Override
+    public boolean logErrorIfNoTrainingCapacity() {
+        return true;
+    }
+
 }

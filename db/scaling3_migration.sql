@@ -15,8 +15,52 @@ CREATE TABLE `ai_status` (
   CONSTRAINT `fk_aiid` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `controller_state`;
+CREATE TABLE `controller_state` (
+  `server_type` VARCHAR(10) NOT NULL,
+  `verified_server_count` INT,
+  `training_capacity` INT,
+  `training_slots_available` INT,
+  `chat_capacity` INT,
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+  PRIMARY KEY (`server_type`)  
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiReader'@'127.0.0.1';
 GRANT SELECT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiDeleter'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`controller_state` TO 'aiReader'@'127.0.0.1';
+
+DROP PROCEDURE IF EXISTS `updateControllerState`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateControllerState`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_verified_server_count` INT,
+  IN `in_training_capacity` INT,
+  IN `in_training_slots_available` INT,
+  IN `in_chat_capacity` INT)
+BEGIN
+INSERT INTO `controller_state` 
+  (`server_type`,
+  `verified_server_count`,
+  `training_capacity`,
+  `training_slots_available`,
+  `chat_capacity`,
+  `update_time`)
+VALUES 
+  (`in_server_type`,
+  `in_verified_server_count`,
+  `in_training_capacity`,
+  `in_training_slots_available`,
+  `in_chat_capacity`,
+  now())
+ON DUPLICATE KEY UPDATE 
+  `verified_server_count`=`in_verified_server_count`, 
+  `training_capacity`=`in_training_capacity`,
+  `training_slots_available`=`in_training_slots_available`,
+  `chat_capacity`=`in_chat_capacity`,
+  `update_time`=now();
+  END$$
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `updateAiStatus`;
 DELIMITER $$
@@ -414,4 +458,4 @@ BEGIN
 DELIMITER ;
 
 ALTER TABLE `hutoma`.`ai` 
-DROP COLUMN `backend_status`;
+DROP COLUMN IF EXISTS `backend_status`;

@@ -219,6 +219,14 @@ public class ServerTracker implements Callable {
         return this.serverSessionID;
     }
 
+    /***
+     * Return the number of chat slots that this server can support
+     * @return
+     */
+    public int getChatCapacity() {
+        return this.registration.getChatCapacity();
+    }
+
     private synchronized int getChatAffinityCount() {
         return this.affinity.size();
     }

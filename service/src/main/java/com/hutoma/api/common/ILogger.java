@@ -28,6 +28,14 @@ public interface ILogger {
     void logInfo(String fromLabel, String logComment);
 
     /**
+     * Adds an INFO log.
+     * @param fromLabel  the origin of the log
+     * @param logComment the comment
+     * @param properties map of properties
+     */
+    void logInfo(String fromLabel, String logComment, LogMap properties);
+    
+    /**
      * Logs an exception.
      * @param fromLabel the origin of the log
      * @param ex        the exception
