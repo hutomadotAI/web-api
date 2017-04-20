@@ -619,6 +619,15 @@ public class TestChatLogic {
     }
 
     @Test
+    public void testChat_AimlNotConf_rnnNull_wnetNotConfident() throws RequestBase.AiControllerException {
+        setupFakeChat(0.0d, "wnet", 0.0d, "aiml", 0.0d, null);
+        when(this.fakeChatServices.awaitRnn()).thenReturn(null);
+        ApiChat result = (ApiChat) getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("aiml", result.getResult().getAnswer());
+    }
+
+    @Test
     public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)

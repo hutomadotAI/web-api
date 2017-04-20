@@ -120,7 +120,7 @@ public class ChatLogic {
                 boolean wnetConfident = false;
                 if (result != null) {
                     // are we confident enough with this reply?
-                    wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.0d);
+                    wnetConfident = (result.getScore() >= minP) && (result.getScore() > 0.00001d);
                     this.telemetryMap.add("WNETScore", result.getScore());
                     this.telemetryMap.add("WNETConfident", wnetConfident);
 
@@ -156,7 +156,7 @@ public class ChatLogic {
                     // If we don't have AIML available (not linked)
                     if (aimlResult != null) {
                         // are we confident enough with this reply?
-                        aimlConfident = aimlResult.getScore() > 0.0d;
+                        aimlConfident = aimlResult.getScore() > 0.00001d;
                         this.telemetryMap.add("AIMLScore", aimlResult.getScore());
                         this.telemetryMap.add("AIMLConfident", aimlConfident);
                         if (aimlConfident) {
@@ -174,28 +174,28 @@ public class ChatLogic {
                         // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
                         this.telemetryMap.add("AnsweredWithConfidence", false);
 
+                        boolean answeredByRnn = false;
+
                         if (rnnResult != null) {
                             this.telemetryMap.add("RNNScore", rnnResult.getScore());
                             // If the RNN was clueless or returned an empty response
-                            if (rnnResult.getAnswer() == null || rnnResult.getAnswer().isEmpty()) {
-                                // Use AIML, if available, use it as it will always generate something
-                                if (aimlResult != null) {
-                                    this.telemetryMap.add("FellBackToAIML", "true");
-                                    this.telemetryMap.add("AnsweredBy", "AIML");
-                                    result = aimlResult;
-                                } else {
-                                    // TODO we need to figure out something
-                                    this.telemetryMap.add("AnsweredBy", "NONE");
-                                    result = getImCompletelyLostChatResult(chatUuid);
-                                }
-                            } else {
+                            if (rnnResult.getAnswer() != null && !rnnResult.getAnswer().isEmpty()) {
                                 result = rnnResult;
                                 this.telemetryMap.add("AnsweredBy", "RNN");
+                                answeredByRnn = true;
                             }
-                        } else {
-                            // TODO we need to figure out something
-                            this.telemetryMap.add("AnsweredBy", "NONE");
-                            result = getImCompletelyLostChatResult(chatUuid);
+                        }
+
+                        if (!answeredByRnn) {
+                            if (aimlResult != null) {
+                                this.telemetryMap.add("FellBackToAIML", "true");
+                                this.telemetryMap.add("AnsweredBy", "AIML");
+                                result = aimlResult;
+                            } else {
+                                // TODO we need to figure out something
+                                this.telemetryMap.add("AnsweredBy", "NONE");
+                                result = getImCompletelyLostChatResult(chatUuid);
+                            }
                         }
 
                         this.telemetryMap.add("RNNAnswered", rnnResult != null);
