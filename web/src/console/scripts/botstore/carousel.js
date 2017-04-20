@@ -5,7 +5,7 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
     var wHTML = "";
     wHTML += '<section class="carousel-content" style="padding-right: 0px;">';
     wHTML += '<div class="carousel-box">';
-    wHTML += '<div class="row no-margin" style="">';
+    wHTML += '<div class="row no-margin" >';
     wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
     wHTML += '</div>';
 
@@ -84,16 +84,28 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
         }
     }
     wHTML += ('</div>');
-    if (!see_more && botstoreCategorizedItems.length > MAX_BOTCARDS_VISIBLE_IN_BOTSORE)
-        wHTML += '<span class="carousel-see-more pull-right"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+    wHTML += '<span class="carousel-see-more pull-right"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
     wHTML += ('</div>');
     wHTML += ('</section>');
 
     var newNode = document.createElement('div');
     newNode.className = 'botsCarousel';
     newNode.innerHTML = wHTML;
-
     document.getElementById('botsCarousels').appendChild(newNode);
+
+    showSeeMoreButton(newNode);
+}
+
+function showSeeMoreButton(node){
+    var carouselBotcardNode = node.children[0].children[0].children[1];
+    var firstBotcard = carouselBotcardNode.children[0].children[0];
+    var marginBottom = window.getComputedStyle(firstBotcard).getPropertyValue("margin-bottom");
+
+    var nodeSeeMore = node.children[0].children[0].lastChild;
+    if ( (parseInt(carouselBotcardNode.offsetHeight)+parseInt(marginBottom)) < parseInt(carouselBotcardNode.scrollHeight))
+        nodeSeeMore.style.visibility= "visible";
+    else
+        nodeSeeMore.style.visibility= "hidden";
 }
 
 function getCarousels(category){
@@ -102,7 +114,7 @@ function getCarousels(category){
     jQuery.ajax({
         url: 'carousel.php',
         type: 'GET',
-        data: { category: category},
+        data: { category: category },
         dataType: 'json',
         success: function (response) {
             for (var key in response)

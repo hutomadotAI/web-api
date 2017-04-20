@@ -62,9 +62,6 @@ var BOT_ICON = {
     DEFAULT_IMAGE: {value: 'dist/img/default_bot.jpg'}
 };
 
-const MAX_BOTCARDS_VISIBLE_IN_BOTSORE = 5;
-
-
 function showBots(str, option, bots, botSubSet ) {
     var wHTML = "";
     str = str.toLowerCase();
