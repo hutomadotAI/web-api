@@ -367,7 +367,21 @@ public class Database {
             final ArrayList<ApiAi> res = new ArrayList<>();
             try {
                 while (rs.next()) {
-                    res.add(getAiFromResultset(rs, jsonSerializer));
+                    ApiAi bot = getAiFromResultset(rs, jsonSerializer);
+                    int publishingStateOnDb = rs.getInt("publishing_state");
+                    // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
+                    // we always get it right regardless of the default value
+                    AiBot.PublishingState state;
+                    try {
+                        state = rs.wasNull()
+                                ? AiBot.PublishingState.NOT_PUBLISHED
+                                : AiBot.PublishingState.from(publishingStateOnDb);
+                    } catch (IllegalArgumentException ex) {
+                        // Default to NOT_PUBLISHED if for some reason we can't understand what is in the db
+                        state = AiBot.PublishingState.NOT_PUBLISHED;
+                    }
+                    bot.setPublishingState(state);
+                    res.add(bot);
                 }
                 return res;
             } catch (final SQLException sqle) {
