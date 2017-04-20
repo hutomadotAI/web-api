@@ -80,7 +80,7 @@ class botstoreListParam
         return array(
             'startFrom' => $this->getStartForm(),
             'pageSize' => $this->getPageSize(),
-            'filter' => $tmp_list_filters,
+            'filter' => implode(',', $tmp_list_filters),
             'orderField' => $this->getOrderFilter(),
             'orderDir' => $this->getOrderDir(),
         );

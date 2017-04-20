@@ -8,7 +8,11 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
     wHTML += '<div class="row no-margin" style="">';
     wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
     wHTML += '</div>';
-    wHTML += ('<div class="row carousel-row no-margin" name="bot_list">');
+
+    if (see_more)
+        wHTML += ('<div class="row carousel-row no-margin" name="bot_list">');
+    else
+        wHTML += ('<div class="row carousel-row no-margin carousel-overflow" name="bot_list">');
 
     for (var x in botstoreCategorizedItems) {
         var bot = JSON.parse(botstoreCategorizedItems[x]);
@@ -80,7 +84,7 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
         }
     }
     wHTML += ('</div>');
-    if (!see_more)
+    if (!see_more && botstoreCategorizedItems.length > MAX_BOTCARDS_VISIBLE_IN_BOTSORE)
         wHTML += '<span class="carousel-see-more pull-right"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
     wHTML += ('</div>');
     wHTML += ('</section>');
