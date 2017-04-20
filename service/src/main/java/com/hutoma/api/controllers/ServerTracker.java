@@ -234,18 +234,33 @@ public class ServerTracker implements Callable {
                     .property(CONNECT_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
                     .request()
                     .post(Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
-            if (response.getStatus() == HttpURLConnection.HTTP_OK) {
-                this.logger.logDebug(LOGFROM,
-                        String.format("heartbeat ping to %s succeeded", this.serverIdentity),
-                        logMap.put("Status", "success"));
-                return true;
-            }
 
-            this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
-                    this.serverIdentity, response.getStatus()), logMap.put("Status", response.getStatus()));
+            // re-check session to see if it was closed while this heartbeat was in progress
+            // if so, just bail out here
+            if (this.runFlag.get()) {
+
+                if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                    this.logger.logDebug(LOGFROM,
+                            String.format("heartbeat ping to %s succeeded", this.serverIdentity),
+                            logMap.put("Status", "success"));
+                    return true;
+                }
+
+                // bad request from a heartbeat means that the backend server has closed the session
+                if (response.getStatus() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                    this.endServerSession();
+                    this.logger.logWarning(LOGFROM,
+                            String.format("%s has closed the session remotely", this.serverIdentity),
+                            logMap.put("Status", response.getStatus()));
+                } else {
+                    this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
+                            this.serverIdentity, response.getStatus()), logMap.put("Status", response.getStatus()));
+                }
+            }
         } catch (Exception e) {
             this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %s",
                     this.serverIdentity, e.toString()), logMap.put("Status", e.toString()));
+
         }
         return false;
     }
