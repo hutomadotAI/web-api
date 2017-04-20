@@ -346,7 +346,7 @@ public class Database {
                 while (rs.next()) {
                     // combine status data with AI
                     UUID aiid = UUID.fromString(rs.getString("aiid"));
-                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid)));
+                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid));
                     int publishingStateOnDb = rs.getInt("publishing_state");
                     // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
                     // we always get it right regardless of the default value
@@ -855,7 +855,7 @@ public class Database {
                 rs.getString("botIcon")
         );
     }
-        
+
     /***
      * Interpret a row from the ai_status table
      * @param rs resultset
