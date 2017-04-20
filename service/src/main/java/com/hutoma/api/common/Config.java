@@ -201,17 +201,27 @@ public class Config {
      * if there are tasks to run or reschedule
      * @return
      */
-    public long getProcessQueueCheckEveryMs() {
+    public long getProcessQueueIntervalDefault() {
         return 2 * 1000;
     }
 
     /***
      * The time to wait if a command needs to be scheduled
      * immediately after this one (in ms)
+     * i.e. minimum interval between queue checks
      * @return
      */
-    public long getProcessQueueScheduleRunNextMs() {
-        return 2 * 1000;
+    public long getProcessQueueIntervalShort() {
+        return 1000;
+    }
+
+    /***
+     * The time to wait if nothing much is going on
+     * and we can wait a while before checking the queue again
+     * @return
+     */
+    public long getProcessQueueIntervalLong() {
+        return 10 * 1000;
     }
 
     /***

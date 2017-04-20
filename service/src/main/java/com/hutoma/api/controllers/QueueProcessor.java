@@ -2,7 +2,6 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
 import com.hutoma.api.connectors.Database;
@@ -17,8 +16,8 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -31,7 +30,7 @@ import javax.inject.Inject;
  * When initialised, will start a thread that monitors the queue
  * and executes queued tasks
  */
-public class QueueProcessor implements Callable {
+public class QueueProcessor extends TimerTask {
 
     protected BackendServerType serverType;
     protected ControllerBase controller;
@@ -45,10 +44,11 @@ public class QueueProcessor implements Callable {
     // flag to tell the inner thread not to quit
     private AtomicBoolean runQueueProcessor;
     // how long to wait until checking the queue again
-    private AtomicLong runAgainIn;
+    private AtomicLong runAgainAfterMs;
+    private long lastRun = 0;
+    private long lastKicked = 0;
 
-    // the inner thread future
-    private Future queueThread;
+    private Timer timer;
 
     @Inject
     public QueueProcessor(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
@@ -59,35 +59,68 @@ public class QueueProcessor implements Callable {
         this.tools = tools;
         this.queueServices = queueServices;
         this.runQueueProcessor = new AtomicBoolean(true);
-        this.runAgainIn = new AtomicLong(0);
+        this.runAgainAfterMs = new AtomicLong(0);
+        this.timer = new Timer();
     }
 
-    public void initialise(ThreadSubPool subPool, ControllerBase controller, final BackendServerType serverType) {
+    public void initialise(ControllerBase controller, final BackendServerType serverType) {
         this.serverType = serverType;
         this.controller = controller;
-        this.queueThread = subPool.submit(this);
         this.logFrom = String.format("qproc-%s", serverType.value());
+        // timer fires approx twice per second
+        this.timer.schedule(this, 0, 500);
     }
 
     @Override
-    public Object call() throws Exception {
-
+    public void run() {
         // check the run flag
-        while (this.runQueueProcessor.get()) {
+        if (this.runQueueProcessor.get()) {
             try {
                 // wait until we are ready to run again
-                this.tools.threadSleep(this.runAgainIn.getAndSet(this.config.getProcessQueueCheckEveryMs()));
-                // process queue now
-                processQueue();
-            } catch (InterruptedException ie) {
-                // this will happen when we want to trigger
-                // the queue to run now
-                this.runAgainIn.set(0);
+                if (this.tools.getTimestamp() >= this.runAgainAfterMs.get()) {
+
+                    long timeNow = this.tools.getTimestamp();
+                    long sinceLastRun = timeNow - this.lastRun;
+                    long sinceLastKick = timeNow - this.lastKicked;
+
+                    this.logger.logDebug(this.logFrom, String.format("queue check: last check was %.1fs ago%s",
+                            sinceLastRun / 1000.0,
+                            (sinceLastRun < sinceLastKick) ? "" :
+                                    String.format(", kicked %.1fs ago", sinceLastKick / 1000.0)));
+                    this.lastRun = timeNow;
+
+                    // by default, wait a small amount of time to check again
+                    // this may be changed inside processQueue
+                    queueCheckAgainAfter(this.config.getProcessQueueIntervalDefault());
+
+                    // process queue now
+                    processQueue();
+                }
             } catch (Exception e) {
                 this.logger.logException(this.logFrom, e);
             }
         }
-        return null;
+    }
+
+    /***
+     * If the queue processor was sleeping (long intervals)
+     * then tell it to run soon
+     */
+    public void kickQueueProcessor() {
+
+        long timeNow = this.tools.getTimestamp();
+        this.lastKicked = timeNow;
+
+        // ideally, we would run the queue at this time
+        final long latestTimeToRun = timeNow + this.config.getProcessQueueIntervalShort();
+
+        // only update the run time if we are bringing it forward not pushing it back
+        this.runAgainAfterMs.getAndUpdate(previousTimeToRunNext ->
+                (previousTimeToRunNext > latestTimeToRun) ? latestTimeToRun : previousTimeToRunNext);
+    }
+
+    private void queueCheckAgainAfter(long milliseconds) {
+        this.runAgainAfterMs.set(this.tools.getTimestamp() + milliseconds);
     }
 
     /***
@@ -114,8 +147,7 @@ public class QueueProcessor implements Callable {
             } else {
                 this.logger.logDebug(this.logFrom, "missing parent AI; cannot delete AI on backend");
             }
-            // deletion is a quick process, in 2 seconds this server will have a free slot again
-            this.runAgainIn.set(this.config.getProcessQueueScheduleRunNextMs());
+
             // delete the status for this AI
             this.database.deleteAiStatus(this.serverType, queued.getAiid());
 
@@ -178,7 +210,7 @@ public class QueueProcessor implements Callable {
                     "requeuing due to failure to start training on backend %s", e.toString()));
 
             // TODO: distinguish between different errors
-            // TODO: 500, 429 = requeue, 404 = don't requeue
+            // TODO: 500, 429 = requeue, 400, 404 = don't requeue
             // if we failed to talk to the back-end server then requeue this command to try again in 30 seconds
             try {
                 this.database.queueUpdate(this.serverType, queued.getAiid(),
@@ -236,10 +268,10 @@ public class QueueProcessor implements Callable {
             // if there was no capacity to begin with
             if (totalCapacity < 1) {
                 // log it
-                this.logger.logDebug(this.logFrom, "training capacity is zero");
+                this.logger.logInfo(this.logFrom, "training capacity is zero");
             } else {
                 // we're at capacity, so log the stats
-                this.logger.logDebug(this.logFrom,
+                this.logger.logInfo(this.logFrom,
                         String.format("max training capacity: %d training slot%s on %d server%s in use",
                                 totalCapacity, totalCapacity == 1 ? "" : "s",
                                 serverCount, serverCount == 1 ? "" : "s"));
@@ -269,12 +301,16 @@ public class QueueProcessor implements Callable {
             switch (queued.getQueueAction()) {
                 case DELETE:
                     unqueueDelete(queued, chosenServer);
+                    queueCheckAgainAfter(this.config.getProcessQueueIntervalShort());
                     break;
                 case TRAIN:
                     unqueueTrain(queued, chosenServer);
+                    queueCheckAgainAfter(this.config.getProcessQueueIntervalShort());
                     break;
                 default:
             }
+        } else {
+            queueCheckAgainAfter(this.config.getProcessQueueIntervalLong());
         }
     }
 }

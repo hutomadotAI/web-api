@@ -20,6 +20,12 @@ public class ControllerRnn extends ControllerBase {
                          final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
         this.queueProcessor = queueProcessor;
-        this.queueProcessor.initialise(threadSubPool, this, BackendServerType.RNN);
+        this.queueProcessor.initialise(this, BackendServerType.RNN);
     }
+
+    @Override
+    public void kickQueueProcessor() {
+        this.queueProcessor.kickQueueProcessor();
+    }
+
 }

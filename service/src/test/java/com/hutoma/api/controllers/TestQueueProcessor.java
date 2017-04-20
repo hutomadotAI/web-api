@@ -3,7 +3,6 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
 import com.hutoma.api.connectors.Database;
@@ -91,7 +90,7 @@ public class TestQueueProcessor {
         this.fakeQueueServices = mock(AIQueueServices.class);
         this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, this.fakeQueueServices,
                 mock(Tools.class), mock(ILogger.class));
-        this.qproc.initialise(null, this.fakeController, BackendServerType.WNET);
+        this.qproc.initialise(this.fakeController, BackendServerType.WNET);
 
         this.fakeData = create(null, ENDPOINT1, 0, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
@@ -135,7 +134,7 @@ public class TestQueueProcessor {
         }
 
         @Override
-        public void initialise(final ThreadSubPool subPool, final ControllerBase controller, final BackendServerType serverType) {
+        public void initialise(final ControllerBase controller, final BackendServerType serverType) {
             this.controller = controller;
             this.serverType = serverType;
         }

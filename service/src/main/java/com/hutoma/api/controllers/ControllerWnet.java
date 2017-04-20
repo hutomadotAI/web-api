@@ -20,7 +20,11 @@ public class ControllerWnet extends ControllerBase {
                           final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
         this.queueProcessor = queueProcessor;
-        this.queueProcessor.initialise(threadSubPool, this, BackendServerType.WNET);
+        this.queueProcessor.initialise(this, BackendServerType.WNET);
     }
 
+    @Override
+    public void kickQueueProcessor() {
+        this.queueProcessor.kickQueueProcessor();
+    }
 }

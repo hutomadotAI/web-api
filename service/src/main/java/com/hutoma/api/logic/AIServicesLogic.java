@@ -110,6 +110,7 @@ public class AIServicesLogic {
 
             // commit the update
             this.database.updateAIStatus(status);
+            controller.kickQueueProcessor();
 
             // update the ai hashcode
             controller.setHashCodeFor(status.getAiid(), status.getAiHash());

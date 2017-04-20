@@ -59,7 +59,9 @@ public class AIServices extends ServerConnector {
     public void startTraining(BackendStatus status, final String devId, final UUID aiid) throws AiServicesException {
         try {
             this.queueServices.userActionStartTraining(status, BackendServerType.WNET, devId, aiid);
+            this.controllerWnet.kickQueueProcessor();
             this.queueServices.userActionStartTraining(status, BackendServerType.RNN, devId, aiid);
+            this.controllerRnn.kickQueueProcessor();
         } catch (Database.DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to start training", e);
         }
@@ -91,7 +93,9 @@ public class AIServices extends ServerConnector {
     public void deleteAI(final BackendStatus backendStatus, final String devId, final UUID aiid) throws AiServicesException {
         try {
             this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
+            this.controllerWnet.kickQueueProcessor();
             this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
+            this.controllerRnn.kickQueueProcessor();
         } catch (Database.DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }

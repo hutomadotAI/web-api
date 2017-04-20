@@ -103,6 +103,13 @@ public abstract class ControllerBase extends ServerMetadata {
         database.synchroniseDBStatuses(jsonSerializer, serverType, statusData, this.botExclusionList);
     }
 
+    /***
+     * If something has changed in the queue and we would like
+     * the queue processor to run sooner rather than later
+     */
+    public void kickQueueProcessor() {
+    }
+
     public enum RequestFor {
         Training,
         Chat
@@ -111,5 +118,4 @@ public abstract class ControllerBase extends ServerMetadata {
     protected ServerTracker createNewServerTracker() {
         return this.serviceLocator.getService(ServerTracker.class);
     }
-
 }
