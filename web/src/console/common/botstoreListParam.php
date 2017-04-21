@@ -40,11 +40,6 @@ class botstoreListParam
         array_push($this->filters, $filterName . "%3D%27" . $filterValue. "%27");
     }
 
-    public function resetFilters()
-    {
-        //$this->filters = array();
-    }
-
     public function getFilters()
     {
         return $this->filters;
