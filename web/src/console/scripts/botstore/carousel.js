@@ -1,7 +1,6 @@
 const MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
 
 window.addEventListener('resize', function(){
-    console.log('resizing');
     var node = document.getElementById('botsCarousels');
     var nCarousel = node.childElementCount;
 

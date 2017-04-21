@@ -51,9 +51,8 @@ if(!\hutoma\console::checkSessionIsActive()){
             <div class="overlay carousel-ovelay" id ="carousel-overlay">
                 <i class="fa fa-refresh fa-spin center-block"></i>
             </div>
-            <p id="botsCarousels">
-            </p>
-            <p></p>
+            <p id="botsCarousels"/>
+            <p/>
             <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
