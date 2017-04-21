@@ -1,5 +1,14 @@
 const MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
 
+window.addEventListener('resize', function(){
+    console.log('resizing');
+    var node = document.getElementById('botsCarousels');
+    var nCarousel = node.childElementCount;
+
+    for ( var i = 0; i < nCarousel; i++ )
+        showSeeMoreButton(node.children[i]);
+});
+
 function showCarousel(botstoreCategorizedItems, category, option, see_more) {
     if(see_more === undefined )
         see_more = false;
@@ -123,10 +132,8 @@ function setSeeMoreButtonPosition(carouselBotcardNode, nodeSeeMore){
             var marginLeft = parseInt(window.getComputedStyle(currNode).marginLeft);
             nodeSeeMore.style.left = ( (currNode.offsetWidth + marginLeft ) * i ) - seeMoreWidth + 'px';
             break;
-           // + '    ' + carouselBotcardNode.offsetTop  + '    '  + carouselBotcardNode.children[i].offsetTop + '  ' + + carouselBotcardNode.children[i].scrollLeft);
         }
     }
-
 }
 
 function getCarousels(category){
