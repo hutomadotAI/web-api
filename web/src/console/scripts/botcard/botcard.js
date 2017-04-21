@@ -1,4 +1,4 @@
-function populateBotFields(botstoreItem, menu_title) {
+function populateBotFields(botstoreItem, menu_title, carousel_category) {
     var bot = JSON.parse(botstoreItem)['metadata'];
     document.getElementById('botTitle').innerText = bot['name'];
     document.getElementById('botBadge').innerText = bot['badge'];
@@ -24,13 +24,17 @@ function populateBotFields(botstoreItem, menu_title) {
     document.getElementById('botVersion').innerText = bot['version'];
     document.getElementById('botClassification').innerText = bot['classification'];
     document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(bot['privacyPolicy']));
-    document.getElementById('botIcon').setAttribute('src', ICON_PATH + bot['botIcon']);
-
+    var botIconPath = '';
+    if (bot['botIcon'] == null || bot['botIcon'] =='')
+        botIconPath = BOT_ICON.DEFAULT_IMAGE.value;
+    else
+        botIconPath = BOT_ICON.PATH.value + bot['botIcon'];
+    document.getElementById('botIcon').setAttribute('src', botIconPath);
     document.getElementById('botNamePurchase').innerText = bot['name'];
     document.getElementById('botDescriptionPurchase').innerText = bot['description'];
     document.getElementById('botPricePurchase').innerText = bot['price'];
     document.getElementById('botLicensePurchase').innerText = bot['licenseType'];
-    document.getElementById('botIconPurchase').setAttribute('src', ICON_PATH + bot['botIcon']);
+    document.getElementById('botIconPurchase').setAttribute('src', botIconPath);
     document.getElementById('bot_id').value = bot['botId'];
 
     var dev = JSON.parse(botstoreItem)['developer'];
@@ -49,7 +53,7 @@ function populateBotFields(botstoreItem, menu_title) {
     else
         document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(bot['videoLink']));
 
-    setButtonParameter(menu_title, JSON.parse(botstoreItem)['owned'])
+    setButtonParameter(menu_title, JSON.parse(botstoreItem)['owned'], carousel_category)
 }
 
 function checkLink(link){
@@ -82,7 +86,7 @@ function videoLinkFilter(url) {
     return '';
 }
 
-function setButtonParameter(title, owned) {
+function setButtonParameter(title, owned, carousel_category) {
     switch (title) {
         case 'home' :
             if (owned)
@@ -98,7 +102,10 @@ function setButtonParameter(title, owned) {
         case 'botstore' :
             if (owned)
                 btnFromBuyToPurchased();
-            document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
+            if(carousel_category=='')
+                document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
+            else
+                document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php?category=' + carousel_category);
             break;
         default:
             document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
