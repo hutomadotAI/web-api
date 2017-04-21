@@ -1419,7 +1419,6 @@ BEGIN
     `ai`.`dev_id`,
     `ai`.`is_private`,
     `ai`.`client_token`,
-    `ai`.`backend_status`,
     `ai`.`ui_ai_language`,
     `ai`.`ui_ai_timezone`,
     `ai`.`ui_ai_confidence`,
