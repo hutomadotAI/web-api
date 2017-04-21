@@ -2,6 +2,7 @@ package com.hutoma.api.validation;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
 
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -117,11 +117,9 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
-                    new LinkedHashMap<String, String>() {{
-                        put("Type", "Query");
-                        put("Parameter", pve.getParameterName());
-                        put("Message", pve.getMessage());
-                    }});
+                    LogMap.map("Type", "Query")
+                            .put("Parameter", pve.getParameterName())
+                            .put("Message", pve.getMessage()));
         }
     }
 

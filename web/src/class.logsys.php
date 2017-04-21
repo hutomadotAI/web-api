@@ -534,8 +534,13 @@ class console
 
     public static function getAdminToken()
     {
-        return "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c";
-
+        $token = getenv("API_ADMIN_DEVTOKEN");
+        if (isset($token) && $token != "") {
+            return $token;
+        } else {
+            self::log_error("getAdminToken", "Admin token not found");
+        }
+        return null;
     }
 
     /**
@@ -1252,23 +1257,22 @@ class console
         return self::$loggedIn;
     }
 
-    public static function isSessionActive()
+    public static function checkSessionIsActive()
     {
-        if (self::$sessionObj->getLastActivity() != null && (time() - self::$sessionObj->getLastActivity() > 1800)) {
+        define('TIMEOUT', 24 * 60 * 60); // 1 day, in seconds
+        if (!self::$loggedIn
+            || PHP_SESSION_ACTIVE != session_status()
+            || (self::$sessionObj->getLastActivity() != null
+                && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) ) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
+            self::redirect('/');
+            return false;
         }
         self::$sessionObj->setLastActivity(time());
-        $sid = session_id();
-        return function_exists('session_status') ? (PHP_SESSION_ACTIVE == session_status()) : (!empty($sid));
+        return true;
     }
-
-    function debug($data)
-    {
-        echo 'console.log(' . $data . ');';
-    }
-
 
 }
 

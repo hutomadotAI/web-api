@@ -1204,6 +1204,29 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteWebhook` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `deleteWebhook`(
+	IN `param_aiid` VARCHAR(50), IN `param_intent_name` VARCHAR(250))
+    READS SQL DATA
+BEGIN
+  DELETE FROM `webhooks`
+  WHERE `webhooks`.`intent_name`=`param_intent_name`
+  AND `webhooks`.`aiid`=`param_aiid`;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `existsAiTrainingFile` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1359,28 +1382,29 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIs`(
     READS SQL DATA
 BEGIN
 
-    SELECT
-      `id`,
-      `aiid`,
-      `ai_name`,
-      `ai_description`,
-      `created_on`,
-      `dev_id`,
-      `is_private`,
-      `client_token`,
-      `backend_status`,
-      `ui_ai_language`,
-      `ui_ai_timezone`,
-      `ui_ai_confidence`,
-      `ui_ai_personality`,
-      `ui_ai_voice`,
-      (SELECT COUNT(`ai_training`.`aiid`)
-       FROM `ai_training`
-       WHERE `ai_training`.`aiid`=`ai`.`aiid`)
-        AS `has_training_file`
-    FROM `ai`
+  SELECT
+    `ai`.`id`,
+    `ai`.`aiid`,
+    `ai`.`ai_name`,
+    `ai`.`ai_description`,
+    `ai`.`created_on`,
+    `ai`.`dev_id`,
+    `ai`.`is_private`,
+    `ai`.`client_token`,
+    `ai`.`backend_status`,
+    `ai`.`ui_ai_language`,
+    `ai`.`ui_ai_timezone`,
+    `ai`.`ui_ai_confidence`,
+    `ai`.`ui_ai_personality`,
+    `ai`.`ui_ai_voice`,
+    (SELECT COUNT(`ai_training`.`aiid`)
+     FROM `ai_training`
+     WHERE `ai_training`.`aiid`=`ai`.`aiid`)
+      AS `has_training_file`,
+    `botStore`.`publishing_state`
+  FROM `ai` LEFT OUTER JOIN `botStore` on `botStore`.`aiid` = `ai`.`aiid`
     WHERE `ai`.`dev_id`=`in_dev_id`
-          AND `deleted`=0;
+          AND `ai`.`deleted`=0;
 
   END ;;
 DELIMITER ;
@@ -2257,18 +2281,16 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getWebhook`(
-	IN `aiid` INT(50), IN `intent_name` INT(250))
+	IN `param_aiid` VARCHAR(50), IN `param_intent_name` VARCHAR(250))
     READS SQL DATA
 BEGIN
-
-	SELECT
-		`aiid`,
+  SELECT
+	`aiid`,
     `intent_name`,
     `endpoint`,
     `enabled`
   FROM `webhooks`
-  WHERE `webhooks`.`intent_id`=`intent_id`;
-
+  WHERE `webhooks`.`intent_name`=`param_intent_name` AND `webhooks`.`aiid`=`param_aiid`;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2812,6 +2834,77 @@ SET
     enabled = param_enabled
 WHERE aiid = param_aiid AND intent_name = param_intent_name;
 END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreList` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreList`(
+	IN `param_filters` VARCHAR(255),
+    IN `param_order` VARCHAR(50),
+    IN `param_pageStart` INT,
+    IN `param_pageSize` INT)
+BEGIN
+
+SET @select_query = "SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website' ";
+SET @from_query = "FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id WHERE publishing_state=2 ";
+IF LENGTH(param_filters) = 0 THEN
+	SET @where_other = "";
+ELSE
+	SET @where_other = concat(" AND ", param_filters);
+END IF;
+IF LENGTH(param_order) = 0 THEN
+	SET @orderBy = "";
+ELSE
+	SET @orderBy = concat(" ORDER BY ", param_order);
+END IF;
+SET @limitTo = concat(concat(concat(" LIMIT ", param_pageStart), ", "), param_pageSize);
+SET @query = concat(concat(concat(concat(@select_query, @from_query), @where_other), @orderBy), @limitTo);
+PREPARE stmt3 FROM @query;
+EXECUTE stmt3;
+DEALLOCATE PREPARE stmt3;
+
+
+SET @select_query = "SELECT COUNT(*) as 'total'";
+SET @query = concat(concat(@select_query, @from_query), @where_other);
+PREPARE stmt3 FROM @query;
+EXECUTE stmt3;
+DEALLOCATE PREPARE stmt3;
+
+END;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreItem` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreItem`(
+	IN `param_botId` INT)
+BEGIN
+
+SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website'
+FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id WHERE bs.publishing_state=2 AND bs.id = param_botId;
+
+END;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

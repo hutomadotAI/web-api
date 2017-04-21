@@ -5,13 +5,13 @@ require_once "./api/entityApi.php";
 require_once "api/aiApi.php";
 require_once "api/botApi.php";
 require_once "api/developerApi.php";
+require_once "api/botstoreApi.php";
 require_once "common/bot.php";
 require_once "common/developer.php";
+require_once "common/botstoreItem.php";
 
-
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
+if(!\hutoma\console::checkSessionIsActive()){
+     exit;
 }
 
 if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'])) {
@@ -20,21 +20,16 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']
 }
 
 $botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
-$purchased = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['purchased'];
 $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
 
-$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$botDetails = $botApi->getBotDetails($botId);
+$botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botstoreItem = $botstoreApi->getBotstoreBot($botId);
 unset($botId);
-unset($botApi);
+unset($botstoreApi);
 
-$devInfoApi = new \hutoma\api\developerApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$devInfo = $devInfoApi->getDeveloperInfo($botDetails['bot']['dev_id']);
-unset($devInfoApi);
-
-if (isset($botDetails)) {
-    switch ($botDetails['status']['code']) {
+if (isset($botstoreItem)) {
+    switch ($botstoreItem['status']['code']) {
         case 200:
             break;
         case 404:
@@ -60,26 +55,15 @@ if (isset($botDetails)) {
     <link rel="stylesheet" href="./scripts/switch/switch.css">
 </head>
 <script>
-    var bot = <?php
-        $bot = new \hutoma\bot();
-        if (isset($botDetails) && (array_key_exists('bot', $botDetails))) {
-            $bot = \hutoma\bot::fromObject($botDetails['bot']);
+    var botstoreItem = <?php
+        $botItem = new \hutoma\botstoreItem();
+        if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem))) {
+            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
         }
-        $tmp_bot = $bot->toJSON();
-        unset($bot);
-
-        echo json_encode($tmp_bot);
-        unset($tmp_bot);
+        echo json_encode($botItem->toJSON());
+        unset($botstoreItem);
+        unset($botItem);
         ?>;
-
-    var devInfo = <?php
-    $dev = new \hutoma\developer();
-    $dev->setCompany($devInfo['info']['company']);
-    $dev->setWebsite($devInfo['info']['website']);
-    echo json_encode($dev->toJSON());
-    unset($dev);
-    unset($devInfo);
-    ?>
 </script>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">
@@ -101,17 +85,10 @@ if (isset($botDetails)) {
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
-
                 <div class="col-md-12">
-                    <div class="box box-solid box-clean flat no-shadow bot-box" id="singleBot">
-                        <?php
-                        include './dynamic/botstore.content.singleBot.card.html.php';
-                        include './dynamic/botstore.content.singleBot.video.html.php';
-                        include './dynamic/botstore.content.singleBot.description.html.php';
-                        include './dynamic/botstore.content.singleBot.footer.html.php';
-                        ?>
-                    </div>
+                    <?php include './dynamic/botstore.content.botcard.html.php'; ?>
                     <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
+                    <script src="./scripts/botcard/botcard.js"></script>
                     <script src="./scripts/botstore/botstoreWizard.js"></script>
                 </div>
             </div>
@@ -127,9 +104,9 @@ if (isset($botDetails)) {
 <script src="./bootstrap/js/bootstrap.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./scripts/botstore/buyBot.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
+<script src="./scripts/botcard/buyBot.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
@@ -137,12 +114,16 @@ if (isset($botDetails)) {
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        var info = infoForBotstore("<?php echo $menu_title; unset($menu_title)?>", "<?php echo $purchased; unset($purchased);?>");
+        var info = infoSidebarMenu("<?php echo $menu_title;?>");
         MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
     </script>
 </form>
 <script>
-    populateBotFields(bot);
+    populateBotFields(
+        botstoreItem,
+        "<?php echo $menu_title; unset($menu_title)?>",
+        "<?php if(isset($_GET['category'])) echo $_GET['category'];?>"
+    );
 </script>
 </body>
 </html>

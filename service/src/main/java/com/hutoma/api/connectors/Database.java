@@ -7,17 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendStatus;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.DevPlan;
-import com.hutoma.api.containers.sub.DeveloperInfo;
-import com.hutoma.api.containers.sub.Integration;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.RateLimitStatus;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 
 import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
@@ -377,7 +367,21 @@ public class Database {
             final ArrayList<ApiAi> res = new ArrayList<>();
             try {
                 while (rs.next()) {
-                    res.add(getAiFromResultset(rs, jsonSerializer));
+                    ApiAi bot = getAiFromResultset(rs, jsonSerializer);
+                    int publishingStateOnDb = rs.getInt("publishing_state");
+                    // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
+                    // we always get it right regardless of the default value
+                    AiBot.PublishingState state;
+                    try {
+                        state = rs.wasNull()
+                                ? AiBot.PublishingState.NOT_PUBLISHED
+                                : AiBot.PublishingState.from(publishingStateOnDb);
+                    } catch (IllegalArgumentException ex) {
+                        // Default to NOT_PUBLISHED if for some reason we can't understand what is in the db
+                        state = AiBot.PublishingState.NOT_PUBLISHED;
+                    }
+                    bot.setPublishingState(state);
+                    res.add(bot);
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -739,7 +743,8 @@ public class Database {
         }
     }
 
-    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) throws DatabaseException {
+    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addWebhook", 4)
                     .add(aiid)
@@ -769,9 +774,17 @@ public class Database {
         }
     }
 
-    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) throws DatabaseException {
+    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("updateWebhook", 4).add(aiid).add(intentName).add(endpoint).add(enabled);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteWebHook(final UUID aiid, final String intentName) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteWebhook", 2).add(aiid).add(intentName);
             return call.executeUpdate() > 0;
         }
     }
@@ -782,30 +795,6 @@ public class Database {
             bots.add(this.getAiBotFromResultset(rs));
         }
         return bots;
-    }
-
-    private AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
-        return new AiBot(
-                rs.getString("dev_id"),
-                UUID.fromString(rs.getString("aiid")),
-                rs.getInt("id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getString("long_description"),
-                rs.getString("alert_message"),
-                rs.getString("badge"),
-                rs.getBigDecimal("price"),
-                rs.getString("sample"),
-                rs.getString("category"),
-                rs.getString("license_type"),
-                new DateTime(rs.getTimestamp("last_update")),
-                rs.getString("privacy_policy"),
-                rs.getString("classification"),
-                rs.getString("version"),
-                rs.getString("video_link"),
-                AiBot.PublishingState.from(rs.getInt("publishing_state")),
-                rs.getString("botIcon")
-        );
     }
 
     private ApiAi getAiFromResultset(final ResultSet rs, JsonSerializer jsonSerializer)
@@ -852,5 +841,29 @@ public class Database {
         public DatabaseIntegrityViolationException(Throwable cause) {
             super(cause);
         }
+    }
+
+    protected AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
+        return new AiBot(
+                rs.getString("dev_id"),
+                UUID.fromString(rs.getString("aiid")),
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("long_description"),
+                rs.getString("alert_message"),
+                rs.getString("badge"),
+                rs.getBigDecimal("price"),
+                rs.getString("sample"),
+                rs.getString("category"),
+                rs.getString("license_type"),
+                new DateTime(rs.getTimestamp("last_update")),
+                rs.getString("privacy_policy"),
+                rs.getString("classification"),
+                rs.getString("version"),
+                rs.getString("video_link"),
+                AiBot.PublishingState.from(rs.getInt("publishing_state")),
+                rs.getString("botIcon")
+        );
     }
 }

@@ -2,6 +2,7 @@ package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.WebHook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ public class ApiIntent extends ApiResult {
     private List<String> responses = new ArrayList<>();
     @SerializedName("user_says")
     private List<String> userSays = new ArrayList<>();
+    @SerializedName("webhook")
+    private WebHook webHook;
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
         this.intentName = intentName;
@@ -75,5 +78,13 @@ public class ApiIntent extends ApiResult {
 
     public String getTopicOut() {
         return this.topicOut;
+    }
+
+    public WebHook getWebHook() {
+        return this.webHook;
+    }
+
+    public void setWebHook(final WebHook webHook) {
+        this.webHook = webHook;
     }
 }

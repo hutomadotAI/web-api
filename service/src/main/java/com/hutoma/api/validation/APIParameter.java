@@ -18,7 +18,6 @@ public enum APIParameter {
     EntityName,
     EntityJson,
     IntentJson,
-    WebhookJson,
     AiConfidence,
     Timezone,
     Locale,

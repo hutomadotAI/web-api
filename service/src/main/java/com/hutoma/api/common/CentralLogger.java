@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -22,8 +21,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -50,7 +47,6 @@ public class CentralLogger implements ILogger {
     private final JerseyClient jerseyClient;
     private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(LOGGING_QUEUE_LENGTH);
     private Timer timer;
-    private String loggingUrl;
     private String esLoggingUrl;
 
     @Inject
@@ -59,14 +55,30 @@ public class CentralLogger implements ILogger {
         this.serializer = serializer;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void logDebug(String fromLabel, String logComment) {
-        logOutput(EventType.DEBUG, fromLabel, logComment);
+        logDebug(fromLabel, logComment, null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void logDebug(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.DEBUG, fromLabel, logComment, properties);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logInfo(String fromLabel, String logComment) {
         logOutput(EventType.INFO, fromLabel, logComment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void logException(String fromLabel, final Exception ex) {
         StringBuilder sb = new StringBuilder();
         sb.append(ex.getMessage());
@@ -80,20 +92,32 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, (Object[]) null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
     }
 
-    public void logWarning(String fromLabel, String logComment) {
-        logOutput(EventType.WARNING, fromLabel, logComment);
+    /**
+     * {@inheritDoc}
+     */
+    public void logWarning(final String fromLabel, final String logComment) {
+        logWarning(fromLabel, logComment, null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void logWarning(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.WARNING, fromLabel, logComment, properties);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logError(String fromLabel, String logComment) {
         logOutput(EventType.ERROR, fromLabel, logComment);
     }
 
     public void initialize(final Config config) {
         this.startLoggingScheduler(
-                config.getLoggingServiceUrl(),
                 config.getElasticSearchLoggingUrl(),
                 config.getLoggingUploadCadency());
     }
@@ -102,7 +126,7 @@ public class CentralLogger implements ILogger {
      * {@inheritDoc}
      */
     public void logUserTraceEvent(final String logFrom, final String event, final String user,
-                                  final Map<String, Object> properties) {
+                                  final LogMap properties) {
         this.logOutput(EventType.TRACE, logFrom, event, addUserToMap(user, properties));
     }
 
@@ -116,25 +140,9 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
-    public void logUserTraceEvent(final String logFrom, final String event, final String user,
-                                  final Object... properties) {
-        this.logUserTraceEvent(logFrom, event, user, arrayToMap(properties));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
-        this.logUserExceptionEvent(logFrom, event, user, exception, (Object[]) null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
-                                      final Exception exception, final Object... properties) {
-        this.logUserExceptionEvent(logFrom, eventName, user, exception, arrayToMap(properties));
+        this.logUserExceptionEvent(logFrom, event, user, exception, null);
     }
 
     /**
@@ -142,18 +150,18 @@ public class CentralLogger implements ILogger {
      */
     public void logUserExceptionEvent(final String logFrom, final String eventName, final String user,
                                       final Exception exception,
-                                      final Map<String, Object> properties) {
-        Map<String, Object> map = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
-        map.put("message", exception.getMessage());
-        map.put("stackTrace", getStackTraceAsString(exception.getStackTrace()));
-        map.put("suppressedExceptions", exception.getSuppressed()
-                != null ? Integer.toString(exception.getSuppressed().length) : "0");
+                                      final LogMap properties) {
+        LogMap map = new LogMap(properties);
+        map = map.put("message", exception.getMessage())
+                .put("stackTrace", getStackTraceAsString(exception.getStackTrace()))
+                .put("suppressedExceptions", exception.getSuppressed()
+                        != null ? exception.getSuppressed().length : 0);
         if (exception.getSuppressed() != null) {
             for (int i = 0; i < exception.getSuppressed().length; i++) {
                 String key = String.format("suppressed_%d", i + 1);
                 Throwable ex = exception.getSuppressed()[i];
-                map.put(key + "_message", ex.getMessage());
-                map.put(key + "_stackTrace", getStackTraceAsString(ex.getStackTrace()));
+                map = map.put(key + "_message", ex.getMessage())
+                        .put(key + "_stackTrace", getStackTraceAsString(ex.getStackTrace()));
             }
         }
         this.logOutput(EventType.EXCEPTION, eventName,
@@ -164,31 +172,21 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
-    public void logUserErrorEvent(String logFrom, String event, String user, Object... properties) {
-        this.logUserErrorEvent(logFrom, event, user, arrayToMap(properties));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void logUserErrorEvent(String logFrom, String event, String user, Map<String, Object> properties) {
+    public void logUserErrorEvent(String logFrom, String event, String user, LogMap properties) {
         this.logOutput(EventType.ERROR, logFrom, event, addUserToMap(user, properties));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void logUserWarnEvent(String logFrom, String event, String user, Object... properties) {
-        this.logWarnEvent(logFrom, event, user, arrayToMap(properties));
     }
 
     @Override
     public void logUserWarnEvent(final String logFrom, final String event, final String user,
-                                 final Map<String, Object> properties) {
+                                 final LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
-    public void logWarnEvent(String logFrom, String event, String user, Map<String, Object> properties) {
+    public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
+        logOutput(EventType.PERF, fromLabel, logComment, logMap);
+    }
+
+    public void logWarnEvent(String logFrom, String event, String user, LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
@@ -196,30 +194,12 @@ public class CentralLogger implements ILogger {
         this.timer.cancel();
     }
 
-    private Map<String, Object> arrayToMap(final Object[] array) {
-        if (array == null) {
-            return new HashMap<>();
-        }
-        if (array.length % 2 != 0) {
-            throw new IllegalArgumentException("Properties need to be in the format of key1, value1, etc");
-        }
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (int i = 0; i < array.length; i += 2) {
-            map.put(array[i].toString(), array[i + 1]);
-        }
-        return map;
-    }
-
-    private Map<String, Object> addUserToMap(final String user, final Map<String, Object> map) {
-        Map<String, Object> newMap = map == null
-                ? new LinkedHashMap<>()
-                : new LinkedHashMap<>(map);
-        newMap.put("user", user == null ? "" : user);
-        return newMap;
+    private LogMap addUserToMap(final String user, final LogMap map) {
+        return new LogMap(map).put("user", user == null ? "" : user);
     }
 
     private void dumpToStorage() {
-        if (this.logQueue.isEmpty() || this.loggingUrl == null) {
+        if (this.logQueue.isEmpty() || this.esLoggingUrl == null) {
             return;
         }
 
@@ -229,16 +209,8 @@ public class CentralLogger implements ILogger {
             this.logQueue.clear();
         }
 
+        Response response = null;
         try {
-            String json = this.serializer.serialize(events);
-            Response response = this.jerseyClient.target(this.loggingUrl)
-                    .queryParam("appId", this.getAppId())
-                    .request()
-                    .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
-            if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                LOGGER.error("Failed to upload logs to the logging server! - " + response.getStatus());
-            }
-
             List<String> docs = new ArrayList<>();
             for (LogEvent event : events) {
                 docs.add(this.serializer.serialize(event));
@@ -252,6 +224,11 @@ public class CentralLogger implements ILogger {
             }
         } catch (JsonParseException ex) {
             LOGGER.error(ex.getMessage());
+        } finally {
+            if (response != null) {
+                response.bufferEntity();
+                response.close();
+            }
         }
     }
 
@@ -270,7 +247,8 @@ public class CentralLogger implements ILogger {
         ERROR,
         TRACE,
         EXCEPTION,
-        COUNT
+        COUNT,
+        PERF
     }
 
     private static class LogEvent {
@@ -302,8 +280,7 @@ public class CentralLogger implements ILogger {
 
     }
 
-    protected void startLoggingScheduler(final String loggingServiceUrl, final String esLoggingUrl,
-                                         final int loggingCadence) {
+    protected void startLoggingScheduler(final String esLoggingUrl, final int loggingCadence) {
         if (this.timer != null) {
             this.timer.cancel();
         }
@@ -314,7 +291,6 @@ public class CentralLogger implements ILogger {
                 CentralLogger.this.dumpToStorage();
             }
         }, loggingCadence, loggingCadence);
-        this.loggingUrl = loggingServiceUrl;
         this.esLoggingUrl = esLoggingUrl;
     }
 
@@ -326,14 +302,14 @@ public class CentralLogger implements ILogger {
         this.logOutput(level, fromLabel, logComment, null);
     }
 
-    void logOutput(EventType level, String fromLabel, String logComment, Map<String, Object> params) {
+    void logOutput(EventType level, String fromLabel, String logComment, LogMap params) {
         LogEvent event = new LogEvent();
         event.type = level.name();
         event.timestamp = System.currentTimeMillis();
-        event.dateTime = new DateTime(DateTimeZone.UTC);;
+        event.dateTime = new DateTime(DateTimeZone.UTC);
         event.tag = (fromLabel == null || fromLabel.isEmpty()) ? "none" : fromLabel;
         event.message = logComment == null ? "" : logComment;
-        event.params = params;
+        event.params = params == null ? null : params.get();
 
         // If the queue is full then it means that we can't contact the logging service, or that we're
         // logging too many operations within a session

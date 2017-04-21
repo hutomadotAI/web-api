@@ -4,6 +4,7 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
@@ -21,10 +22,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.net.HttpURLConnection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -98,12 +97,12 @@ public class AILogic {
             // if the stored procedure returns a different aiid then it didn't
             // create the one we requested because of a name clash
             if (!namedAiid.equals(aiUUID)) {
-                this.logger.logUserTraceEvent(LOGFROM, "CreateAI name clash", devId, "Name", name,
-                        "Belongs to", namedAiid.toString());
-                return ApiError.getBadRequest("an ai with that name already exists");
+                this.logger.logUserTraceEvent(LOGFROM, "CreateAI name clash", devId,
+                        LogMap.map("Name", name).put("Belongs to", namedAiid));
+                return ApiError.getBadRequest("A bot with that name already exists");
             }
 
-            this.logger.logUserTraceEvent(LOGFROM, "CreateAI", devId, "New AIID", aiUUID.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "CreateAI", devId, LogMap.map("New AIID", aiUUID));
             return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, devId, null, e);
@@ -122,9 +121,10 @@ public class AILogic {
             final Locale language,
             final String timezone) {
         try {
+            LogMap logMap = LogMap.map("AIID", aiid);
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - AI not found", devId, "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - AI not found", devId, logMap);
                 return ApiError.getNotFound();
             }
             if (!this.database.updateAI(
@@ -137,12 +137,11 @@ public class AILogic {
                     confidence,
                     personality,
                     voice)) {
-                this.logger.logUserErrorEvent(LOGFROM, "UpdateAI - db fail updating ai", devId,
-                        "AIID", aiid.toString());
+                this.logger.logUserErrorEvent(LOGFROM, "UpdateAI - db fail updating ai", devId, logMap);
                 return ApiError.getInternalServerError();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "UpdateAI", devId, "AIID", aiid.toString());
-            return new ApiResult().setSuccessStatus("successfully updated");
+            this.logger.logUserTraceEvent(LOGFROM, "UpdateAI", devId, logMap);
+            return new ApiResult().setSuccessStatus("Successfully updated");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "UpdateAI", devId, e);
             return ApiError.getInternalServerError();
@@ -167,12 +166,13 @@ public class AILogic {
 
     public ApiResult getSingleAI(final String devid, final UUID aiid) {
         try {
+            LogMap logMap = LogMap.map("AIID", aiid);
             ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devid, "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devid, logMap);
                 return ApiError.getNotFound();
             } else {
-                this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI", devid, "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI", devid, logMap);
                 return ai.setSuccessStatus();
             }
         } catch (Exception e) {
@@ -183,24 +183,25 @@ public class AILogic {
 
     public ApiResult deleteAI(final String devid, final UUID aiid) {
         try {
+            LogMap logMap = LogMap.map("AIID", aiid);
             // Only delete the AI when it doesn't have a bot that has been purchased already
             AiBot bot = this.database.getPublishedBotForAI(devid, aiid);
             if (bot != null) {
                 if (this.database.hasBotBeenPurchased(bot.getBotId())) {
                     this.logger.logUserTraceEvent(LOGFROM,
                             "DeleteAI - cannot delete due to bot having been purchased by others",
-                            devid, "AIID", aiid.toString(), "BotId", Integer.toString(bot.getBotId()));
+                            devid, logMap.put("BotId", bot.getBotId()));
                     return ApiError.getBadRequest("Bot has been purchased already, cannot delete it.");
                 }
 
                 // Un-publish the bot
                 this.database.updateBotPublishingState(bot.getBotId(), AiBot.PublishingState.REMOVED);
-                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - unpublished bot", devid, "AIID", aiid.toString(),
-                        "BotId", Integer.toString(bot.getBotId()));
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - unpublished bot", devid,
+                        logMap.put("BotId", bot.getBotId()));
             }
 
             if (!this.database.deleteAi(devid, aiid)) {
-                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
 
@@ -219,8 +220,8 @@ public class AILogic {
                     throw ex;
                 }
             }
-            this.logger.logUserTraceEvent(LOGFROM, "DeleteAI", devid, "AIID", aiid.toString());
-            return new ApiResult().setSuccessStatus("deleted successfully");
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteAI", devid, logMap);
+            return new ApiResult().setSuccessStatus("Deleted successfully");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteAI", devid, e);
             return ApiError.getInternalServerError();
@@ -229,7 +230,7 @@ public class AILogic {
 
     public ApiResult getLinkedBots(final String devId, final UUID aiid) {
         try {
-            this.logger.logUserTraceEvent(LOGFROM, "GetLinkedBots", devId, "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "GetLinkedBots", devId, LogMap.map("AIID", aiid));
             return new ApiAiBotList(this.database.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetLinkedBots", devId, ex);
@@ -239,41 +240,38 @@ public class AILogic {
 
     public ApiResult linkBotToAI(final String devId, final UUID aiid, final int botId) {
         try {
-            Map<String, Object> map = new LinkedHashMap<String, Object>() {{
-                put("AIID", aiid.toString());
-                put("BotId", botId);
-            }};
+            LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
             AiBot botDetails = this.database.getBotDetails(botId);
             if (botDetails == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, map);
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, logMap);
                 return ApiError.getBadRequest(String.format("Bot %d not found", botId));
             }
             // If bot is now owned (purchased or built by the dev) then it can't be linked
             if (!botDetails.getDevId().equals(devId)) {
                 List<AiBot> purchased = this.database.getPurchasedBots(devId);
                 if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
-                    this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devId, map);
+                    this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devId, logMap);
                     return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
                 }
             }
             List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
             if (linked.size() >= this.config.getMaxLinkedBotsPerAi()) {
                 this.logger.logUserTraceEvent(LOGFROM,
-                        "LinkBotToAI - reached maximum allowed number of bots to be linked", devId, map);
+                        "LinkBotToAI - reached maximum allowed number of bots to be linked", devId, logMap);
                 return ApiError.getBadRequest(String.format("Maximum number of linked bots reached: %d",
                         this.config.getMaxLinkedBotsPerAi()));
             }
             if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot already linked to AI", devId, map);
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot already linked to AI", devId, logMap);
                 return ApiError.getBadRequest(String.format("Bot %d already linked to AI", botId));
             }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.linkBotToAi(devId, aiid, botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devId, map);
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devId, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, map);
-                return ApiError.getNotFound("AI or Bot not found");
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devId, logMap);
+                return ApiError.getNotFound("Bot not found");
             }
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "LinkBotToAI", devId, ex);
@@ -283,17 +281,14 @@ public class AILogic {
 
     public ApiResult unlinkBotFromAI(final String devId, final UUID aiid, final int botId) {
         try {
-
+            LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.unlinkBotFromAi(devId, aiid, botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devId, "AIID", aiid.toString(),
-                        "BotId", botId);
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devId, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked", devId,
-                        "AIID", aiid.toString(),
-                        "BotId", botId);
-                return ApiError.getNotFound("AI or Bot not found, or not currently linked");
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked", devId, logMap);
+                return ApiError.getNotFound("Bot not found, or not currently linked");
             }
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UnlinkBotFromAI", devId, ex);
@@ -303,13 +298,13 @@ public class AILogic {
 
     public ApiResult getPublishedBotForAI(final String devId, final UUID aiid) {
         try {
+            LogMap logMap = LogMap.map("AIID", aiid);
             AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
             if (bot == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBotForAI - not found", devId,
-                        "AIID", aiid.toString());
+                this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBotForAI - not found", devId, logMap);
                 return ApiError.getNotFound();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBotForAI", devId, "AIID", aiid.toString());
+            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBotForAI", devId, logMap);
             return new ApiAiBot(bot).setSuccessStatus();
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBotForAI", devId, ex);

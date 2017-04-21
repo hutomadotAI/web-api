@@ -2,7 +2,7 @@
 
     <div class="box-header with-border">
         <i class="fa fa-cloud-upload text-info"></i>
-        <div class="box-title"><b>Upload File</b></div>
+        <div class="box-title"><b>Upload a text file</b></div>
     </div>
     <div class="box-body">
 
@@ -10,12 +10,16 @@
             <i class="fa fa-cloud-upload"></i> upload
         </button>
 
-        <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox" data-buttonName="btn-success btn-sm flat" data-placeholder="Select a file..." data-buttonText="choose file">
+        <input type="file" id="inputfile" class="filestyle" data-iconName="glyphicon glyphicon-inbox"
+               data-buttonName="btn-success btn-sm flat" data-placeholder="select txt file"
+               data-buttonText="select txt file">
         <p></p>
         <div class="alert alert-dismissable flat alert-base no-margin" id="containerMsgAlertUploadFile" style="margin-bottom: 0px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertUploadFile"></i>
-            <span id="msgAlertUploadFile">Upload a text file with chat examples to begin training.</span>
+            <span id="msgAlertUploadFile">Upload a plain text file with chat examples to begin training. Look at <a
+                    data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor='pointer'">this example</a>.
+            </span>
         </div>
     </div>
     <div class="box-footer">

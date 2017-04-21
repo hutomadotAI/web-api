@@ -2,9 +2,11 @@ package com.hutoma.api;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 
 import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.jersey.server.model.Invocable;
 import org.glassfish.jersey.server.monitoring.ApplicationEvent;
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
 import org.glassfish.jersey.server.monitoring.RequestEvent;
@@ -21,9 +23,14 @@ public class ServerInit implements ApplicationEventListener {
     @Inject
     ServiceLocator serviceLocator;
     private Config config;
+    private ILogger logger;
 
+    /**
+     * Application event handler.
+     * @param applicationEvent the application event
+     */
     @Override
-    public void onEvent(ApplicationEvent applicationEvent) {
+    public void onEvent(final ApplicationEvent applicationEvent) {
         switch (applicationEvent.getType()) {
             case INITIALIZATION_FINISHED:
                 initialise(applicationEvent);
@@ -40,22 +47,54 @@ public class ServerInit implements ApplicationEventListener {
         }
     }
 
+    /**
+     * Request handler for intercepting all requests performed.
+     * @param requestEvent the request event
+     * @return the request event listener
+     */
     @Override
-    public RequestEventListener onRequest(RequestEvent requestEvent) {
-        return null;
+    public RequestEventListener onRequest(final RequestEvent requestEvent) {
+        return new RequestEventListener() {
+            private long startTime;
+
+            @Override
+            public void onEvent(final RequestEvent requestEvent) {
+                switch (requestEvent.getType()) {
+                    case RESOURCE_METHOD_START:
+                        this.startTime = System.currentTimeMillis();
+                        break;
+                    case FINISHED:
+                        // Only log if we have a method to handle it
+                        if (requestEvent.getUriInfo().getMatchedResourceMethod() != null) {
+                            final long finishTime = System.currentTimeMillis();
+                            Invocable invocable = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable();
+                            LogMap logMap = LogMap.map("Start", this.startTime)
+                                    .put("Finish", finishTime)
+                                    .put("Duration", finishTime - this.startTime)
+                                    .put("Success", requestEvent.isSuccess())
+                                    .put("Class", invocable.getDefinitionMethod().getDeclaringClass().getSimpleName())
+                                    .put("Method", invocable.getDefinitionMethod().getName());
+                            ServerInit.this.logger.logPerf("perfrequestlistener", "APICall", logMap);
+                        }
+                        break;
+                    default: // empty
+                        break;
+                }
+            }
+        };
     }
 
-    private void initialise(ApplicationEvent applicationEvent) {
-        ILogger logger = this.serviceLocator.getService(ILogger.class);
+    private void initialise(final ApplicationEvent applicationEvent) {
+        this.logger = this.serviceLocator.getService(ILogger.class);
         this.config = this.serviceLocator.getService(Config.class);
         try {
             this.config.validateConfigPresent();
-            logger.initialize(this.config);
+            this.logger.initialize(this.config);
             DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
             connectionPool.borrowConnection().close();
-            logger.logInfo(LOGFROM, "initialisation finished");
+            this.logger.logInfo(LOGFROM, "initialisation finished");
         } catch (Exception e) {
-            logger.logError(LOGFROM, "initialisation error: " + e.toString());
+            this.logger.logError(LOGFROM, "initialisation error: " + e.toString());
         }
     }
 }

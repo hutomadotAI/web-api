@@ -358,6 +358,36 @@ public class TestTrainingLogic {
     }
 
     @Test
+    public void testUpdateTraining_withFileToUpload_withIntents()
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        verifyUpdateTraining_withIntents(SOMETEXT);
+    }
+
+    @Test
+    public void testUpdateTraining_noFileToUpload_withIntents()
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        verifyUpdateTraining_withIntents(null);
+    }
+
+    @Test
+    public void testUpdateTraining_emptyFileToUpload_withIntents()
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        verifyUpdateTraining_withIntents("");
+    }
+
+    @Test
+    public void testUpdateTraining_noFileToUpload_noIntents()
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        verifyUpdateTraining_noIntents(null);
+    }
+
+    @Test
+    public void testUpdateTraining_withFileToUpload_noIntents()
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        verifyUpdateTraining_noIntents(SOMETEXT);
+    }
+
+    @Test
     public void testGetTrainingMaterials_multipleIntents() throws Database.DatabaseException {
         final String trainingFile = "Q1\nA1\n";
         final List<String> intentNames = Arrays.asList("intent1", "intent2");
@@ -377,19 +407,9 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(1))).thenReturn(intent2);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(DEVID, AIID);
 
-        // build the expected training which will be:
-        // training file \n userSaysIntent1 \n intent1 \n ...
-        StringBuilder sb = new StringBuilder();
-        sb.append(trainingFile).append(EOL);
-        sb.append(userSaysIntent1.get(0)).append(EOL);
-        sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(0)).append(EOL).append(EOL);
-        sb.append(userSaysIntent1.get(1)).append(EOL);
-        sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(0)).append(EOL).append(EOL);
-        sb.append(userSaysIntent2.get(0)).append(EOL);
-        sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(1)).append(EOL);
-
         Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
-        Assert.assertEquals(sb.toString(), materials.getTrainingFile());
+        Assert.assertEquals(getTrainingMaterials(trainingFile, intentNames, userSaysIntent1, userSaysIntent2),
+                materials.getTrainingFile());
     }
 
     @Test
@@ -433,7 +453,6 @@ public class TestTrainingLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
 
         StringBuilder sb = new StringBuilder();
-        sb.append(EOL);
         sb.append(userSays).append(EOL);
         sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentName).append(EOL);
         Assert.assertEquals(sb.toString(), materials.getTrainingFile());
@@ -453,6 +472,55 @@ public class TestTrainingLogic {
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(anyString(), any(), anyString());
         ApiResult result = this.logic.uploadFile(DEVID, AIID, TrainingLogic.TrainingType.TEXT, null, createUpload(SOMETEXT), this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    private void verifyUpdateTraining_noIntents(final String fileToUpload)
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(fileToUpload);
+        when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(Collections.emptyList());
+        ApiResult result = this.logic.updateTraining(DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeAiServices).uploadTraining(DEVID, AIID, fileToUpload == null ? "" : fileToUpload);
+    }
+
+    private void verifyUpdateTraining_withIntents(final String fileToUpload)
+            throws Database.DatabaseException, AIServices.AiServicesException {
+        final List<String> intentNames = Arrays.asList("intent1", "intent2");
+        final List<String> userSaysIntent1 = Arrays.asList("a b", "xy");
+        final List<String> userSaysIntent2 = Collections.singletonList("request something");
+        ApiIntent intent1 = new ApiIntent(intentNames.get(0), "", "");
+        intent1.setUserSays(userSaysIntent1);
+        ApiIntent intent2 = new ApiIntent(intentNames.get(1), "", "");
+        intent2.setUserSays(userSaysIntent2);
+
+        when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(0))).thenReturn(intent1);
+        when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(1))).thenReturn(intent2);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(fileToUpload);
+        when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(intentNames);
+        ApiResult result = this.logic.updateTraining(DEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+
+        verify(this.fakeAiServices).uploadTraining(DEVID, AIID,
+                getTrainingMaterials(fileToUpload, intentNames, userSaysIntent1, userSaysIntent2));
+    }
+
+    private String getTrainingMaterials(final String trainingFile, final List<String> intentNames,
+                                        final List<String> userSaysIntent1, final List<String> userSaysIntent2) {
+        // build the expected training which will be:
+        // training file \n userSaysIntent1 \n intent1 \n ...
+        StringBuilder sb = new StringBuilder();
+        if (trainingFile != null && !trainingFile.isEmpty()) {
+            sb.append(trainingFile).append(EOL);
+        }
+        sb.append(userSaysIntent1.get(0)).append(EOL);
+        sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(0)).append(EOL).append(EOL);
+        sb.append(userSaysIntent1.get(1)).append(EOL);
+        sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(0)).append(EOL).append(EOL);
+        sb.append(userSaysIntent2.get(0)).append(EOL);
+        sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentNames.get(1)).append(EOL);
+        return sb.toString();
     }
 
     private void testTraining_invalidAi(Supplier<ApiResult> supplier) throws Database.DatabaseException,

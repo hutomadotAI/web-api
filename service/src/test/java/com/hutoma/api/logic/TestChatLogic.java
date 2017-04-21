@@ -619,6 +619,15 @@ public class TestChatLogic {
     }
 
     @Test
+    public void testChat_AimlNotConf_rnnNull_wnetNotConfident() throws RequestBase.AiControllerException {
+        setupFakeChat(0.0d, "wnet", 0.0d, "aiml", 0.0d, null);
+        when(this.fakeChatServices.awaitRnn()).thenReturn(null);
+        ApiChat result = (ApiChat) getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("aiml", result.getResult().getAnswer());
+    }
+
+    @Test
     public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
@@ -770,6 +779,34 @@ public class TestChatLogic {
 
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertEquals(webHookResponse, result.getResult().getAnswer());
+        Assert.assertTrue(mi.isFulfilled());
+    }
+
+    /***
+     * Test WebHook null response is handled.
+     */
+    @Test
+    public void testChat_webHookNullResponseHandled()
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+        final String intentName = "intent1";
+        final String webHookResponse = null;
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setCurrentValue("a value"); // to fulfill
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
+        WebHookResponse wr = new WebHookResponse(webHookResponse);
+        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+        when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(true);
+        when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
+        setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        Assert.assertFalse(mi.isFulfilled());
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertEquals("response", result.getResult().getAnswer());
         Assert.assertTrue(mi.isFulfilled());
     }
 

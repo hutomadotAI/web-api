@@ -3,6 +3,7 @@ package com.hutoma.api.validation;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
@@ -12,6 +13,7 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
+import com.hutoma.api.containers.sub.WebHook;
 
 import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.message.internal.MediaTypes;
@@ -21,7 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -71,7 +72,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case AiStatusJson:
                 case ServerRegistration:
                 case ServerAffinity:
-                case WebhookJson:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -120,21 +120,18 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
-                    new LinkedHashMap<String, String>() {{
-                        put("Type", "Post");
-                        put("Parameter", pve.getParameterName());
-                        put("Message", pve.getMessage());
-                    }});
+                    LogMap.map("Type", "Post")
+                            .put("Parameter", pve.getParameterName())
+                            .put("Message", pve.getMessage()));
         } catch (Exception ex) {
             requestContext.abortWith(ApiError.getInternalServerError(ex.getMessage())
                     .getResponse(this.serializer).build());
             this.logger.logUserExceptionEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext), ex,
-                    new LinkedHashMap<String, Object>() {{
-                        put("Type", "Post");
-                        put("Parameters", Strings.join(checkList.stream().map(APIParameter::toString).iterator(), ','));
-                        put("RequestLength", requestContext.getLength());
-                        put("Path", requestContext.getUriInfo().getPath());
-                    }});
+                    LogMap.map("Type", "Post")
+                            .put("Parameters", Strings.join(
+                                    checkList.stream().map(APIParameter::toString).iterator(), ','))
+                            .put("RequestLength", requestContext.getLength())
+                            .put("Path", requestContext.getUriInfo().getPath()));
         }
     }
 
@@ -214,6 +211,17 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
                     }
                 }
+
+                WebHook webHook = intent.getWebHook();
+                if (webHook != null) {
+                    this.checkParameterNotNull("enabled", webHook.isEnabled());
+                    this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+
+                    if (webHook.isEnabled()) {
+                        this.checkParameterNotNull("endpoint", webHook.getEndpoint());
+                        this.checkParameterNotNull(AIID, webHook.getAiid());
+                    }
+                }
                 request.setProperty(APIParameter.IntentJson.toString(), intent);
             }
 
@@ -248,7 +256,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
 
         } catch (JsonParseException jpe) {
-            this.logger.logUserErrorEvent(LOGFROM, jpe.getMessage(), getDeveloperId(request));
+            this.logger.logUserErrorEvent(LOGFROM, jpe.getMessage(), getDeveloperId(request), null);
             throw new ParameterValidationException("error in json format", "request body");
         }
     }

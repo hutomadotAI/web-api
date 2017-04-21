@@ -3,6 +3,7 @@ package com.hutoma.api.connectors;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -12,7 +13,6 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -97,12 +97,11 @@ public class DatabaseAiStatusUpdates extends Database {
                         if (serverEntry == null) {
                             TrainingStatus finalStatusInDb = statusInDb;
                             this.logger.logUserWarnEvent(LOGFROM, String.format("%s did not report ai %s",
-                                    serverType.toString(), aiid.toString()), null, new HashMap<String, Object>() {{
-                                this.put("AIEngine", serverType.toString());
-                                this.put("AIID", aiid.toString());
-                                this.put("DEVID", devid.toString());
-                                this.put("ApiStatus", finalStatusInDb.toString());
-                            }});
+                                    serverType.toString(), aiid.toString()), null,
+                                    LogMap.map("AIEngine", serverType.toString())
+                                            .put("AIID", aiid.toString())
+                                            .put("DEVID", devid.toString())
+                                            .put("ApiStatus", finalStatusInDb.toString()));
                         } else {
                             statusOnBackend = serverEntry.getTrainingStatus();
                         }
@@ -120,13 +119,11 @@ public class DatabaseAiStatusUpdates extends Database {
                                     String.format("%s status mismatch. Updating from %s to %s for ai %s",
                                             serverType.toString(), statusInDb.toString(),
                                             statusOnBackend.toString(), aiid.toString()),
-                                    null, new HashMap<String, Object>() {{
-                                        this.put("AIEngine", serverType.toString());
-                                        this.put("AIID", aiid.toString());
-                                        this.put("DEVID", devid.toString());
-                                        this.put("ApiStatus", finalStatusInDb1.toString());
-                                        this.put("BackendStatus", finalStatusOnBackend.toString());
-                                    }});
+                                    null, LogMap.map("AIEngine", serverType.toString())
+                                            .put("AIID", aiid.toString())
+                                            .put("DEVID", devid.toString())
+                                            .put("ApiStatus", finalStatusInDb1.toString())
+                                            .put("BackendStatus", finalStatusOnBackend.toString()));
 
                             // keep everything but update the status
                             statusBlockInDB.updateEngineStatus(serverType, statusOnBackend);

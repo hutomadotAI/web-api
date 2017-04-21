@@ -1,20 +1,11 @@
 package com.hutoma.api.connectors;
 
-import com.hutoma.api.common.AiServiceStatusLogger;
-import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.ThreadPool;
-import com.hutoma.api.common.ThreadSubPool;
-import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.controllers.ControllerRnn;
-import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerMetadata;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -26,15 +17,13 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import static com.hutoma.api.common.TestDataHelper.AIID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +44,7 @@ public class TestWebhooks {
 
     @Before
     public void setup() throws ServerMetadata.NoServerAvailable {
-        this.serializer = new JsonSerializer();
+        this.serializer = mock(JsonSerializer.class);
         this.fakeDatabase = mock(Database.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeClient = mock(JerseyClient.class);
@@ -122,6 +111,8 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult();
 
+        when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
+        when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
         WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNull(response);
@@ -137,8 +128,12 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult();
 
-        when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
-        WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
+        when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
+
+        WebHooks spy = Mockito.spy(this.webHooks);
+        doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
+        when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
+        WebHookResponse response = spy.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNotNull(response);
     }
 
@@ -151,7 +146,6 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult();
 
-        when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
         WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNull(response);
     }
@@ -166,7 +160,9 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult();
 
-        when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("").build());
+        when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
+        when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
+        when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNull(response);
     }
@@ -181,6 +177,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult();
 
+        when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNull(response);

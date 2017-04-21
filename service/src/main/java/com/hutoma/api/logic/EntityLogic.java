@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
@@ -39,11 +40,12 @@ public class EntityLogic {
 
             final List<String> entityList = this.database.getEntities(devid);
             if (entityList.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid, "Num Entities", "0");
+                this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid,
+                        LogMap.map("Num Entities", "0"));
                 return ApiError.getNotFound();
             }
             this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid,
-                    "Num Entities", entityList.size());
+                    LogMap.map("Num Entities", entityList.size()));
             return new ApiEntityList(entityList).setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetEntities", devid, e);
@@ -54,7 +56,7 @@ public class EntityLogic {
     public ApiResult getEntity(final String devid, final String entityName) {
         try {
             final ApiEntity entity = this.database.getEntity(devid, entityName);
-            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devid, "Entity", entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devid, LogMap.map("Entity", entityName));
             return entity.setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetEntity", devid, e);
@@ -63,14 +65,15 @@ public class EntityLogic {
     }
 
     public ApiResult writeEntity(final String devid, final String entityName, final ApiEntity entity) {
+        LogMap logMap = LogMap.map("Entity", entityName);
         try {
+
             stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
-            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devid, "Entity", entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devid, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseIntegrityViolationException dive) {
-            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name", devid,
-                    "Entity", entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name", devid, logMap);
             return ApiError.getBadRequest("entity name already in use");
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WriteEntity", devid, e);
@@ -80,12 +83,13 @@ public class EntityLogic {
 
     public ApiResult deleteEntity(final String devid, final String entityName) {
         try {
+            LogMap logMap = LogMap.map("Entity", entityName);
             if (!this.database.deleteEntity(devid, entityName)) {
-                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devid, "Entity", entityName);
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
             stopTrainingIfEntityInUse(devid, entityName);
-            this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devid, "Entity", entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devid, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteEntity", devid, e);

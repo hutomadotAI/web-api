@@ -9,14 +9,12 @@ require '../../pages/config.php';
 require_once "../api/apiBase.php";
 require_once "../api/aiApi.php";
 
-if ((!\hutoma\console::$loggedIn) || (!\hutoma\console::isSessionActive())) {
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
+if(!\hutoma\console::checkSessionIsActive()){
+     exit;
 }
 
 if (!isset($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['aiid'])){
-    \hutoma\console::redirect('../pages/login.php');
-    exit;
+     exit;
 }
 
 if (!isset($_POST['aiSkill'])) {

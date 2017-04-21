@@ -12,7 +12,6 @@ include "TelemetryEvent.php";
 
 class telemetry
 {
-    const APPID = "devconsole-v1";
     private static $instance;
     private $curl;
     private $loggingUrl;
@@ -35,8 +34,19 @@ class telemetry
             }
         }
         if (isset($this->loggingUrl)) {
-            $this->loggingUrl .= "/" . self::APPID . "/log/_bulk";
+            $this->loggingUrl .= "/" . $this->getAppId() . "/log/_bulk";
         }
+    }
+
+    private function getAppId()
+    {
+        $appId = getenv("LOG_SERVICE_ANALYTICS_APPID");
+        if (isset($appId) && $appId != "") {
+            return $appId;
+        } else {
+            error_log("Telemetry - Could not obtain the APPID for this service");
+        }
+        return null;
     }
 
     public static function getInstance()
@@ -46,7 +56,6 @@ class telemetry
         }
         return self::$instance;
     }
-
 
     public function log($type, $tag, $message, $params = null)
     {
@@ -70,22 +79,9 @@ class telemetry
         // Build bulk data
         $bulkData = "";
         foreach ($GLOBALS["devconsole_telemetry"] as $log) {
-            $bulkData .= "{\"index\":{}}\n";
-            $bulkData .= json_encode($log) . "\n";
+            // For now only add it to the error log
+            error_log(json_encode($log));
         }
-
-        // send to logging server
-        $this->curl->setUrl($this->loggingUrl);
-        //$this->curl->addHeader('Content-Type', 'application/json');
-        $this->curl->addHeader('Content-Type', 'text/plain');
-        $this->curl->post($bulkData);
-        $response = $this->curl->exec();
-        $code = $this->curl->getResultCode();
-        if ($code == 200) {
-            // clear the events
-            unset($GLOBALS["devconsole_telemetry"]);
-        } else {
-            error_log("Failed to save telemetry events to server. Error code: " . $code . "  " . $response);
-        }
+        unset($GLOBALS["devconsole_telemetry"]);
     }
 }

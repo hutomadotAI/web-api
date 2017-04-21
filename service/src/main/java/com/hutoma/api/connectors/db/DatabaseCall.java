@@ -51,12 +51,37 @@ public class DatabaseCall implements AutoCloseable {
         }
     }
 
+    public boolean execute() throws Database.DatabaseException {
+        checkParamsSet();
+        try {
+            return this.statement.execute();
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+    }
+
     public int executeUpdate() throws Database.DatabaseException {
         checkParamsSet();
         try {
             return this.statement.executeUpdate();
         } catch (java.sql.SQLIntegrityConstraintViolationException icve) {
             throw new Database.DatabaseIntegrityViolationException(icve);
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+    }
+
+    public ResultSet getResultSet() throws Database.DatabaseException {
+        try {
+            return this.statement.getResultSet();
+        } catch (SQLException e) {
+            throw new Database.DatabaseException(e);
+        }
+    }
+
+    public boolean hasMoreResults() throws Database.DatabaseException {
+        try {
+            return this.statement.getMoreResults();
         } catch (SQLException e) {
             throw new Database.DatabaseException(e);
         }
