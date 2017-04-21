@@ -64,15 +64,18 @@ public class ServerInit implements ApplicationEventListener {
                         this.startTime = System.currentTimeMillis();
                         break;
                     case FINISHED:
-                        final long finishTime = System.currentTimeMillis();
-                        Invocable invocable = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable();
-                        LogMap logMap = LogMap.map("Start", this.startTime)
-                                .put("Finish", finishTime)
-                                .put("Duration", finishTime - this.startTime)
-                                .put("Success", requestEvent.isSuccess())
-                                .put("Class", invocable.getDefinitionMethod().getDeclaringClass().getSimpleName())
-                                .put("Method", invocable.getDefinitionMethod().getName());
-                        ServerInit.this.logger.logPerf("perfrequestlistener", "APICall", logMap);
+                        // Only log if we have a method to handle it
+                        if (requestEvent.getUriInfo().getMatchedResourceMethod() != null) {
+                            final long finishTime = System.currentTimeMillis();
+                            Invocable invocable = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable();
+                            LogMap logMap = LogMap.map("Start", this.startTime)
+                                    .put("Finish", finishTime)
+                                    .put("Duration", finishTime - this.startTime)
+                                    .put("Success", requestEvent.isSuccess())
+                                    .put("Class", invocable.getDefinitionMethod().getDeclaringClass().getSimpleName())
+                                    .put("Method", invocable.getDefinitionMethod().getName());
+                            ServerInit.this.logger.logPerf("perfrequestlistener", "APICall", logMap);
+                        }
                         break;
                     default: // empty
                         break;
