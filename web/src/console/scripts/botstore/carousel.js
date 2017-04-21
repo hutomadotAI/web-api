@@ -1,3 +1,5 @@
+const MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
+
 function showCarousel(botstoreCategorizedItems, category, option, see_more) {
     if(see_more === undefined )
         see_more = false;
@@ -84,12 +86,11 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
         }
     }
     wHTML += ('</div>');
-    wHTML += '<span class="carousel-see-more pull-right"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
     wHTML += ('</div>');
     wHTML += ('</section>');
 
     var newNode = document.createElement('div');
-    newNode.className = 'botsCarousel';
     newNode.innerHTML = wHTML;
     document.getElementById('botsCarousels').appendChild(newNode);
 
@@ -98,14 +99,34 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
 
 function showSeeMoreButton(node){
     var carouselBotcardNode = node.children[0].children[0].children[1];
-    var firstBotcard = carouselBotcardNode.children[0].children[0];
-    var marginBottom = window.getComputedStyle(firstBotcard).getPropertyValue("margin-bottom");
+    var firstBotcardNode = carouselBotcardNode.children[0].children[0];
+    var marginBottom = window.getComputedStyle(firstBotcardNode).getPropertyValue("margin-bottom");
 
     var nodeSeeMore = node.children[0].children[0].lastChild;
-    if ( (parseInt(carouselBotcardNode.offsetHeight)+parseInt(marginBottom)) < parseInt(carouselBotcardNode.scrollHeight))
-        nodeSeeMore.style.visibility= "visible";
+    if ((parseInt(carouselBotcardNode.offsetHeight)+parseInt(marginBottom)) < parseInt(carouselBotcardNode.scrollHeight) || carouselBotcardNode.childElementCount >= MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL) {
+        setSeeMoreButtonPosition(carouselBotcardNode,nodeSeeMore);
+        nodeSeeMore.style.visibility = "visible";
+    }
     else
         nodeSeeMore.style.visibility= "hidden";
+}
+
+function setSeeMoreButtonPosition(carouselBotcardNode, nodeSeeMore){
+    var nBot = carouselBotcardNode.childElementCount;
+    var offsetTopStartPosition = carouselBotcardNode.offsetTop;
+
+    for ( var i = 0; i < nBot; i++ ){
+        var currNode = carouselBotcardNode.children[i].children[0];
+        var offsetTopCurrentPosition = currNode.offsetTop;
+        if (offsetTopCurrentPosition > offsetTopStartPosition ){
+            var seeMoreWidth =  nodeSeeMore.offsetWidth;
+            var marginLeft = parseInt(window.getComputedStyle(currNode).marginLeft);
+            nodeSeeMore.style.left = ( (currNode.offsetWidth + marginLeft ) * i ) - seeMoreWidth + 'px';
+            break;
+           // + '    ' + carouselBotcardNode.offsetTop  + '    '  + carouselBotcardNode.children[i].offsetTop + '  ' + + carouselBotcardNode.children[i].scrollLeft);
+        }
+    }
+
 }
 
 function getCarousels(category){

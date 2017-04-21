@@ -14,7 +14,7 @@ if(!\hutoma\console::checkSessionIsActive()){
 }
 
 $CAROUSEL_CATEGORIES = ["Entertainment","Other","Education","Events", "Finance", "Fitness", "Games", "Health & Beauty", "Internet of Things", "News", "Personal", "Shopping", "Social", "Travel", "Virtual Assistants"];
-$MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
+$MAX_BOTCARDS_LOADED_FOR_CAROUSEL = 10;
 
 $botCategorizedItems =[];
 
@@ -28,7 +28,7 @@ if(isset($_GET['category'])){
 foreach ($CAROUSEL_CATEGORIES as $category) {
     $botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $botstoreListParam = new \hutoma\botstoreListParam();
-    $botstoreListParam->setPageSize($MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL);
+    $botstoreListParam->setPageSize($MAX_BOTCARDS_LOADED_FOR_CAROUSEL);
     $botstoreListParam->addFilter('category',$category);
     $botstoreItems = $botstoreApi->getBotstoreList($botstoreListParam->getQueryParameter());
 

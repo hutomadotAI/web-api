@@ -6485,7 +6485,8 @@ ul.pagination li a {
 
 .carousel-see-more{
     height: 45px;
-    padding-top: 5px;
+    top: 10px;
+    position:relative;
 }
 
 .carousel-ovelay{
