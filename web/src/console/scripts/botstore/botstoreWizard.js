@@ -16,6 +16,7 @@ function infoSidebarMenu(title) {
             v['menu_deep'] = 0;
             break;
         case 'botstore' :
+
             v['menu_title'] = 'botstore';
             v['menu_level'] = 2;
             v['menu_block'] = false;

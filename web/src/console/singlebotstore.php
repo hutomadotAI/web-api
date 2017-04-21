@@ -20,6 +20,7 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']
 }
 
 $botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
+$purchased = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['purchased'];
 $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
 
@@ -119,11 +120,7 @@ if (isset($botstoreItem)) {
     </script>
 </form>
 <script>
-    populateBotFields(
-        botstoreItem,
-        "<?php echo $menu_title; unset($menu_title)?>",
-        "<?php if(isset($_GET['category'])) echo $_GET['category'];?>"
-    );
+    populateBotFields(botstoreItem,"<?php echo $menu_title; unset($menu_title)?>");
 </script>
 </body>
 </html>

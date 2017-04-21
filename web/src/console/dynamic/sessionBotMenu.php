@@ -13,17 +13,16 @@ if (!isPostInputAvailable()) {
 }
 
 $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'] = $_POST['botId'];
+$_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['purchased'] = $_POST['purchased'];
 $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'] = $_POST['menu_title'];
 
-if (isset($_POST['category']))
-    \hutoma\console::redirect('../singlebotstore.php?category='.$_POST['category']);
-else
-    \hutoma\console::redirect('../singlebotstore.php');
+\hutoma\console::redirect('../singlebotstore.php');
 
 function isPostInputAvailable()
 {
     return (
         isset($_POST['botId']) &&
+        isset($_POST['purchased']) &&
         isset($_POST['menu_title'])
     );
 }

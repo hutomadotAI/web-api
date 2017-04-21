@@ -6,13 +6,13 @@ class botstoreListParam
 {
     private $startFrom;
     private $pageSize;
-    private $filters = array();
+    private $filter;
     private $orderField;
     private $orderDir;
 
     public function __construct()
     {
-        
+
     }
 
     public function getStartForm()
@@ -35,14 +35,14 @@ class botstoreListParam
         $this->pageSize = $pageSize;
     }
 
-    public function addFilter($filterName, $filterValue)
+    public function getFilter()
     {
-        array_push($this->filters, $filterName . "%3D%27" . $filterValue. "%27");
+        return $this->filter;
     }
 
-    public function getFilters()
+    public function setFilter($filter)
     {
-        return $this->filters;
+        $this->filter = $filter;
     }
 
     public function getOrderFilter()
@@ -65,19 +65,31 @@ class botstoreListParam
         $this->orderDir = $orderDir;
     }
 
-    public function getQueryParameter()
+    public function toJSON()
     {
-        $tmp_list_filters = array();
-        foreach ($this->filters as $value) {
-            array_push($tmp_list_filters,$value);
-        }
+        $json = $this->toArray();
+        return json_encode($json);
+    }
 
+    public static function fromObject($botstoreQueryParam)
+    {
+        $queryParam = new botstoreListParam();
+        $queryParam->setStartForm($botstoreQueryParam['startFrom']);
+        $queryParam->setPageSize($botstoreQueryParam['pageSize']);
+        $queryParam->setFilter($botstoreQueryParam['filter']);
+        $queryParam->setOrderFilter($botstoreQueryParam['orderField']);
+        $queryParam->setOrderDir($botstoreQueryParam['orderDir']);
+        return $queryParam;
+    }
+
+    public function toArray()
+    {
         return array(
             'startFrom' => $this->getStartForm(),
             'pageSize' => $this->getPageSize(),
-            'filter' => implode(',', $tmp_list_filters),
+            'filter' => $this->getFilter(),
             'orderField' => $this->getOrderFilter(),
-            'orderDir' => $this->getOrderDir(),
+            'orderDir' => $this->getOrderDir()
         );
     }
 

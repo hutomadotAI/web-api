@@ -57,10 +57,7 @@ var DRAW_BOTCARDS =
     ADD_SKILL_FLOW: {value: 2}
 };
 
-var BOT_ICON = {
-    PATH: {value: 'dist/img/boticon/'},
-    DEFAULT_IMAGE: {value: 'dist/img/default_bot.jpg'}
-};
+const ICON_PATH = 'dist/img/boticon/';
 
 function showBots(str, option, bots, botSubSet ) {
     var wHTML = "";
@@ -176,7 +173,7 @@ function switchCard(botId,optionFlow) {
     }
 }
 
-function openSingleBot(elem, option, botId, category) {
+function openSingleBot(elem, option, botId, purchased) {
     elem.setAttribute('onClick', '');
 
     var form = document.createElement("form");
@@ -190,13 +187,11 @@ function openSingleBot(elem, option, botId, category) {
     element.type = 'hidden';
     form.appendChild(element);
 
-    if (category!==undefined) {
-        var element = document.createElement("INPUT");
-        element.name = "category";
-        element.value = category;
-        element.type = 'hidden';
-        form.appendChild(element);
-    }
+    element = document.createElement("INPUT");
+    element.name = "purchased";
+    element.value = purchased;
+    element.type = 'hidden';
+    form.appendChild(element);
 
     element = document.createElement("INPUT");
     element.name = "menu_title";
