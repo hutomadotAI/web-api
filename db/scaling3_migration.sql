@@ -341,27 +341,28 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIs`(
     READS SQL DATA
 BEGIN
 
-    SELECT
-      `id`,
-      `aiid`,
-      `ai_name`,
-      `ai_description`,
-      `created_on`,
-      `dev_id`,
-      `is_private`,
-      `client_token`,      
-      `ui_ai_language`,
-      `ui_ai_timezone`,
-      `ui_ai_confidence`,
-      `ui_ai_personality`,
-      `ui_ai_voice`,
-      (SELECT COUNT(`ai_training`.`aiid`)
-       FROM `ai_training`
-       WHERE `ai_training`.`aiid`=`ai`.`aiid`)
-        AS `has_training_file`
-    FROM `ai`
+  SELECT
+    `ai`.`id`,
+    `ai`.`aiid`,
+    `ai`.`ai_name`,
+    `ai`.`ai_description`,
+    `ai`.`created_on`,
+    `ai`.`dev_id`,
+    `ai`.`is_private`,
+    `ai`.`client_token`,
+    `ai`.`ui_ai_language`,
+    `ai`.`ui_ai_timezone`,
+    `ai`.`ui_ai_confidence`,
+    `ai`.`ui_ai_personality`,
+    `ai`.`ui_ai_voice`,
+    (SELECT COUNT(`ai_training`.`aiid`)
+     FROM `ai_training`
+     WHERE `ai_training`.`aiid`=`ai`.`aiid`)
+      AS `has_training_file`,
+    `botStore`.`publishing_state`
+  FROM `ai` LEFT OUTER JOIN `botStore` on `botStore`.`aiid` = `ai`.`aiid`
     WHERE `ai`.`dev_id`=`in_dev_id`
-          AND `deleted`=0;
+          AND `ai`.`deleted`=0;
 
   END$$
 DELIMITER ;
