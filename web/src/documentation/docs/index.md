@@ -1,0 +1,1 @@
+Welcome to the user documentation for Hu:toma. Please contact support if these documents are unable to answer questions you might have regarding our platform.

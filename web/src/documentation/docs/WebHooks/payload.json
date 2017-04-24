@@ -1,0 +1,30 @@
+{
+  "intentName": "colour",
+  "memoryVariables": [
+    {
+      "name": "colour",
+      "currentValue": "blue",
+      "isMandatory": true,
+      "entityKeys": [
+        "red",
+        "yellow",
+        "green",
+        "blue"
+      ],
+      "prompts": [
+        "Which colour?"
+      ],
+      "timesPrompted": 1,
+      "timesToPrompt": 1
+    }
+  ],
+  "chatResult": {
+    "topicIn": "",
+    "score": 0,
+    "query": "Tell me about the colour blue",
+    "answer": "",
+    "history": "",
+    "elapsedTime": 0,
+    "topicOut": ""
+  }
+}

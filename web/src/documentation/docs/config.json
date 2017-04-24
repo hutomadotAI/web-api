@@ -1,0 +1,13 @@
+{
+	"title": "Hu:toma AI",
+	"tagline": "A Deep Learning Chatbot Marketplace",
+	"image": "https://www.hutoma.com/img/logo-white-with-tagline.png",
+	"twitter": ["hutomadotai"],
+	"html": {
+    		"theme": "daux-navy"
+  	},
+	"links": {
+		"Hu:toma Web-site": "https://www.hutoma.com/",
+		"GitHub Repo": "https://github.com/hutomadotai"
+	}
+}
