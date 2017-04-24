@@ -1272,6 +1272,7 @@ class console
         }
         self::$sessionObj->setLastActivity(time());
         return true;
+    }
 
 }
 
