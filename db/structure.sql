@@ -537,6 +537,7 @@ CREATE TABLE `users` (
   `last_name` varchar(30) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `valid` tinyint(1) NOT NULL DEFAULT '1',
+  `internal` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id_UNIQUE` (`dev_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=latin1;
