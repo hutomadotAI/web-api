@@ -6,6 +6,7 @@ import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.controllers.IServerEndpoint;
 
 import org.joda.time.DateTime;
 
@@ -65,5 +66,21 @@ public class TestDataHelper {
     public static BackendStatus getTrainingInProgress() {
         return setBackendEngineStatus(TrainingStatus.AI_TRAINING);
     }
+
+    public static IServerEndpoint getEndpointFor(String url) {
+        return new IServerEndpoint() {
+
+            @Override
+            public String getServerUrl() {
+                return url;
+            }
+
+            @Override
+            public String getServerIdentifier() {
+                return "mock";
+            }
+        };
+    }
+
 
 }

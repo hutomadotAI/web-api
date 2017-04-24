@@ -4,6 +4,7 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
@@ -101,8 +102,10 @@ public class TestAiServicesClient {
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         this.threadPool = new ThreadPool(this.fakeConfig);
 
-        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
-        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
+        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(
+                TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
+        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
+                TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);

@@ -56,20 +56,23 @@ public abstract class RequestBase {
         this.controller = controller;
     }
 
-    public List<Future<InvocationResult>> issueChatRequests(final Map<String, String> chatParams,
-                                                            final List<Pair<String, UUID>> ais)
+    public List<RequestInProgress> issueChatRequests(final Map<String, String> chatParams,
+                                                     final List<Pair<String, UUID>> ais)
             throws ServerMetadata.NoServerAvailable {
-        List<Callable<InvocationResult>> callables = new ArrayList<>();
+        List<RequestCallable> callables = new ArrayList<>();
 
         for (Pair<String, UUID> ai : ais) {
-            callables.add(createCallable(this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat),
-                    ai.getA(), ai.getB(), chatParams, this.controller.getHashCodeFor(ai.getB())));
+            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat);
+            callables.add(new RequestCallable(
+                    createCallable(endpoint.getServerUrl(), ai.getA(), ai.getB(), chatParams,
+                            this.controller.getHashCodeFor(ai.getB())),
+                    endpoint.getServerIdentifier()));
         }
 
         return this.execute(callables);
     }
 
-    public Map<UUID, ChatResult> waitForAll(final List<Future<InvocationResult>> futures, final int timeoutMs)
+    public Map<UUID, ChatResult> waitForAll(final List<RequestInProgress> futures, final int timeoutMs)
             throws AiControllerException {
         // have we made the call at all?
         if (futures == null) {
@@ -79,7 +82,7 @@ public abstract class RequestBase {
         Map<UUID, ChatResult> map = new HashMap<>();
 
         // get and wait for all the calls to complete
-        for (Future<InvocationResult> future : futures) {
+        for (RequestInProgress future : futures) {
             final InvocationResult result = waitForResult(future, timeoutMs);
 
             if (result != null) {
@@ -124,23 +127,23 @@ public abstract class RequestBase {
         this.threadSubPool.cancelAll();
     }
 
-    private InvocationResult waitForResult(final Future<InvocationResult> future, final int timeoutMs)
+    private InvocationResult waitForResult(final RequestInProgress requestInProgress, final int timeoutMs)
             throws AiControllerException {
         InvocationResult invocationResult;
+        Future<InvocationResult> future = requestInProgress.getFuture();
+
         try {
-            try {
-                if (future.isDone()) {
-                    invocationResult = future.get();
-                } else {
-                    invocationResult = future.get(timeoutMs, TimeUnit.MILLISECONDS);
-                }
-            } catch (ExecutionException | TimeoutException ex) {
-                this.logger.logException(this.getLogFrom(), ex);
-                throw new AiControllerException("Error executing request: " + ex.getClass().getSimpleName());
+            if (future.isDone()) {
+                invocationResult = future.get();
+            } else {
+                invocationResult = future.get(timeoutMs, TimeUnit.MILLISECONDS);
             }
+        } catch (ExecutionException | TimeoutException ex) {
+            throw new AiControllerException(String.format("Error executing request to %s: %s",
+                    requestInProgress.getEndpointIdentifier(), ex.getClass().getSimpleName()));
         } catch (InterruptedException ex) {
-            this.logger.logException(this.getLogFrom(), ex);
-            throw new AiControllerException("Interrupted");
+            throw new AiControllerException(String.format("Interrupted request to %s",
+                    requestInProgress.getEndpointIdentifier()));
         }
         return invocationResult;
     }
@@ -157,6 +160,41 @@ public abstract class RequestBase {
         }
     }
 
+    public static class RequestInProgress {
+        private Future<InvocationResult> future;
+        private String endpointIdentifier;
+
+        public RequestInProgress(final Future<InvocationResult> future, final String endpointIdentifier) {
+            this.future = future;
+            this.endpointIdentifier = endpointIdentifier;
+        }
+
+        public Future<InvocationResult> getFuture() {
+            return this.future;
+        }
+
+        public String getEndpointIdentifier() {
+            return this.endpointIdentifier;
+        }
+    }
+
+    public static class RequestCallable {
+        private Callable<InvocationResult> callable;
+        private String endpointIdentifier;
+
+        public RequestCallable(final Callable<InvocationResult> callable, final String endpointIdentifier) {
+            this.callable = callable;
+            this.endpointIdentifier = endpointIdentifier;
+        }
+
+        public Callable<InvocationResult> getCallable() {
+            return this.callable;
+        }
+
+        public String getEndpointIdentifier() {
+            return this.endpointIdentifier;
+        }
+    }
 
     protected Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
                                                         final Map<String, String> params, final String aiHash) {
@@ -181,15 +219,17 @@ public abstract class RequestBase {
         };
     }
 
-    protected List<Future<InvocationResult>> execute(
-            final List<Callable<InvocationResult>> callables) {
+    protected List<RequestInProgress> execute(
+            final List<RequestCallable> callables) {
         this.logger.logDebug(this.getLogFrom(), String.format("Issuing %d requests for %s",
                 callables.size(), this.tools.getCallerMethod(3)));
-        List<Future<InvocationResult>> futures = new ArrayList<>();
+        List<RequestInProgress> futures = new ArrayList<>();
 
         // get a named future for a named callable response
         callables.forEach((entry) -> {
-            futures.add(this.threadSubPool.submit(entry));
+            futures.add(new RequestInProgress(this.threadSubPool.submit(
+                    entry.getCallable()),
+                    entry.getEndpointIdentifier()));
         });
 
         return futures;
