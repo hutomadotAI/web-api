@@ -2655,7 +2655,7 @@ SELECT MIN(`ai_status`.`aiid`) INTO v_aiid
 	FROM `ai_status` 
 	WHERE `server_type` = `in_server_type` 
 	AND `queue_time`<now()
-	ORDER BY `queue_time`
+	ORDER BY `queue_time` ASC
 	LIMIT 1 FOR UPDATE;
 
 IF NOT v_aiid IS NULL THEN
