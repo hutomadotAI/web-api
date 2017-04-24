@@ -170,8 +170,8 @@ public class AIServices extends ServerConnector {
     private List<String> getAllEndpoints(UUID aiid) throws AiServicesException {
         try {
             return Arrays.asList(
-                    this.controllerWnet.getBackendEndpoint(aiid, RequestFor.Training),
-                    this.controllerRnn.getBackendEndpoint(aiid, RequestFor.Training));
+                    this.controllerWnet.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl(),
+                    this.controllerRnn.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
         } catch (ServerMetadata.NoServerAvailable noServer) {
             throw new AiServicesException(noServer.getMessage());
         }

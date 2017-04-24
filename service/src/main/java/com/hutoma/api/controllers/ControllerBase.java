@@ -67,9 +67,9 @@ public abstract class ControllerBase extends ServerMetadata {
         return serverSessionID;
     }
 
-    public String getBackendEndpoint(UUID aiid, RequestFor requestFor) throws NoServerAvailable {
+    public IServerEndpoint getBackendEndpoint(UUID aiid, RequestFor requestFor) throws NoServerAvailable {
         ServerTracker tracker = this.getServerFor(aiid, requestFor);
-        return tracker.getServerUrl();
+        return tracker;
     }
 
     public synchronized String getHashCodeFor(UUID aiid) {

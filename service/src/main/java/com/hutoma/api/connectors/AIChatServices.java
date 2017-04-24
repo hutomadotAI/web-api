@@ -11,7 +11,6 @@ import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.controllers.InvocationResult;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
@@ -41,9 +39,9 @@ public class AIChatServices extends ServerConnector {
     private final RequestWnet requestWnet;
     private final RequestRnn requestRnn;
     private final RequestAiml requestAiml;
-    private List<Future<InvocationResult>> wnetFutures;
-    private List<Future<InvocationResult>> rnnFutures;
-    private List<Future<InvocationResult>> aimlFutures;
+    private List<RequestBase.RequestInProgress> wnetFutures;
+    private List<RequestBase.RequestInProgress> rnnFutures;
+    private List<RequestBase.RequestInProgress> aimlFutures;
 
     private long requestDeadline;
 

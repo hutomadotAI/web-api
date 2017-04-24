@@ -27,7 +27,7 @@ import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 /**
  * Created by David MG on 01/02/2017.
  */
-public class ServerTracker implements Callable {
+public class ServerTracker implements Callable, IServerEndpoint {
 
     private static final String LOGFROM = "servertracker";
     private final HashSet<UUID> affinity;
@@ -88,14 +88,6 @@ public class ServerTracker implements Callable {
      */
     public boolean isEndpointVerified() {
         return this.endpointVerified.get();
-    }
-
-    /***
-     * Uniquely identifies a server across sessions.
-     * @return
-     */
-    public String getServerIdentifier() {
-        return this.serverIdentity;
     }
 
     @Override
@@ -193,6 +185,14 @@ public class ServerTracker implements Callable {
      */
     public String getServerUrl() {
         return this.registration.getServerUrl();
+    }
+
+    /***
+     * Uniquely identifies a server across sessions.
+     * @return
+     */
+    public String getServerIdentifier() {
+        return this.serverIdentity;
     }
 
     public synchronized Set<UUID> getChatAffinity() {
