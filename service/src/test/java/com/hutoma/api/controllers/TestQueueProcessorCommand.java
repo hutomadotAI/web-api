@@ -84,6 +84,34 @@ public class TestQueueProcessorCommand {
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
     }
 
+    // load status, fail to delete ai with 404, don't requeue
+    @Test
+    public void testQueueCommand_Delete_Fail404_drop() throws
+            Database.DatabaseException, ServerConnector.AiServicesException {
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
+        ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
+        servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 404));
+        doThrow(servicesException).when(this.fakeQueueServices)
+                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+        this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
+        verify(this.fakeDatabase, never())
+                .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
+    }
+
+    // load status, fail to delete ai with 500, requeue
+    @Test
+    public void testQueueCommand_Delete_Fail500_requeue() throws
+            Database.DatabaseException, ServerConnector.AiServicesException {
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
+        ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
+        servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 500));
+        doThrow(servicesException).when(this.fakeQueueServices)
+                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+        this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
+        verify(this.fakeDatabase, times(1))
+                .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
+    }
+
     // load status, fail to delete ai, fail to requeue
     @Test
     public void testQueueCommand_DeleteFailRequeueFail() throws
@@ -145,6 +173,39 @@ public class TestQueueProcessorCommand {
         verify(this.fakeDatabase, times(1))
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
     }
+
+    // load status, fail to train ai with 404, drop
+    @Test
+    public void testQueueCommand_TrainFail404_drop() throws
+            Database.DatabaseException, ServerConnector.AiServicesException {
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
+        ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
+        servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 404));
+        doThrow(servicesException).when(this.fakeQueueServices)
+                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+        this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
+        verify(this.fakeDatabase, times(1)).updateAIStatus(
+                any(), any(), eq(TrainingStatus.AI_ERROR), anyString(), anyDouble(), anyDouble());
+        verify(this.fakeDatabase, never())
+                .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
+    }
+
+    // load status, fail to train ai with 500, requeue
+    @Test
+    public void testQueueCommand_TrainFail500_requeue() throws
+            Database.DatabaseException, ServerConnector.AiServicesException {
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
+        ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
+        servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 500));
+        doThrow(servicesException).when(this.fakeQueueServices)
+                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+        this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
+        verify(this.fakeDatabase, never()).updateAIStatus(
+                any(), any(), any(), anyString(), anyDouble(), anyDouble());
+        verify(this.fakeDatabase, times(1))
+                .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
+    }
+
 
     // load status, fail to train ai, fail to requeue
     @Test

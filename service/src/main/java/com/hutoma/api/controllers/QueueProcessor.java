@@ -14,6 +14,8 @@ import com.hutoma.api.containers.sub.QueueAction;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
+import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -181,6 +183,117 @@ public class QueueProcessor extends TimerTask {
         }
     }
 
+    private ServerConnector.AiServicesException findFirstSuppressedHttpError(ServerConnector.AiServicesException e) {
+
+        // usual null checks
+        if (e == null || e.getSuppressed() == null) {
+            return null;
+        }
+        // find the first AiServicesException
+        return Arrays.stream(e.getSuppressed())
+                .filter(error -> error instanceof ServerConnector.AiServicesException)
+                .map(error -> (ServerConnector.AiServicesException) error)
+                // with a non-zero http response code
+                .filter(error -> error.getResponseStatus() > 0)
+                .findFirst().orElse(null);
+    }
+
+    /***
+     * * Deal with logging and requeuing or dropping when a delete task fails
+     * @param queued
+     * @param server
+     * @param e
+     */
+    private void handleDeleteTaskFailure(final BackendEngineStatus queued, final ServerTracker server, final ServerConnector.AiServicesException e) {
+
+        // requeue flag
+        boolean requeueThis = true;
+        String logMessage;
+        // get the first suppressed error with a non-zero http error code
+        ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(e);
+        if (httpError != null) {
+            switch (httpError.getResponseStatus()) {
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    requeueThis = false;
+                    break;
+                default:
+                    break;
+            }
+            logMessage = httpError.getMessage();
+        } else {
+            logMessage = e.toString();
+        }
+
+        try {
+            if (requeueThis) {
+                this.logger.logError(this.logFrom,
+                        String.format("REQUEUE delete that failed on backend %s with error %s",
+                                server.getServerIdentifier(), logMessage));
+                // requeue
+                this.database.queueUpdate(this.serverType, queued.getAiid(),
+                        true, this.config.getProcessQueueScheduleFutureCommand(), QueueAction.DELETE);
+            } else {
+                // drop the delete command and ignore permanently
+                this.logger.logError(this.logFrom,
+                        String.format("DROP delete that failed on backend %s with error %s",
+                                server.getServerIdentifier(), logMessage));
+            }
+        } catch (Database.DatabaseException e1) {
+            this.logger.logException(this.logFrom, e1);
+        }
+    }
+
+    /***
+     * Deal with logging and requeuing or dropping when a train task fails
+     * @param queued
+     * @param server
+     * @param e
+     */
+    private void handleTrainTaskFailure(final BackendEngineStatus queued, final ServerTracker server,
+                                        final ServerConnector.AiServicesException e) {
+
+        // queue flag
+        boolean requeueThis = true;
+        String logMessage;
+        // get the first error with a non-zero result code
+        ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(e);
+        // if there is one
+        if (httpError != null) {
+            switch (httpError.getResponseStatus()) {
+                case HttpURLConnection.HTTP_BAD_REQUEST:
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    requeueThis = false;
+                    break;
+                default:
+                    break;
+            }
+            logMessage = httpError.getMessage();
+        } else {
+            logMessage = e.toString();
+        }
+
+        try {
+            if (requeueThis) {
+                this.logger.logError(this.logFrom,
+                        String.format("REQUEUE train task that failed on backend %s with error %s",
+                                server.getServerIdentifier(), logMessage));
+                // requeue the task now
+                this.database.queueUpdate(this.serverType, queued.getAiid(),
+                        true, this.config.getProcessQueueScheduleFutureCommand(), QueueAction.TRAIN);
+            } else {
+                // don't requeue
+                this.logger.logError(this.logFrom,
+                        String.format("DROP train-task that failed on backend %s with error %s",
+                                server.getServerIdentifier(), logMessage));
+                // and permanently flag the AI state as ERROR
+                this.database.updateAIStatus(this.serverType, queued.getAiid(), TrainingStatus.AI_ERROR,
+                        server.getServerIdentifier(), 0.0, 0.0);
+            }
+        } catch (Database.DatabaseException e1) {
+            this.logger.logException(this.logFrom, e1);
+        }
+    }
+
     /***
      * Process a deletion
      * @param queued
@@ -210,21 +323,7 @@ public class QueueProcessor extends TimerTask {
             this.database.deleteAiStatus(this.serverType, queued.getAiid());
 
         } catch (ServerConnector.AiServicesException e) {
-
-            // if there was a failure to connect with the backend
-            this.logger.logError(this.logFrom,
-                    String.format("requeuing due to failure to delete AI on backend %s", e.toString()));
-
-            // requeue the deletion for later
-            // TODO: distinguish between different errors
-            // TODO: 500, 429 = requeue, 404 = don't requeue
-            try {
-                this.database.queueUpdate(this.serverType, queued.getAiid(),
-                        true, this.config.getProcessQueueScheduleFutureCommand(), QueueAction.DELETE);
-            } catch (Database.DatabaseException e1) {
-                this.logger.logError(this.logFrom,
-                        String.format("failed to requeue AI deletion on backend: %s", e1.toString()));
-            }
+            handleDeleteTaskFailure(queued, server, e);
         } catch (Database.DatabaseException e) {
             this.logger.logError(this.logFrom,
                     String.format("db exception while deleting AI status: %s", e.toString()));
@@ -264,19 +363,7 @@ public class QueueProcessor extends TimerTask {
                     TrainingStatus.AI_TRAINING, server.getServerIdentifier(),
                     currentStatus.getTrainingProgress(), currentStatus.getTrainingError());
         } catch (ServerConnector.AiServicesException e) {
-            this.logger.logError(this.logFrom, String.format(
-                    "requeuing due to failure to start training on backend %s", e.toString()));
-
-            // TODO: distinguish between different errors
-            // TODO: 500, 429 = requeue, 400, 404 = don't requeue
-            // if we failed to talk to the back-end server then requeue this command to try again in 30 seconds
-            try {
-                this.database.queueUpdate(this.serverType, queued.getAiid(),
-                        true, this.config.getProcessQueueScheduleFutureCommand(), QueueAction.TRAIN);
-            } catch (Database.DatabaseException e1) {
-                this.logger.logError(this.logFrom,
-                        String.format("failed to requeue AI training on backend: %s", e1.toString()));
-            }
+            handleTrainTaskFailure(queued, server, e);
         } catch (Database.DatabaseException e) {
             this.logger.logError(this.logFrom, String.format("failed to set endpoint in status: %s", e.toString()));
         }
