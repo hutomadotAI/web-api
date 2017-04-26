@@ -16,12 +16,12 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 
 import java.net.HttpURLConnection;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -38,25 +38,24 @@ public class QueueProcessor extends TimerTask {
 
     protected BackendServerType serverType;
     protected ControllerBase controller;
+    // server rotation
+    AtomicInteger roundRobinIndex;
     private DatabaseAiStatusUpdates database;
     private AIQueueServices queueServices;
     private Tools tools;
     private ILogger logger;
     private String logFrom;
     private Config config;
-
     // flag to tell the inner thread not to quit
     private AtomicBoolean runQueueProcessor;
     // how long to wait until checking the queue again
     private AtomicLong runAgainAfterMs;
-
     // store the last state so that we know when it has changed
     private AtomicReference<String> lastKnownControllerState;
-
     // only used for logging
     private long lastRun = 0;
     private long lastKicked = 0;
-
+    // used for scheduling queue checks
     private Timer timer;
 
     @Inject
@@ -71,6 +70,7 @@ public class QueueProcessor extends TimerTask {
         this.runAgainAfterMs = new AtomicLong(0);
         this.lastKnownControllerState = new AtomicReference<>("");
         this.timer = new Timer();
+        this.roundRobinIndex = new AtomicInteger(0);
     }
 
     public void initialise(ControllerBase controller, final BackendServerType serverType) {
@@ -420,19 +420,19 @@ public class QueueProcessor extends TimerTask {
             return;
         }
 
-        // filter out the server with the lowest load
-
-        // TODO: consider picking a random available slot in the future
-        // because the server with the lowest load might be faulty in some way
-        // and we would keep assigning all tasks to the faulty server because
-        // it will always have the lowest load
-        ServerEndpointTrainingSlots lowestLoad = slotLookup.values().stream()
+        // get a list of servers with available training slots
+        List<ServerEndpointTrainingSlots> x = slotLookup.values().stream()
                 .filter(ServerEndpointTrainingSlots::hasFreeTrainingSlots)
-                .min(Comparator.comparing(ServerEndpointTrainingSlots::getLoadFactor))
-                .orElse(null);
+                .collect(Collectors.toList());
+
+        // use round robin on servers with capacity
+        // to avoid a single malfunctioning server bringing task
+        // processing to a halt
+        ServerEndpointTrainingSlots chosenSlot =
+                x.get(this.roundRobinIndex.getAndIncrement() % x.size());
 
         // get a tracker for the server we have chosen
-        ServerTracker chosenServer = serverMap.get(lowestLoad.getEndpoint());
+        ServerTracker chosenServer = serverMap.get(chosenSlot.getEndpoint());
 
         // take the next task off the queue
         BackendEngineStatus queued = this.database.queueTakeNext(this.serverType);

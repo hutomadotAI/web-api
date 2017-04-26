@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -30,6 +31,8 @@ public class TestQueueProcessor {
 
     private static final String ENDPOINT1 = "e1";
     private static final String ENDPOINT2 = "e2";
+    private static final String ENDPOINT3 = "e3";
+    private static final String ENDPOINT4 = "e4";
 
     QueueProcessorTest qproc;
     ControllerBase fakeController;
@@ -40,13 +43,20 @@ public class TestQueueProcessor {
     Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> fakeData;
 
     @Test
-    public void testQueue_LowestLoadServer() throws Database.DatabaseException {
-        this.fakeData = create(null, ENDPOINT1, 1, 2, true);
+    public void testQueue_RoundRobinAllocation() throws Database.DatabaseException {
+        this.fakeData = create(null, ENDPOINT1, 0, 2, true);
         this.fakeData = create(this.fakeData, ENDPOINT2, 0, 2, true);
+        this.fakeData = create(this.fakeData, ENDPOINT3, 0, 2, true);
+        this.fakeData = create(this.fakeData, ENDPOINT4, 0, 2, true);
         when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
-        this.qproc.processQueue();
-        Assert.assertEquals(ENDPOINT2, this.qproc.getChosenServer());
+        HashSet<String> serversSelected = new HashSet<>();
+        for (int i = 0; i < 4; i++) {
+            this.qproc.processQueue();
+            serversSelected.add(this.qproc.getChosenServer());
+        }
+        // round robin: make sure all four servers have come up in four requests
+        Assert.assertEquals(4, serversSelected.size());
     }
 
     @Test
