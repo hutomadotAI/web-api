@@ -55,6 +55,22 @@ public class CentralLogger implements ILogger {
         this.serializer = serializer;
     }
 
+    private static LogEvent generateErrorEvent(final String message, final LogEvent original) {
+        LogEvent err = new LogEvent();
+        err.timestamp = System.currentTimeMillis();
+        err.dateTime = new DateTime(DateTimeZone.UTC);
+        err.type = EventType.ERROR.name();
+        err.message = message;
+        err.tag = "centrallogger";
+        if (original != null) {
+            err.params.put("orig date", original.dateTime);
+            err.params.put("orig type", original.type);
+            err.params.put("orig tag", original.tag);
+            err.params.put("orig message", original.message);
+        }
+        return err;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -208,6 +224,9 @@ public class CentralLogger implements ILogger {
         this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, null));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void logWarnEvent(String logFrom, String event, String user, LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
@@ -235,7 +254,12 @@ public class CentralLogger implements ILogger {
         try {
             List<String> docs = new ArrayList<>();
             for (LogEvent event : events) {
-                docs.add(this.serializer.serialize(event));
+                String doc = this.serializer.serialize(event);
+                if (doc == null || doc.isEmpty()) {
+                    docs.add(this.serializer.serialize(generateErrorEvent("Error serialising logging event", event)));
+                } else {
+                    docs.add(doc);
+                }
             }
             ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
             response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
