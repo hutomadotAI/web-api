@@ -114,17 +114,6 @@ function setButtonParameter(title, owned, carousel_category) {
     }
 }
 
-function btnFromBuyToPurchased() {
-    var wHTML = '';
-    var nodeBtn = document.getElementById('btnBuyBot');
-    wHTML += ('<b>Bot purchased </b>');
-    wHTML += ('<span class="fa fa-check-circle-o"></span>');
-    nodeBtn.setAttribute('data-toggle', '');
-    nodeBtn.setAttribute('data-target', '');
-    nodeBtn.innerHTML = wHTML;
-    nodeBtn.className = 'btn btn-primary pull-right flat';
-}
-
 $('#buyBot').on('hide.bs.modal', function (e) {
     var purchase_state = document.getElementById('purchase_state').value;
     if (purchase_state == 1)

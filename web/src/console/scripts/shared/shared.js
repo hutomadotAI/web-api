@@ -105,17 +105,6 @@ function showBots(str, option, bots, botSubSet ) {
                 + '" data-price="' + bot['price'] 
                 + '" data-license="' + bot['licenseType'] + '"';
             switch (option) {
-                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
-                    wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
-                    if ($.inArray(bot['botId'], botSubSet) != -1) {
-                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
-                    }
-                    else {
-                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
-                        wHTML += (bot['price']+ ' &#8364');
-                        wHTML += ('</div>');
-                    }
-                    break;
                 case DRAW_BOTCARDS.BOTSTORE_FLOW.value:  // botstore showed in BOTSTORE
                     wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
                     if ($.inArray(bot['botId'], botSubSet) != -1) {
@@ -132,10 +121,10 @@ function showBots(str, option, bots, botSubSet ) {
                 default:
                     if ($.inArray(bot['botId'], botSubSet) != -1) {
                         wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
-                        wHTML += ('<div class="switch switchOn" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="1"></div>');
+                        wHTML += ('<div class="switch switchOn" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + option+ ',"' + bot['botId'] + '"); data-link="1"></div>');
                     } else {
                         wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="0">');
-                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
+                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + option+ ',"' + bot['botId'] + '"); data-link="0"></div>');
                     }
 
             }
@@ -166,7 +155,8 @@ function switchCard(botId,optionFlow) {
             targetDiv.innerHTML = ('purchased');
             break;
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
-            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + botId + '");></div>');
+            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '");></div>');
+
             var parent = targetDiv.parentNode;
             parent.setAttribute('data-linked', '0');
             parent.innerHTML = wHTML;
@@ -228,28 +218,50 @@ function RecursiveUnbind($jElement) {
     });
 }
 
-function toggleAddBotSkill(node, botId) {
+function toggleAddBotSkill(node, optionFlow, botId) {
     var MAX_LINKED_BOTS = 5;
     var parent = node.parentNode;
+    var activatedBots = 0;
 
-    var listActive = document.getElementById('botsSearch').children[0].getElementsByClassName('borderActive');
+    switch(optionFlow){
+        case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
+            activatedBots = document.getElementById('botsCarousels').getElementsByClassName('borderActive').length;
+            break;
+        case DRAW_BOTCARDS.ADD_SKILL_FLOW.value:
+            activatedBots = document.getElementById('botsSearch').children[0].getElementsByClassName('borderActive').length;
+            break;
+        default:
+    }
 
-    if (!node.classList.contains('switchOn') && listActive.length >= MAX_LINKED_BOTS) {
+    if (!node.classList.contains('switchOn') && parseInt(activatedBots) >= MAX_LINKED_BOTS) {
         alert("You can only combine up to " + MAX_LINKED_BOTS + " bots.");
         return;
     }
 
     $(node).toggleClass('switchOn');
+    var botcard = document.getElementById('card' + botId).children[0];
+
     if ($(node).attr('data-link') == '0') {
         $(node).attr('data-link', 1);
         parent.setAttribute('data-linked', '1');
-        document.getElementById('card' + botId).children[0].classList.add("borderActive");
+        botcard.classList.add("borderActive");
     }
     else {
         $(node).attr('data-link', 0);
         parent.setAttribute('data-linked', '0');
-        document.getElementById('card' + botId).children[0].classList.remove("borderActive");
+        botcard.classList.remove("borderActive");
     }
+}
+
+function btnFromBuyToPurchased() {
+    var wHTML = '';
+    var nodeBtn = document.getElementById('btnBuyBot');
+    wHTML += ('<b>Bot purchased </b>');
+    wHTML += ('<span class="fa fa-check-circle-o"></span>');
+    nodeBtn.setAttribute('data-toggle', '');
+    nodeBtn.setAttribute('data-target', '');
+    nodeBtn.innerHTML = wHTML;
+    nodeBtn.className = 'btn btn-primary pull-right flat';
 }
 
 $(document).ready(function () {
