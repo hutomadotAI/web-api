@@ -1263,12 +1263,11 @@ class console
         if (!self::$loggedIn
             || PHP_SESSION_ACTIVE != session_status()
             || (self::$sessionObj->getLastActivity() != null
-                && (time() - self::$sessionObj->getLastActivity() > TIMEOUT))
-        ) {
+                && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) ) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
-            self::redirect(self::$config['pages']['login_page']);
+            self::redirect('/');
             return false;
         }
         self::$sessionObj->setLastActivity(time());
