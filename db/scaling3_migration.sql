@@ -116,7 +116,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueTakeNext`(
 BEGIN
 
 DECLARE v_aiid VARCHAR(50);
-SELECT MIN(`ai_status`.`aiid`) INTO v_aiid 
+SELECT `ai_status`.`aiid` INTO v_aiid 
 	FROM `ai_status` 
 	WHERE `server_type` = `in_server_type` 
 	AND `queue_time`<now()
