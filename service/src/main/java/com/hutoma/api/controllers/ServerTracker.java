@@ -222,7 +222,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
     protected boolean beatHeart() {
         LogMap logMap = LogMap.map("Op", "heartbeat")
                 .put("Url", this.registration.getServerUrl())
-                .put("Type", this.registration.getServerType())
+                .put("Type", this.registration.getServerType().value())
                 .put("Server", this.serverIdentity)
                 .put("SessionId", this.serverSessionID);
         try {
