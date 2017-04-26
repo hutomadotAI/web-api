@@ -137,8 +137,8 @@ function showSeeMoreButton(node){
 
 function setSeeMoreButtonPosition(carouselBotcardNode, nodeSeeMore){
     var nBot = carouselBotcardNode.childElementCount;
-    var offsetTopStartPosition = carouselBotcardNode.offsetTop;
-
+    var offsetTopPadding = parseInt(window.getComputedStyle(carouselBotcardNode).paddingTop);
+    var offsetTopStartPosition = carouselBotcardNode.offsetTop + offsetTopPadding;
     for ( var i = 0; i < nBot; i++ ){
         var currNode = carouselBotcardNode.children[i].children[0];
         var offsetTopCurrentPosition = currNode.offsetTop;
