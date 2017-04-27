@@ -44,7 +44,7 @@ function isSessionVariablesAvailable()
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
-<div class="wrapper" id="wrapper">
+<div class="wrapper" id="wrapper" style="background: #434343;">
     <header class="main-header">
         <?php include './dynamic/header.html.php'; ?>
     </header>
