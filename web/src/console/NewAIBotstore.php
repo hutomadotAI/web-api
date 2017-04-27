@@ -1,9 +1,6 @@
 <?php
 require "../pages/config.php";
 require_once "api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
-require_once "common/bot.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -13,13 +10,6 @@ if (!isSessionVariablesAvailable()) {
     \hutoma\console::redirect('./error.php?err=100');
     exit;
 }
-
-$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$bots = $botApi->getPublishedBots();
-
-$botPurchaseApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$purchasedBots = $botPurchaseApi->getPurchasedBots();
-unset($botPurchaseApi);
 
 function isSessionVariablesAvailable()
 {
@@ -33,7 +23,6 @@ function isSessionVariablesAvailable()
         isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'])
     );
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -71,6 +60,11 @@ function isSessionVariablesAvailable()
     <div class="content-wrapper">
         <section class="content">
             <?php include './dynamic/newAIBotstore.content.html.php'; ?>
+            <div class="overlay carousel-ovelay" id ="carousel-overlay">
+                <i class="fa fa-refresh fa-spin center-block"></i>
+            </div>
+            <p id="botsCarousels"/>
+            <p/>
             <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
@@ -96,51 +90,14 @@ function isSessionVariablesAvailable()
 
 <script src="./scripts/createAI/createAIWizard.js"></script>
 <script src="./scripts/botstore/botstore.js"></script>
+<script src="./scripts/botstore/carousel.js"></script>
 <script src="./scripts/botcard/buyBot.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 <script>
-    var bots = <?php
-        $tmp_list = [];
-        if (isset($bots) && (array_key_exists("bots", $bots))) {
-            foreach ($bots['bots'] as $botDetails) {
-                $bot = \hutoma\bot::fromObject($botDetails);
-                $tmp_bot = $bot->toJSON();
-                array_push($tmp_list, $tmp_bot);
-            }
-        }
-        echo json_encode($tmp_list);
-        unset($bots);
-        unset($tmp_list);
-        unset($botApi);
-        ?>;
-
-    var purchasedBots = <?php
-        $tmp_purchased_list = [];
-        if (isset($purchasedBots) && (array_key_exists("bots", $purchasedBots))) {
-            foreach ($purchasedBots['bots'] as $botDetails) {
-                $purchasedBot = new \hutoma\bot();
-                array_push($tmp_purchased_list, $botDetails['botId']);
-            }
-        }
-        echo json_encode($tmp_purchased_list);
-        unset($purchasedBot);
-        unset($tmp_purchased_list);
-        ?>;
-</script>
-<script>
-    var newNode = document.createElement('div');
-    newNode.className = 'row no-margin';
-    newNode.id = 'bot_list';
-
-    function searchBots(str) {
-        showBots(str, DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value,bots,purchasedBots);
-    }
-</script>
-<script>
     $(document).ready(function () {
-        showBots('', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value,bots,purchasedBots);
+        getCarousels('', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
     });
 </script>
 </body>
