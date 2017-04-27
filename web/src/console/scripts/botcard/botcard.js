@@ -87,30 +87,39 @@ function videoLinkFilter(url) {
 }
 
 function setButtonParameter(title, owned, carousel_category) {
+    var nodeCloseButtonBack = document.getElementById('btnBuyBotBack');
+    var nodeButtonBack =  document.getElementById('btnBackToBotstore');
     switch (title) {
         case 'home' :
+            var newAIBotstoreLink = './NewAIBotstore.php';
+
             if (owned)
                 btnFromBuyToPurchased();
-            document.getElementById('btnBuyBotBack').setAttribute('href', './NewAIBotstore.php');
-            document.getElementById('bthBackToBotstore').innerText = 'Go back';
-            document.getElementById('bthBackToBotstore').setAttribute('href', './NewAIBotstore.php');
+            if(carousel_category!='')
+                newAIBotstoreLink += '?category=' + carousel_category;
+
+            nodeCloseButtonBack.setAttribute('href', newAIBotstoreLink);
+            nodeButtonBack.innerText = 'Go back';
+            nodeButtonBack.setAttribute('href', newAIBotstoreLink);
             break;
         case 'settings' :
-            document.getElementById('btnBuyBotBack').setAttribute('href', './settingsAI.php?botstore=1');
+            nodeCloseButtonBack.setAttribute('href', './settingsAI.php?botstore=1');
             btnFromBuyToPurchased();
             break;
         case 'botstore' :
+            var botstoreLink = './botstore.php';
+
             if (owned)
                 btnFromBuyToPurchased();
-            if(carousel_category=='')
-                document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
-            else
-                document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php?category=' + carousel_category);
+            if(carousel_category!='')
+                botstoreLink += '?category=' + carousel_category;
+
+            nodeCloseButtonBack.setAttribute('href', botstoreLink);
             break;
         default:
-            document.getElementById('btnBuyBotBack').setAttribute('href', './botstore.php');
-            document.getElementById('bthBackToBotstore').innerText = 'Go back';
-            document.getElementById('bthBackToBotstore').setAttribute('href', '././botstore.php');
+            nodeCloseButtonBack.setAttribute('href', './botstore.php');
+            nodeButtonBack.innerText = 'Go back';
+            nodeButtonBack.setAttribute('href', '././botstore.php');
     }
 }
 

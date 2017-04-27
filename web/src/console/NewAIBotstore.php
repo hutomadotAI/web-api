@@ -68,12 +68,11 @@ function isSessionVariablesAvailable()
             <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
-
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
-
 </div>
+
+<footer class="main-footer">
+    <?php include './dynamic/footer.inc.html.php'; ?>
+</footer>
 
 <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
@@ -97,7 +96,7 @@ function isSessionVariablesAvailable()
 <script src="./scripts/shared/shared.js"></script>
 <script>
     $(document).ready(function () {
-        getCarousels('', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
+        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
     });
 </script>
 </body>

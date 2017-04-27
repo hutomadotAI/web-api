@@ -14,15 +14,22 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
     var wHTML = "";
     wHTML += '<section class="carousel-content" style="padding-right: 0px;">';
-    wHTML += '<div class="carousel-box">';
-    wHTML += '<div class="row no-margin" >';
-    wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
-    wHTML += '</div>';
 
-    if (see_more)
-        wHTML += ('<div class="row carousel-row no-margin" name="bot_list">');
-    else
+
+    if (see_more) {
+        wHTML += '<div class="">';
+        wHTML += '<div class="row no-margin" >';
+        wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
+        wHTML += '</div>';
+        wHTML += ('<div class="row no-margin" name="bot_list">');
+    }
+    else {
+        wHTML += '<div class="carousel-box">';
+        wHTML += '<div class="row no-margin" >';
+        wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
+        wHTML += '</div>';
         wHTML += ('<div class="row carousel-row no-margin carousel-overflow" name="bot_list">');
+    }
 
     for (var x in botstoreCategorizedItems) {
         var bot = JSON.parse(botstoreCategorizedItems[x]);
@@ -110,7 +117,9 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
         }
     }
     wHTML += ('</div>');
-    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+
+    var hrefLocation = ( optionFlow == DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value ? 'NewAIBotstore.php' : 'botstore.php');
+    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\''+ hrefLocation +'?category='+ category +'\'";><b>see more</b></button></span>';
     wHTML += ('</div>');
     wHTML += ('</section>');
 
