@@ -52,6 +52,7 @@ body {
 /* Layout */
 .wrapper {
     min-height: 100%;
+    background-color: #434343 !important;
     position: relative;
     overflow: hidden;
 }
