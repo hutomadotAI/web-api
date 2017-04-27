@@ -87,7 +87,6 @@ function videoLinkFilter(url) {
 }
 
 function setButtonParameter(title, owned, carousel_category) {
-    alert(title);
     var nodeCloseButtonBack = document.getElementById('btnBuyBotBack');
     var nodeButtonBack =  document.getElementById('btnBackToBotstore');
     switch (title) {
