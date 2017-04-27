@@ -110,7 +110,12 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
         }
     }
     wHTML += ('</div>');
-    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+
+    if (optionFlow == DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value)
+        wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'NewAIBotstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+    else
+        wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+
     wHTML += ('</div>');
     wHTML += ('</section>');
 
