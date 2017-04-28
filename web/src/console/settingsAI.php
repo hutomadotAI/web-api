@@ -180,7 +180,7 @@ function isSessionVariablesAvailable()
     newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
     function searchBots(str) {
-        showBots(str, purchasedBots,linkedBots);
+        showAddSkills(str, purchasedBots,linkedBots);
     }
 </script>
 <script>
