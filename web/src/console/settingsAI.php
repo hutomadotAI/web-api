@@ -180,12 +180,12 @@ function isSessionVariablesAvailable()
     newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
     function searchBots(str) {
-        showBots(str, DRAW_BOTCARDS.ADD_SKILL_FLOW.value,purchasedBots,linkedBots);
+        showAddSkills(str, purchasedBots,linkedBots);
     }
 </script>
 <script>
     $(document).ready(function () {
-        showBots('',  DRAW_BOTCARDS.ADD_SKILL_FLOW.value,purchasedBots,linkedBots);
+        showAddSkills('', purchasedBots,linkedBots);
     });
 </script>
 </body>
