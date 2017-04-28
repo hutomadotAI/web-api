@@ -5,7 +5,7 @@ function showAddSkills(str,  bots, botSubSet ) {
         var bot = JSON.parse(bots[x]);
         var botId = bot['botId'];
         var botName = bot['name'];
-        var botAuthor ='hutoma prova';
+        var botAuthor ='';
 
         if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str) != -1 )) {
             var isActiveBot = ($.inArray(botId, botSubSet) != -1);
