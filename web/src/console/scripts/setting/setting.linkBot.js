@@ -5,7 +5,6 @@ function showAddSkills(str,  bots, botSubSet ) {
         var bot = JSON.parse(bots[x]);
         var botId = bot['botId'];
         var botName = bot['name'];
-        var botAuthor ='';
 
         if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str) != -1 )) {
             var isActiveBot = ($.inArray(botId, botSubSet) != -1);
@@ -18,7 +17,6 @@ function showAddSkills(str,  bots, botSubSet ) {
             wHTML += botName;
             wHTML += '</div>';
             wHTML += '<div class="card-author unselectable no-shadow">';
-            wHTML += 'by ' + botAuthor;
             wHTML += '</div>';
             wHTML += ('<div class="card-footer flat unselectable">');
             wHTML += ('<div class="row no-margin">');
