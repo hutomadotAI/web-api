@@ -3,7 +3,7 @@ from aiohttp import web
 import os
 import requests
 
-solrUrl = os.getenv("SOLR_URL", "http://52.44.202.141:8983/solr/")
+solrUrl = os.getenv("SOLR_URL", "http://52.44.202.141:8983/solr/nokia/select")#"http://localhost")
 
 async def handle(request):
     body = await request.json()
@@ -12,7 +12,12 @@ async def handle(request):
 
     try:
         query = chatResult['query'].lower().split("search for ",1)[1]
-        solrResult = requests.get(solrUrl + "nokia/select?wt=json&indent=true&q=" + query)
+        params = {}
+        params['wt'] = 'json'
+        params['indent'] = 'true'
+        params['q'] = query
+        encoded = urlencode(query)
+        solrResult = requests.get(solrUrl + encoded)
         result = solrResult.json()['response']['docs'][0]['id']
         return web.Response(text=result)
     except BaseException as E:
