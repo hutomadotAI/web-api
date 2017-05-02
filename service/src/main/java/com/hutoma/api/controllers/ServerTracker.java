@@ -267,10 +267,11 @@ public class ServerTracker implements Callable, IServerEndpoint {
                     this.endServerSession();
                     this.logger.logWarning(LOGFROM,
                             String.format("%s has closed the session remotely", this.serverIdentity),
-                            logMap.put("Status", response.getStatus()));
+                            logMap.put("Status", Integer.toString(response.getStatus())));
                 } else {
                     this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
-                            this.serverIdentity, response.getStatus()), logMap.put("Status", response.getStatus()));
+                            this.serverIdentity, response.getStatus()), logMap.put("Status",
+                            Integer.toString(response.getStatus())));
                 }
             }
         } catch (Exception e) {

@@ -7,10 +7,10 @@ $(function () {
         type: "single",
         grid: true,
         keyboard: true,
-        onStart: function  (data) {console.log("onStart"); },
-        onChange: function (data) {console.log("onChange"); },
-        onFinish: function (data) {msgAlertUpdateAI(ALERT.BASIC.value, 'This page allows you to change the basic information of your Bot.'); },
-        onUpdate: function (data) {console.log("onUpdate"); },
+        onStart: function  () { },
+        onChange: function () { },
+        onFinish: function () {msgAlertUpdateAI(ALERT.BASIC.value, 'This page allows you to change the basic information of your Bot.'); },
+        onUpdate: function () { },
         values: ["never", "rarely", "sometimes", "often", "always"]
     });
 });

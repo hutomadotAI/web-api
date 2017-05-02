@@ -21,7 +21,6 @@ function backPage() {
 function deactiveButtons() {
     document.getElementById('btnBack').setAttribute('disabled', 'disabled');
     document.getElementById('btnNext').setAttribute('disabled', 'disabled');
-    document.getElementById('botSearch').setAttribute('disabled', 'disabled');
 }
 
 function getAllBotsLinked() {

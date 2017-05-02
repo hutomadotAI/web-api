@@ -8,21 +8,28 @@ window.addEventListener('resize', function(){
         showSeeMoreButton(node.children[i]);
 });
 
-function showCarousel(botstoreCategorizedItems, category, option, see_more) {
+function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) {
     if(see_more === undefined )
         see_more = false;
 
     var wHTML = "";
     wHTML += '<section class="carousel-content" style="padding-right: 0px;">';
-    wHTML += '<div class="carousel-box">';
-    wHTML += '<div class="row no-margin" >';
-    wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
-    wHTML += '</div>';
 
-    if (see_more)
-        wHTML += ('<div class="row carousel-row no-margin" name="bot_list">');
-    else
+
+    if (see_more) {
+        wHTML += '<div class="">';
+        wHTML += '<div class="row no-margin" >';
+        wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
+        wHTML += '</div>';
+        wHTML += ('<div class="row no-margin" name="bot_list">');
+    }
+    else {
+        wHTML += '<div class="carousel-box">';
+        wHTML += '<div class="row no-margin" >';
+        wHTML += '<span><div class="carousel-title pull-left"> ' + category + ' </div></span>';
+        wHTML += '</div>';
         wHTML += ('<div class="row carousel-row no-margin carousel-overflow" name="bot_list">');
+    }
 
     for (var x in botstoreCategorizedItems) {
         var bot = JSON.parse(botstoreCategorizedItems[x]);
@@ -37,9 +44,9 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
 
         var openBotDetails= '';
         if (see_more)
-            openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + botId + '","' + category + '");';
+            openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '","' + category + '");';
         else
-            openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + botId + '");';
+            openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '");';
 
         var botIconPath = '';
         if (bot['metadata']['botIcon'] == null || bot['metadata']['botIcon'] =='')
@@ -74,16 +81,32 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
                 + '" data-price="' + botPrice
                 + '" data-license="' + botLicenseType + '"';
 
-            wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
-            if (botOwned) {
-                wHTML += ('<div class="card-purchased pull-right">');
-                wHTML += ('purchased');
-                wHTML += ('</div>');
-            }
-            else {
-                wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
-                wHTML += (botPrice + ' &#8364');
-                wHTML += ('</div>');
+            switch (optionFlow) {
+                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
+                    wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
+                    if (botOwned) {
+                        wHTML += ('<div class="switch" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '"); data-link="0"></div>');
+                    }
+                    else {
+                        wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
+                        wHTML += (botPrice + ' &#8364');
+                        wHTML += ('</div>');
+                    }
+                    break;
+                case DRAW_BOTCARDS.BOTSTORE_FLOW.value:  // botstore showed in BOTSTORE
+                    wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
+                    if (botOwned) {
+                        wHTML += ('<div class="card-purchased pull-right">');
+                        wHTML += ('purchased');
+                        wHTML += ('</div>');
+                    }
+                    else {
+                        wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
+                        wHTML += (botPrice + ' &#8364');
+                        wHTML += ('</div>');
+                    }
+                    break;
+                default:
             }
 
             wHTML += '</span>';
@@ -94,7 +117,9 @@ function showCarousel(botstoreCategorizedItems, category, option, see_more) {
         }
     }
     wHTML += ('</div>');
-    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\'botstore.php?category='+ category +'\'";><b>see more</b></button></span>';
+
+    var hrefLocation = ( optionFlow == DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value ? 'NewAIBotstore.php' : 'botstore.php');
+    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\''+ hrefLocation +'?category='+ category +'\'";><b>see more</b></button></span>';
     wHTML += ('</div>');
     wHTML += ('</section>');
 
@@ -121,8 +146,8 @@ function showSeeMoreButton(node){
 
 function setSeeMoreButtonPosition(carouselBotcardNode, nodeSeeMore){
     var nBot = carouselBotcardNode.childElementCount;
-    var offsetTopStartPosition = carouselBotcardNode.offsetTop;
-
+    var offsetTopPadding = parseInt(window.getComputedStyle(carouselBotcardNode).paddingTop);
+    var offsetTopStartPosition = carouselBotcardNode.offsetTop + offsetTopPadding;
     for ( var i = 0; i < nBot; i++ ){
         var currNode = carouselBotcardNode.children[i].children[0];
         var offsetTopCurrentPosition = currNode.offsetTop;
@@ -135,7 +160,7 @@ function setSeeMoreButtonPosition(carouselBotcardNode, nodeSeeMore){
     }
 }
 
-function getCarousels(category){
+function getCarousels(category,optionFlow){
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     jQuery.ajax({
@@ -145,7 +170,7 @@ function getCarousels(category){
         dataType: 'json',
         success: function (response) {
             for (var key in response)
-                showCarousel(response[key], key, DRAW_BOTCARDS.BOTSTORE_FLOW.value, category!==undefined);
+                showCarousel(response[key], key, optionFlow, (category!==undefined && category!==''));
             hideOverlay(true);
         },
         complete: function () {

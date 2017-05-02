@@ -62,96 +62,6 @@ var BOT_ICON = {
     DEFAULT_IMAGE: {value: 'dist/img/default_bot.jpg'}
 };
 
-function showBots(str, option, bots, botSubSet ) {
-    var wHTML = "";
-    str = str.toLowerCase();
-    for (var x in bots) {
-        var bot = JSON.parse(bots[x]);
-        if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str) != -1 )) {
-
-            var openBotDetails = 'onClick=openSingleBot(this,' + option + ',"' + bot['botId'] + '",' + ($.inArray(bot['botId'], botSubSet) != -1) + ');';
-            wHTML += ('<span id="card' + bot['botId'] + '" data-pos="' + x + '">');
-
-            if ( (option == DRAW_BOTCARDS.ADD_SKILL_FLOW.value) && ($.inArray(bot['botId'], botSubSet) != -1) )
-                wHTML += ('<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1 borderActive">');
-            else
-                wHTML += ('<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">');
-
-            wHTML += ('<img class="card-icon unselectable" src="' + bot['imagePath'] + '"' + openBotDetails +'>');
-
-            wHTML += ('<div class="card-title unselectable"' + openBotDetails +'>');
-            wHTML += ('<p>' + bot['name'] + '</p>');
-            wHTML += ('</div>');
-
-            wHTML += ('<div class="card-author unselectable">');
-            // TODO when API in ready we can add this infos
-            //wHTML += ('<p>by ' + bot['name'] + '</p>');
-            wHTML += ('</div>');
-
-            wHTML += ('<div class="card-footer flat unselectable">');
-            wHTML += ('<div class="row no-margin">');
-
-            wHTML += ('<div class="pull-left">');
-            // TODO when API in ready we can add this infos
-            //wHTML += ('<i class="fa fa-star card-star"></i>');
-            //wHTML += ('<span class="card-users text-left">'+ bot['activations']+'</span>');
-            wHTML += ('</div>');
-
-            var dataBuyBot = 'id="btnBuyBot' + bot['botId']
-                + '" data-toggle="modal" data-target="#buyBot" data-botid="' + bot['botId'] 
-                + '" data-name="' + bot['name']
-                + '" data-description="' + bot['description']
-                + '" data-icon="' + bot['imagePath'] 
-                + '" data-price="' + bot['price'] 
-                + '" data-license="' + bot['licenseType'] + '"';
-            switch (option) {
-                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
-                    wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
-                    if ($.inArray(bot['botId'], botSubSet) != -1) {
-                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
-                    }
-                    else {
-                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
-                        wHTML += (bot['price']+ ' &#8364');
-                        wHTML += ('</div>');
-                    }
-                    break;
-                case DRAW_BOTCARDS.BOTSTORE_FLOW.value:  // botstore showed in BOTSTORE
-                    wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="">');
-                    if ($.inArray(bot['botId'], botSubSet) != -1) {
-                        wHTML += ('<div class="card-purchased pull-right">');
-                        wHTML += ('purchased');
-                        wHTML += ('</div>');
-                    }
-                    else {
-                        wHTML += ('<div class="card-price pull-right" ' + dataBuyBot + '>');
-                        wHTML += (bot['price']+ ' &#8364');
-                        wHTML += ('</div>');
-                    }
-                    break;
-                default:
-                    if ($.inArray(bot['botId'], botSubSet) != -1) {
-                        wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="1">');
-                        wHTML += ('<div class="switch switchOn" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="1"></div>');
-                    } else {
-                        wHTML += ('<span class="card-linked" data-botid = "' + bot['botId'] + '" data-linked="0">');
-                        wHTML += ('<div class="switch" id="btnSwitch' + bot['botId'] + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + bot['botId'] + '"); data-link="0"></div>');
-                    }
-
-            }
-            wHTML += ('</span>');
-
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-
-            wHTML += ('</div>');
-            wHTML += ('</span>');
-        }
-    }
-    newNode.innerHTML = wHTML;
-    document.getElementById('botsSearch').appendChild(newNode);
-}
-
 function switchCard(botId,optionFlow) {
     var node = document.getElementById('card' + botId);
     var btnClassName = 'card-price pull-right'
@@ -166,7 +76,8 @@ function switchCard(botId,optionFlow) {
             targetDiv.innerHTML = ('purchased');
             break;
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
-            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch" style="margin-top:10px;" onclick=toggleAddBotSkill(this,"' + botId + '");></div>');
+            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '");></div>');
+
             var parent = targetDiv.parentNode;
             parent.setAttribute('data-linked', '0');
             parent.innerHTML = wHTML;
@@ -228,28 +139,50 @@ function RecursiveUnbind($jElement) {
     });
 }
 
-function toggleAddBotSkill(node, botId) {
+function toggleAddBotSkill(node, optionFlow, botId) {
     var MAX_LINKED_BOTS = 5;
     var parent = node.parentNode;
+    var activatedBots = 0;
 
-    var listActive = document.getElementById('botsSearch').children[0].getElementsByClassName('borderActive');
+    switch(optionFlow){
+        case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
+            activatedBots = document.getElementById('botsCarousels').getElementsByClassName('borderActive').length;
+            break;
+        case DRAW_BOTCARDS.ADD_SKILL_FLOW.value:
+            activatedBots = document.getElementById('botsSearch').children[0].getElementsByClassName('borderActive').length;
+            break;
+        default:
+    }
 
-    if (!node.classList.contains('switchOn') && listActive.length >= MAX_LINKED_BOTS) {
+    if (!node.classList.contains('switchOn') && parseInt(activatedBots) >= MAX_LINKED_BOTS) {
         alert("You can only combine up to " + MAX_LINKED_BOTS + " bots.");
         return;
     }
 
     $(node).toggleClass('switchOn');
+    var botcard = document.getElementById('card' + botId).children[0];
+
     if ($(node).attr('data-link') == '0') {
         $(node).attr('data-link', 1);
         parent.setAttribute('data-linked', '1');
-        document.getElementById('card' + botId).children[0].classList.add("borderActive");
+        botcard.classList.add("borderActive");
     }
     else {
         $(node).attr('data-link', 0);
         parent.setAttribute('data-linked', '0');
-        document.getElementById('card' + botId).children[0].classList.remove("borderActive");
+        botcard.classList.remove("borderActive");
     }
+}
+
+function btnFromBuyToPurchased() {
+    var wHTML = '';
+    var nodeBtn = document.getElementById('btnBuyBot');
+    wHTML += ('<b>Bot purchased </b>');
+    wHTML += ('<span class="fa fa-check-circle-o"></span>');
+    nodeBtn.setAttribute('data-toggle', '');
+    nodeBtn.setAttribute('data-target', '');
+    nodeBtn.innerHTML = wHTML;
+    nodeBtn.className = 'btn btn-primary pull-right flat';
 }
 
 $(document).ready(function () {
