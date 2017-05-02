@@ -34,7 +34,7 @@ public interface ILogger {
      * @param properties map of properties
      */
     void logInfo(String fromLabel, String logComment, LogMap properties);
-    
+
     /**
      * Logs an exception.
      * @param fromLabel the origin of the log
@@ -94,6 +94,23 @@ public interface ILogger {
      * @param user    the user
      */
     void logUserTraceEvent(String logFrom, String event, String user);
+
+    /**
+     * Logs a user-related INFO event.
+     * @param logFrom    where it's logging from
+     * @param event      the event name
+     * @param user       the user
+     * @param properties map of properties
+     */
+    void logUserInfoEvent(String logFrom, String event, String user, LogMap properties);
+
+    /**
+     * Logs a user-related INFO event.
+     * @param logFrom where it's logging from
+     * @param event   the event name
+     * @param user    the user
+     */
+    void logUserInfoEvent(String logFrom, String event, String user);
 
     /**
      * Logs a user-related EXCEPTION event.

@@ -1,7 +1,7 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
@@ -43,7 +43,7 @@ public class QueueProcessor extends TimerTask {
     private DatabaseAiStatusUpdates database;
     private AIQueueServices queueServices;
     private Tools tools;
-    private ILogger logger;
+    private AiServiceStatusLogger logger;
     private String logFrom;
     private Config config;
     // flag to tell the inner thread not to quit
@@ -60,7 +60,7 @@ public class QueueProcessor extends TimerTask {
 
     @Inject
     public QueueProcessor(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
-                          final Tools tools, ILogger logger) {
+                          final Tools tools, AiServiceStatusLogger logger) {
         this.config = config;
         this.logger = logger;
         this.database = database;
@@ -150,7 +150,7 @@ public class QueueProcessor extends TimerTask {
         // if we detected a change ...
         if (changes) {
             // log the new state
-            LogMap logMap = LogMap.map("Op", "heartbeat")
+            LogMap logMap = LogMap.map("Op", "controllerstate")
                     .put("Type", this.serverType)
                     .put("ServerCount", serverCount)
                     .put("TrainingCapacity", totalTrainingCapacity)
@@ -274,6 +274,7 @@ public class QueueProcessor extends TimerTask {
 
         try {
             if (requeueThis) {
+                
                 this.logger.logError(this.logFrom,
                         String.format("REQUEUE train task that failed on backend %s with error %s",
                                 server.getServerIdentifier(), logMessage));
@@ -301,6 +302,9 @@ public class QueueProcessor extends TimerTask {
      */
     protected void unqueueDelete(final BackendEngineStatus queued, final ServerTracker server) {
 
+        this.logger.logDebugQueueAction(this.logFrom, "delete", this.serverType,
+                queued.getAiid(), queued.getDevId(), server.getServerIdentifier());
+
         // read the queue status of this ai
         BackendEngineStatus currentStatus = null;
         try {
@@ -313,7 +317,8 @@ public class QueueProcessor extends TimerTask {
             // if we have a status then proceed to tell the backend
             // to delete this AI
             if (currentStatus != null) {
-                this.queueServices.deleteAIDirect(currentStatus.getDevId(), queued.getAiid(),
+                this.queueServices.deleteAIDirect(this.serverType,
+                        currentStatus.getDevId(), queued.getAiid(),
                         server.getServerUrl(), server.getServerIdentifier());
             } else {
                 this.logger.logDebug(this.logFrom, "missing parent AI; cannot delete AI on backend");
@@ -337,6 +342,9 @@ public class QueueProcessor extends TimerTask {
      */
     protected void unqueueTrain(final BackendEngineStatus queued, final ServerTracker server) {
 
+        this.logger.logDebugQueueAction(this.logFrom, "train", this.serverType,
+                queued.getAiid(), queued.getDevId(), server.getServerIdentifier());
+
         // read the queue status of this ai
         BackendEngineStatus currentStatus = null;
         try {
@@ -354,8 +362,11 @@ public class QueueProcessor extends TimerTask {
 
         try {
             // tell the chosen server to start training
-            this.queueServices.startTrainingDirect(currentStatus.getDevId(), queued.getAiid(),
+            this.queueServices.startTrainingDirect(this.serverType,
+                    currentStatus.getDevId(), queued.getAiid(),
                     server.getServerUrl(), server.getServerIdentifier());
+
+
             // carefully set the AI status to indicate that the AI is training and the
             // slot is in use
             // when training actually starts the server will call us back to set status

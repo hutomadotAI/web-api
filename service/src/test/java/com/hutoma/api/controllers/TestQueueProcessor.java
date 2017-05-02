@@ -1,7 +1,7 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
@@ -99,7 +99,7 @@ public class TestQueueProcessor {
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
         this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, this.fakeQueueServices,
-                mock(Tools.class), mock(ILogger.class));
+                mock(Tools.class), mock(AiServiceStatusLogger.class));
         this.qproc.initialise(this.fakeController, BackendServerType.WNET);
 
         this.fakeData = create(null, ENDPOINT1, 0, 1, true);
@@ -139,7 +139,7 @@ public class TestQueueProcessor {
         String chosenServer;
 
         public QueueProcessorTest(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
-                                  final Tools tools, final ILogger logger) {
+                                  final Tools tools, final AiServiceStatusLogger logger) {
             super(config, database, queueServices, tools, logger);
         }
 

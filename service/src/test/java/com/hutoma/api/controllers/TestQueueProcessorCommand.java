@@ -1,7 +1,7 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
@@ -41,7 +41,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, times(1))
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         verify(this.fakeDatabase, times(1)).deleteAiStatus(any(), any());
     }
 
@@ -53,7 +53,7 @@ public class TestQueueProcessorCommand {
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
         // no backend call
         verify(this.fakeQueueServices, never())
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         // delete from db anyway
         verify(this.fakeDatabase, times(1)).deleteAiStatus(any(), any());
     }
@@ -66,7 +66,7 @@ public class TestQueueProcessorCommand {
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
         // no backend call
         verify(this.fakeQueueServices, never())
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         // delete from db anyway
         verify(this.fakeDatabase, times(1)).deleteAiStatus(any(), any());
     }
@@ -77,7 +77,7 @@ public class TestQueueProcessorCommand {
             Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, never()).deleteAiStatus(any(), any());
         verify(this.fakeDatabase, times(1))
@@ -92,7 +92,7 @@ public class TestQueueProcessorCommand {
         ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
         servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 404));
         doThrow(servicesException).when(this.fakeQueueServices)
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, never())
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
@@ -106,7 +106,7 @@ public class TestQueueProcessorCommand {
         ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
         servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 500));
         doThrow(servicesException).when(this.fakeQueueServices)
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, times(1))
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
@@ -118,7 +118,7 @@ public class TestQueueProcessorCommand {
             Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
-                .deleteAIDirect(anyString(), any(), anyString(), anyString());
+                .deleteAIDirect(any(), anyString(), any(), anyString(), anyString());
         doThrow(Database.DatabaseException.class).when(this.fakeDatabase)
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
         this.qproc.unqueueDelete(this.status, this.fakeServerTracker);
@@ -131,7 +131,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, times(1))
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
@@ -143,7 +143,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenThrow(new Database.DatabaseException("test"));
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, never())
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         verify(this.fakeDatabase, never()).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
@@ -155,7 +155,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(null);
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, never())
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         verify(this.fakeDatabase, never()).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
@@ -166,7 +166,7 @@ public class TestQueueProcessorCommand {
             Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, never()).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
@@ -182,7 +182,7 @@ public class TestQueueProcessorCommand {
         ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
         servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 404));
         doThrow(servicesException).when(this.fakeQueueServices)
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), eq(TrainingStatus.AI_ERROR), anyString(), anyDouble(), anyDouble());
@@ -198,7 +198,7 @@ public class TestQueueProcessorCommand {
         ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
         servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 500));
         doThrow(servicesException).when(this.fakeQueueServices)
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, never()).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
@@ -206,14 +206,13 @@ public class TestQueueProcessorCommand {
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
     }
 
-
     // load status, fail to train ai, fail to requeue
     @Test
     public void testQueueCommand_TrainFailRequeueFail() throws
             Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
-                .startTrainingDirect(anyString(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), anyString(), any(), anyString(), anyString());
         doThrow(Database.DatabaseException.class).when(this.fakeDatabase)
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
@@ -248,7 +247,7 @@ public class TestQueueProcessorCommand {
 
         public QueueProcessorCommandTest(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
                                          final Tools tools) {
-            super(config, database, queueServices, tools, mock(ILogger.class));
+            super(config, database, queueServices, tools, mock(AiServiceStatusLogger.class));
         }
 
         @Override

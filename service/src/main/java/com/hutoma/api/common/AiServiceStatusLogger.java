@@ -7,6 +7,7 @@ import com.hutoma.api.containers.sub.ServerAiEntry;
 
 import org.glassfish.jersey.client.JerseyClient;
 
+import java.util.UUID;
 import javax.inject.Inject;
 
 /**
@@ -28,6 +29,7 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String AICOUNT = "AiCount";
     private static final String AICOUNTUPDATED = "AiCountUpdated";
     private static final String SERVER = "Server";
+    private static final String OPERATION = "Op";
 
     @Inject
     public AiServiceStatusLogger(final JerseyClient jerseyClient, final JsonSerializer serializer,
@@ -92,6 +94,19 @@ public class AiServiceStatusLogger extends CentralLogger {
                 logParameters.get(AIENGINE),
                 logParameters.get(AIID)),
                 null, new LogMap(logParameters));
+    }
+
+    public void logDebugQueueAction(String logFrom, String operation, BackendServerType serverType,
+                                    UUID aiid, String devid, String serverIdentifier) {
+        LogMap logMap = LogMap.map("Action", "Queue")
+                .map(OPERATION, operation)
+                .map(AIENGINE, serverType.toString())
+                .map(DEVID, devid)
+                .map(AIID, aiid.toString());
+        this.logDebug(logFrom,
+                String.format("Processing %s %s %s on %s",
+                        serverType.value(), operation, aiid.toString(), serverIdentifier),
+                logMap);
     }
 
     @Override

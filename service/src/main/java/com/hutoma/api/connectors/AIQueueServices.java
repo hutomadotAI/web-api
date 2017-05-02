@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
@@ -44,16 +45,26 @@ public class AIQueueServices extends ServerConnector {
 
     /***
      * Call from queued task to backend to delete an AI
+     *
+     * @param serverType
      * @param devId
      * @param aiid
      * @param endpoint
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    public void deleteAIDirect(final String devId, final UUID aiid,
+    public void deleteAIDirect(final BackendServerType serverType, final String devId, final UUID aiid,
                                final String endpoint, final String serverIdentifier) throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        this.logger.logInfo(LOGFROM, String.format("Sending \"delete\" %s to %s", aiid.toString(), serverIdentifier));
+
+        LogMap logMap = LogMap.map("Op", "delete")
+                .map("Type", serverType.value())
+                .map("Server", serverIdentifier)
+                .map("AIID", aiid);
+        this.logger.logUserInfoEvent(LOGFROM,
+                String.format("Sending \"delete\" %s to %s", aiid.toString(), serverType.value()),
+                devId, logMap);
+
         callables.put(endpoint, () -> new InvocationResult(
                 aiid,
                 this.jerseyClient
@@ -67,13 +78,16 @@ public class AIQueueServices extends ServerConnector {
 
     /***
      * Call from queued task to backend to start training
+     *
+     * @param serverType
      * @param devId
      * @param aiid
      * @param serverUrl
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    public void startTrainingDirect(final String devId, final UUID aiid,
+    public void startTrainingDirect(final BackendServerType serverType,
+                                    final String devId, final UUID aiid,
                                     final String serverUrl, final String serverIdentifier) throws AiServicesException {
         // first get the devplan to load training parameters
         DevPlan devPlan;
@@ -82,7 +96,15 @@ public class AIQueueServices extends ServerConnector {
         } catch (Database.DatabaseException ex) {
             throw new AiServicesException("Could not get plan for devId " + devId);
         }
-        this.logger.logInfo(LOGFROM, String.format("Sending \"start\" %s to %s", aiid.toString(), serverIdentifier));
+
+        LogMap logMap = LogMap.map("Op", "train-start")
+                .map("Type", serverType.value())
+                .map("Server", serverIdentifier)
+                .map("AIID", aiid);
+        this.logger.logUserInfoEvent(LOGFROM,
+                String.format("Sending \"start\" %s to %s", aiid.toString(), serverType.value()),
+                devId, logMap);
+
         HashMap<String, Callable<InvocationResult>> callables = getTrainingCallableForEndpoint(devId, aiid, serverUrl,
                 new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "start");
@@ -93,15 +115,26 @@ public class AIQueueServices extends ServerConnector {
 
     /***
      * Call from queued task to backend to stop training
+     *
+     * @param serverType
      * @param devId
      * @param aiid
      * @param serverEndpoint
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    private void stopTrainingDirect(final String devId, final UUID aiid, final String serverEndpoint, final String serverIdentifier)
+    private void stopTrainingDirect(final BackendServerType serverType, final String devId, final UUID aiid,
+                                    final String serverEndpoint, final String serverIdentifier)
             throws AiServicesException {
-        this.logger.logInfo(LOGFROM, String.format("Sending \"stop\" %s to %s", aiid.toString(), serverIdentifier));
+
+        LogMap logMap = LogMap.map("Op", "train-stop")
+                .map("Type", serverType.value())
+                .map("Server", serverIdentifier)
+                .map("AIID", aiid);
+        this.logger.logUserInfoEvent(LOGFROM,
+                String.format("Sending \"stop\" %s to %s", aiid.toString(), serverType.value()),
+                devId, logMap);
+
         HashMap<String, Callable<InvocationResult>> callables =
                 getTrainingCallableForEndpoint(devId, aiid, serverEndpoint, new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "stop");
@@ -181,7 +214,8 @@ public class AIQueueServices extends ServerConnector {
 
         // if we have a tracker then tell the training server to stop
         if (tracker != null) {
-            this.stopTrainingDirect(devid, aiid, tracker.getServerUrl(), tracker.getServerIdentifier());
+            this.stopTrainingDirect(serverType, devid, aiid,
+                    tracker.getServerUrl(), tracker.getServerIdentifier());
         }
     }
 
