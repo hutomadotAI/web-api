@@ -18,7 +18,7 @@ $MAX_BOTCARDS_LOADED_FOR_CAROUSEL = 10;
 
 $botCategorizedItems =[];
 
-if(isset($_GET['category'])){
+if(isset($_GET['category']) && $_GET['category']!=''){
     global $CAROUSEL_CATEGORIES;
     global $MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL;
     $CAROUSEL_CATEGORIES = [$_GET['category']];

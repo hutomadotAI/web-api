@@ -9,8 +9,7 @@
     </div>
 
     <div class="box-body" id="boxNewAIBotstore">
-        <div class="alert alert-dismissable flat alert-info" id="containerMsgAlertNewAiBotstore" style="padding-bottom: 25px;">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <div class="alert alert-dismissable flat alert-info no-margin" id="containerMsgAlertNewAiBotstore" style="padding-bottom: 25px;">
         <span id="msgAlertNewAiBotstore" >
         <dt>Hu:toma Bot Store</dt>
         <dd>
@@ -18,8 +17,6 @@
         </dd>
         </span>
         </div>
-        <input class="form-control flat no-shadow" id="botSearch" value="" placeholder="Search the Bot Store..." tabindex="0" onkeyup="searchBots(this.value)">
-        <p></p>
     </div>
 
     <div id="collapseInfoNewAIBotstore" class="panel-collapse collapse">

@@ -1,13 +1,6 @@
 <?php
 require "../pages/config.php";
 require_once "api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
-require_once "api/botstoreApi.php";
-require_once "common/bot.php";
-require_once "common/developer.php";
-require_once "common/botstoreItem.php";
-require_once "common/botstoreListParam.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -87,7 +80,7 @@ if(!\hutoma\console::checkSessionIsActive()){
 
 <script>
     $(document).ready(function () {
-        getCarousels(<?php if( isset($_GET['category']) ) echo json_encode($_GET['category']);?>);
+        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', DRAW_BOTCARDS.BOTSTORE_FLOW.value);
     });
 </script>
 </body>
