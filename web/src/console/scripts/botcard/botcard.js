@@ -89,12 +89,15 @@ function videoLinkFilter(url) {
 function setButtonParameter(title, owned, carousel_category) {
     var nodeCloseButtonBack = document.getElementById('btnBuyBotBack');
     var nodeButtonBack =  document.getElementById('btnBackToBotstore');
+    var nodeButtonBuy =  document.getElementById('btnBuyBot');
     switch (title) {
         case 'home' :
             var newAIBotstoreLink = './NewAIBotstore.php';
-
             if (owned)
                 btnFromBuyToPurchased();
+            else
+                nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
+
             if(carousel_category!='')
                 newAIBotstoreLink += '?category=' + carousel_category;
 
@@ -111,6 +114,9 @@ function setButtonParameter(title, owned, carousel_category) {
 
             if (owned)
                 btnFromBuyToPurchased();
+            else
+                nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
+
             if(carousel_category!='')
                 botstoreLink += '?category=' + carousel_category;
 
