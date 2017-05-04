@@ -458,5 +458,27 @@ BEGIN
   END$$
 DELIMITER ;
 
+LOCK TABLES `ai_status` WRITE, `ai` WRITE;
+INSERT INTO `ai_status` (server_type, aiid, training_status, training_progress, training_error, server_endpoint) 
+    SELECT 
+    "rnn",
+    aiid,
+    json_extract(backend_status, "$.engines.rnn.training_status"),
+    json_extract(backend_status, "$.engines.rnn.training_progress"),
+    json_extract(backend_status, "$.engines.rnn.training_error"),
+    ""
+    FROM `ai` WHERE json_extract(backend_status, "$.engines.rnn") IS NOT NULL;
+
+INSERT INTO `ai_status` (server_type, aiid, training_status, training_progress, training_error, server_endpoint) 
+    SELECT 
+    "wnet",
+    aiid,
+    json_extract(backend_status, "$.engines.wnet.training_status"),
+    json_extract(backend_status, "$.engines.wnet.training_progress"),
+    json_extract(backend_status, "$.engines.wnet.training_error"),
+    ""
+    FROM `ai` WHERE json_extract(backend_status, "$.engines.wnet") IS NOT NULL;
+UNLOCK TABLES;
+
 ALTER TABLE `hutoma`.`ai` 
 DROP COLUMN `backend_status`;
