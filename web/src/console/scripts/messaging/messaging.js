@@ -401,26 +401,18 @@ function msgAlertWebHook(alarm,msg){
 }
 
 
-function msgAlertMarketplace(alarm,msg){
+function msgAlertBotcard(alarm,msg){
     switch (alarm){
-        case ALERT.BASIC.value:
-            $("#containerMsgAlertMarketplace").attr('class','alert alert-dismissable flat alert-base');
-            $("#iconAlertMarketplace").attr('class', 'icon fa fa-check');
-            break;
         case ALERT.WARNING.value:
-            $("#containerMsgAlertMarketplace").attr('class','alert alert-dismissable flat alert-warning');
-            $("#iconAlertMarketplace").attr('class', 'icon fa fa-check');
+            $("#containerMsgAlertBotcard").attr('class','alert alert-dismissable flat alert-warning no-margin');
+            $("#iconAlertBotcard").attr('class', 'icon fa fa-check');
             break;
         case ALERT.DANGER.value:
-            $("#containerMsgAlertMarketplace").attr('class','alert alert-dismissable flat alert-danger');
-            $("#iconAlertMarketplace").attr('class', 'icon fa fa-warning');
-            break;
-        case ALERT.PRIMARY.value:
-            $("#containerMsgAlertMarketplace").attr('class','alert alert-dismissable flat alert-primary');
-            $("#iconAlertMarketplace").attr('class', 'icon fa fa-check');
+            $("#containerMsgAlertBotcard").attr('class','alert alert-dismissable flat alert-danger no-margin');
+            $("#iconAlertBotcard").attr('class', 'icon fa fa-warning');
             break;
     }
-    document.getElementById('msgAlertMarketplace').innerText = msg;
+    document.getElementById('msgAlertBotcard').innerText = msg;
 }
 
 function msgAlertPublish(alarm,msg){
