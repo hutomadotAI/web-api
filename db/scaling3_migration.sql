@@ -463,9 +463,9 @@ INSERT INTO `ai_status` (server_type, aiid, training_status, training_progress, 
     SELECT 
     "rnn",
     aiid,
-    json_extract(backend_status, "$.engines.rnn.training_status"),
-    json_extract(backend_status, "$.engines.rnn.training_progress"),
-    json_extract(backend_status, "$.engines.rnn.training_error"),
+    JSON_UNQUOTE(json_extract(backend_status, "$.engines.rnn.training_status")),
+    JSON_UNQUOTE(json_extract(backend_status, "$.engines.rnn.training_progress")),
+    JSON_UNQUOTE(json_extract(backend_status, "$.engines.rnn.training_error")),
     ""
     FROM `ai` WHERE json_extract(backend_status, "$.engines.rnn") IS NOT NULL;
 
@@ -473,9 +473,9 @@ INSERT INTO `ai_status` (server_type, aiid, training_status, training_progress, 
     SELECT 
     "wnet",
     aiid,
-    json_extract(backend_status, "$.engines.wnet.training_status"),
-    json_extract(backend_status, "$.engines.wnet.training_progress"),
-    json_extract(backend_status, "$.engines.wnet.training_error"),
+    JSON_UNQUOTE(json_extract(backend_status, "$.engines.wnet.training_status")),
+    JSON_UNQUOTE(json_extract(backend_status, "$.engines.wnet.training_progress")),
+    JSON_UNQUOTE(json_extract(backend_status, "$.engines.wnet.training_error")),
     ""
     FROM `ai` WHERE json_extract(backend_status, "$.engines.wnet") IS NOT NULL;
 UNLOCK TABLES;
