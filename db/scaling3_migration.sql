@@ -459,4 +459,4 @@ BEGIN
 DELIMITER ;
 
 ALTER TABLE `hutoma`.`ai` 
-DROP COLUMN IF EXISTS `backend_status`;
+DROP COLUMN `backend_status`;
