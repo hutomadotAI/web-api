@@ -218,3 +218,11 @@ GRANT INSERT, DELETE ON `hutoma`.`botIcon` TO 'botStoreWriter'@'127.0.0.1';
 CREATE USER 'analytics'@'%' IDENTIFIED BY '*2F308CADE7BCAFDE8273D8DA24246FFC892588AF';
 
 GRANT SELECT,CREATE TEMPORARY TABLES  ON hutoma.* to 'analytics'@'%';
+
+
+# Privileges for `dataLookup`@`%`
+
+GRANT USAGE ON `data_storage`.* TO 'dataLookup'@'%' IDENTIFIED BY PASSWORD '*C313F8BCB6FC67A062F11A728A4DBA9675B5BF90';
+
+GRANT EXECUTE, SELECT ON `data_storage`.* TO 'dataLookup'@'%';
+
