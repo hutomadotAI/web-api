@@ -6783,6 +6783,14 @@ ul.pagination li a {
     padding: 10px 0px 0px 10px;
 }
 
+.bot-alert-msg {
+    text-align: justify;
+    font-size: 12px;
+    height: 60px;
+    padding: 10px 10px 0px 10px;
+    display: none;
+}
+
 .bot-other {
     height: 40px;
 }

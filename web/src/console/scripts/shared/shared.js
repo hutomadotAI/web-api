@@ -77,7 +77,6 @@ function switchCard(botId,optionFlow) {
             break;
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
             var wHTML = ('<div class="switch" data-link="0" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '");></div>');
-
             var parent = targetDiv.parentNode;
             parent.setAttribute('data-linked', '0');
             parent.innerHTML = wHTML;
@@ -182,6 +181,7 @@ function btnFromBuyToPurchased() {
     nodeBtn.setAttribute('data-toggle', '');
     nodeBtn.setAttribute('data-target', '');
     nodeBtn.innerHTML = wHTML;
+    nodeBtn.setAttribute('onClick','');
     nodeBtn.className = 'btn btn-primary pull-right flat';
 }
 

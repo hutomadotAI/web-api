@@ -40,8 +40,7 @@ public class TestParameterValidation {
 
     private static Object[] dataProviderTopicDisallowedChars() {
         return $(
-                $("@"),
-                $("<")
+                $("@")
         );
     }
 
@@ -122,7 +121,7 @@ public class TestParameterValidation {
 
     @Test
     public void testAiDescNormal() throws Validate.ParameterValidationException {
-        String test = "123 tester !£$%&().,";
+        String test = "123 tester !$%&().,";
         Assert.assertEquals(test, this.validation.validateOptionalDescription("desc", test));
     }
 
@@ -133,17 +132,17 @@ public class TestParameterValidation {
         Assert.assertEquals("", this.validation.validateOptionalDescription("desc", null));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
+    @Test
     public void testAiDescQuotes() throws Validate.ParameterValidationException {
         assertFailAiDesc("\'");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
+    @Test
     public void testAiDescDoubleQuotes() throws Validate.ParameterValidationException {
         assertFailAiDesc("\"");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
+    @Test
     public void testAiDescWavyBrackets() throws Validate.ParameterValidationException {
         assertFailAiDesc("{");
     }
@@ -197,11 +196,6 @@ public class TestParameterValidation {
     @Parameters(method = "dataProviderTopicDisallowedChars")
     public void testTopicDisallowedCharacters(String chars) throws Validate.ParameterValidationException {
         assertFailTopic(chars);
-    }
-
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testTopicDisallowedBrackets() throws Validate.ParameterValidationException {
-        assertFailTopic("]");
     }
 
     @Test

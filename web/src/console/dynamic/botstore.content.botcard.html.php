@@ -63,13 +63,21 @@
                     </div>
                 </div>
                 <div class="col-xs-4 bot-button">
-                    <button class="btn btn-success pull-right flat" id="btnBuyBot" data-toggle="modal" data-target="#buyBot" style="width:135px;">
+                    <button class="btn btn-success pull-right flat" id="btnBuyBot" style="width:135px;">
                         <b>Use Bot </b>
                         <span class="fa fa-arrow-circle-right"></span>
                     </button>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ================ BOT DETAILS ALERT BOX ============================= -->
+    <div class="bot-alert-msg" id="msgAlertBotcardBox">
+        <div id="containerMsgAlertBotcard">
+            <i id="iconAlertBotcard"></i>
+            <span id="msgAlertBotcard"></span>
         </div>
     </div>
 

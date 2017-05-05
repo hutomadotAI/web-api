@@ -18,10 +18,10 @@ import javax.inject.Inject;
 public class Validate {
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
-    private static final Pattern alphaNumericAndMoreDesc =
-            Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\@\\? ]+$");
-    private static final Pattern alphaNumericAndMoreNoAt =
-            Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
+    private static final Pattern printableAscii =
+            Pattern.compile("^[\\x20-\\x7E]+$");
+    private static final Pattern printableAsciiNoAt =
+            Pattern.compile("^[\\x20-\\x3f\\x41-\\x7E]+$");
     private static final Pattern uuidPattern =
             Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private static final Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
@@ -307,22 +307,22 @@ public class Validate {
 
     String validateAiName(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
+        return validatePatternOptionalField(printableAscii, paramName, param);
     }
 
     String validateOptionalDescription(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
+        return validatePatternOptionalField(printableAscii, paramName, param);
     }
 
     List<String> validateOptionalDescriptionList(String paramName, List<String> paramList)
             throws ParameterValidationException {
-        return validatePatternUniqueList(alphaNumericAndMoreDesc, paramName, paramList);
+        return validatePatternUniqueList(printableAscii, paramName, paramList);
     }
 
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
+        return validatePatternOptionalField(printableAsciiNoAt, paramName, param);
     }
 
     List<String> validateOptionalObjectValues(String paramName, List<String> paramList)

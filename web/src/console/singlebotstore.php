@@ -106,7 +106,7 @@ if (isset($botstoreItem)) {
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
-<script src="./scripts/botcard/buyBot.js"></script>
+<script src="./scripts/botcard/buyBotFromBotcardDetail.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
