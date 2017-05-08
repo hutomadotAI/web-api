@@ -1,7 +1,12 @@
 package com.hutoma.api.common;
 
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.internal.LinkedTreeMap;
+
 import org.glassfish.jersey.client.JerseyClient;
 
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -47,5 +52,35 @@ public class ElasticSearchClient {
                 .target(String.format("%s/%s/%s/_bulk", this.elasticSearchUrl, indexName, DOCUMENT_TYPE))
                 .request()
                 .post(Entity.text(sb.toString()));
+    }
+
+
+    public static class BulkResponse {
+        @SerializedName("items")
+        private List<LinkedTreeMap<String, Object>> items;
+
+        @SerializedName("errors")
+        private boolean errors;
+
+        public List<String> getErrors(final int expectedNumItems) {
+            List<String> errList = new ArrayList<>();
+            if (expectedNumItems != this.items.size()) {
+                errList.add(String.format("Unexpected number of items. Expected: %s, actual: %s",
+                        expectedNumItems, this.items.size()));
+            }
+            if (this.errors) {
+                int pos = 1;
+                for (LinkedTreeMap<String, Object> item : this.items) {
+                    LinkedTreeMap<String, Object> index = (LinkedTreeMap<String, Object>) item.get("index");
+                    int status = (int) index.get("status");
+                    if (status != HttpURLConnection.HTTP_CREATED) {
+                        errList.add(String.format("item at position %d ws not created and has status %d", pos, status));
+                    }
+                    pos++;
+                }
+            }
+            return errList;
+        }
+
     }
 }
