@@ -8,12 +8,15 @@ var MENU = MENU || (function () {
                 // _args[1] -> label menu clicked
                 // _args[2] -> level tree menu clicked
                 // _args[3] -> block href link on clicked menu
-                // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
+                // _args[4] -> deep menu level
+                // _args[5] -> is user logged
 
+                // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
+                //alert(_args[5]);
                 if ((_args[0] === '') || (_args[1] === 'home'))
                     buildLimitedConsoleMenu(_args[1]);
                 else
-                    buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[5]);
+                    buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[4], _args[5]);
 
 
                 buildAccountMenu();
@@ -25,6 +28,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
     const MAX_LENGTH_AINAME_TEXT_VISIBLE = 18;
     var newNode = document.createElement('ul');
     newNode.className = 'sidebar-menu';
+    newNode.style = " padding-bottom:65px;";
     newNode.id = 'console-menu';
     var wHTML = "";
 
@@ -47,31 +51,20 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
+    var loc = "botstore.php";
+
     wHTML += ('<li class="unselectable" id="level2">');
-    /*
-     wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-     wHTML += ('</li>');
-     */
-
-    if ((deep_level_name === '' || deep_level_name === undefined)) {
-        wHTML += ('<li class="unselectable" id="menu_botstore"><a href="./botstore.php" id="link_botstore"><i class="fa fa-shopping-cart text-green"></i><span class="unselectable"> botstore</span></a></li>');
-        wHTML += ('</li>');
+    wHTML += ('<a href="#"><i class="fa fa-shopping-cart text-green"></i><span> botstore</span><i class="fa fa-ellipsis-v pull-right"></i></a>');
+    wHTML += ('<ul class="treeview-menu">');
+    wHTML += ('<li id="menu_botstore" ><a href="./' + loc + '"><i class="fa fa-globe text-gray text-center"></i> All</a></li>');
+    for(var key in category_list) {
+        var category = category_list[key];
+        wHTML += ('<li id="menu_' + removeSpecialCharacters(category)  + '" ><a href="' + loc + buildCategoryURIparameter(category) + '"><i class="fa ' + category_list_icons[key] + ' text-gray text-center"></i> ' + category + '</a></li>');
     }
-    else {
+    wHTML += ('</ul>');
+    wHTML += ('</li>');
 
-        var loc = "'./botstore.php'";
-
-        wHTML += ('<li class="unselectable" id="level3">');
-        wHTML += ('<a href="#"><span><i class="fa fa-shopping-cart text-green"></i><span onClick="window.location.href ='+loc+'"> botstore</span></span></a>');
-        wHTML += ('<ul class="treeview-menu">');
-        wHTML += ('<li id="menu_bot"><a href="#" id="link_bot"><i class="fa fa-arrow-circle-o-right text-sm text-white"></i>'+deep_level_name+'</a></li>');
-        wHTML += ('</ul>');
-        wHTML += ('</li>');
-        label_menu = 'bot';
-    }
-
-
-    wHTML += ('<li class="unselectable" id="level4">');
+    wHTML += ('<li class="unselectable" id="level3">');
     wHTML += ('<a href="#">');
     wHTML += ('<i class="fa fa-book text-purple"></i><span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
     wHTML += ('</a>');
@@ -85,7 +78,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, deep_level_name) {
     document.getElementById('sidebarmenu').appendChild(newNode);
 
     document.getElementById('level' + level).className = 'active';
-    document.getElementById('menu_' + label_menu).className = 'active';
+    document.getElementById('menu_' + removeSpecialCharacters(label_menu)).className = 'active';
     if (block)
         document.getElementById('link_' + label_menu).href = '#';
 }
@@ -117,7 +110,7 @@ function buildAccountMenu() {
     newNode.className = 'sidebar-menu';
     newNode.id = 'account-menu';
 
-    newNode.style = " position: absolute; bottom:0; width: 230px; min-height: 135px;";
+    newNode.style = " position: absolute; bottom:0; width: 230px; min-height: 85px;";
     var wHTML = "";
 
     wHTML += ('<ul class="sidebar-menu" style=" background: #2e3032; position: absolute; bottom:0; width: 230px; min-height: 85px;">');
@@ -127,4 +120,17 @@ function buildAccountMenu() {
 
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);
+}
+
+function buildCategoryURIparameter(category){
+    return '?category='+ adjustURIEscapingCategoryValue(category);
+}
+
+function adjustURIEscapingCategoryValue(value){
+    return value.replace('&', '%26').split(' ').join('%20');
+}
+
+
+function removeSpecialCharacters(str){
+    return str.replace(/[&\/\\#,+()$~%.'":*?<>{}\s+]/g, '');
 }

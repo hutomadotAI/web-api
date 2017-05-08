@@ -44,7 +44,7 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         var openBotDetails= '';
         if (see_more)
-            openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '","' + category + '");';
+            openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '","' + adjustURIEscapingCategoryValue(category) + '");';
         else
             openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '");';
 
@@ -119,7 +119,7 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
     wHTML += ('</div>');
 
     var hrefLocation = ( optionFlow == DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value ? 'NewAIBotstore.php' : 'botstore.php');
-    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\''+ hrefLocation +'?category='+ category +'\'";><b>see more</b></button></span>';
+    wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="'+ category +'" onCLick="window.location.href=\''+ hrefLocation + buildCategoryURIparameter(category) +'\'";><b>see more</b></button></span>';
     wHTML += ('</div>');
     wHTML += ('</section>');
 
