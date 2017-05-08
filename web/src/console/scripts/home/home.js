@@ -29,7 +29,6 @@ function drawTableRows() {
     for (var i = 0, len = aiList.length; i < len; i++) {
         var wHTML = '';
         var newNode = document.createElement('tr');
-        wHTML += '<td style="padding-top: 15px;padding-left:0px;">' + aiList[i]['aiid'] + '</td>';
         wHTML += '<td class="text-gray"style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
         wHTML += '<td style="padding-top: 15px;">' + aiList[i]['description'] + '</td>';
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
