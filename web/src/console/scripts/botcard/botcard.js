@@ -99,7 +99,7 @@ function setButtonParameter(title, owned, carousel_category) {
                 nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
 
             if(carousel_category!='')
-                newAIBotstoreLink += '?category=' + carousel_category;
+                newAIBotstoreLink += buildCategoryURIparameter(carousel_category);
 
             nodeCloseButtonBack.setAttribute('href', newAIBotstoreLink);
             nodeButtonBack.innerText = 'Go back';
@@ -118,7 +118,7 @@ function setButtonParameter(title, owned, carousel_category) {
                 nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
 
             if(carousel_category!='')
-                botstoreLink += '?category=' + carousel_category;
+                botstoreLink +=  buildCategoryURIparameter(carousel_category);
 
             nodeCloseButtonBack.setAttribute('href', botstoreLink);
             break;

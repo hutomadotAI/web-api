@@ -13,19 +13,19 @@ if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
-$CAROUSEL_CATEGORIES = ["Entertainment","Other","Education","Events", "Finance", "Fitness", "Games", "Health & Beauty", "Internet of Things", "News", "Personal", "Shopping", "Social", "Travel", "Virtual Assistants"];
+$categories = json_decode(CAROUSEL_CATEGORIES);
 $MAX_BOTCARDS_LOADED_FOR_CAROUSEL = 10;
 
 $botCategorizedItems =[];
 
 if(isset($_GET['category']) && $_GET['category']!=''){
-    global $CAROUSEL_CATEGORIES;
+    global $categories;
     global $MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL;
-    $CAROUSEL_CATEGORIES = [$_GET['category']];
+    $categories = [$_GET['category']];
     $MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = '';
 }
 
-foreach ($CAROUSEL_CATEGORIES as $category) {
+foreach ($categories as $category) {
     $botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
     $botstoreListParam = new \hutoma\botstoreListParam();
     $botstoreListParam->setPageSize($MAX_BOTCARDS_LOADED_FOR_CAROUSEL);
@@ -45,5 +45,6 @@ foreach ($CAROUSEL_CATEGORIES as $category) {
 }
 echo json_encode($botCategorizedItems, true);
 unset($botCategorizedItems);
+unset($categories);
 
 
