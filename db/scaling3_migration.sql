@@ -227,7 +227,8 @@ BEGIN
         `ai_status`.`update_time`
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
-    WHERE `ai`.`deleted` = 0;
+    WHERE `ai`.`deleted` = 0
+    AND `ai_status`.`server_type` = `in_server_type`;
   END$$
 DELIMITER ;
 
