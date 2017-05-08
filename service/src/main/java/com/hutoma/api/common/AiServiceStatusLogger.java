@@ -7,6 +7,7 @@ import com.hutoma.api.containers.sub.ServerAiEntry;
 
 import org.glassfish.jersey.client.JerseyClient;
 
+import java.util.UUID;
 import javax.inject.Inject;
 
 /**
@@ -28,6 +29,7 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String AICOUNT = "AiCount";
     private static final String AICOUNTUPDATED = "AiCountUpdated";
     private static final String SERVER = "Server";
+    private static final String OPERATION = "Op";
 
     @Inject
     public AiServiceStatusLogger(final JerseyClient jerseyClient, final JsonSerializer serializer,
@@ -36,7 +38,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.startLoggingScheduler(config.getElasticSearchLoggingUrl(), SERVICESTATUS_LOGGING_CADENCE);
     }
 
-    public void logStatusUpdate(final String logFrom, final AiStatus status, final String serverIdentifier) {
+    public void logStatusUpdate(final String logFrom, final AiStatus status) {
         LogParameters logParameters = new LogParameters("UpdateAIStatus") {{
             this.put(AIENGINE, status.getAiEngine());
             this.put(AIID, status.getAiid());
@@ -44,7 +46,7 @@ public class AiServiceStatusLogger extends CentralLogger {
             this.put(STATUS, status.getTrainingStatus());
             this.put(ERROR, status.getTrainingError());
             this.put(TRAININGPROGRESS, status.getTrainingProgress());
-            this.put(SERVER, serverIdentifier);
+            this.put(SERVER, status.getServerIdentifier());
             this.put("AIHash", status.getAiHash());
         }};
         String narrative = String.format("Update %s status %s progress %d%% on ai %s",
@@ -52,7 +54,7 @@ public class AiServiceStatusLogger extends CentralLogger {
                 logParameters.get(STATUS),
                 (int) (status.getTrainingProgress() * 100.0),
                 logParameters.get(AIID));
-        this.logUserTraceEvent(logFrom, narrative, null, new LogMap(logParameters));
+        this.logUserInfoEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
     public void logAffinityUpdate(final String logFrom, final BackendServerType updated,
@@ -65,7 +67,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         String narrative = String.format("%s affinity list update with %s items",
                 logParameters.get(AIENGINE),
                 logParameters.get(AICOUNT));
-        this.logUserTraceEvent(logFrom, narrative, null, new LogMap(logParameters));
+        this.logUserInfoEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
     public void logDbSyncComplete(final String logFrom, final BackendServerType serverType,
@@ -79,7 +81,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         String narrative = String.format("%s server db-sync complete. %s items updated.",
                 logParameters.get(AIENGINE),
                 logParameters.get(AICOUNTUPDATED).toString());
-        this.logUserTraceEvent(logFrom, narrative, null, new LogMap(logParameters));
+        this.logUserInfoEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
     public void logDbSyncUnknownAi(String logFrom, BackendServerType serverType, ServerAiEntry aiEntry) {
@@ -92,6 +94,19 @@ public class AiServiceStatusLogger extends CentralLogger {
                 logParameters.get(AIENGINE),
                 logParameters.get(AIID)),
                 null, new LogMap(logParameters));
+    }
+
+    public void logDebugQueueAction(String logFrom, String operation, BackendServerType serverType,
+                                    UUID aiid, String devid, String serverIdentifier) {
+        LogMap logMap = LogMap.map("Action", "Queue")
+                .map(OPERATION, operation)
+                .map(AIENGINE, serverType.toString())
+                .map(DEVID, devid)
+                .map(AIID, aiid.toString());
+        this.logDebug(logFrom,
+                String.format("Processing %s %s %s on %s",
+                        serverType.value(), operation, aiid.toString(), serverIdentifier),
+                logMap);
     }
 
     @Override

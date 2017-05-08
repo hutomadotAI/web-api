@@ -82,6 +82,14 @@ public class ServerTracker implements Callable, IServerEndpoint {
     }
 
     /***
+     * How many training slots does this server have?
+     * @return
+     */
+    public int getTrainingCapacity() {
+        return this.registration.getTrainingCapacity();
+    }
+
+    /***
      * True if we have managed at least one ping,
      * therefore the path to the server is correct and the server is reachable
      * @return
@@ -209,6 +217,14 @@ public class ServerTracker implements Callable, IServerEndpoint {
 
     public UUID getSessionID() {
         return this.serverSessionID;
+    }
+
+    /***
+     * Return the number of chat slots that this server can support
+     * @return
+     */
+    public int getChatCapacity() {
+        return this.registration.getChatCapacity();
     }
 
     private synchronized int getChatAffinityCount() {

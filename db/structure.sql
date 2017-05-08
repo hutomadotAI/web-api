@@ -33,7 +33,6 @@ CREATE TABLE `ai` (
   `dev_id` varchar(50) NOT NULL,
   `is_private` tinyint(1) DEFAULT '1',
   `client_token` varchar(250) NOT NULL,
-  `backend_status` json DEFAULT NULL,
   `ui_ai_language` varchar(10) DEFAULT 'en-US',
   `ui_ai_timezone` varchar(50) DEFAULT 'UTC',
   `ui_ai_confidence` double DEFAULT NULL,
@@ -42,7 +41,7 @@ CREATE TABLE `ai` (
   `deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,6 +62,30 @@ CREATE TABLE `ai_memory` (
   `variable_type` varchar(20) NOT NULL,
   `dev_id` varchar(50) NOT NULL,
   PRIMARY KEY (`aiid`,`uid`,`variable_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ai_status`
+--
+
+DROP TABLE IF EXISTS `ai_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ai_status` (
+  `server_type` varchar(10) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `training_status` varchar(45) NOT NULL,
+  `training_progress` float DEFAULT '0',
+  `training_error` float DEFAULT '10000',
+  `server_endpoint` varchar(256) NOT NULL,
+  `queue_action` varchar(50) DEFAULT NULL,
+  `queue_time` datetime DEFAULT NULL,
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`server_type`,`aiid`),
+  KEY `fk_aiid` (`aiid`),
+  CONSTRAINT `fk_aiid` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -165,7 +188,7 @@ CREATE TABLE `botStore` (
   KEY `aiid` (`aiid`),
   CONSTRAINT `botStore_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE,
   CONSTRAINT `botStore_ibfk_2` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,6 +226,24 @@ CREATE TABLE `chatState` (
   `locked_aiid` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`dev_id`,`chat_id`),
   UNIQUE KEY `chat_id_UNIQUE` (`chat_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `controller_state`
+--
+
+DROP TABLE IF EXISTS `controller_state`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `controller_state` (
+  `server_type` varchar(10) NOT NULL,
+  `verified_server_count` int(11) DEFAULT NULL,
+  `training_capacity` int(11) DEFAULT NULL,
+  `training_slots_available` int(11) DEFAULT NULL,
+  `chat_capacity` int(11) DEFAULT NULL,
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`server_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -608,7 +649,6 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAi`(
   IN `param_ai_description` VARCHAR(250),
   IN `param_dev_id` VARCHAR(50),
   IN `param_is_private` TINYINT(1),
-  IN `param_backend_status` JSON,
   IN `param_client_token` VARCHAR(250),
   IN `param_ui_ai_language` VARCHAR(10),
   IN `param_ui_ai_timezone` VARCHAR(50),
@@ -626,10 +666,10 @@ BEGIN
 
     IF var_exists_count=0 THEN
       INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private,
-                      backend_status, client_token,
+                      client_token,
                       ui_ai_language, ui_ai_timezone, ui_ai_confidence, ui_ai_personality, ui_ai_voice)
       VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private,
-                          param_backend_status, param_client_token,
+                          param_client_token,
                           param_ui_ai_language,
                           param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice);
       SET var_named_aiid = `param_aiid`;
@@ -927,9 +967,32 @@ CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAi`(
   IN `in_aiid` VARCHAR(50))
     MODIFIES SQL DATA
 BEGIN
-    UPDATE `ai`
-    SET `deleted` = 1
-    WHERE `dev_id`=`in_dev_id` AND `aiid`=`in_aiid`;
+    UPDATE `ai` SET `deleted` = 1
+		WHERE `dev_id`=`in_dev_id` AND `aiid`=`in_aiid`;
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteAiStatus` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAiStatus`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50))
+    MODIFIES SQL DATA
+BEGIN
+    DELETE FROM `ai_status` 
+		WHERE `ai_status`.`server_type`=`in_server_type`
+        AND `ai_status`.`aiid` = `in_aiid`;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -944,12 +1007,12 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAllAIs`(IN `param_devid` varchar(50))
     MODIFIES SQL DATA
 BEGIN
-    UPDATE ai SET `deleted` = 1 WHERE dev_id=param_devid;
+    UPDATE `ai` SET `deleted` = 1 WHERE `dev_id`=param_devid;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1298,8 +1361,7 @@ BEGIN
       `created_on`,
       `dev_id`,
       `is_private`,
-      `client_token`,
-      `backend_status`,
+      `client_token`,      
       `ui_ai_language`,
       `ui_ai_timezone`,
       `ui_ai_confidence`,
@@ -1320,7 +1382,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getAiDeepLearningError` */;
+/*!50003 DROP PROCEDURE IF EXISTS `getAIQueueStatus` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -1330,38 +1392,27 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiDeepLearningError`(
-  IN `param_aiid` VARCHAR(50))
-    READS SQL DATA
-    COMMENT 'aiReader@127.0.0.1'
-BEGIN
-    DECLARE var_learning_error FLOAT;
-    SELECT json_extract(backend_status, "$.engines.rnn.training_error" ) INTO var_learning_error
-    FROM `ai`
-    WHERE `ai`.`aiid`= `param_aiid`;
-
-    SELECT IFNULL(var_learning_error, 0) AS 'deep_learning_error';
-
-  END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getAiDeepLearningStatus` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiDeepLearningStatus`(IN `param_aiid` VARCHAR(50))
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIQueueStatus`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT deep_learning_status FROM ai WHERE aiid=param_aiid;
+    SELECT 
+		`ai_status`.`server_type`,
+		`ai_status`.`aiid`,
+        `ai`.`dev_id`,
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_time`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`,
+        `ai`.`deleted`
+        FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai_status`.`aiid` = `in_aiid`
+    AND `ai_status`.`server_type` = `in_server_type`;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1392,7 +1443,6 @@ BEGIN
     `ai`.`dev_id`,
     `ai`.`is_private`,
     `ai`.`client_token`,
-    `ai`.`backend_status`,
     `ai`.`ui_ai_language`,
     `ai`.`ui_ai_timezone`,
     `ai`.`ui_ai_confidence`,
@@ -1438,6 +1488,72 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getAIsServerStatus` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIsServerStatus`(
+  IN `in_server_type` VARCHAR(10))
+    READS SQL DATA
+BEGIN
+    SELECT 
+		`ai_status`.`aiid`,
+        `ai`.`dev_id`,
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_time`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`
+    FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai`.`deleted` = 0;
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getAIsStatus` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIsStatus`(
+  IN `in_dev_id` VARCHAR(50))
+    READS SQL DATA
+BEGIN
+    SELECT 
+		`ai_status`.`server_type`,
+		`ai_status`.`aiid`,
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`
+    FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai`.`dev_id` = `in_dev_id`
+    AND `ai`.`deleted` = 0;
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getAiStatus` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1453,9 +1569,20 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiStatus`(
   IN `param_devid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT `backend_status`
-    FROM `ai`
-    WHERE `aiid`=`param_aiid` AND `dev_id`=param_devid;
+    SELECT 
+		`ai_status`.`server_type`,
+        `ai_status`.`aiid`,
+		`ai_status`.`training_status`, 
+		`ai_status`.`training_progress`, 
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`        
+    FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai_status`.`aiid`=`param_aiid`
+    AND `ai`.`dev_id`=`param_devid`
+    AND `ai`.`deleted` = 0;    
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1475,10 +1602,18 @@ DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiStatusAll`()
     READS SQL DATA
 BEGIN
-    SELECT `ai`.`aiid`, `backend_status`, `ai`.`dev_id`
-    FROM `ai`
-    WHERE `ai`.`deleted` = 0
-    FOR UPDATE;
+    SELECT 
+		`ai_status`.`server_type`,
+		`ai_status`.`aiid`,
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`        
+    FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai`.`deleted` = 0;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1500,9 +1635,20 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiStatusForUpdate`(
   IN `param_devid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT `backend_status`
-    FROM `ai`
-    WHERE `aiid`=`param_aiid` AND `dev_id`=param_devid
+    SELECT 
+		`ai_status`.`server_type`,
+        `ai_status`.`aiid`,
+		`ai_status`.`training_status`, 
+		`ai_status`.`training_progress`, 
+        `ai_status`.`training_error`,
+        `ai_status`.`queue_action`,
+        `ai_status`.`server_endpoint`,
+        `ai_status`.`update_time`        
+    FROM `ai_status`
+    JOIN `ai` USING (`aiid`)
+    WHERE `ai_status`.`aiid`=param_aiid 
+    AND `ai`.`dev_id`=param_devid
+    AND `ai`.`deleted` = 0
     FOR UPDATE;
   END ;;
 DELIMITER ;
@@ -1608,6 +1754,77 @@ CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotsLinkedToAi`(IN `pa
 BEGIN
     SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id WHERE bai.aiid = param_aiid AND bai.dev_id = param_devId;
   END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreItem` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreItem`(
+	IN `param_botId` INT)
+BEGIN
+
+SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website'
+FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id WHERE bs.publishing_state=2 AND bs.id = param_botId;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreList` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreList`(
+	IN `param_filters` VARCHAR(255),
+    IN `param_order` VARCHAR(50),
+    IN `param_pageStart` INT,
+    IN `param_pageSize` INT)
+BEGIN
+
+SET @select_query = "SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website' ";
+SET @from_query = "FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id WHERE publishing_state=2 ";
+IF LENGTH(param_filters) = 0 THEN
+	SET @where_other = "";
+ELSE
+	SET @where_other = concat(" AND ", param_filters);
+END IF;
+IF LENGTH(param_order) = 0 THEN
+	SET @orderBy = "";
+ELSE
+	SET @orderBy = concat(" ORDER BY ", param_order);
+END IF;
+SET @limitTo = concat(concat(concat(" LIMIT ", param_pageStart), ", "), param_pageSize);
+SET @query = concat(concat(concat(concat(@select_query, @from_query), @where_other), @orderBy), @limitTo);
+PREPARE stmt3 FROM @query;
+EXECUTE stmt3;
+DEALLOCATE PREPARE stmt3;
+
+
+SET @select_query = "SELECT COUNT(*) as 'total'";
+SET @query = concat(concat(@select_query, @from_query), @where_other);
+PREPARE stmt3 FROM @query;
+EXECUTE stmt3;
+DEALLOCATE PREPARE stmt3;
+
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2273,10 +2490,10 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getWebhook` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
@@ -2473,6 +2690,117 @@ BEGIN
     DECLARE thePrice DECIMAL;
     SELECT price INTO thePrice FROM botStore WHERE id = param_botId;
     INSERT INTO botPurchase (botId, dev_id, price) VALUES (param_botId, param_devId, thePrice);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `queueCountSlots` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueCountSlots`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_training_status` VARCHAR(50))
+BEGIN
+
+DECLARE v_cutoff DATETIME;
+SET v_cutoff = DATE_SUB(NOW(), INTERVAL 5 MINUTE);
+
+SELECT `ai_status`.`server_endpoint`,
+ sum(case when `ai_status`.`update_time` > v_cutoff then 1 else 0 end) training,
+ sum(case when `ai_status`.`update_time` <= v_cutoff then 1 else 0 end) lapsed
+FROM `ai_status`
+WHERE `server_type` = `in_server_type`
+AND `ai_status`.`queue_time` IS NULL
+AND `ai_status`.`training_status` = `in_training_status`
+GROUP BY `ai_status`.`server_endpoint`;
+
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `queueTakeNext` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueTakeNext`(
+  IN `in_server_type` VARCHAR(10))
+BEGIN
+
+DECLARE v_aiid VARCHAR(50);
+SELECT `ai_status`.`aiid` INTO v_aiid 
+	FROM `ai_status` 
+	WHERE `server_type` = `in_server_type` 
+	AND `queue_time`<now()
+	ORDER BY `queue_time` ASC
+	LIMIT 1 FOR UPDATE;
+
+IF NOT v_aiid IS NULL THEN
+    UPDATE `ai_status` SET `queue_time`=NULL 
+		WHERE `aiid` = v_aiid
+        AND `in_server_type`=`server_type`;
+END IF;        
+SELECT * FROM `ai_status` 
+	WHERE v_aiid IS NOT NULL
+	AND `aiid`=v_aiid
+	AND `in_server_type`=`server_type`;
+
+
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `queueUpdate` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueUpdate`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_set_queued` TINYINT,
+  IN `in_queue_offset` INT,
+  IN `in_queue_action` VARCHAR(50)
+  )
+BEGIN
+ 
+DECLARE v_queue_time DATETIME;
+IF (`in_set_queued` = 0) THEN
+	SET v_queue_time = NULL;
+ELSE
+	SET v_queue_time = now() + INTERVAL `in_queue_offset` SECOND;
+END IF;
+
+UPDATE `ai_status` SET 	
+	`queue_time`=v_queue_time,
+    `queue_action`=`in_queue_action`,
+    `update_time`=now()
+WHERE `server_type` = `in_server_type` 
+	AND `aiid` = `in_aiid`;
+
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2713,15 +3041,35 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateAiStatus`(
-  IN `param_aiid` VARCHAR(50),
-  IN `param_devid` VARCHAR(50),
-  IN `param_backend_status` JSON)
-    READS SQL DATA
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateAiStatus`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_training_status` VARCHAR(45),
+  IN `in_server_endpoint` VARCHAR(256),
+  IN `in_training_progress` FLOAT,
+  IN `in_training_error` FLOAT)
 BEGIN
-    UPDATE `ai`
-    SET `backend_status`=`param_backend_status`
-    WHERE `aiid`=`param_aiid` AND `dev_id`=`param_devid`;
+
+INSERT INTO `ai_status` 
+( `server_type`,
+  `aiid`,
+  `training_status`,
+  `training_progress`,
+  `training_error`,
+  `server_endpoint`)
+VALUES 
+( `in_server_type`,
+  `in_aiid`,
+  `in_training_status`,
+  `in_training_progress`,
+  `in_training_error`,
+  `in_server_endpoint`)
+ON DUPLICATE KEY UPDATE 
+	`training_status`=`in_training_status`,	
+    `training_progress`=`in_training_progress`,	
+    `training_error`=`in_training_error`,
+	`server_endpoint`=`in_server_endpoint`,
+    `update_time`=now();
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2767,6 +3115,49 @@ DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateBotPublishingState`(IN `param_botId` INT(11), IN `param_publishingState` TINYINT(1))
 BEGIN
     UPDATE botStore SET publishing_state = param_publishingState WHERE id = param_botId;
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `updateControllerState` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateControllerState`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_verified_server_count` INT,
+  IN `in_training_capacity` INT,
+  IN `in_training_slots_available` INT,
+  IN `in_chat_capacity` INT)
+BEGIN
+INSERT INTO `controller_state` 
+  (`server_type`,
+  `verified_server_count`,
+  `training_capacity`,
+  `training_slots_available`,
+  `chat_capacity`,
+  `update_time`)
+VALUES 
+  (`in_server_type`,
+  `in_verified_server_count`,
+  `in_training_capacity`,
+  `in_training_slots_available`,
+  `in_chat_capacity`,
+  now())
+ON DUPLICATE KEY UPDATE 
+  `verified_server_count`=`in_verified_server_count`, 
+  `training_capacity`=`in_training_capacity`,
+  `training_slots_available`=`in_training_slots_available`,
+  `chat_capacity`=`in_chat_capacity`,
+  `update_time`=now();
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2840,77 +3231,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreList` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreList`(
-	IN `param_filters` VARCHAR(255),
-    IN `param_order` VARCHAR(50),
-    IN `param_pageStart` INT,
-    IN `param_pageSize` INT)
-BEGIN
-
-SET @select_query = "SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website' ";
-SET @from_query = "FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id WHERE publishing_state=2 ";
-IF LENGTH(param_filters) = 0 THEN
-	SET @where_other = "";
-ELSE
-	SET @where_other = concat(" AND ", param_filters);
-END IF;
-IF LENGTH(param_order) = 0 THEN
-	SET @orderBy = "";
-ELSE
-	SET @orderBy = concat(" ORDER BY ", param_order);
-END IF;
-SET @limitTo = concat(concat(concat(" LIMIT ", param_pageStart), ", "), param_pageSize);
-SET @query = concat(concat(concat(concat(@select_query, @from_query), @where_other), @orderBy), @limitTo);
-PREPARE stmt3 FROM @query;
-EXECUTE stmt3;
-DEALLOCATE PREPARE stmt3;
-
-
-SET @select_query = "SELECT COUNT(*) as 'total'";
-SET @query = concat(concat(@select_query, @from_query), @where_other);
-PREPARE stmt3 FROM @query;
-EXECUTE stmt3;
-DEALLOCATE PREPARE stmt3;
-
-END;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreItem` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreItem`(
-	IN `param_botId` INT)
-BEGIN
-
-SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website'
-FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id WHERE bs.publishing_state=2 AND bs.id = param_botId;
-
-END;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -2921,4 +3241,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-03-16 10:33:07
+-- Dump completed on 2017-05-04 13:49:27

@@ -23,12 +23,17 @@ public class AiStatus {
 
     @SerializedName("training_progress")
     private final double trainingProgress;
+
     @SerializedName("server_session_id")
     public UUID serverSessionID;
+
     @SerializedName("training_error")
     private double trainingError;
+
     @SerializedName("ai_hash")
     private String aiHash;
+
+    private transient String serverIdentifier;
 
     public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus,
                     final BackendServerType aiEngine,
@@ -42,6 +47,7 @@ public class AiStatus {
         this.trainingProgress = trainingProgress;
         this.aiHash = aiHash;
         this.serverSessionID = serverSessionID;
+        this.serverIdentifier = null;
     }
 
     public UUID getAiid() {
@@ -78,5 +84,13 @@ public class AiStatus {
 
     public UUID getServerSessionID() {
         return this.serverSessionID;
+    }
+
+    public String getServerIdentifier() {
+        return this.serverIdentifier == null ? "" : this.serverIdentifier;
+    }
+
+    public void setServerIdentifier(final String serverIdentifier) {
+        this.serverIdentifier = serverIdentifier;
     }
 }

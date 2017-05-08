@@ -30,6 +30,7 @@ public abstract class ControllerBase extends ServerMetadata {
     protected ThreadSubPool threadSubPool;
     protected ServiceLocator serviceLocator;
     protected HashSet<UUID> botExclusionList;
+    protected QueueProcessor queueProcessor;
     Config config;
 
     public ControllerBase(final Config config,
@@ -101,6 +102,19 @@ public abstract class ControllerBase extends ServerMetadata {
                                       final Map<UUID, ServerAiEntry> statusData) throws Database.DatabaseException {
         database.synchroniseDBStatuses(jsonSerializer, serverType, statusData, this.botExclusionList);
     }
+
+    /***
+     * If something has changed in the queue and we would like
+     * the queue processor to run sooner rather than later
+     */
+    public void kickQueueProcessor() {
+    }
+
+    /***
+     * Does this flavour of server require training capacity to operate?
+     * @return
+     */
+    public abstract boolean logErrorIfNoTrainingCapacity();
 
     public enum RequestFor {
         Training,

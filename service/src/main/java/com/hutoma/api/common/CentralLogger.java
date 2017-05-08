@@ -202,6 +202,31 @@ public class CentralLogger implements ILogger {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void logInfo(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.INFO, fromLabel, logComment, properties);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserInfoEvent(final String logFrom, final String event, final String user,
+                                 final LogMap properties) {
+        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserInfoEvent(final String logFrom, final String event, final String user) {
+        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, null));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logWarnEvent(String logFrom, String event, String user, LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }

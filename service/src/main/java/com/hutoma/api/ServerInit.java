@@ -4,6 +4,9 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
+import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
 
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.model.Invocable;
@@ -96,5 +99,11 @@ public class ServerInit implements ApplicationEventListener {
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "initialisation error: " + e.toString());
         }
+
+        // create the singleton instances so that the timers start
+        // and with them the server monitoring
+        this.serviceLocator.getService(ControllerWnet.class);
+        this.serviceLocator.getService(ControllerRnn.class);
+        this.serviceLocator.getService(ControllerAiml.class);
     }
 }

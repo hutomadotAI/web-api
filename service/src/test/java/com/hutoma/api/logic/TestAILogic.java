@@ -73,7 +73,7 @@ public class TestAILogic {
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyObject(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), anyObject())).thenReturn(TestDataHelper.AIID);
         ApiResult result = this.aiLogic.createAI(DEVID, "name", "description", true, 0, 0.0, 1, null, "");
@@ -92,7 +92,7 @@ public class TestAILogic {
 
     @Test
     public void testCreate_DBFail_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyObject(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), anyObject())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.createAI(DEVID, "name", "description", true, 0, 0.0, 1, null, "");
@@ -108,28 +108,28 @@ public class TestAILogic {
 
     @Test
     public void testGetSingle_Valid() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiResult result = this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_Valid_Return() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiAi result = (ApiAi) this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(AIID.toString(), result.getAiid());
     }
 
     @Test
     public void testGetSingle_DBFail_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getAI(anyString(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_DB_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(null);
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(null);
         ApiResult result = this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -137,7 +137,7 @@ public class TestAILogic {
     @Test
     public void testGetAll_Valid() throws Database.DatabaseException {
         ArrayList<ApiAi> returnList = getAIList();
-        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID), any())).thenReturn(returnList);
+        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID))).thenReturn(returnList);
         ApiResult result = this.aiLogic.getAIs(VALIDDEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -145,7 +145,7 @@ public class TestAILogic {
     @Test
     public void testGetAll_Valid_Return() throws Database.DatabaseException {
         ArrayList<ApiAi> returnList = getAIList();
-        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID), any())).thenReturn(returnList);
+        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID))).thenReturn(returnList);
         ApiResult result = this.aiLogic.getAIs(VALIDDEVID);
         Assert.assertTrue(result instanceof ApiAiList);
         ApiAiList list = (ApiAiList) result;
@@ -157,7 +157,7 @@ public class TestAILogic {
     @Test
     public void testGetAll_NoneFound() throws Database.DatabaseException {
         ArrayList<ApiAi> returnList = getAIList();
-        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID), any())).thenReturn(new ArrayList<>());
+        when(this.fakeDatabase.getAllAIs(eq(VALIDDEVID))).thenReturn(new ArrayList<>());
         ApiResult result = this.aiLogic.getAIs(VALIDDEVID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -165,7 +165,7 @@ public class TestAILogic {
     @Test
     public void testGetAll_DBFail() throws Database.DatabaseException {
         ArrayList<ApiAi> returnList = getAIList();
-        when(this.fakeDatabase.getAllAIs(anyString(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getAllAIs(anyString())).thenThrow(Database.DatabaseException.class);
         this.aiLogic.getAIs(VALIDDEVID);
         ApiResult result = this.aiLogic.getAIs(VALIDDEVID);
         Assert.assertEquals(500, result.getStatus().getCode());
@@ -175,10 +175,11 @@ public class TestAILogic {
     public void testDelete_Valid() throws Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(null);
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(true);
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(200, result.getStatus().getCode());
         // Make sure we request it to be deleted by the backends
-        verify(this.fakeAiServices).deleteAI(anyString(), any());
+        verify(this.fakeAiServices).deleteAI(any(), anyString(), any());
     }
 
     @Test
@@ -194,7 +195,8 @@ public class TestAILogic {
         ServerConnector.AiServicesException exMain = new ServerConnector.AiServicesException("main");
         ServerConnector.AiServicesException exSub = new ServerConnector.AiServicesException("sub", HttpURLConnection.HTTP_NOT_FOUND);
         exMain.addSuppressed(exSub);
-        doThrow(exMain).when(this.fakeAiServices).deleteAI(anyString(), any());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
+        doThrow(exMain).when(this.fakeAiServices).deleteAI(any(), anyString(), any());
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -205,7 +207,8 @@ public class TestAILogic {
         ServerConnector.AiServicesException exMain = new ServerConnector.AiServicesException("main");
         ServerConnector.AiServicesException exSub = new ServerConnector.AiServicesException("sub", HttpURLConnection.HTTP_INTERNAL_ERROR);
         exMain.addSuppressed(exSub);
-        doThrow(exMain).when(this.fakeAiServices).deleteAI(anyString(), any());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
+        doThrow(exMain).when(this.fakeAiServices).deleteAI(any(), anyString(), any());
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -215,10 +218,11 @@ public class TestAILogic {
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenReturn(true);
         when(this.fakeDatabase.hasBotBeenPurchased(anyInt())).thenReturn(false);
         when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         verify(this.fakeDatabase).deleteAi(anyString(), any());
-        verify(this.fakeAiServices).deleteAI(anyString(), any());
+        verify(this.fakeAiServices).deleteAI(any(), anyString(), any());
     }
 
     @Test
@@ -228,13 +232,13 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         // Verify we don't actually request it to be deleted by the backends
-        verify(this.fakeAiServices, never()).deleteAI(anyString(), any());
+        verify(this.fakeAiServices, never()).deleteAI(any(), anyString(), any());
         verify(this.fakeDatabase, never()).deleteAi(anyString(), any());
     }
 
     @Test
     public void testUpdateAi() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
         ApiResult result = this.aiLogic.updateAI(DEVID, AIID, "desc", true, 0, 0.0, 0,
@@ -244,7 +248,7 @@ public class TestAILogic {
 
     @Test
     public void testUpdateAi_dbFail() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(false);
         ApiResult result = this.aiLogic.updateAI(DEVID, AIID, "desc", true, 0, 0.0, 0,
@@ -254,7 +258,7 @@ public class TestAILogic {
 
     @Test
     public void testUpdateAi_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.updateAI(DEVID, AIID, "desc", true, 0, 0.0, 0,
@@ -264,6 +268,7 @@ public class TestAILogic {
 
     @Test
     public void testDelete_DBFail_Error() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabase.deleteAi(anyString(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
@@ -299,10 +304,10 @@ public class TestAILogic {
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(true);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTraining(DEVID, AIID);
+        verify(this.fakeAiServices, never()).stopTraining(null, DEVID, AIID);
     }
 
     @Test
@@ -311,7 +316,7 @@ public class TestAILogic {
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(true);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         verify(this.fakeAiServices).stopTrainingIfNeeded(DEVID, AIID);
@@ -323,7 +328,7 @@ public class TestAILogic {
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(false);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -334,7 +339,7 @@ public class TestAILogic {
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenThrow(Database.DatabaseException.class);
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -345,9 +350,9 @@ public class TestAILogic {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(true);
-        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(anyString(), any());
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(any(), anyString(), any());
         ApiResult result = this.aiLogic.linkBotToAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -401,17 +406,17 @@ public class TestAILogic {
 
     @Test
     public void testUnlinkBotFromAi() throws Database.DatabaseException, ServerConnector.AiServicesException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(true);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTraining(DEVID, AIID);
+        verify(this.fakeAiServices, never()).stopTraining(null, DEVID, AIID);
     }
 
     @Test
     public void testUnlinkBotFromAi_aiTrainingInProgress()
             throws Database.DatabaseException, ServerConnector.AiServicesException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(true);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -420,7 +425,7 @@ public class TestAILogic {
 
     @Test
     public void testUnlinkBotFromAi_DB_failed_update() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(false);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
@@ -428,7 +433,7 @@ public class TestAILogic {
 
     @Test
     public void testUnlinkBotFromAi_DBException() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -437,9 +442,9 @@ public class TestAILogic {
     @Test
     public void testUnlinkBotFromAi_aiTrainingFile_AIException()
             throws Database.DatabaseException, ServerConnector.AiServicesException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(true);
-        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(anyString(), any());
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(any(), anyString(), any());
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -467,7 +472,7 @@ public class TestAILogic {
     }
 
     private void whenCreateAiReturn(UUID aiid) throws Database.DatabaseException {
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyObject(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), anyObject())).thenReturn(aiid);
     }

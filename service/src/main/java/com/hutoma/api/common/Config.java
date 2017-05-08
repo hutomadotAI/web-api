@@ -197,6 +197,42 @@ public class Config {
     }
 
     /***
+     * Every n milliseconds we check the queue status to see
+     * if there are tasks to run or reschedule
+     * @return
+     */
+    public long getProcessQueueIntervalDefault() {
+        return 2 * 1000;
+    }
+
+    /***
+     * The time to wait if a command needs to be scheduled
+     * immediately after this one (in ms)
+     * i.e. minimum interval between queue checks
+     * @return
+     */
+    public long getProcessQueueIntervalShort() {
+        return 1000;
+    }
+
+    /***
+     * The time to wait if nothing much is going on
+     * and we can wait a while before checking the queue again
+     * @return
+     */
+    public long getProcessQueueIntervalLong() {
+        return 10 * 1000;
+    }
+
+    /***
+     * How far in the future to schedule a command
+     * (in seconds)
+     */
+    public int getProcessQueueScheduleFutureCommand() {
+        return 30;
+    }
+
+    /***
      * The total number of milliseconds that we wait for backend
      * requests to complete.
      * N.B. this value is not 'per request'.

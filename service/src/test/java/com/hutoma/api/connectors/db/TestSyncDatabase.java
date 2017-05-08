@@ -5,15 +5,15 @@ import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
-import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +28,8 @@ import javax.inject.Provider;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyDouble;
 import static org.mockito.Mockito.*;
 
 public class TestSyncDatabase {
@@ -70,7 +72,8 @@ public class TestSyncDatabase {
     @Test
     public void undefinedAIs_noBackend_noChanges() throws Exception {
 
-        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1, TrainingStatus.AI_UNDEFINED);
+        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_UNDEFINED);
         List<FakeRecord> records = new ArrayList<>();
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
@@ -103,7 +106,8 @@ public class TestSyncDatabase {
     @Test
     public void blankAIs_noBackend_noChanges() throws Exception {
 
-        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1, TrainingStatus.AI_UNDEFINED);
+        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_UNDEFINED);
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, null);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
@@ -116,7 +120,8 @@ public class TestSyncDatabase {
     public void noAIs_undefinedBackend_noChanges() throws Exception {
 
         HashMap<UUID, ServerAiEntry> registration = new HashMap<>();
-        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_UNDEFINED);
+        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1,
+                TrainingStatus.AI_UNDEFINED);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
         database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
@@ -127,8 +132,10 @@ public class TestSyncDatabase {
     @Test
     public void matchingAI_noChanges() throws Exception {
 
-        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1, TrainingStatus.AI_TRAINING);
-        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_TRAINING);
+        HashMap<UUID, ServerAiEntry> registration = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_TRAINING);
+        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1,
+                TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
         database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
@@ -139,17 +146,19 @@ public class TestSyncDatabase {
     @Test
     public void matchingAI_differentStatus() throws Exception {
 
-        HashMap<UUID, ServerAiEntry> regData = addRegistrationData(null, this.aiid1, TrainingStatus.AI_TRAINING_COMPLETE);
-        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_TRAINING);
+        HashMap<UUID, ServerAiEntry> regData = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_TRAINING_COMPLETE);
+        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1,
+                TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
         database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
                 regData, new HashSet<UUID>());
 
         Assert.assertEquals(1, this.parameterList.size());
-        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("0"));
-        Assert.assertEquals(this.devid1.toString(), this.parameterList.get(0).getString("1"));
-        Assert.assertTrue(this.parameterList.get(0).getString("2").contains(TrainingStatus.AI_TRAINING_COMPLETE.value()));
+        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("1"));
+        Assert.assertTrue(this.parameterList.get(0).getString("2").contains(
+                TrainingStatus.AI_TRAINING_COMPLETE.value()));
     }
 
     @Test
@@ -158,10 +167,12 @@ public class TestSyncDatabase {
         UUID aiid2 = this.tools.createNewRandomUUID();
         UUID devid2 = this.tools.createNewRandomUUID();
 
-        HashMap<UUID, ServerAiEntry> regData = addRegistrationData(null, this.aiid1, TrainingStatus.AI_TRAINING_COMPLETE);
+        HashMap<UUID, ServerAiEntry> regData = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_TRAINING_COMPLETE);
         addRegistrationData(regData, aiid2, TrainingStatus.AI_TRAINING_COMPLETE);
 
-        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, TrainingStatus.AI_TRAINING);
+        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1,
+                TrainingStatus.AI_TRAINING);
         addDatabaseData(records, devid2, aiid2, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
@@ -170,13 +181,13 @@ public class TestSyncDatabase {
 
         Assert.assertEquals(2, this.parameterList.size());
 
-        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("0"));
-        Assert.assertEquals(this.devid1.toString(), this.parameterList.get(0).getString("1"));
-        Assert.assertTrue(this.parameterList.get(0).getString("2").contains(TrainingStatus.AI_TRAINING_COMPLETE.value()));
+        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("1"));
+        Assert.assertTrue(this.parameterList.get(0).getString("2").contains(
+                TrainingStatus.AI_TRAINING_COMPLETE.value()));
 
-        Assert.assertEquals(aiid2.toString(), this.parameterList.get(1).getString("0"));
-        Assert.assertEquals(devid2.toString(), this.parameterList.get(1).getString("1"));
-        Assert.assertTrue(this.parameterList.get(1).getString("2").contains(TrainingStatus.AI_TRAINING_COMPLETE.value()));
+        Assert.assertEquals(aiid2.toString(), this.parameterList.get(1).getString("1"));
+        Assert.assertTrue(this.parameterList.get(1).getString("2").contains(
+                TrainingStatus.AI_TRAINING_COMPLETE.value()));
 
     }
 
@@ -195,27 +206,38 @@ public class TestSyncDatabase {
         when(fakeResultSet.getString(anyString())).thenAnswer((invocation) -> {
             return this.currentData.getString(invocation.getArgument(0));
         });
+        when(fakeResultSet.getDouble(anyString())).thenAnswer((invocation) -> {
+            return Double.parseDouble(this.currentData.getString(invocation.getArgument(0)));
+        });
+
         return fakeResultSet;
     }
 
-    private DatabaseAiStatusUpdates fakeDatabaseCalls(List<FakeRecord> records) throws Database.DatabaseException, SQLException {
+    private DatabaseAiStatusUpdates fakeDatabaseCalls(List<FakeRecord> records)
+            throws Database.DatabaseException, SQLException {
         DatabaseTransaction transaction = mock(DatabaseTransaction.class);
         when(this.transactionProvider.get()).thenReturn(transaction);
         DatabaseCall databaseCall = mock(DatabaseCall.class);
         when(transaction.getDatabaseCall()).thenReturn(databaseCall);
         when(databaseCall.initialise(anyString(), anyInt())).thenReturn(databaseCall);
         when(databaseCall.add(anyString())).thenAnswer(invocation -> {
-            if (this.currentParameters == null) {
-                this.currentParameters = new FakeRecord();
-            }
-            this.currentParameters.addNext(invocation.getArgument(0));
+            addParameterInvoke(invocation);
             return (databaseCall);
         });
         when(databaseCall.add((UUID) any())).thenAnswer(invocation -> {
-            if (this.currentParameters == null) {
-                this.currentParameters = new FakeRecord();
-            }
-            this.currentParameters.addNext(invocation.getArgument(0).toString());
+            addParameterInvoke(invocation);
+            return (databaseCall);
+        });
+        when(databaseCall.add(anyDouble())).thenAnswer(invocation -> {
+            addParameterInvoke(invocation);
+            return (databaseCall);
+        });
+        when(databaseCall.add(anyBoolean())).thenAnswer(invocation -> {
+            addParameterInvoke(invocation);
+            return (databaseCall);
+        });
+        when(databaseCall.add((DateTime) any())).thenAnswer(invocation -> {
+            addParameterInvoke(invocation);
             return (databaseCall);
         });
         when(databaseCall.executeQuery()).thenAnswer((invocation) -> {
@@ -232,30 +254,28 @@ public class TestSyncDatabase {
         return new DatabaseAiStatusUpdates(this.logger, this.callProvider, this.transactionProvider);
     }
 
+    private void addParameterInvoke(final InvocationOnMock invocation) {
+        if (this.currentParameters == null) {
+            this.currentParameters = new FakeRecord();
+        }
+        Object o = invocation.getArgument(0);
+        this.currentParameters.addNext((o == null) ? null : o.toString());
+    }
+
     // helper function
-    private HashMap<UUID, ServerAiEntry> addRegistrationData(HashMap<UUID, ServerAiEntry> map, final UUID aiid1, TrainingStatus status) {
+    private HashMap<UUID, ServerAiEntry> addRegistrationData(HashMap<UUID, ServerAiEntry> map,
+                                                             final UUID aiid1, TrainingStatus status) {
         map = (map == null) ? new HashMap<>() : map;
         map.put(aiid1, new ServerAiEntry(aiid1, status, ""));
         return map;
     }
 
     // helper function
-    private List<FakeRecord> addDatabaseData(List<FakeRecord> list, final UUID devid, final UUID aiid, final TrainingStatus aiTraining) {
+    private List<FakeRecord> addDatabaseData(List<FakeRecord> list, final UUID devid, final UUID aiid,
+                                             final TrainingStatus aiTraining) {
         list = (list == null) ? new ArrayList<>() : list;
-        list.add(new FakeDBStatus(aiid.toString(), devid.toString(), this.serializer.serialize(
-                createBackendStatus(devid, aiid, aiTraining))));
+        list.add(new FakeDBStatus(aiid.toString(), devid.toString(), aiTraining));
         return list;
-    }
-
-    // helper function
-    private BackendStatus createBackendStatus(UUID devid, UUID aiid, TrainingStatus trainingStatus) {
-        BackendStatus dbStatus = new BackendStatus();
-        if (trainingStatus != null) {
-            dbStatus.setEngineStatus(new AiStatus(devid.toString(), aiid, trainingStatus,
-                    BackendServerType.WNET, 0.0, 0.0, "",
-                    this.tools.createNewRandomUUID()));
-        }
-        return dbStatus;
     }
 
     // fake database record
@@ -282,10 +302,15 @@ public class TestSyncDatabase {
 
     // fake database record for dbstatus
     public class FakeDBStatus extends FakeRecord {
-        public FakeDBStatus(final String aiid, final String devid, final String statusBlock) {
+        public FakeDBStatus(final String aiid, final String devid, final TrainingStatus trainingStatus) {
             addString("aiid", aiid);
             addString("dev_id", devid);
-            addString("backend_status", statusBlock);
+            addString("training_status",
+                    (trainingStatus == null) ? null : trainingStatus.value());
+            addString("server_endpoint", "endpoint");
+            addString("training_progress", "0.0");
+            addString("training_error", "0.0");
+            //addString("queue_time", "");
         }
     }
 }

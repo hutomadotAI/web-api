@@ -62,7 +62,7 @@ public class TestAiServicesClient {
 
     private static HttpServer httpServer;
     private JsonSerializer fakeSerializer;
-    private Database fakeDatabase;
+    private DatabaseAiStatusUpdates fakeDatabase;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
@@ -71,6 +71,7 @@ public class TestAiServicesClient {
     private ControllerWnet fakeControllerWnet;
     private ControllerRnn fakeControllerRnn;
     private ThreadPool threadPool;
+    private AIQueueServices fakeQueueServices;
 
     @BeforeClass
     public static void initializeClass() {
@@ -88,10 +89,11 @@ public class TestAiServicesClient {
     public void setup() throws ServerMetadata.NoServerAvailable {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
+        this.fakeQueueServices = mock(AIQueueServices.class);
 
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerRnn = mock(ControllerRnn.class);
@@ -106,23 +108,23 @@ public class TestAiServicesClient {
                 TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn);
+                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
 
     @Test
     public void testStartTraining() throws AIServices.AiServicesException, Database.DatabaseException {
         when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
-        this.aiServices.startTraining(DEVID, AIID);
+        this.aiServices.startTraining(null, DEVID, AIID);
     }
 
     @Test
     public void testStopTraining() throws AIServices.AiServicesException {
-        this.aiServices.stopTraining(DEVID, AIID);
+        this.aiServices.stopTraining(null, DEVID, AIID);
     }
 
     @Test
     public void testDeleteAi() throws AIServices.AiServicesException {
-        this.aiServices.deleteAI(DEVID, AIID);
+        this.aiServices.deleteAI(null, DEVID, AIID);
     }
 
     @Test
@@ -135,8 +137,8 @@ public class TestAiServicesClient {
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn);
-        thisAiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
+                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
+        thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }
 
     @Path("/training")

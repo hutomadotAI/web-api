@@ -16,7 +16,6 @@ import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.BackendStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -75,17 +74,12 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
-            // this creates an empty container for multiple-backend statuses
-            // which is the same as setting each server to AI_UNDEFINED
-            BackendStatus statusNew = new BackendStatus();
-
             UUID namedAiid = this.database.createAI(
                     aiUUID,
                     name,
                     description,
                     devId,
                     isPrivate,
-                    statusNew,
                     token,
                     language,
                     timezone,
@@ -122,7 +116,7 @@ public class AILogic {
             final String timezone) {
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.database.getAI(devId, aiid);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - AI not found", devId, logMap);
                 return ApiError.getNotFound();
@@ -151,7 +145,7 @@ public class AILogic {
     public ApiResult getAIs(final String devId) {
 
         try {
-            List<ApiAi> aiList = this.database.getAllAIs(devId, this.jsonSerializer);
+            List<ApiAi> aiList = this.database.getAllAIs(devId);
             if (aiList.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetAIs - empty list", devId);
                 return ApiError.getNotFound();
@@ -167,7 +161,7 @@ public class AILogic {
     public ApiResult getSingleAI(final String devid, final UUID aiid) {
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.database.getAI(devid, aiid);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devid, logMap);
                 return ApiError.getNotFound();
@@ -200,13 +194,15 @@ public class AILogic {
                         logMap.put("BotId", bot.getBotId()));
             }
 
-            if (!this.database.deleteAi(devid, aiid)) {
+            ApiAi ai = this.database.getAI(devid, aiid);
+            if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devid, logMap);
                 return ApiError.getNotFound();
             }
+            this.database.deleteAi(devid, aiid);
 
             try {
-                this.aiServices.deleteAI(devid, aiid);
+                this.aiServices.deleteAI(ai.getBackendStatus(), devid, aiid);
             } catch (ServerConnector.AiServicesException ex) {
                 if (Stream.of(ex.getSuppressed())
                         .filter(c -> c instanceof ServerConnector.AiServicesException)

@@ -12,6 +12,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
@@ -23,11 +24,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 
 import java.net.HttpURLConnection;
-import java.util.UUID;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 
@@ -47,9 +47,10 @@ public class TestAIServicesLogic {
     private ControllerWnet fakeControllerWnet;
 
     private AIServicesLogic aiServicesLogic;
+    private BackendEngineStatus backendStatus;
 
     @Before
-    public void setup() {
+    public void setup() throws Database.DatabaseException {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
@@ -63,7 +64,8 @@ public class TestAIServicesLogic {
                 this.fakeControllerWnet, mock(ControllerRnn.class), mock(ControllerAiml.class));
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("fake");
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        this.backendStatus = new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0);
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.backendStatus);
     }
 
     @Test
@@ -72,18 +74,18 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
-    public void testUpdateAiStatus_db_returns_false() throws Database.DatabaseException {
+    public void testUpdateAiStatus_db_returns_nothing() throws Database.DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
+                TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(false);
+        when(this.fakeDatabase.getAiQueueStatus(anyObject(), any())).thenReturn(null);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -91,10 +93,10 @@ public class TestAIServicesLogic {
     @Test
     public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
+                TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -105,7 +107,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(Database.DatabaseException.class);
         status.setTrainingError(Double.NaN);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -117,7 +119,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         verify(this.fakeControllerWnet, times(1)).setHashCodeFor(TestDataHelper.AIID, "hash");
@@ -129,24 +131,44 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 this.fakeTools.createNewRandomUUID());
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testUpdateAiStatus_updateFromWrongServer() throws Database.DatabaseException {
-
-        UUID session = this.fakeTools.createNewRandomUUID();
-        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(session))).thenReturn("fake");
-        when(this.fakeControllerWnet.isPrimaryMaster(eq(session))).thenReturn(false);
-
+    public void testUpdateAiStatus_deletedbot() throws Database.DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
+                TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
-                session);
-        when(this.fakeDatabase.updateAIStatus(anyObject(), any())).thenReturn(true);
+                TestDataHelper.SESSIONID);
+        this.backendStatus.setDeleted(true);
+        ApiResult result = this.aiServicesLogic.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_badStateTransition() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
+                TrainingStatus.AI_UNDEFINED, AI_ENGINE,
+                0.0, 0.0, "hash",
+                TestDataHelper.SESSIONID);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(false);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_botGetsRequeued() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(
+                new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0));
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
+                TrainingStatus.AI_TRAINING_QUEUED, AI_ENGINE,
+                0.0, 0.0, "hash",
+                TestDataHelper.SESSIONID);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
+        ApiResult result = this.aiServicesLogic.updateAIStatus(status);
+        verify(this.fakeDatabase, atLeast(1)).queueUpdate(any(), any(), Matchers.eq(true), anyInt(), any());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 }
