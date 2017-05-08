@@ -58,9 +58,9 @@ public class AIQueueServices extends ServerConnector {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
 
         LogMap logMap = LogMap.map("Op", "delete")
-                .map("Type", serverType.value())
-                .map("Server", serverIdentifier)
-                .map("AIID", aiid);
+                .put("Type", serverType.value())
+                .put("Server", serverIdentifier)
+                .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
                 String.format("Sending \"delete\" %s to %s", aiid.toString(), serverType.value()),
                 devId, logMap);
@@ -98,9 +98,9 @@ public class AIQueueServices extends ServerConnector {
         }
 
         LogMap logMap = LogMap.map("Op", "train-start")
-                .map("Type", serverType.value())
-                .map("Server", serverIdentifier)
-                .map("AIID", aiid);
+                .put("Type", serverType.value())
+                .put("Server", serverIdentifier)
+                .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
                 String.format("Sending \"start\" %s to %s", aiid.toString(), serverType.value()),
                 devId, logMap);
@@ -128,9 +128,9 @@ public class AIQueueServices extends ServerConnector {
             throws AiServicesException {
 
         LogMap logMap = LogMap.map("Op", "train-stop")
-                .map("Type", serverType.value())
-                .map("Server", serverIdentifier)
-                .map("AIID", aiid);
+                .put("Type", serverType.value())
+                .put("Server", serverIdentifier)
+                .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
                 String.format("Sending \"stop\" %s to %s", aiid.toString(), serverType.value()),
                 devId, logMap);

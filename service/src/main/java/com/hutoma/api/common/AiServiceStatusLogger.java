@@ -99,10 +99,10 @@ public class AiServiceStatusLogger extends CentralLogger {
     public void logDebugQueueAction(String logFrom, String operation, BackendServerType serverType,
                                     UUID aiid, String devid, String serverIdentifier) {
         LogMap logMap = LogMap.map("Action", "Queue")
-                .map(OPERATION, operation)
-                .map(AIENGINE, serverType.toString())
-                .map(DEVID, devid)
-                .map(AIID, aiid.toString());
+                .put(OPERATION, operation)
+                .put(AIENGINE, serverType.toString())
+                .put(DEVID, devid)
+                .put(AIID, aiid.toString());
         this.logDebug(logFrom,
                 String.format("Processing %s %s %s on %s",
                         serverType.value(), operation, aiid.toString(), serverIdentifier),
