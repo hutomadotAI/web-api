@@ -60,6 +60,7 @@ public class TestTrainingLogic {
     private static final String SOMETEXT = "some text\nsome response";
     private static final String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
     private static final String EOL = "\n";
+    private static final String DEFAULT_TOPIC = topic("topic1");
     private Config fakeConfig;
     private AIServices fakeAiServices;
     private DatabaseEntitiesIntents fakeDatabase;
@@ -119,6 +120,18 @@ public class TestTrainingLogic {
                 $(TrainingStatus.AI_UNDEFINED),
                 $(TrainingStatus.AI_TRAINING_COMPLETE)
         );
+    }
+
+    private static Object[] topicsNonClosedConversation() {
+        return $(
+                $(Arrays.asList("Q1", DEFAULT_TOPIC, "Q2", "A2")),
+                $(Arrays.asList("Q1", "", DEFAULT_TOPIC, "Q2", "A2")),
+                $(Arrays.asList("Q2", "A2", DEFAULT_TOPIC))
+        );
+    }
+
+    private static String topic(final String topicName) {
+        return String.format("%s=%s", TrainingLogic.TOPIC_MARKER, topicName);
     }
 
     @Before
@@ -473,6 +486,34 @@ public class TestTrainingLogic {
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), anyString(), any(), anyString());
         ApiResult result = this.logic.uploadFile(DEVID, AIID, TrainingLogic.TrainingType.TEXT, null, createUpload(SOMETEXT), this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_topics_oddNumberOfTopics_doesNotGenerateError() {
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList("Q1", "A1", DEFAULT_TOPIC, "Q2", "A2"));
+        Assert.assertEquals(String.format("Q1\nA1\n%s\nQ2\nA2\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        Assert.assertEquals(0, result.getEvents().size());
+    }
+
+    @Test
+    public void testTrain_topics_topicAfterNotClosedConversation_ignoresQuestion() {
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList("Q1", DEFAULT_TOPIC, "Q2", "A2"));
+        Assert.assertEquals(String.format("%s\nQ2\nA2\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        Assert.assertEquals(1, result.getEvents().size());
+        result = this.logic.parseTrainingFile(Arrays.asList("Q1", "", DEFAULT_TOPIC, "Q2", "A2"));
+        Assert.assertEquals(String.format("\n%s\nQ2\nA2\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        Assert.assertEquals(1, result.getEvents().size());
+        result = this.logic.parseTrainingFile(Arrays.asList("Q1", "A1", DEFAULT_TOPIC));
+        Assert.assertEquals(String.format("Q1\nA1\n%s\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        Assert.assertEquals(0, result.getEvents().size());
+    }
+
+    @Test
+    public void testTrain_topics_topicWithNoConversations_doesNotGenerateError() {
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList("Q1", "A1", DEFAULT_TOPIC));
+        Assert.assertEquals(String.format("Q1\nA1\n%s\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        result = this.logic.parseTrainingFile(Arrays.asList("Q1", "A1", DEFAULT_TOPIC, topic("topic2"), "Q2", "A2"));
+        Assert.assertEquals(String.format("Q1\nA1\n%s\n%s\nQ2\nA2\n\n", DEFAULT_TOPIC, topic("topic2")), result.getTrainingText());
     }
 
     private void verifyUpdateTraining_noIntents(final String fileToUpload)

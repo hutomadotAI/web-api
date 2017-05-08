@@ -42,6 +42,8 @@ import static com.hutoma.api.connectors.Database.DatabaseException;
  */
 public class TrainingLogic {
 
+    public static final String TOPIC_MARKER = "@topic";
+
     private static final String EMPTY_STRING = "";
     private static final String EOL = "\n";
     private static final String LOGFROM = "traininglogic";
@@ -349,29 +351,39 @@ public class TrainingLogic {
 
         for (String currentSentence : training) {
 
+            boolean isTopicMarker = isTopicMarker(currentSentence);
+
             // empty line means a new conversation exchange
-            if (currentSentence.isEmpty()) {
-                if (!lastLineEmpty) {
+            if (currentSentence.isEmpty() || isTopicMarker) {
+                if (!lastLineEmpty || isTopicMarker(currentSentence)) {
                     // If the last question didn't have an answer then
                     // ignore the last question
                     if (!humanTalkingNow) {
                         removeLastConversationEntry(validConversation);
                         result.addEvent(UPLOAD_MISSING_RESPONSE, lastHumanSentence);
                     }
-                    // New conversation
-                    validConversation.add(EMPTY_STRING);
+
+                    if (isTopicMarker) {
+                        validConversation.add(currentSentence);
+                    } else {
+                        // New conversation
+                        validConversation.add(EMPTY_STRING);
+                    }
                 }
                 humanTalkingNow = true;
-                lastLineEmpty = true;
+                lastLineEmpty = currentSentence.isEmpty();
                 continue;
             }
 
             validConversation.add(currentSentence);
 
-            // if the AI is talking then store the response
-            lastHumanSentence = currentSentence;
+            if (!isTopicMarker) {
+                // if the AI is talking then store the response
+                lastHumanSentence = currentSentence;
 
-            humanTalkingNow = !humanTalkingNow;
+                humanTalkingNow = !humanTalkingNow;
+            }
+
             lastLineEmpty = false;
         }
 
@@ -397,6 +409,10 @@ public class TrainingLogic {
         }
 
         return result;
+    }
+
+    private boolean isTopicMarker(final String line) {
+        return line.startsWith(TrainingLogic.TOPIC_MARKER);
     }
 
     private String getTrainingMaterialsCommon(final String devId, final UUID aiid) throws DatabaseException {
