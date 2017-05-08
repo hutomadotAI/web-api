@@ -7,7 +7,6 @@
         <table class="table dataTable" id="tableAi">
             <thead>
             <tr disabled>
-            <th class="text-center" style="border:0; width:35%">ID</th>
             <th class="text-left" style="border:0; width:20%">Bot Name</th>
             <th class="text-left" style="border:0; width:25%">Description</th>
             <th class="text-center" style="border:0; width:15%">Status</th>
