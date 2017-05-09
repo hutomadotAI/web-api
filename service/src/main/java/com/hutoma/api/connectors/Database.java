@@ -295,7 +295,8 @@ public class Database {
     }
 
     public boolean updateAIStatus(BackendServerType serverType, UUID aiid, TrainingStatus trainingStatus,
-                                  String endpoint, double trainingProgress, double trainingError) throws DatabaseException {
+                                  String endpoint, double trainingProgress, double trainingError)
+            throws DatabaseException {
 
         // open a transaction since this is a read/modify/write operation and we need consistency
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {

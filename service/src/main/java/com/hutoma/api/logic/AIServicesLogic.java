@@ -309,7 +309,7 @@ public class AIServicesLogic {
         return null;
     }
 
-    public class StatusTransitionRejectedException extends Exception {
+    public static class StatusTransitionRejectedException extends Exception {
         public StatusTransitionRejectedException(final String message) {
             super(message);
         }

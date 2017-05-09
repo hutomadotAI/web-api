@@ -36,31 +36,31 @@ import javax.inject.Inject;
  */
 public class QueueProcessor extends TimerTask {
 
+    private final DatabaseAiStatusUpdates database;
+    private final AIQueueServices queueServices;
+    private final Tools tools;
+    private final AiServiceStatusLogger logger;
+    private final Config config;
+    // flag to tell the inner thread not to quit
+    private final AtomicBoolean runQueueProcessor;
+    // how long to wait until checking the queue again
+    private final AtomicLong runAgainAfterMs;
+    // store the last state so that we know when it has changed
+    private final AtomicReference<String> lastKnownControllerState;
+    // used for scheduling queue checks
+    private final Timer timer;
     protected BackendServerType serverType;
     protected ControllerBase controller;
     // server rotation
     AtomicInteger roundRobinIndex;
-    private DatabaseAiStatusUpdates database;
-    private AIQueueServices queueServices;
-    private Tools tools;
-    private AiServiceStatusLogger logger;
     private String logFrom;
-    private Config config;
-    // flag to tell the inner thread not to quit
-    private AtomicBoolean runQueueProcessor;
-    // how long to wait until checking the queue again
-    private AtomicLong runAgainAfterMs;
-    // store the last state so that we know when it has changed
-    private AtomicReference<String> lastKnownControllerState;
     // only used for logging
     private long lastRun = 0;
     private long lastKicked = 0;
-    // used for scheduling queue checks
-    private Timer timer;
 
     @Inject
-    public QueueProcessor(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
-                          final Tools tools, AiServiceStatusLogger logger) {
+    public QueueProcessor(final Config config, final DatabaseAiStatusUpdates database,
+                          final AIQueueServices queueServices, final Tools tools, AiServiceStatusLogger logger) {
         this.config = config;
         this.logger = logger;
         this.database = database;
@@ -183,14 +183,15 @@ public class QueueProcessor extends TimerTask {
         }
     }
 
-    private ServerConnector.AiServicesException findFirstSuppressedHttpError(ServerConnector.AiServicesException e) {
+    private ServerConnector.AiServicesException findFirstSuppressedHttpError(
+            ServerConnector.AiServicesException exception) {
 
         // usual null checks
-        if (e == null || e.getSuppressed() == null) {
+        if (exception == null || exception.getSuppressed() == null) {
             return null;
         }
         // find the first AiServicesException
-        return Arrays.stream(e.getSuppressed())
+        return Arrays.stream(exception.getSuppressed())
                 .filter(error -> error instanceof ServerConnector.AiServicesException)
                 .map(error -> (ServerConnector.AiServicesException) error)
                 // with a non-zero http response code
@@ -202,15 +203,16 @@ public class QueueProcessor extends TimerTask {
      * * Deal with logging and requeuing or dropping when a delete task fails
      * @param queued
      * @param server
-     * @param e
+     * @param exception
      */
-    private void handleDeleteTaskFailure(final BackendEngineStatus queued, final ServerTracker server, final ServerConnector.AiServicesException e) {
+    private void handleDeleteTaskFailure(final BackendEngineStatus queued, final ServerTracker server,
+                                         final ServerConnector.AiServicesException exception) {
 
         // requeue flag
         boolean requeueThis = true;
         String logMessage;
         // get the first suppressed error with a non-zero http error code
-        ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(e);
+        ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(exception);
         if (httpError != null) {
             switch (httpError.getResponseStatus()) {
                 case HttpURLConnection.HTTP_NOT_FOUND:
@@ -221,7 +223,7 @@ public class QueueProcessor extends TimerTask {
             }
             logMessage = httpError.getMessage();
         } else {
-            logMessage = e.toString();
+            logMessage = exception.toString();
         }
 
         try {
@@ -247,16 +249,16 @@ public class QueueProcessor extends TimerTask {
      * Deal with logging and requeuing or dropping when a train task fails
      * @param queued
      * @param server
-     * @param e
+     * @param exception
      */
     private void handleTrainTaskFailure(final BackendEngineStatus queued, final ServerTracker server,
-                                        final ServerConnector.AiServicesException e) {
+                                        final ServerConnector.AiServicesException exception) {
 
         // queue flag
         boolean requeueThis = true;
         String logMessage;
         // get the first error with a non-zero result code
-        ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(e);
+        ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(exception);
         // if there is one
         if (httpError != null) {
             switch (httpError.getResponseStatus()) {
@@ -269,12 +271,12 @@ public class QueueProcessor extends TimerTask {
             }
             logMessage = httpError.getMessage();
         } else {
-            logMessage = e.toString();
+            logMessage = exception.toString();
         }
 
         try {
             if (requeueThis) {
-                
+
                 this.logger.logError(this.logFrom,
                         String.format("REQUEUE train task that failed on backend %s with error %s",
                                 server.getServerIdentifier(), logMessage));
@@ -432,7 +434,7 @@ public class QueueProcessor extends TimerTask {
         }
 
         // get a list of servers with available training slots
-        List<ServerEndpointTrainingSlots> x = slotLookup.values().stream()
+        List<ServerEndpointTrainingSlots> listServersFreeSlots = slotLookup.values().stream()
                 .filter(ServerEndpointTrainingSlots::hasFreeTrainingSlots)
                 .collect(Collectors.toList());
 
@@ -440,7 +442,7 @@ public class QueueProcessor extends TimerTask {
         // to avoid a single malfunctioning server bringing task
         // processing to a halt
         ServerEndpointTrainingSlots chosenSlot =
-                x.get(this.roundRobinIndex.getAndIncrement() % x.size());
+                listServersFreeSlots.get(this.roundRobinIndex.getAndIncrement() % listServersFreeSlots.size());
 
         // get a tracker for the server we have chosen
         ServerTracker chosenServer = serverMap.get(chosenSlot.getEndpoint());

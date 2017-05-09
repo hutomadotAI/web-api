@@ -74,10 +74,13 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws AiServicesException
      */
-    public void stopTraining(final BackendStatus backendStatus, final String devId, final UUID aiid) throws AiServicesException {
+    public void stopTraining(final BackendStatus backendStatus, final String devId, final UUID aiid)
+            throws AiServicesException {
         try {
-            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
-            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
+            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.controllerWnet,
+                    devId, aiid);
+            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN, this.controllerRnn,
+                    devId, aiid);
         } catch (Database.DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to stop training", e);
         }
@@ -90,9 +93,11 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws AiServicesException
      */
-    public void deleteAI(final BackendStatus backendStatus, final String devId, final UUID aiid) throws AiServicesException {
+    public void deleteAI(final BackendStatus backendStatus, final String devId, final UUID aiid)
+            throws AiServicesException {
         try {
-            this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
+            this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.controllerWnet,
+                    devId, aiid);
             this.controllerWnet.kickQueueProcessor();
             this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
             this.controllerRnn.kickQueueProcessor();
@@ -123,13 +128,15 @@ public class AIServices extends ServerConnector {
      * @param trainingMaterials
      * @throws AiServicesException
      */
-    public void uploadTraining(final BackendStatus backendStatus, final String devId, final UUID aiid, final String trainingMaterials)
+    public void uploadTraining(final BackendStatus backendStatus, final String devId, final UUID aiid,
+                               final String trainingMaterials)
             throws AiServicesException {
 
         // for each type of server, send a stop command (if needed),
         // set the status and the queue state
         try {
-            this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.controllerWnet, devId, aiid);
+            this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.controllerWnet,
+                    devId, aiid);
             this.queueServices.userActionUpload(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
         } catch (Database.DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to upload training materials", e);

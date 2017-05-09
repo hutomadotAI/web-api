@@ -95,6 +95,13 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
+    public void logInfo(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.INFO, fromLabel, logComment, properties);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logException(String fromLabel, final Exception ex) {
         StringBuilder sb = new StringBuilder();
         sb.append(ex.getMessage());
@@ -160,6 +167,21 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
+    public void logUserInfoEvent(final String logFrom, final String event, final String user,
+                                 final LogMap properties) {
+        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserInfoEvent(final String logFrom, final String event, final String user) {
+        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, null));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void logUserExceptionEvent(final String logFrom, final String event, final String user,
                                       final Exception exception) {
         this.logUserExceptionEvent(logFrom, event, user, exception, null);
@@ -200,28 +222,6 @@ public class CentralLogger implements ILogger {
     public void logUserWarnEvent(final String logFrom, final String event, final String user,
                                  final LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void logInfo(final String fromLabel, final String logComment, final LogMap properties) {
-        logOutput(EventType.INFO, fromLabel, logComment, properties);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void logUserInfoEvent(final String logFrom, final String event, final String user,
-                                 final LogMap properties) {
-        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, properties));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void logUserInfoEvent(final String logFrom, final String event, final String user) {
-        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, null));
     }
 
     /**

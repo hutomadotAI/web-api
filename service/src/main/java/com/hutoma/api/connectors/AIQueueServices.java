@@ -33,12 +33,12 @@ public class AIQueueServices extends ServerConnector {
     private static final String COMMAND_PARAM = "command";
     private static final String TRAINING_TIME_ALLOWED_PARAM = "training_time_allowed";
 
-    private DatabaseAiStatusUpdates databaseAiStatusUpdates;
+    private final DatabaseAiStatusUpdates databaseAiStatusUpdates;
 
     @Inject
-    public AIQueueServices(final DatabaseAiStatusUpdates database, final ILogger logger, final JsonSerializer serializer,
-                           final Tools tools, final Config config, final JerseyClient jerseyClient,
-                           final ThreadSubPool threadSubPool) {
+    public AIQueueServices(final DatabaseAiStatusUpdates database, final ILogger logger,
+                           final JsonSerializer serializer, final Tools tools, final Config config,
+                           final JerseyClient jerseyClient, final ThreadSubPool threadSubPool) {
         super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
         this.databaseAiStatusUpdates = database;
     }
@@ -194,22 +194,24 @@ public class AIQueueServices extends ServerConnector {
             if (!Strings.isNullOrEmpty(endpoint)) {
                 tracker = map.get(endpoint);
             }
-        }
 
-        // if we want to save this state to the DB
-        if (setDbStatus && status != null) {
-            TrainingStatus newStatus = status.getTrainingStatus();
-            switch (newStatus) {
-                case AI_TRAINING:
-                case AI_TRAINING_QUEUED:
-                case AI_READY_TO_TRAIN:
-                    newStatus = TrainingStatus.AI_TRAINING_STOPPED;
-                    break;
-                default:
+            // if we want to save this state to the DB
+            if (setDbStatus) {
+                TrainingStatus newStatus = status.getTrainingStatus();
+                if (newStatus != null) {
+                    switch (newStatus) {
+                        case AI_TRAINING:
+                        case AI_TRAINING_QUEUED:
+                        case AI_READY_TO_TRAIN:
+                            newStatus = TrainingStatus.AI_TRAINING_STOPPED;
+                            break;
+                        default:
+                    }
+                    // copy the old fields but set new status
+                    this.database.updateAIStatus(serverType, aiid, newStatus,
+                            status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
+                }
             }
-            // copy the old fields but set new status
-            this.database.updateAIStatus(serverType, aiid, newStatus,
-                    status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
         }
 
         // if we have a tracker then tell the training server to stop
@@ -250,7 +252,8 @@ public class AIQueueServices extends ServerConnector {
      * @param aiid
      * @throws Database.DatabaseException
      */
-    void userActionStartTraining(BackendStatus status, BackendServerType serverType, String devid, UUID aiid) throws Database.DatabaseException {
+    void userActionStartTraining(BackendStatus status, BackendServerType serverType, String devid, UUID aiid)
+            throws Database.DatabaseException {
         // get the current status
         BackendEngineStatus engineStatus = status.getEngineStatus(serverType);
         // set the status to training_queued without changing the progress
@@ -288,7 +291,9 @@ public class AIQueueServices extends ServerConnector {
      * @throws Database.DatabaseException
      * @throws ServerConnector.AiServicesException
      */
-    void userActionDelete(final BackendStatus backendStatus, BackendServerType serverType, ControllerBase controller, String devid, UUID aiid) throws Database.DatabaseException, ServerConnector.AiServicesException {
+    void userActionDelete(final BackendStatus backendStatus, BackendServerType serverType, ControllerBase controller,
+                          String devid, UUID aiid)
+            throws Database.DatabaseException, ServerConnector.AiServicesException {
         // if we are training then stop immediately
         stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, false);
         // queue the action to delete, only run this some time in the future after the ai is fully stopped

@@ -524,8 +524,8 @@ public class TrainingLogic {
         return source;
     }
 
-    private ApiResult uploadTrainingFile(final ApiAi ai, final String devId, final UUID aiid, final String trainingMaterials,
-                                         final TrainingFileParsingResult result)
+    private ApiResult uploadTrainingFile(final ApiAi ai, final String devId, final UUID aiid,
+                                         final String trainingMaterials, final TrainingFileParsingResult result)
             throws DatabaseException {
         try {
             this.aiServices.uploadTraining(ai.getBackendStatus(), devId, aiid, trainingMaterials);
