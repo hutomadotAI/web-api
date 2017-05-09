@@ -77,7 +77,7 @@ function isSessionVariablesAvailable()
 <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["", "home", 0, true, true]);
+        MENU.init(["", "home", 0, false, true]);
     </script>
 </form>
 

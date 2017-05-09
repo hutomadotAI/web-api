@@ -115,7 +115,7 @@ if (isset($botstoreItem)) {
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         var info = infoSidebarMenu("<?php echo $menu_title;?>");
-        MENU.init(["<?php echo $name; unset($name); ?>", info['menu_title'], info['menu_level'], info['menu_block'], info['menu_active']]);
+        MENU.init(["<?php echo $name; unset($name); ?>", info['menu_label'], info['menu_level'], info['menu_block'], <?php echo json_encode(!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])); ?>]);
     </script>
 </form>
 <script>

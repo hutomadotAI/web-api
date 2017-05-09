@@ -58,7 +58,7 @@ if(!\hutoma\console::checkSessionIsActive()){
 <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "<?php if(isset($_GET['category'])) echo $_GET['category']; else echo'botstore';?>", 2, false, false]);
+        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "<?php if(isset($_GET['category'])) echo $_GET['category']; else echo'botstore';?>", 2, false, <?php echo json_encode(!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])); ?>]);
     </script>
 </form>
 

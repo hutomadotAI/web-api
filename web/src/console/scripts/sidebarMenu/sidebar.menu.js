@@ -8,11 +8,10 @@ var MENU = MENU || (function () {
                 // _args[1] -> label menu clicked
                 // _args[2] -> level tree menu clicked
                 // _args[3] -> block href link on clicked menu
-                // _args[4] -> deep menu level
-                // _args[5] -> is user logged
+                // _args[4] -> is menu limited
                 // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
 
-                buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], (_args[0] === '') || (_args[1] === 'home'));
+                buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[4] );
                 buildAccountMenu();
             }
         };
@@ -25,8 +24,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     newNode.style = " padding-bottom:65px;";
     newNode.id = 'console-menu';
     var wHTML = "";
-
-    alert(block);
+    
     wHTML += ('<li class="header unselectable" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
     wHTML += ('<li id="menu_home" class="unselectable"><a href="./home.php"><i class="fa fa-home text-light-blue" id="level0"></i><span>home</span></a></li>');
 
