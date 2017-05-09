@@ -78,9 +78,6 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
         document.getElementById('link_' + label_menu).href = '#';
 }
 
-function buildLimitedConsoleMenu(label_menu) {
-
-}
 
 function buildAccountMenu() {
     var newNode = document.createElement('ul');
