@@ -16,7 +16,6 @@ function purchaseBot() {
                 data: {botId: botId},
                 type: 'POST',
                 success: function (response) {
-
                     var parsedResponse = JSON.parse(response);
                     var statusCode = parsedResponse['status']['code'];
                     var message = parsedResponse['status']['info'];

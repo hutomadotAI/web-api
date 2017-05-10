@@ -122,7 +122,8 @@ if (isset($botstoreItem)) {
     populateBotFields(
         botstoreItem,
         "<?php echo $menu_title; unset($menu_title)?>",
-        "<?php if(isset($_GET['category'])) echo $_GET['category'];?>"
+        "<?php if(isset($_GET['category'])) echo $_GET['category'];?>",
+        <?php echo json_encode(isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
     );
 </script>
 </body>

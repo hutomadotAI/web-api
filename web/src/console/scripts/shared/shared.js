@@ -118,6 +118,9 @@ function openSingleBot(elem, option, botId, category) {
         case DRAW_BOTCARDS.BOTSTORE_FLOW.value:
             element.value = 'botstore';
             break;
+        case DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value:
+            element.value = 'botstore';
+            break;
         case DRAW_BOTCARDS.ADD_SKILL_FLOW.value:
             element.value = 'settings';
             break;
