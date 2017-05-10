@@ -2,8 +2,6 @@ document.getElementById("btnPayment").addEventListener("click", purchaseBot);
 
 function purchaseBot() {
     var flow = JSON.parse(this.getAttribute('data-flow'));
-
-    alert(flow);
     switch(flow) {
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value :
         case DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value :
