@@ -331,10 +331,11 @@ public class ChatLogic {
             sessionData(this.chatId).setAlarmId(2683);
             sessionData(this.chatId).setActionId(1);
         }
-        if  (message.contains("lte68")) {
+        if  (message.contains("lte 68")|| message.contains("lte68")) {
             sessionData(this.chatId).setAlarmId(68);
             sessionData(this.chatId).setActionId(1);
         }
+
         if (message.contains("70359")
                 || message.contains("fail") && message.contains("hdd")
                 || message.contains("disk") && message.contains("fail")
@@ -345,6 +346,7 @@ public class ChatLogic {
                 || message.contains("disk") && message.contains("alarm")
                 || message.contains("hdd") && message.contains("alarm")) {
             sessionData(this.chatId).setAlarmId(70359);
+            sessionData(this.chatId).setActionId(1);
         }
 
         if (message.contains("3159") || message.contains("3199")
