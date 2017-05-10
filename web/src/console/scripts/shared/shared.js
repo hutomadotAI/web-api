@@ -54,7 +54,8 @@ var DRAW_BOTCARDS =
 {
     CREATE_NEW_BOT_FLOW: {value: 0},
     BOTSTORE_FLOW: {value: 1},
-    ADD_SKILL_FLOW: {value: 2}
+    BOTSTORE_WITH_BOT_FLOW: {value: 2},
+    ADD_SKILL_FLOW: {value: 3}
 };
 
 var BOT_ICON = {

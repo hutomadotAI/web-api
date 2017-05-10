@@ -6,6 +6,8 @@ if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
+$_SESSION[$_SESSION['navigation_id']]['user_details']['canbuy'] = false;
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -80,7 +82,7 @@ if(!\hutoma\console::checkSessionIsActive()){
 
 <script>
     $(document).ready(function () {
-        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', DRAW_BOTCARDS.BOTSTORE_FLOW.value);
+        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', <?php echo json_encode(isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value);
     });
     $('#buyBot').on('hide.bs.modal', function (e) {
         var purchase_state = document.getElementById('purchase_state').value;

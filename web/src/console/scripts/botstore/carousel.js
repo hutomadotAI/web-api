@@ -79,10 +79,12 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                 + '" data-description="' + botDescription
                 + '" data-icon="' + botIconPath
                 + '" data-price="' + botPrice
-                + '" data-license="' + botLicenseType + '"';
+                + '" data-license="' + botLicenseType
+                + '" data-flow="' + optionFlow + '"';
 
             switch (optionFlow) {
-                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:  // botstore showed during creation AI wizard
+                case DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value: 
+                case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
                     wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
                     if (botOwned) {
                         wHTML += ('<div class="switch" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '"); data-link="0"></div>');

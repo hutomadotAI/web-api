@@ -54,7 +54,7 @@
                         </div>
                         <div class="col-xs-4 bot-buy-purchase">
                                 <!--purchased button-->
-                                <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal" id="btnPayment" style="width:130px;">
+                                <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal" data-flow="" style="width:130px;">
                                     <b>Use Bot </b>
                                     <span class="fa fa-arrow-circle-right"></span>
                                 </button>
