@@ -1,17 +1,13 @@
 var MENU = MENU || (function () {
-        var _args = {}; // private
         return {
             init: function (Args) {
-                _args = Args;
-
-                // _args[0] -> ai_name
-                // _args[1] -> label menu clicked
-                // _args[2] -> level tree menu clicked
-                // _args[3] -> block href link on clicked menu
-                // _args[4] -> is menu limited
-                // _args[0] == '' -> limited menu show during creation AI wizard or when start first time
-
-                buildConsoleMenu(_args[0], _args[1], _args[2], _args[3], _args[4] );
+                var aiName = Args[0];
+                var labelMenuClicked = Args[1];
+                var levelTreeMenuClicked = Args[2];
+                var blockHrefLinkMenuClicked = Args[3];
+                var isMenuLimited = Args[4];
+                
+                buildConsoleMenu(aiName, labelMenuClicked, levelTreeMenuClicked, blockHrefLinkMenuClicked, isMenuLimited );
                 buildAccountMenu();
             }
         };
