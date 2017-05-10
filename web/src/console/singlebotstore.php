@@ -22,6 +22,7 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']
 $botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
 $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
+$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 
 $botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
@@ -123,7 +124,7 @@ if (isset($botstoreItem)) {
         botstoreItem,
         "<?php echo $menu_title; unset($menu_title)?>",
         "<?php if(isset($_GET['category'])) echo $_GET['category'];?>",
-        <?php echo json_encode(isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']));?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
+        <?php echo json_encode($isExistAiId);?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
     );
 </script>
 </body>
