@@ -88,10 +88,6 @@ $(function () {
         type: "single",
         grid: true,
         keyboard: true,
-        onStart: function (data) {console.log("onStart"); },
-        onChange: function (data) {console.log("onChange"); },
-        onFinish: function (data) { console.log("onFinish"); },
-        onUpdate: function (data) {console.log("onUpdate"); },
         values: ["never", "rarely", "sometimes", "often", "always"]
     });
 });

@@ -6,6 +6,9 @@ if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
+$aiName = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
+$category = isset($_GET['category']) ? $_GET['category'] : 'botstore';
+$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -58,7 +61,13 @@ if(!\hutoma\console::checkSessionIsActive()){
 <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "<?php if(isset($_GET['category'])) echo $_GET['category']; else echo'botstore';?>", 2, false, false]);
+        MENU.init([
+            "<?php echo $aiName;?>",
+            "<?php echo $category;?>",
+            2,
+            false,
+            <?php echo json_encode(!$isExistAiId);?>
+        ]);
     </script>
 </form>
 
@@ -80,13 +89,18 @@ if(!\hutoma\console::checkSessionIsActive()){
 
 <script>
     $(document).ready(function () {
-        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', DRAW_BOTCARDS.BOTSTORE_FLOW.value);
+        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', <?php echo json_encode($isExistAiId);?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value);
     });
     $('#buyBot').on('hide.bs.modal', function (e) {
         var purchase_state = document.getElementById('purchase_state').value;
         if (purchase_state == 1)
             switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.BOTSTORE_FLOW.value);
     });
+    <?php
+        unset($aiName);
+        unset($category);
+        unset($isExistAiId);
+    ?>
 </script>
 </body>
 </html>
