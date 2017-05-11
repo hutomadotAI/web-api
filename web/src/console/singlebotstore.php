@@ -13,7 +13,7 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']
 
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
 $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
-
+$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -49,7 +49,12 @@ $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <iframe src="botcardDetail.php" frameBorder="0" scrolling="no" class="iframe-full-height">Browser not compatible.</iframe>
+                    <iframe src="botcardDetail.php"
+                            class="iframe-full-height"
+                            frameBorder="0"
+                            scrolling="no"
+                            id="botcardDetailFrame">
+                    </iframe>
                 </div>
             </div>
         </section>
@@ -82,7 +87,19 @@ $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         var info = infoSidebarMenu("<?php echo $menu_title;?>");
-        MENU.init(["<?php echo $name; unset($name); ?>", info['menu_label'], info['menu_level'], info['menu_block'], <?php echo json_encode(!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])); ?>]);
+        MENU.init([
+            "<?php echo $name; unset($name); ?>",
+            info['menu_label'],
+            info['menu_level'],
+            info['menu_block'],
+            <?php echo json_encode(!$isExistAiId);?>
+        ]);
+
+        var category = '<?php if( isset($_GET['category']) ) echo $_GET['category'];?>';
+        if(category !=''){
+            var nodeFrame = document.getElementById('botcardDetailFrame');
+            nodeFrame.setAttribute('src', nodeFrame.getAttribute('src') + buildCategoryURIparameter(category));
+        }
     </script>
 </form>
 </body>

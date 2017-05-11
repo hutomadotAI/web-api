@@ -84,7 +84,7 @@ if (isset($botstoreItem)) {
                     </div>
                     <!--close button-->
                     <div class="col-xs-1 bot-close-button no-padding">
-                        <a href="" id="btnBuyBotBack" class="fa fa-close text-md text-darkgray"></a>
+                        <a href="" id="btnBuyBotBack" class="fa fa-close text-md text-darkgray" target="_top"></a>
                     </div>
                 </div>
 
@@ -248,7 +248,7 @@ if (isset($botstoreItem)) {
                 </div>
             </div>
             <br>
-            <a href="./botstore.php" id="btnBackToBotstore" class="btn btn-primary pull-left flat">Go to Botstore</a>
+            <a href="./botstore.php" id="btnBackToBotstore" class="btn btn-primary pull-left flat" target="_top">Go to Botstore</a>
         </div>
     </div>
 
@@ -341,6 +341,7 @@ if (isset($botstoreItem)) {
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 
 <script>
     populateBotFields(
