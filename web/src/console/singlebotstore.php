@@ -1,14 +1,6 @@
 <?php
 require "../pages/config.php";
 require_once "./api/apiBase.php";
-require_once "./api/entityApi.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
-require_once "api/developerApi.php";
-require_once "api/botstoreApi.php";
-require_once "common/bot.php";
-require_once "common/developer.php";
-require_once "common/botstoreItem.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
      exit;
@@ -19,28 +11,9 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']
     exit;
 }
 
-$botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
-$menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
-$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 
-$botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$botstoreItem = $botstoreApi->getBotstoreBot($botId);
-unset($botId);
-unset($botstoreApi);
-
-if (isset($botstoreItem)) {
-    switch ($botstoreItem['status']['code']) {
-        case 200:
-            break;
-        case 404:
-            \hutoma\console::redirect('./error.php?err=100');
-            exit;
-        case 500:
-            \hutoma\console::redirect('./error.php?err=100');
-            exit;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -55,17 +28,6 @@ if (isset($botstoreItem)) {
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
 </head>
-<script>
-    var botstoreItem = <?php
-        $botItem = new \hutoma\botstoreItem();
-        if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem))) {
-            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
-        }
-        echo json_encode($botItem->toJSON());
-        unset($botstoreItem);
-        unset($botItem);
-        ?>;
-</script>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">
 <?php include_once "../console/common/google_analytics.php"; ?>
@@ -87,10 +49,7 @@ if (isset($botstoreItem)) {
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/botstore.content.botcard.html.php'; ?>
-                    <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
-                    <script src="./scripts/botcard/botcard.js"></script>
-                    <script src="./scripts/botstore/botstoreWizard.js"></script>
+                    <iframe src="botcardDetail.php" frameBorder="0" scrolling="no" class="iframe-full-height">Browser not compatible.</iframe>
                 </div>
             </div>
         </section>
@@ -107,25 +66,24 @@ if (isset($botstoreItem)) {
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 
+<script src="./scripts/botstore/botstoreWizard.js"></script>
 <script src="./scripts/botcard/buyBotFromBotcardDetail.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 
+<script>
+    $('.iframe-full-height').on('load', function(){
+        this.style.height=this.contentDocument.body.scrollHeight + 'px';
+        this.style.width= '100%';
+    });
+</script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         var info = infoSidebarMenu("<?php echo $menu_title;?>");
         MENU.init(["<?php echo $name; unset($name); ?>", info['menu_label'], info['menu_level'], info['menu_block'], <?php echo json_encode(!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])); ?>]);
     </script>
 </form>
-<script>
-    populateBotFields(
-        botstoreItem,
-        "<?php echo $menu_title; unset($menu_title)?>",
-        "<?php if(isset($_GET['category'])) echo $_GET['category'];?>",
-        <?php echo json_encode($isExistAiId);?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
-    );
-</script>
 </body>
 </html>

@@ -47,19 +47,21 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         elem.style.display = 'block';
         document.getElementById('botWebsite').setAttribute('href', checkLink(dev['website']));
     }
-
-    if (bot['videoLink'] == null || videoLinkFilter(bot['videoLink']) == '')
-        document.getElementById('botVideoLinkSection').innerHTML = '';
-    else
-        document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(bot['videoLink']));
-
-    setButtonParameter(menu_title, JSON.parse(botstoreItem)['owned'], carousel_category, current_flow)
+    
+    setButtonParameter(menu_title, JSON.parse(botstoreItem)['owned'], carousel_category, current_flow);
 }
 
 function checkLink(link){
     if (link.indexOf('http') == -1 )
         link = 'http://' + link;
     return link;
+}
+
+function addEmbedVideoLink(bot){
+    if (bot['videoLink'] == null || videoLinkFilter(bot['videoLink']) == '')
+        document.getElementById('botVideoLinkSection').innerHTML = '';
+    else
+        document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(bot['videoLink']));
 }
 
 function videoLinkFilter(url) {
