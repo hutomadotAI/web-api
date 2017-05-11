@@ -39,4 +39,4 @@ app.router.add_post('/', chooser.do_route)
 
 chooser.reg_acceptor('application/json', handle_json)
 
-web.run_app(app, port=os.getenv("PORT", 5858))
+web.run_app(app, port=int(os.getenv("PORT", 5858)))
