@@ -86,6 +86,7 @@
     var previousFilled = <?php if (isPreviousFieldsFilled()) echo('true'); else echo ('false'); ?>;
     var previousGeneralInfo  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
     var err = <?php if(isset($_GET['err'])) echo($_GET['err']); else echo ('false'); ?>;
+    var errObj = <?php if(isset($_GET['errObj'])) echo($_GET['errObj']); else echo json_encode('');?>;
 </script>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>

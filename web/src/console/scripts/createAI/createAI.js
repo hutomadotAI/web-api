@@ -88,10 +88,6 @@ $(function () {
         type: "single",
         grid: true,
         keyboard: true,
-        onStart: function (data) {console.log("onStart"); },
-        onChange: function (data) {console.log("onChange"); },
-        onFinish: function (data) { console.log("onFinish"); },
-        onUpdate: function (data) {console.log("onUpdate"); },
         values: ["never", "rarely", "sometimes", "often", "always"]
     });
 });
@@ -108,7 +104,9 @@ $(document).ready(function(){
     else {
         setSliderValue('ai_confidence', 0.2); // default value "sometimes"
     }
-    if(err)
-        msgAlertNameAI(ALERT.DANGER.value, document.getElementById('ai_name').value+' name already in use. Please choose another one.');
+    if(err) {
+        document.getElementById('containerMsgAlertNewAI').style.display = 'block';
+        document.getElementById('msgAlertNewAI').innerText = errObj;
+    }
 
 });
