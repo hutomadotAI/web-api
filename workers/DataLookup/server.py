@@ -31,7 +31,8 @@ async def handle_json(request):
         except BaseException:
             return web.Response(text="A processing error occurred.")
 
-        return web.Response(text=querydata.getValueForRow(knownColumn, knownValue, targetValue, intentName))
+        response = {"text": querydata.getValueForRow(knownColumn, knownValue, targetValue, intentName)}
+        return web.json_response(response)
 
 app = web.Application()
 chooser = AcceptChooser()
