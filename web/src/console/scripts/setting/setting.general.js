@@ -7,10 +7,7 @@ $(function () {
         type: "single",
         grid: true,
         keyboard: true,
-        onStart: function  () { },
-        onChange: function () { },
         onFinish: function () {msgAlertUpdateAI(ALERT.BASIC.value, 'This page allows you to change the basic information of your Bot.'); },
-        onUpdate: function () { },
         values: ["never", "rarely", "sometimes", "often", "always"]
     });
 });
@@ -53,6 +50,10 @@ function updateAI() {
             if (statusCode === 200) {
                 msgAlertUpdateAI(ALERT.SUCCESS.value, 'Your Bot\'s information has been updated.');
                 updatePreviousDataLoaded(JSONdata);
+                activeGeneralButtons();
+            }
+            else{
+                msgAlertUpdateAI(ALERT.DANGER.value, JSONdata['status']['info']);
                 activeGeneralButtons();
             }
         },

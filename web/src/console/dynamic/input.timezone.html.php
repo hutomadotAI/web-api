@@ -6,7 +6,6 @@ $html .= '<div class="form-group">';
 $html .= '<label for="ai_timezone">Time zone</label>';
 $html .= '<select class="form-control select2" name="ai_timezone" id="ai_timezone" style="width: 100%;">';
 
-$prev='';
 foreach ($zones as $zone) {
   $zone = explode('/', $zone); // 0 => Continent, 1 => City
   // Only use "friendly" continent names
@@ -20,15 +19,17 @@ foreach ($zones as $zone) {
       $zone[0] == 'Europe' ||
       $zone[0] == 'Indian' ||
       $zone[0] == 'Pacific')
-    if (isset($zone[1]) != '' && $prev != $zone[0] . '/' . $zone[1]) {
 
-      $locations[$zone[0]][$zone[0] . '/' . $zone[1]] = str_replace('_', ' ', $zone[1]); // Creates array(DateTimeZone => 'Friendly name')
-      if ($zone[0] . '/' . $zone[1] == 'Europe/London')
-        $html .= '<option selected="selected">'. $zone[0] . '/' . $zone[1] .'</option>';
-      else
-        $html .= '<option>'. $zone[0] . '/' . $zone[1] .'</option>';
+      if (isset($zone[1]) != '') {
+          $timezone = $zone[0] . '/' . $zone[1];
 
-      $prev = $zone[0] . '/' . $zone[1];
+          if (isset($zone[2]) != '')
+              $timezone .= '/' . $zone[2];
+
+          if ($timezone == 'Europe/London')
+            $html .= '<option selected="selected">'. $timezone .'</option>';
+          else
+            $html .= '<option>'. $timezone .'</option>';
     }
 }
 
