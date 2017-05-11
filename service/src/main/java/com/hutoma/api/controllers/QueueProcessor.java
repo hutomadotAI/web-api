@@ -14,6 +14,9 @@ import com.hutoma.api.containers.sub.QueueAction;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
+import org.joda.time.DateTime;
+import org.joda.time.Seconds;
+
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.List;
@@ -298,6 +301,52 @@ public class QueueProcessor extends TimerTask {
     }
 
     /***
+     * If any of the active training slots have not reported progress in a while
+     * then we re-queue the bot to train, freeing up the slot in the process
+     * @param slotList
+     */
+    private void recoverInterruptedTraining(final List<ServerEndpointTrainingSlots> slotList) {
+
+        // bail here if there is no interrupted training
+        if (!slotList.stream().anyMatch(ServerEndpointTrainingSlots::hasSlotsInterruptedTraining)) {
+            return;
+        }
+
+        // create a log entry per server with (n>0) interrupted training slots
+        slotList.stream().filter(ServerEndpointTrainingSlots::hasSlotsInterruptedTraining)
+                .forEach(server -> {
+                    LogMap logMap = LogMap.map("Op", "interruptedtraining")
+                            .put("type", this.serverType)
+                            .put("server", server.getEndpointIdentifier());
+                    this.logger.logWarning(this.logFrom,
+                            String.format("Found %d bots that stopped training unexpectedly on server %s",
+                                    server.getSlotsInterruptedTraining(), server.getEndpointIdentifier()), logMap);
+                });
+
+        // for all the bots that are in training limbo, requeue training and free up the slots
+        try {
+            this.database.recoverInterruptedTraining(this.serverType, this.config.getProcessQueueInterruptedSeconds())
+                    .forEach(interrupted -> {
+                        // then create a single log line per bot that has been requeued
+                        DateTime lastUpdated = interrupted.getUpdateTime();
+                        Seconds since = Seconds.secondsBetween(
+                                lastUpdated, new DateTime(this.tools.getTimestamp()));
+                        LogMap logMap = LogMap.map("Op", "interruptedtraining")
+                                .put("type", this.serverType)
+                                .put("server", interrupted.getServerIdentifier())
+                                .put("aiid", interrupted.getAiid())
+                                .put("lastupdate", lastUpdated)
+                                .put("updategap", since.getSeconds());
+                        this.logger.logWarning(this.logFrom, String.format(
+                                "After %d minutes without a training progress update, requeuing %s for training",
+                                since.getSeconds() / 60, interrupted.getAiid().toString()), logMap);
+                    });
+        } catch (Database.DatabaseException exception) {
+            this.logger.logException(this.logFrom, exception);
+        }
+    }
+
+    /***
      * Process a deletion
      * @param queued
      * @param server
@@ -389,14 +438,15 @@ public class QueueProcessor extends TimerTask {
     protected void processQueue() throws Database.DatabaseException {
 
         // get a summary of training slots from the database
-        List<ServerEndpointTrainingSlots> slotList = this.database.getQueueSlotCounts(this.serverType);
+        List<ServerEndpointTrainingSlots> slotList = this.database.getQueueSlotCounts(this.serverType,
+                this.config.getProcessQueueInterruptedSeconds());
 
         // if any training slots have timed out, requeue them
-        // TODO: deal with slots that are in use but need to be requeued
+        recoverInterruptedTraining(slotList);
 
         // make the slot summary into a map to prepare for matching
         Map<String, ServerEndpointTrainingSlots> slotLookup = slotList.stream()
-                .collect(Collectors.toMap(ServerEndpointTrainingSlots::getEndpoint, Function.identity()));
+                .collect(Collectors.toMap(ServerEndpointTrainingSlots::getEndpointIdentifier, Function.identity()));
 
         // get a map of connected endpoints
         Map<String, ServerTracker> serverMap = this.controller.getVerifiedEndpointMap();
@@ -445,7 +495,7 @@ public class QueueProcessor extends TimerTask {
                 listServersFreeSlots.get(this.roundRobinIndex.getAndIncrement() % listServersFreeSlots.size());
 
         // get a tracker for the server we have chosen
-        ServerTracker chosenServer = serverMap.get(chosenSlot.getEndpoint());
+        ServerTracker chosenServer = serverMap.get(chosenSlot.getEndpointIdentifier());
 
         // take the next task off the queue
         BackendEngineStatus queued = this.database.queueTakeNext(this.serverType);

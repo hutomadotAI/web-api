@@ -233,6 +233,14 @@ public class Config {
     }
 
     /***
+     * If this many seconds pass and no update is received for an active training slot
+     * then we consider it 'interrupted' and reallocate the training job to a server with space
+     */
+    public int getProcessQueueInterruptedSeconds() {
+        return 2 * 60;
+    }
+
+    /***
      * The total number of milliseconds that we wait for backend
      * requests to complete.
      * N.B. this value is not 'per request'.

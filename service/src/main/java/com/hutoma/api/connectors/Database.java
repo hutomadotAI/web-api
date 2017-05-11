@@ -799,7 +799,7 @@ public class Database {
                 rs.getString("client_token"),
                 rs.getString("ai_name"),
                 rs.getString("ai_description"),
-                new DateTime(rs.getDate("created_on")),
+                new DateTime(rs.getTimestamp("created_on")),
                 rs.getBoolean("is_private"),
                 (backendStatus == null) ? new BackendStatus() : backendStatus,
                 rs.getBoolean("has_training_file"),
@@ -882,7 +882,7 @@ public class Database {
             // queue status
             QueueAction action = QueueAction.forValue(rs.getString("queue_action"));
             String serverIdentifier = rs.getString("server_endpoint");
-            Object updateTimeObject = rs.getDate("update_time");
+            java.sql.Timestamp updateTimeObject = rs.getTimestamp("update_time");
             DateTime updateTime = (updateTimeObject == null) ? null : new DateTime(updateTimeObject);
 
             BackendEngineStatus status = new BackendEngineStatus(aiid, trainingStatus, trainingError,

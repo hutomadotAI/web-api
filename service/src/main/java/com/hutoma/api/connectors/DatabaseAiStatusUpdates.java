@@ -69,17 +69,20 @@ public class DatabaseAiStatusUpdates extends Database {
      * i.e. for each individual server endpoint a count of active used training slots
      * and a count of used training slots that have not been updated in a while
      * @param serverType
+     * @param cutoffSeconds seconds that need to have passed for a training slot to be considered 'lapsed'
      * @return
      * @throws DatabaseException
      */
-    public List<ServerEndpointTrainingSlots> getQueueSlotCounts(BackendServerType serverType) throws DatabaseException {
+    public List<ServerEndpointTrainingSlots> getQueueSlotCounts(
+            BackendServerType serverType, int cutoffSeconds) throws DatabaseException {
 
         List<ServerEndpointTrainingSlots> slots = new ArrayList<>();
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            ResultSet rs = transaction.getDatabaseCall().initialise("queueCountSlots", 2)
+            ResultSet rs = transaction.getDatabaseCall().initialise("queueCountSlots", 3)
                     .add(serverType.value())
                     .add(TrainingStatus.AI_TRAINING.value())
+                    .add(cutoffSeconds)
                     .executeQuery();
 
             while (rs.next()) {
@@ -151,6 +154,46 @@ public class DatabaseAiStatusUpdates extends Database {
             throw new DatabaseException(e);
         }
         return backendEngineStatus;
+    }
+
+    /***
+     * Gets a list of AIs that were training but have lapsed
+     * i.e. the server no longer seems to be training them but hasn't told us about it
+     * Each bot is requeued so that the slot is effectively cleared
+     * @param serverType
+     * @param cutoffSeconds number of seconds with no updates after which the AI is considered lapsed
+     * @return
+     * @throws DatabaseException
+     */
+    public List<BackendEngineStatus> recoverInterruptedTraining(
+            BackendServerType serverType, int cutoffSeconds) throws DatabaseException {
+
+        List<BackendEngineStatus> slots = new ArrayList<>();
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            ResultSet rs = transaction.getDatabaseCall().initialise("getInterruptedTrainingList", 3)
+                    .add(serverType.value())
+                    .add(TrainingStatus.AI_TRAINING.value())
+                    .add(cutoffSeconds)
+                    .executeQuery();
+
+            while (rs.next()) {
+                BackendEngineStatus lapsed = getBackendEngineStatus(rs).getB();
+                slots.add(lapsed);
+
+                transaction.getDatabaseCall().initialise("queueRecover", 4)
+                        .add(serverType.value())
+                        .add(lapsed.getAiid())
+                        .add(QueueAction.TRAIN.value())
+                        .add(TrainingStatus.AI_TRAINING_QUEUED.value())
+                        .executeUpdate();
+            }
+
+            transaction.commit();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+        return slots;
     }
 
     public void deleteAiStatus(BackendServerType serverType, UUID aiid) throws DatabaseException {

@@ -44,11 +44,11 @@ public class TestQueueProcessor {
 
     @Test
     public void testQueue_RoundRobinAllocation() throws Database.DatabaseException {
-        this.fakeData = create(null, ENDPOINT1, 0, 2, true);
-        this.fakeData = create(this.fakeData, ENDPOINT2, 0, 2, true);
-        this.fakeData = create(this.fakeData, ENDPOINT3, 0, 2, true);
-        this.fakeData = create(this.fakeData, ENDPOINT4, 0, 2, true);
-        when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
+        this.fakeData = create(null, ENDPOINT1, 0, 2, 0, true);
+        this.fakeData = create(this.fakeData, ENDPOINT2, 0, 2, 0, true);
+        this.fakeData = create(this.fakeData, ENDPOINT3, 0, 2, 0, true);
+        this.fakeData = create(this.fakeData, ENDPOINT4, 0, 2, 0, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
         HashSet<String> serversSelected = new HashSet<>();
         for (int i = 0; i < 4; i++) {
@@ -61,8 +61,8 @@ public class TestQueueProcessor {
 
     @Test
     public void testQueue_FreeSlot() throws Database.DatabaseException {
-        this.fakeData = create(null, ENDPOINT1, 0, 1, true);
-        when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
+        this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
         this.qproc.processQueue();
         Assert.assertEquals(ENDPOINT1, this.qproc.getChosenServer());
@@ -70,8 +70,8 @@ public class TestQueueProcessor {
 
     @Test
     public void testQueue_NoFreeSlots() throws Database.DatabaseException {
-        this.fakeData = create(null, ENDPOINT1, 1, 1, true);
-        when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
+        this.fakeData = create(null, ENDPOINT1, 1, 1, 0, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
@@ -79,7 +79,7 @@ public class TestQueueProcessor {
 
     @Test
     public void testQueue_NoSlotsNoServers() throws Database.DatabaseException {
-        when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(new ArrayList<>());
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(new ArrayList<>());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(new HashMap<>());
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
@@ -92,6 +92,24 @@ public class TestQueueProcessor {
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
     }
 
+    @Test
+    public void testQueue_NoSlotRecovery() throws Database.DatabaseException {
+        this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
+        this.qproc.processQueue();
+        verify(this.fakeDatabase, Mockito.never()).recoverInterruptedTraining(any(), anyInt());
+    }
+
+    @Test
+    public void testQueue_RecoverSlots() throws Database.DatabaseException {
+        this.fakeData = create(null, ENDPOINT1, 0, 1, 1, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
+        this.qproc.processQueue();
+        verify(this.fakeDatabase, Mockito.times(1)).recoverInterruptedTraining(any(), anyInt());
+    }
+
     @Before
     public void setup() throws Database.DatabaseException {
         this.fakeConfig = mock(Config.class);
@@ -102,8 +120,8 @@ public class TestQueueProcessor {
                 mock(Tools.class), mock(AiServiceStatusLogger.class));
         this.qproc.initialise(this.fakeController, BackendServerType.WNET);
 
-        this.fakeData = create(null, ENDPOINT1, 0, 1, true);
-        when(this.fakeDatabase.getQueueSlotCounts(any())).thenReturn(this.fakeData.getA());
+        this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
 
         BackendEngineStatus fakeStatus = mock(BackendEngineStatus.class);
@@ -113,10 +131,11 @@ public class TestQueueProcessor {
 
     private Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> create(
             Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> current,
-            String name, int usedSlots, int totalSlots, boolean verified) {
+            String name, int usedSlots, int totalSlots, int interruptedSlots, boolean verified) {
         ArrayList<ServerEndpointTrainingSlots> slots = (current == null) ? new ArrayList<>() : current.getA();
         HashMap<String, ServerTracker> servers = (current == null) ? new HashMap<>() : current.getB();
-        Pair<ServerEndpointTrainingSlots, ServerTracker> appended = createSlots(name, usedSlots, totalSlots, verified);
+        Pair<ServerEndpointTrainingSlots, ServerTracker> appended =
+                createSlots(name, usedSlots, totalSlots, interruptedSlots, verified);
         slots.add(appended.getA());
         servers.put(appended.getB().getServerIdentifier(), appended.getB());
         return (current == null) ?
@@ -124,8 +143,8 @@ public class TestQueueProcessor {
                 current;
     }
 
-    private Pair<ServerEndpointTrainingSlots, ServerTracker> createSlots(String name, int usedSlots, int totalSlots, boolean verified) {
-        ServerEndpointTrainingSlots slots = new ServerEndpointTrainingSlots(name, usedSlots, 0);
+    private Pair<ServerEndpointTrainingSlots, ServerTracker> createSlots(String name, int usedSlots, int totalSlots, int interruptedSlots, boolean verified) {
+        ServerEndpointTrainingSlots slots = new ServerEndpointTrainingSlots(name, usedSlots, interruptedSlots);
         ServerTracker tracker = mock(ServerTracker.class);
         when(tracker.canTrain()).thenReturn(true);
         when(tracker.isEndpointVerified()).thenReturn(verified);

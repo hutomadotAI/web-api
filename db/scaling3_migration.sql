@@ -169,11 +169,12 @@ DROP PROCEDURE IF EXISTS `queueCountSlots`;
 DELIMITER $$
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueCountSlots`(
   IN `in_server_type` VARCHAR(10),
-  IN `in_training_status` VARCHAR(50))
+  IN `in_training_status` VARCHAR(50),
+  IN `in_cutoff_seconds` INT)
 BEGIN
 
 DECLARE v_cutoff DATETIME;
-SET v_cutoff = DATE_SUB(NOW(), INTERVAL 5 MINUTE);
+SET v_cutoff = DATE_SUB(NOW(), INTERVAL `in_cutoff_seconds` SECOND);
 
 SELECT `ai_status`.`server_endpoint`,
  sum(case when `ai_status`.`update_time` > v_cutoff then 1 else 0 end) training,
@@ -183,6 +184,50 @@ WHERE `server_type` = `in_server_type`
 AND `ai_status`.`queue_time` IS NULL
 AND `ai_status`.`training_status` = `in_training_status`
 GROUP BY `ai_status`.`server_endpoint`;
+
+  END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `getInterruptedTrainingList`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getInterruptedTrainingList`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_training_status` VARCHAR(50),
+  IN `in_cutoff_seconds` INT)
+BEGIN
+
+DECLARE v_cutoff DATETIME;
+SET v_cutoff = DATE_SUB(NOW(), INTERVAL `in_cutoff_seconds` SECOND);
+
+SELECT `ai_status`.*
+FROM `ai_status`
+WHERE `server_type` = `in_server_type`
+AND `ai_status`.`queue_time` IS NULL
+AND `ai_status`.`training_status` = `in_training_status`
+AND `update_time`<=v_cutoff
+ORDER BY `update_time` ASC
+FOR UPDATE;
+
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `queueRecover`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueRecover`(
+  IN `in_server_type` VARCHAR(10),
+  IN `in_aiid` VARCHAR(50),  
+  IN `in_queue_action` VARCHAR(50),
+  IN `in_training_status` VARCHAR(45)
+  )
+BEGIN
+ 
+UPDATE `ai_status` SET 	
+	`training_status` = `in_training_status`,
+    `queue_action`=`in_queue_action`,
+    `update_time`=now(),
+    `queue_time`=now()
+WHERE `server_type` = `in_server_type` 
+	AND `aiid` = `in_aiid`;
 
   END$$
 DELIMITER ;

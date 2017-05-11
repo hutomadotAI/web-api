@@ -57,6 +57,10 @@ public class BackendEngineStatus {
         this.aiHash = aiStatus.getAiHash();
     }
 
+    public DateTime getUpdateTime() {
+        return this.updateTime;
+    }
+
     public TrainingStatus getTrainingStatus() {
         return this.trainingStatus;
     }

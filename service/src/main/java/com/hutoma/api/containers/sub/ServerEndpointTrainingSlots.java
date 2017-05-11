@@ -2,16 +2,16 @@ package com.hutoma.api.containers.sub;
 
 public class ServerEndpointTrainingSlots {
 
-    private String endpoint;
+    private String endpointIdentifier;
     private int slotsInUse;
-    private int slotsLapsed;
+    private int slotsInterruptedTraining;
     private int trainingCapacity;
     private int chatCapacity;
 
-    public ServerEndpointTrainingSlots(final String endpoint, final int slotsInUse, final int slotsLapsed) {
-        this.endpoint = endpoint;
+    public ServerEndpointTrainingSlots(final String endpoint, final int slotsInUse, final int slotsInterruptedTraining) {
+        this.endpointIdentifier = endpoint;
         this.slotsInUse = slotsInUse;
-        this.slotsLapsed = slotsLapsed;
+        this.slotsInterruptedTraining = slotsInterruptedTraining;
         this.trainingCapacity = 0;
         this.chatCapacity = 0;
     }
@@ -33,8 +33,8 @@ public class ServerEndpointTrainingSlots {
         return Math.max(0, this.trainingCapacity - this.slotsInUse);
     }
 
-    public String getEndpoint() {
-        return this.endpoint;
+    public String getEndpointIdentifier() {
+        return this.endpointIdentifier;
     }
 
     public boolean hasFreeTrainingSlots() {
@@ -55,5 +55,13 @@ public class ServerEndpointTrainingSlots {
 
     public void setChatCapacity(final int chatCapacity) {
         this.chatCapacity = chatCapacity;
+    }
+
+    public boolean hasSlotsInterruptedTraining() {
+        return this.slotsInterruptedTraining > 0;
+    }
+
+    public int getSlotsInterruptedTraining() {
+        return this.slotsInterruptedTraining;
     }
 }
