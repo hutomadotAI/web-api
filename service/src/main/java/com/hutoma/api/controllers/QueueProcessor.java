@@ -52,6 +52,8 @@ public class QueueProcessor extends TimerTask {
     private final AtomicReference<String> lastKnownControllerState;
     // used for scheduling queue checks
     private final Timer timer;
+    // the timestamp after which we can perform slot recovery
+    private final long noSlotRecoveryBeforeTimestamp;
     protected BackendServerType serverType;
     protected ControllerBase controller;
     // server rotation
@@ -74,6 +76,8 @@ public class QueueProcessor extends TimerTask {
         this.lastKnownControllerState = new AtomicReference<>("");
         this.timer = new Timer();
         this.roundRobinIndex = new AtomicInteger(0);
+        this.noSlotRecoveryBeforeTimestamp = tools.getTimestamp() +
+                (config.getProcessQueueDelayRecoveryForFirstSeconds() * 1000);
     }
 
     public void initialise(ControllerBase controller, final BackendServerType serverType) {
@@ -96,10 +100,15 @@ public class QueueProcessor extends TimerTask {
                     long sinceLastRun = timeNow - this.lastRun;
                     long sinceLastKick = timeNow - this.lastKicked;
 
+                    boolean kicked = sinceLastRun > sinceLastKick;
+                    double secondsSinceLastRun = sinceLastRun / 1000.0;
+                    LogMap logmap = LogMap.map("Op", "queuecheck")
+                            .put("gap", secondsSinceLastRun)
+                            .put("kicked", kicked);
                     this.logger.logDebug(this.logFrom, String.format("queue check: last check was %.1fs ago%s",
-                            sinceLastRun / 1000.0,
-                            (sinceLastRun <= sinceLastKick) ? "" :
-                                    String.format(", kicked %.1fs ago", sinceLastKick / 1000.0)));
+                            secondsSinceLastRun,
+                            (kicked) ? String.format(", kicked %.1fs ago", sinceLastKick / 1000.0) : ""),
+                            logmap);
                     this.lastRun = timeNow;
 
                     // by default, wait a small amount of time to check again
@@ -306,6 +315,11 @@ public class QueueProcessor extends TimerTask {
      * @param slotList
      */
     private void recoverInterruptedTraining(final List<ServerEndpointTrainingSlots> slotList) {
+
+        // bail here if it is too early to perform slot recovery
+        if (this.tools.getTimestamp() < this.noSlotRecoveryBeforeTimestamp) {
+            return;
+        }
 
         // bail here if there is no interrupted training
         if (!slotList.stream().anyMatch(ServerEndpointTrainingSlots::hasSlotsInterruptedTraining)) {

@@ -241,6 +241,14 @@ public class Config {
     }
 
     /***
+     * Do not attempt slot recovery for the first n seconds after the API has started up
+     * This gives servers enough time to re-register and reclaim their training tasks
+     */
+    public int getProcessQueueDelayRecoveryForFirstSeconds() {
+        return 2 * 60;
+    }
+
+    /***
      * The total number of milliseconds that we wait for backend
      * requests to complete.
      * N.B. this value is not 'per request'.

@@ -2,6 +2,7 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
@@ -39,6 +40,7 @@ public class TestQueueProcessor {
     DatabaseAiStatusUpdates fakeDatabase;
     AIQueueServices fakeQueueServices;
     Config fakeConfig;
+    Tools fakeTools;
 
     Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> fakeData;
 
@@ -102,25 +104,43 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_RecoverSlots() throws Database.DatabaseException {
+    public void testQueue_RecoverSlots() throws Database.DatabaseException, InterruptedException {
         this.fakeData = create(null, ENDPOINT1, 0, 1, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
+        // fake-wait until the 1 second startup recovery delay passes
+        this.fakeTools.threadSleep(1000);
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.times(1)).recoverInterruptedTraining(any(), anyInt());
+    }
+
+    @Test
+    public void testQueue_TooEarlyToRecoverSlots() throws Database.DatabaseException, InterruptedException {
+        this.fakeData = create(null, ENDPOINT1, 0, 1, 1, true);
+        when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
+        when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
+        // fake-wait for less than one second so we are still within the startup recovery delay
+        this.fakeTools.threadSleep(999);
+        this.qproc.processQueue();
+        verify(this.fakeDatabase, Mockito.never()).recoverInterruptedTraining(any(), anyInt());
     }
 
     @Before
     public void setup() throws Database.DatabaseException {
         this.fakeConfig = mock(Config.class);
+        when(this.fakeConfig.getProcessQueueDelayRecoveryForFirstSeconds()).thenReturn(1);
+
         this.fakeController = mock(ControllerBase.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
+        this.fakeTools = new FakeTimerTools();
+
         this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, this.fakeQueueServices,
-                mock(Tools.class), mock(AiServiceStatusLogger.class));
+                this.fakeTools, mock(AiServiceStatusLogger.class));
         this.qproc.initialise(this.fakeController, BackendServerType.WNET);
 
         this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
+
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
 
