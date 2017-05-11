@@ -9,6 +9,9 @@ require_once "common/bot.php";
 require_once "common/developer.php";
 require_once "common/botstoreItem.php";
 
+if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']))
+    \hutoma\console::redirect('./botstore.php');
+
 $botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
 $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
