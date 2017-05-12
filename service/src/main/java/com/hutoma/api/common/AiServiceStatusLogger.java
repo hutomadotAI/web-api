@@ -86,7 +86,7 @@ public class AiServiceStatusLogger extends CentralLogger {
 
     public void logDbSyncUnknownAi(String logFrom, BackendServerType serverType, ServerAiEntry aiEntry) {
         LogParameters logParameters = new LogParameters("DbSyncStatus") {{
-            this.put(AIENGINE, serverType.toString());
+            this.put(AIENGINE, serverType.value());
             this.put(AIID, aiEntry.getAiid().toString());
             this.put("BackendStatus", aiEntry.getTrainingStatus().toString());
         }};
@@ -100,7 +100,7 @@ public class AiServiceStatusLogger extends CentralLogger {
                                     UUID aiid, String devid, String serverIdentifier) {
         LogMap logMap = LogMap.map("Action", "Queue")
                 .put(OPERATION, operation)
-                .put(AIENGINE, serverType.toString())
+                .put(AIENGINE, serverType.value())
                 .put(DEVID, devid)
                 .put(AIID, aiid.toString());
         this.logDebug(logFrom,

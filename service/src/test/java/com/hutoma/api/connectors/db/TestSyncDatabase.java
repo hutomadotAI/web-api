@@ -162,6 +162,27 @@ public class TestSyncDatabase {
     }
 
     @Test
+    public void matchingAI_differentStatus_KeepTraining() throws Exception {
+
+        // if the database says "training" and the server says either
+        // "ready to train" or "training queued" then we keep the "training" status
+        UUID aiid2 = this.tools.createNewRandomUUID();
+        HashMap<UUID, ServerAiEntry> regData = addRegistrationData(null, this.aiid1,
+                TrainingStatus.AI_TRAINING_QUEUED);
+        addRegistrationData(regData, aiid2, TrainingStatus.AI_READY_TO_TRAIN);
+
+        List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1,
+                TrainingStatus.AI_TRAINING);
+        addDatabaseData(records, this.devid1, aiid2, TrainingStatus.AI_TRAINING);
+
+        DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
+        database.synchroniseDBStatuses(this.serializer, BackendServerType.WNET,
+                regData, new HashSet<UUID>());
+
+        Assert.assertEquals(0, this.parameterList.size());
+    }
+
+    @Test
     public void matchingAI_differentStatus_Multiple() throws Exception {
 
         UUID aiid2 = this.tools.createNewRandomUUID();

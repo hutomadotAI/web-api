@@ -284,29 +284,10 @@ public class DatabaseAiStatusUpdates extends Database {
 
                         // if the status is not what we are expecting
                         if (statusInDb != statusOnBackend) {
-                            itemsChangedStatus++;
-                            // log the difference
-                            TrainingStatus finalStatusOnBackend = statusOnBackend;
-                            TrainingStatus finalStatusInDb1 = statusInDb;
-                            this.logger.logUserWarnEvent(LOGFROM,
-                                    String.format("%s status mismatch. Updating from %s to %s for ai %s",
-                                            serverType.value(), statusInDb.toString(),
-                                            statusOnBackend.toString(), aiid.toString()),
-                                    null, LogMap.map("AIEngine", serverType.toString())
-                                            .put("AIID", aiid.toString())
-                                            .put("DEVID", devid.toString())
-                                            .put("ApiStatus", finalStatusInDb1.toString())
-                                            .put("BackendStatus", finalStatusOnBackend.toString()));
-
-                            // keep everything but update the status
-                            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
-                                    .add(serverType.value())
-                                    .add(aiid)
-                                    .add(statusOnBackend.value())
-                                    .add(rs.getString("server_endpoint"))
-                                    .add(rs.getDouble("training_progress"))
-                                    .add(rs.getDouble("training_error"))
-                                    .executeUpdate();
+                            if (syncMismatchedStatuses(serverType, transaction, rs,
+                                    aiid, devid, statusInDb, statusOnBackend)) {
+                                itemsChangedStatus++;
+                            }
                         }
                     }
                 } catch (IllegalArgumentException | JsonParseException e) {
@@ -361,5 +342,75 @@ public class DatabaseAiStatusUpdates extends Database {
                     .executeUpdate();
             transaction.commit();
         }
+    }
+
+    /***
+     * Handle a mismatch in reported status and status in database
+     * @param serverType
+     * @param transaction
+     * @param rs
+     * @param aiid
+     * @param devid
+     * @param statusInDb
+     * @param statusOnBackend
+     * @return
+     * @throws DatabaseException
+     * @throws SQLException
+     */
+    private boolean syncMismatchedStatuses(final BackendServerType serverType,
+                                           final DatabaseTransaction transaction, final ResultSet rs,
+                                           final UUID aiid, final UUID devid, final TrainingStatus statusInDb,
+                                           final TrainingStatus statusOnBackend) throws DatabaseException, SQLException {
+
+        boolean itemChanged = false;
+
+        // we are logging either way so create the logmap here
+        LogMap logmap = LogMap.map("AIEngine", serverType.toString())
+                .put("AIID", aiid.toString())
+                .put("DEVID", devid.toString())
+                .put("ApiStatus", statusInDb.toString())
+                .put("BackendStatus", statusOnBackend.toString());
+
+        boolean dontUpdateKeepTraining = false;
+
+        // keep status AI_TRAINING if the server reports
+        // READY or QUEUED because another server might be training
+        if (statusInDb == TrainingStatus.AI_TRAINING) {
+            switch (statusOnBackend) {
+                case AI_READY_TO_TRAIN:
+                case AI_TRAINING_QUEUED:
+                    dontUpdateKeepTraining = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (!dontUpdateKeepTraining) {
+            itemChanged = true;
+            // log the difference
+            this.logger.logUserWarnEvent(LOGFROM,
+                    String.format("%s status mismatch. Updating from %s to %s for ai %s",
+                            serverType.value(), statusInDb.toString(),
+                            statusOnBackend.toString(), aiid.toString()),
+                    null, logmap);
+
+            // keep everything but update the status
+            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
+                    .add(serverType.value())
+                    .add(aiid)
+                    .add(statusOnBackend.value())
+                    .add(rs.getString("server_endpoint"))
+                    .add(rs.getDouble("training_progress"))
+                    .add(rs.getDouble("training_error"))
+                    .executeUpdate();
+        } else {
+            this.logger.logUserWarnEvent(LOGFROM,
+                    String.format("%s status mismatch. Ai is training so we are ignoring reported status %s for ai %s",
+                            serverType.value(),
+                            statusOnBackend.toString(), aiid.toString()),
+                    null, logmap);
+        }
+        return itemChanged;
     }
 }
