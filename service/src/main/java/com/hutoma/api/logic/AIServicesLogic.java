@@ -118,6 +118,8 @@ public class AIServicesLogic {
 
         } catch (StatusTransitionRejectedException rejected) {
             return ApiError.getBadRequest(rejected.getMessage());
+        } catch (OriginatingServerRejectedException rejected) {
+            return ApiError.getConflict(rejected.getMessage());
         } catch (Exception ex) {
             this.serviceStatusLogger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
@@ -180,19 +182,19 @@ public class AIServicesLogic {
 
     /***
      * Load the old state and make sure the new one makes sense
-     * @param status
+     * @param statusUpdate
      * @return whether AI was found or not
      * @throws Database.DatabaseException
      * @throws StatusTransitionRejectedException
      */
-    private boolean checkIfStatusTransitionIsValid(final AiStatus status)
-            throws Database.DatabaseException, StatusTransitionRejectedException {
+    private boolean checkIfStatusTransitionIsValid(final AiStatus statusUpdate)
+            throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException {
 
         // load the status
-        BackendEngineStatus botStatus = this.database.getAiQueueStatus(status.getAiEngine(), status.getAiid());
+        BackendEngineStatus botStatus = this.database.getAiQueueStatus(statusUpdate.getAiEngine(), statusUpdate.getAiid());
         if ((botStatus == null) || botStatus.isDeleted()) {
             this.logger.logError(LOGFROM, String.format("received update %s for bot %s that no longer exists",
-                    status.getTrainingStatus().value(), status.getAiid().toString()));
+                    statusUpdate.getTrainingStatus().value(), statusUpdate.getAiid().toString()));
             // return false if the AI was not found, or was found to have been deleted
             return false;
         }
@@ -201,64 +203,96 @@ public class AIServicesLogic {
         TrainingStatus previousStatus = botStatus.getTrainingStatus();
         previousStatus = (previousStatus == null) ? TrainingStatus.AI_UNDEFINED : previousStatus;
 
-        switch (status.getTrainingStatus()) {
+        // if the bot is currently training
+        // or just received an update that says "training"
+        // then check that the update is from the right server
+        if (previousStatus == TrainingStatus.AI_TRAINING ||
+                statusUpdate.getTrainingStatus() == TrainingStatus.AI_TRAINING) {
+            rejectIfUpdateWasFromWrongServer(statusUpdate, botStatus);
+        }
+
+        switch (statusUpdate.getTrainingStatus()) {
             case AI_TRAINING_QUEUED:
                 // if the backend is telling us to queue training
                 // then it means that a bot has finished its training timeslice
-                rejectIfPreviousStatusWasNot(previousStatus, status,
+                rejectIfPreviousStatusWasNot(previousStatus, statusUpdate,
                         new TrainingStatus[]{
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_TRAINING_QUEUED});
                 // so queue it again for another one
-                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         true, 0, QueueAction.TRAIN);
                 break;
             case AI_UNDEFINED:
                 // there is no valid reason for the backend to tell us that
                 // a bot should become undefined
-                rejectIfPreviousStatusWasNot(previousStatus, status,
+                rejectIfPreviousStatusWasNot(previousStatus, statusUpdate,
                         new TrainingStatus[]{});
                 break;
             case AI_TRAINING:
                 // we should only get a training callback
                 // if we had previously queued something to train
                 // or it was training already
-                rejectIfPreviousStatusWasNot(previousStatus, status,
+                rejectIfPreviousStatusWasNot(previousStatus, statusUpdate,
                         new TrainingStatus[]{
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_TRAINING_QUEUED});
-                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
             case AI_TRAINING_STOPPED:
                 // backend acknowledges that we have halted training for a bot
-                rejectIfPreviousStatusWasNot(previousStatus, status,
+                rejectIfPreviousStatusWasNot(previousStatus, statusUpdate,
                         new TrainingStatus[]{
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_READY_TO_TRAIN,
                                 TrainingStatus.AI_TRAINING_QUEUED,
                                 TrainingStatus.AI_TRAINING_STOPPED});
-                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
             case AI_TRAINING_COMPLETE:
                 // we only accept COMPLETE if the ai was either recently queued or training
                 // any other state means that we never told the backend to train in the first place
-                rejectIfPreviousStatusWasNot(previousStatus, status,
+                rejectIfPreviousStatusWasNot(previousStatus, statusUpdate,
                         new TrainingStatus[]{
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_TRAINING_QUEUED});
-                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
             // other states are always valid
             case AI_ERROR:
             case AI_READY_TO_TRAIN:
             default:
-                this.database.queueUpdate(status.getAiEngine(), status.getAiid(),
+                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
         }
         return true;
+    }
+
+    /***
+     * If the bot is training then we know which server is supposed to be training it
+     * When an update arrives we need to check that it came from the right server.
+     * @param status
+     * @param botStatus
+     * @throws OriginatingServerRejectedException
+     */
+    private void rejectIfUpdateWasFromWrongServer(final AiStatus status, final BackendEngineStatus botStatus)
+            throws OriginatingServerRejectedException {
+        // ensure that a training update comes from
+        // the server we allocated training to
+        if (!botStatus.getServerIdentifier().equals(status.getServerIdentifier())) {
+
+            // log the transition attempt
+            this.logger.logWarning(LOGFROM,
+                    String.format("ignoring status update from wrong server %s (expected %s) for bot %s",
+                            status.getServerIdentifier(), botStatus.getServerIdentifier(),
+                            status.getAiid().toString()));
+
+            // reject with distinct HTTP error
+            throw new OriginatingServerRejectedException("another server is training this bot");
+        }
     }
 
     /***
@@ -314,4 +348,11 @@ public class AIServicesLogic {
             super(message);
         }
     }
+
+    public static class OriginatingServerRejectedException extends Exception {
+        public OriginatingServerRejectedException(final String message) {
+            super(message);
+        }
+    }
+
 }

@@ -38,22 +38,27 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.startLoggingScheduler(config.getElasticSearchLoggingUrl(), SERVICESTATUS_LOGGING_CADENCE);
     }
 
+    public static String logUuid(UUID uuid) {
+        return (uuid == null) ? "null" : uuid.toString().substring(0, 7);
+    }
+
     public void logStatusUpdate(final String logFrom, final AiStatus status) {
         LogParameters logParameters = new LogParameters("UpdateAIStatus") {{
             this.put(AIENGINE, status.getAiEngine());
             this.put(AIID, status.getAiid());
             this.put(DEVID, status.getDevId());
-            this.put(STATUS, status.getTrainingStatus());
+            this.put(STATUS, status.getTrainingStatus().value());
             this.put(ERROR, status.getTrainingError());
             this.put(TRAININGPROGRESS, status.getTrainingProgress());
             this.put(SERVER, status.getServerIdentifier());
             this.put("AIHash", status.getAiHash());
         }};
-        String narrative = String.format("Update %s status %s progress %d%% on ai %s",
+        String narrative = String.format("%s status update %s %d%% on ai %s from %s",
                 logParameters.get(AIENGINE),
                 logParameters.get(STATUS),
                 (int) (status.getTrainingProgress() * 100.0),
-                logParameters.get(AIID));
+                logUuid(status.getAiid()),
+                logParameters.get(SERVER));
         this.logUserInfoEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
@@ -87,12 +92,12 @@ public class AiServiceStatusLogger extends CentralLogger {
     public void logDbSyncUnknownAi(String logFrom, BackendServerType serverType, ServerAiEntry aiEntry) {
         LogParameters logParameters = new LogParameters("DbSyncStatus") {{
             this.put(AIENGINE, serverType.value());
-            this.put(AIID, aiEntry.getAiid().toString());
+            this.put(AIID, aiEntry.getAiid());
             this.put("BackendStatus", aiEntry.getTrainingStatus().toString());
         }};
         this.logUserWarnEvent(logFrom, String.format("%s reports ai %s that is unknown to us",
                 logParameters.get(AIENGINE),
-                logParameters.get(AIID)),
+                logUuid(aiEntry.getAiid())),
                 null, new LogMap(logParameters));
     }
 
@@ -102,10 +107,10 @@ public class AiServiceStatusLogger extends CentralLogger {
                 .put(OPERATION, operation)
                 .put(AIENGINE, serverType.value())
                 .put(DEVID, devid)
-                .put(AIID, aiid.toString());
+                .put(AIID, aiid);
         this.logDebug(logFrom,
-                String.format("Processing %s %s %s on %s",
-                        serverType.value(), operation, aiid.toString(), serverIdentifier),
+                String.format("Processing %s %s ai %s on %s",
+                        serverType.value(), operation, logUuid(aiid), serverIdentifier),
                 logMap);
     }
 

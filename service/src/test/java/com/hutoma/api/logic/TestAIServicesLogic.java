@@ -14,12 +14,14 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.QueueAction;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import junitparams.JUnitParamsRunner;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +37,9 @@ import static org.mockito.Mockito.*;
 @RunWith(JUnitParamsRunner.class)
 public class TestAIServicesLogic {
 
+    private static final String ENDPOINTID = "fake";
     private static final BackendServerType AI_ENGINE = BackendServerType.WNET;
-
+    private static final java.lang.String ALT_ENDPOINTID = "wrong server";
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
     private Config fakeConfig;
@@ -62,9 +65,13 @@ public class TestAIServicesLogic {
         this.aiServicesLogic = new AIServicesLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase,
                 this.fakeServices, this.fakeServicesStatusLogger, this.fakeLogger, this.fakeTools,
                 this.fakeControllerWnet, mock(ControllerRnn.class), mock(ControllerAiml.class));
-        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("fake");
+        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn(ENDPOINTID);
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        this.backendStatus = new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0);
+        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(ALT_ENDPOINTID);
+        when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(true);
+        this.backendStatus = new BackendEngineStatus(TestDataHelper.AIID,
+                TrainingStatus.AI_TRAINING, 0.0, 0.0,
+                QueueAction.NONE, ENDPOINTID, new DateTime(0));
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.backendStatus);
     }
 
@@ -160,15 +167,53 @@ public class TestAIServicesLogic {
 
     @Test
     public void testUpdateAiStatus_botGetsRequeued() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(
-                new BackendEngineStatus(TrainingStatus.AI_TRAINING, 0.0, 0.0));
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING_QUEUED, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
-        verify(this.fakeDatabase, atLeast(1)).queueUpdate(any(), any(), Matchers.eq(true), anyInt(), any());
+        verify(this.fakeDatabase, atLeast(1))
+                .queueUpdate(any(), any(), Matchers.eq(true), anyInt(), any());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
+
+    @Test
+    public void testUpdateAiStatus_reject_wrongServer_ifTraining() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
+                TrainingStatus.AI_UNDEFINED, AI_ENGINE,
+                0.0, 0.0, "hash",
+                TestDataHelper.ALT_SESSIONID);
+        ApiResult result = this.aiServicesLogic.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_CONFLICT, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_accept_differentServer() throws Database.DatabaseException {
+        this.backendStatus = new BackendEngineStatus(TestDataHelper.AIID,
+                TrainingStatus.AI_READY_TO_TRAIN, 0.0, 0.0,
+                QueueAction.NONE, ENDPOINTID, new DateTime(0));
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.backendStatus);
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
+                TrainingStatus.AI_TRAINING_STOPPED, AI_ENGINE,
+                0.0, 0.0, "hash",
+                TestDataHelper.ALT_SESSIONID);
+        ApiResult result = this.aiServicesLogic.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testUpdateAiStatus_reject_wrongServer_ifQueueToTrain() throws Database.DatabaseException {
+        this.backendStatus = new BackendEngineStatus(TestDataHelper.AIID,
+                TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0,
+                QueueAction.NONE, ENDPOINTID, new DateTime(0));
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.backendStatus);
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
+                TrainingStatus.AI_TRAINING, AI_ENGINE,
+                0.0, 0.0, "hash",
+                TestDataHelper.ALT_SESSIONID);
+        ApiResult result = this.aiServicesLogic.updateAIStatus(status);
+        Assert.assertEquals(HttpURLConnection.HTTP_CONFLICT, result.getStatus().getCode());
+    }
+
+
 }
