@@ -6695,6 +6695,12 @@ ul.pagination li a {
     background-color: #232426;
 }
 
+.bot-card-alert {
+    max-width: 720px;
+    margin: auto;
+    padding-top:50px;
+}
+
 .bot-card-area {
     overflow: hidden;
     height: 185px;

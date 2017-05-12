@@ -1,5 +1,7 @@
 function populateBotFields(botstoreItem, menu_title, carousel_category, current_flow) {
-    var bot = JSON.parse(botstoreItem)['metadata'];
+    var item = JSON.parse(botstoreItem);
+    var bot = item['metadata'];
+
     document.getElementById('botTitle').innerText = bot['name'];
     document.getElementById('botBadge').innerText = bot['badge'];
     document.getElementById('botDescription').value = bot['description'];
@@ -47,8 +49,8 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         elem.style.display = 'block';
         document.getElementById('botWebsite').setAttribute('href', checkLink(dev['website']));
     }
-    
-    setButtonParameter(menu_title, JSON.parse(botstoreItem)['owned'], carousel_category, current_flow);
+    var owned = (item['owned'] == null || item['owned'] == '') ? false : item['owned'];
+    setButtonParameter(menu_title, owned, carousel_category, current_flow);
 }
 
 function checkLink(link){

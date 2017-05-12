@@ -9,6 +9,9 @@ require_once "common/bot.php";
 require_once "common/developer.php";
 require_once "common/botstoreItem.php";
 
+
+/*  On this page UI to be updated to show star ratings once API has star ratings */
+
 if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']))
     \hutoma\console::redirect('./botstore.php');
 
@@ -20,19 +23,6 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 $botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
 unset($botstoreApi);
-
-if (isset($botstoreItem)) {
-    switch ($botstoreItem['status']['code']) {
-        case 200:
-            break;
-        case 404:
-            \hutoma\console::redirect('./error.php?err=100');
-            exit;
-        case 500:
-            \hutoma\console::redirect('./error.php?err=100');
-            exit;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -47,23 +37,16 @@ if (isset($botstoreItem)) {
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
 </head>
-<script>
-    var botstoreItem = <?php
-        $botItem = new \hutoma\botstoreItem();
-        if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem))) {
-            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
-        }
-        echo json_encode($botItem->toJSON());
-        unset($botstoreItem);
-        unset($botItem);
-        ?>;
-</script>
-<script type="text/javascript">
-    var category_list = <?php echo (CAROUSEL_CATEGORIES);?>;
-    var category_list_icons = <?php echo (CAROUSEL_CATEGORIES_ICONS);?>;
-</script>
-
 <body class="hold-transition fixed">
+
+<!-- ================ ALERT MESSAGE BOX ================= -->
+<div class="row center-block bot-card-alert" id="containerMsgAlertBotcardDetail" style="display:none;">
+    <div class="alert alert-dismissable flat alert-danger no-margin">
+        <button type="button" class="close text-white" data-dismiss="alert" aria-hidden="true">×</button>
+        <i class="icon fa fa-warning" id="iconAlertBotcardDetail"></i>
+        <span id="msgAlertBotcardDetail"></span>
+    </div>
+</div>
 
 <!-- ================ PAGE CONTENT ================= -->
 <div class="col-md-12 no-margin no-padding" id="botcardDetailContent" style="display:none;">
@@ -97,7 +80,7 @@ if (isset($botstoreItem)) {
                         <textarea class="bot-default-style bot-description-limited pull-left flat no-shadow unselectable" id="botDescription" readonly></textarea>
                     </div>
 
-                    <!--tmp div to fix UI to be updated once we have star ratings-->
+                    <!--star ratings-->
                     <div class="col-xs-3 bot-star">
                     </div>
                 </div>
@@ -344,20 +327,47 @@ if (isset($botstoreItem)) {
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 
 <script>
-    populateBotFields(
-        botstoreItem,
-        "<?php echo $menu_title; unset($menu_title)?>",
-        "<?php if(isset($_GET['category'])) echo $_GET['category'];?>",
-        <?php echo json_encode($isExistAiId);?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
-    );
+    var responseCode = <?php echo $botstoreItem['status']['code']; ?>;
+    var botstoreItem = <?php
+        $botItem = new \hutoma\botstoreItem();
+        if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem)))
+            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
+        echo json_encode($botItem->toJSON());
+        unset($botstoreItem);
+        unset($botItem);
+        ?>;
 </script>
+
 <script>
     $(function() {
-        document.getElementById('botcardDetailContent').style.display = 'block';
-        addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
+        var nodeContainerAlert = document.getElementById('containerMsgAlertBotcardDetail');
+        var nodeMessageAlert = document.getElementById('msgAlertBotcardDetail');
+        switch (responseCode) {
+            case 200:
+                populateBotFields(
+                    botstoreItem,
+                    "<?php echo $menu_title; unset($menu_title)?>",
+                    "<?php if (isset($_GET['category'])) echo $_GET['category'];?>",
+                    <?php echo $isExistAiId ? "true" : "false" ?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
+                );
+
+                document.getElementById('botcardDetailContent').style.display = 'block';
+                addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
+                break;
+            case 404:
+                nodeContainerAlert.style.display = 'block';
+                nodeMessageAlert.innerText='Bot not found';
+                break;
+            case 500:
+                nodeContainerAlert.style.display = 'block';
+                nodeMessageAlert.innerText='There was a problem acquiring the bot';
+                break;
+            default:
+                nodeContainerAlert.style.display = 'block';
+                nodeMessageAlert.innerText='Something has gone wrong.';
+        }
     });
 </script>
 </body>

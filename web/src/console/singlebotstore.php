@@ -92,7 +92,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
             info['menu_label'],
             info['menu_level'],
             info['menu_block'],
-            <?php echo json_encode(!$isExistAiId);?>
+            <?php echo $isExistAiId ? "false" : "true" ?>
         ]);
 
         var category = '<?php if( isset($_GET['category']) ) echo $_GET['category'];?>';

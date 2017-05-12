@@ -58,19 +58,6 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     <?php include './dynamic/footer.inc.html.php'; ?>
 </footer>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init([
-            "<?php echo $aiName;?>",
-            "<?php echo $category;?>",
-            2,
-            false,
-            <?php echo json_encode(!$isExistAiId);?>
-        ]);
-    </script>
-</form>
-
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
@@ -87,9 +74,22 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 
+<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<form action="" method="post" enctype="multipart/form-data">
+    <script type="text/javascript">
+        MENU.init([
+            "<?php echo $aiName;?>",
+            "<?php echo $category;?>",
+            2,
+            false,
+            <?php echo $isExistAiId ? "false" : "true" ?>
+        ]);
+    </script>
+</form>
+
 <script>
     $(document).ready(function () {
-        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', <?php echo json_encode($isExistAiId);?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value);
+        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', <?php echo $isExistAiId ? "true" : "false" ?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value);
     });
     $('#buyBot').on('hide.bs.modal', function (e) {
         var purchase_state = document.getElementById('purchase_state').value;
