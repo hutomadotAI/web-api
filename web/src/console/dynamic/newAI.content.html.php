@@ -6,7 +6,13 @@
     <form method="POST" name="createAIform" action="./dynamic/sessionCreateAI.php">
         <div class="box-body">
 
-            <div class="row">
+            <div class="alert alert-dismissable flat alert-danger no-margin" id="containerMsgAlertNewAI" style="display:none;">
+                <button type="button" class="close text-white" data-dismiss="alert" aria-hidden="true">×</button>
+                <i class="icon fa fa-warning" id="iconAlertNewAI"></i>
+                <span id="msgAlertNewAI"></span>
+            </div>
+
+            <div class="row" style="margin-top: 10px;">
                 <div class="col-md-6">
                     <?php include './dynamic/input.name.html.php'; ?>
                 </div>
