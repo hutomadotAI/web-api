@@ -6,6 +6,10 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AILogic;
 import junitparams.JUnitParamsRunner;
@@ -69,6 +73,30 @@ public class TestServiceAi extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
         Assert.assertEquals(ai.getAiid(), responseAi.getAiid());
+    }
+
+    public ApiAi checkMaskedTrainingStatus(
+            TrainingStatus trainingStatus, double trainingProgress) throws Database.DatabaseException {
+        BackendStatus status = new BackendStatus();
+        status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
+                trainingStatus, 0.0, trainingProgress));
+        status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
+                trainingStatus, 0.0, trainingProgress));
+        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(TestDataHelper.getAi(status));
+        final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
+        return deserializeResponse(response, ApiAi.class);
+    }
+
+    @Test
+    public void testGetSingle_QueuedNotMasked() throws Database.DatabaseException {
+        ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0);
+        Assert.assertEquals(TrainingStatus.AI_TRAINING_QUEUED, result.getSummaryStatusPublic());
+    }
+
+    @Test
+    public void testGetSingle_QueuedMasked() throws Database.DatabaseException {
+        ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.1);
+        Assert.assertEquals(TrainingStatus.AI_TRAINING, result.getSummaryStatusPublic());
     }
 
     @Test
