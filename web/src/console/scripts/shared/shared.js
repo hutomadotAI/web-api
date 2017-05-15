@@ -189,6 +189,18 @@ function btnFromBuyToPurchased() {
     nodeBtn.className = 'btn btn-primary pull-right flat';
 }
 
+function buildCategoryURIparameter(category){
+    return '?category='+ adjustURIEscapingCategoryValue(category);
+}
+
+function adjustURIEscapingCategoryValue(value){
+    return value.replace('&', '%26').split(' ').join('%20');
+}
+
+function removeSpecialCharacters(str){
+    return str.replace(/[&\/\\#,+()$~%.'":*?<>{}\s+]/g, '');
+}
+
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
