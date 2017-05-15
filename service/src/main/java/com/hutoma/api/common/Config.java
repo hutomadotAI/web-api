@@ -259,6 +259,10 @@ public class Config {
         return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
     }
 
+    /**
+     * The botstore icon storage path. This will typically be a NFS mount point.
+     * @return the botstore icon storage path
+     */
     public String getBotIconStoragePath() {
         return getConfigFromProperties("bot_icon_path", "/boticon");
     }
@@ -267,12 +271,8 @@ public class Config {
         return getConfigFromProperties("logging_es_url", "");
     }
 
-    public void dumpApiEnvironmentVars() {
-        System.getenv().entrySet().stream().forEach(e -> {
-            if (e.getKey().startsWith(API_ENV_PREFIX)) {
-                this.logger.logInfo(LOGFROM, e.getKey() + "=" + e.getValue());
-            }
-        });
+    public String getEntityRecognizerUrl() {
+        return getConfigFromProperties("entity_recognizer_url", "");
     }
 
     public void validateConfigPresent() throws Exception {

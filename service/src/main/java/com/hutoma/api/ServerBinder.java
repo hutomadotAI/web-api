@@ -2,15 +2,7 @@ package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AIQueueServices;
-import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.DatabaseUI;
-import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -115,6 +107,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
         bind(QueueProcessor.class).to(QueueProcessor.class);
+        bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);

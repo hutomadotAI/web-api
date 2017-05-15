@@ -99,7 +99,9 @@ public class WebHooks {
             return null;
         }
 
+        response.bufferEntity();
         WebHookResponse webHookResponse = this.deserializeResponse(response);
+        response.close();
 
         this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s",
                 intent.getAiid(), intent.getName()));
@@ -112,7 +114,6 @@ public class WebHooks {
      * @return The deserialized WebHookResponse or null.
      */
     public WebHookResponse deserializeResponse(final Response response) {
-        WebHookResponse webHookResponse = null;
         try {
             return (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class),
                     WebHookResponse.class);

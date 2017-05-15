@@ -65,6 +65,14 @@ public interface ILogger {
     void logError(String fromLabel, String logComment);
 
     /**
+     * Adds an ERROR log.
+     * @param fromLabel  the origin of the log
+     * @param logComment the comment
+     * @param properties map of properties
+     */
+    void logError(String fromLabel, String logComment, LogMap properties);
+
+    /**
      * Logs a performance-related entry.
      * @param fromLabel  where it's logging from
      * @param logComent  the event name

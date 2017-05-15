@@ -135,8 +135,15 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
-    public void logError(String fromLabel, String logComment) {
-        logOutput(EventType.ERROR, fromLabel, logComment);
+    public void logError(final String fromLabel, final String logComment) {
+        logError(fromLabel, logComment, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logError(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.ERROR, fromLabel, logComment, properties);
     }
 
     public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
