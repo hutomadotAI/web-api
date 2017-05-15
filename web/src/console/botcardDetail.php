@@ -352,9 +352,6 @@ unset($botstoreApi);
                     "<?php if (isset($_GET['category'])) echo $_GET['category'];?>",
                     <?php echo $isExistAiId ? "true" : "false" ?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
                 );
-
-                document.getElementById('botcardDetailContent').style.display = 'block';
-                addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
                 break;
             case 404:
                 nodeContainerAlert.style.display = 'block';
