@@ -124,7 +124,7 @@ public class TestMemoryIntentHandler {
         final String entityName = "entity1";
         ApiIntent apiIntent = new ApiIntent(INTENT_NAME, "in", "out");
         IntentVariable iv = new IntentVariable(entityName, true, 1, null);
-        ApiEntity apiEntity = new ApiEntity(entityName, Arrays.asList("a", "b"));
+        ApiEntity apiEntity = new ApiEntity(entityName, Arrays.asList("a", "b"), false);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(anyString(), any(), anyString())).thenReturn(apiIntent);
         when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
@@ -193,7 +193,8 @@ public class TestMemoryIntentHandler {
                 values,
                 Collections.singletonList("prompt"),
                 123,
-                5);
+                5,
+                false);
         Assert.assertEquals("name", mv.getName());
         Assert.assertEquals("currentValue", mv.getCurrentValue());
         Assert.assertEquals(values, mv.getEntityKeys());
@@ -220,6 +221,21 @@ public class TestMemoryIntentHandler {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
         when(this.fakeDatabase.deleteAllMemoryIntents(any())).thenThrow(exception);
         this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
+        verify(this.fakeLogger).logException(anyString(), any());
+    }
+
+    @Test
+    public void testIntent_clearIntents() throws Database.DatabaseException {
+        List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
+        this.memoryIntentHandler.clearIntents(intents);
+        verify(this.fakeDatabaseEntities).deleteMemoryIntent(intents.get(0));
+    }
+
+    @Test
+    public void testIntent_clearIntents_dbException() throws Database.DatabaseException {
+        List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
+        when(this.fakeDatabaseEntities.deleteMemoryIntent(any())).thenThrow(Database.DatabaseException.class);
+        this.memoryIntentHandler.clearIntents(intents);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 

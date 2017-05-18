@@ -360,7 +360,8 @@ public class DatabaseAiStatusUpdates extends Database {
     private boolean syncMismatchedStatuses(final BackendServerType serverType,
                                            final DatabaseTransaction transaction, final ResultSet rs,
                                            final UUID aiid, final UUID devid, final TrainingStatus statusInDb,
-                                           final TrainingStatus statusOnBackend) throws DatabaseException, SQLException {
+                                           final TrainingStatus statusOnBackend)
+            throws DatabaseException, SQLException {
 
         boolean itemChanged = false;
 

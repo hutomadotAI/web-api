@@ -9,6 +9,9 @@ import java.util.List;
  * Created by pedrotei on 06/10/16.
  */
 public interface IEntityRecognizer {
+
+    String SYSTEM_ENTITY_PREFIX = "sys.";
+
     /**
      * Retrieve entities from a chat line.
      * @param chatLine the chat line

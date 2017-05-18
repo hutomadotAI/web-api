@@ -1,18 +1,31 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
  * Created by pedrotei on 06/10/16.
  */
 public class MemoryVariable {
+    @SerializedName("entity")
     private String name;
+    @SerializedName("value")
     private String currentValue;
+    @SerializedName("mandatory")
     private boolean isMandatory;
+    // TODO: entity_keys should not be sent back to the user
+    @SerializedName("entity_keys")
     private List<String> entityKeys;
+    // TODO: prompts should not be sent back to the user
+    @SerializedName("prompts")
     private List<String> prompts;
+    @SerializedName("times_prompted")
     private int timesPrompted;
+    @SerializedName("max_prompts")
     private int timesToPrompt;
+    @SerializedName("system_entity")
+    private boolean isSystem;
 
     /**
      * Ctor.
@@ -25,13 +38,14 @@ public class MemoryVariable {
     }
 
     public MemoryVariable(String name, String currentValue, boolean isMandatory, List<String> entityKeys,
-                          List<String> prompts, int timesToPrompt, int timesPrompted) {
+                          List<String> prompts, int timesToPrompt, int timesPrompted, final boolean isSystem) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
         this.prompts = prompts;
         this.timesPrompted = timesPrompted;
         this.timesToPrompt = timesToPrompt;
+        this.isSystem = isSystem;
     }
 
     /**
@@ -124,6 +138,14 @@ public class MemoryVariable {
      */
     public List<String> getPrompts() {
         return this.prompts;
+    }
+
+    /**
+     * Gets whether this is a system variable or a custom one.
+     * @return whether this is a system variable or a custom one
+     */
+    public boolean isSystem() {
+        return this.isSystem;
     }
 
     /**

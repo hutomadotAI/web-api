@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 /**
- * Created by pedrotei on 05/10/16.
+ * Memory Intent Handler.
  */
 public class MemoryIntentHandler implements IMemoryIntentHandler {
 
@@ -131,7 +131,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                             apiEntity.getEntityValueList(),
                             intentVar.getPrompts(),
                             intentVar.getNumPrompts(),
-                            0);
+                            0,
+                            apiEntity.isSystem());
                     variables.add(variable);
                 }
                 intent = new MemoryIntent(intentName, aiid, chatId, variables, false);

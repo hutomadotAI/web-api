@@ -62,14 +62,24 @@ public class DatabaseEntitiesIntents extends Database {
 
     public ApiEntity getEntity(final String devid, final String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntityValues", 2).add(devid).add(entityName);
-            final ResultSet rs = call.executeQuery();
+            ResultSet rs;
             try {
-                final ArrayList<String> entityValues = new ArrayList<>();
-                while (rs.next()) {
-                    entityValues.add(rs.getString("value"));
+                call.initialise("getEntityDetails", 2).add(devid).add(entityName);
+                rs = call.executeQuery();
+                boolean isSystem = false;
+                if (rs.next()) {
+                    isSystem = rs.getBoolean("isSystem");
                 }
-                return new ApiEntity(entityName, entityValues);
+                final ArrayList<String> entityValues = new ArrayList<>();
+                // only custom entities have values as ystem entities are handled externally
+                if (!isSystem) {
+                    call.initialise("getEntityValues", 2).add(devid).add(entityName);
+                    rs = call.executeQuery();
+                    while (rs.next()) {
+                        entityValues.add(rs.getString("value"));
+                    }
+                }
+                return new ApiEntity(entityName, entityValues, isSystem);
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }

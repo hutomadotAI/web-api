@@ -20,6 +20,11 @@ public class RecognizedEntity {
     @SerializedName("start")
     private int start;
 
+    /**
+     * Ctor.
+     * @param category the entity category
+     * @param value the entity value
+     */
     public RecognizedEntity(final String category, final String value) {
         this.category = category;
         this.value = value;

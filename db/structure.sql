@@ -334,6 +334,7 @@ CREATE TABLE `entity` (
   `dev_id` varchar(50) NOT NULL,
   `name` varchar(250) NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `isSystem` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id` (`dev_id`,`name`),
   CONSTRAINT `entity_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
@@ -2034,6 +2035,29 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getEntityDetails` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`entityUser`@`127.0.0.1` PROCEDURE `getEntityDetails`(
+  IN in_dev_id VARCHAR(50),
+  IN in_name VARCHAR(250))
+  BEGIN
+    SELECT * FROM `entity`
+    WHERE `entity`.`name`=`in_name`
+          AND (`entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getEntityValues` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2290,18 +2314,19 @@ CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentVariables`(
 )
 BEGIN
 
-    SELECT
-      `intent_variable`.`id` AS `id`,
-      `entity`.`name` AS `entity_name`,
-      `intent_variable`.`required` AS `required`,
-      `intent_variable`.`n_prompts` AS `n_prompts`,
-      `intent_variable`.`value` AS `value`
-    FROM `intent_variable`, `entity`
-    WHERE `intent_variable`.`intent_id` =
-          (SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-                                                                                            (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
-          AND `entity`.`id` =
-              (SELECT `id` FROM `entity` WHERE `id` = `intent_variable`.`entity_id` AND `in_dev_id`=`dev_id`);
+  SELECT
+    `intent_variable`.`id` AS `id`,
+    `entity`.`name` AS `entity_name`,
+    `intent_variable`.`required` AS `required`,
+    `intent_variable`.`n_prompts` AS `n_prompts`,
+    `intent_variable`.`value` AS `value`
+  FROM `intent_variable`, `entity`
+  WHERE `intent_variable`.`intent_id` =
+        (SELECT `id` FROM `intent`
+        WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid`
+              AND `in_aiid` IN (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id` OR `entity`.`isSystem`=1))
+        AND `entity`.`id` =
+            (SELECT `id` FROM `entity` WHERE `id` = `intent_variable`.`entity_id` AND (`in_dev_id`=`dev_id` OR `entity`.`isSystem`=1));
 
   END ;;
 DELIMITER ;

@@ -8,7 +8,8 @@ public class ServerEndpointTrainingSlots {
     private int trainingCapacity;
     private int chatCapacity;
 
-    public ServerEndpointTrainingSlots(final String endpoint, final int slotsInUse, final int slotsInterruptedTraining) {
+    public ServerEndpointTrainingSlots(final String endpoint, final int slotsInUse,
+                                       final int slotsInterruptedTraining) {
         this.endpointIdentifier = endpoint;
         this.slotsInUse = slotsInUse;
         this.slotsInterruptedTraining = slotsInterruptedTraining;

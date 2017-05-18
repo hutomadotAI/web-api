@@ -17,10 +17,10 @@ import com.hutoma.api.controllers.RequestWnet;
 import com.hutoma.api.controllers.ServerTracker;
 import com.hutoma.api.logic.*;
 import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ExternalEntityRecognizer;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
-import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
 import org.glassfish.hk2.api.Factory;
@@ -72,7 +72,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AIBotStoreLogic.class).to(AIBotStoreLogic.class);
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(MemoryIntentHandler.class).to(MemoryIntentHandler.class).to(IMemoryIntentHandler.class);
-        bind(SimpleEntityRecognizer.class).to(SimpleEntityRecognizer.class).to(IEntityRecognizer.class);
+        bind(ExternalEntityRecognizer.class).to(ExternalEntityRecognizer.class).to(IEntityRecognizer.class);
         bind(TrainingLogic.class).to(TrainingLogic.class);
         bind(EntityLogic.class).to(EntityLogic.class);
         bind(IntentLogic.class).to(IntentLogic.class);

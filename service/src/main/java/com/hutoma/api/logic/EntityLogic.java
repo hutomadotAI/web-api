@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.memory.IEntityRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,13 +68,18 @@ public class EntityLogic {
     public ApiResult writeEntity(final String devid, final String entityName, final ApiEntity entity) {
         LogMap logMap = LogMap.map("Entity", entityName);
         try {
-
+            if (entityName.startsWith(IEntityRecognizer.SYSTEM_ENTITY_PREFIX)) {
+                this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt name an entity with system prefix",
+                        devid, logMap);
+                return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
+            }
             stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devid, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseIntegrityViolationException dive) {
-            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name",
+                    devid, logMap);
             return ApiError.getBadRequest("entity name already in use");
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WriteEntity", devid, e);

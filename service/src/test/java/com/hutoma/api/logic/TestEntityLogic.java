@@ -202,11 +202,11 @@ public class TestEntityLogic {
     }
 
     private ApiEntity getEntity() {
-        return new ApiEntity(this.ENTNAME, Arrays.asList("oneval", "twoval"));
+        return new ApiEntity(this.ENTNAME, Arrays.asList("oneval", "twoval"), false);
     }
 
     private ApiEntity getEntityEmpty() {
-        return new ApiEntity(this.ENTNAME, Arrays.asList(new String[]{}));
+        return new ApiEntity(this.ENTNAME, Arrays.asList(new String[]{}), false);
     }
 
 

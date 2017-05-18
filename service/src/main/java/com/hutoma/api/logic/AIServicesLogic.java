@@ -191,7 +191,8 @@ public class AIServicesLogic {
             throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException {
 
         // load the status
-        BackendEngineStatus botStatus = this.database.getAiQueueStatus(statusUpdate.getAiEngine(), statusUpdate.getAiid());
+        BackendEngineStatus botStatus = this.database.getAiQueueStatus(statusUpdate.getAiEngine(),
+                statusUpdate.getAiid());
         if ((botStatus == null) || botStatus.isDeleted()) {
             this.logger.logError(LOGFROM, String.format("received update %s for bot %s that no longer exists",
                     statusUpdate.getTrainingStatus().value(), statusUpdate.getAiid().toString()));
@@ -206,8 +207,8 @@ public class AIServicesLogic {
         // if the bot is currently training
         // or just received an update that says "training"
         // then check that the update is from the right server
-        if (previousStatus == TrainingStatus.AI_TRAINING ||
-                statusUpdate.getTrainingStatus() == TrainingStatus.AI_TRAINING) {
+        if (previousStatus == TrainingStatus.AI_TRAINING
+                || statusUpdate.getTrainingStatus() == TrainingStatus.AI_TRAINING) {
             rejectIfUpdateWasFromWrongServer(statusUpdate, botStatus);
         }
 

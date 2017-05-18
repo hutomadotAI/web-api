@@ -76,8 +76,8 @@ public class QueueProcessor extends TimerTask {
         this.lastKnownControllerState = new AtomicReference<>("");
         this.timer = new Timer();
         this.roundRobinIndex = new AtomicInteger(0);
-        this.noSlotRecoveryBeforeTimestamp = tools.getTimestamp() +
-                (config.getProcessQueueDelayRecoveryForFirstSeconds() * 1000);
+        this.noSlotRecoveryBeforeTimestamp = tools.getTimestamp()
+                + (config.getProcessQueueDelayRecoveryForFirstSeconds() * 1000);
     }
 
     public void initialise(ControllerBase controller, final BackendServerType serverType) {

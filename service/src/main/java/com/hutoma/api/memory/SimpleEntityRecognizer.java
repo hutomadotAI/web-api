@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 /**
- * Created by pedrotei on 06/10/16.
+ * Simple entity recognizer.
  */
 public class SimpleEntityRecognizer implements IEntityRecognizer {
 
@@ -26,7 +26,7 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
      * @param logger the logger
      */
     @Inject
-    public SimpleEntityRecognizer(ILogger logger) {
+    public SimpleEntityRecognizer(final ILogger logger) {
         this.logger = logger;
     }
 
@@ -34,20 +34,34 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
      * {@inheritDoc}
      */
     public List<Pair<String, String>> retrieveEntities(final String chatLine, final List<MemoryVariable> entities) {
+        final List<Pair<String, String>> vars = regexFindEntities(chatLine, entities);
+        this.logger.logDebug(LOGFROM, String.format("Found %d entities", vars.size()));
+        return vars;
+    }
+
+    /**
+     * Finds entities based on regex - looks for the presence of the same word (case insensitive).
+     * @param chatLine the text to search in
+     * @param entities the list of entities to search for
+     * @return the list of pairs of entities and values found
+     */
+    static List<Pair<String, String>> regexFindEntities(final String chatLine,
+                                                               final List<MemoryVariable> entities) {
         final List<Pair<String, String>> vars = new ArrayList<>();
         final String lowercaseResponse = chatLine.toLowerCase();
         for (MemoryVariable v : entities) {
             for (String key : v.getEntityKeys()) {
-                Matcher matcher = Pattern.compile("(?i:\\b" + key + "\\b)").matcher(lowercaseResponse);
-                if (matcher.find()) {
-                    // it's this one
-                    vars.add(new Pair<>(v.getName(), key));
-                    // stop processing this entity
-                    break;
+                if (v.getName() != null) {
+                    Matcher matcher = Pattern.compile("(?i:\\b" + key + "\\b)").matcher(lowercaseResponse);
+                    if (matcher.find()) {
+                        // it's this one
+                        vars.add(new Pair<>(v.getName(), key));
+                        // stop processing this entity
+                        break;
+                    }
                 }
             }
         }
-        this.logger.logDebug(LOGFROM, String.format("Found %d entities", vars.size()));
         return vars;
     }
 }

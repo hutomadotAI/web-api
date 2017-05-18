@@ -48,13 +48,14 @@ public class Database {
             for (LinkedTreeMap<String, Object> e : list) {
                 @SuppressWarnings("unchecked")
                 MemoryVariable memoryVariable = new MemoryVariable(
-                        e.get("name").toString(),
-                        e.containsKey("currentValue") ? e.get("currentValue").toString() : null,
-                        (boolean) e.get("isMandatory"),
-                        (List<String>) e.get("entityKeys"),
+                        e.get("entity").toString(),
+                        e.containsKey("value") ? e.get("value").toString() : null,
+                        (boolean) e.get("mandatory"),
+                        (List<String>) e.get("entity_keys"),
                         (List<String>) e.get("prompts"),
-                        (int) Math.round((double) e.get("timesToPrompt")),
-                        (int) Math.round((double) e.get("timesPrompted")));
+                        (int) Math.round((double) e.get("max_prompts")),
+                        (int) Math.round((double) e.get("times_prompted")),
+                        (boolean) e.get("system_entity"));
                 variables.add(memoryVariable);
             }
             return new MemoryIntent(rs.getString("name"),

@@ -60,4 +60,21 @@ INSERT INTO `botStore` VALUES (4,'d14b441b-e2a2-4b9f-be9b-4301647e1265','873e61b
 /*!40000 ALTER TABLE `botStore` ENABLE KEYS */;
 UNLOCK TABLES;
 
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `hutoma`.`users` (`username`, `email`, `password`, `password_salt`, `first_name`, `dev_token`, `dev_id`, `client_token`, `last_name`) VALUES ('system-user', '', 'none', 'none', 'system user', '', '192a1677-551f-46bb-9188-04ed8a658926', 'none', '');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
 
+LOCK TABLES `entity` WRITE;
+/*!40000 ALTER TABLE `entity` DISABLE KEYS */;
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.geopolitical', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.person', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.group', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.date', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.time', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.percent', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.number', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.ordinal', '2017-05-12 00:00:00', '1');
+/*!40000 ALTER TABLE `entity` ENABLE KEYS */;
+UNLOCK TABLES;

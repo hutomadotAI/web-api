@@ -959,7 +959,8 @@ public class TestChatLogic {
                 Arrays.asList(promptTrigger, "b"),
                 Collections.singletonList(prompt),
                 maxPrompts,
-                0);
+                0,
+                false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         setupFakeChat(0.9d, "@meta.intent." + intentName, 0.3d, "", 0.3d, "");

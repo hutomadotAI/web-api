@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by pedrotei on 06/10/16.
  */
-public class TestEntityRecognizer {
+public class TestSimpleEntityRecognizer {
     private SimpleEntityRecognizer recognizer;
 
     @Before
@@ -27,19 +27,27 @@ public class TestEntityRecognizer {
 
     @Test
     public void testRecognizeOneEntity() {
+        recognizeOneEntity(recognizer);
+    }
+
+    @Test
+    public void testRecognizeMultipleEntities() {
+        recognizeMultipleEntities(recognizer);
+    }
+
+    public static void recognizeOneEntity(final IEntityRecognizer recognizer) {
         final String variableName = "NAME";
         final String variableValue = "VARIABLE";
         List<MemoryVariable> l = new ArrayList<MemoryVariable>() {{
             this.add(new MemoryVariable(variableName, Arrays.asList(variableValue, "another value")));
         }};
-        List<Pair<String, String>> r = this.recognizer.retrieveEntities("this is a " + variableValue + " to recognize", l);
+        List<Pair<String, String>> r = recognizer.retrieveEntities("this is a " + variableValue + " to recognize", l);
         Assert.assertEquals(1, r.size());
         Assert.assertEquals(variableName, r.get(0).getA());
         Assert.assertEquals(variableValue, r.get(0).getB());
     }
 
-    @Test
-    public void testRecognizeMultipleEntities() {
+    public static void recognizeMultipleEntities(final IEntityRecognizer recognizer) {
         final String[] varNames = {"var1", "var2"};
         final String[] varValues = {"value 1", "value2"};
         List<MemoryVariable> l = new ArrayList<MemoryVariable>() {{
@@ -47,7 +55,7 @@ public class TestEntityRecognizer {
             this.add(new MemoryVariable(varNames[1], Arrays.asList(varValues[1], "K")));
             this.add(new MemoryVariable("some other", Arrays.asList("X", "Y")));
         }};
-        List<Pair<String, String>> r = this.recognizer.retrieveEntities(
+        List<Pair<String, String>> r = recognizer.retrieveEntities(
                 "Start " + varValues[1].toUpperCase() + " and " + varValues[0] + " end", l);
         Assert.assertEquals(2, r.size());
         // Note - the order is currently defined by the order on the MemoryVariable list,
