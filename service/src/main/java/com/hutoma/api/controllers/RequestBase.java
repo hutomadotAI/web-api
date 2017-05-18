@@ -110,8 +110,10 @@ public abstract class RequestBase {
                         this.logger.logDebug("requestbase", "chat response from " + result.getEndpoint());
                         ChatResult chatResult = new ChatResult((ChatResult)
                                 this.serializer.deserialize(content, ChatResult.class));
+                        UUID aiid = result.getAiid();
+                        chatResult.setAiid(aiid);
                         chatResult.setElapsedTime(result.getDurationMs() / 1000.0);
-                        map.put(result.getAiid(), chatResult);
+                        map.put(aiid, chatResult);
                     } catch (JsonParseException jpe) {
                         this.logger.logException(this.getLogFrom(), jpe);
                         throw new AiControllerException(jpe.getMessage());

@@ -388,12 +388,12 @@ public class ChatLogic {
         return handledIntent;
     }
 
-    private Pair<UUID, ChatResult> getTopScore(final Map<UUID, ChatResult> chatResults) {
+    private ChatResult getTopScore(final Map<UUID, ChatResult> chatResults) {
         // Check if the currently locked bot still has an acceptable response
         if (this.chatState.getLockedAiid() != null && chatResults.containsKey(this.chatState.getLockedAiid())) {
             ChatResult result = chatResults.get(this.chatState.getLockedAiid());
             if (result.getScore() >= this.minP) {
-                return new Pair<>(this.chatState.getLockedAiid(), result);
+                return result;
             }
         }
         UUID responseFromAi = null;
@@ -406,7 +406,7 @@ public class ChatLogic {
         }
         // lock to this AI
         this.chatState.setLockedAiid(responseFromAi);
-        return new Pair<>(responseFromAi, chatResult);
+        return chatResult;
     }
 
     private ChatResult interpretSemanticResult() throws RequestBase.AiControllerException {
@@ -416,10 +416,10 @@ public class ChatLogic {
             return null;
         }
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        ChatResult chatResult = getTopScore(allResults);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
-        ChatResult chatResult = result.getB();
         if (chatResult.getAnswer() != null) {
             // if we receive a reset command then remove the command and flag the status
             if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
@@ -455,10 +455,9 @@ public class ChatLogic {
         }
 
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
-
-        ChatResult chatResult = result.getB();
+        ChatResult chatResult = getTopScore(allResults);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
@@ -480,11 +479,12 @@ public class ChatLogic {
         if (allResults == null) {
             return null;
         }
-        // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
-        ChatResult chatResult = result.getB();
+        // Get the top score
+        ChatResult chatResult = getTopScore(allResults);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
+
         if (chatResult.getAnswer() != null) {
             // always reset the conversation if we have gone with a non-wnet result
             chatResult.setResetConversation(true);

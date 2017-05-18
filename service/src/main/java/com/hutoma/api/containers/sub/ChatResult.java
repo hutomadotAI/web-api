@@ -25,6 +25,9 @@ public class ChatResult {
     private String topicOut = "";
     private UUID chatId;
     private List<MemoryIntent> intents;
+
+    // the actual bot ID that provided the result
+    private UUID aiid;
     private transient boolean resetConversation;
 
     public ChatResult() {
@@ -40,6 +43,7 @@ public class ChatResult {
         this.answer = source.answer;
         this.elapsedTime = source.elapsedTime;
         this.topicOut = source.topicOut;
+        this.aiid = source.aiid;
     }
 
     public String getAnswer() {
@@ -109,6 +113,10 @@ public class ChatResult {
     public void setHistory(String history) {
         this.history = history;
     }
+
+    public UUID getAiid() { return this.aiid; }
+
+    public void setAiid(UUID aiid) { this.aiid = aiid; }
 
     public boolean isResetConversation() {
         return this.resetConversation;
