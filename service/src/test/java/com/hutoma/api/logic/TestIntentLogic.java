@@ -81,7 +81,7 @@ public class TestIntentLogic {
 
     @Test
     public void testGetIntent_Success() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(getIntent());
+        when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(getIntent());
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -91,28 +91,28 @@ public class TestIntentLogic {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhook", true);
         ApiIntent intent = this.getIntent();
         intent.setWebHook(wh);
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(intent);
+        when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(intent);
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Success_Return() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(getIntent());
+        when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(getIntent());
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(this.INTENTNAME, ((ApiIntent) result).getIntentName());
     }
 
     @Test
     public void testGetIntent_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenReturn(null);
+        when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(null);
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntent_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.getIntent(anyString(), any(), anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getIntent(any(), anyString())).thenThrow(Database.DatabaseException.class);
         final ApiResult result = this.intentLogic.getIntent(DEVID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -204,6 +204,6 @@ public class TestIntentLogic {
     private ApiIntent getIntent() {
         return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT)
                 .addResponse("response").addUserSays("usersays")
-                .addVariable(new IntentVariable("entity", true, 3, "somevalue").addPrompt("prompt"));
+                .addVariable(new IntentVariable("entity", UUID.randomUUID(), true, 3, "somevalue").addPrompt("prompt"));
     }
 }

@@ -376,7 +376,7 @@ public class TestChatLogic {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(miList);
         ApiResult result = getChat(0.5f);
         ChatResult r = ((ApiChat) result).getResult();
@@ -395,10 +395,10 @@ public class TestChatLogic {
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
         Assert.assertFalse(mi.isFulfilled());
         ApiChat result = (ApiChat) getChat(0.5f);
@@ -566,7 +566,7 @@ public class TestChatLogic {
 
         // Next answer should exit intent handling and go through normal chat processing
         final String wnetAnswer = "wnet answer";
-        when(this.fakeIntentHandler.parseAiResponseForIntent(anyString(), any(), any(), anyString())).thenReturn(null);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(null);
         ChatResult wnetResult = new ChatResult();
         wnetResult.setScore(0.9f);
         wnetResult.setAnswer(wnetAnswer);
@@ -769,10 +769,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
 
         Assert.assertFalse(mi.isFulfilled());
@@ -799,10 +799,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(true);
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
         Assert.assertFalse(mi.isFulfilled());
         ApiChat result = (ApiChat) getChat(0.5f);
@@ -828,10 +828,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
 
         Assert.assertFalse(mi.isFulfilled());
@@ -857,10 +857,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(null);
 
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
 
         Assert.assertFalse(mi.isFulfilled());
@@ -964,7 +964,7 @@ public class TestChatLogic {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         setupFakeChat(0.9d, "@meta.intent." + intentName, 0.3d, "", 0.3d, "");
-        when(this.fakeIntentHandler.parseAiResponseForIntent(anyString(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);
         return mi;
     }
 

@@ -60,7 +60,7 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public ApiEntity getEntity(final String devid, final String entityName) throws DatabaseException {
+    public ApiEntity getEntity(final UUID devid, final String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             ResultSet rs;
             try {
@@ -79,7 +79,7 @@ public class DatabaseEntitiesIntents extends Database {
                         entityValues.add(rs.getString("value"));
                     }
                 }
-                return new ApiEntity(entityName, entityValues, isSystem);
+		return new ApiEntity(entityName, devid, entityValues, isSystem);
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
@@ -103,16 +103,15 @@ public class DatabaseEntitiesIntents extends Database {
     /***
      * Gets a fully populated intent object
      * including intent, usersays, variables and prompts
-     * @param devid owner dev
      * @param aiid the aiid that owns the intent
      * @param intentName
      * @return an intent
      * @throws DatabaseException if things go wrong
      */
-    public ApiIntent getIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
+    public ApiIntent getIntent(UUID aiid, String intentName) throws DatabaseException {
 
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 3).add(devid).add(aiid).add(intentName)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 2).add(aiid).add(intentName)
                     .executeQuery();
             if (!rs.next()) {
                 // the intent was not found at all
@@ -123,31 +122,36 @@ public class DatabaseEntitiesIntents extends Database {
             ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
 
             // get the user triggers
-            ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
+                    .add(aiid).add(intentName).executeQuery();
             while (saysRs.next()) {
                 intent.addUserSays(saysRs.getString("says"));
             }
 
             // get the list of responses
-            ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 2)
+                    .add(aiid).add(intentName).executeQuery();
             while (intentResponseRs.next()) {
                 intent.addResponse(intentResponseRs.getString("response"));
             }
 
             // get each intent variable
-            ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 2)
+                    .add(aiid).add(intentName).executeQuery();
             while (varRs.next()) {
                 int varID = varRs.getInt("id");
+                String uuidString = varRs.getString("dev_id");
+                UUID devOwnerUUID = UUID.fromString(uuidString);
                 IntentVariable variable = new IntentVariable(
-                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"),
+                        varRs.getString("entity_name"),
+                        devOwnerUUID,
+                        varRs.getBoolean("required"),
+                        varRs.getInt("n_prompts"),
                         varRs.getString("value"));
 
                 // for each variable get all its prompts
-                ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                        .add(devid).add(aiid).add(varID).executeQuery();
+                ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
+                        .add(aiid).add(varID).executeQuery();
                 while (promptRs.next()) {
                     variable.addPrompt(promptRs.getString("prompt"));
                 }
@@ -360,14 +364,17 @@ public class DatabaseEntitiesIntents extends Database {
             throws DatabaseException, SQLException {
 
         // read the existing intent variables from the database
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariables", 2)
+                .add(aiid).add(intent.getIntentName()).executeQuery();
 
         // put them into a set
         HashMap<String, IntentVariable> currentSet = new HashMap<>();
         while (readCurrentRs.next()) {
+            String uuidString = readCurrentRs.getString("dev_id");
+            UUID devOwnerUUID = UUID.fromString(uuidString);
             IntentVariable old = new IntentVariable(
                     readCurrentRs.getString("entity_name"),
+                    devOwnerUUID,
                     readCurrentRs.getBoolean("required"), readCurrentRs.getInt("n_prompts"),
                     readCurrentRs.getString("value"),
                     readCurrentRs.getInt("id"));

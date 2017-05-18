@@ -127,7 +127,7 @@ public class ChatLogic {
                     if (wnetConfident) {
                         // if we are taking WNET's reply then process intents
                         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                                devId, aiid, chatUuid, result.getAnswer());
+                                result.getAiid(), chatUuid, result.getAnswer());
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
@@ -511,7 +511,7 @@ public class ChatLogic {
 
     private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid) {
         memoryIntent.setIsFulfilled(true);
-        ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
+        ApiIntent intent = this.intentHandler.getIntent(aiid, memoryIntent.getName());
         if (intent != null) {
             List<String> responses = intent.getResponses();
             chatResult.setAnswer(responses.get((int) (Math.random() * responses.size())));

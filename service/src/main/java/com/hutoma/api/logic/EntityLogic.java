@@ -56,7 +56,8 @@ public class EntityLogic {
 
     public ApiResult getEntity(final String devid, final String entityName) {
         try {
-            final ApiEntity entity = this.database.getEntity(devid, entityName);
+            UUID devidUUID = UUID.fromString(devid);
+            final ApiEntity entity = this.database.getEntity(devidUUID, entityName);
             this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devid, LogMap.map("Entity", entityName));
             return entity.setSuccessStatus();
         } catch (final Exception e) {
