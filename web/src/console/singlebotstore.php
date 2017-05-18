@@ -14,6 +14,7 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']
 $name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
 $menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
 $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -49,7 +50,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <iframe src="botcardDetail.php"
+                    <iframe src="botcardDetail.php?botId=<?php echo $botId?>&origin=<?php echo $menu_title?>"
                             class="iframe-full-height"
                             frameBorder="0"
                             scrolling="no"
@@ -96,7 +97,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
         ]);
 
         var category = '<?php if( isset($_GET['category']) ) echo $_GET['category'];?>';
-        if(category !=''){
+        if(category !== ''){
             var nodeFrame = document.getElementById('botcardDetailFrame');
             nodeFrame.setAttribute('src', nodeFrame.getAttribute('src') + buildCategoryURIparameter(category));
         }

@@ -47,8 +47,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
             <div class="overlay carousel-ovelay" id ="carousel-overlay">
                 <i class="fa fa-refresh fa-spin center-block"></i>
             </div>
-            <p id="botsCarousels"/>
-            <p/>
+            <p id="botsCarousels"></p>
             <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
@@ -93,7 +92,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     });
     $('#buyBot').on('hide.bs.modal', function (e) {
         var purchase_state = document.getElementById('purchase_state').value;
-        if (purchase_state == 1)
+        if (purchase_state === 1)
             switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.BOTSTORE_FLOW.value);
     });
     <?php

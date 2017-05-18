@@ -1,6 +1,6 @@
 function populateBotFields(botstoreItem, menu_title, carousel_category, current_flow) {
     var item;
-    
+
     try {
         item = JSON.parse(botstoreItem);
         var bot = item['metadata'];
@@ -8,7 +8,7 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('botTitle').innerText = bot['name'];
         document.getElementById('botBadge').innerText = bot['badge'];
         document.getElementById('botDescription').value = bot['description'];
-        if (bot['alertMessage'] == null || bot['alertMessage'].replace(/\s/g, "") == ''){
+        if (bot['alertMessage'] === null || bot['alertMessage'].replace(/\s/g, "") === '') {
             document.getElementById('botMessageIcon').style.display = 'none';
             document.getElementById('botMessage').style.display = 'none';
         }
@@ -20,7 +20,7 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('botLongDescription').innerText = bot['longDescription'];
         document.getElementById('botSample').innerText = bot['sample'];
         var dateString = "";
-        if (bot['lastUpdate'] != "") {
+        if (bot['lastUpdate'] !== "") {
             var date = new Date(bot['lastUpdate']);
             dateString = date.toLocaleDateString() + " " + date.toLocaleTimeString();
         }
@@ -29,8 +29,8 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('botVersion').innerText = bot['version'];
         document.getElementById('botClassification').innerText = bot['classification'];
         document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(bot['privacyPolicy']));
-        var botIconPath = '';
-        if (bot['botIcon'] == null || bot['botIcon'] =='')
+        var botIconPath = "";
+        if (!bot.hasOwnProperty('botIcon') || bot['botIcon'] === "")
             botIconPath = BOT_ICON.DEFAULT_IMAGE.value;
         else
             botIconPath = BOT_ICON.PATH.value + bot['botIcon'];
@@ -46,34 +46,34 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('botCompany').innerText = dev['company'];
         var elem = document.getElementById('developerInfo');
 
-        if (dev['website'] == null || dev['website'] == '') {
+        if (dev['website'] === null || dev['website'] === '') {
             elem.style.display = 'none';
         } else {
             elem.style.display = 'block';
             document.getElementById('botWebsite').setAttribute('href', checkLink(dev['website']));
         }
-        var owned = (item['owned'] == null || item['owned'] == '') ? false : item['owned'];
+        var owned = (item['owned'] === null || item['owned'] === '') ? false : item['owned'];
         setButtonParameter(menu_title, owned, carousel_category, current_flow);
 
         document.getElementById('botcardDetailContent').style.display = 'block';
         addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
 
-    } catch(e) {
+    } catch (e) {
         document.getElementById('containerMsgAlertBotcardDetail').style.display = 'block';
-        document.getElementById('msgAlertBotcardDetail').innerText='Missing required arguments';
+        document.getElementById('msgAlertBotcardDetail').innerText = 'Missing required arguments';
     }
-   
+
 }
 
 
-function checkLink(link){
-    if (link.indexOf('http') == -1 )
+function checkLink(link) {
+    if (link.indexOf('http') === -1)
         link = 'http://' + link;
     return link;
 }
 
-function addEmbedVideoLink(bot){
-    if (bot['videoLink'] == null || videoLinkFilter(bot['videoLink']) == '')
+function addEmbedVideoLink(bot) {
+    if (bot['videoLink'] === null || videoLinkFilter(bot['videoLink']) === '')
         document.getElementById('botVideoLinkSection').innerHTML = '';
     else
         document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(bot['videoLink']));
@@ -84,10 +84,10 @@ function videoLinkFilter(url) {
     var param = '?controls=1&hd=1&enablejsapi=1';
     url = url.replace(/\s/g, '');
 
-    if (url == '')
+    if (url === '')
         return '';
 
-    if (url.indexOf('https://www.youtube.com') != -1) {
+    if (url.indexOf('https://www.youtube.com') !== -1) {
         var pos = url.lastIndexOf('=');
         if (pos == -1)
             pos = url.lastIndexOf("/");
@@ -95,7 +95,7 @@ function videoLinkFilter(url) {
         return src;
     }
 
-    if (url.indexOf('https://youtu.be/') != -1) {
+    if (url.indexOf('https://youtu.be/') !== -1) {
         var pos = url.lastIndexOf("/");
         src += url.substring(pos) + param;
         return src;
@@ -105,8 +105,8 @@ function videoLinkFilter(url) {
 
 function setButtonParameter(title, owned, carousel_category, flow) {
     var nodeCloseButtonBack = document.getElementById('btnBuyBotBack');
-    var nodeButtonBack =  document.getElementById('btnBackToBotstore');
-    var nodeButtonBuy =  document.getElementById('btnBuyBot');
+    var nodeButtonBack = document.getElementById('btnBackToBotstore');
+    var nodeButtonBuy = document.getElementById('btnBuyBot');
     switch (title) {
         case 'home' :
             var newAIBotstoreLink = './NewAIBotstore.php';
@@ -115,13 +115,13 @@ function setButtonParameter(title, owned, carousel_category, flow) {
             else
                 nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
 
-            if(carousel_category!='')
+            if (carousel_category !== '')
                 newAIBotstoreLink += buildCategoryURIparameter(carousel_category);
 
             nodeCloseButtonBack.setAttribute('href', newAIBotstoreLink);
             nodeButtonBack.innerText = 'Go back';
             nodeButtonBack.setAttribute('href', newAIBotstoreLink);
-            nodeButtonBuy.setAttribute('data-flow',(flow).toString());
+            nodeButtonBuy.setAttribute('data-flow', (flow).toString());
             break;
         case 'settings' :
             nodeCloseButtonBack.setAttribute('href', './settingsAI.php?botstore=1');
@@ -143,15 +143,16 @@ function setButtonParameter(title, owned, carousel_category, flow) {
                     default:
                 }
 
-            if(carousel_category!='')
-                botstoreLink +=  buildCategoryURIparameter(carousel_category);
+            if (carousel_category !== '')
+                botstoreLink += buildCategoryURIparameter(carousel_category);
 
             nodeCloseButtonBack.setAttribute('href', botstoreLink);
-            nodeButtonBuy.setAttribute('data-flow',(flow).toString());
+            nodeButtonBuy.setAttribute('data-flow', (flow).toString());
             break;
         default:
             nodeCloseButtonBack.setAttribute('href', './botstore.php');
             nodeButtonBack.innerText = 'Go back';
             nodeButtonBack.setAttribute('href', '././botstore.php');
+            nodeButtonBuy.setAttribute('onClick', 'location.href="https://console.hutoma.com"');
     }
 }

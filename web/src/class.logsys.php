@@ -15,6 +15,8 @@ if (function_exists('libxml_disable_entity_loader')) {
     libxml_disable_entity_loader(true);
 }
 
+require_once("console/common/config.php");
+require_once("console/common/utils.php");
 require_once("console/common/apiConnector.php");
 require_once("console/common/telemetry.php");
 require_once("console/common/sessionObject.php");
@@ -424,8 +426,7 @@ class console
      */
     public static function redirect($url, $status = 302)
     {
-        header("Location: $url", true, $status);
-        exit;
+        utils::redirect($url, $status);
     }
 
     /**
@@ -551,11 +552,8 @@ class console
 
     public static function getApiRequestUrl()
     {
-        $url = getenv("HUTOMA_API_URL");
-        if (isset($url) && $url != "") {
-            return $url;
-        }
-        return self::$config["api"]["request_url"];
+        $url = config::getApiRequestBaseUrl();
+        return isset($url) ? $url : self::$config["api"]["request_url"];
     }
 
     /**

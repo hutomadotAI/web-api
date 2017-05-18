@@ -18,7 +18,7 @@ class botstoreApi extends apiBase
         $query = str_replace('%2C', ',', str_replace('%25', '%', $query));
 
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath).'?'.$query);
+            $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath) . '?' . $query);
             $this->curl->setVerbGet();
 
             $this->curl->addHeader('Content-Type', 'application/json');
@@ -31,7 +31,7 @@ class botstoreApi extends apiBase
 
     public function getBotstoreBot($botId)
     {
-        if ($this->isLoggedIn()) {
+        if (isset($botId)) {
             $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath . '/' . $botId));
             $this->curl->setVerbGet();
 

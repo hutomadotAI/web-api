@@ -1,28 +1,18 @@
 <?php
-require "../pages/config.php";
-require_once "./api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
+require_once "api/apiBase.php";
 require_once "api/developerApi.php";
 require_once "api/botstoreApi.php";
-require_once "common/bot.php";
-require_once "common/developer.php";
 require_once "common/botstoreItem.php";
+require_once "common/sessionObject.php";
 
 
-/*  On this page UI to be updated to show star ratings once API has star ratings */
-
-if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid']))
-    \hutoma\console::redirect('./botstore.php');
-
-$botId = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['botid'];
-$menu_title = $_SESSION[$_SESSION['navigation_id']]['user_details']['bot']['menu_title'];
-$name = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
-$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-
-$botstoreApi = new \hutoma\api\botstoreApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botId = $_GET['botId'];
+$menu_title = $_GET['origin'];
+$session = new hutoma\sessionObject();
+$botstoreApi = new \hutoma\api\botstoreApi(false, $session->getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
 unset($botstoreApi);
+unset($session);
 ?>
 <!DOCTYPE html>
 <html>
@@ -77,7 +67,9 @@ unset($botstoreApi);
                 <div class="row no-margin">
                     <!--description-->
                     <div class="col-xs-9 bot-description">
-                        <textarea class="bot-default-style bot-description-limited pull-left flat no-shadow unselectable" id="botDescription" readonly></textarea>
+                        <textarea
+                                class="bot-default-style bot-description-limited pull-left flat no-shadow unselectable"
+                                id="botDescription" readonly></textarea>
                     </div>
 
                     <!--star ratings-->
@@ -135,9 +127,9 @@ unset($botstoreApi);
 
         <!-- ================ BOT DETAILS VIDEO ============================= -->
         <span id="botVideoLinkSection">
-            <div class="box-body flat unselectable" >
-                <div class="col-xs-12 no-padding bot-video flat" >
-                    <div class="box-body no-padding flat" >
+            <div class="box-body flat unselectable">
+                <div class="col-xs-12 no-padding bot-video flat">
+                    <div class="box-body no-padding flat">
                         <div class="overlay center-block" style="background-color: black;">
                             <div class="embed-responsive embed-responsive-16by9">
                                 <embed id="botVideoLink" src="" frameborder="0" allowfullscreen></embed>
@@ -217,7 +209,8 @@ unset($botstoreApi);
                 <div class="col-xs-4 unselectable">
                     <div class="bot-more-details">Privacy</div>
                     <div class="text-left">
-                        <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy Policy</a>
+                        <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy
+                            Policy</a>
                     </div>
                 </div>
             </div>
@@ -234,7 +227,8 @@ unset($botstoreApi);
                 </div>
             </div>
             <br>
-            <a href="./botstore.php" id="btnBackToBotstore" class="btn btn-primary pull-left flat" target="_top">Go to Botstore</a>
+            <a href="./botstore.php" id="btnBackToBotstore" class="btn btn-primary pull-left flat" target="_top">Go to
+                Botstore</a>
         </div>
     </div>
 
@@ -263,14 +257,18 @@ unset($botstoreApi);
                                     </div>
                                     <!--close button-->
                                     <div class="col-xs-1 bot-close-button">
-                                        <button type="button" class="close text-white" id="btnModelClose" data-dismiss="modal">&times;</button>
+                                        <button type="button" class="close text-white" id="btnModelClose"
+                                                data-dismiss="modal">&times;
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div class="row no-margin">
                                     <!--description-->
                                     <div class="col-xs-12" style="padding:2px 15px 0 0;">
-                                        <textarea class="bot-default-style bot-description-limited flat no-shadow unselectable" id="botDescriptionPurchase" readonly></textarea>
+                                        <textarea
+                                                class="bot-default-style bot-description-limited flat no-shadow unselectable"
+                                                id="botDescriptionPurchase" readonly></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -287,7 +285,8 @@ unset($botstoreApi);
                                     <div class="pull-left text-orange">
                                         price
                                         <span class="text-orange"></span>
-                                        <span id="botPricePurchase"></span><span class="bot-badge no-padding text-orange"> &#8364</span>
+                                        <span id="botPricePurchase"></span><span
+                                                class="bot-badge no-padding text-orange"> &#8364</span>
                                     </div>
                                 </div>
                             </div>
@@ -296,7 +295,8 @@ unset($botstoreApi);
                             </div>
                             <div class="col-xs-4 bot-buy-purchase">
                                 <!--purchased button-->
-                                <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal" data-flow="" style="width:130px;">
+                                <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal"
+                                        data-flow="" style="width:130px;">
                                     <b>Use Bot </b>
                                     <span class="fa fa-arrow-circle-right"></span>
                                 </button>
@@ -341,30 +341,38 @@ unset($botstoreApi);
 </script>
 
 <script>
-    $(function() {
+    $(function () {
         var nodeContainerAlert = document.getElementById('containerMsgAlertBotcardDetail');
         var nodeMessageAlert = document.getElementById('msgAlertBotcardDetail');
+
+        <?php if (isset($botId)) {?>
         switch (responseCode) {
             case 200:
                 populateBotFields(
                     botstoreItem,
-                    "<?php echo $menu_title; unset($menu_title)?>",
+                    "<?php echo(isset($menu_title) ? $menu_title : ""); unset($menu_title)?>",
                     "<?php if (isset($_GET['category'])) echo $_GET['category'];?>",
-                    <?php echo $isExistAiId ? "true" : "false" ?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
+                    <?php echo((isset($isExistAiId) && $isExistAiId) ? "true" : "false") ?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
                 );
                 break;
             case 404:
                 nodeContainerAlert.style.display = 'block';
-                nodeMessageAlert.innerText='Bot not found';
+                nodeMessageAlert.innerText = 'Bot not found';
                 break;
             case 500:
                 nodeContainerAlert.style.display = 'block';
-                nodeMessageAlert.innerText='There was a problem acquiring the bot';
+                nodeMessageAlert.innerText = 'There was a problem acquiring the bot';
                 break;
             default:
                 nodeContainerAlert.style.display = 'block';
-                nodeMessageAlert.innerText='Something has gone wrong.';
+                nodeMessageAlert.innerText = 'Something has gone wrong.';
         }
+        <?php } else { ?>
+        nodeContainerAlert.style.display = 'block';
+        nodeMessageAlert.innerText = 'Bot not found';
+
+
+        <?php } ?>
     });
 </script>
 </body>
