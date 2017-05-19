@@ -79,7 +79,7 @@ public class DatabaseEntitiesIntents extends Database {
                         entityValues.add(rs.getString("value"));
                     }
                 }
-		return new ApiEntity(entityName, devid, entityValues, isSystem);
+                return new ApiEntity(entityName, devid, entityValues, isSystem);
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
@@ -280,8 +280,8 @@ public class DatabaseEntitiesIntents extends Database {
             throws DatabaseException, SQLException {
 
         // read current
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
+                .add(aiid).add(intent.getIntentName()).executeQuery();
 
         HashSet<String> currentSet = new HashSet<>();
         // put them into a set
@@ -322,8 +322,8 @@ public class DatabaseEntitiesIntents extends Database {
 
 
         // read current
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 2)
+                .add(aiid).add(intent.getIntentName()).executeQuery();
 
         // put them into a set
         HashSet<String> currentSet = new HashSet<>();
@@ -433,8 +433,8 @@ public class DatabaseEntitiesIntents extends Database {
         int varId = updateVarRs.getInt("affected_id");
 
         // what prompts do we have now?
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                .add(devid).add(aiid).add(varId).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
+                .add(aiid).add(varId).executeQuery();
         // put them into a set
         HashSet<String> currentSet = new HashSet<>();
         while (readCurrentRs.next()) {
