@@ -80,6 +80,122 @@ public class Database {
     }
 
     /**
+     * Gets the user information.
+     * @param username the username
+     * @return the user information
+     * @throws DatabaseException
+     */
+    public UserInfo getUser(final String username) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getUserDetails", 1).add(username);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return new UserInfo(
+                            rs.getString("first_name"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            new DateTime(rs.getTimestamp("created")),
+                            rs.getBoolean("valid"),
+                            rs.getBoolean("internal"),
+                            rs.getString("password"),
+                            rs.getString("password_salt"),
+                            rs.getString("dev_id"),
+                            rs.getString("attempt"),
+                            rs.getInt("id"),
+                            rs.getString("dev_token"));
+                }
+                return null;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean updateUserPassword(final int userId, final String password, final String passwordSalt)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateUserPassword", 3)
+                    .add(userId).add(password).add(passwordSalt);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean isPasswordResetTokenValid(final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("isPasswordResetTokenValid", 1).add(token);
+            final ResultSet rs = call.executeQuery();
+            try {
+                return rs.next();
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public int getUserIdForResetToken(final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getUserIdForResetToken", 1).add(token);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getInt("uid");
+                }
+                return -1;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean deletePasswordResetToken(final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deletePasswordResetToken", 1).add(token);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean insertPasswordResetToken(final int userId, final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("insertResetToken", 2).add(token).add(userId);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Gets whether the user already exists or not.
+     * @param username   the username to check
+     * @param checkEmail whether to check the email field as well or not
+     * @return whether the user already exists or not
+     * @throws DatabaseException
+     */
+    public boolean userExists(final String username, final boolean checkEmail) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("userExists", 2).add(username).add(checkEmail);
+            final ResultSet rs = call.executeQuery();
+            try {
+                return rs.next();
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    /**
+     * Updates the user login attempts.
+     * @param devId    the developer id
+     * @param attempts the number of attempts, or a 'magic code' (this comes from the PHP code)
+     * @return whether the update succeeded or not
+     * @throws DatabaseException
+     */
+    public boolean updateUserLoginAttempts(final String devId, final String attempts) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateUserLoginAttempts", 2).add(devId).add(attempts);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
      * Redeems an invite code for user registration.
      * @param code     the invite code.
      * @param username the registering user.

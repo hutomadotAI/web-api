@@ -177,6 +177,8 @@ GRANT SELECT ON `hutoma`.`developerInfo` TO `userTableReader`@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`invite_codes` TO `userTableReader`@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`resetTokens` TO `userTableReader`@`127.0.0.1`;
+
 
 # Privileges for `userTableWriter`@`127.0.0.1`
 
@@ -193,6 +195,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`developerInfo` TO 'userTableWr
 GRANT SELECT, UPDATE ON `hutoma`.`invite_codes` TO `userTableWriter`@'127.0.0.1';
 
 GRANT INSERT ON `hutoma`.`invite_code_uses` TO `userTableWriter`@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`resetTokens` TO `userTableWriter`@`127.0.0.1`;
 
 
 # Privileges for `botStoreReader`@`127.0.0.1`

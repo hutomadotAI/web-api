@@ -10,6 +10,9 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiString;
+import com.hutoma.api.containers.ApiUserInfo;
+import com.hutoma.api.containers.sub.UserInfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -96,7 +99,7 @@ public class AdminLogic {
             this.aiServices.deleteDev(devId);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteDev", ADMIN_DEVID_LOG, logMap);
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "DeleveDev", ADMIN_DEVID_LOG, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "DeleveDev", ADMIN_DEVID_LOG, e, logMap);
             return ApiError.getInternalServerError();
         }
 
@@ -115,7 +118,130 @@ public class AdminLogic {
             this.logger.logUserTraceEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, logMap);
             return new ApiAdmin(devtoken, devid).setSuccessStatus();
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetDevToken", ADMIN_DEVID_LOG, e, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult doesUserExist(final String username, final boolean checkEmail) {
+        try {
+            if (!this.database.userExists(username, checkEmail)) {
+                return ApiError.getNotFound();
+            }
+            return new ApiResult().setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetUser", ADMIN_DEVID_LOG, ex,
+                    LogMap.map("UserName", username));
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getUser(final String username) {
+        LogMap logMap = LogMap.map("UserName", username);
+        try {
+            UserInfo userInfo = this.database.getUser(username);
+            if (userInfo == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetUser - not found", ADMIN_DEVID_LOG, logMap);
+                return ApiError.getNotFound();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "GetUser", ADMIN_DEVID_LOG, logMap);
+            return new ApiUserInfo(userInfo).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetUser", ADMIN_DEVID_LOG, ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult updateLoginAttempts(final String devId, final String loginAttempts) {
+        LogMap logMap = LogMap.map("DevId", devId);
+        try {
+            if (this.database.updateUserLoginAttempts(devId, loginAttempts)) {
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateLoginAttempts", devId,
+                        logMap.put("LoginAttempts", loginAttempts));
+                return new ApiResult().setSuccessStatus();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "UpdateLoginAttempts - not found", devId, logMap);
+            return ApiError.getBadRequest();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "UpdateLoginAttempts", ADMIN_DEVID_LOG, ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult updateUserPassword(final int userId, final String password, final String passwordSalt) {
+        LogMap logMap = LogMap.map("UserId", userId);
+        try {
+            if (this.database.updateUserPassword(userId, password, passwordSalt)) {
+                return new ApiResult().setSuccessStatus();
+            }
+            return ApiError.getBadRequest();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "UpdateUserPassword", ADMIN_DEVID_LOG, ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult isPasswordResetTokenValid(final String token) {
+        LogMap logMap = LogMap.map("Token", token);
+        try {
+            if (this.database.isPasswordResetTokenValid(token)) {
+                this.logger.logUserTraceEvent(LOGFROM, "IsPasswordResetTokenValid", ADMIN_DEVID_LOG, logMap);
+                return new ApiResult().setSuccessStatus();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "IsPasswordResetTokenValid - not found", ADMIN_DEVID_LOG,
+                    logMap);
+            return ApiError.getNotFound();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "IsPasswordResetTokenValid", ADMIN_DEVID_LOG, ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getUserIdForResetToken(final String token) {
+        LogMap logMap = LogMap.map("Token", token);
+        try {
+            int userId = this.database.getUserIdForResetToken(token);
+            if (userId >= 0) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetUserIdForResetToken", ADMIN_DEVID_LOG, logMap);
+                return new ApiString(Integer.toString(userId)).setSuccessStatus();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "GetUserIdForResetToken - not found", ADMIN_DEVID_LOG,
+                    logMap);
+            return ApiError.getNotFound();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetUserIdForResetToken", ADMIN_DEVID_LOG, ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult deletePasswordResetToken(final String token) {
+        LogMap logMap = LogMap.map("Token", token);
+        try {
+            if (this.database.deletePasswordResetToken(token)) {
+                this.logger.logUserTraceEvent(LOGFROM, "DeletePasswordResetToken", ADMIN_DEVID_LOG, logMap);
+                return new ApiResult().setSuccessStatus();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "DeletePasswordResetToken - not found", ADMIN_DEVID_LOG,
+                    logMap);
+            return ApiError.getNotFound();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "DeletePasswordResetToken", ADMIN_DEVID_LOG, ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult insertPasswordResetToken(final int userId, final String token) {
+        LogMap logMap = LogMap.map("Token", token).put("UserId", userId);
+        try {
+            if (this.database.insertPasswordResetToken(userId, token)) {
+                this.logger.logUserTraceEvent(LOGFROM, "InsertPasswordResetToken", ADMIN_DEVID_LOG, logMap);
+                return new ApiResult().setSuccessStatus();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "InsertPasswordResetToken - not found", ADMIN_DEVID_LOG,
+                    logMap);
+            return ApiError.getNotFound();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "InsertPasswordResetToken", ADMIN_DEVID_LOG, ex, logMap);
             return ApiError.getInternalServerError();
         }
     }

@@ -1,5 +1,8 @@
 <?php
-$trackerObject = \hutoma\console::getGoogleAnalyticsTrackerObject();
+
+require_once "utils.php";
+
+$trackerObject = \hutoma\utils::getGoogleAnalyticsTrackerObject();
 
 if (isset($trackerObject)) {
     ?>

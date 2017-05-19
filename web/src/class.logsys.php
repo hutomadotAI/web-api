@@ -1,7 +1,8 @@
 <?php
+
 namespace hutoma;
 
-/** ANDREA **/
+
 date_default_timezone_set('Europe/London');
 
 /**
@@ -18,8 +19,13 @@ if (function_exists('libxml_disable_entity_loader')) {
 require_once("console/common/config.php");
 require_once("console/common/utils.php");
 require_once("console/common/apiConnector.php");
+require_once("console/api/adminApi.php");
+require_once("console/api/signupCodeApi.php");
 require_once("console/common/telemetry.php");
 require_once("console/common/sessionObject.php");
+
+use hutoma\api\adminApi;
+
 
 class console
 {
@@ -39,19 +45,6 @@ class console
             "company" => "hutoma",
             "email" => "hello@hutoma.com",
             "email_callback" => 0
-        ),
-
-        /**
-         * Database Configuration
-         */
-        "db" => array(
-            "host" => 'https://api.hutoma.com/v1',
-            "port" => '433',
-            "username" => 'hutoma_caller',
-            "password" => '>YR"khuN*.gF)V4#',
-            "name" => 'hutoma',
-            "table" => 'users',
-            "token_table" => "resetTokens"
         ),
 
         /** Intercom ID acquired */
@@ -162,55 +155,6 @@ class console
             "expire" => "+30 days",
             "path" => "/",
             "domain" => "",
-        ),
-
-        /**
-         * 2 Step Login
-         */
-        'two_step_login' => array(
-            /**
-             * Message to show before displaying "Enter Token" form.
-             */
-            'instruction' => '',
-
-            /**
-             * Callback when token is generated.
-             * Used to send message to user (Phone/E-Mail)
-             */
-            'send_callback' => '',
-
-            /**
-             * The table to stoe user's sessions
-             */
-            'devices_table' => 'user_devices',
-
-            /**
-             * The length of token generated.
-             * A low value is better for tokens sent via Mobile SMS
-             */
-            'token_length' => 4,
-
-            /**
-             * Whether the token should be numeric only ?
-             * Default Token : Alphabetic + Numeric mixed strings
-             */
-            'numeric' => false,
-
-            /**
-             * The expire time of cookie that authorizes the device
-             * to login using the user's account with 2 Step Verification
-             * The value is for setting in strtotime() function
-             * http://php.net/manual/en/function.strtotime.php
-             */
-            'expire' => '+45 days',
-
-            /**
-             * Should logSys checks if device is valid, everytime
-             * logSys is initiated ie everytime a page loads
-             * If you want to check only the first time a user loads
-             * a page, then set the value to TRUE, else FALSE
-             */
-            'first_check_only' => true
         )
     );
 
@@ -222,12 +166,10 @@ class console
 
     public static $config = array();
     public static $loggedIn = false;
-    public static $db = true;
     public static $user = false;
     private static $constructed = false;
     private static $init_called = false;
-    private static $cookie, $session, $remember_cookie, $dbh;
-    private static $sessionObj = null;
+    private static $cookie, $session, $remember_cookie;
 
     /**
      * Merge user config and default config
@@ -254,127 +196,48 @@ class console
             if (self::$config['features']['start_session'] === true) {
                 session_start();
             }
-            self::$sessionObj = new sessionObject();
+
             /**
-             * Try connecting to Database Server
+             * Add the login page to the array of pages that doesn't need logging in
              */
-            try {
-                /**
-                 * Add the login page to the array of pages that doesn't need logging in
-                 */
-                array_push(self::$config['pages']['no_login'], self::$config['pages']['login_page']);
+            array_push(self::$config['pages']['no_login'], self::$config['pages']['login_page']);
 
-                $connectionString = getenv("HUTOMA_API_DB_CONNECTION_STRING");
-                if (!isset($connectionString) || $connectionString == "") {
-                    self::$dbh = new \PDO("mysql:dbname=" . self::$config['db']['name'] . ";host=" . self::$config['db']['host'] . ";port=" . self::$config['db']['port'] . ";charset=utf8", self::$config['db']['username'], self::$config['db']['password']);
-                } else {
-                    self::$dbh = new \PDO($connectionString, getenv("HUTOMA_API_DB_USERNAME"), getenv("HUTOMA_API_DB_PASSWORD"));
-                }
+            self::$cookie = isset($_COOKIE['logSyslogin']) ? $_COOKIE['logSyslogin'] : false;
+            self::$session = isset($_SESSION['logSyscuruser']) ? $_SESSION['logSyscuruser'] : false;
+            self::$remember_cookie = isset($_COOKIE['logSysrememberMe']) ? $_COOKIE['logSysrememberMe'] : false;
 
-                self::$db = true;
-                self::$cookie = isset($_COOKIE['logSyslogin']) ? $_COOKIE['logSyslogin'] : false;
-                self::$session = isset($_SESSION['logSyscuruser']) ? $_SESSION['logSyscuruser'] : false;
-                self::$remember_cookie = isset($_COOKIE['logSysrememberMe']) ? $_COOKIE['logSysrememberMe'] : false;
+            $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$session . self::$config['keys']['cookie']);
+            if (self::$cookie == $encUserID) {
+                self::$loggedIn = true;
+            } else {
+                self::$loggedIn = false;
+            }
 
-                // DEBUG self::$dbh->setAttribute( \PDO::ATTR_ERRMODE , \PDO::ERRMODE_EXCEPTION );
-
-                $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$session . self::$config['keys']['cookie']);
+            /**
+             * If there is a Remember Me Cookie and the user is not logged in,
+             * then log in the user with the ID in the remember cookie, if it
+             * matches with the decrypted value in `logSyslogin` cookie
+             */
+            if (self::$config['features']['remember_me'] === true && self::$remember_cookie !== false && self::$loggedIn === false) {
+                $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$remember_cookie . self::$config['keys']['cookie']);
                 if (self::$cookie == $encUserID) {
                     self::$loggedIn = true;
                 } else {
                     self::$loggedIn = false;
                 }
-
-                /**
-                 * If there is a Remember Me Cookie and the user is not logged in,
-                 * then log in the user with the ID in the remember cookie, if it
-                 * matches with the decrypted value in `logSyslogin` cookie
-                 */
-                if (self::$config['features']['remember_me'] === true && self::$remember_cookie !== false && self::$loggedIn === false) {
-                    $encUserID = hash("sha256", self::$config['keys']['cookie'] . self::$remember_cookie . self::$config['keys']['cookie']);
-                    if (self::$cookie == $encUserID) {
-                        self::$loggedIn = true;
-                    } else {
-                        self::$loggedIn = false;
-                    }
-                    if (self::$loggedIn === true) {
-                        $_SESSION['logSyscuruser'] = self::$remember_cookie;
-                        self::$session = self::$remember_cookie;
-                    }
+                if (self::$loggedIn === true) {
+                    $_SESSION['logSyscuruser'] = self::$remember_cookie;
+                    self::$session = self::$remember_cookie;
                 }
-
-                self::$user = self::$session;
-
-                /**
-                 * Check if devices is authorized to use the account
-                 */
-                if (self::$config['features']['two_step_login'] === true && self::$loggedIn) {
-                    $login_page = self::curPage() === self::$config['pages']['login_page'];
-
-                    if (!isset($_COOKIE['logSysdevice']) && $login_page === false) {
-                        /**
-                         * The device cookie is not even set. So, logout
-                         */
-                        self::logout();
-                        $called_from = "login";
-                    } else if (self::$config['two_step_login']['first_check_only'] === false || (self::$config['two_step_login']['first_check_only'] === true && !isset($_SESSION['device_check']))) {
-                        //TODO: 2-step-login is off at the moment - to wil have to be moved to a stored procedure to work
-                        $sql = self::$dbh->prepare("SELECT '1' FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
-                        $sql->execute(array(self::$user, $_COOKIE['logSysdevice']));
-
-                        /**
-                         * Device not authorized, so remove device cookie & logout
-                         */
-                        if ($sql->fetchColumn() !== '1' && $login_page === false) {
-                            setcookie("logSysdevice", "", time() - 10);
-                            self::logout();
-                            $called_from = "login";
-                        } else {
-                            $_SESSION['device_check'] = 1;
-                        }
-                    }
-                }
-
-                if (self::$config['features']['auto_init'] === true && $called_from != "logout" && $called_from != "login") {
-                    self::init();
-                }
-                return true;
-            } catch (\PDOException $e) {
-                /**
-                 * Couldn't connect to Database
-                 */
-                self::log_error("init", "Exception: " . $e->getMessage());
-                return false;
             }
-        }
-    }
 
-    /**
-     * Get the current page path.
-     * Eg: /mypage, /folder/mypage.php
-     */
-    public static function curPage()
-    {
-        $parts = parse_url(self::curPageURL());
-        return $parts["path"];
-    }
+            self::$user = self::$session;
 
-    /**
-     * Get the current page URL
-     */
-    public static function curPageURL()
-    {
-        $pageURL = 'http';
-        if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
-            $pageURL .= "s";
+            if (self::$config['features']['auto_init'] === true && $called_from != "logout" && $called_from != "login") {
+                self::init();
+            }
+            return true;
         }
-        $pageURL .= "://";
-        if ($_SERVER["SERVER_PORT"] != "80") {
-            $pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"] . $_SERVER["REQUEST_URI"];
-        } else {
-            $pageURL .= $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
-        }
-        return $pageURL;
     }
 
     /**
@@ -388,12 +251,12 @@ class console
         setcookie("logSyslogin", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
         setcookie("logSysrememberMe", "", time() - 10, self::$config['cookies']['path'], self::$config['cookies']['domain']);
 
-        self::$sessionObj->clear();
+        sessionObject::clear();
         /**
          * Wait for the cookies to be removed, then redirect
          */
         usleep(2000);
-        self::redirect(self::$config['pages']['login_page']);
+        utils::redirect(self::$config['pages']['login_page']);
         return true;
     }
 
@@ -435,10 +298,10 @@ class console
     public static function init()
     {
         self::construct();
-        if (self::$loggedIn === true && array_search(self::curPage(), self::$config['pages']['no_login']) !== false) {
-            self::redirect(self::$config['pages']['home_page']);
-        } elseif (self::$loggedIn === false && array_search(self::curPage(), self::$config['pages']['no_login']) === false) {
-            self::redirect(self::$config['pages']['login_page']);
+        if (self::$loggedIn === true && array_search(utils::curPage(), self::$config['pages']['no_login']) !== false) {
+            utils::redirect(self::$config['pages']['home_page']);
+        } elseif (self::$loggedIn === false && array_search(utils::curPage(), self::$config['pages']['no_login']) === false) {
+            utils::redirect(self::$config['pages']['login_page']);
         }
         self::$init_called = true;
     }
@@ -455,37 +318,21 @@ class console
     public static function register($id, $password, $username, $fullname, $created)
     {
         self::construct();
-        if (self::userExists($id) || (isset($other['email']) && self::userExists($other['email']))) {
+        if (self::userExists($id)) {
             return "exists";
         } else {
             $randomSalt = self::rand_string(20);
             $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $randomSalt);
-            $dev_token = self::getAdminToken();
-            $params = array(
-                'email' => $id,
-                'username' => $username,
-                'password' => $saltedPass,
-                'password_salt' => $randomSalt,
-                'first_name' => $fullname
-            );
-            $path = '/admin?' . http_build_query($params);
-            $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
-            $curl->setVerbPost();
-            $curl->addHeader('Content-type', 'application/json');
-            $curl_response = $curl->exec();
-            if (isset($curl_response) && $curl_response !== false) {
-                $res = json_decode($curl_response, true);
-                if (array_key_exists('status', $res)) {
-                    $curl->close();
-                    $subject = "Welcome to Hu:toma!";
-                    $body = "Congrats, you are all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.\r\nThanks\r\n-The Hu:toma team";
-                    if (!self::sendMail($id, $subject, $body)) {
-                        self::log_error("registration", "Could not send welcome email to " . $id);
-                    }
-                    return $res['status']['code'];
+
+            $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
+            if ($api->register($id, $username, $saltedPass, $randomSalt, $fullname)) {
+                $subject = "Welcome to Hu:toma!";
+                $body = "Congrats, you are all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.\r\nThanks\r\n-The Hu:toma team";
+                if (!utils::sendMail($id, $subject, $body)) {
+                    self::log_error("registration", "Could not send welcome email to " . $id);
                 }
+                return 200;
             }
-            $curl->close();
             return "unknown";
         }
     }
@@ -496,20 +343,8 @@ class console
      */
     public static function userExists($identification)
     {
-        self::construct();
-
-        $query = "CALL getUserId(:userName, :checkEmail)";
-        $sql = self::$dbh->prepare($query);
-        $sql->execute(array(
-            ":userName" => $identification,
-            ":checkEmail" => (self::$config['features']['email_login'] === true)
-        ));
-        $rowCount = $sql->rowCount();
-
-        // finally fetch the additional sql row for stored proc calls
-        $sql->nextRowset();
-
-        return $rowCount == 0 ? false : true;
+        $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
+        return $api->userExists($identification);
     }
 
     /**
@@ -535,7 +370,7 @@ class console
 
     public static function getAdminToken()
     {
-        $token = getenv("API_ADMIN_DEVTOKEN");
+        $token = config::getAdminToken();
         if (isset($token) && $token != "") {
             return $token;
         } else {
@@ -557,86 +392,16 @@ class console
     }
 
     /**
-     * Any mails need to be sent by logSys goes to here
-     */
-    public static function sendMail($email, $subject, $body)
-    {
-        $headers = array();
-        $headers[] = "MIME-Version: 1.0";
-        $headers[] = "Content-type: text/html; charset=iso-8859-1";
-        $headers[] = "From: " . self::$config['basic']['email'];
-        $headers[] = "Reply-To: " . self::$config['basic']['email'];
-        return mail($email, $subject, $body, implode("\r\n", $headers));
-    }
-
-    public static function inviteCodeValid($code)
-    {
-        self::construct();
-        $dev_token = self::getAdminToken();
-        $path = "/invite/" . $code;
-
-        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
-        $curl->setVerbGet();
-        $curl_response = $curl->exec();
-
-        if (isset($curl_response) && $curl_response !== false) {
-            $res = json_decode($curl_response, true);
-            if (array_key_exists('status', $res)) {
-                $curl->close();
-                return $res['status']['code'];
-            }
-        }
-
-        $curl->close();
-        return "unknown";
-    }
-
-    public static function redeemInviteCode($code, $username)
-    {
-        self::construct();
-        $dev_token = self::getAdminToken();
-
-        $params = array(
-            'username' => $username
-        );
-
-        $path = "/invite/" . $code . "/redeem?" . http_build_query($params);
-        $curl = new apiConnector(self::getApiRequestUrl() . $path, $dev_token);
-        $curl->setVerbPost();
-        $curl_response = $curl->exec();
-
-        if (isset($curl_response) && $curl_response !== false) {
-            $res = json_decode($curl_response, true);
-            if (array_key_exists('status', $res)) {
-                $curl->close();
-                return $res['status']['code'];
-            }
-        }
-
-        $curl->close();
-        return "unknown";
-    }
-
-    public static function getGoogleAnalyticsTrackerObject()
-    {
-        $trackerObject = getenv("GOOGLE_ANALYTICS_TRACKER");
-        if (isset($trackerObject) && $trackerObject != "") {
-            return $trackerObject;
-        }
-        return null;
-    }
-
-    /**
      * A function to handle the Forgot Password process
      */
     public static function forgotPassword()
     {
         self::construct();
         $curStatus = "initial";  // The Current Status of Forgot Password process
-        $identName = self::$config['features']['email_login'] === false ? "Username" : "Username / E-Mail";
+        $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
 
         if (!isset($_POST['logSysForgotPass']) && !isset($_GET['resetPassToken']) && !isset($_POST['logSysForgotPassChange'])) {
-            $html = '<form action="' . self::curPageURL() . '" method="POST">';
+            $html = '<form action="' . utils::curPageURL() . '" method="POST">';
             $html .= "<div class='form-group has-feedback'>";
             $html .= "<input  type='email' class='form-control flat' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
             $html .= "<span class='glyphicon glyphicon-envelope form-control-feedback'></span>";
@@ -653,11 +418,7 @@ class console
              * The user gave the password reset token. Check if the token is valid.
              */
             $reset_pass_token = urldecode($_GET['resetPassToken']);
-            //TODO: move this to a stored procedure - at the moment this code is not being used.
-            $sql = self::$dbh->prepare("SELECT `uid` FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
-            $sql->execute(array($reset_pass_token));
-
-            if ($sql->rowCount() == 0 || $reset_pass_token == "") {
+            if (!$api->isPasswordResetTokenValid($reset_pass_token)) {
                 echo "<h3>Error : Wrong/Invalid Token</h3>";
                 $curStatus = "invalidToken"; // The token user gave was not valid
             } else {
@@ -685,11 +446,7 @@ class console
             }
         } elseif (isset($_POST['logSysForgotPassChange']) && isset($_POST['logSysForgotPassNewPassword']) && isset($_POST['logSysForgotPassRetypedPassword'])) {
             $reset_pass_token = urldecode($_POST['token']);
-            //TODO: move this to a stored procedure - at the moment this code is not being used.
-            $sql = self::$dbh->prepare("SELECT `uid` FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
-            $sql->execute(array($reset_pass_token));
-
-            if ($sql->rowCount() == 0 || $reset_pass_token == "") {
+            if (!$api->isPasswordResetTokenValid($reset_pass_token)) {
                 echo "<h3>Error : Wrong/Invalid Token</h3>";
                 $curStatus = "invalidToken"; // The token user gave was not valid
             } else {
@@ -705,7 +462,7 @@ class console
                      * change the password as \Fr\LS::changePassword()
                      * requires the user to be logged in.
                      */
-                    self::$user = $sql->fetchColumn();
+                    self::$user = $api->getUserIdForToken($reset_pass_token);
                     self::$loggedIn = true;
 
                     if (self::changePassword($_POST['logSysForgotPassNewPassword'])) {
@@ -715,11 +472,7 @@ class console
                         /**
                          * The token shall not be used again, so remove it.
                          */
-                        //TODO: move this to a stored procedure - at the moment this code is not being used.
-                        $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ?");
-                        $result = $sql->execute(array($reset_pass_token));
-                        if (!$result) {
-                            self::log_error("ChangePassword", print_r($sql->errorInfo(), true));
+                        if (!$api->deletePasswordResetToken($reset_pass_token)) {
                             echo "<h3>Error</h3><p>There was a problem resetting your password.</p>";
                         } else {
                             echo "<h3>Success : Password Reset Successful</h3><p>You may now login with your new password.</p>";
@@ -739,36 +492,23 @@ class console
                 exit();
 
             } else {
-                //TODO: move this to a stored procedure - at the moment this code is not being used.
-
-                $query = "CALL getUser(:userName, :checkEmail)";
-                $sql = self::$dbh->prepare($query);
-                $sql->execute(array(
-                    ":userName" => $identification,
-                    ":checkEmail" => (self::$config['features']['email_login'] === true)
-                ));
-                if ($sql->rowCount() == 0) {
+                $userInfo = $api->getUserInfo($identification);
+                if ($userInfo === null) {
                     $curStatus = "userNotFound"; // The user with the identity given was not found in the users database
                     self::log_info("reset_pwd", "User '" . $identification . "' attempted to reset password, but user not found");
                 } else {
-                    $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-                    $email = $rows['email'];
-                    $uid = $rows['id'];
-                    $token = self::rand_string(40);
-                    $query = "CALL insertResetToken(:token, :uid)";
-                    $sql = self::$dbh->prepare($query);
-                    $sql->execute(array(
-                        ":token" => $token,
-                        ":uid" => $uid
-                    ));
+                    $email = $userInfo['email'];
+                    $uid = $userInfo['id'];
 
+                    $token = utils::generateRandomString(40);
+                    $api->insertPasswordResetToken($uid, $token);
                     $encodedToken = urlencode($token);
                     $subject = "Hu:toma Password Reset";
                     $body = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
                       <blockquote>
-                        <a href='" . self::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
+                        <a href='" . utils::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
-                    if (!self::sendMail($email, $subject, $body)) {
+                    if (!utils::sendMail($email, $subject, $body)) {
                         echo "<p>There was a problem sending the reset e-mail. Please go back and try again.</p>";
                         self::log_error("reset_pwd", "User '" . $identification . "' attempted to reset password, but email could not be sent");
                         return $curStatus;
@@ -779,6 +519,7 @@ class console
                 echo "<p>If you entered a valid username, you should be receiving shortly a password reset email in your inbox. Don't forget to check your spam folder too!</p>";
             }
         }
+        unset($api);
         return $curStatus;
     }
 
@@ -789,14 +530,14 @@ class console
     {
         self::construct();
         if (self::$loggedIn) {
-            $randomSalt = self::rand_string(20);
-            $saltedPass = hash('sha256', $newpass . self::$config['keys']['salt'] . $randomSalt);
-            //TODO: move this to a stored procedure - at the moment this code is not being used.
-            $sql = self::$dbh->prepare("UPDATE `" . self::$config['db']['table'] . "` SET `password` = ?, `password_salt` = ? WHERE `id` = ?");
-            $result = $sql->execute(array($saltedPass, $randomSalt, self::$user));
-            if (!$result) {
-                self::log_error("ChangePassword", print_r($sql->errorInfo(), true));
-            }
+            $randomSalt = utils::getRandomSalt();
+            $saltedPass = utils::generatePassword($newpass, $randomSalt);
+            $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
+            $api->updateUserPassword(
+                self::$user,
+                $saltedPass,
+                $randomSalt
+            );
             return true;
         } else {
             echo "<h3>Error : Not Logged In</h3>";
@@ -813,7 +554,11 @@ class console
         if ($user == null) {
             $user = self::$user;
         }
-        $created = self::getUser("created");
+        $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
+        $userInfo = $api->getUserInfo($user);
+        $created = $userInfo['created'];
+        unset($api);
+
         $timeFirst = strtotime($created);
         $timeSecond = strtotime("now");
         $memsince = $timeSecond - strtotime($created);
@@ -855,197 +600,6 @@ class console
      * ---------------------
      */
 
-    /**
-     * Fetches data of user in database. Returns a single value or an
-     * array of value according to parameteres given to the function
-     */
-    public static function getUser($what = "*", $user = null)
-    {
-        self::construct();
-        if ($user == null) {
-            $user = self::$user;
-        }
-
-        if (is_array($what)) {
-            $columns = implode("`,`", $what);
-            $columns = "`{$columns}`";
-        } else {
-            $columns = $what != "*" ? "`$what`" : "*";
-        }
-
-        $query = "CALL getUserById(:id, :columns)";
-        $sql = self::$dbh->prepare($query);
-
-        /* Bind the values */
-        $sql->bindValue(":id", $user);
-        $sql->bindValue(":columns", $columns);
-        $sql->execute();
-
-        $data = $sql->fetch(\PDO::FETCH_ASSOC);
-
-        if (!is_array($what)) {
-            $data = $what == "*" ? $data : $data[$what];
-        }
-
-        // finally fetch the additional sql row for stored proc calls
-        $sql->nextRowset();
-
-        return $data;
-    }
-
-    /**
-     * 2 Step Verification Login Process
-     * ---------------------------------
-     * When user logs in, it checks whether there is a cookie named "logSysdevice" and if there is :
-     *    1. Checks `config` -> `two_step_login` -> `devices_table` table in DB whethere there is a token with value as that of $_COOKIES['logSysdevice']
-     *    2. If there is a row in table, then the "Enter Received Token" form is not shown and is directly logged in if username & pass is correct
-     * If there is not a cookie, then :
-     *    1. The "Enter Received token" form is shown
-     *    2. If the token entered is correct, then a unique string is set as $_COOKIE['logSysdevice'] value and inserted to `config` -> `two_step_login` -> `devices_table` table in DB
-     *    3. The $_COOKIE['logSysdevice'] is set to be stored for 4 months
-     * ---------------------
-     * ^ In the above instructions, the token sending to E-Mail/SMS is not mentioned. Assume that it is done
-     */
-    public static function twoStepLogin($identification = "", $password = "", $remember_me = false)
-    {
-        if (isset($_POST['logSys_two_step_login-token']) && isset($_POST['logSys_two_step_login-uid']) && $_SESSION['logSys_two_step_login-first_step'] === '1') {
-            /**
-             * The user's ID and token is got through the form
-             * User = One who is about to log in and is stuck at 2 step verification
-             */
-            $uid = $_POST['logSys_two_step_login-uid'];
-            $token = $_POST['logSys_two_step_login-token'];
-
-            //TODO: this statement needs to move to stored procedure
-            $sql = self::$dbh->prepare("SELECT COUNT(1) FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ? AND `uid` = ?");
-            $sql->execute(array($token, $uid));
-
-            if ($sql->fetchColumn() == 0) {
-                /**
-                 * To prevent user from Brute Forcing the token, we set the
-                 * status of the first login step to false,
-                 * so that the user would have to login again
-                 */
-                $_SESSION['logSys_two_step_login-first_step'] = '0';
-                echo "<h3>Error : Wrong/Invalid Token</h3>";
-                return "invalidToken";
-            } else {
-                /**
-                 * Register User's new device if and only if
-                 * the user wants to remember the device from
-                 * which the user is logging in
-                 */
-                if (isset($_POST['logSys_two_step_login-dontask'])) {
-                    $device_token = self::rand_string(10);
-                    //TODO: this statement needs to move to stored procedure
-                    $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['two_step_login']['devices_table'] . "` (`uid`, `token`, `last_access`) VALUES (?, ?, NOW())");
-                    $sql->execute(array($uid, $device_token));
-                    setcookie("logSysdevice", $device_token, strtotime(self::$config['two_step_login']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
-                }
-
-                /**
-                 * Revoke token from reusing
-                 */
-                //TODO: this statement needs to move to stored procedure
-                $sql = self::$dbh->prepare("DELETE FROM `" . self::$config['db']['token_table'] . "` WHERE `token` = ? AND `uid` = ?");
-                $sql->execute(array($token, $uid));
-                self::login(self::getUser("username", $uid), "", isset($_POST['logSys_two_step_login-remember_me']));
-            }
-            return true;
-        } else if ($identification != "" && $password != "") {
-            $login = self::login($identification, $password, $remember_me, false);
-            if ($login === false) {
-                /**
-                 * Username/Password wrong
-                 */
-                return false;
-            } else if (is_array($login) && $login['status'] == "blocked") {
-                return $login;
-            } else {
-                /**
-                 * Get the user ID from \Fr\LS::login()
-                 */
-                $uid = $login;
-
-                /**
-                 * Check if device is verfied so that 2 Step Verification can be skipped
-                 */
-                if (isset($_COOKIE['logSysdevice'])) {
-                    //TODO: move this to a stored procedure - at the moment this code is not being used.
-                    $sql = self::$dbh->prepare("SELECT 1 FROM `" . self::$config['two_step_login']['devices_table'] . "` WHERE `uid` = ? AND `token` = ?");
-                    $sql->execute(array($uid, $_COOKIE['logSysdevice']));
-                    if ($sql->fetchColumn() == "1") {
-                        $verfied = true;
-                        /**
-                         * Update last accessed time
-                         */
-                        //TODO: this statement needs to move to stored procedure
-                        $sql = self::$dbh->prepare("UPDATE `" . self::$config['two_step_login']['devices_table'] . "` SET `last_access` = NOW() WHERE `uid` = ? AND `token` = ?");
-                        $sql->execute(array($uid, $_COOKIE['logSysdevice']));
-
-                        self::login(self::getUser("username", $uid), "", $remember_me);
-                        return true;
-                    }
-                }
-                /**
-                 * Start the 2 Step Verification Process
-                 * Do only if callback is present and if
-                 * the device is not verified
-                 */
-                if (is_callable(self::$config['two_step_login']['send_callback']) && !isset($verified)) {
-                    /**
-                     * The first part of 2 Step Login is completed
-                     */
-                    $_SESSION['logSys_two_step_login-first_step'] = '1';
-
-                    /**
-                     * The 2nd parameter depends on `config` -> `two_step_login` -> `numeric`
-                     */
-                    $token = self::rand_string(self::$config['two_step_login']['token_length'], self::$config['two_step_login']['numeric']);
-
-                    /**
-                     * Save the token in DB
-                     */
-                    //TODO: this statement needs to move to stored procedure
-                    $sql = self::$dbh->prepare("INSERT INTO `" . self::$config['db']['token_table'] . "` (`token`, `uid`, `requested`) VALUES (?, ?, NOW())");
-                    $sql->execute(array($token, $uid));
-
-                    call_user_func_array(self::$config['two_step_login']['send_callback'], array($uid, $token));
-
-                    /**
-                     * Display the form
-                     */
-                    $html = "<form action='" . self::curPageURL() . "' method='POST'>
-            <p>" . self::$config['two_step_login']['instruction'] . "</p>
-            <label>
-              <p>Token Received</p>
-              <input type='text' name='logSys_two_step_login-token' placeholder='Paste the token here... (case sensitive)' />
-            </label>
-            <label style='display: block;'>
-              <span>Remember this device ?</span>
-              <input type='checkbox' name='logSys_two_step_login-dontask' />
-            </label>
-            <input type='hidden' name='logSys_two_step_login-uid' value='" . $uid . "' />
-            " . ($remember_me === true ? "<input type='hidden' name='logSys_two_step_login-remember_me' />" : "") . "
-            <label>
-              <button>Verify</button>
-            </label>
-          </form>";
-                    echo $html;
-                    return "formDisplay";
-                } else {
-                    self::log_error("2step_login", "two_step_login: Token Callback not present");
-                }
-            }
-        }
-        /**
-         * 2 Step Login is not doing any actions or
-         * hasn't returned anything before. If so,
-         * then return false to indicate that the
-         * function is not doing anything
-         */
-        return false;
-    }
 
     /**
      * A function to login the user with the username and password.
@@ -1056,198 +610,131 @@ class console
     {
         self::construct("login");
 
-        if (self::$db === true) {
+        $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
+        $userInfo = $api->getUserInfo($username);
+
+        if ($userInfo == null) {
+            // No such user like that
+            return false;
+        } else {
+            $us_id = $userInfo['id'];
+            $userId = $userInfo['dev_id'];
+            $us_pass = $userInfo['encrypted_password'];
+            $us_salt = $userInfo['password_salt'];
+            $status = $userInfo['attempts'];
+            $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $us_salt);
+            if (substr($status, 0, 2) == "b-") {
+                $blockedTime = substr($status, 2);
+                if (time() < $blockedTime) {
+                    $blocked = true;
+                    return array(
+                        "status" => "blocked",
+                        "minutes" => round(abs($blockedTime - time()) / 60, 0),
+                        "seconds" => round(abs($blockedTime - time()) / 60 * 60, 2)
+                    );
+                } else {
+                    // remove the block, because the time limit is over
+                    $api->updateUserLoginAttempts($userId, "");
+                }
+            }
             /**
-             * We Add LIMIT to 1 in SQL query because to
-             * get an array with key as the column name.
+             * Why login if password is empty ?
+             * --------------------------------
+             * If using OAuth, you have to login someone without knowing their password,
+             * this usage is helpful. But, it makes a serious security problem too.
+             * Hence, before calling \Fr\LS::login() in the login page, it is
+             * required to check whether the password fieldis left blank
              */
-            $query = "CALL getUser(:userName, :checkEmail)";
-            $sql = self::$dbh->prepare($query);
-            $sql->execute(array(
-                ":userName" => $username,
-                ":checkEmail" => (self::$config['features']['email_login'] === true)
-            ));
+            if (!isset($blocked) && ($saltedPass == $us_pass || $password == "")) {
+                self::log_info("login", "UserId: " . $userId);
+                if ($cookies === true) {
 
-            if ($sql->rowCount() == 0) {
-                // finally fetch the additional sql row for stored proc calls
-                $sql->nextRowset();
+                    $_SESSION['logSyscuruser'] = $us_id;
+                    $_COOKIE['logSyscuruser'] = $userInfo['username'];
+                    setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
 
-                // No such user like that
-                return false;
+                    $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
+
+                    if ($remember_me === true && self::$config['features']['remember_me'] === true) {
+                        setcookie("logSysrememberMe", $us_id, strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
+                    }
+                    self::$loggedIn = true;
+
+                    if (self::$config['features']['block_brute_force'] === true) {
+                        /**
+                         * If Brute Force Protection is Enabled,
+                         * Reset the attempt status
+                         */
+                        $api->updateUserLoginAttempts($userId, "0");
+                    }
+
+                    // Store the dev token
+                    sessionObject::setDevToken($userInfo['dev_token']);
+
+                    // Redirect
+                    if (self::$init_called) {
+                        utils::redirect(self::$config['pages']['home_page']);
+                    }
+                    return true;
+                } else {
+
+                    self::log_info("no_cookies", "UserId: " . $us_id);
+                    /**
+                     * If cookies shouldn't be set,
+                     * it means login() was called
+                     * to get the user's ID. So, return it
+                     */
+                    return $us_id;
+                }
             } else {
                 /**
-                 * Get the user details
+                 * Incorrect password
+                 * ------------------
+                 * Check if brute force protection is enabled
                  */
-                $rows = $sql->fetch(\PDO::FETCH_ASSOC);
+                if (self::$config['features']['block_brute_force'] === true) {
+                    $max_tries = self::$config['brute_force']['tries'];
 
-                // finally fetch the additional sql row for stored proc calls
-                $sql->nextRowset();
-
-                $us_id = $rows['id'];
-                $us_pass = $rows['password'];
-                $us_salt = $rows['password_salt'];
-                $status = $rows['attempt'];
-                $saltedPass = hash('sha256', $password . self::$config['keys']['salt'] . $us_salt);
-                if (substr($status, 0, 2) == "b-") {
-                    $blockedTime = substr($status, 2);
-                    if (time() < $blockedTime) {
-                        $blocked = true;
+                    if ($status == "") {
+                        // User was not logged in before
+                        $api->updateUserLoginAttempts($userId, "1");
+                    } else if ($status == $max_tries) {
+                        /**
+                         * Account Blocked. User will be only able to
+                         * re-login at the time in UNIX timestamp
+                         */
+                        $eligible_for_next_login_time = strtotime("+" . self::$config['brute_force']['time_limit'] . " seconds", time());
+                        $api->updateUserLoginAttempts($userId, "b-"); // eligible_for_next_login_time,
                         return array(
                             "status" => "blocked",
-                            "minutes" => round(abs($blockedTime - time()) / 60, 0),
-                            "seconds" => round(abs($blockedTime - time()) / 60 * 60, 2)
+                            "minutes" => round(abs($eligible_for_next_login_time - time()) / 60, 0),
+                            "seconds" => round(abs($eligible_for_next_login_time - time()) / 60 * 60, 2)
                         );
-                    } else {
-                        // remove the block, because the time limit is over
-                        self::updateUserLoginAttempts("" // No tries at all
-                            , $us_id);
+                    } else if ($status < $max_tries) {
+                        // If the attempts are less than Max and not Max
+                        $api->updateUserLoginAttempts($userId, $status + 1); // Increase the no of tries by +1.
                     }
                 }
-                /**
-                 * Why login if password is empty ?
-                 * --------------------------------
-                 * If using OAuth, you have to login someone without knowing their password,
-                 * this usage is helpful. But, it makes a serious security problem too.
-                 * Hence, before calling \Fr\LS::login() in the login page, it is
-                 * required to check whether the password fieldis left blank
-                 */
-                if (!isset($blocked) && ($saltedPass == $us_pass || $password == "")) {
-                    self::log_info("login", "UserId: " . $us_id);
-                    if ($cookies === true) {
-
-                        $_SESSION['logSyscuruser'] = $us_id;
-
-                        setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
-
-                        $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
-
-                        if ($remember_me === true && self::$config['features']['remember_me'] === true) {
-                            setcookie("logSysrememberMe", $us_id, strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
-                        }
-                        self::$loggedIn = true;
-
-                        if (self::$config['features']['block_brute_force'] === true) {
-                            /**
-                             * If Brute Force Protection is Enabled,
-                             * Reset the attempt status
-                             */
-                            self::updateUserLoginAttempts("0",
-                                $us_id);
-                        }
-
-                        // Store the dev token
-                        $devToken = $rows['dev_token'];
-                        self::$sessionObj->setDevToken($devToken);
-
-                        // Redirect
-                        if (self::$init_called) {
-                            self::redirect(self::$config['pages']['home_page']);
-                        }
-                        return true;
-                    } else {
-
-                        self::log_info("no_cookies", "UserId: " . $us_id);
-                        /**
-                         * If cookies shouldn't be set,
-                         * it means login() was called
-                         * to get the user's ID. So, return it
-                         */
-                        return $us_id;
-                    }
-                } else {
-                    /**
-                     * Incorrect password
-                     * ------------------
-                     * Check if brute force protection is enabled
-                     */
-                    if (self::$config['features']['block_brute_force'] === true) {
-                        $max_tries = self::$config['brute_force']['tries'];
-
-                        if ($status == "") {
-                            // User was not logged in before
-                            self::updateUserLoginAttempts("1", // Tried 1 time
-                                $us_id);
-                        } else if ($status == $max_tries) {
-                            /**
-                             * Account Blocked. User will be only able to
-                             * re-login at the time in UNIX timestamp
-                             */
-                            $eligible_for_next_login_time = strtotime("+" . self::$config['brute_force']['time_limit'] . " seconds", time());
-                            self::updateUserLoginAttempts("b-" . $eligible_for_next_login_time,
-                                $us_id);
-                            return array(
-                                "status" => "blocked",
-                                "minutes" => round(abs($eligible_for_next_login_time - time()) / 60, 0),
-                                "seconds" => round(abs($eligible_for_next_login_time - time()) / 60 * 60, 2)
-                            );
-                        } else if ($status < $max_tries) {
-                            // If the attempts are less than Max and not Max
-                            self::updateUserLoginAttempts($status + 1, // Increase the no of tries by +1.
-                                $us_id);
-                        }
-                    }
-                    return false;
-                }
+                return false;
             }
         }
     }
 
-    /**
-     * Updates the login attempts of the user
-     */
-    public static function updateUserLoginAttempts($attempts, $user = null)
+    public static function getDevId()
     {
-        self::construct();
-        if ($user == null) {
-            $user = self::$user;
-        }
-
-        $sql = self::$dbh->prepare("CALL updateUserLoginAttempts(:id, :attempts)");
-        $sql->bindValue(":id", $user);
-        $sql->bindValue(":attempts", $attempts);
-
-        $sql->execute();
-
-        // finally fetch the additional sql row for stored proc calls
-        $sql->nextRowset();
+        return $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'];
     }
-
-    /**
-     * Check if E-Mail is valid
-     */
-    public static function validEmail($email = "")
-    {
-        return filter_var($email, FILTER_VALIDATE_EMAIL);
-    }
-
-    /**
-     * ---------------------
-     * NEW CONSOLE FUNCTIONS
-     * ---------------------
-     */
-
 
     public static function getDevToken()
     {
-        if (self::$sessionObj->getDevToken() === NULL) {
-            $token = "";
-            if (self::$loggedIn) {
-                $query = "CALL getDevToken(:id)";
-                $sql = self::$dbh->prepare($query);
-                $sql->execute(array(
-                    ":id" => self::$user
-                ));
-                if ($sql->rowCount() > 0) {
-                    $rows = $sql->fetch(\PDO::FETCH_ASSOC);
-                    $sql->nextRowset();
-                    $token = $rows['dev_token'];
-                } else {
-                    telemetry::getInstance()->log(TelemetryEvent::ERROR, "getDevToken", "Could not obtain dev token");
-                }
+        if (sessionObject::getDevToken() === NULL) {
+            $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
+            $token = $api->getDevToken(self::getDevId());
+            if (isset($token)) {
+                sessionObject::setDevToken($token);
             }
-            self::$sessionObj->setDevToken($token);
         }
-        return self::$sessionObj->getDevToken();
+        return sessionObject::getDevToken();
     }
 
     public static function isLoggedIn()
@@ -1260,15 +747,16 @@ class console
         define('TIMEOUT', 24 * 60 * 60); // 1 day, in seconds
         if (!self::$loggedIn
             || PHP_SESSION_ACTIVE != session_status()
-            || (self::$sessionObj->getLastActivity() != null
-                && (time() - self::$sessionObj->getLastActivity() > TIMEOUT)) ) {
+            || (sessionObject::getLastActivity() != null
+                && (time() - sessionObject::getLastActivity() > TIMEOUT))
+        ) {
             // last request was more than 30 minutes ago
             session_unset();     // unset $_SESSION variable
             session_destroy();   // destroy session
-            self::redirect('/');
+            utils::redirect('/');
             return false;
         }
-        self::$sessionObj->setLastActivity(time());
+        sessionObject::setLastActivity(time());
         return true;
     }
 

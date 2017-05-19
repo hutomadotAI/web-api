@@ -1,16 +1,22 @@
 <?php
 require '../pages/config.php';
 require_once "./api/apiBase.php";
+require_once "./api/adminApi.php";
 require_once "./api/aiApi.php";
 require_once "./api/botApi.php";
 require_once "./common/bot.php";
+require_once "./common/config.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
+$api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
+$userInfo = $api->getUserInfo(\hutoma\console::$user);
+unset($api);
+
 if(!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])){
-    $_SESSION[$_SESSION['navigation_id']]['user_details'] = \hutoma\console::getUser();
+    $_SESSION[$_SESSION['navigation_id']]['user_details'] = $userInfo;
     $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[$_SESSION['navigation_id']]['user_details']);
 }
 

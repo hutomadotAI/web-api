@@ -8,16 +8,6 @@ define('CAROUSEL_CATEGORIES_ICONS',  json_encode(array("fa-film", "fa-graduation
 
 require __DIR__ . "/../class.logsys.php";
 \hutoma\console::config(array(
-    "db" => array(
-        "host" => "10.132.0.4",
-        "port" => 13306,
-        "username" => "hutoma_caller",
-        "password" => '>YR"khuN*.gF)V4#',
-        "name" => "hutoma",
-        "ai" => "ai",
-        "table" => "users",
-        "token_table" =>  "resetTokens"
-    ),
     "api" => array(
         "request_url" => "http://10.132.0.4:8081/v1"
     ),
