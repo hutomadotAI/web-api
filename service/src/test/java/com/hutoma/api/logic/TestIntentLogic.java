@@ -83,6 +83,7 @@ public class TestIntentLogic {
     @Test
     public void testGetIntent_Success() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(getIntent());
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -93,6 +94,7 @@ public class TestIntentLogic {
         ApiIntent intent = this.getIntent();
         intent.setWebHook(wh);
         when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(intent);
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -100,6 +102,7 @@ public class TestIntentLogic {
     @Test
     public void testGetIntent_Success_Return() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(getIntent());
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, this.INTENTNAME);
         Assert.assertEquals(this.INTENTNAME, ((ApiIntent) result).getIntentName());
     }
@@ -107,6 +110,7 @@ public class TestIntentLogic {
     @Test
     public void testGetIntent_NotFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(any(), anyString())).thenReturn(null);
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -114,6 +118,7 @@ public class TestIntentLogic {
     @Test
     public void testGetIntent_Error() throws Database.DatabaseException {
         when(this.fakeDatabase.getIntent(any(), anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, this.INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }

@@ -89,6 +89,10 @@ public class AdminLogic {
     }
 
     public ApiResult deleteDev(final UUID devId) {
+        if (devId == null) {
+            return ApiError.getBadRequest("null devId sent");
+        }
+
         LogMap logMap = LogMap.map("DevId", devId);
         try {
             //TODO: distinguish between error condition and "failed to delete", perhaps because the dev was not found?
