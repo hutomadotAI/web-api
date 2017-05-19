@@ -102,7 +102,7 @@ public class AiServiceStatusLogger extends CentralLogger {
     }
 
     public void logDebugQueueAction(String logFrom, String operation, BackendServerType serverType,
-                                    UUID aiid, String devid, String serverIdentifier) {
+                                    UUID aiid, UUID devid, String serverIdentifier) {
         LogMap logMap = LogMap.map("Action", "Queue")
                 .put(OPERATION, operation)
                 .put(AIENGINE, serverType.value())

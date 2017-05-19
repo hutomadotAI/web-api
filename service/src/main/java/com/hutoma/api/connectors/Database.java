@@ -239,7 +239,7 @@ public class Database {
      * @return the plan, or null if there is no developer Id or not plan associated to it
      * @throws DatabaseException database exception
      */
-    public DevPlan getDevPlan(final String devId) throws DatabaseException {
+    public DevPlan getDevPlan(final UUID devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDevPlan", 1).add(devId);
             final ResultSet rs = call.executeQuery();
@@ -261,7 +261,7 @@ public class Database {
      * @return true if the user was found and deleted, false if no user was found
      * @throws DatabaseException
      */
-    public boolean deleteDev(final String devid) throws DatabaseException {
+    public boolean deleteDev(final UUID devid) throws DatabaseException {
 
         int updateCount = 0;
         // start a transaction
@@ -282,13 +282,15 @@ public class Database {
      * @return the developer info
      * @throws DatabaseException
      */
-    public DeveloperInfo getDeveloperInfo(final String devId) throws DatabaseException {
+    public DeveloperInfo getDeveloperInfo(final UUID devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDeveloperInfo", 1).add(devId);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
+                final String devIdString = rs.getString("dev_id");
+                final UUID devIdDb = UUID.fromString(devIdString);
                 return new DeveloperInfo(
-                        rs.getString("dev_id"),
+                        devIdDb,
                         rs.getString("name"),
                         rs.getString("company"),
                         rs.getString("email"),
@@ -343,7 +345,7 @@ public class Database {
      * @return
      * @throws DatabaseException
      */
-    public UUID createAI(final UUID aiid, final String name, final String description, final String devid,
+    public UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
                          final boolean isPrivate,
                          final String clientToken,
                          final Locale language, final String timezoneString,
@@ -376,7 +378,7 @@ public class Database {
         }
     }
 
-    public boolean updateAI(final String devId, final UUID aiid, final String description, final boolean isPrivate,
+    public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
                             final Locale language, final String timezoneString, final double confidence,
                             final int personality, final int voice)
             throws DatabaseException {
@@ -402,7 +404,7 @@ public class Database {
      * @return
      * @throws DatabaseException
      */
-    public BackendStatus getAIStatusReadOnly(final String devId, final UUID aiid)
+    public BackendStatus getAIStatusReadOnly(final UUID devId, final UUID aiid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             return getBackendStatus(devId, aiid, call);
@@ -448,7 +450,7 @@ public class Database {
      * @return
      * @throws DatabaseException
      */
-    public List<ApiAi> getAllAIs(final String devid) throws DatabaseException {
+    public List<ApiAi> getAllAIs(final UUID devid) throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             // load a hashmap with all the dev's statuses
             HashMap<UUID, BackendStatus> backendStatuses = getAllAIsStatusHashMap(
@@ -496,7 +498,7 @@ public class Database {
      * @return an ai, or null if it was not found
      * @throws DatabaseException
      */
-    public ApiAi getAI(final String devid, final UUID aiid)
+    public ApiAi getAI(final UUID devid, final UUID aiid)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             // load the statuses first
@@ -510,6 +512,22 @@ public class Database {
                 return getAiFromResultset(rs, backendStatus);
             }
             return null;
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public boolean checkAIBelongsToDevId(final UUID devId, final UUID aiid) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            // then load the AI
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAiSimple", 2)
+                    .add(devId.toString())
+                    .add(aiid)
+                    .executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+            return false;
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -530,7 +548,7 @@ public class Database {
         }
     }
 
-    public String getDevToken(final String devid) throws DatabaseException {
+    public String getDevToken(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDevTokenFromDevID", 1).add(devid);
             final ResultSet rs = call.executeQuery();
@@ -545,14 +563,14 @@ public class Database {
         }
     }
 
-    public boolean deleteAi(final String devid, final UUID aiid) throws DatabaseException {
+    public boolean deleteAi(final UUID devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAi", 2).add(devid).add(aiid);
             return call.executeUpdate() > 0;
         }
     }
 
-    public List<AiBot> getBotsLinkedToAi(final String devId, final UUID aiid) throws DatabaseException {
+    public List<AiBot> getBotsLinkedToAi(final UUID devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotsLinkedToAi", 2).add(devId).add(aiid);
             final ResultSet rs = call.executeQuery();
@@ -576,21 +594,21 @@ public class Database {
         }
     }
 
-    public boolean linkBotToAi(final String devId, final UUID aiid, final int botId) throws DatabaseException {
+    public boolean linkBotToAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("linkBotToAi", 3).add(devId).add(aiid).add(botId);
             return call.executeUpdate() > 0;
         }
     }
 
-    public boolean unlinkBotFromAi(final String devId, final UUID aiid, final int botId) throws DatabaseException {
+    public boolean unlinkBotFromAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("unlinkBotFromAi", 3).add(devId).add(aiid).add(botId);
             return call.executeUpdate() > 0;
         }
     }
 
-    public AiBot getPublishedBotForAI(final String devId, final UUID aiid) throws DatabaseException {
+    public AiBot getPublishedBotForAI(final UUID devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPublishedBotForAi", 2).add(devId).add(aiid);
             final ResultSet rs = call.executeQuery();
@@ -660,7 +678,7 @@ public class Database {
         }
     }
 
-    public List<AiBot> getPurchasedBots(final String devId) throws DatabaseException {
+    public List<AiBot> getPurchasedBots(final UUID devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPurchasedBots", 1).add(devId);
             final ResultSet rs = call.executeQuery();
@@ -672,7 +690,7 @@ public class Database {
         }
     }
 
-    public boolean purchaseBot(final String devId, final int botId) throws DatabaseException {
+    public boolean purchaseBot(final UUID devId, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("purchaseBot", 2).add(devId).add(botId);
             return call.executeUpdate() > 0;
@@ -692,7 +710,7 @@ public class Database {
         }
     }
 
-    public boolean saveBotIconPath(final String devId, final int botId, final String filename)
+    public boolean saveBotIconPath(final UUID devId, final int botId, final String filename)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("saveBotIcon", 3).add(devId).add(botId).add(filename);
@@ -713,7 +731,7 @@ public class Database {
         return false;
     }
 
-    public RateLimitStatus checkRateLimit(final String devId, final String rateKey, final double burst,
+    public RateLimitStatus checkRateLimit(final UUID devId, final String rateKey, final double burst,
                                           final double frequency) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("rateLimitCheck", 4).add(devId).add(rateKey).add(burst).add(frequency);
@@ -768,7 +786,7 @@ public class Database {
         }
     }
 
-    public ChatState getChatState(final String devId, final UUID chatId) throws DatabaseException {
+    public ChatState getChatState(final UUID devId, final UUID chatId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getChatState", 2).add(devId).add(chatId);
             ResultSet rs = call.executeQuery();
@@ -785,7 +803,7 @@ public class Database {
         }
     }
 
-    public boolean saveChatState(final String devId, final UUID chatId, final ChatState chatState)
+    public boolean saveChatState(final UUID devId, final UUID chatId, final ChatState chatState)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("setChatState", 5)
@@ -952,7 +970,7 @@ public class Database {
 
     protected AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
         return new AiBot(
-                rs.getString("dev_id"),
+                UUID.fromString(rs.getString("dev_id")),
                 UUID.fromString(rs.getString("aiid")),
                 rs.getInt("id"),
                 rs.getString("name"),
@@ -1019,7 +1037,7 @@ public class Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    protected BackendStatus getBackendStatus(final String devId, final UUID aiid, final DatabaseCall call)
+    protected BackendStatus getBackendStatus(final UUID devId, final UUID aiid, final DatabaseCall call)
             throws DatabaseException, SQLException {
         ResultSet rs = call.initialise("getAiStatus", 2)
                 .add(aiid).add(devId).executeQuery();
@@ -1041,7 +1059,7 @@ public class Database {
      * @throws DatabaseException
      */
     protected HashMap<UUID, BackendStatus> getAllAIsStatusHashMap(
-            final String devid,
+            final UUID devid,
             final DatabaseCall call) throws DatabaseException, SQLException {
         ResultSet rs = call.initialise("getAIsStatus", 1)
                 .add(devid)

@@ -10,6 +10,8 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.Integration;
 
 import java.util.List;
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 /**
@@ -31,7 +33,7 @@ public class AIIntegrationLogic {
         this.logger = logger;
     }
 
-    public ApiResult getIntegrations(final String devId) {
+    public ApiResult getIntegrations(final UUID devId) {
 
         try {
             List<Integration> integrationList = this.database.getAiIntegrationList();

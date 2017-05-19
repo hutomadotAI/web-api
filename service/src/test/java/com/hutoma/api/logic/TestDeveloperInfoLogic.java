@@ -10,9 +10,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.UUID;
 
 import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,7 +36,7 @@ public class TestDeveloperInfoLogic {
     @Test
     public void testGet_Valid_requestOwnInfo() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
-        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(DEVID, DEVID);
+        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(DEVID_UUID, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, info.getStatus().getCode());
         Assert.assertEquals(DEVINFO.getDevId(), info.getInfo().getDevId());
         Assert.assertEquals(DEVINFO.getName(), info.getInfo().getName());
@@ -43,9 +44,9 @@ public class TestDeveloperInfoLogic {
 
     @Test
     public void testGet_Valid_requestOthedDevInfo() throws Database.DatabaseException {
-        final String requesterDevId = "requester";
+        final UUID requesterDevId = UUID.randomUUID();
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
-        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(requesterDevId, DEVID);
+        ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(requesterDevId, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, info.getStatus().getCode());
         Assert.assertEquals(DEVINFO.getDevId(), info.getInfo().getDevId());
         Assert.assertEquals(DEVINFO.getCompany(), info.getInfo().getCompany());
@@ -61,14 +62,14 @@ public class TestDeveloperInfoLogic {
     @Test
     public void testGet_notFound() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(null);
-        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID, DEVID);
+        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID_UUID, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, info.getStatus().getCode());
     }
 
     @Test
     public void testGet_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenThrow(Database.DatabaseException.class);
-        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID, DEVID);
+        ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID_UUID, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, info.getStatus().getCode());
     }
 
@@ -81,7 +82,7 @@ public class TestDeveloperInfoLogic {
 
     @Test
     public void testSet_requiredParamNull() throws Database.DatabaseException {
-        ApiResult result = this.devInfoLogic.setDeveloperInfo(DEVID, null, DEVINFO.getCompany(),
+        ApiResult result = this.devInfoLogic.setDeveloperInfo(DEVID_UUID, null, DEVINFO.getCompany(),
                 DEVINFO.getEmail(), DEVINFO.getAddress(), DEVINFO.getPostCode(), DEVINFO.getCity(),
                 DEVINFO.getCountry(), DEVINFO.getWebsite());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -89,7 +90,7 @@ public class TestDeveloperInfoLogic {
 
     @Test
     public void testSet_requiredParamEmpty() throws Database.DatabaseException {
-        ApiResult result = this.devInfoLogic.setDeveloperInfo(DEVID, DEVINFO.getName(), "",
+        ApiResult result = this.devInfoLogic.setDeveloperInfo(DEVID_UUID, DEVINFO.getName(), "",
                 DEVINFO.getEmail(), DEVINFO.getAddress(), DEVINFO.getPostCode(), DEVINFO.getCity(),
                 DEVINFO.getCountry(), DEVINFO.getWebsite());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -117,7 +118,7 @@ public class TestDeveloperInfoLogic {
     }
 
     private ApiResult callSetDeveloperInfo() {
-        return this.devInfoLogic.setDeveloperInfo(DEVID, DEVINFO.getName(), DEVINFO.getCompany(),
+        return this.devInfoLogic.setDeveloperInfo(DEVID_UUID, DEVINFO.getName(), DEVINFO.getCompany(),
                 DEVINFO.getEmail(), DEVINFO.getAddress(), DEVINFO.getPostCode(), DEVINFO.getCity(),
                 DEVINFO.getCountry(), DEVINFO.getWebsite());
     }

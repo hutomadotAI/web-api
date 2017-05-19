@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnitParamsRunner.class)
 public class TestAiServices {
 
-    private static final String DEVID = "devid";
+    private static final UUID DEVID =  UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
     private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
@@ -107,7 +107,7 @@ public class TestAiServices {
         this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
     }
 
-    private void testCommand(CheckedByConsumer<String, UUID> logicMethod, String verb)
+    private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
@@ -126,7 +126,7 @@ public class TestAiServices {
         logicMethod.apply(DEVID, AIID);
     }
 
-    private void testCommand_serverError(CheckedByConsumer<String, UUID> logicMethod, String verb)
+    private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
@@ -145,7 +145,7 @@ public class TestAiServices {
         logicMethod.apply(DEVID, AIID);
     }
 
-    private void testCommand_response_noEntity(CheckedByConsumer<String, UUID> logicMethod, String verb)
+    private void testCommand_response_noEntity(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {

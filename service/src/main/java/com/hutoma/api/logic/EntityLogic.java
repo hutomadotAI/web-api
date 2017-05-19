@@ -36,84 +36,86 @@ public class EntityLogic {
         this.trainingLogic = trainingLogic;
     }
 
-    public ApiResult getEntities(final String devid) {
+    public ApiResult getEntities(final UUID devid) {
+        final String devidString = devid.toString();
         try {
-
             final List<String> entityList = this.database.getEntities(devid);
             if (entityList.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid,
+                this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
                         LogMap.map("Num Entities", "0"));
                 return ApiError.getNotFound();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devid,
+            this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
                     LogMap.map("Num Entities", entityList.size()));
             return new ApiEntityList(entityList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetEntities", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetEntities", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult getEntity(final String devid, final String entityName) {
+    public ApiResult getEntity(final UUID devid, final String entityName) {
+        final String devidString = devid.toString();
         try {
-            UUID devidUUID = UUID.fromString(devid);
-            final ApiEntity entity = this.database.getEntity(devidUUID, entityName);
-            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devid, LogMap.map("Entity", entityName));
+            final ApiEntity entity = this.database.getEntity(devid, entityName);
+            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devidString, LogMap.map("Entity", entityName));
             return entity.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetEntity", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetEntity", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult writeEntity(final String devid, final String entityName, final ApiEntity entity) {
+    public ApiResult writeEntity(final UUID devid, final String entityName, final ApiEntity entity) {
+        final String devidString = devid.toString();
         LogMap logMap = LogMap.map("Entity", entityName);
         try {
             if (entityName.startsWith(IEntityRecognizer.SYSTEM_ENTITY_PREFIX)) {
                 this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt name an entity with system prefix",
-                        devid, logMap);
+                        devidString, logMap);
                 return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
             }
             stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
-            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (Database.DatabaseIntegrityViolationException dive) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name",
-                    devid, logMap);
+                    devidString, logMap);
             return ApiError.getBadRequest("entity name already in use");
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WriteEntity", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "WriteEntity", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult deleteEntity(final String devid, final String entityName) {
+    public ApiResult deleteEntity(final UUID devid, final String entityName) {
+        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("Entity", entityName);
             if (!this.database.deleteEntity(devid, entityName)) {
-                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devid, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
             stopTrainingIfEntityInUse(devid, entityName);
-            this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devidString, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "DeleteEntity", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "DeleteEntity", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    private List<UUID> getAisWithEntityInUse(final String devid, final String entityName) {
+    private List<UUID> getAisWithEntityInUse(final UUID devid, final String entityName) {
         try {
             return this.database.getAisForEntity(devid, entityName);
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetAisWithEntityInUse", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetAisWithEntityInUse", devid.toString(), e);
         }
         return new ArrayList<>();
     }
 
-    private void stopTrainingIfEntityInUse(final String devid, final String entityName) {
+    private void stopTrainingIfEntityInUse(final UUID devid, final String entityName) {
         List<UUID> ais = getAisWithEntityInUse(devid, entityName);
         if (!ais.isEmpty()) {
             for (UUID ai : ais) {

@@ -70,11 +70,11 @@ public class ChatLogic {
         this.chatStateHandler = chatStateHandler;
     }
 
-    public ApiResult chat(final UUID aiid, final String devId, final String question, final String chatId,
+    public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
                           final String history, final String topic, final float minP) {
 
         // TODO: Bug#1349 - topic is now ignored if passed from the caller
-
+        final String devIdString = devId.toString();
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
         this.minP = minP;
@@ -220,25 +220,25 @@ public class ChatLogic {
             apiChat.setResult(result);
 
         } catch (RequestBase.AiNotFoundException notFoundException) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devId,
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devIdString,
                     LogMap.map("Message", notFoundException.getMessage()).put("AIID", aiid));
-            this.chatLogger.logChatError(LOGFROM, devId, notFoundException, this.telemetryMap);
+            this.chatLogger.logChatError(LOGFROM, devIdString, notFoundException, this.telemetryMap);
             return ApiError.getNotFound("Bot not found");
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, LogMap.map("AIID", aiid));
-            this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devIdString, LogMap.map("AIID", aiid));
+            this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getBadRequest(
                     "This bot is not ready to chat. It needs to train and/or be linked to other bots");
 
         } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
-                    devId, ex, LogMap.map("AIID", aiid));
-            this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
+                    devIdString, ex, LogMap.map("AIID", aiid));
+            this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "Chat", devId, e);
-            this.chatLogger.logChatError(LOGFROM, devId, e, this.telemetryMap);
+            this.logger.logUserExceptionEvent(LOGFROM, "Chat", devIdString, e);
+            this.chatLogger.logChatError(LOGFROM, devIdString, e, this.telemetryMap);
             return ApiError.getInternalServerError();
 
         } finally {
@@ -256,14 +256,13 @@ public class ChatLogic {
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
 
         // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devId, this.telemetryMap);
-        this.logger.logUserTraceEvent(LOGFROM, "Chat", devId, LogMap.map("AIID", aiid).put("SessionId", chatId));
+        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
+        this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid).put("SessionId", chatId));
         return apiChat.setSuccessStatus();
     }
 
-    public ApiResult assistantChat(UUID aiid, String devId, String question, String chatId,
+    public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId,
                                    String history, String topic, float minP) {
-
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
@@ -294,13 +293,14 @@ public class ChatLogic {
         apiChat.setResult(result);
 
         // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId, this.telemetryMap);
+        this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId.toString(), this.telemetryMap);
         return apiChat.setSuccessStatus();
     }
 
-    private boolean processIntent(final String devId, final UUID aiid, final MemoryIntent currentIntent,
+    private boolean processIntent(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
                                   final String question, ChatResult chatResult)
             throws IntentException {
+        final String devIdString = devId.toString();
         if (currentIntent == null) {
             // no intent to process
             return false;
@@ -328,7 +328,7 @@ public class ChatLogic {
                 if (response == null) {
                     this.logger.logUserErrorEvent(LOGFROM,
                             "Error occured executing WebHook for intent %s for aiid %s.",
-                            devId,
+                            devIdString,
                             LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
                 } else if (response.getText() != null && !response.getText().isEmpty()) {
                     chatResult.setAnswer(response.getText());
@@ -347,7 +347,7 @@ public class ChatLogic {
                 if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                     // Should not happen as this should be validated during creation
                     this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
-                            devId, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
+                            devIdString, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
                                     .put("Variable", variable.getName()));
                     throw new IntentException(
                             String.format("Entity %s for intent %s does not specify any prompts",

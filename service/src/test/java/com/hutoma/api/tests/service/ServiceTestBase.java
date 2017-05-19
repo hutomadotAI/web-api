@@ -228,7 +228,7 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {
-            when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+            when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                     .thenReturn(new RateLimitStatus(false, 1.0, true));
         } catch (Database.DatabaseException e) {
             // this will never happen, but on the zero in a million chance that it does ....

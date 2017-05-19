@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import java.net.HttpURLConnection;
 import javax.ws.rs.core.Response;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -25,7 +26,7 @@ public class TestServiceFilters extends ServiceTestBase {
 
     @Test
     public void testGetNormal() throws Database.DatabaseException {
-        when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+        when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(false, 1.0, true));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
@@ -33,7 +34,7 @@ public class TestServiceFilters extends ServiceTestBase {
 
     @Test
     public void testRateLimited() throws Database.DatabaseException {
-        when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+        when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(true, 1.0, true));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(429, response.getStatus());
@@ -41,7 +42,7 @@ public class TestServiceFilters extends ServiceTestBase {
 
     @Test
     public void testAccountDisabled() throws Database.DatabaseException {
-        when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+        when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(false, 1.0, false));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_FORBIDDEN, response.getStatus());
@@ -49,7 +50,7 @@ public class TestServiceFilters extends ServiceTestBase {
 
     @Test
     public void testAccountDisabledAndRateLimited() throws Database.DatabaseException {
-        when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+        when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(true, 1.0, false));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_FORBIDDEN, response.getStatus());

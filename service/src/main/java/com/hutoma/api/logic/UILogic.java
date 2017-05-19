@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ui.BotstoreItem;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import javax.inject.Inject;
 
 /**
@@ -37,7 +38,7 @@ public class UILogic {
      * @param orderDirection sort direction
      * @return the ApiResult containing the list of botstore items, or an error.
      */
-    public ApiResult getBotstoreList(final String devId, final int startFrom, final int pageSize,
+    public ApiResult getBotstoreList(final UUID devId, final int startFrom, final int pageSize,
                                      final List<String> filterList,
                                      final String orderField, final String orderDirection) {
         try {
@@ -66,7 +67,7 @@ public class UILogic {
      * @param botId the bot id
      * @return the item
      */
-    public ApiResult getBotstoreBot(final String devId, final int botId) {
+    public ApiResult getBotstoreBot(final UUID devId, final int botId) {
         try {
             BotstoreItem item = this.databaseUi.getBotstoreItem(botId);
             if (item == null) {

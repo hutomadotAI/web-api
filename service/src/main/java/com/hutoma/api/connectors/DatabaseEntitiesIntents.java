@@ -28,7 +28,7 @@ public class DatabaseEntitiesIntents extends Database {
         super(logger, callProvider, transactionProvider);
     }
 
-    public List<String> getEntities(final String devid) throws DatabaseException {
+    public List<String> getEntities(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntities", 1).add(devid);
             final ResultSet rs = call.executeQuery();
@@ -44,7 +44,7 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public List<UUID> getAisForEntity(final String devid, final String entityName) throws DatabaseException {
+    public List<UUID> getAisForEntity(final UUID devid, final String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIsForEntity", 2).add(devid).add(entityName);
             final ResultSet rs = call.executeQuery();
@@ -86,7 +86,7 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public List<String> getIntents(final String devid, final UUID aiid) throws DatabaseException {
+    public List<String> getIntents(final UUID devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getIntents", 2).add(devid).add(aiid);
             ResultSet rs = call.executeQuery();
@@ -167,7 +167,7 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public void writeEntity(final String devid, final String entityOldName, final ApiEntity entity)
+    public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
@@ -210,7 +210,7 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public boolean deleteEntity(String devid, String entityName) throws DatabaseException {
+    public boolean deleteEntity(UUID devid, String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityName).executeUpdate();
             return rowCount > 0;
@@ -227,7 +227,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @param intent the new data
      * @throws DatabaseException
      */
-    public void writeIntent(final String devid, final UUID aiid, final String intentName, final ApiIntent intent)
+    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent)
             throws DatabaseException {
 
         // start the transaction
@@ -262,7 +262,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @return
      * @throws DatabaseException
      */
-    public boolean deleteIntent(final String devid, final UUID aiid, final String intentName) throws DatabaseException {
+    public boolean deleteIntent(final UUID devid, final UUID aiid, final String intentName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             int rowCount = call.initialise("deleteIntent", 3).add(devid).add(aiid).add(intentName).executeUpdate();
             return rowCount > 0;
@@ -278,7 +278,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentUserSays(final String devid, final UUID aiid, final ApiIntent intent,
+    private void updateIntentUserSays(final UUID devid, final UUID aiid, final ApiIntent intent,
                                       final DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
 
@@ -320,7 +320,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentResponses(final String devid, final UUID aiid, final ApiIntent intent,
+    private void updateIntentResponses(final UUID devid, final UUID aiid, final ApiIntent intent,
                                        final DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
 
@@ -364,7 +364,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentVariables(final String devid, final UUID aiid, final ApiIntent intent,
+    private void updateIntentVariables(final UUID devid, final UUID aiid, final ApiIntent intent,
                                        final DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
 
@@ -413,7 +413,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void intentVariableCreateOrUpdate(final DatabaseTransaction transaction, final String devid,
+    private void intentVariableCreateOrUpdate(final DatabaseTransaction transaction, final UUID devid,
                                               final UUID aiid, final ApiIntent intent,
                                               final IntentVariable intentVariable)
             throws DatabaseException, SQLException {
@@ -473,7 +473,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @param variable
      * @throws DatabaseException
      */
-    private void intentVariableDeleteOld(final DatabaseTransaction transaction, final String devid, final UUID aiid,
+    private void intentVariableDeleteOld(final DatabaseTransaction transaction, final UUID devid, final UUID aiid,
                                          ApiIntent intent, IntentVariable variable) throws DatabaseException {
         transaction.getDatabaseCall().initialise("deleteIntentVariable", 3)
                 .add(devid).add(aiid).add(variable.getId())

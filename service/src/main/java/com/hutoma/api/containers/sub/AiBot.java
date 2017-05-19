@@ -30,12 +30,12 @@ public class AiBot {
     private final String videoLink;
     private final String botIcon;
     @SerializedName("dev_id")
-    private String devId;
+    private UUID devId;
     private PublishingState publishingState;
     private UUID aiid;
     private int botId;
 
-    public AiBot(final String devId, final UUID aiid, final int botId, final String name, final String description,
+    public AiBot(final UUID devId, final UUID aiid, final int botId, final String name, final String description,
                  final String longDescription, final String alertMessage, final String badge, final BigDecimal price,
                  final String sample, final String category, final String licenseType, final DateTime lastUpdate,
                  final String privacyPolicy, final String classification, final String version, final String videoLink,
@@ -91,11 +91,11 @@ public class AiBot {
         this.botId = botId;
     }
 
-    public String getDevId() {
+    public UUID getDevId() {
         return this.devId;
     }
 
-    public void setDevId(final String devId) {
+    public void setDevId(final UUID devId) {
         this.devId = devId;
     }
 

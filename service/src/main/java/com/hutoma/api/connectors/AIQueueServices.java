@@ -53,22 +53,22 @@ public class AIQueueServices extends ServerConnector {
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    public void deleteAIDirect(final BackendServerType serverType, final String devId, final UUID aiid,
+    public void deleteAIDirect(final BackendServerType serverType, final UUID devId, final UUID aiid,
                                final String endpoint, final String serverIdentifier) throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-
+        final String devIdString = devId.toString();
         LogMap logMap = LogMap.map("Op", "delete")
                 .put("Type", serverType.value())
                 .put("Server", serverIdentifier)
                 .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
                 String.format("Sending \"delete\" %s to %s", aiid.toString(), serverType.value()),
-                devId, logMap);
+                devIdString, logMap);
 
         callables.put(endpoint, () -> new InvocationResult(
                 aiid,
                 this.jerseyClient
-                        .target(endpoint).path(devId).path(aiid.toString())
+                        .target(endpoint).path(devIdString).path(aiid.toString())
                         .request()
                         .delete(),
                 endpoint,
@@ -87,7 +87,7 @@ public class AIQueueServices extends ServerConnector {
      * @throws AiServicesException
      */
     public void startTrainingDirect(final BackendServerType serverType,
-                                    final String devId, final UUID aiid,
+                                    final UUID devId, final UUID aiid,
                                     final String serverUrl, final String serverIdentifier) throws AiServicesException {
         // first get the devplan to load training parameters
         DevPlan devPlan;
@@ -103,7 +103,7 @@ public class AIQueueServices extends ServerConnector {
                 .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
                 String.format("Sending \"start\" %s to %s", aiid.toString(), serverType.value()),
-                devId, logMap);
+                devId.toString(), logMap);
 
         HashMap<String, Callable<InvocationResult>> callables = getTrainingCallableForEndpoint(devId, aiid, serverUrl,
                 new HashMap<String, String>() {{
@@ -123,7 +123,7 @@ public class AIQueueServices extends ServerConnector {
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    private void stopTrainingDirect(final BackendServerType serverType, final String devId, final UUID aiid,
+    private void stopTrainingDirect(final BackendServerType serverType, final UUID devId, final UUID aiid,
                                     final String serverEndpoint, final String serverIdentifier)
             throws AiServicesException {
 
@@ -133,7 +133,7 @@ public class AIQueueServices extends ServerConnector {
                 .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
                 String.format("Sending \"stop\" %s to %s", aiid.toString(), serverType.value()),
-                devId, logMap);
+                devId.toString(), logMap);
 
         HashMap<String, Callable<InvocationResult>> callables =
                 getTrainingCallableForEndpoint(devId, aiid, serverEndpoint, new HashMap<String, String>() {{
@@ -152,7 +152,7 @@ public class AIQueueServices extends ServerConnector {
      * @throws AiServicesException
      */
     private HashMap<String, Callable<InvocationResult>> getTrainingCallableForEndpoint(
-            final String devId, final UUID aiid, final String endpoint, Map<String, String> params)
+            final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params)
             throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId.toString()).path(aiid.toString());
@@ -179,7 +179,7 @@ public class AIQueueServices extends ServerConnector {
      */
     private void stopTrainingIfActive(final BackendStatus backendStatus, final BackendServerType serverType,
                                       final ControllerBase controller,
-                                      final String devid, final UUID aiid,
+                                      final UUID devid, final UUID aiid,
                                       boolean setDbStatus) throws Database.DatabaseException, AiServicesException {
 
         // get an endpoint map, i.e. a map from serverIdentifier to the actual servertracker object
@@ -232,7 +232,7 @@ public class AIQueueServices extends ServerConnector {
      * @throws AiServicesException
      */
     void userActionUpload(final BackendStatus backendStatus, BackendServerType serverType,
-                          ControllerBase controller, String devid, UUID aiid)
+                          ControllerBase controller, UUID devid, UUID aiid)
             throws Database.DatabaseException, AiServicesException {
         // send a stop training command if necessary
         stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, false);
@@ -252,7 +252,7 @@ public class AIQueueServices extends ServerConnector {
      * @param aiid
      * @throws Database.DatabaseException
      */
-    void userActionStartTraining(BackendStatus status, BackendServerType serverType, String devid, UUID aiid)
+    void userActionStartTraining(BackendStatus status, BackendServerType serverType, UUID devid, UUID aiid)
             throws Database.DatabaseException {
         // get the current status
         BackendEngineStatus engineStatus = status.getEngineStatus(serverType);
@@ -275,7 +275,7 @@ public class AIQueueServices extends ServerConnector {
      */
     void userActionStopTraining(final BackendStatus backendStatus, BackendServerType serverType,
                                 ControllerBase controller,
-                                String devid, UUID aiid)
+                                UUID devid, UUID aiid)
             throws Database.DatabaseException, ServerConnector.AiServicesException {
         // stop training, and save "stopped" state in the dabatase
         stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, true);
@@ -292,7 +292,7 @@ public class AIQueueServices extends ServerConnector {
      * @throws ServerConnector.AiServicesException
      */
     void userActionDelete(final BackendStatus backendStatus, BackendServerType serverType, ControllerBase controller,
-                          String devid, UUID aiid)
+                          UUID devid, UUID aiid)
             throws Database.DatabaseException, ServerConnector.AiServicesException {
         // if we are training then stop immediately
         stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, false);

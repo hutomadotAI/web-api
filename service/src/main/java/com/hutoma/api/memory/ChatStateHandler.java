@@ -25,24 +25,24 @@ public class ChatStateHandler {
         this.logger = logger;
     }
 
-    public ChatState getState(final String devId, final UUID chatId) {
+    public ChatState getState(final UUID devId, final UUID chatId) {
         try {
             return this.database.getChatState(devId, chatId);
         } catch (Exception ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId, ex);
+            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
         }
         return ChatState.getEmpty();
     }
 
-    public void saveState(final String devId, final UUID chatId, final ChatState chatState) {
+    public void saveState(final UUID devId, final UUID chatId, final ChatState chatState) {
         try {
             chatState.setTimestamp(DateTime.now());
             if (!this.database.saveChatState(devId, chatId, chatState)) {
                 this.logger.logUserErrorEvent(LOGFROM, "Could not save state for chat " + chatId,
-                        devId, LogMap.map("ChatId", chatId));
+                        devId.toString(), LogMap.map("ChatId", chatId));
             }
         } catch (Exception ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId, ex);
+            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
         }
     }
 }
