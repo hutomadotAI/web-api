@@ -55,7 +55,7 @@ public class IntentLogic {
     public ApiResult getIntent(final String devid, final UUID aiid, final String intentName) {
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
-            ApiIntent intent = this.database.getIntent(devid, aiid, intentName);
+            ApiIntent intent = this.database.getIntent(aiid, intentName);
             if (null == intent) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devid, logMap);
                 return ApiError.getNotFound();

@@ -417,8 +417,8 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         when(this.fakeDatabase.getAiTrainingFile(AIID)).thenReturn(trainingFile);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(intentNames);
-        when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(0))).thenReturn(intent1);
-        when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(1))).thenReturn(intent2);
+        when(this.fakeDatabase.getIntent(AIID, intentNames.get(0))).thenReturn(intent1);
+        when(this.fakeDatabase.getIntent(AIID, intentNames.get(1))).thenReturn(intent2);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(DEVID, AIID);
 
         Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
@@ -462,7 +462,7 @@ public class TestTrainingLogic {
         intent1.setUserSays(Collections.singletonList(userSays));
         when(this.fakeDatabase.getAI(DEVID, AIID)).thenReturn(apiAi);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(Collections.singletonList(intentName));
-        when(this.fakeDatabase.getIntent(DEVID, AIID, intentName)).thenReturn(intent1);
+        when(this.fakeDatabase.getIntent(AIID, intentName)).thenReturn(intent1);
         ApiTrainingMaterials materials = (ApiTrainingMaterials) this.logic.getTrainingMaterials(DEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, materials.getStatus().getCode());
 
@@ -537,8 +537,8 @@ public class TestTrainingLogic {
         ApiIntent intent2 = new ApiIntent(intentNames.get(1), "", "");
         intent2.setUserSays(userSaysIntent2);
 
-        when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(0))).thenReturn(intent1);
-        when(this.fakeDatabase.getIntent(DEVID, AIID, intentNames.get(1))).thenReturn(intent2);
+        when(this.fakeDatabase.getIntent(AIID, intentNames.get(0))).thenReturn(intent1);
+        when(this.fakeDatabase.getIntent(AIID, intentNames.get(1))).thenReturn(intent2);
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabase.getIntents(DEVID, AIID)).thenReturn(intentNames);

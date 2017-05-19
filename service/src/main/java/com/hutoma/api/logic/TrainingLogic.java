@@ -428,7 +428,7 @@ public class TrainingLogic {
             sb.append(userTrainingFile);
         }
         for (String intentName : this.database.getIntents(devId, aiid)) {
-            ApiIntent intent = this.database.getIntent(devId, aiid, intentName);
+            ApiIntent intent = this.database.getIntent(aiid, intentName);
             for (String userSays : intent.getUserSays()) {
                 if (sb.length() > 0) {
                     sb.append(EOL);

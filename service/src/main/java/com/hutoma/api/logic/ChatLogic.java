@@ -79,7 +79,6 @@ public class ChatLogic {
         UUID chatUuid = UUID.fromString(chatId);
         this.minP = minP;
         this.chatState = this.chatStateHandler.getState(devId, chatUuid);
-
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
         // Set the timestamp of the request
@@ -96,7 +95,8 @@ public class ChatLogic {
                 .put("Q", question)
                 .put("MinP", minP);
 
-        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid);
+        UUID aiidForMemoryIntents = this.chatState.getLockedAiid() == null ? aiid : this.chatState.getLockedAiid();
+        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiidForMemoryIntents, chatUuid);
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
         ChatResult result = new ChatResult();
@@ -104,7 +104,7 @@ public class ChatLogic {
         try {
 
             // Check if we're in the middle of an intent flow and process it.
-            if (processIntent(devId, aiid, currentIntent, question, result)) {
+            if (processIntent(devId, aiidForMemoryIntents, currentIntent, question, result)) {
                 // Intent was handled, confidence is high
                 result.setScore(1.0d);
             } else {
@@ -126,14 +126,15 @@ public class ChatLogic {
 
                     if (wnetConfident) {
                         // if we are taking WNET's reply then process intents
+                        UUID aiid_from_result = result.getAiid();
                         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                                devId, aiid, chatUuid, result.getAnswer());
+                                aiid_from_result, chatUuid, result.getAnswer());
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
                             this.telemetryMap.add("IntentRecognized", memoryIntent.getName());
 
-                            if (processIntent(devId, aiid, memoryIntent, question, result)) {
+                            if (processIntent(devId, aiid_from_result, memoryIntent, question, result)) {
                                 this.telemetryMap.add("AnsweredBy", "WNET");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
@@ -318,7 +319,7 @@ public class ChatLogic {
         // Check if there still are mandatory entities not currently fulfilled
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
         if (vars.isEmpty()) {
-            notifyIntentFulfilled(chatResult, currentIntent, devId, aiid);
+            notifyIntentFulfilled(chatResult, currentIntent, aiid);
 
             // If the webhook returns a text response, overwrite the answer.
             if (this.webHooks.activeWebhookExists(currentIntent, devId)) {
@@ -388,12 +389,12 @@ public class ChatLogic {
         return handledIntent;
     }
 
-    private Pair<UUID, ChatResult> getTopScore(final Map<UUID, ChatResult> chatResults) {
+    private ChatResult getTopScore(final Map<UUID, ChatResult> chatResults) {
         // Check if the currently locked bot still has an acceptable response
         if (this.chatState.getLockedAiid() != null && chatResults.containsKey(this.chatState.getLockedAiid())) {
             ChatResult result = chatResults.get(this.chatState.getLockedAiid());
             if (result.getScore() >= this.minP) {
-                return new Pair<>(this.chatState.getLockedAiid(), result);
+                return result;
             }
         }
         UUID responseFromAi = null;
@@ -406,7 +407,7 @@ public class ChatLogic {
         }
         // lock to this AI
         this.chatState.setLockedAiid(responseFromAi);
-        return new Pair<>(responseFromAi, chatResult);
+        return chatResult;
     }
 
     private ChatResult interpretSemanticResult() throws RequestBase.AiControllerException {
@@ -416,10 +417,10 @@ public class ChatLogic {
             return null;
         }
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        ChatResult chatResult = getTopScore(allResults);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
-        ChatResult chatResult = result.getB();
         if (chatResult.getAnswer() != null) {
             // if we receive a reset command then remove the command and flag the status
             if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
@@ -455,10 +456,9 @@ public class ChatLogic {
         }
 
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
-
-        ChatResult chatResult = result.getB();
+        ChatResult chatResult = getTopScore(allResults);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
@@ -480,11 +480,12 @@ public class ChatLogic {
         if (allResults == null) {
             return null;
         }
-        // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
-        ChatResult chatResult = result.getB();
+        // Get the top score
+        ChatResult chatResult = getTopScore(allResults);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
+
         if (chatResult.getAnswer() != null) {
             // always reset the conversation if we have gone with a non-wnet result
             chatResult.setResetConversation(true);
@@ -509,9 +510,9 @@ public class ChatLogic {
         return Math.round(input * 10.0d) / 10.0d;
     }
 
-    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid) {
+    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, UUID aiid) {
         memoryIntent.setIsFulfilled(true);
-        ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
+        ApiIntent intent = this.intentHandler.getIntent(aiid, memoryIntent.getName());
         if (intent != null) {
             List<String> responses = intent.getResponses();
             chatResult.setAnswer(responses.get((int) (Math.random() * responses.size())));

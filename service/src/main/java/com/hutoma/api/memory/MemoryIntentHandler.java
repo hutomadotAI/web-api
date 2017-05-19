@@ -44,13 +44,13 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     /**
      * {@inheritDoc}
      */
-    public MemoryIntent parseAiResponseForIntent(final String devid, final UUID aiid, final UUID chatId,
+    public MemoryIntent parseAiResponseForIntent(final UUID aiid, final UUID chatId,
                                                  final String response) {
         if (response.trim().startsWith(META_INTENT_TAG)) {
             Matcher matcher = META_INTEG_PATTERN.matcher(response);
             if (matcher.find()) {
                 String intentName = matcher.group(1);
-                return this.loadIntentForAi(devid, aiid, chatId, intentName);
+                return this.loadIntentForAi(aiid, chatId, intentName);
             }
         }
         return null;
@@ -103,27 +103,27 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     /**
      * {@inheritDoc}
      */
-    public ApiIntent getIntent(final String devid, final UUID aiid, final String intentName) {
+    public ApiIntent getIntent(final UUID aiid, final String intentName) {
         try {
-            return this.databaseIntents.getIntent(devid, aiid, intentName);
+            return this.databaseIntents.getIntent(aiid, intentName);
         } catch (Database.DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
         return null;
     }
 
-    private MemoryIntent loadIntentForAi(final String devid, final UUID aiid, final UUID chatId,
+    private MemoryIntent loadIntentForAi(final UUID aiid, final UUID chatId,
                                          final String intentName) {
         MemoryIntent intent = null;
         try {
             intent = this.database.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
             if (intent == null) {
-                ApiIntent apiIntent = this.databaseIntents.getIntent(devid, aiid, intentName);
+                ApiIntent apiIntent = this.databaseIntents.getIntent(aiid, intentName);
                 List<MemoryVariable> variables = new ArrayList<>();
                 // This intent is not yet available in the db, so we need to initialize it from the existing
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
-                    ApiEntity apiEntity = this.databaseIntents.getEntity(devid, intentVar.getEntityName());
+                    ApiEntity apiEntity = this.databaseIntents.getEntity(intentVar.getDevOwner(), intentVar.getEntityName());
                     MemoryVariable variable = new MemoryVariable(
                             intentVar.getEntityName(),
                             null,

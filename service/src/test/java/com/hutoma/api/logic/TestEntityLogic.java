@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -75,14 +77,14 @@ public class TestEntityLogic {
 
     @Test
     public void testGetEntity_Success() throws Database.DatabaseException {
-        when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(getEntity());
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
         final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testGetEntity_Success_Return() throws Database.DatabaseException {
-        when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(getEntity());
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
         final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
     }
@@ -93,7 +95,7 @@ public class TestEntityLogic {
      * an empty value list
      */
     public void testGetEntity_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getEntity(anyString(), anyString())).thenReturn(getEntityEmpty());
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntityEmpty());
         final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
         Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
@@ -102,28 +104,28 @@ public class TestEntityLogic {
 
     @Test
     public void testGetEntity_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.getEntity(anyString(), anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenThrow(Database.DatabaseException.class);
         final ApiResult result = this.entityLogic.getEntity(DEVID, this.ENTNAME);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteEntity_Success() throws Database.DatabaseException {
-        final ApiResult result = this.entityLogic.writeEntity(DEVID, this.ENTNAME, new ApiEntity(this.ENTNAME));
+        final ApiResult result = this.entityLogic.writeEntity(DEVID, this.ENTNAME, new ApiEntity(this.ENTNAME, DEVID_UUID));
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteEntity_Error() throws Database.DatabaseException {
         doThrow(Database.DatabaseException.class).when(this.fakeDatabase).writeEntity(anyString(), anyString(), any());
-        final ApiResult result = this.entityLogic.writeEntity(DEVID, this.ENTNAME, new ApiEntity(this.ENTNAME));
+        final ApiResult result = this.entityLogic.writeEntity(DEVID, this.ENTNAME, new ApiEntity(this.ENTNAME, DEVID_UUID));
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteEntity_RenameClash() throws Database.DatabaseException {
         doThrow(new Database.DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabase).writeEntity(anyString(), anyString(), any());
-        final ApiResult result = this.entityLogic.writeEntity(DEVID, this.ENTNAME, new ApiEntity("nameclash"));
+        final ApiResult result = this.entityLogic.writeEntity(DEVID, this.ENTNAME, new ApiEntity("nameclash", DEVID_UUID));
         Assert.assertEquals(400, result.getStatus().getCode());
     }
 
@@ -202,11 +204,11 @@ public class TestEntityLogic {
     }
 
     private ApiEntity getEntity() {
-        return new ApiEntity(this.ENTNAME, Arrays.asList("oneval", "twoval"), false);
+        return new ApiEntity(this.ENTNAME, DEVID_UUID, Arrays.asList("oneval", "twoval"), false);
     }
 
     private ApiEntity getEntityEmpty() {
-        return new ApiEntity(this.ENTNAME, Arrays.asList(new String[]{}), false);
+        return new ApiEntity(this.ENTNAME, DEVID_UUID, Arrays.asList(new String[]{}), false);
     }
 
 
