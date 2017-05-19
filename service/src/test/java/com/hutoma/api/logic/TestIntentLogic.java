@@ -124,6 +124,14 @@ public class TestIntentLogic {
     }
 
     @Test
+    public void testGetIntent_Aiid_Invalid() throws Database.DatabaseException {
+        when(this.fakeDatabase.getIntent(any(), anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(false);
+        final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, this.INTENTNAME);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testWriteIntent_Success() throws Database.DatabaseException {
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, this.getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
