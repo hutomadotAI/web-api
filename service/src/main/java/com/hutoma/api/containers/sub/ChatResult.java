@@ -27,7 +27,7 @@ public class ChatResult {
     private List<MemoryIntent> intents;
 
     // the actual bot ID that provided the result
-    private UUID aiid;
+    private transient UUID aiid;
     private transient boolean resetConversation;
 
     public ChatResult() {
