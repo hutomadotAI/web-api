@@ -2113,19 +2113,14 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntent`(
-  IN in_dev_id VARCHAR(50),
   IN in_aiid VARCHAR(50),
   IN in_name VARCHAR(250))
 BEGIN
     SELECT `id`, `name`, `topic_in`, `topic_out`
     FROM `intent`
     WHERE `intent`.`name`=`in_name`
-          AND `intent`.`id` IN
-              (SELECT `intent`.`id` from `intent`, `ai`
-              WHERE `ai`.`dev_id` = `in_dev_id`
-                    AND `ai`.`aiid` = `in_aiid`
-                    AND `intent`.`aiid` = `in_aiid`);
-  END ;;
+		AND `intent`.`aiid` = `in_aiid`;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2169,15 +2164,14 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentResponses`(
-  IN in_dev_id VARCHAR(50),
   IN in_aiid VARCHAR(50),
   IN in_name VARCHAR(250))
 BEGIN
     SELECT `response`
     FROM `intent_response` WHERE `intent_id` IN
-                                 (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-                                                                                                            (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
-  END ;;
+         (SELECT `id` FROM `intent` 
+          WHERE `in_name`=`name` AND `in_aiid`=`aiid`);
+END  ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2220,15 +2214,14 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentUserSays`(
-  IN in_dev_id VARCHAR(50),
   IN in_aiid VARCHAR(50),
   IN in_name VARCHAR(250))
 BEGIN
     SELECT `says`
     FROM `intent_user_says` WHERE `intent_id` IN
-                                  (SELECT `id` FROM `intent` WHERE `in_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-                                                                                                             (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
-  END ;;
+         (SELECT `id` FROM `intent` 
+          WHERE `in_name`=`name` AND `in_aiid`=`aiid`);
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2275,7 +2268,6 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentVariablePrompts`(
-  IN in_dev_id VARCHAR(50),
   IN in_aiid VARCHAR(50),
   IN in_intent_variable_id INT
 )
@@ -2287,11 +2279,9 @@ BEGIN
       (SELECT `intent_variable`.`id`
        FROM `intent_variable`, `intent`
        WHERE `intent_variable`.`intent_id` = `intent`.`id`
-             AND `in_aiid` = `intent`.`aiid`
-             AND `in_aiid` IN
-                 (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
+             AND `in_aiid` = `intent`.`aiid`);
 
-  END ;;
+END  ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2308,27 +2298,27 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentVariables`(
-  IN in_dev_id VARCHAR(50),
   IN in_aiid VARCHAR(50),
   IN in_intent_name VARCHAR(250)
 )
 BEGIN
 
-  SELECT
-    `intent_variable`.`id` AS `id`,
-    `entity`.`name` AS `entity_name`,
-    `intent_variable`.`required` AS `required`,
-    `intent_variable`.`n_prompts` AS `n_prompts`,
-    `intent_variable`.`value` AS `value`
-  FROM `intent_variable`, `entity`
-  WHERE `intent_variable`.`intent_id` =
-        (SELECT `id` FROM `intent`
-        WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid`
-              AND `in_aiid` IN (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id` OR `entity`.`isSystem`=1))
-        AND `entity`.`id` =
-            (SELECT `id` FROM `entity` WHERE `id` = `intent_variable`.`entity_id` AND (`in_dev_id`=`dev_id` OR `entity`.`isSystem`=1));
+    SELECT
+      `intent_variable`.`id` AS `id`,
+      `entity`.`name` AS `entity_name`,
+      `intent_variable`.`required` AS `required`,
+      `intent_variable`.`n_prompts` AS `n_prompts`,
+      `intent_variable`.`value` AS `value`,
+      `entity`.`dev_id` AS `dev_id`
+    FROM `intent_variable`, `entity`
+    WHERE `intent_variable`.`intent_id` =
+          (SELECT `id` FROM `intent`
+           WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid`)
+          AND `entity`.`id` =
+              (SELECT `id` FROM `entity`
+               WHERE `id` = `intent_variable`.`entity_id`);
 
-  END ;;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
