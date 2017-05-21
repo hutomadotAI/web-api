@@ -288,7 +288,7 @@ public class ChatLogic {
             String uid = URLEncoder.encode(Integer.toString(sessionData(this.chatId).getUserid()), "UTF-8");
             String aid = URLEncoder.encode("384", "UTF-8");
             String q = URLEncoder.encode(message, "UTF-8");
-            URL url = new URL("https://www.hutoma.com:8443/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
+            URL url = new URL("https://52.44.202.141:8443/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
 
             connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("GET");
