@@ -24,7 +24,7 @@ public class BackendEngineStatus {
     private transient String serverIdentifier;
     private transient DateTime updateTime;
     private transient UUID aiid;
-    private transient String devId;
+    private transient UUID devId;
     private transient boolean deleted;
 
     public BackendEngineStatus(final TrainingStatus trainingStatus, final double trainingError,
@@ -85,11 +85,11 @@ public class BackendEngineStatus {
         return this.aiid;
     }
 
-    public String getDevId() {
+    public UUID getDevId() {
         return this.devId;
     }
 
-    public void setDevId(final String devId) {
+    public void setDevId(final UUID devId) {
         this.devId = devId;
     }
 

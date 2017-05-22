@@ -59,8 +59,10 @@ public class ParameterFilter extends Validate {
     }
 
     // static accessors to retrieve validated parameters from the request context
-    public static String getDevid(final ContainerRequestContext requestContext) {
-        return (String) requestContext.getProperty(APIParameter.DevID.toString());
+    public static UUID getDevid(final ContainerRequestContext requestContext) {
+        final String str = (String) requestContext.getProperty(APIParameter.DevID.toString());
+        UUID uuid = UUID.fromString(str);
+        return uuid;
     }
 
     public static UUID getAiid(final ContainerRequestContext requestContext) {

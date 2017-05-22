@@ -55,102 +55,104 @@ public class AIBotStoreLogic {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ApiResult getPublishedBots(final String devId) {
+    public ApiResult getPublishedBots(final UUID devId) {
         try {
             List<AiBot> bots = this.database.getPublishedBots();
-            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId,
+            this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId.toString(),
                     LogMap.map("Num Bots", bots.size()));
             return new ApiAiBotList(bots).setSuccessStatus();
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBots", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBots", devId.toString(), e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult getPurchasedBots(final String devId) {
+    public ApiResult getPurchasedBots(final UUID devId) {
         try {
             List<AiBot> bots = this.database.getPurchasedBots(devId);
-            this.logger.logUserTraceEvent(LOGFROM, "GetPurchasedBots", devId,
+            this.logger.logUserTraceEvent(LOGFROM, "GetPurchasedBots", devId.toString(),
                     LogMap.map("Num Bots", bots.size()));
             return new ApiAiBotList(bots).setSuccessStatus();
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetPurchasedBots", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetPurchasedBots", devId.toString(), e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult purchaseBot(final String devId, final int botId) {
+    public ApiResult purchaseBot(final UUID devId, final int botId) {
+        final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("BotId", botId);
             // Check if the bot actually exists in the store
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null || bot.getPublishingState() != AiBot.PublishingState.PUBLISHED) {
                 this.logger.logUserTraceEvent(LOGFROM, String.format("Bot not %s",
-                        bot == null ? "found" : "published"), devId, logMap);
+                        bot == null ? "found" : "published"), devIdString, logMap);
                 return ApiError.getNotFound("Bot not found");
             }
             // Check if the bot has already been purchased
             List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase already owned bot", devId,
+                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase already owned bot", devIdString,
                         logMap);
                 return ApiError.getBadRequest("Bot already purchased");
             }
             if (this.database.purchaseBot(devId, botId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logUserErrorEvent(LOGFROM, "PurchaseBot - could not purchase", devId, logMap);
+                this.logger.logUserErrorEvent(LOGFROM, "PurchaseBot - could not purchase", devIdString, logMap);
                 return ApiError.getInternalServerError();
             }
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "PurchaseBot", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "PurchaseBot", devIdString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult getBotDetails(final String devId, final int botId) {
+    public ApiResult getBotDetails(final UUID devId, final int botId) {
+        final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("BotId", botId);
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails - not found", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails - not found", devIdString, logMap);
                 return ApiError.getNotFound();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails", devId, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails", devIdString, logMap);
             return new ApiAiBot(bot).setSuccessStatus();
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetBotDetails", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetBotDetails", devIdString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult publishBot(final String devId, final UUID aiid, final String name, final String description,
+    public ApiResult publishBot(final UUID devId, final UUID aiid, final String name, final String description,
                                 final String longDescription, final String alertMessage, final String badge,
                                 final BigDecimal price, final String sample, final String category,
                                 final String licenseType, final String privacyPolicy, final String classification,
                                 final String version, final String videoLink) {
+        final String devIdString = devId.toString();
         try {
-
             LogMap logMap = LogMap.map("AIID", aiid);
             DeveloperInfo devInfo = this.database.getDeveloperInfo(devId);
             if (devInfo == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - DevInfo not entered", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - DevInfo not entered", devIdString, logMap);
                 return ApiError.getBadRequest("Please set the developer information first");
             }
             AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
             if (bot != null) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot", devIdString, logMap);
                 return ApiError.getBadRequest("Bot already has a published bot");
             }
             ApiAi ai = this.database.getAI(devId, aiid);
             if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devIdString, logMap);
                 return ApiError.getBadRequest("Bot needs to be fully trained before being allowed to be published");
             }
             List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
             if (!linkedBots.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI is linked to other bots", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI is linked to other bots", devIdString, logMap);
                 return ApiError.getBadRequest(
                         "Publishing an bot that is already linked to one or more bots is not yet supported "
                                 + "(coming soon!)");
@@ -160,15 +162,15 @@ public class AIBotStoreLogic {
                     videoLink, AiBot.PublishingState.SUBMITTED, null);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);
                 return ApiError.getBadRequest("Invalid publish request");
             } else {
                 bot.setBotId(botId);
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devId, logMap.put("New BotId", botId));
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devIdString, logMap.put("New BotId", botId));
                 return new ApiAiBot(bot).setSuccessStatus();
             }
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "PublishBot", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "PublishBot", devIdString, e);
             return ApiError.getInternalServerError();
         }
     }
@@ -187,20 +189,21 @@ public class AIBotStoreLogic {
         }
     }
 
-    public ApiResult uploadBotIcon(final String devId, final int botId, final InputStream inputStream,
+    public ApiResult uploadBotIcon(final UUID devId, final int botId, final InputStream inputStream,
                                    final FormDataContentDisposition fileDetail) {
+        final String devIdString = devId.toString();
         File tempFile = null;
         try {
             LogMap logMap = LogMap.map("BotId", botId);
             AiBot bot = this.database.getBotDetails(botId);
             if (bot == null || !bot.getDevId().equals(devId)) {
-                this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - request uploading for other dev's bot", devId,
-                        logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - request uploading for other dev's bot",
+                        devIdString, logMap);
                 return ApiError.getNotFound();
             }
             String extension = FilenameUtils.getExtension(fileDetail.getFileName()).toLowerCase();
             if (!ALLOWED_ICON_EXT.contains(extension)) {
-                this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - invalid extension", devId,
+                this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - invalid extension", devIdString,
                         logMap.put("Extension", extension));
                 return ApiError.getBadRequest("Image extension not allowed");
             }
@@ -215,7 +218,7 @@ public class AIBotStoreLogic {
                 for (long count = 0L; -1 != (n1 = inputStream.read(buffer)); count += (long) n1) {
                     out.write(buffer, 0, n1);
                     if ((count + n1) > MAX_ICON_FILE_SIZE) {
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - exceeded max size", devId,
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - exceeded max size", devIdString,
                                 logMap);
                         return ApiError.getBadRequest(
                                 String.format("File is larger than the maximum allowed size (%d bytes)",
@@ -230,17 +233,17 @@ public class AIBotStoreLogic {
             Files.copy(tempFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             this.database.saveBotIconPath(devId, botId, destFilename);
-            this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devId, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devIdString, logMap);
             return new ApiResult().setSuccessStatus();
 
         } catch (Database.DatabaseException | IOException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UploadBotIcon", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "UploadBotIcon", devIdString, e);
             return ApiError.getInternalServerError();
         } finally {
             if (tempFile != null) {
                 if (!tempFile.delete()) {
-                    this.logger.logUserWarnEvent(LOGFROM, "UploadBotIcon - could not delete temp file", devId,
-                            LogMap.map("Path", tempFile.getAbsolutePath()));
+                    this.logger.logUserWarnEvent(LOGFROM, "UploadBotIcon - could not delete temp file",
+                            devIdString, LogMap.map("Path", tempFile.getAbsolutePath()));
                 }
             }
         }

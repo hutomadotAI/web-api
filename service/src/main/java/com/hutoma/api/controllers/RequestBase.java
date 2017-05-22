@@ -7,6 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.AiDevId;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
 
@@ -57,15 +58,15 @@ public abstract class RequestBase {
     }
 
     public List<RequestInProgress> issueChatRequests(final Map<String, String> chatParams,
-                                                     final List<Pair<String, UUID>> ais)
+                                                     final List<AiDevId> ais)
             throws ServerMetadata.NoServerAvailable {
         List<RequestCallable> callables = new ArrayList<>();
 
-        for (Pair<String, UUID> ai : ais) {
-            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat);
+        for (AiDevId ai : ais) {
+            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.ai, RequestFor.Chat);
             callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.getA(), ai.getB(), chatParams,
-                            this.controller.getHashCodeFor(ai.getB())),
+                    createCallable(endpoint.getServerUrl(), ai.dev, ai.ai, chatParams,
+                            this.controller.getHashCodeFor(ai.ai)),
                     endpoint.getServerIdentifier()));
         }
 
@@ -198,14 +199,14 @@ public abstract class RequestBase {
         }
     }
 
-    protected Callable<InvocationResult> createCallable(final String endpoint, final String devId, final UUID aiid,
+    protected Callable<InvocationResult> createCallable(final String endpoint, final UUID devId, final UUID aiid,
                                                         final Map<String, String> params, final String aiHash) {
 
         // create call to back-end chat endpoints
         // e.g.
         //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
         //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae&topic=&history=
-        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId).path(aiid.toString()).path("chat");
+        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId.toString()).path(aiid.toString()).path("chat");
         for (Map.Entry<String, String> param : params.entrySet()) {
             target = target.queryParam(param.getKey(), param.getValue());
         }

@@ -11,6 +11,8 @@ import com.hutoma.api.validation.ParameterFilter;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
+import java.util.UUID;
+
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -45,7 +47,8 @@ public class RateLimitCheck implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
         // retrieve a validated devid, or bundle ratelimiting with anonymous
-        String devid = ParameterFilter.getDevid(requestContext);
+        String devIdString = "{null or empty}";
+        UUID devid = ParameterFilter.getDevid(requestContext);
         LogMap logMap = LogMap.map("Method", requestContext.getMethod())
                 .put("Path", requestContext.getUriInfo().getPath());
 
@@ -53,11 +56,11 @@ public class RateLimitCheck implements ContainerRequestFilter {
         double frequency = 1.0;
         boolean skipRateLimit = false;
         try {
-            if ((null == devid) || (devid.isEmpty())) {
-                devid = "{null or empty}";
+            if (null == devid) {
                 throw new AccountDisabledException();
             }
 
+            devIdString = devid.toString();
             // get the bucket that we will use to rate limit this resource
             RateKey rateKey = determineRateKey(this.resourceInfo);
 
@@ -96,14 +99,14 @@ public class RateLimitCheck implements ContainerRequestFilter {
 
         } catch (AccountDisabledException ade) {
             requestContext.abortWith(ApiError.getAccountDisabled().getResponse(this.serializer).build());
-            this.logger.logUserTraceEvent(LOGFROM, "Account not valid", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "Account not valid", devIdString, logMap);
         } catch (RateLimitedException rle) {
             requestContext.abortWith(ApiError.getRateLimited().getResponse(this.serializer).build());
-            this.logger.logUserTraceEvent(LOGFROM, rle.getMessage(), devid,
+            this.logger.logUserTraceEvent(LOGFROM, rle.getMessage(), devIdString,
                     logMap.put("Burst", burst).put("Frequency", frequency));
         } catch (Exception e) {
             requestContext.abortWith(ApiError.getInternalServerError().getResponse(this.serializer).build());
-            this.logger.logUserExceptionEvent(LOGFROM, e.toString(), devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, e.toString(), devIdString, e);
         }
     }
 
@@ -130,7 +133,7 @@ public class RateLimitCheck implements ContainerRequestFilter {
      * @throws RateLimitedException if we should fail the call due to limiting
      * @throws AccountDisabledException if the devid was not recognised or the account was disabled
      */
-    private void checkRateLimitReached(final String devid, final RateKey rateKey, final double burst,
+    private void checkRateLimitReached(final UUID devid, final RateKey rateKey, final double burst,
                                        final double frequency)
             throws Database.DatabaseException, RateLimitedException, AccountDisabledException {
         if (frequency == 0.0d) {

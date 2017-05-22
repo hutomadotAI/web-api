@@ -6,10 +6,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -44,6 +41,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -91,7 +89,7 @@ public class TestChatLogic {
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
                 this.fakeChatStateHandler);
 
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     /***
@@ -631,7 +629,7 @@ public class TestChatLogic {
     public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -640,7 +638,7 @@ public class TestChatLogic {
     public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -649,7 +647,7 @@ public class TestChatLogic {
     public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(Exception.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -666,7 +664,7 @@ public class TestChatLogic {
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException {
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID()));
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID()));
         ApiChat result = (ApiChat) getChat(0.1f);
         // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -699,7 +697,7 @@ public class TestChatLogic {
             put(UUID.randomUUID(), cr2);
         }};
         ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
     }
@@ -717,7 +715,7 @@ public class TestChatLogic {
             put(cr2Uuid, cr2);
         }};
         ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr2, cr2Uuid);
     }
@@ -735,7 +733,7 @@ public class TestChatLogic {
             put(cr2Uuid, cr2);
         }};
         ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ChatResult cr1Aiml = new ChatResult();
         cr1Aiml.setScore(0.6);
@@ -874,7 +872,7 @@ public class TestChatLogic {
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertEquals(returnedResult.getScore(), result.getResult().getScore(), 0.0001);
         ArgumentCaptor<ChatState> argumentCaptor = ArgumentCaptor.forClass(ChatState.class);
-        verify(this.fakeChatStateHandler).saveState(anyString(), any(), argumentCaptor.capture());
+        verify(this.fakeChatStateHandler).saveState(any(), any(), argumentCaptor.capture());
         // And that the contains the lockedAiid value for the aiid with the highest score
         Assert.assertEquals(usedAiid, argumentCaptor.getValue().getLockedAiid());
 
@@ -894,7 +892,7 @@ public class TestChatLogic {
     }
 
     private ApiResult getChat(float min_p, String question) {
-        return this.chatLogic.chat(AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
+        return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
     private ApiResult getAssistantChat(float min_p) {
@@ -903,7 +901,7 @@ public class TestChatLogic {
 
     private ApiResult getAssistantChat(float min_p, String
             question) {
-        return this.chatLogic.assistantChat(AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
+        return this.chatLogic.assistantChat(AIID, DEVID_UUID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
     /***
@@ -927,7 +925,8 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
-        when(this.fakeChatServices.getLinkedBotsAiids(anyString(), any())).thenReturn(Collections.singletonList(new Pair<>(DEVID, AIML_BOT_AIID)));
+        when(this.fakeChatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.singletonList(
+                new AiDevId(DEVID_UUID, AIML_BOT_AIID)));
         ChatResult aimlResult = new ChatResult();
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);

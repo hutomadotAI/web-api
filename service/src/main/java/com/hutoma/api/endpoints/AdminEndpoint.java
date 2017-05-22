@@ -6,6 +6,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AdminLogic;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -59,7 +61,7 @@ public class AdminEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteDeveloper(
-            @DefaultValue("") @QueryParam("devid") String devId) {
+            @DefaultValue("") @QueryParam("devid") UUID devId) {
         ApiResult result = this.adminLogic.deleteDev(devId);
         return result.getResponse(this.serializer).build();
     }
@@ -69,7 +71,7 @@ public class AdminEndpoint {
     @Secured({Role.ROLE_ADMIN})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getToken(
-            @DefaultValue("") @PathParam("devid") String devId) {
+            @DefaultValue("") @PathParam("devid") UUID devId) {
         ApiResult result = this.adminLogic.getDevToken(devId);
         return result.getResponse(this.serializer).build();
     }

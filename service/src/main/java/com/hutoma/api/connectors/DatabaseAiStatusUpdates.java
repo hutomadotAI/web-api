@@ -145,7 +145,9 @@ public class DatabaseAiStatusUpdates extends Database {
             if (rs.next()) {
                 backendEngineStatus = getBackendEngineStatus(rs).getB();
                 // also read the devid and the deleted flag from the ai table
-                backendEngineStatus.setDevId(rs.getString("dev_id"));
+                final String devId = rs.getString("dev_id");
+                final UUID devIdUuid = UUID.fromString(devId);
+                backendEngineStatus.setDevId(devIdUuid);
                 backendEngineStatus.setDeleted(rs.getBoolean("deleted"));
             }
             // if all goes well, commit

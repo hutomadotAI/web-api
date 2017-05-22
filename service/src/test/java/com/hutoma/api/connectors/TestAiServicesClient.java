@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
  */
 public class TestAiServicesClient {
 
-    private static final String DEVID = "devid";
+    private static final UUID DEVID = UUID.fromString("1a5c55e7-6492-4d08-8dfd-d167ac9f3330");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String COMMAND_PARAM = "command";
     private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9090";
@@ -153,7 +153,7 @@ public class TestAiServicesClient {
                 @PathParam("aiid") String aiid,
                 @QueryParam(COMMAND_PARAM) String command) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
                 checkParameterValue(AIID.toString(), aiid);
                 checkParameterValue(Arrays.asList("start", "stop", "wake"), command);
             } catch (Exception ex) {
@@ -169,7 +169,7 @@ public class TestAiServicesClient {
                 @PathParam("devId") String devId,
                 @PathParam("aiid") String aiid) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
                 checkParameterValue(AIID.toString(), aiid);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
@@ -183,7 +183,7 @@ public class TestAiServicesClient {
         public Response sendOkForDevIdDelete(
                 @PathParam("devId") String devId) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
             }
@@ -197,7 +197,7 @@ public class TestAiServicesClient {
                 @PathParam("devId") String devId,
                 @PathParam("aiid") String aiid) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
                 checkParameterValue(AIID.toString(), aiid);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
@@ -214,7 +214,7 @@ public class TestAiServicesClient {
             try {
                 AIServices.AiInfo info = (AIServices.AiInfo) this.serializer.deserialize(
                         infoPart.getValueAs(String.class), AIServices.AiInfo.class);
-                checkParameterValue(DEVID, info.getDevId());
+                checkParameterValue(DEVID.toString(), info.getDevId());
                 checkParameterValue(AIID.toString(), info.getAiid());
                 checkParameterValue(TRAINING_MATERIALS, trainingMaterials);
             } catch (Exception ex) {

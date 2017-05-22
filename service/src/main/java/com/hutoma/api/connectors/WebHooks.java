@@ -14,6 +14,8 @@ import com.hutoma.api.containers.sub.WebHookResponse;
 import org.glassfish.jersey.client.JerseyClient;
 
 import java.io.IOException;
+import java.util.UUID;
+
 import java.net.HttpURLConnection;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
@@ -45,7 +47,8 @@ public class WebHooks {
      * @return a WebHookResponse containing the returned data.
      * @throws IOException if the endpoint cannot be accessed.
      */
-    public WebHookResponse executeWebHook(final MemoryIntent intent, final ChatResult chatResult, final String devId) {
+    public WebHookResponse executeWebHook(final MemoryIntent intent, final ChatResult chatResult, final UUID devId) {
+        final String devIdString = devId.toString();
         if (intent == null) {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
             return null;
@@ -56,14 +59,14 @@ public class WebHooks {
         try {
             webHook = this.database.getWebHook(intent.getAiid(), intent.getName());
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devIdString, e);
             return null;
         }
 
         if (webHook == null) {
             this.logger.logUserErrorEvent(LOGFROM,
                     "WebHook not found at execution for intent %s in aiid %s",
-                    devId,
+                    devIdString,
                     LogMap.map("Intent", intent.getName()).put("AIID", intent.getAiid()));
             return null;
         }
@@ -74,7 +77,7 @@ public class WebHooks {
         try {
             jsonPayload = this.serializer.serialize(payload);
         } catch (JsonIOException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "Webhook Payload Serialisation Failed", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "Webhook Payload Serialisation Failed", devIdString, e);
             return null;
         }
 
@@ -86,14 +89,14 @@ public class WebHooks {
                     .request()
                     .post(Entity.json(jsonPayload));
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Execution Failed", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Execution Failed", devIdString, e);
             return null;
         }
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
                     "WebHook Failed (%s): intent %s for aiid %s at %s",
-                    devId,
+                    devIdString,
                     LogMap.map("ResponseStatus", response.getStatus()).put("Intent", intent.getName())
                             .put("AIID", intent.getAiid()).put("Endpoint", webHook.getEndpoint()));
             return null;
@@ -129,12 +132,12 @@ public class WebHooks {
      * @return true if an active WebHook exists, else false.
      * @throws Database.DatabaseException if the WebHook cannot be retrieved.
      */
-    public boolean activeWebhookExists(final MemoryIntent intent, final String devId) {
+    public boolean activeWebhookExists(final MemoryIntent intent, final UUID devId) {
         WebHook webHook = null;
         try {
             webHook = this.database.getWebHook(intent.getAiid(), intent.getName());
         } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId.toString(), e);
         }
 
         return webHook != null && webHook.isEnabled();

@@ -18,6 +18,9 @@ import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import java.net.HttpURLConnection;
+
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
@@ -68,7 +71,7 @@ public class DeveloperInfoEndpoint {
     @TypeHint(DeveloperInfo.class)
     Response getDeveloperInfo(
             @Context final ContainerRequestContext requestContext,
-            @NotNull final @PathParam("devid") String requestDevId) {
+            @NotNull final @PathParam("devid") UUID requestDevId) {
         ApiResult result = this.developerLogic.getDeveloperInfo(
                 ParameterFilter.getDevid(requestContext),
                 requestDevId

@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -38,15 +38,15 @@ public class TestChatStateHandler {
         final String topic = "theTopic";
         final DateTime timestamp = DateTime.now();
         ChatState chatState = new ChatState(timestamp, topic, AIID);
-        when(this.fakeDatabase.getChatState(anyString(), any())).thenReturn(chatState);
-        ChatState result = this.chatStateHandler.getState(DEVID, UUID.randomUUID());
+        when(this.fakeDatabase.getChatState(any(), any())).thenReturn(chatState);
+        ChatState result = this.chatStateHandler.getState(DEVID_UUID, UUID.randomUUID());
         assertChatStateEquals(chatState, result);
     }
 
     @Test
     public void testChatStateHandler_getState_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabase.getChatState(anyString(), any())).thenThrow(Database.DatabaseException.class);
-        ChatState result = this.chatStateHandler.getState(DEVID, UUID.randomUUID());
+        when(this.fakeDatabase.getChatState(any(), any())).thenThrow(Database.DatabaseException.class);
+        ChatState result = this.chatStateHandler.getState(DEVID_UUID, UUID.randomUUID());
         assertChatStateEquals(ChatState.getEmpty(), result);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
@@ -55,16 +55,16 @@ public class TestChatStateHandler {
     public void testChatStateHandler_saveState() throws Database.DatabaseException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = new ChatState(DateTime.now(), "theTopic", AIID);
-        this.chatStateHandler.saveState(DEVID, chatId, chatState);
-        verify(this.fakeDatabase).saveChatState(DEVID, chatId, chatState);
+        this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
+        verify(this.fakeDatabase).saveChatState(DEVID_UUID, chatId, chatState);
     }
 
     @Test
     public void testChatStateHandler_saveState_dbException() throws Database.DatabaseException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = new ChatState(DateTime.now(), "theTopic", AIID);
-        when(this.fakeDatabase.saveChatState(anyString(), any(), any())).thenThrow(Database.DatabaseException.class);
-        this.chatStateHandler.saveState(DEVID, chatId, chatState);
+        when(this.fakeDatabase.saveChatState(any(), any(), any())).thenThrow(Database.DatabaseException.class);
+        this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
 

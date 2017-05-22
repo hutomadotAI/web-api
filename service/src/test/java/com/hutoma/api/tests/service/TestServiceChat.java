@@ -60,7 +60,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Before
     public void setup() {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     @Test

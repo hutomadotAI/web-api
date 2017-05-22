@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.UUID;
 
 /**
  * Developer information (including non-public data).
@@ -8,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 public class DeveloperInfo {
 
     @SerializedName("devid")
-    private final String devId;
+    private final UUID devId;
     private final String company;
     private final String website;
     private final String name;
@@ -18,7 +19,7 @@ public class DeveloperInfo {
     private final String city;
     private final String country;
 
-    public DeveloperInfo(final String devId, final String name, final String company, final String email,
+    public DeveloperInfo(final UUID devId, final String name, final String company, final String email,
                          final String address, final String postCode, final String city, final String country,
                          final String website) {
         this.devId = devId;
@@ -56,7 +57,7 @@ public class DeveloperInfo {
         return this.country;
     }
 
-    public String getDevId() {
+    public UUID getDevId() {
         return this.devId;
     }
 

@@ -92,7 +92,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testGetPurchasedBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         final Response response = target(BOTSTORE_PURCHASEDPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBotList list = deserializeResponse(response, ApiAiBotList.class);
@@ -109,8 +109,8 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     @Test
     public void testPurchaseBot() throws Database.DatabaseException {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
-        when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.purchaseBot(anyString(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabase.purchaseBot(any(), anyInt())).thenReturn(true);
         final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(defaultHeaders).post(null);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
@@ -124,8 +124,8 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     @Test
     public void testPublishBot() throws Database.DatabaseException {
         final int newBotId = 76832;
-        when(this.fakeDatabase.getDeveloperInfo(anyString())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(anyString(), any())).thenReturn(
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
         final Response response = target(BOTSTORE_BASEPATH)
@@ -163,9 +163,9 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.saveBotIconPath(anyString(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabase.saveBotIconPath(any(), anyInt(), any())).thenReturn(true);
         AiBot bot = new AiBot(SAMPLEBOT);
-        bot.setDevId(DEVID.toString());
+        bot.setDevId(DEVID);
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         FormDataMultiPart multipart = generateIconMultipartEntity();
         final Response response = target(BOTSTORE_BOTICONPATH)

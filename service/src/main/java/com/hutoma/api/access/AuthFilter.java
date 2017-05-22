@@ -79,10 +79,11 @@ public class AuthFilter implements ContainerRequestFilter {
      * @param config         the configuration
      * @return the developer id, or null if not present
      */
-    public static String getDevIdFromHeader(final ContainerRequestContext requestContext, final Config config) {
+    public static UUID getDevIdFromHeader(final ContainerRequestContext requestContext, final Config config) {
         String token = getTokenFromAuthBearer(requestContext);
         if (token != null) {
-            return getClaimsFromToken(token, config).getSubject();
+            final String devId = getClaimsFromToken(token, config).getSubject();
+            return UUID.fromString(devId);
         }
         return null;
     }

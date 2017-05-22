@@ -71,18 +71,18 @@ public class TrainingLogic {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ApiResult uploadFile(final String devid, final UUID aiid, final TrainingType type, final String url,
+    public ApiResult uploadFile(final UUID devid, final UUID aiid, final TrainingType type, final String url,
                                 final InputStream uploadedInputStream, final FormDataContentDisposition fileDetail) {
 
         ArrayList<String> source;
-
+        final String devidString = devid.toString();
         long maxUploadFileSize = 1024L * this.config.getMaxUploadSizeKb();
         LogMap logMap = LogMap.map("AIID", aiid);
 
         try {
             ApiAi ai = this.database.getAI(devid, aiid);
             if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devid, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
 
@@ -91,7 +91,7 @@ public class TrainingLogic {
                 // 0 = training file is text chat
                 case TEXT:
                     if (fileDetail == null) {
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadFile - no file specified", devid, logMap);
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadFile - no file specified", devidString, logMap);
                         return ApiError.getBadRequest("no file was specified");
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
@@ -105,18 +105,18 @@ public class TrainingLogic {
                                             result.getEvents().get(i).getKey().name(),
                                             result.getEvents().get(i).getValue()));
                         }
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadFile - file parsing errors", devid, logMap);
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadFile - file parsing errors", devidString, logMap);
                         return ApiError.getBadRequest("File parsing errors", result.getEvents());
                     }
                     if (!this.database.updateAiTrainingFile(aiid, result.getTrainingText())) {
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devid, logMap);
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devidString, logMap);
                         return ApiError.getNotFound();
                     }
 
                     String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
                     if (trainingMaterials == null) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadFile - training materials null after validation",
-                                devid, logMap);
+                                devidString, logMap);
                         return ApiError.getInternalServerError();
                     }
                     return uploadTrainingFile(ai, devid, aiid, trainingMaterials, result);
@@ -124,50 +124,50 @@ public class TrainingLogic {
                 // 1 = training file is a document
                 case DOCUMENT:
                     if (null == fileDetail) {
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadDocument - no file specified", devid,
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadDocument - no file specified", devidString,
                                 logMap);
                         return ApiError.getBadRequest("No file was specified");
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
                     if (!this.database.updateAiTrainingFile(aiid, String.join(EOL, source))) {
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadDocument - AI not found", devid, logMap);
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadDocument - AI not found", devidString, logMap);
                         return ApiError.getNotFound("ai not found");
                     }
 
                     // in case of an unstructured text we simply upload the file with no further processing
                     //  so unless the upload fails then we always return ok
-                    this.logger.logUserTraceEvent(LOGFROM, "UploadDocument", devid, logMap);
+                    this.logger.logUserTraceEvent(LOGFROM, "UploadDocument", devidString, logMap);
                     return new ApiResult().setSuccessStatus("Document uploaded");
 
                 // 2 = training file is a webpage
                 case WEBPAGE:
                     if (!this.database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
-                        this.logger.logUserTraceEvent(LOGFROM, "UploadWebPage - AI not found", devid, logMap);
+                        this.logger.logUserTraceEvent(LOGFROM, "UploadWebPage - AI not found", devidString, logMap);
                         return ApiError.getNotFound("Bot not found");
                     }
                     // in case of an unstructured webpage we simply upload the file with no further processing
                     //  so unless the upload fails then we always return ok
-                    this.logger.logUserTraceEvent(LOGFROM, "UploadWebPage", devid, logMap);
+                    this.logger.logUserTraceEvent(LOGFROM, "UploadWebPage", devidString, logMap);
                     return new ApiResult().setSuccessStatus("Document from url uploaded");
 
                 default:
-                    this.logger.logUserTraceEvent(LOGFROM, "UploadFile - incorrect training type", devid, logMap);
+                    this.logger.logUserTraceEvent(LOGFROM, "UploadFile - incorrect training type", devidString, logMap);
                     return ApiError.getBadRequest("Incorrect training type");
             }
         } catch (IOException ioe) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devid, ioe);
+            this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devidString, ioe);
             return ApiError.getInternalServerError();
         } catch (HTMLExtractor.HtmlExtractionException ht) {
             logMap.add("Cause", ht.getCause().toString());
-            this.logger.logUserTraceEvent(LOGFROM, "UploadFile - html extraction error", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "UploadFile - html extraction error", devidString, logMap);
             return ApiError.getBadRequest("HTML extraction error");
         } catch (UploadTooLargeException tooLarge) {
             this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload attempt was larger than maximum allowed",
-                    devid, logMap);
+                    devidString, logMap);
             return ApiError.getPayloadTooLarge();
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devidString, e);
             return ApiError.getInternalServerError();
         } finally {
             try {
@@ -187,18 +187,19 @@ public class TrainingLogic {
      * @param aiid
      * @return
      */
-    public ApiResult startTraining(final String devid, final UUID aiid) {
+    public ApiResult startTraining(final UUID devid, final UUID aiid) {
 
         ApiAi ai;
         LogMap logMap = LogMap.map("AIID", aiid);
+        final String devidString = devid.toString();
         try {
             ai = this.database.getAI(devid, aiid);
         } catch (DatabaseException ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devid, ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
             return ApiError.getInternalServerError();
         }
         if (ai == null) {
-            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - AI not found", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - AI not found", devidString, logMap);
             return ApiError.getNotFound();
         }
 
@@ -209,15 +210,15 @@ public class TrainingLogic {
             try {
                 this.aiServices.startTraining(ai.getBackendStatus(), devid, aiid);
             } catch (AIServices.AiServicesException | RuntimeException ex) {
-                this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devid, ex);
+                this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
                 return ApiError.getInternalServerError();
             }
             // Delete all memory variables for this AI
             this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
-            this.logger.logUserTraceEvent(LOGFROM, "StartTraining", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "StartTraining", devidString, logMap);
             return new ApiResult().setSuccessStatus("Training session started.");
         } else {
-            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - start in invalid state", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - start in invalid state", devidString, logMap);
             switch (trainingStatus) {
                 case AI_TRAINING_COMPLETE:
                     return ApiError.getBadRequest("Training could not be started because it was already completed.");
@@ -240,12 +241,13 @@ public class TrainingLogic {
      * @return
      */
 
-    public ApiResult stopTraining(final String devid, final UUID aiid) {
+    public ApiResult stopTraining(final UUID devid, final UUID aiid) {
+        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
             ApiAi ai = this.database.getAI(devid, aiid);
             if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devid, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
             TrainingStatus trainingStatus = ai.getSummaryAiStatus();
@@ -255,15 +257,15 @@ public class TrainingLogic {
             if (statusWnet == TrainingStatus.AI_TRAINING_QUEUED || statusWnet == TrainingStatus.AI_TRAINING
                     || statusRnn == TrainingStatus.AI_TRAINING_QUEUED || statusRnn == TrainingStatus.AI_TRAINING) {
                 this.aiServices.stopTraining(backendStatus, devid, aiid);
-                this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devid, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devidString, logMap);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not in an allowed state to stop training",
-                        devid, logMap.put("AI state", trainingStatus.name()));
+                        devidString, logMap.put("AI state", trainingStatus.name()));
                 return ApiError.getBadRequest("Bot not in an allowed state to stop training");
             }
         } catch (Exception ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "StopTraining", devid, ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "StopTraining", devidString, ex);
             return ApiError.getInternalServerError();
         }
     }
@@ -271,17 +273,18 @@ public class TrainingLogic {
     /**
      * An update to an existing training session means we will have to delete any existing neural
      * network and start from scratch.
-     * @param devId
+     * @param devid
      * @param aiid
      * @return
      */
 
-    public ApiResult updateTraining(final String devId, final UUID aiid) {
+    public ApiResult updateTraining(final UUID devid, final UUID aiid) {
+        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devId, aiid);
+            ApiAi ai = this.database.getAI(devid, aiid);
             if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
 
@@ -292,46 +295,47 @@ public class TrainingLogic {
                 case AI_TRAINING_COMPLETE:  // fallthrough
                 case AI_TRAINING_QUEUED:
                     try {
-                        String trainingMaterials = this.getTrainingMaterialsCommon(devId, aiid);
-                        this.aiServices.uploadTraining(ai.getBackendStatus(), devId, aiid, trainingMaterials);
+                        String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
+                        this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
-                        this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devId, logMap);
+                        this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devidString, logMap);
                         return new ApiResult().setSuccessStatus("Training updated");
                     } catch (AIServices.AiServicesException ex) {
-                        this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devId, ex);
+                        this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devidString, ex);
                         return ApiError.getInternalServerError("Could not update training");
                     }
 
                 default:
-                    this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - could not update training", devId, logMap);
+                    this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - could not update training", devidString, logMap);
                     return ApiError.getInternalServerError("Could not update the current training session.");
             }
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devId, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
     /**
      * Gets the training materials for an AI.
-     * @param devId
+     * @param devid
      * @param aiid
      * @return
      */
-    public ApiResult getTrainingMaterials(final String devId, final UUID aiid) {
+    public ApiResult getTrainingMaterials(final UUID devid, final UUID aiid) {
+        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            String trainingMaterials = this.getTrainingMaterialsCommon(devId, aiid);
+            String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
             if (trainingMaterials == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials - AI not founf", devId, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials - AI not founf", devidString, logMap);
                 return ApiError.getNotFound();
             }
             ApiTrainingMaterials result = new ApiTrainingMaterials(trainingMaterials);
-            this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials", devId, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials", devidString, logMap);
             return result.setSuccessStatus();
         } catch (DatabaseException dbe) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetTrainingMaterials", devId, dbe);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetTrainingMaterials", devidString, dbe);
             return ApiError.getInternalServerError();
         }
     }
@@ -415,11 +419,12 @@ public class TrainingLogic {
         return line.startsWith(TrainingLogic.TOPIC_MARKER);
     }
 
-    private String getTrainingMaterialsCommon(final String devId, final UUID aiid) throws DatabaseException {
+    private String getTrainingMaterialsCommon(final UUID devid, final UUID aiid) throws DatabaseException {
+        final String devidString = devid.toString();
         StringBuilder sb = new StringBuilder();
-        ApiAi ai = this.database.getAI(devId, aiid);
+        ApiAi ai = this.database.getAI(devid, aiid);
         if (ai == null) {
-            this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterialsCommon - AI not found", devId,
+            this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterialsCommon - AI not found", devidString,
                     LogMap.map("AIID", aiid));
             return null;
         }
@@ -427,7 +432,7 @@ public class TrainingLogic {
         if (userTrainingFile != null && !userTrainingFile.isEmpty()) {
             sb.append(userTrainingFile);
         }
-        for (String intentName : this.database.getIntents(devId, aiid)) {
+        for (String intentName : this.database.getIntents(devid, aiid)) {
             ApiIntent intent = this.database.getIntent(aiid, intentName);
             for (String userSays : intent.getUserSays()) {
                 if (sb.length() > 0) {
@@ -524,17 +529,18 @@ public class TrainingLogic {
         return source;
     }
 
-    private ApiResult uploadTrainingFile(final ApiAi ai, final String devId, final UUID aiid,
+    private ApiResult uploadTrainingFile(final ApiAi ai, final UUID devid, final UUID aiid,
                                          final String trainingMaterials, final TrainingFileParsingResult result)
             throws DatabaseException {
+        final String devidString = devid.toString();
         try {
-            this.aiServices.uploadTraining(ai.getBackendStatus(), devId, aiid, trainingMaterials);
+            this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
         } catch (AIServices.AiServicesException ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UploadTrainingFile", devId, ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "UploadTrainingFile", devidString, ex);
             return ApiError.getInternalServerError("Could not upload training data");
         }
 
-        this.logger.logUserTraceEvent(LOGFROM, "UploadFile", devId, LogMap.map("AIID", aiid));
+        this.logger.logUserTraceEvent(LOGFROM, "UploadFile", devidString, LogMap.map("AIID", aiid));
         return new ApiResult().setSuccessStatus("Upload complete",
                 result.getEventCount() == 0 ? null : result.getEvents());
     }

@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class TestWebhooks {
     private static final UUID AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
-    private static final String DEVID = "devid";
+    private static final UUID DEVID = UUID.fromString("ef1593e6-503f-481c-a1fd-071a32c69271");
 
     private JsonSerializer serializer;
     private Database fakeDatabase;

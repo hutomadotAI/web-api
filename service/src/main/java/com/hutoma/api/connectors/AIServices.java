@@ -56,7 +56,7 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws AiServicesException
      */
-    public void startTraining(BackendStatus status, final String devId, final UUID aiid) throws AiServicesException {
+    public void startTraining(BackendStatus status, final UUID devId, final UUID aiid) throws AiServicesException {
         try {
             this.queueServices.userActionStartTraining(status, BackendServerType.WNET, devId, aiid);
             this.controllerWnet.kickQueueProcessor();
@@ -74,7 +74,7 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws AiServicesException
      */
-    public void stopTraining(final BackendStatus backendStatus, final String devId, final UUID aiid)
+    public void stopTraining(final BackendStatus backendStatus, final UUID devId, final UUID aiid)
             throws AiServicesException {
         try {
             this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.controllerWnet,
@@ -93,7 +93,7 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws AiServicesException
      */
-    public void deleteAI(final BackendStatus backendStatus, final String devId, final UUID aiid)
+    public void deleteAI(final BackendStatus backendStatus, final UUID devId, final UUID aiid)
             throws AiServicesException {
         try {
             this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.controllerWnet,
@@ -106,14 +106,14 @@ public class AIServices extends ServerConnector {
         }
     }
 
-    public void deleteDev(final String devId) throws AiServicesException {
+    public void deleteDev(final UUID devId) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getListOfPrimaryEndpoints(null)) {
             callables.put(endpoint, () -> new InvocationResult(
                     null,
                     this.jerseyClient
-                            .target(endpoint).path(devId)
+                            .target(endpoint).path(devId.toString())
                             .request()
                             .delete(), endpoint, 0));
         }
@@ -128,7 +128,7 @@ public class AIServices extends ServerConnector {
      * @param trainingMaterials
      * @throws AiServicesException
      */
-    public void uploadTraining(final BackendStatus backendStatus, final String devId, final UUID aiid,
+    public void uploadTraining(final BackendStatus backendStatus, final UUID devId, final UUID aiid,
                                final String trainingMaterials)
             throws AiServicesException {
 
@@ -175,7 +175,7 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws Database.DatabaseException
      */
-    public void stopTrainingIfNeeded(final String devId, final UUID aiid)
+    public void stopTrainingIfNeeded(final UUID devId, final UUID aiid)
             throws Database.DatabaseException {
         try {
             ApiAi ai = this.database.getAI(devId, aiid);
@@ -210,9 +210,9 @@ public class AIServices extends ServerConnector {
         @SerializedName("dev_id")
         private final String devId;
 
-        public AiInfo(final String devId, final UUID aiid) {
+        public AiInfo(final UUID devId, final UUID aiid) {
             this.aiid = aiid.toString();
-            this.devId = devId;
+            this.devId = devId.toString();
         }
 
         public String getAiid() {

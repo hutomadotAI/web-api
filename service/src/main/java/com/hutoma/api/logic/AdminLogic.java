@@ -81,14 +81,18 @@ public class AdminLogic {
             }
             this.logger.logUserTraceEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG,
                     LogMap.map("DevId", devId));
-            return new ApiAdmin(devToken, devId.toString()).setSuccessStatus("created successfully");
+            return new ApiAdmin(devToken, devId).setSuccessStatus("created successfully");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult deleteDev(final String devId) {
+    public ApiResult deleteDev(final UUID devId) {
+        if (devId == null) {
+            return ApiError.getBadRequest("null devId sent");
+        }
+
         LogMap logMap = LogMap.map("DevId", devId);
         try {
             //TODO: distinguish between error condition and "failed to delete", perhaps because the dev was not found?
@@ -107,7 +111,7 @@ public class AdminLogic {
         return new ApiResult().setSuccessStatus("deleted successfully");
     }
 
-    public ApiResult getDevToken(final String devid) {
+    public ApiResult getDevToken(final UUID devid) {
         LogMap logMap = LogMap.map("DevId", devid);
         try {
             String devtoken = this.database.getDevToken(devid);

@@ -1,6 +1,7 @@
 package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.UUID;
 
 /**
  * API Administration result message.
@@ -11,9 +12,9 @@ public class ApiAdmin extends ApiResult {
     private final String devToken;
 
     @SerializedName("devid")
-    private final String devId;
+    private final UUID devId;
 
-    public ApiAdmin(String devToken, String devId) {
+    public ApiAdmin(String devToken, UUID devId) {
         this.devToken = devToken;
         this.devId = devId;
     }
@@ -22,7 +23,7 @@ public class ApiAdmin extends ApiResult {
         return this.devToken;
     }
 
-    public String getDevid() {
+    public UUID getDevid() {
         return this.devId;
     }
 }

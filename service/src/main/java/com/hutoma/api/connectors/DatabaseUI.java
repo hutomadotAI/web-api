@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -92,8 +93,10 @@ public class DatabaseUI extends Database {
     }
 
     private DeveloperInfo getDeveloperInfoFromBotstoreList(final ResultSet rs) throws SQLException {
+        final String devIdString = rs.getString("dev_id");
+        final UUID devId = UUID.fromString(devIdString);
         return new DeveloperInfo(
-                rs.getString("dev_id"),
+                devId,
                 rs.getString("dev_name"),
                 rs.getString("dev_company"),
                 rs.getString("dev_email"),
