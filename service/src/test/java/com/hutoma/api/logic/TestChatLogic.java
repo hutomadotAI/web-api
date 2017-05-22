@@ -6,10 +6,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -929,7 +926,7 @@ public class TestChatLogic {
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeChatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.singletonList(
-                new Pair<>(DEVID_UUID, AIML_BOT_AIID)));
+                new AiDevId(DEVID_UUID, AIML_BOT_AIID)));
         ChatResult aimlResult = new ChatResult();
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);

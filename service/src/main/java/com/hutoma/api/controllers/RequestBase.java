@@ -7,6 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.AiDevId;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
 
@@ -57,15 +58,15 @@ public abstract class RequestBase {
     }
 
     public List<RequestInProgress> issueChatRequests(final Map<String, String> chatParams,
-                                                     final List<Pair<UUID, UUID>> ais)
+                                                     final List<AiDevId> ais)
             throws ServerMetadata.NoServerAvailable {
         List<RequestCallable> callables = new ArrayList<>();
 
-        for (Pair<UUID, UUID> ai : ais) {
-            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.getB(), RequestFor.Chat);
+        for (AiDevId ai : ais) {
+            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.ai, RequestFor.Chat);
             callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.getA(), ai.getB(), chatParams,
-                            this.controller.getHashCodeFor(ai.getB())),
+                    createCallable(endpoint.getServerUrl(), ai.dev, ai.ai, chatParams,
+                            this.controller.getHashCodeFor(ai.ai)),
                     endpoint.getServerIdentifier()));
         }
 

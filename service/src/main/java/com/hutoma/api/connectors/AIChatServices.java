@@ -81,24 +81,24 @@ public class AIChatServices extends ServerConnector {
             put("topic", topicIn);
             put("q", question);
         }};
-        List<Pair<UUID, UUID>> ais = this.getLinkedBotsAiids(devId, aiid);
+        List<AiDevId> ais = this.getLinkedBotsAiids(devId, aiid);
 
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;
         HashSet<UUID> aimlBotIdsSet = new HashSet<>(this.config.getAimlBotAiids());
         if (!aimlBotIdsSet.isEmpty()) {
-            Set<UUID> usedAimlAis = ais.stream().map(Pair::getB).collect(Collectors.toSet());
+            Set<UUID> usedAimlAis = ais.stream().map(aiDevId -> aiDevId.ai).collect(Collectors.toSet());
             // intersect the two sets to usedAimlAis retains only the AIML ais in use
             usedAimlAis.retainAll(aimlBotIdsSet);
             if (!usedAimlAis.isEmpty()) {
-                List<Pair<UUID, UUID>> listAis = new ArrayList<>();
-                usedAimlAis.forEach(x -> listAis.add(new Pair<>(/* ignored at the moment */devId, x)));
+                List<AiDevId> listAis = new ArrayList<>();
+                usedAimlAis.forEach(x -> listAis.add(new AiDevId(/* ignored at the moment */devId, x)));
                 this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis);
                 usedAimlBot = true;
                 // remove the aiml bots ais from the list of ais
-                List<Pair<UUID, UUID>> newList = new ArrayList<>();
-                for (Pair<UUID, UUID> ai : ais) {
-                    if (!usedAimlAis.contains(ai.getB())) {
+                List<AiDevId> newList = new ArrayList<>();
+                for (AiDevId ai : ais) {
+                    if (!usedAimlAis.contains(ai.ai)) {
                         newList.add(ai);
                     }
                 }
@@ -110,15 +110,15 @@ public class AIChatServices extends ServerConnector {
         Set<BackendServerType> canChatWith = canChatWithAi(devId, aiid);
 
         // make copies of the AI lists
-        List<Pair<UUID, UUID>> wnetAIs = new ArrayList<>(ais);
-        List<Pair<UUID, UUID>> rnnAIs = new ArrayList<>(ais);
+        List<AiDevId> wnetAIs = new ArrayList<>(ais);
+        List<AiDevId> rnnAIs = new ArrayList<>(ais);
 
         // add the AI to the list if the server can chat
         if (canChatWith.contains(BackendServerType.WNET)) {
-            wnetAIs.add(new Pair<UUID, UUID>(devId, aiid));
+            wnetAIs.add(new AiDevId(devId, aiid));
         }
         if (canChatWith.contains(BackendServerType.RNN)) {
-            rnnAIs.add(new Pair<UUID, UUID>(devId, aiid));
+            rnnAIs.add(new AiDevId(devId, aiid));
         }
 
         // If we're issuing a chat request but there are no AIs available to serve it, just fail
@@ -176,13 +176,13 @@ public class AIChatServices extends ServerConnector {
         this.requestAiml.abandonCalls();
     }
 
-    public List<Pair<UUID, UUID>> getLinkedBotsAiids(final UUID devId, final UUID aiid)
+    public List<AiDevId> getLinkedBotsAiids(final UUID devId, final UUID aiid)
             throws RequestBase.AiControllerException {
-        List<Pair<UUID, UUID>> ais = new ArrayList<>();
+        List<AiDevId> ais = new ArrayList<>();
         try {
             List<AiBot> bots = this.database.getBotsLinkedToAi(devId, aiid);
             for (AiBot bot : bots) {
-                ais.add(new Pair<>(bot.getDevId(), bot.getAiid()));
+                ais.add(new AiDevId(bot.getDevId(), bot.getAiid()));
             }
         } catch (Database.DatabaseException ex) {
             throw new RequestBase.AiControllerException("Couldn't get the list of linked bots");
