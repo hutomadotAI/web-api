@@ -101,6 +101,9 @@ public class ChatLogic {
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
         ChatResult result = new ChatResult();
 
+        // add the question to the result.
+        result.setQuery(question);
+
         try {
 
             // Check if we're in the middle of an intent flow and process it.
