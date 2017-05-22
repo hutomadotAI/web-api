@@ -16,21 +16,25 @@ function purchaseBot() {
                 data: {botId: botId},
                 type: 'POST',
                 success: function (response) {
-                    var parsedResponse = JSON.parse(response);
-                    var statusCode = parsedResponse['status']['code'];
-                    var message = parsedResponse['status']['info'];
-                    switch (statusCode) {
-                        case 200:
-                            document.getElementById('message').innerText = 'Bot added successfully!';
-                            $('#purchase_state').val('1');
-                            var $tmp = $('#btnBuyBot');
-                            if ($tmp.length)
-                                btnFromBuyToPurchased();
-                            break;
-                        default:
-                            document.getElementById('message').innerText = message == null ? GENERIC_ERROR_STRING : message;
-                            $('#purchase_state').val('0');
-                            break;
+                    try {
+                        var parsedResponse = JSON.parse(response);
+                        var statusCode = parsedResponse['status']['code'];
+                        var message = parsedResponse['status']['info'];
+                        switch (statusCode) {
+                            case 200:
+                                document.getElementById('message').innerText = 'Bot added successfully!';
+                                $('#purchase_state').val('1');
+                                var $tmp = $('#btnBuyBot');
+                                if ($tmp.length)
+                                    btnFromBuyToPurchased();
+                                break;
+                            default:
+                                document.getElementById('message').innerText = message == null ? GENERIC_ERROR_STRING : message;
+                                $('#purchase_state').val('0');
+                                break;
+                        }
+                    } catch (err) {
+                        location.href = URLS.HUTOMA_CONSOLE + "?redirect";
                     }
                 },
                 complete: function () {

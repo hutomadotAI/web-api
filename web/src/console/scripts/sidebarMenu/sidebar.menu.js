@@ -20,6 +20,10 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     newNode.style = " padding-bottom:65px;";
     newNode.id = 'console-menu';
     var wHTML = "";
+
+    if (label_menu === "") {
+        label_menu = "botstore";
+    }
     
     wHTML += ('<li class="header unselectable" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
     wHTML += ('<li id="menu_home" class="unselectable"><a href="./home.php"><i class="fa fa-home text-light-blue" id="level0"></i><span>home</span></a></li>');
@@ -45,7 +49,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     wHTML += ('<li class="unselectable" id="level2">');
     wHTML += ('<a href="#"><i class="fa fa-shopping-cart text-green"></i><span> botstore</span><i class="fa fa-ellipsis-v pull-right"></i></a>');
     wHTML += ('<ul class="treeview-menu">');
-    wHTML += ('<li id="menu_botstore" ><a href="./' + loc + '"><i class="fa fa-globe text-gray text-center"></i> All</a></li>');
+    wHTML += ('<li id="menu_botstore" ><a href="' + loc + '"><i class="fa fa-globe text-gray text-center"></i> All</a></li>');
     for (var key in category_list) {
         var category = category_list[key];
         wHTML += ('<li id="menu_' + removeSpecialCharacters(category) + '" ><a href="' + loc + buildCategoryURIparameter(category) + '"><i class="fa ' + category_list_icons[key] + ' text-gray text-center"></i> ' + category + '</a></li>');

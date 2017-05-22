@@ -651,12 +651,18 @@ class console
 
                     $_SESSION['logSyscuruser'] = $us_id;
                     $_COOKIE['logSyscuruser'] = $userInfo['username'];
-                    setcookie("logSyslogin", hash("sha256", self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']), strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
+                    setcookie("logSyslogin",
+                        hash("sha256",
+                        self::$config['keys']['cookie'] . $us_id . self::$config['keys']['cookie']),
+                        strtotime(self::$config['cookies']['expire']),
+                        self::$config['cookies']['path'],
+                        self::$config['cookies']['domain']);
 
                     $_SESSION['navigation_id'] = $_COOKIE['logSyscuruser'];
 
                     if ($remember_me === true && self::$config['features']['remember_me'] === true) {
-                        setcookie("logSysrememberMe", $us_id, strtotime(self::$config['cookies']['expire']), self::$config['cookies']['path'], self::$config['cookies']['domain']);
+                        setcookie("logSysrememberMe", $us_id, strtotime(self::$config['cookies']['expire']),
+                            self::$config['cookies']['path'], self::$config['cookies']['domain']);
                     }
                     self::$loggedIn = true;
 

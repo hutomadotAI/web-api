@@ -5,6 +5,8 @@ require_once "api/botstoreApi.php";
 require_once "common/botstoreItem.php";
 require_once "common/sessionObject.php";
 
+header('P3P: CP="CAO PSA OUR"');
+session_start();
 
 $botId = $_GET['botId'];
 $menu_title = $_GET['origin'];
@@ -352,7 +354,7 @@ unset($session);
                     botstoreItem,
                     "<?php echo(isset($menu_title) ? $menu_title : ""); unset($menu_title)?>",
                     "<?php if (isset($_GET['category'])) echo $_GET['category'];?>",
-                    <?php echo((isset($isExistAiId) && $isExistAiId) ? "true" : "false") ?> ? DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value : DRAW_BOTCARDS.BOTSTORE_FLOW.value
+                    DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value
                 );
                 break;
             case 404:
@@ -374,6 +376,7 @@ unset($session);
 
         <?php } ?>
     });
+
 </script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 require '../../pages/config.php';
 require_once "../api/apiBase.php";
 require_once "../api/botApi.php";
+require_once "../common/utils.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;

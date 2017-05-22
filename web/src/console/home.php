@@ -6,13 +6,14 @@ require_once "./api/aiApi.php";
 require_once "./api/botApi.php";
 require_once "./common/bot.php";
 require_once "./common/config.php";
+require_once "./api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
 $api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
-$userInfo = $api->getUserInfo(\hutoma\console::$user);
+$userInfo = $api->getUserInfo($_SESSION['navigation_id']);
 unset($api);
 
 if(!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])){

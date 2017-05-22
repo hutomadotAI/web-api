@@ -5,6 +5,7 @@ require_once "../console/api/apiBase.php";
 require_once "../console/api/intentsApi.php";
 require_once "../console/api/entityApi.php";
 require_once "../console/api/aiApi.php";
+require_once "../console/api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;

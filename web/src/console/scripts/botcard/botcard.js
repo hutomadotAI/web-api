@@ -63,6 +63,7 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('msgAlertBotcardDetail').innerText = 'Missing required arguments';
     }
 
+    parent.$(parent.document).trigger('BotstoreFinishPaintEvent');
 }
 
 
@@ -152,7 +153,7 @@ function setButtonParameter(title, owned, carousel_category, flow) {
         default:
             nodeCloseButtonBack.setAttribute('href', './botstore.php');
             nodeButtonBack.innerText = 'Go back';
-            nodeButtonBack.setAttribute('href', '././botstore.php');
-            nodeButtonBuy.setAttribute('onClick', 'location.href="https://console.hutoma.com"');
+            nodeButtonBack.setAttribute('href', 'javascript:history.back()');
+            nodeButtonBuy.setAttribute('onClick', 'location.href="' + URLS.HUTOMA_CONSOLE + '"');
     }
 }

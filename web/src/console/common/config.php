@@ -8,7 +8,6 @@
 
 namespace hutoma;
 
-
 class config
 {
     public static function getApiRequestBaseUrl()

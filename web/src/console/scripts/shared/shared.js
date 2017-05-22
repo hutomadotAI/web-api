@@ -63,6 +63,10 @@ var BOT_ICON = {
     DEFAULT_IMAGE: {value: 'dist/img/default_bot.jpg'}
 };
 
+var URLS = {
+    HUTOMA_CONSOLE : 'https://console.hutoma.com'
+};
+
 function switchCard(botId,optionFlow) {
     var node = document.getElementById('card' + botId);
     var btnClassName = 'card-price pull-right'
@@ -102,7 +106,7 @@ function openSingleBot(elem, option, botId, category) {
     form.appendChild(element);
 
     if (category!==undefined) {
-        var element = document.createElement("INPUT");
+        element = document.createElement("INPUT");
         element.name = "category";
         element.value = category;
         element.type = 'hidden';

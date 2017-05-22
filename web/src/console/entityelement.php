@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/entityApi.php";
+require_once "api/botstoreApi.php";
 
 
 if(!\hutoma\console::checkSessionIsActive()){
