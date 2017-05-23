@@ -11,6 +11,7 @@
   window.Intercom('boot', {
     app_id: '<?php echo $app_id;?>',
     email: '<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['email'];?>',
+    name: '<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['name'];?>',
     user_id: '<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['id'];?>',
     created_at: <?php echo strtotime($_SESSION[$_SESSION['navigation_id']]['user_details']['created']);?>
 
