@@ -4,7 +4,7 @@
     }
 ?>
 <script>
-    var human =  <?php echo json_encode( $_SESSION[$_SESSION['navigation_id']]['user_details']['first_name'] ); ?>;
+    var human =  <?php echo json_encode( $_SESSION[$_SESSION['navigation_id']]['user_details']['name'] ); ?>;
     var AI = <?php echo json_encode( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] ); ?>;
     var lang = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']); ?>;
     var gender = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']); ?>;
