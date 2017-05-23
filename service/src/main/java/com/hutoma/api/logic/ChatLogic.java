@@ -374,6 +374,7 @@ public class ChatLogic {
                 // if we run out of n_prompts we just stop asking.
                 // the user can still answer the question ... or not
                 this.telemetryMap.add("IntentNotFulfilled", currentIntent.getName());
+                intentsToClear.add(currentIntent);
             }
         }
 
@@ -384,7 +385,7 @@ public class ChatLogic {
             this.intentHandler.updateStatus(currentIntent);
         }
 
-        // Clear fulfilled intents so they can be triggered again
+        // Clear fulfilled intents or intents which have exhausted their prompts, so they can be triggered again
         if (!intentsToClear.isEmpty()) {
             this.intentHandler.clearIntents(intentsToClear);
         }

@@ -434,11 +434,10 @@ public class TestChatLogic {
         ChatResult r = ((ApiChat) result).getResult();
         // The answer is NOT the prompt
         Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
-        // The intent status is updated to storage
-        verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is not incremented
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
-        verify(this.fakeIntentHandler, never()).clearIntents(any());
+        // we need to clear the intent if we exceeded the number of prompts
+        verify(this.fakeIntentHandler, times(1)).clearIntents(any());
     }
 
     /***
