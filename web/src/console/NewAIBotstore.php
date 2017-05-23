@@ -1,6 +1,10 @@
 <?php
 require "../pages/config.php";
 require_once "api/apiBase.php";
+require_once "api/botApi.php";
+require_once "api/aiApi.php";
+require_once "api/botstoreApi.php";
+require_once "common/bot.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -10,6 +14,13 @@ if (!isSessionVariablesAvailable()) {
     \hutoma\console::redirect('./error.php?err=100');
     exit;
 }
+
+$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$purchasedBots = $botApi->getPurchasedBots();
+
+$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+unset($aiApi);
 
 function isSessionVariablesAvailable()
 {
@@ -60,12 +71,13 @@ function isSessionVariablesAvailable()
     <div class="content-wrapper">
         <section class="content">
             <?php include './dynamic/newAIBotstore.content.html.php'; ?>
-            <div class="overlay carousel-ovelay" id ="carousel-overlay">
-                <i class="fa fa-refresh fa-spin center-block"></i>
+
+            <p id="botsCarousels"></p>
+            <div class="row" style="background-color: #434343;">
+                <div class="col-lg-12" style="background-color: #434343; padding:5px;">
+                    <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
+                </div>
             </div>
-            <p id="botsCarousels"/>
-            <p/>
-            <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
     </div>
 </div>
@@ -90,13 +102,55 @@ function isSessionVariablesAvailable()
 <script src="./scripts/createAI/createAIWizard.js"></script>
 <script src="./scripts/botstore/botstore.js"></script>
 <script src="./scripts/botstore/carousel.js"></script>
-<script src="./scripts/botcard/buyBot.js"></script>
+
+<script src="./scripts/setting/setting.linkBot.js"></script>
+<script src="./scripts/setting/setting.aiSkill.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 <script>
+
+    var purchasedBots = <?php
+        $tmp_list = [];
+        if (isset($purchasedBots) && (array_key_exists("bots", $purchasedBots))) {
+            foreach ($purchasedBots['bots'] as $botDetails) {
+                $puchasedBot = \hutoma\bot::fromObject($botDetails);
+                $tmp_bot = $puchasedBot->toJSON();
+                if ($botDetails['aiid'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
+                    array_push($tmp_list, $tmp_bot);
+            }
+        }
+        echo json_encode($tmp_list);
+        unset($purchasedBots);
+        unset($tmp_list);
+        unset($botApi);
+        ?>;
+
+
+    var linkedBots = <?php
+        $tmp_linked_list = [];
+        if (isset($linkedBots) && (array_key_exists("bots", $linkedBots))) {
+            foreach ($linkedBots['bots'] as $botDetails) {
+                $linkedBot = new \hutoma\bot();
+                array_push($tmp_linked_list, $botDetails['botId']);
+            }
+        }
+        echo json_encode($tmp_linked_list);
+        unset($purchasedBots);
+        unset($tmp_linked_list);
+        ?>;
+
+    var newNode = document.createElement('div');
+    newNode.className = 'row no-margin';
+    newNode.id = 'bot_list';
+    function searchBots(str) {
+        showAddSkills(str, purchasedBots,linkedBots);
+    }
+
     $(document).ready(function () {
-        getCarousels('<?php if( isset($_GET['category']) ) echo $_GET['category'];?>', DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
+        activeRightMenu("<?php if (isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
+
+        showAddSkills('', purchasedBots,linkedBots);
     });
 </script>
 </body>

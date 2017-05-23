@@ -5,10 +5,11 @@ function showAddSkills(str,  bots, botSubSet ) {
         var bot = JSON.parse(bots[x]);
         var botId = bot['botId'];
         var botName = bot['name'];
+        var category = bot['category'];
 
-        if ((str != " ") && ( (str.length == 0) || (bot['name'].toLowerCase()).indexOf(str) != -1 )) {
-            var isActiveBot = ($.inArray(botId, botSubSet) != -1);
-            var openBotDetails = 'onClick=openSingleBot(this,' + DRAW_BOTCARDS.ADD_SKILL_FLOW.value + ',"' + botId + '",' + isActiveBot + ');';
+        if ((str !== " ") && ( (str.length === 0) || (bot['name'].toLowerCase()).indexOf(str) !== -1 )) {
+            var isActiveBot = ($.inArray(botId, botSubSet) !== -1);
+            var openBotDetails = 'onClick="location.href=\'botstore.php?botId=' + botId + '&category=' + encodeURIComponent(category) + '\'");';
 
             wHTML += ('<span id="card' + botId + '" data-pos="' + x + '">');
             wHTML += ('<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1' + ((isActiveBot) ? ' borderActive">' : '">'));
@@ -47,7 +48,7 @@ function showAddSkills(str,  bots, botSubSet ) {
 }
 
 function activeRightMenu(response) {
-    if (response == '1') {
+    if (response === '1') {
         document.getElementById('page_general').classList.remove('active');
         document.getElementById('page_aiskill').classList.add('active');
         document.getElementById('tab_general').className = '';
