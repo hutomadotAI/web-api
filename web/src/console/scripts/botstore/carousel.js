@@ -79,7 +79,10 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
             if (category === botCategory) {
                 wHTML += '<span id="card' + botId + '" data-pos="' + x + '">';
                 wHTML += '<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">';
+                // we need to have an href tag to allow crawlers to reach each bot's details
+                wHTML += '<a href="/console/botcardDetail.php?botId=' + botId + '">';
                 wHTML += '<img class="card-icon unselectable" src="' + botIconPath + '"' + openBotDetails + '>';
+                wHTML += '</a>';
                 wHTML += '<div class="card-title unselectable no-shadow"' + openBotDetails + '>';
                 wHTML += botName;
                 wHTML += '</div>';

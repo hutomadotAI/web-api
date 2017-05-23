@@ -13,6 +13,8 @@ $menu_title = $_GET['origin'];
 $session = new hutoma\sessionObject();
 $botstoreApi = new \hutoma\api\botstoreApi(false, $session->getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
+$metadata = $botstoreItem['item']['metadata'];
+$developer = $botstoreItem['item']['developer'];
 unset($botstoreApi);
 unset($session);
 ?>
@@ -21,7 +23,12 @@ unset($session);
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Botstore - box</title>
+    <title>hu:toma | Botstore | <?php echo $metadata['name']?></title>
+    <meta name="description" content="Hutoma Botstore, Bot name=<?php
+    echo $metadata['name']?>, Category=<?php
+    echo $metadata['category']?>, Description=<?php
+    echo $metadata['description']?>, Developer=<?php
+    echo $developer['company']?>">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
