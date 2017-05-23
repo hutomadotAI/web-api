@@ -52,9 +52,9 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                     <?php
                     $innerPage = "";
                     if (isset($botId)) {
-                        $innerPage = "botcardDetail.php?botId=" . $botId . "&origin=botstore&PHPSESSID=" . $_COOKIE['PHPSESSID'];
+                        $innerPage = "botcardDetail.php?botId=" . $botId . "&origin=botstore";
                     } else {
-                        $innerPage = "botstoreList.php?category=" . urlencode($category) . "&origin=botstore&PHPSESSID=" . $_COOKIE['PHPSESSID'];
+                        $innerPage = "botstoreList.php?category=" . urlencode($category);
                     }
                     ?>
                     <iframe src="<?php echo $innerPage ?>"

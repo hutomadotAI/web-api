@@ -18,6 +18,11 @@ if(isset($_POST['action_login'])){
             } else if (is_array($login) && $login['status'] == "blocked") {
                 $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
             }
+
+            $redirectPage = $_GET["redirect"];
+            if (isset($redirectPage)) {
+                \hutoma\utils::redirect(urldecode($redirectPage));
+            }
         }
         catch(Exception $e){
             $servererror  ='<div class="alert alert-danger text-white flat">';

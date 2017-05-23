@@ -5,6 +5,7 @@ require_once "./api/adminApi.php";
 require_once "./api/aiApi.php";
 require_once "./api/botApi.php";
 require_once "./common/bot.php";
+require_once "./common/utils.php";
 require_once "./common/config.php";
 require_once "./api/botstoreApi.php";
 
