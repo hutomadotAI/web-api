@@ -38,4 +38,8 @@ class config
     public static function getSalt() {
         return "^#$9%1f+2^p9)a@89)V$";
     }
+
+    public static function getErrorPageUrl() {
+        return "/console/error.php";
+    }
 }
