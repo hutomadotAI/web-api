@@ -4,6 +4,7 @@ import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItem;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
 import com.hutoma.api.logic.UILogic;
@@ -95,6 +96,28 @@ public class UIEndpoint {
                 getListFromMultipeValuedParam(filters),
                 orderField,
                 orderDirection);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @GET
+    @Path("botstore/per_category")
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    @ResourceMethodSignature(
+            queryParams = {@QueryParam("max"), @QueryParam("orderField")},
+            output = ApiBotstoreCategoryItemList.class
+    )
+    public Response getBotstoreListPerCategory(
+            @Context ContainerRequestContext requestContext,
+            @DefaultValue(DEFAULT_PAGE_SIZE) @QueryParam("max") int max) {
+        ApiResult result = this.uiLogic.getBotstoreListPerCategory(
+                AuthFilter.getDevIdFromHeader(requestContext, this.config), max);
         return result.getResponse(this.serializer).build();
     }
 

@@ -5,12 +5,14 @@ import com.hutoma.api.connectors.DatabaseUI;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItem;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
 import com.hutoma.api.containers.ui.BotstoreItem;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -62,6 +64,35 @@ public class UILogic {
     }
 
     /**
+     * Gets a list od botstore items divided by category.
+     * In all effects this is a map keyed by the category name, in wich each has a list of bots for that category.
+     * @param devId            the developer id (or null if public access)
+     * @param maxNumberOfItems maximum number of items per category
+     * @return the map of botstore items
+     */
+    public ApiResult getBotstoreListPerCategory(final UUID devId, final int maxNumberOfItems) {
+        try {
+            ApiBotstoreCategoryItemList map = this.databaseUi.getBotstoreItemsPerCategory(maxNumberOfItems);
+            if (devId != null) {
+                List<AiBot> ownedBots = this.databaseUi.getPurchasedBots(devId);
+                HashSet<Integer> ownedSet = new HashSet<>();
+                ownedBots.forEach(x -> ownedSet.add(x.getBotId()));
+                for (Map.Entry<String, List<BotstoreItem>> entry : map.getCategoriesMap().entrySet()) {
+                    for (BotstoreItem b : entry.getValue()) {
+                        if (ownedSet.contains(b.getMetadata().getBotId())) {
+                            b.setOwned(true);
+                        }
+                    }
+                }
+            }
+            return map.setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "getBotstoreListPerCategory", null, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    /**
      * Gets an item from the botstore.
      * @param devId the developer id
      * @param botId the bot id
@@ -73,10 +104,10 @@ public class UILogic {
             if (item == null) {
                 return ApiError.getNotFound();
             }
-            
+
             if (devId != null) {
                 List<AiBot> ownedBots = this.databaseUi.getPurchasedBots(devId);
-                if (ownedBots.stream().filter(x -> x.getBotId() == botId).findAny().isPresent()) {
+                if (ownedBots.stream().anyMatch(x -> x.getBotId() == botId)) {
                     item.setOwned(true);
                 }
             }

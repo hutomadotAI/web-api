@@ -4,12 +4,14 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.sub.DeveloperInfo;
+import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
 import com.hutoma.api.containers.ui.BotstoreItem;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -87,6 +89,42 @@ public class DatabaseUI extends Database {
                         false);
             }
             return null;
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
+    public ApiBotstoreCategoryItemList getBotstoreItemsPerCategory(final int maxNumberOfItemsPerCategory)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotstoreListPerCategory", 1)
+                    .add(maxNumberOfItemsPerCategory);
+            ResultSet rs = call.executeQuery();
+            String prevCategory = "";
+            List<BotstoreItem> bots = new ArrayList<>();
+            HashMap<String, List<BotstoreItem>> map = new HashMap<>();
+            int order = 0;
+            while (rs.next()) {
+                final String category = rs.getString("category");
+                if (!category.equals(prevCategory)) {
+                    if (!bots.isEmpty()) {
+                        map.put(prevCategory, bots);
+                        bots = new ArrayList<>();
+                    }
+                    prevCategory = category;
+                    order = 0;
+                }
+                BotstoreItem item = new BotstoreItem(
+                        order++,
+                        this.getAiBotFromResultset(rs),
+                        this.getDeveloperInfoFromBotstoreList(rs),
+                        false);
+                bots.add(item);
+            }
+            if (!bots.isEmpty()) {
+                map.put(prevCategory, bots);
+            }
+            return new ApiBotstoreCategoryItemList(map);
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }

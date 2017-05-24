@@ -23,26 +23,43 @@ if(isset($_GET['category']) && $_GET['category']!=''){
     global $MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL;
     $categories = [$_GET['category']];
     $MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = '';
+    $category = $_GET['category'];
 }
 
-foreach ($categories as $category) {
-    $botstoreApi = new \hutoma\api\botstoreApi(false, \hutoma\sessionObject::getDevToken());
-    $botstoreListParam = new \hutoma\botstoreListParam();
-    $botstoreListParam->setPageSize($MAX_BOTCARDS_LOADED_FOR_CAROUSEL);
+$botstoreApi = new \hutoma\api\botstoreApi(false, \hutoma\sessionObject::getDevToken());
+$botstoreListParam = new \hutoma\botstoreListParam();
+$botstoreListParam->setPageSize($MAX_BOTCARDS_LOADED_FOR_CAROUSEL);
+
+
+if (!isset($category) || empty($category)) {
+    $botstoreItems = $botstoreApi->getBotstoreListPerCategory($botstoreListParam);
+    foreach($botstoreItems['categories'] as $resultCat) {
+        foreach($resultCat as $botstoreItem) {
+            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem);
+            $botCategory = $botItem->getMetadata()['category'];
+            $array = $botCategorizedItems[$botCategory];
+            if (!isset($array)) {
+                $array = [];
+            }
+            array_push($array, $botItem->toJSON());
+            $botCategorizedItems[$botCategory] = $array;
+        }
+    }
+
+} else {
     $botstoreListParam->addFilter('category',$category);
     $botstoreItems = $botstoreApi->getBotstoreList($botstoreListParam);
-
     if (isset($botstoreItems) && (array_key_exists("items", $botstoreItems)) && sizeof($botstoreItems['items']) > 0 ) {
-
         $tmp_category_botItems = [];
         foreach ($botstoreItems['items'] as $botstoreItem) {
             $botItem = \hutoma\botstoreItem::fromObject($botstoreItem);
             $tmp_botItem = $botItem->toJSON();
-            array_push($tmp_category_botItems,$tmp_botItem);
+            array_push($tmp_category_botItems, $tmp_botItem);
         }
         $botCategorizedItems[$category] = $tmp_category_botItems;
     }
 }
+
 echo json_encode($botCategorizedItems, true);
 unset($botCategorizedItems);
 unset($categories);

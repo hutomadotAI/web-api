@@ -48,6 +48,17 @@ class botstoreApi extends apiBase
         return $json_response;
     }
 
+    public function getBotstoreListPerCategory(botstoreListParam $botstoreQuery)
+    {
+        $query = "max=" . $botstoreQuery->getPageSize() . "&";
+
+        $this->curl->setUrl($this->buildRequestUrl(self::$UIEndpointPath . self::$botstorePath . '/per_category') . '?' . $query);
+        $this->curl->setVerbGet();
+        $curl_response = $this->curl->exec();
+        $json_response = json_decode($curl_response, true);
+        return $json_response;
+    }
+
     public function getBotstoreBot($botId)
     {
         if (isset($botId)) {

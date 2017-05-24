@@ -1881,6 +1881,45 @@ DEALLOCATE PREPARE stmt3;
 
 END ;;
 DELIMITER ;
+
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `getBotstoreListPerCategory` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreListPerCategory`(
+	IN `param_max` INT(11))
+BEGIN
+	SET @select_query =
+    "SELECT * FROM(
+		SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website',
+			(@num:=if(@group = bs.category, @num +1, if(@group := bs.category, 1, 1))) row_number
+		FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id
+		CROSS JOIN (select @num:=0, @group:=null) c
+		WHERE publishing_state=2
+        ORDER BY bs.category
+	) as x
+    WHERE x.row_number <= ";
+
+    SET @limitTo = param_max;
+
+    SET @query = concat(@select_query, @limitTo);
+
+    PREPARE stmt3 FROM @query;
+	EXECUTE stmt3;
+	DEALLOCATE PREPARE stmt3;
+
+END ;;
+DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
