@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -489,6 +488,87 @@ public class TestChatLogic {
     }
 
     /***
+     * Memory intent with multiple entities is fulfilled from persisted value.
+     */
+    @Test
+    public void testChat_multiLineIntent_fulfilledFromPersistence()
+            throws RequestBase.AiControllerException, Database.DatabaseException {
+        MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
+
+        // Make sure all variables are clean
+        for (MemoryVariable mv : mi.getVariables()) {
+            mv.setCurrentValue(null);
+        }
+
+        HashMap<String, String> entityValues = new HashMap<>();
+        entityValues.put("persistent_var", "persistentValue");
+        ChatState state = new ChatState(DateTime.now(), null, null, entityValues);
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(state);
+
+        // First question, triggers the intent but without the right entity value
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        // Verify intent is triggered
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
+        // Second question, the answer to the prompt with the right entity value
+        final String varValue = "_value_";
+        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
+            this.add(new Pair<>(mi.getVariables().get(0).getName(), varValue));
+        }};
+        when(this.fakeRecognizer.retrieveEntities(anyString(), any())).thenReturn(entities);
+        result = getChat(0.5f, "nothing to see here.");
+        r = ((ApiChat) result).getResult();
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        // Is fulfilled
+        Assert.assertTrue(r.getIntents().get(0).isFulfilled());
+    }
+
+    /***
+     * Memory intent is not fulfilled when persistent variable has not been set.
+     */
+    @Test
+    public void testChat_multiLineIntent_notFulfilledWithNonPersistedValue()
+            throws RequestBase.AiControllerException, Database.DatabaseException {
+        MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
+
+        // Make sure all variables are clean
+        for (MemoryVariable mv : mi.getVariables()) {
+            mv.setCurrentValue(null);
+        }
+
+        // First question, triggers the intent but without the right entity value
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        // Verify intent is triggered
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
+        // Second question, the answer to the prompt with the right entity value
+        final String varValue = "_value_";
+        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
+            this.add(new Pair<>(mi.getVariables().get(0).getName(), varValue));
+        }};
+        when(this.fakeRecognizer.retrieveEntities(anyString(), any())).thenReturn(entities);
+        result = getChat(0.5f, "nothing to see here.");
+        r = ((ApiChat) result).getResult();
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        // Is not fulfilled.
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+    }
+
+    /***
      * Memory intent is fulfilled after it's prompted once
      */
     @Test
@@ -663,7 +743,7 @@ public class TestChatLogic {
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException {
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID()));
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID(), new HashMap<String, String>()));
         ApiChat result = (ApiChat) getChat(0.1f);
         // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -695,7 +775,7 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(UUID.randomUUID(), cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
         when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
@@ -713,7 +793,7 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
         when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr2, cr2Uuid);
@@ -731,7 +811,7 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
         when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ChatResult cr1Aiml = new ChatResult();
@@ -958,8 +1038,47 @@ public class TestChatLogic {
                 Collections.singletonList(prompt),
                 maxPrompts,
                 0,
+                false,
                 false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+
+        setupFakeChat(0.9d, "@meta.intent." + intentName, 0.3d, "", 0.3d, "");
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);
+        return mi;
+    }
+
+    private MemoryIntent getMultiEntityMemoryIntentForPrompt(
+            int maxPrompts, String currentValue) throws
+            RequestBase.AiControllerException {
+        final String intentName = "intent1";
+        final String promptTrigger = "variableValue";
+        final String prompt = "prompt1";
+        MemoryVariable mv = new MemoryVariable(
+                "var",
+                currentValue,
+                true,
+                Arrays.asList(promptTrigger, "b"),
+                Collections.singletonList(prompt),
+                maxPrompts,
+                0,
+                false,
+                false);
+        final String persistentTrigger = "persistentValue";
+        final String persistentPrompt = "persistentPrompt";
+        MemoryVariable persistentVariable = new MemoryVariable(
+                "persistent_var",
+                currentValue,
+                true,
+                Arrays.asList(persistentTrigger),
+                Collections.singletonList(persistentPrompt),
+                maxPrompts,
+                0,
+                false,
+                true);
+        List<MemoryVariable> variables = new ArrayList<>();
+        variables.add(mv);
+        variables.add(persistentVariable);
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, variables);
 
         setupFakeChat(0.9d, "@meta.intent." + intentName, 0.3d, "", 0.3d, "");
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);

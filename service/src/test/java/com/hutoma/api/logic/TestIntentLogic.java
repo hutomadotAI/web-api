@@ -218,6 +218,6 @@ public class TestIntentLogic {
     private ApiIntent getIntent() {
         return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT)
                 .addResponse("response").addUserSays("usersays")
-                .addVariable(new IntentVariable("entity", UUID.randomUUID(), true, 3, "somevalue").addPrompt("prompt"));
+                .addVariable(new IntentVariable("entity", UUID.randomUUID(), true, 3, "somevalue", false).addPrompt("prompt"));
     }
 }

@@ -24,6 +24,7 @@ public class MemoryVariable {
     private int timesPrompted;
     @SerializedName("max_prompts")
     private int timesToPrompt;
+    private boolean persistent;
     @SerializedName("system_entity")
     private boolean isSystem;
 
@@ -37,14 +38,16 @@ public class MemoryVariable {
         this.entityKeys = entityKeys;
     }
 
-    public MemoryVariable(String name, String currentValue, boolean isMandatory, List<String> entityKeys,
-                          List<String> prompts, int timesToPrompt, int timesPrompted, final boolean isSystem) {
+    public MemoryVariable(final String name, final String currentValue, final boolean isMandatory, final List<String> entityKeys,
+                          final List<String> prompts, final int timesToPrompt, final int timesPrompted, final boolean isSystem,
+                          final boolean persistent) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
         this.prompts = prompts;
         this.timesPrompted = timesPrompted;
         this.timesToPrompt = timesToPrompt;
+        this.persistent = persistent;
         this.isSystem = isSystem;
     }
 
@@ -131,6 +134,18 @@ public class MemoryVariable {
     public int getTimesToPrompt() {
         return this.timesToPrompt;
     }
+
+    /*
+     * Gets whether the entity is persistent.
+     * @return true if true, else false.
+     */
+    public boolean getIsPersistent() { return this.persistent; }
+
+    /*
+     * Sets whether the entity is persistent.
+     * @param persistent Whether the entity should be persistent.
+     */
+    public void setIsPersistent(boolean persistent) { this.persistent = persistent; }
 
     /**
      * Gets the prompts.

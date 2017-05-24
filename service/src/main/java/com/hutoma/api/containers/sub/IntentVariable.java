@@ -22,20 +22,22 @@ public class IntentVariable {
     @SerializedName("value")
     private String value;
     private int id;
+    private boolean persistent;
 
     private List<String> prompts;
 
-    public IntentVariable(String entityName, UUID devOwner, boolean required, int numPrompts, String value) {
+    public IntentVariable(String entityName, UUID devOwner, boolean required, int numPrompts, String value, boolean persistent) {
         this.entityName = entityName;
         this.devOwner = devOwner;
         this.required = required;
         this.numberOfPrompts = numPrompts;
         this.value = value;
         this.prompts = new ArrayList<>();
+        this.persistent = persistent;
     }
 
-    public IntentVariable(String entityName, UUID devOwner, boolean required, int numPrompts, String value, int id) {
-        this(entityName, devOwner, required, numPrompts, value);
+    public IntentVariable(String entityName, UUID devOwner, boolean required, int numPrompts, String value, int id, boolean persistent) {
+        this(entityName, devOwner, required, numPrompts, value, persistent);
         this.id = id;
     }
 
@@ -75,6 +77,10 @@ public class IntentVariable {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public boolean isPersistent() { return this.persistent; }
+
+    public void setPersistent(boolean persistent) { this.persistent = persistent; }
 
     public int getId() {
         return this.id;

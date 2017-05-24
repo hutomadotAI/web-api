@@ -150,7 +150,8 @@ public class DatabaseEntitiesIntents extends Database {
                         devOwnerUUID,
                         varRs.getBoolean("required"),
                         varRs.getInt("n_prompts"),
-                        varRs.getString("value"));
+                        varRs.getString("value"),
+                        varRs.getBoolean("isPersistent"));
 
                 // for each variable get all its prompts
                 ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
@@ -385,7 +386,8 @@ public class DatabaseEntitiesIntents extends Database {
                     devOwnerUUID,
                     readCurrentRs.getBoolean("required"), readCurrentRs.getInt("n_prompts"),
                     readCurrentRs.getString("value"),
-                    readCurrentRs.getInt("id"));
+                    readCurrentRs.getInt("id"),
+                    readCurrentRs.getBoolean("isPersistent"));
             currentSet.put(old.getEntityName(), old);
         }
 

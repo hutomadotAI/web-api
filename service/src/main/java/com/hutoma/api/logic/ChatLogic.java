@@ -79,6 +79,7 @@ public class ChatLogic {
         UUID chatUuid = UUID.fromString(chatId);
         this.minP = minP;
         this.chatState = this.chatStateHandler.getState(devId, chatUuid);
+
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
         // Set the timestamp of the request
@@ -97,6 +98,7 @@ public class ChatLogic {
 
         UUID aiidForMemoryIntents = this.chatState.getLockedAiid() == null ? aiid : this.chatState.getLockedAiid();
         List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiidForMemoryIntents, chatUuid);
+
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
         ChatResult result = new ChatResult();
@@ -243,7 +245,6 @@ public class ChatLogic {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat", devIdString, e);
             this.chatLogger.logChatError(LOGFROM, devIdString, e, this.telemetryMap);
             return ApiError.getInternalServerError();
-
         } finally {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
@@ -312,11 +313,28 @@ public class ChatLogic {
         List<MemoryIntent> intentsToClear = new ArrayList<>();
         boolean handledIntent = false;
 
+        // Populate persistent entities.
+        for (MemoryVariable variable : currentIntent.getVariables()) {
+            String persistentValue = this.chatState.getEntityValue(variable.getName());
+            if (persistentValue != null) {
+                variable.setCurrentValue(persistentValue);
+            }
+        }
+
         // Attempt to retrieve entities from the question
         List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
                 currentIntent.getVariables());
         if (!entities.isEmpty()) {
             currentIntent.fulfillVariables(entities);
+
+            // Write recognised persistent entities.
+            for (Object entity : currentIntent.getVariables()
+                    .stream()
+                    .filter(x -> x.getIsPersistent() && x.getCurrentValue() != null)
+                    .toArray()) {
+                MemoryVariable memoryVariable = (MemoryVariable)entity;
+                this.chatState.setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
+            }
         }
 
         // Check if there still are mandatory entities not currently fulfilled

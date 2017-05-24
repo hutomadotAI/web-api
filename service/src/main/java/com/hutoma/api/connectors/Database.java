@@ -55,7 +55,8 @@ public class Database {
                         (List<String>) e.get("prompts"),
                         (int) Math.round((double) e.get("max_prompts")),
                         (int) Math.round((double) e.get("times_prompted")),
-                        (boolean) e.get("system_entity"));
+                        (boolean) e.get("system_entity"),
+                        (boolean)e.get("isPersistent"));
                 variables.add(memoryVariable);
             }
             return new MemoryIntent(rs.getString("name"),
@@ -786,15 +787,21 @@ public class Database {
         }
     }
 
-    public ChatState getChatState(final UUID devId, final UUID chatId) throws DatabaseException {
+    public ChatState getChatState(final UUID devId, final UUID chatId, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getChatState", 2).add(devId).add(chatId);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
+                String entitiesJson = rs.getString("entity_values");
+                HashMap<String, String> entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
+
+                String locked_aiid = rs.getString("locked_aiid");
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),
                         rs.getString("topic"),
-                        UUID.fromString(rs.getString("locked_aiid"))
+                        locked_aiid != null ? UUID.fromString(locked_aiid) : null,
+                        entities
                 );
             }
             return ChatState.getEmpty();
@@ -803,15 +810,17 @@ public class Database {
         }
     }
 
-    public boolean saveChatState(final UUID devId, final UUID chatId, final ChatState chatState)
+    public boolean saveChatState(final UUID devId, final UUID chatId, final ChatState chatState, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("setChatState", 5)
+            String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
+            call.initialise("setChatState", 6)
                     .add(devId)
                     .add(chatId)
                     .add(chatState.getTimestamp())
                     .add(chatState.getTopic())
-                    .add(chatState.getLockedAiid().toString());
+                    .add(lockedAiid)
+                    .add(chatState.getEntityValues().isEmpty() ? null : jsonSerializer.serialize(chatState.getEntityValues()));
             return call.executeUpdate() > 0;
         }
     }

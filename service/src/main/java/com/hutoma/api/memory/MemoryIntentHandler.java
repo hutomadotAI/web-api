@@ -132,7 +132,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                             intentVar.getPrompts(),
                             intentVar.getNumPrompts(),
                             0,
-                            apiEntity.isSystem());
+                            apiEntity.isSystem(),
+                            intentVar.isPersistent());
                     variables.add(variable);
                 }
                 intent = new MemoryIntent(intentName, aiid, chatId, variables, false);

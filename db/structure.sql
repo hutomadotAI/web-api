@@ -224,6 +224,7 @@ CREATE TABLE `chatState` (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `topic` varchar(250) DEFAULT NULL,
   `locked_aiid` varchar(50) DEFAULT NULL,
+  `entity_values` text,
   PRIMARY KEY (`dev_id`,`chat_id`),
   UNIQUE KEY `chat_id_UNIQUE` (`chat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -335,6 +336,7 @@ CREATE TABLE `entity` (
   `name` varchar(250) NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `isSystem` tinyint(1) NOT NULL DEFAULT 0,
+  `isPersistent` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `dev_id` (`dev_id`,`name`),
   CONSTRAINT `entity_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
@@ -994,7 +996,7 @@ CREATE DEFINER=`aiDeleter`@`127.0.0.1` PROCEDURE `deleteAiStatus`(
   IN `in_aiid` VARCHAR(50))
     MODIFIES SQL DATA
 BEGIN
-    DELETE FROM `ai_status` 
+    DELETE FROM `ai_status`
 		WHERE `ai_status`.`server_type`=`in_server_type`
         AND `ai_status`.`aiid` = `in_aiid`;
   END ;;
@@ -1385,7 +1387,7 @@ BEGIN
       `created_on`,
       `dev_id`,
       `is_private`,
-      `client_token`,      
+      `client_token`,
       `ui_ai_language`,
       `ui_ai_timezone`,
       `ui_ai_confidence`,
@@ -1449,7 +1451,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIQueueStatus`(
   IN `in_aiid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT 
+    SELECT
 		`ai_status`.`server_type`,
 		`ai_status`.`aiid`,
         `ai`.`dev_id`,
@@ -1554,7 +1556,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIsServerStatus`(
   IN `in_server_type` VARCHAR(10))
     READS SQL DATA
 BEGIN
-    SELECT 
+    SELECT
 		`ai_status`.`aiid`,
         `ai`.`dev_id`,
 		`ai_status`.`training_status`,
@@ -1588,7 +1590,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIsStatus`(
   IN `in_dev_id` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT 
+    SELECT
 		`ai_status`.`server_type`,
 		`ai_status`.`aiid`,
 		`ai_status`.`training_status`,
@@ -1622,20 +1624,20 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiStatus`(
   IN `param_devid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT 
+    SELECT
 		`ai_status`.`server_type`,
         `ai_status`.`aiid`,
-		`ai_status`.`training_status`, 
-		`ai_status`.`training_progress`, 
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
         `ai_status`.`training_error`,
         `ai_status`.`queue_action`,
         `ai_status`.`server_endpoint`,
-        `ai_status`.`update_time`        
+        `ai_status`.`update_time`
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai_status`.`aiid`=`param_aiid`
     AND `ai`.`dev_id`=`param_devid`
-    AND `ai`.`deleted` = 0;    
+    AND `ai`.`deleted` = 0;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1655,7 +1657,7 @@ DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiStatusAll`()
     READS SQL DATA
 BEGIN
-    SELECT 
+    SELECT
 		`ai_status`.`server_type`,
 		`ai_status`.`aiid`,
 		`ai_status`.`training_status`,
@@ -1663,7 +1665,7 @@ BEGIN
         `ai_status`.`training_error`,
         `ai_status`.`queue_action`,
         `ai_status`.`server_endpoint`,
-        `ai_status`.`update_time`        
+        `ai_status`.`update_time`
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
     WHERE `ai`.`deleted` = 0;
@@ -1688,18 +1690,18 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiStatusForUpdate`(
   IN `param_devid` VARCHAR(50))
     READS SQL DATA
 BEGIN
-    SELECT 
+    SELECT
 		`ai_status`.`server_type`,
         `ai_status`.`aiid`,
-		`ai_status`.`training_status`, 
-		`ai_status`.`training_progress`, 
+		`ai_status`.`training_status`,
+		`ai_status`.`training_progress`,
         `ai_status`.`training_error`,
         `ai_status`.`queue_action`,
         `ai_status`.`server_endpoint`,
-        `ai_status`.`update_time`        
+        `ai_status`.`update_time`
     FROM `ai_status`
     JOIN `ai` USING (`aiid`)
-    WHERE `ai_status`.`aiid`=param_aiid 
+    WHERE `ai_status`.`aiid`=param_aiid
     AND `ai`.`dev_id`=param_devid
     AND `ai`.`deleted` = 0
     FOR UPDATE;
@@ -2263,7 +2265,7 @@ CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentResponses`(
 BEGIN
     SELECT `response`
     FROM `intent_response` WHERE `intent_id` IN
-         (SELECT `id` FROM `intent` 
+         (SELECT `id` FROM `intent`
           WHERE `in_name`=`name` AND `in_aiid`=`aiid`);
 END  ;;
 DELIMITER ;
@@ -2313,7 +2315,7 @@ CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntentUserSays`(
 BEGIN
     SELECT `says`
     FROM `intent_user_says` WHERE `intent_id` IN
-         (SELECT `id` FROM `intent` 
+         (SELECT `id` FROM `intent`
           WHERE `in_name`=`name` AND `in_aiid`=`aiid`);
 END ;;
 DELIMITER ;
@@ -2403,7 +2405,8 @@ BEGIN
       `intent_variable`.`required` AS `required`,
       `intent_variable`.`n_prompts` AS `n_prompts`,
       `intent_variable`.`value` AS `value`,
-      `entity`.`dev_id` AS `dev_id`
+      `entity`.`dev_id` AS `dev_id`,
+      `entity`.`isPersistent` as `isPersistent`
     FROM `intent_variable`, `entity`
     WHERE `intent_variable`.`intent_id` =
           (SELECT `id` FROM `intent`
@@ -2927,18 +2930,18 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueRecover`(
   IN `in_server_type` VARCHAR(10),
-  IN `in_aiid` VARCHAR(50),  
+  IN `in_aiid` VARCHAR(50),
   IN `in_queue_action` VARCHAR(50),
   IN `in_training_status` VARCHAR(45)
   )
 BEGIN
- 
-UPDATE `ai_status` SET 	
+
+UPDATE `ai_status` SET
 	`training_status` = `in_training_status`,
     `queue_action`=`in_queue_action`,
     `update_time`=now(),
     `queue_time`=now()
-WHERE `server_type` = `in_server_type` 
+WHERE `server_type` = `in_server_type`
 	AND `aiid` = `in_aiid`;
 
   END ;;
@@ -2962,19 +2965,19 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueTakeNext`(
 BEGIN
 
 DECLARE v_aiid VARCHAR(50);
-SELECT `ai_status`.`aiid` INTO v_aiid 
-	FROM `ai_status` 
-	WHERE `server_type` = `in_server_type` 
+SELECT `ai_status`.`aiid` INTO v_aiid
+	FROM `ai_status`
+	WHERE `server_type` = `in_server_type`
 	AND `queue_time`<now()
 	ORDER BY `queue_time` ASC
 	LIMIT 1 FOR UPDATE;
 
 IF NOT v_aiid IS NULL THEN
-    UPDATE `ai_status` SET `queue_time`=NULL 
+    UPDATE `ai_status` SET `queue_time`=NULL
 		WHERE `aiid` = v_aiid
         AND `in_server_type`=`server_type`;
-END IF;        
-SELECT * FROM `ai_status` 
+END IF;
+SELECT * FROM `ai_status`
 	WHERE v_aiid IS NOT NULL
 	AND `aiid`=v_aiid
 	AND `in_server_type`=`server_type`;
@@ -3004,7 +3007,7 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `queueUpdate`(
   IN `in_queue_action` VARCHAR(50)
   )
 BEGIN
- 
+
 DECLARE v_queue_time DATETIME;
 IF (`in_set_queued` = 0) THEN
 	SET v_queue_time = NULL;
@@ -3012,11 +3015,11 @@ ELSE
 	SET v_queue_time = now() + INTERVAL `in_queue_offset` SECOND;
 END IF;
 
-UPDATE `ai_status` SET 	
+UPDATE `ai_status` SET
 	`queue_time`=v_queue_time,
     `queue_action`=`in_queue_action`,
     `update_time`=now()
-WHERE `server_type` = `in_server_type` 
+WHERE `server_type` = `in_server_type`
 	AND `aiid` = `in_aiid`;
 
   END ;;
@@ -3147,11 +3150,12 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
   IN `param_chatId` VARCHAR(50),
   IN `param_timestamp` TIMESTAMP,
   IN `param_topic` VARCHAR(250),
-  IN `param_locked_aiid` VARCHAR(50))
+  IN `param_locked_aiid` VARCHAR(50),
+  IN `param_entity_values` TEXT)
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, locked_aiid)
-    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_locked_aiid)
-    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, locked_aiid = param_locked_aiid;
+    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, locked_aiid, entity_values)
+    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_locked_aiid, param_entity_values)
+    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, locked_aiid = param_locked_aiid, entity_values = param_entity_values;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3268,23 +3272,23 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateAiStatus`(
   IN `in_training_error` FLOAT)
 BEGIN
 
-INSERT INTO `ai_status` 
+INSERT INTO `ai_status`
 ( `server_type`,
   `aiid`,
   `training_status`,
   `training_progress`,
   `training_error`,
   `server_endpoint`)
-VALUES 
+VALUES
 ( `in_server_type`,
   `in_aiid`,
   `in_training_status`,
   `in_training_progress`,
   `in_training_error`,
   `in_server_endpoint`)
-ON DUPLICATE KEY UPDATE 
-	`training_status`=`in_training_status`,	
-    `training_progress`=`in_training_progress`,	
+ON DUPLICATE KEY UPDATE
+	`training_status`=`in_training_status`,
+    `training_progress`=`in_training_progress`,
     `training_error`=`in_training_error`,
 	`server_endpoint`=`in_server_endpoint`,
     `update_time`=now();
@@ -3356,22 +3360,22 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateControllerState`(
   IN `in_training_slots_available` INT,
   IN `in_chat_capacity` INT)
 BEGIN
-INSERT INTO `controller_state` 
+INSERT INTO `controller_state`
   (`server_type`,
   `verified_server_count`,
   `training_capacity`,
   `training_slots_available`,
   `chat_capacity`,
   `update_time`)
-VALUES 
+VALUES
   (`in_server_type`,
   `in_verified_server_count`,
   `in_training_capacity`,
   `in_training_slots_available`,
   `in_chat_capacity`,
   now())
-ON DUPLICATE KEY UPDATE 
-  `verified_server_count`=`in_verified_server_count`, 
+ON DUPLICATE KEY UPDATE
+  `verified_server_count`=`in_verified_server_count`,
   `training_capacity`=`in_training_capacity`,
   `training_slots_available`=`in_training_slots_available`,
   `chat_capacity`=`in_chat_capacity`,
