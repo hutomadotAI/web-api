@@ -7,6 +7,7 @@ import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.Entity;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,9 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -58,7 +57,7 @@ public class TestEntityLogic {
         when(this.fakeDatabase.getEntities(any())).thenReturn(getEntitiesList());
         final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
         Assert.assertEquals(1, ((ApiEntityList) result).getEntities().size());
-        Assert.assertEquals(this.ENTNAME, ((ApiEntityList) result).getEntities().get(0));
+        Assert.assertEquals(this.ENTNAME, ((ApiEntityList) result).getEntities().get(0).getName());
     }
 
     @Test
@@ -199,8 +198,8 @@ public class TestEntityLogic {
     }
 
 
-    private List<String> getEntitiesList() {
-        return Collections.singletonList(this.ENTNAME);
+    private List<Entity> getEntitiesList() {
+        return Collections.singletonList(new Entity(this.ENTNAME, false));
     }
 
     private ApiEntity getEntity() {

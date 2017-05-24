@@ -48,7 +48,7 @@ function postingEntityName() {
 }
 
 function showEntities(str) {
-    var wHTML = "";
+
 
     if (entities.length < 1) {
         msgAlertEntity(ALERT.BASIC.value, 'No entities yet. Create the first one.');
@@ -57,23 +57,37 @@ function showEntities(str) {
     else
         msgAlertEntity(ALERT.BASIC.value, 'In this section you can create different entities.');
 
-    for (var x in entities) {
-        if ((str != " ") && ( (str.length == 0) || (entities[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
+    var entitiesUser = "";
+    var entitiesSystem = "";
+    entities.map(function(entity, index) {
 
+        var isSystem = entity['is_system'];
+        var name = entity['entity_name'];
+
+        if ((str != " ") && ( (str.length == 0) || (name.toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
+
+            var wHTML = "";
             wHTML += ('<div class="col-xs-12">');
             wHTML += ('<div class="box-body flat no-padding" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
             wHTML += ('<div class="row item-row">');
 
             wHTML += ('<div class="col-xs-10 no-padding" id="obj-entity">');
-            wHTML += ('<input type="text" class="form-control flat no-shadow" id="entity-label' + x + '"  name="entity-label" onClick="editEntity(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" style="padding-left:10px; background-color: #404446; " value="@' + entities[x] + '" readonly>');
+            wHTML += ('<input type="text" class="form-control flat no-shadow" id="entity-label' + index + '"  name="entity-label" ');
+            if (!isSystem) {
+                wHTML += ('onClick="editEntity(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" ');
+            }
+            wHTML += ('style="padding-left:10px; background-color: #404446; " value="@' + name + '" readonly>');
+
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;" >');
             wHTML += ('<div class="btn-group pull-right text-gray">');
 
-            wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + x + '" style="cursor: pointer;">');
-            wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
-            wHTML += ('</a>');
+            if (!isSystem) {
+                wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + index + '" style="cursor: pointer;">');
+                wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
+                wHTML += ('</a>');
+            }
             wHTML += ('</div>');
 
             wHTML += ('</div>');
@@ -82,16 +96,20 @@ function showEntities(str) {
             wHTML += ('</div>');
             wHTML += ('</div>');
             wHTML += ('</div>');
+            if (isSystem) {
+                entitiesSystem += wHTML;
+            } else {
+                entitiesUser += wHTML;
+            }
         }
-
-    }
-
-    newNode.innerHTML = wHTML;
+    });
+    newNode.innerHTML = entitiesUser + "\n" + entitiesSystem;
     document.getElementById('entsearch').appendChild(newNode);
+
 }
 
 function deleteEntity(elem) {
-    this.location.href = 'entity.php?deleteentity=' + entities[elem];
+    this.location.href = 'entity.php?deleteentity=' + entities[elem]['entity_name'];
 }
 
 function OnMouseIn(elem) {

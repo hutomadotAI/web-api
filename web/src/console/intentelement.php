@@ -67,7 +67,7 @@ function echoJsonIntentResponse($intent)
 function echoJsonEntityListResponse($entityList)
 {
     if ($entityList['status']['code'] !== 404) {
-        echo json_encode($entityList['entity_name']);
+        echo json_encode($entityList['entities']);
     } else
         echo '""'; // return empty string
 }

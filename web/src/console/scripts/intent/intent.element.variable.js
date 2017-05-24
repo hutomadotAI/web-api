@@ -128,7 +128,7 @@ function isUsedEntities(entity_name) {
         var container = $(node).find("ul");
         var elem = container.find("li.selected");
         var text = elem.text();
-        if (text.replace(/[@]/g, "") == entity_name)
+        if (text === entity_name)
             return true;
     }
     return false;
@@ -159,21 +159,26 @@ function pushEntitiesList(node) {
         return;
     }
 
-    for (var x in entityListFromServer) {
-        // if a Entity is just used , it mush remove from possible selection on dropdown menu but add if is itself
-        if (!isUsedEntities(entityListFromServer[x]) || selected.text().replace(/[@]/g, "") == entityListFromServer[x]) {
+    var listEntities = [];
+    // non-system entities at the top
+    entityListFromServer.map(function(entity) { if (!entity['is_system']) { listEntities.push(entity); }} );
+    entityListFromServer.map(function(entity) { if (entity['is_system']) { listEntities.push(entity); }} );
+    listEntities.map(function(entity) {
+        var name = '@' + entity['entity_name'];
+        // if a Entity is just used , it must remove from possible selection on dropdown menu but add if is itself
+        if (!isUsedEntities(name) || selected.text() === name) {
             var elem = document.createElement('li');
             elem.setAttribute('data-toggle', 'tooltip');
-            elem.setAttribute('title', entityListFromServer[x]);
+            elem.setAttribute('title', entity['entity_name']);
             // if elem was selected, maintain this selection on new list
-            if (selected.text().replace(/[@]/g, "") == entityListFromServer[x])
+            if (selected.text() === name)
                 elem.className = 'selected';
             else
                 elem.setAttribute('onClick','enableSaving(true)');
-            elem.innerHTML = '@' + entityListFromServer[x];
+            elem.innerHTML = name;
             container.append(elem);
         }
-    }
+    });
 }
 
 function variableOnMouseIn(elem) {

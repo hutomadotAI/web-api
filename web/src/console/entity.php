@@ -31,7 +31,7 @@ if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) 
 function echoJsonEntitiesResponse($entities)
 {
     if ($entities['status']['code'] !== 404) {
-        echo json_encode($entities['entity_name']);
+        echo json_encode($entities['entities']);
     }
     else
         echo '""'; // return empty string

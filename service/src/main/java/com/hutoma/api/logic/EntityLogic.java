@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.memory.IEntityRecognizer;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class EntityLogic {
     public ApiResult getEntities(final UUID devid) {
         final String devidString = devid.toString();
         try {
-            final List<String> entityList = this.database.getEntities(devid);
+            List<Entity> entityList = this.database.getEntities(devid);
             if (entityList.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
                         LogMap.map("Num Entities", "0"));

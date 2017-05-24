@@ -18,6 +18,7 @@ import javax.inject.Inject;
 public class Validate {
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
+    private static final Pattern entityNames = Pattern.compile("^[\\.a-zA-Z0-9_-]+$");
     private static final Pattern printableAscii =
             Pattern.compile("^[\\x20-\\x7E]+$");
     private static final Pattern printableAsciiNoAt =
@@ -288,6 +289,10 @@ public class Validate {
 
     String validateAlphaNumPlusDashes(final String paramName, final String param) throws ParameterValidationException {
         return validatePattern(alphaNumericDashes, paramName, param);
+    }
+
+    String validateEntityName(final String paramName, final String param) throws ParameterValidationException {
+        return validatePattern(entityNames, paramName, param);
     }
 
     String validateRequiredSanitized(final String paramName, final String param) throws ParameterValidationException {

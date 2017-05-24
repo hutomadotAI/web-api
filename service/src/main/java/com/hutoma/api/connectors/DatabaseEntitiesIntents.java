@@ -5,6 +5,7 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 
 import java.sql.ResultSet;
@@ -28,14 +29,16 @@ public class DatabaseEntitiesIntents extends Database {
         super(logger, callProvider, transactionProvider);
     }
 
-    public List<String> getEntities(final UUID devid) throws DatabaseException {
+    public List<Entity> getEntities(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntities", 1).add(devid);
             final ResultSet rs = call.executeQuery();
             try {
-                final ArrayList<String> entities = new ArrayList<>();
+                List<Entity> entities = new ArrayList<>();
                 while (rs.next()) {
-                    entities.add(rs.getString("name"));
+                    entities.add(new Entity(
+                            rs.getString("name"),
+                            rs.getBoolean("isSystem")));
                 }
                 return entities;
             } catch (final SQLException sqle) {

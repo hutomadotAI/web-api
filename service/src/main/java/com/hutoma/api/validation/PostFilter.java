@@ -188,7 +188,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
             if (checkList.contains(APIParameter.EntityJson)) {
                 ApiEntity entity = (ApiEntity) this.serializer.deserialize(request.getEntityStream(), ApiEntity.class);
-                this.validateAlphaNumPlusDashes(ENTITYNAME, entity.getEntityName());
+                this.validateEntityName(ENTITYNAME, entity.getEntityName());
                 this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
             }
@@ -203,7 +203,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 if (null != intent.getVariables()) {
                     for (IntentVariable variable : intent.getVariables()) {
                         // validate the name
-                        this.validateAlphaNumPlusDashes(ENTITYNAME, variable.getEntityName());
+                        this.validateEntityName(ENTITYNAME, variable.getEntityName());
                         // the list of prompts
                         variable.setPrompts(this.validateOptionalDescriptionList(INTENT_PROMPTLIST,
                                 variable.getPrompts()));

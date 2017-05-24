@@ -852,7 +852,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `addUpdateIntentVariable`(
   IN in_dev_id VARCHAR(50),
@@ -870,13 +870,16 @@ BEGIN
       SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`
       FROM `intent`, `entity`
       WHERE `intent`.`id` =
-            (SELECT `id` FROM `intent` WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
-                                                                                              (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
+            (SELECT `id` FROM `intent` 
+				WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
+					(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
             AND `entity`.`id` =
-                (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`)
+                (SELECT `id` FROM `entity` WHERE 
+					(`entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1)
+					AND `in_entity_name`=`name`)
     ON DUPLICATE KEY UPDATE
       `required`=`in_required`, `n_prompts`=`in_n_prompts`, `value`=`in_value`,
-      `entity_id`= (SELECT `id` FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_name`=`name`),
+      `entity_id`= (SELECT `id` FROM `entity` WHERE (`entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1) AND `in_entity_name`=`name`),
       `dummy` = NOT `dummy`,
       `id` = LAST_INSERT_ID(`intent_variable`.`id`);
 
@@ -2113,13 +2116,14 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`entityUser`@`127.0.0.1` PROCEDURE `getEntities`(
   IN in_dev_id VARCHAR(50))
 BEGIN
-    SELECT `name` FROM `entity` WHERE `in_dev_id`=`dev_id`;
-  END ;;
+    SELECT `name`, `isSystem` FROM `entity` WHERE 
+    `entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1;    
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
