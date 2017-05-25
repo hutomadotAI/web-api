@@ -78,6 +78,38 @@ public class Validate {
     }
 
     /***
+     * Throw a validation exception if the string is too long
+     * @param maxLength
+     * @param paramName
+     * @param param
+     * @return
+     * @throws ParameterValidationException
+     */
+    public String validateFieldLength(final int maxLength, final String paramName, final String param)
+            throws ParameterValidationException {
+        if ((null != param) && param.length() > maxLength) {
+            throw new ParameterValidationException("parameter too long", paramName);
+        }
+        return param;
+    }
+
+    /***
+     * * Throw a validation exception if any of the strings are too long
+     * @param maxLength
+     * @param paramName
+     * @param paramList
+     * @return
+     * @throws ParameterValidationException
+     */
+    public List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
+            throws ParameterValidationException {
+        for (String item : paramList) {
+            validateFieldLength(maxLength, paramName, item);
+        }
+        return paramList;
+    }
+
+    /***
      * Validates a parameter against a pattern
      * @param pattern the static pattern to match to
      * @param paramName the name of the param, to use in the exception message
@@ -178,14 +210,11 @@ public class Validate {
     }
 
     /***
-     * Validates an optional floating point number
-     * @param paramName parameter name used for exception
-     * @param min valid range lowest value
-     * @param max valid range highest value
-     * @param fallback return this if the field is empty or missing
-     * @param param the parameter value
-     * @return valid float representing the input, or fallback
-     * @throws ParameterValidationException if the float was invalid or out of range
+     * Interpret training source type and ensure it is valid
+     * @param paramName
+     * @param param
+     * @return
+     * @throws ParameterValidationException
      */
     TrainingLogic.TrainingType validateTrainingSourceType(final String paramName, final String param)
             throws ParameterValidationException {

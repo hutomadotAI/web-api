@@ -149,7 +149,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         if (checkList.contains(APIParameter.AIName)) {
             request.setProperty(APIParameter.AIName.toString(),
-                    this.validateAiName(AINAME, getFirst(form.get(AINAME))));
+                    this.validateFieldLength(50, AINAME,
+                            this.validateAiName(AINAME, getFirst(form.get(AINAME)))));
         }
 
         if (checkList.contains(APIParameter.AIID)) {
@@ -159,7 +160,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         if (checkList.contains(APIParameter.AIDescription)) {
             request.setProperty(APIParameter.AIDescription.toString(),
-                    this.validateOptionalDescription(AIDESC, getFirst(form.get(AIDESC))));
+                    this.validateFieldLength(250, AIDESC,
+                            this.validateOptionalDescription(AIDESC, getFirst(form.get(AIDESC)))));
         }
         if (checkList.contains(APIParameter.AiConfidence)) {
             request.setProperty(APIParameter.AiConfidence.toString(),
@@ -198,16 +200,20 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 // decode
                 ApiIntent intent = (ApiIntent) this.serializer.deserialize(request.getEntityStream(), ApiIntent.class);
                 // validate name
+                this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
                 this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
                 // for each variable
                 if (null != intent.getVariables()) {
                     for (IntentVariable variable : intent.getVariables()) {
                         // validate the name
+                        this.validateFieldLength(250, ENTITYNAME, variable.getEntityName());
                         this.validateEntityName(ENTITYNAME, variable.getEntityName());
                         // the list of prompts
+                        this.validateFieldLengthsInList(250, INTENT_PROMPTLIST, variable.getPrompts());
                         variable.setPrompts(this.validateOptionalDescriptionList(INTENT_PROMPTLIST,
                                 variable.getPrompts()));
                         // the value
+                        this.validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
                         this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
                     }
                 }
@@ -215,9 +221,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 WebHook webHook = intent.getWebHook();
                 if (webHook != null) {
                     this.checkParameterNotNull("enabled", webHook.isEnabled());
+                    this.validateFieldLength(250, INTENTNAME, webHook.getIntentName());
                     this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
 
                     if (webHook.isEnabled()) {
+                        this.validateFieldLength(255, "endpoint", webHook.getEndpoint());
                         this.checkParameterNotNull("endpoint", webHook.getEndpoint());
                         this.checkParameterNotNull(AIID, webHook.getAiid());
                     }
@@ -238,6 +246,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 ServerRegistration serverRegistration = (ServerRegistration)
                         this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
                 checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
+                this.validateFieldLength(255, SERVER_URL, serverRegistration.getServerUrl());
                 checkParameterNotNull(SERVER_URL, serverRegistration.getServerUrl());
                 checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
                 for (ServerAiEntry entry : serverRegistration.getAiList()) {

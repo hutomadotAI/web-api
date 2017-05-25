@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 import javax.ws.rs.client.WebTarget;
@@ -28,7 +29,6 @@ import javax.ws.rs.core.Response;
 
 import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -97,6 +97,38 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat_invalidChatId() {
         final Response response = target(CHAT_PATH).queryParam("q", "").queryParam("chatId", "invalid")
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_chatQuestionTooLong() {
+        String question = String.join("", Collections.nCopies(1024 + 1, "A"));
+        final Response response = target(CHAT_PATH)
+                .queryParam("q", question)
+                .queryParam("chatId", "")
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_chatTopicTooLong() {
+        String topic = String.join("", Collections.nCopies(250 + 1, "A"));
+        final Response response = target(CHAT_PATH)
+                .queryParam("q", "question")
+                .queryParam("chatId", "")
+                .queryParam("current_topic", topic)
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_chatHistoryTooLong() {
+        String history = String.join("", Collections.nCopies(1024 + 1, "A"));
+        final Response response = target(CHAT_PATH)
+                .queryParam("q", "question")
+                .queryParam("chatId", "")
+                .queryParam("chat_history", history)
                 .request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }

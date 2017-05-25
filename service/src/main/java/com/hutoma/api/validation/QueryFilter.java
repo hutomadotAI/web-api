@@ -62,11 +62,6 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                         this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
             }
 
-            if (checkList.contains(APIParameter.AIID_MESH)) {
-                requestContext.setProperty(APIParameter.AIID_MESH.toString(),
-                        this.validateUuid(AIID_MESH, getFirst(pathParameters.get(AIID_MESH))));
-            }
-
             if (checkList.contains(APIParameter.ChatID)) {
                 final String chatId = getFirstOrDefault(queryParameters.get(CHATID), "");
                 requestContext.setProperty(APIParameter.ChatID.toString(),
@@ -77,31 +72,41 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             }
             if (checkList.contains(APIParameter.EntityName)) {
                 requestContext.setProperty(APIParameter.EntityName.toString(),
-                        this.validateAlphaNumPlusDashes(ENTITYNAME, getFirst(queryParameters.get(ENTITYNAME))));
+                        this.validateFieldLength(250, ENTITYNAME,
+                                this.validateAlphaNumPlusDashes(ENTITYNAME,
+                                        getFirst(queryParameters.get(ENTITYNAME)))));
             }
             if (checkList.contains(APIParameter.IntentName)) {
                 requestContext.setProperty(APIParameter.IntentName.toString(),
-                        this.validateAlphaNumPlusDashes(INTENTNAME, getFirst(queryParameters.get(INTENTNAME))));
+                        this.validateFieldLength(250, INTENTNAME,
+                                this.validateAlphaNumPlusDashes(INTENTNAME,
+                                        getFirst(queryParameters.get(INTENTNAME)))));
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
-                        this.validateRequiredSanitized("question", getFirst(queryParameters.get(CHATQUESTION))));
+                        this.validateFieldLength(1024, "question",
+                                this.validateRequiredSanitized("question",
+                                        getFirst(queryParameters.get(CHATQUESTION)))));
             }
             if (checkList.contains(APIParameter.ChatHistory)) {
                 requestContext.setProperty(APIParameter.ChatHistory.toString(),
-                        this.validateOptionalSanitized(getFirst(queryParameters.get(CHATHISTORY))));
+                        this.validateFieldLength(1024, CHATHISTORY,
+                                this.validateOptionalSanitized(getFirst(queryParameters.get(CHATHISTORY)))));
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
-                        this.validateAiName(AINAME, getFirst(queryParameters.get(AINAME))));
+                        this.validateFieldLength(250, AINAME,
+                                this.validateAiName(AINAME, getFirst(queryParameters.get(AINAME)))));
             }
             if (checkList.contains(APIParameter.AIDescription)) {
                 requestContext.setProperty(APIParameter.AIDescription.toString(),
-                        this.validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC))));
+                        this.validateFieldLength(250, AIDESC,
+                                this.validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC)))));
             }
             if (checkList.contains(APIParameter.ChatTopic)) {
                 requestContext.setProperty(APIParameter.ChatTopic.toString(),
-                        this.validateOptionalSanitizeRemoveAt(TOPIC, getFirst(queryParameters.get(TOPIC))));
+                        this.validateFieldLength(250, TOPIC,
+                                this.validateOptionalSanitizeRemoveAt(TOPIC, getFirst(queryParameters.get(TOPIC)))));
             }
             if (checkList.contains(APIParameter.Min_P)) {
                 requestContext.setProperty(APIParameter.Min_P.toString(),
