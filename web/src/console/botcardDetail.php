@@ -319,7 +319,7 @@ unset($session);
 
         </div>
     </div>
-    <input type="hidden" id="purchase_state" name="purchase_state" value="0" style="display:none;">
+    <input type="hidden" id="purchase_state" name="purchase_state" value="false" style="display:none;">
     <input type="hidden" id="bot_id" name="bot_id" style="display:none;">
 
 </div>

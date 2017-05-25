@@ -20,11 +20,7 @@ session_start();
 <body class="hold-transition skin-blue fixed ">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
-
-
-
     <!-- ================ PAGE CONTENT ================= -->
-
         <section class="content">
             <div class="overlay carousel-ovelay" id ="carousel-overlay">
                 <i class="fa fa-refresh fa-spin center-block"></i>
@@ -32,8 +28,6 @@ session_start();
             <p id="botsCarousels"></p>
             <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
-
-
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
@@ -51,7 +45,6 @@ session_start();
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 
-
 <script>
     $(document).ready(function () {
         getCarousels(
@@ -60,8 +53,9 @@ session_start();
     });
     $('#buyBot').on('hide.bs.modal', function (e) {
         var purchase_state = document.getElementById('purchase_state').value;
-        if (purchase_state === 1)
+        if (purchase_state ==='true') {
             switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.BOTSTORE_FLOW.value);
+        }
     });
     <?php
     unset($aiName);
