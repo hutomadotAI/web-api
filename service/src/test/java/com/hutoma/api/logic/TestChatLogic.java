@@ -801,9 +801,9 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult("Hi");
+        ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.2);
-        ChatResult cr2 = new ChatResult("Hi2");
+        ChatResult cr2 = new ChatResult("question");
         cr2.setScore(0.3);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
@@ -814,9 +814,39 @@ public class TestChatLogic {
         ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
         when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
-        ChatResult cr1Aiml = new ChatResult("Hi3");
+        ChatResult cr1Aiml = new ChatResult("question");
         cr1Aiml.setScore(0.6);
-        ChatResult cr2Aiml = new ChatResult("Hi4");
+        ChatResult cr2Aiml = new ChatResult("question");
+        cr2Aiml.setScore(0.7);
+        when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1Aiml);
+            put(cr2Uuid, cr2Aiml);
+        }});
+        // We now expect to get the AIML one with the highest score
+        validateStateSaved(cr2Aiml, cr2Uuid);
+    }
+
+    @Test
+    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws RequestBase.AiControllerException {
+        // BOT1 has higher score in WNET
+        ChatResult cr1 = new ChatResult("question");
+        cr1.setScore(0.3);
+        ChatResult cr2 = new ChatResult("question");
+        cr2.setScore(0.2);
+        UUID cr1Uuid = UUID.randomUUID();
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1);
+            put(cr2Uuid, cr2);
+        }};
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+
+        // BOT2 has higher score in AIML
+        ChatResult cr1Aiml = new ChatResult("question");
+        cr1Aiml.setScore(0.6);
+        ChatResult cr2Aiml = new ChatResult("question");
         cr2Aiml.setScore(0.7);
         when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
             put(cr1Uuid, cr1Aiml);
