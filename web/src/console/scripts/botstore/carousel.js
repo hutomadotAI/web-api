@@ -89,6 +89,11 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                 wHTML += '<div class="card-author unselectable no-shadow">';
                 wHTML += 'by ' + botAuthor;
                 wHTML += '</div>';
+
+                wHTML += '<a class="card-testBotLink" id="cardTestBotLink' + botId + '" href="./newAI.php" target="_top">';
+                wHTML += 'Test Bot';
+                wHTML += '</a>';
+
                 wHTML += '<div class="card-footer flat unselectable">';
                 wHTML += '<div class="row no-margin">';
                 wHTML += '<div class="pull-left">';
@@ -96,8 +101,8 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                 // TODO when API in ready we can add this infos
                 //wHTML += '<i class="fa fa-star card-star"></i>';
                 //wHTML += '<span class="card-users text-left">'+ bot['metadata']['activations']+'</span>';
-                wHTML += '</div>';
 
+                wHTML += '</div>';
 
                 var dataBuyBot = 'id="btnBuyBot' + botId
                     + '" data-toggle="modal" data-target="#buyBot" data-botid="' + botId
@@ -116,9 +121,11 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                             /*wHTML += ('<div class="switch" id="btnSwitch' + botId
                              + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,'
                              + optionFlow + ',"' + botId + '"); data-link="0"></div>');*/
+
                             wHTML += ('<div class="card-purchased pull-right">');
                             wHTML += ('purchased');
                             wHTML += ('</div>');
+
                         }
                         else {
                             wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
@@ -158,11 +165,9 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         wHTML += ('</div>');
 
-
-        wHTML += ('<span class="carousel-see-more">');
-        wHTML += ('<a href="botstoreList.php' + buildCategoryURIparameter(category) + '" onclick=\"triggerCategoryChanged(\''+ encodeURIComponent(category) + '\')\">');
-        wHTML += ('<button class="btn btn-primary flat" value="' + category + '"><b>see more</b></button>');
-        wHTML += ('</a></span>');
+        var hrefLocation = ( optionFlow === DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value ? 'NewAIBotstore.php' : 'botstore.php');
+        wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="' + category
+            + '" onCLick="window.location.href=\'' + hrefLocation + buildCategoryURIparameter(category) + '\'";><b>see more</b></button></span>';
         wHTML += ('</div>');
         wHTML += ('</section>');
 
@@ -172,14 +177,7 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         showSeeMoreButton(newNode);
     }
-
-    // Notify any parent that we've finished painting
-    window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
-}
-
-function triggerCategoryChanged(category) {
-    var event = new CustomEvent('BotstoreCategoryChanged', { detail : { 'category' : category } });
-    window.parent.document.dispatchEvent(event);
+    parent.$(parent.document).trigger('BotstoreFinishPaintEvent');
 }
 
 function showSeeMoreButton(node) {

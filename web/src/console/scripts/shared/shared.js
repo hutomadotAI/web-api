@@ -69,7 +69,7 @@ var URLS = {
 
 function switchCard(botId,optionFlow) {
     var node = document.getElementById('card' + botId);
-    var btnClassName = 'card-price pull-right'
+    var btnClassName = 'card-price pull-right';
     var pos = node.getAttribute('data-pos');
     var targetDiv = node.getElementsByClassName(btnClassName)[0];
     switch (optionFlow) {
@@ -79,6 +79,7 @@ function switchCard(botId,optionFlow) {
             targetDiv.setAttribute('data-toggle', '');
             targetDiv.setAttribute('data-target', '');
             targetDiv.innerHTML = ('purchased');
+            document.getElementById('cardTestBotLink' + botId).style.display = 'block';
             break;
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
             var wHTML = ('<div class="switch" data-link="0" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '");></div>');
