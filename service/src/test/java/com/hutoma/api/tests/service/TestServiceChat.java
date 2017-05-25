@@ -66,7 +66,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat() throws RequestBase.AiControllerException {
         final String answer = "the answer";
-        ChatResult semanticAnalysisResult = new ChatResult();
+        ChatResult semanticAnalysisResult = new ChatResult("Hi");
         semanticAnalysisResult.setAnswer(answer);
         semanticAnalysisResult.setScore(0.9);
         when(this.fakeAiChatServices.awaitWnet()).thenReturn(new HashMap<UUID, ChatResult>() {{

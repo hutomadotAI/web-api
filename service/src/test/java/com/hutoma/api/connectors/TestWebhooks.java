@@ -94,7 +94,7 @@ public class TestWebhooks {
     public void testExecuteWebHook_InvalidIntent() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
         WebHookResponse response = this.webHooks.executeWebHook(null, chatResult, DEVID);
@@ -109,7 +109,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
@@ -126,7 +126,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
 
@@ -144,7 +144,7 @@ public class TestWebhooks {
     public void testExecuteWebHook_NoWebHook() throws Database.DatabaseException, IOException {
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNull(response);
@@ -158,7 +158,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
@@ -175,7 +175,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());

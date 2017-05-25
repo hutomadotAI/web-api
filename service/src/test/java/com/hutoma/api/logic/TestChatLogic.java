@@ -253,7 +253,7 @@ public class TestChatLogic {
     @Test
     public void testChat_RejectedNeuralDueToAIStatus() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
         chatResult.setAnswer(null);
         Map<UUID, ChatResult> map = new HashMap<UUID, ChatResult>() {{
             this.put(AIID, chatResult);
@@ -644,7 +644,7 @@ public class TestChatLogic {
         // Next answer should exit intent handling and go through normal chat processing
         final String wnetAnswer = "wnet answer";
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(null);
-        ChatResult wnetResult = new ChatResult();
+        ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(0.9f);
         wnetResult.setAnswer(wnetAnswer);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
@@ -751,9 +751,9 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_noPreviousLock_lockToHighestBot() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.4);
         UUID cr1Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
@@ -766,9 +766,9 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
@@ -783,9 +783,9 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
@@ -801,9 +801,9 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.3);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
@@ -814,9 +814,9 @@ public class TestChatLogic {
         ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
         when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
-        ChatResult cr1Aiml = new ChatResult();
+        ChatResult cr1Aiml = new ChatResult("Hi3");
         cr1Aiml.setScore(0.6);
-        ChatResult cr2Aiml = new ChatResult();
+        ChatResult cr2Aiml = new ChatResult("Hi4");
         cr2Aiml.setScore(0.7);
         when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
             put(cr1Uuid, cr1Aiml);
@@ -998,7 +998,7 @@ public class TestChatLogic {
                                double rnnConfidence, String rnnResponse) throws
             RequestBase.AiControllerException {
 
-        ChatResult wnetResult = new ChatResult();
+        ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(wnetConfidence);
         wnetResult.setAnswer(wnetResponse);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
@@ -1006,12 +1006,12 @@ public class TestChatLogic {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeChatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.singletonList(
                 new AiDevId(DEVID_UUID, AIML_BOT_AIID)));
-        ChatResult aimlResult = new ChatResult();
+        ChatResult aimlResult = new ChatResult("Hi2");
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);
         when(this.fakeChatServices.awaitAiml()).thenReturn(getChatResultMap(AIML_BOT_AIID, aimlResult));
 
-        ChatResult rnnResult = new ChatResult();
+        ChatResult rnnResult = new ChatResult("Hi3");
         rnnResult.setScore(rnnConfidence);
         rnnResult.setAnswer(rnnResponse);
         when(this.fakeChatServices.awaitRnn()).thenReturn(getChatResultMap(AIID, rnnResult));

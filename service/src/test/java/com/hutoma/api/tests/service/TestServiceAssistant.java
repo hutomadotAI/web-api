@@ -61,7 +61,7 @@ public class TestServiceAssistant extends ServiceTestBase {
     @Test
     public void testStubbedChat() throws ServerConnector.AiServicesException {
         final String answer = "Hello";
-        ChatResult semanticAnalysisResult = new ChatResult();
+        ChatResult semanticAnalysisResult = new ChatResult("Hi");
         semanticAnalysisResult.setAnswer(answer);
         semanticAnalysisResult.setScore(1.0);
 
