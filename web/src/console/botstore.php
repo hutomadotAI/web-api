@@ -80,7 +80,6 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     <script src="scripts/external/select2/select2.full.js"></script>
 
     <script src="./scripts/botstore/botstoreWizard.js"></script>
-    <script src="./scripts/botstore/botstore.js"></script>
     <script src="./scripts/botstore/carousel.js"></script>
     <script src="./scripts/botcard/botcard.js"></script>
 
@@ -105,11 +104,6 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
             var iFrame = document.getElementById('contentFrame');
             iFrame.height = window.frames[0].document.body.scrollHeight + 'px';
             iFrame.style.width = '100%';
-        });
-        $('#buyBot').on('hide.bs.modal', function (e) {
-            var purchase_state = document.getElementById('purchase_state').value;
-            if (purchase_state === 1)
-                switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.BOTSTORE_FLOW.value);
         });
         <?php
         unset($aiName);

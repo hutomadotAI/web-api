@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
-<div class="modal fade" id="buyBot" role="dialog" style="padding-top:100px;">
-    <div class="modal-dialog flat">
+<div class="modal fade" id="buyBot" role="dialog">
+    <div class="modal-dialog flat" id="modalDialog">
 
         <div class="modal-content bot-shadow">
 
