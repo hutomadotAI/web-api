@@ -109,21 +109,6 @@ function setButtonParameter(title, owned, carousel_category, flow) {
     var nodeButtonBack = document.getElementById('btnBackToBotstore');
     var nodeButtonBuy = document.getElementById('btnBuyBot');
     switch (title) {
-        case 'home' :
-            var newAIBotstoreLink = './NewAIBotstore.php';
-            if (owned)
-                btnFromBuyToPurchased();
-            else
-                nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
-
-            if (carousel_category !== '')
-                newAIBotstoreLink += buildCategoryURIparameter(carousel_category);
-
-            nodeCloseButtonBack.setAttribute('href', newAIBotstoreLink);
-            nodeButtonBack.innerText = 'Go back';
-            nodeButtonBack.setAttribute('href', newAIBotstoreLink);
-            nodeButtonBuy.setAttribute('data-flow', (flow).toString());
-            break;
         case 'settings' :
             nodeCloseButtonBack.setAttribute('href', './settingsAI.php?botstore=1');
             btnFromBuyToPurchased();
@@ -134,20 +119,13 @@ function setButtonParameter(title, owned, carousel_category, flow) {
             if (owned)
                 btnFromBuyToPurchased();
             else
-                switch (flow) {
-                    case DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value:
-                        nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
-                        break;
-                    case DRAW_BOTCARDS.BOTSTORE_FLOW.value :
-                        nodeButtonBuy.setAttribute('onClick', 'window.location=\'./newAI.php\'');
-                        break;
-                    default:
-                }
+                nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
+
 
             if (carousel_category !== '')
                 botstoreLink += buildCategoryURIparameter(carousel_category);
 
-            nodeCloseButtonBack.setAttribute('href', botstoreLink);
+            nodeCloseButtonBack.setAttribute('href', 'javascript:history.back()');
             nodeButtonBuy.setAttribute('data-flow', (flow).toString());
             break;
         default:

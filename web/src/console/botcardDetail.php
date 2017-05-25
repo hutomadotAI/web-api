@@ -9,7 +9,13 @@ header('P3P: CP="CAO PSA OUR"');
 session_start();
 
 $botId = $_GET['botId'];
-$menu_title = $_GET['origin'];
+if (isset($_GET['origin'])) {
+    $menu_title = $_GET['origin'];
+} else {
+    if (\hutoma\sessionObject::getDevToken() != null) {
+        $menu_title = "botstore";
+    }
+}
 $session = new hutoma\sessionObject();
 $botstoreApi = new \hutoma\api\botstoreApi(false, $session->getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
