@@ -152,6 +152,8 @@ public class ChatLogic {
 
                 if (!wnetConfident) {
                     // otherwise,
+                    // clear the locked AI
+                    this.chatState.setLockedAiid(null);
                     // wait for the AIML server to respond
                     ChatResult aimlResult = this.interpretAimlResult(question);
 
@@ -171,6 +173,9 @@ public class ChatLogic {
                     this.telemetryMap.add("AIMLAnswered", aimlResult != null);
 
                     if (aimlResult == null || !aimlConfident) {
+                        // clear the locked AI
+                        this.chatState.setLockedAiid(null);
+
                         // get a response from the RNN
                         ChatResult rnnResult = this.interpretRnnResult(question);
 
@@ -406,22 +411,30 @@ public class ChatLogic {
 
     private ChatResult getTopScore(final Map<UUID, ChatResult> chatResults, final String question) {
         // Check if the currently locked bot still has an acceptable response
+        ChatResult chatResult = null;
         if (this.chatState.getLockedAiid() != null && chatResults.containsKey(this.chatState.getLockedAiid())) {
             ChatResult result = chatResults.get(this.chatState.getLockedAiid());
             if (result.getScore() >= this.minP) {
-                return result;
+                chatResult = result;
+                chatResult.setAiid(this.chatState.getLockedAiid());
             }
         }
-        UUID responseFromAi = null;
-        ChatResult chatResult = new ChatResult(question);
-        for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
-            if (entry.getValue().getScore() >= chatResult.getScore()) {
-                chatResult = entry.getValue();
-                responseFromAi = entry.getKey();
+
+        if (chatResult == null) {
+            for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
+                if (chatResult == null || entry.getValue().getScore() >= chatResult.getScore()) {
+                    chatResult = entry.getValue();
+                    chatResult.setAiid(entry.getKey());
+                }
             }
         }
+
+        if (chatResult == null) {
+            chatResult = new ChatResult(question);
+        }
+
         // lock to this AI
-        this.chatState.setLockedAiid(responseFromAi);
+        this.chatState.setLockedAiid(chatResult.getAiid());
         chatResult.setQuery(question);
         return chatResult;
     }
