@@ -25,9 +25,9 @@ async def handle_json(request):
         intentMapping = querydata.getIntentMapping(intentName)
 
         try:
-            knownValue = next((x for x in variables if x['name'] == intentMapping['key_entity']), None)['currentValue']
+            knownValue = next((x for x in variables if x['entity'] == intentMapping['key_entity']), None)['value']
             knownColumn = intentMapping['key_column']
-            targetValue = next((x for x in variables if x['name'] == intentMapping['value_entity']), None)['currentValue']
+            targetValue = next((x for x in variables if x['entity'] == intentMapping['value_entity']), None)['value']
         except BaseException:
             return web.Response(text="A processing error occurred.")
 
