@@ -14,7 +14,7 @@ public class ChatResult {
     private final String topicIn = "";
     private double score;
     @SerializedName("query")
-    private final String query;
+    private String query;
     private String answer = "";
     private String history = "";
     @SerializedName("elapsedTime")
@@ -55,6 +55,8 @@ public class ChatResult {
     public void setAnswer(String answer) {
         this.answer = answer;
     }
+
+    public void setQuery(final String query) { this.query = query; }
 
     public final String getQuery() { return this.query; }
 

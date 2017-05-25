@@ -422,6 +422,7 @@ public class ChatLogic {
         }
         // lock to this AI
         this.chatState.setLockedAiid(responseFromAi);
+        chatResult.setQuery(question);
         return chatResult;
     }
 
