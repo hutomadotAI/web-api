@@ -99,11 +99,19 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     </form>
 
     <script>
-        $(document).bind('BotstoreFinishPaintEvent', function() {
+
+        window.document.addEventListener('BotstoreFinishPaintEvent', function() {
             var iFrame = document.getElementById('contentFrame');
             iFrame.height = window.frames[0].document.body.scrollHeight + 'px';
             iFrame.style.width = '100%';
-        });
+        }, false);
+
+        window.document.addEventListener('BotstoreCategoryChanged', function(e) {
+            var menu = document.getElementById('botstoreMenu');
+            menu.childNodes.forEach(function(elem) {elem.classList.remove('active');});
+            document.getElementById('menu_' + removeSpecialCharacters(decodeURIComponent(e.detail.category))).classList.add('active');
+        }, false);
+
         <?php
         unset($aiName);
         unset($category);

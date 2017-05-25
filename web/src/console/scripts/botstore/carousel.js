@@ -114,8 +114,8 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                         wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
                         if (botOwned) {
                             /*wHTML += ('<div class="switch" id="btnSwitch' + botId
-                            + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,'
-                            + optionFlow + ',"' + botId + '"); data-link="0"></div>');*/
+                             + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,'
+                             + optionFlow + ',"' + botId + '"); data-link="0"></div>');*/
                             wHTML += ('<div class="card-purchased pull-right">');
                             wHTML += ('purchased');
                             wHTML += ('</div>');
@@ -158,9 +158,11 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         wHTML += ('</div>');
 
-        var hrefLocation = ( optionFlow === DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value ? 'NewAIBotstore.php' : 'botstore.php');
-        wHTML += '<span class="carousel-see-more"><button class="btn btn-primary flat" value="' + category
-            + '" onCLick="window.location.href=\'' + hrefLocation + buildCategoryURIparameter(category) + '\'";><b>see more</b></button></span>';
+
+        wHTML += ('<span class="carousel-see-more">');
+        wHTML += ('<a href="botstoreList.php' + buildCategoryURIparameter(category) + '" onclick=\"triggerCategoryChanged(\''+ encodeURIComponent(category) + '\')\">');
+        wHTML += ('<button class="btn btn-primary flat" value="' + category + '"><b>see more</b></button>');
+        wHTML += ('</a></span>');
         wHTML += ('</div>');
         wHTML += ('</section>');
 
@@ -170,7 +172,14 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         showSeeMoreButton(newNode);
     }
-    parent.$(parent.document).trigger('BotstoreFinishPaintEvent');
+
+    // Notify any parent that we've finished painting
+    window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
+}
+
+function triggerCategoryChanged(category) {
+    var event = new CustomEvent('BotstoreCategoryChanged', { detail : { 'category' : category } });
+    window.parent.document.dispatchEvent(event);
 }
 
 function showSeeMoreButton(node) {

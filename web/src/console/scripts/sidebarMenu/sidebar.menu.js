@@ -48,7 +48,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     var loc = "botstore.php";
     wHTML += ('<li class="unselectable" id="level2">');
     wHTML += ('<a href="#"><i class="fa fa-shopping-cart text-green"></i><span> botstore</span><i class="fa fa-ellipsis-v pull-right"></i></a>');
-    wHTML += ('<ul class="treeview-menu">');
+    wHTML += ('<ul class="treeview-menu" id="botstoreMenu">');
     wHTML += ('<li id="menu_botstore" ><a href="' + loc + '"><i class="fa fa-globe text-gray text-center"></i> All</a></li>');
     for (var key in category_list) {
         var category = category_list[key];
