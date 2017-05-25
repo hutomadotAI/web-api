@@ -14,7 +14,7 @@ public class ChatResult {
     private final String topicIn = "";
     private double score;
     @SerializedName("query")
-    private String query = "";
+    private String query;
     private String answer = "";
     private String history = "";
     @SerializedName("elapsedTime")
@@ -30,7 +30,8 @@ public class ChatResult {
     private transient UUID aiid;
     private transient boolean resetConversation;
 
-    public ChatResult() {
+    public ChatResult(final String query) {
+        this.query = query;
     }
 
     /***
@@ -39,6 +40,7 @@ public class ChatResult {
      * @param source
      */
     public ChatResult(final ChatResult source) {
+        this.query = source.query;
         this.score = source.score;
         this.answer = source.answer;
         this.elapsedTime = source.elapsedTime;
@@ -54,9 +56,9 @@ public class ChatResult {
         this.answer = answer;
     }
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
+    public void setQuery(final String query) { this.query = query; }
+
+    public final String getQuery() { return this.query; }
 
     public void setAction(String action) {
         this.action = action;

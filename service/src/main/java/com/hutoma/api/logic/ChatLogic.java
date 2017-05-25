@@ -101,10 +101,7 @@ public class ChatLogic {
 
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
-        ChatResult result = new ChatResult();
-
-        // add the question to the result.
-        result.setQuery(question);
+        ChatResult result = new ChatResult(question);
 
         try {
 
@@ -120,7 +117,7 @@ public class ChatLogic {
                         this.chatState.getTopic());
 
                 // wait for WNET to return
-                result = this.interpretSemanticResult();
+                result = this.interpretSemanticResult(question);
 
                 boolean wnetConfident = false;
                 if (result != null) {
@@ -155,8 +152,10 @@ public class ChatLogic {
 
                 if (!wnetConfident) {
                     // otherwise,
+                    // clear the locked AI
+                    this.chatState.setLockedAiid(null);
                     // wait for the AIML server to respond
-                    ChatResult aimlResult = this.interpretAimlResult();
+                    ChatResult aimlResult = this.interpretAimlResult(question);
 
                     boolean aimlConfident = false;
                     // If we don't have AIML available (not linked)
@@ -174,8 +173,11 @@ public class ChatLogic {
                     this.telemetryMap.add("AIMLAnswered", aimlResult != null);
 
                     if (aimlResult == null || !aimlConfident) {
+                        // clear the locked AI
+                        this.chatState.setLockedAiid(null);
+
                         // get a response from the RNN
-                        ChatResult rnnResult = this.interpretRnnResult();
+                        ChatResult rnnResult = this.interpretRnnResult(question);
 
                         // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
                         this.telemetryMap.add("AnsweredWithConfidence", false);
@@ -200,7 +202,7 @@ public class ChatLogic {
                             } else {
                                 // TODO we need to figure out something
                                 this.telemetryMap.add("AnsweredBy", "NONE");
-                                result = getImCompletelyLostChatResult(chatUuid);
+                                result = getImCompletelyLostChatResult(chatUuid, question);
                             }
                         }
 
@@ -208,9 +210,6 @@ public class ChatLogic {
                     }
                 }
             }
-
-            // add the question
-            result.setQuery(question);
 
             // set the history to the answer, unless we have received a reset command,
             // in which case send an empty string
@@ -280,9 +279,8 @@ public class ChatLogic {
                 .put("History", history)
                 .put("Q", question);
 
-        ChatResult result = new ChatResult();
+        ChatResult result = new ChatResult(question);
         result.setElapsedTime(this.tools.getTimestamp() - startTime);
-        result.setQuery(question);
 
         // Set a fixed response.
         result.setAnswer("Hello");
@@ -411,35 +409,44 @@ public class ChatLogic {
         return handledIntent;
     }
 
-    private ChatResult getTopScore(final Map<UUID, ChatResult> chatResults) {
+    private ChatResult getTopScore(final Map<UUID, ChatResult> chatResults, final String question) {
         // Check if the currently locked bot still has an acceptable response
+        ChatResult chatResult = null;
         if (this.chatState.getLockedAiid() != null && chatResults.containsKey(this.chatState.getLockedAiid())) {
             ChatResult result = chatResults.get(this.chatState.getLockedAiid());
             if (result.getScore() >= this.minP) {
-                return result;
+                chatResult = result;
+                chatResult.setAiid(this.chatState.getLockedAiid());
             }
         }
-        UUID responseFromAi = null;
-        ChatResult chatResult = new ChatResult();
-        for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
-            if (entry.getValue().getScore() >= chatResult.getScore()) {
-                chatResult = entry.getValue();
-                responseFromAi = entry.getKey();
+
+        if (chatResult == null) {
+            for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
+                if (chatResult == null || entry.getValue().getScore() >= chatResult.getScore()) {
+                    chatResult = entry.getValue();
+                    chatResult.setAiid(entry.getKey());
+                }
             }
         }
+
+        if (chatResult == null) {
+            chatResult = new ChatResult(question);
+        }
+
         // lock to this AI
-        this.chatState.setLockedAiid(responseFromAi);
+        this.chatState.setLockedAiid(chatResult.getAiid());
+        chatResult.setQuery(question);
         return chatResult;
     }
 
-    private ChatResult interpretSemanticResult() throws RequestBase.AiControllerException {
+    private ChatResult interpretSemanticResult(final String question) throws RequestBase.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitWnet();
         if (allResults == null) {
             return null;
         }
         // Get the top score
-        ChatResult chatResult = getTopScore(allResults);
+        ChatResult chatResult = getTopScore(allResults, question);
         UUID aiid = chatResult.getAiid();
         this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
@@ -470,7 +477,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretAimlResult() throws RequestBase.AiControllerException {
+    private ChatResult interpretAimlResult(final String question) throws RequestBase.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitAiml();
         if (allResults == null) {
@@ -478,7 +485,7 @@ public class ChatLogic {
         }
 
         // Get the top score
-        ChatResult chatResult = getTopScore(allResults);
+        ChatResult chatResult = getTopScore(allResults, question);
         UUID aiid = chatResult.getAiid();
         this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
@@ -496,7 +503,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretRnnResult() throws RequestBase.AiControllerException {
+    private ChatResult interpretRnnResult(final String question) throws RequestBase.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitRnn();
         if (allResults == null) {
@@ -504,7 +511,7 @@ public class ChatLogic {
         }
 
         // Get the top score
-        ChatResult chatResult = getTopScore(allResults);
+        ChatResult chatResult = getTopScore(allResults, question);
         UUID aiid = chatResult.getAiid();
         this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
@@ -543,8 +550,8 @@ public class ChatLogic {
 
     }
 
-    private ChatResult getImCompletelyLostChatResult(final UUID chatId) {
-        ChatResult result = new ChatResult();
+    private ChatResult getImCompletelyLostChatResult(final UUID chatId, final String question) {
+        ChatResult result = new ChatResult(question);
         result.setChatId(chatId);
         result.setScore(0.0);
         result.setAnswer("Erm... What?");
