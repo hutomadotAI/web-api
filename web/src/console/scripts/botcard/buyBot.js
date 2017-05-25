@@ -23,14 +23,14 @@ function purchaseBot() {
                         switch (statusCode) {
                             case 200:
                                 document.getElementById('message').innerText = 'Bot added successfully!';
-                                $('#purchase_state').val('1');
+                                $('#purchase_state').val(true);
                                 var $tmp = $('#btnBuyBot');
                                 if ($tmp.length)
                                     btnFromBuyToPurchased();
                                 break;
                             default:
                                 document.getElementById('message').innerText = message == null ? GENERIC_ERROR_STRING : message;
-                                $('#purchase_state').val('0');
+                                $('#purchase_state').val(false);
                                 break;
                         }
                     } catch (err) {

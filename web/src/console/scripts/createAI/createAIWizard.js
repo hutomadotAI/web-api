@@ -42,7 +42,7 @@ function getAllBotsLinked() {
 
 $('#buyBot').on('hide.bs.modal', function (e) {
     var purchase_state = document.getElementById('purchase_state').value;
-    if (purchase_state == 1)
+    if (purchase_state ==='true')
         switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
 });
 

@@ -80,7 +80,6 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     <script src="scripts/external/select2/select2.full.js"></script>
 
     <script src="./scripts/botstore/botstoreWizard.js"></script>
-    <script src="./scripts/botstore/carousel.js"></script>
     <script src="./scripts/botcard/botcard.js"></script>
 
     <script src="./scripts/messaging/messaging.js"></script>
