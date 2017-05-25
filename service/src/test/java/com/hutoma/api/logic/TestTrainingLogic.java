@@ -509,6 +509,20 @@ public class TestTrainingLogic {
     }
 
     @Test
+    public void testTrain_topics_fileStartsWithTopic() {
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList(DEFAULT_TOPIC, "Q1", "A1"));
+        Assert.assertEquals(String.format("%s\nQ1\nA1\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        Assert.assertEquals(0, result.getEvents().size());
+    }
+
+    @Test
+    public void testTrain_topics_topicEnd_blankLine_isPreserved() {
+        TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList(DEFAULT_TOPIC, "Q1", "A1", "", "Q2", "A2"));
+        Assert.assertEquals(String.format("%s\nQ1\nA1\n\nQ2\nA2\n\n", DEFAULT_TOPIC), result.getTrainingText());
+        Assert.assertEquals(0, result.getEvents().size());
+    }
+
+    @Test
     public void testTrain_topics_topicWithNoConversations_doesNotGenerateError() {
         TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList("Q1", "A1", DEFAULT_TOPIC));
         Assert.assertEquals(String.format("Q1\nA1\n%s\n\n", DEFAULT_TOPIC), result.getTrainingText());

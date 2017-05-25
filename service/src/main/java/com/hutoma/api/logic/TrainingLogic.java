@@ -42,7 +42,7 @@ import static com.hutoma.api.connectors.Database.DatabaseException;
  */
 public class TrainingLogic {
 
-    public static final String TOPIC_MARKER = "@topic";
+    public static final String TOPIC_MARKER = "@topic_out";
 
     private static final String EMPTY_STRING = "";
     private static final String EOL = "\n";
@@ -328,7 +328,7 @@ public class TrainingLogic {
             LogMap logMap = LogMap.map("AIID", aiid);
             String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
             if (trainingMaterials == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials - AI not founf", devidString, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
             ApiTrainingMaterials result = new ApiTrainingMaterials(trainingMaterials);
