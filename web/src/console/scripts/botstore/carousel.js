@@ -89,6 +89,11 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                 wHTML += '<div class="card-author unselectable no-shadow">';
                 wHTML += 'by ' + botAuthor;
                 wHTML += '</div>';
+
+                wHTML += '<a class="card-testBotLink" id="cardTestBotLink' + botId + '" href="./newAI.php" target="_top">';
+                wHTML += 'Test Bot';
+                wHTML += '</a>';
+
                 wHTML += '<div class="card-footer flat unselectable">';
                 wHTML += '<div class="row no-margin">';
                 wHTML += '<div class="pull-left">';
@@ -97,7 +102,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                 //wHTML += '<i class="fa fa-star card-star"></i>';
                 //wHTML += '<span class="card-users text-left">'+ bot['metadata']['activations']+'</span>';
                 wHTML += '</div>';
-
 
                 var dataBuyBot = 'id="btnBuyBot' + botId
                     + '" data-toggle="modal" data-target="#buyBot" data-botid="' + botId
@@ -172,7 +176,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         showSeeMoreButton(newNode);
     }
-
     // Notify any parent that we've finished painting
     window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
 }
