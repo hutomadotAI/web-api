@@ -23,12 +23,12 @@ unset($session);
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Botstore | <?php echo $metadata['name']?></title>
+    <title>hu:toma | Botstore | <?php echo $metadata['name'] ?></title>
     <meta name="description" content="Hutoma Botstore, Bot name=<?php
-    echo $metadata['name']?>, Category=<?php
-    echo $metadata['category']?>, Description=<?php
-    echo $metadata['description']?>, Developer=<?php
-    echo $developer['company']?>">
+    echo $metadata['name'] ?>, Category=<?php
+    echo $metadata['category'] ?>, Description=<?php
+    echo $metadata['description'] ?>, Developer=<?php
+    echo $developer['company'] ?>">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
@@ -337,18 +337,21 @@ unset($session);
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 
-<script>
-    var responseCode = <?php echo $botstoreItem['status']['code']; ?>;
-    var botstoreItem = <?php
-        $botItem = new \hutoma\botstoreItem();
-        if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem)))
-            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
-        echo json_encode($botItem->toJSON());
-        unset($botstoreItem);
-        unset($botItem);
-        ?>;
-</script>
-
+<?php
+if (isset($botstoreItem) && $botstoreItem != null) {
+    ?>
+    <script>
+        var responseCode = <?php echo $botstoreItem['status']['code']; ?>;
+        var botstoreItem = <?php
+            $botItem = new \hutoma\botstoreItem();
+            if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem)))
+                $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
+            echo json_encode($botItem->toJSON());
+            unset($botstoreItem);
+            unset($botItem);
+            ?>;
+    </script>
+<?php } ?>
 <script>
     $(function () {
         var nodeContainerAlert = document.getElementById('containerMsgAlertBotcardDetail');
@@ -383,7 +386,8 @@ unset($session);
 
         <?php } ?>
     });
-
 </script>
+
+
 </body>
 </html>
