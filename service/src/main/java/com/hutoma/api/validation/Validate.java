@@ -62,21 +62,11 @@ public class Validate {
                     lastCharWasSpace = true;
                 }
             } else {
-                // ignore out of range characters
-                if ((ch >= 32) && (ch < 127)) {
-                    switch (ch) {
-                        // characters to omit
-                        case '[':
-                        case ']':
-                        case '<':
-                        case '>':
-                        case '&':
-                            break;
-                        // characters to retain unchanged
-                        default:
-                            sb.append(ch);
-                            lastCharWasSpace = false;
-                    }
+                // silently omit control characters
+                // i.e. 00-1f, 7f-9f
+                if (!Character.isISOControl(ch)) {
+                    sb.append(ch);
+                    lastCharWasSpace = false;
                 }
             }
         }

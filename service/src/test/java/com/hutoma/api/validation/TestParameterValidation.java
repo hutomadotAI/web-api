@@ -160,7 +160,7 @@ public class TestParameterValidation {
 
     @Test
     public void testChatDisallowedCharacters() throws Validate.ParameterValidationException {
-        Assert.assertEquals("123", this.validation.validateRequiredSanitized("chat", "\t\n123£"));
+        Assert.assertEquals("123", this.validation.validateRequiredSanitized("chat", "\t\n123\t"));
     }
 
     @Test(expected = Validate.ParameterValidationException.class)
