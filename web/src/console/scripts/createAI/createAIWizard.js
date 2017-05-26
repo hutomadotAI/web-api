@@ -25,7 +25,7 @@ function deactiveButtons() {
 
 function getAllBotsLinked() {
     var userActivedBots = {};
-    var i, $list = $("[data-linked=\"1\"]");
+    var i, $list = $("[data-linked=\"true\"]");
 
     userActivedBots.bots = new Array();
 
