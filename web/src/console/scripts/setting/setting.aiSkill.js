@@ -19,7 +19,7 @@ function getLinkTasks(userSkill, aiSkill) {
 
     for (var i = 0; i < userSkill.length; i++) {
         if (aiSkill.indexOf(parseInt(userSkill[i]['botId'])) === -1) {
-            if (userSkill[i]['active'] === '1') {
+            if (userSkill[i]['active'] === 'true') {
                 //pushed to link a bot
                 linkTasks.bots.push({
                     "botId": userSkill[i]['botId'],
@@ -28,7 +28,7 @@ function getLinkTasks(userSkill, aiSkill) {
             }
         }
         else {
-            if (userSkill[i]['active'] === '0') { //exists
+            if (userSkill[i]['active'] === 'false') { //exists
                 //pushed to  unlink a bot
                 linkTasks.bots.push({
                     "botId": userSkill[i]['botId'],
@@ -94,7 +94,7 @@ function callback(jsonString) {
         var active = task[x]['active'];
         var index = linkedBots.indexOf(botId);
 
-        if (active === 0) {
+        if (active === 'false') {
             if (index > -1) {
                 linkedBots.splice(index, 1);
             }

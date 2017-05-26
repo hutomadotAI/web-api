@@ -82,9 +82,9 @@ function switchCard(botId,optionFlow) {
             document.getElementById('cardTestBotLink' + botId).style.display = 'block';
             break;
         case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
-            var wHTML = ('<div class="switch" data-link="0" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '");></div>');
+            var wHTML = ('<div class="switch" data-link="false" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + optionFlow + ',"' + botId + '");></div>');
             var parent = targetDiv.parentNode;
-            parent.setAttribute('data-linked', '0');
+            parent.setAttribute('data-linked', 'false');
             parent.innerHTML = wHTML;
             break;
         default:
@@ -170,14 +170,14 @@ function toggleAddBotSkill(node, optionFlow, botId) {
     $(node).toggleClass('switchOn');
     var botcard = document.getElementById('card' + botId).children[0];
 
-    if ($(node).attr('data-link') == '0') {
-        $(node).attr('data-link', 1);
-        parent.setAttribute('data-linked', '1');
+    if ($(node).attr('data-link') === 'false') {
+        $(node).attr('data-link', true);
+        parent.setAttribute('data-linked', 'true');
         botcard.classList.add("borderActive");
     }
     else {
-        $(node).attr('data-link', 0);
-        parent.setAttribute('data-linked', '0');
+        $(node).attr('data-link', false);
+        parent.setAttribute('data-linked', 'false');
         botcard.classList.remove("borderActive");
     }
 }

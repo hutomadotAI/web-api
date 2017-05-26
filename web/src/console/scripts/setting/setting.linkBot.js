@@ -29,11 +29,11 @@ function showAddSkills(str,  bots, botSubSet ) {
             wHTML += ('</div>');
 
             if (isActiveBot) {
-                wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="1">');
-                wHTML += ('<div class="switch switchOn" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + DRAW_BOTCARDS.ADD_SKILL_FLOW.value + ',"' + botId + '"); data-link="1"></div>');
+                wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="true">');
+                wHTML += ('<div class="switch switchOn" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + DRAW_BOTCARDS.ADD_SKILL_FLOW.value + ',"' + botId + '"); data-link="true"></div>');
             } else {
-                wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="0">');
-                wHTML += ('<div class="switch" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + DRAW_BOTCARDS.ADD_SKILL_FLOW.value + ',"' + botId + '"); data-link="0"></div>');
+                wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="false">');
+                wHTML += ('<div class="switch" id="btnSwitch' + botId + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,' + DRAW_BOTCARDS.ADD_SKILL_FLOW.value + ',"' + botId + '"); data-link="false"></div>');
             }
 
             wHTML += ('</span>');
