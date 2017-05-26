@@ -50,8 +50,7 @@
     <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
-    
-    
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">

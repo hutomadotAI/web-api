@@ -57,6 +57,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
