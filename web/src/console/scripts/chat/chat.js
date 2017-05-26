@@ -146,14 +146,16 @@ function requestAnswerAI(ai_name, question, chatId) {
 
                 // Write response in JSON message box
                 var JSONnode = document.getElementById('msgJSON');
-                JSONnode.innerHTML = JSON.stringify(response, undefined, 2);
+                JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
                 var JSONdata = response;
+                var safeAnswer = htmlEncode(JSONdata['result']['answer']);
                 if (JSONdata['chatId'] === '') {
                     createRightMsg(ai_name, 'no chat id returned', '', -1, true);
                 } else {
                     var chatId = JSONdata['chatId'];
                     if (JSONdata['status']['code'] === 200)
-                        createRightMsg(ai_name, JSONdata['result']['answer'], chatId, JSONdata['result']['score'], false);
+
+                        createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
                     else
                         createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                 }

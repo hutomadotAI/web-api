@@ -206,6 +206,10 @@ function removeSpecialCharacters(str){
     return str.replace(/[&\/\\#,+()$~%.'":*?<>{}\s+]/g, '');
 }
 
+function htmlEncode(value){
+    return $('<div/>').text(value).html();
+}
+
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
