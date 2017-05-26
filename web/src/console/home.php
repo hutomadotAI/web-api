@@ -46,7 +46,7 @@ unset($aiApi);
     <link rel="stylesheet" href="scripts/external/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <script type="text/javascript">(function(o){var b="https://api.autopilothq.com/anywhere/",t="cbf0f1bc32534e378a3344d5ded23c1b773ea5ca8b8548899be30488fc01d84b",a=window.AutopilotAnywhere={_runQueue:[],run:function(){this._runQueue.push(arguments);}},c=encodeURIComponent,s="SCRIPT",d=document,l=d.getElementsByTagName(s)[0],p="t="+c(d.title||"")+"&u="+c(d.location.href||"")+"&r="+c(d.referrer||""),j="text/javascript",z,y;if(!window.Autopilot) window.Autopilot=a;if(o.app) p="devmode=true&"+p;z=function(src,asy){var e=d.createElement(s);e.src=src;e.type=j;e.async=asy;l.parentNode.insertBefore(e,l);};if(!o.noaa){z(b+"aa/"+t+'?'+p,false)};y=function(){z(b+t+'?'+p,true);};if(window.attachEvent){window.attachEvent("onload",y);}else{window.addEventListener("load",y,false);}})({"app":true});</script>
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">

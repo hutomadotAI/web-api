@@ -27,6 +27,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
