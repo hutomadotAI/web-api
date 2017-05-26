@@ -19,7 +19,7 @@ function getLinkTasks(userSkill, aiSkill) {
 
     for (var i = 0; i < userSkill.length; i++) {
         if (aiSkill.indexOf(parseInt(userSkill[i]['botId'])) === -1) {
-            if (userSkill[i]['active'] === 1) {
+            if (userSkill[i]['active'] === '1') {
                 //pushed to link a bot
                 linkTasks.bots.push({
                     "botId": userSkill[i]['botId'],
@@ -28,7 +28,7 @@ function getLinkTasks(userSkill, aiSkill) {
             }
         }
         else {
-            if (userSkill[i]['active'] === 0) { //exists
+            if (userSkill[i]['active'] === '0') { //exists
                 //pushed to  unlink a bot
                 linkTasks.bots.push({
                     "botId": userSkill[i]['botId'],
