@@ -24,8 +24,11 @@ import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,15 +131,15 @@ public class ChatLogic {
 
                     if (wnetConfident) {
                         // if we are taking WNET's reply then process intents
-                        UUID aiid_from_result = result.getAiid();
+                        UUID aiidFromResult = result.getAiid();
                         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                                aiid_from_result, chatUuid, result.getAnswer());
+                                aiidFromResult, chatUuid, result.getAnswer());
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
-                            this.telemetryMap.add("IntentRecognized", memoryIntent.getName());
+                            this.telemetryMap.add("IntentRecognized", true);
 
-                            if (processIntent(devId, aiid_from_result, memoryIntent, question, result)) {
+                            if (processIntent(devId, aiidFromResult, memoryIntent, question, result)) {
                                 this.telemetryMap.add("AnsweredBy", "WNET");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
@@ -308,6 +311,9 @@ public class ChatLogic {
             return false;
         }
 
+        Map<String, Object> intentLog = new HashMap<>();
+        intentLog.put("Name", currentIntent.getName());
+
         List<MemoryIntent> intentsToClear = new ArrayList<>();
         boolean handledIntent = false;
 
@@ -323,6 +329,7 @@ public class ChatLogic {
         List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
                 currentIntent.getVariables());
         if (!entities.isEmpty()) {
+            intentLog.put("Entities retrieved", StringUtils.join(entities, ","));
             currentIntent.fulfillVariables(entities);
 
             // Write recognised persistent entities.
@@ -330,18 +337,20 @@ public class ChatLogic {
                     .stream()
                     .filter(x -> x.getIsPersistent() && x.getCurrentValue() != null)
                     .toArray()) {
-                MemoryVariable memoryVariable = (MemoryVariable)entity;
+                MemoryVariable memoryVariable = (MemoryVariable) entity;
                 this.chatState.setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
             }
         }
 
         // Check if there still are mandatory entities not currently fulfilled
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
+        intentLog.put("Fulfilled", vars.isEmpty());
         if (vars.isEmpty()) {
             notifyIntentFulfilled(chatResult, currentIntent, aiid);
 
             // If the webhook returns a text response, overwrite the answer.
             if (this.webHooks.activeWebhookExists(currentIntent, devId)) {
+                intentLog.put("Webhook run", true);
                 WebHookResponse response = this.webHooks.executeWebHook(currentIntent, chatResult, devId);
 
                 if (response == null) {
@@ -351,7 +360,10 @@ public class ChatLogic {
                             LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
                 } else if (response.getText() != null && !response.getText().isEmpty()) {
                     chatResult.setAnswer(response.getText());
+                    intentLog.put("Webhook response", response.getText());
                 }
+            } else {
+                intentLog.put("Webhook run", false);
             }
 
             intentsToClear.add(currentIntent);
@@ -379,11 +391,9 @@ public class ChatLogic {
                     chatResult.setAnswer(variable.getPrompts().get(pos));
                     // and decrement the number of prompts
                     variable.setTimesPrompted(variable.getTimesPrompted() + 1);
-                    this.telemetryMap.add("IntentPrompt",
-                            String.format("intent:'%s' variable:'%s' currentPrompt:%d/%d",
-                                    currentIntent.getName(), variable.getName(),
-                                    variable.getTimesPrompted(),
-                                    variable.getTimesToPrompt()));
+                    intentLog.put("Variable name", variable.getName());
+                    intentLog.put("Variable times prompted", variable.getTimesPrompted());
+                    intentLog.put("Variable times to prompt", variable.getTimesToPrompt());
                     handledIntent = true;
                 }
             } else { // intent not fulfilled but no variables left to handle
@@ -405,6 +415,9 @@ public class ChatLogic {
         if (!intentsToClear.isEmpty()) {
             this.intentHandler.clearIntents(intentsToClear);
         }
+
+        intentLog.put("Handled", handledIntent);
+        this.telemetryMap.add("Intent", intentLog);
 
         return handledIntent;
     }
