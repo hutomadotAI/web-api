@@ -794,7 +794,12 @@ public class Database {
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
                 String entitiesJson = rs.getString("entity_values");
-                HashMap<String, String> entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
+                HashMap<String, String> entities;
+                if (entitiesJson == null) {
+                    entities = new HashMap<>();
+                } else {
+                    entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
+                }
 
                 String locked_aiid = rs.getString("locked_aiid");
                 return new ChatState(

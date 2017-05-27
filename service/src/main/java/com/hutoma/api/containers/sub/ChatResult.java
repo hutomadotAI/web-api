@@ -21,7 +21,7 @@ public class ChatResult {
     private double elapsedTime;
     private String action;
     private String context;
-    @SerializedName("topicOut")
+    @SerializedName("topic_out")
     private String topicOut = "";
     private UUID chatId;
     private List<MemoryIntent> intents;
