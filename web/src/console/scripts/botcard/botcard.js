@@ -1,6 +1,5 @@
 function populateBotFields(botstoreItem, menu_title, carousel_category, current_flow) {
     var item;
-
     try {
         item = JSON.parse(botstoreItem);
         var bot = item['metadata'];
@@ -62,10 +61,7 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('containerMsgAlertBotcardDetail').style.display = 'block';
         document.getElementById('msgAlertBotcardDetail').innerText = 'Missing required arguments';
     }
-
-    parent.$(parent.document).trigger('BotstoreFinishPaintEvent');
 }
-
 
 function checkLink(link) {
     if (link.indexOf('http') === -1)

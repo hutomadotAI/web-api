@@ -3,7 +3,6 @@ const MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
 window.addEventListener('resize', function () {
     var node = document.getElementById('botsCarousels');
     var nCarousel = node.childElementCount;
-
     for (var i = 0; i < nCarousel; i++)
         showSeeMoreButton(node.children[i]);
 });
@@ -33,7 +32,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
         wHTML = "";
         wHTML += '<section class="carousel-content" style="padding-right: 0px;">';
 
-
         if (see_more) {
             wHTML += '<div class="">';
             wHTML += '<div class="row no-margin" >';
@@ -48,7 +46,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
             wHTML += '</div>';
             wHTML += ('<div class="row carousel-row no-margin carousel-overflow" name="bot_list">');
         }
-
 
         for (var x in botstoreCategorizedItems) {
             if (!botstoreCategorizedItems.hasOwnProperty(x)) {
@@ -176,8 +173,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
         showSeeMoreButton(newNode);
     }
-    // Notify any parent that we've finished painting
-    window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
 }
 
 function triggerCategoryChanged(category) {
@@ -237,6 +232,8 @@ function getCarousels(category, optionFlow) {
                 }
             }
             hideOverlay(true);
+            // Notify any parent that we've finished painting
+            window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
@@ -246,6 +243,26 @@ function getCarousels(category, optionFlow) {
     });
 }
 
+function resizeIFrame() {
+    var carouselBotcardListNode = document.getElementsByName('bot_list');
+    if ( carouselBotcardListNode.length === 1 ){
+        var carouselNode = carouselBotcardListNode[0];
+        var firstBotCarouselNode = carouselNode.children[0];
+        var lastBotCarouselNode = carouselNode.lastChild;
+
+        if ( parseInt(lastBotCarouselNode.children[0].offsetTop) > parseInt(firstBotCarouselNode.children[0].offsetTop)) {
+            var iFrame = parent.document.getElementById('contentFrame');
+            iFrame.height = lastBotCarouselNode.children[0].offsetTop + lastBotCarouselNode.children[0].scrollHeight + 'px';
+        }
+    }
+}
+
 function hideOverlay(state) {
     document.getElementById('carousel-overlay').style.display = (state) ? 'none' : '';
 }
+
+$(document).ready(function() {
+    window.addEventListener('resize', function () {
+        resizeIFrame();
+    });
+});
