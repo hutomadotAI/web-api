@@ -9,7 +9,7 @@ $('#buyBot').on('show.bs.modal', function (e) {
     var curr_bot_license = modalNode.data('license');
     var curr_bot_icon = modalNode.data('icon');
     var curr_bot_flow = modalNode.data('flow');
-    var posY = parseFloat(modalNode.offset().top) - extraPadding;
+    var posY = parseFloat(modalNode.offset().top) - extraPadding - window.scrollY;
 
     document.getElementById('bot_id').value = curr_bot_id;
     document.getElementById('botNamePurchase').innerText = curr_bot_name;
