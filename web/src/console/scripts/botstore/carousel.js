@@ -1,10 +1,13 @@
 const MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
 
 window.addEventListener('resize', function () {
-    var node = document.getElementById('botsCarousels');
-    var nCarousel = node.childElementCount;
-    for (var i = 0; i < nCarousel; i++)
-        showSeeMoreButton(node.children[i]);
+    if (document.getElementsByName('bot_list')[0].childElementCount > 0 ) {
+        var node = document.getElementById('botsCarousels');
+        var nCarousel = node.childElementCount;
+        if (document.getElementsByName('bot_list')[0].childElementCount > 0)
+            for (var i = 0; i < nCarousel; i++)
+                showSeeMoreButton(node.children[i]);
+    }
 });
 
 function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) {
@@ -246,13 +249,16 @@ function getCarousels(category, optionFlow) {
 function resizeIFrame() {
     var carouselBotcardListNode = document.getElementsByName('bot_list');
     if ( carouselBotcardListNode.length === 1 ){
-        var carouselNode = carouselBotcardListNode[0];
-        var firstBotCarouselNode = carouselNode.children[0];
-        var lastBotCarouselNode = carouselNode.lastChild;
 
-        if ( parseInt(lastBotCarouselNode.children[0].offsetTop) > parseInt(firstBotCarouselNode.children[0].offsetTop)) {
-            var iFrame = parent.document.getElementById('contentFrame');
-            iFrame.height = lastBotCarouselNode.children[0].offsetTop + lastBotCarouselNode.children[0].scrollHeight + 'px';
+        var carouselNode = carouselBotcardListNode[0];
+        if ( carouselNode.childElementCount > 0 ) {
+            var firstBotCarouselNode = carouselNode.children[0];
+            var lastBotCarouselNode = carouselNode.lastChild;
+
+            if (parseInt(lastBotCarouselNode.children[0].offsetTop) > parseInt(firstBotCarouselNode.children[0].offsetTop)) {
+                var iFrame = parent.document.getElementById('contentFrame');
+                iFrame.height = lastBotCarouselNode.children[0].offsetTop + lastBotCarouselNode.children[0].scrollHeight + 'px';
+            }
         }
     }
 }
