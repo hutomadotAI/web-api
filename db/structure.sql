@@ -598,7 +598,7 @@ CREATE TABLE `webhooks` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `aiid` varchar(50) NOT NULL,
   `intent_name` varchar(250) NOT NULL,
-  `endpoint` varchar(255) NOT NULL,
+  `endpoint` varchar(2048) NOT NULL,
   `enabled` int(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -947,7 +947,11 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addWebhook`(IN `aiid` VARCHAR(50), IN `intent_name` VARCHAR(250), IN `endpoint` VARCHAR(255), IN `enabled` INT(1))
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addWebhook`(
+    IN `aiid` VARCHAR(50), 
+    IN `intent_name` VARCHAR(250), 
+    IN `endpoint` VARCHAR(2048), 
+    IN `enabled` INT(1))
     MODIFIES SQL DATA
 BEGIN
 INSERT INTO `webhooks`(`aiid`, `intent_name`, `endpoint`, `enabled`)
@@ -3528,7 +3532,11 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateWebhook`(IN `param_aiid` VARCHAR(50), IN `param_intent_name` VARCHAR(250), IN `param_endpoint` VARCHAR(255), IN `param_enabled` INT(1))
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateWebhook`(
+    IN `param_aiid` VARCHAR(50), 
+    IN `param_intent_name` VARCHAR(250), 
+    IN `param_endpoint` VARCHAR(2048), 
+    IN `param_enabled` INT(1))
     MODIFIES SQL DATA
 BEGIN
 UPDATE webhooks

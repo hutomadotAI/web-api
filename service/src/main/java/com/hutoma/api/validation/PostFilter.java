@@ -232,7 +232,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                     this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
 
                     if (webHook.isEnabled()) {
-                        this.validateFieldLength(255, "endpoint", webHook.getEndpoint());
+                        this.validateFieldLength(2048, "endpoint", webHook.getEndpoint());
                         this.checkParameterNotNull("endpoint", webHook.getEndpoint());
                         this.checkParameterNotNull(AIID, webHook.getAiid());
                     }
