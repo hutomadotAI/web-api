@@ -224,13 +224,15 @@ function getCarousels(category, optionFlow) {
             var carouselsShown = 0;
             for (var key in response) {
                 if (response.hasOwnProperty(key)) {
-                    showCarousel(response[key], key, optionFlow, (category !== undefined && category !== ''));
+                    showCarousel(response[key], key, optionFlow, (key !== undefined && key !== ''));
                     carouselsShown++;
                 }
             }
             if (carouselsShown === 0) {
                 if (category !== "") {
-                    showCarousel(null, category, optionFlow, (category !== undefined && category !== ''));
+                    var html_category = $.parseHTML(category);
+                    var safe_category = $(html_category).text();
+                    showCarousel(null, safe_category, optionFlow, (safe_category !== undefined && safe_category !== ''));
                 }
             }
             hideOverlay(true);
