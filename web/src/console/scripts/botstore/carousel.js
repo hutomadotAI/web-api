@@ -224,7 +224,7 @@ function getCarousels(category, optionFlow) {
             var carouselsShown = 0;
             for (var key in response) {
                 if (response.hasOwnProperty(key)) {
-                    showCarousel(response[key], key, optionFlow, (key !== undefined && key !== ''));
+                    showCarousel(response[key], key, optionFlow, (category !== undefined && category !== ''));
                     carouselsShown++;
                 }
             }
