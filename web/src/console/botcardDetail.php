@@ -369,7 +369,6 @@ if (isset($botstoreItem) && $botstoreItem != null) {
             if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem)))
                 $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
             echo json_encode($botItem->toJSON());
-            unset($botstoreItem);
             unset($botItem);
             ?>;
     </script>
@@ -379,7 +378,7 @@ if (isset($botstoreItem) && $botstoreItem != null) {
         var nodeContainerAlert = document.getElementById('containerMsgAlertBotcardDetail');
         var nodeMessageAlert = document.getElementById('msgAlertBotcardDetail');
 
-        <?php if ( isset($botId) && isset($botstoreItem) ) {?>
+        <?php if ( isset($botId) && isset($botstoreItem) ) { unset($botstoreItem);?>
         switch (responseCode) {
             case 200:
                 populateBotFields(
