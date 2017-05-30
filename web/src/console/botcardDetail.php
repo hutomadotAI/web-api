@@ -20,9 +20,6 @@ $session = new hutoma\sessionObject();
 $botstoreApi = new \hutoma\api\botstoreApi(false, $session->getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
 
-$metadata = '';
-$developer = '';
-
 unset($botstoreApi);
 unset($session);
 ?>
@@ -33,8 +30,6 @@ unset($session);
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <?php
         if (isset($botstoreItem) && $botstoreItem != null) {
-            global $metadata, $developer;
-
             $metadata = $botstoreItem['item']['metadata'];
             $developer = $botstoreItem['item']['developer'];
 
@@ -46,6 +41,8 @@ unset($session);
             $wHtml .= 'Description=' . $metadata['description'] . ',';
             $wHtml .= 'Developer=' . $developer['company'] . '">';
             echo $wHtml;
+            unset ($metadata);
+            unset ($developer);
             unset ($wHtml);
         }else{
             echo '<title>hu:toma | Botstore </title><meta name="description" content="Hutoma Botstore"';
