@@ -146,7 +146,7 @@ public class TestTrainingLogic {
         this.fakeLogger = mock(ILogger.class);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.fakeValidation = TestParameterValidation.getFakeValidation();
-        when(this.fakeValidation.textSanitizer(anyString())).thenCallRealMethod();
+        when(this.fakeValidation.filterControlAndCoalesceSpaces(anyString())).thenCallRealMethod();
         this.fakeExtractor = mock(HTMLExtractor.class);
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);

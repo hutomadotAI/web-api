@@ -30,7 +30,7 @@ function drawTableRows() {
         var wHTML = '';
         var newNode = document.createElement('tr');
         wHTML += '<td class="text-gray"style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
-        wHTML += '<td style="padding-top: 15px;">' + aiList[i]['description'] + '</td>';
+        wHTML += '<td style="padding-top: 15px;">' + htmlEncode(aiList[i]['description']) + '</td>';
         wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
 
         var publishDisabled = aiList[i]['ai_status'] === 'ai_training_complete' ? 'onClick="sendAIID(this,\'./publishAI.php\')"' : ' data-toggle="tooltip" title="The bot needs to be fully trained before being published" ';

@@ -32,13 +32,13 @@ function isInputInvalid(txt,field) {
     switch(field){
 
         case 'ai_name' :        letters = /^[a-zA-Z0-9\-_\s]+$/;                break;
-        case 'ai_description' : letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
+        case 'ai_description' : letters = /^[\u0020-\u007e\u00a0-\uffff]+$/;    break;
         case 'entity_name' :    letters = /^[a-zA-Z0-9_]+$/;                    break;
         case 'entity_value' :   letters = /^[a-zA-Z0-9\-_\s]+$/;                break;
         case 'intent_name' :    letters = /^[a-zA-Z0-9\-_]+$/;                  break;
-        case 'intent_response': letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
-        case 'intent_prompt':   letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
-        case 'user_expression': letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;   break;
+        case 'intent_response': letters = /^[\u0020-\u007e\u00a0-\uffff]+$/;    break;
+        case 'intent_prompt':   letters = /^[\u0020-\u007e\u00a0-\uffff]+$/;    break;
+        case 'user_expression': letters = /^[\u0020-\u007e\u00a0-\uffff]+$/;    break;
         case 'intent_n_prompt': letters = /^([0]?[1-9]{1,2})$/;                 break;
         case 'response' :       letters = /^[a-zA-Z0-9\-_.,?!']+$/;             break;
 

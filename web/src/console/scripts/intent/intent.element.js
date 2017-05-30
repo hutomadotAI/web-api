@@ -146,7 +146,7 @@ function saveIntent() {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
                 case 200:
-                    msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved!!');
+                    msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
                     enableSaving(false);
                     if (trainingFile)
                         createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);

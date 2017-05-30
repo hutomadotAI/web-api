@@ -18,22 +18,22 @@ public class TestValidationTextSanitizer {
 
     @Test
     public void testTextNormal() {
-        Assert.assertEquals("abcXYZ", this.validation.textSanitizer("abcXYZ"));
+        Assert.assertEquals("abcXYZ", this.validation.filterControlAndCoalesceSpaces("abcXYZ"));
     }
 
     @Test
     public void testTextTrim() {
-        Assert.assertEquals("abcXYZ", this.validation.textSanitizer(" abcXYZ "));
+        Assert.assertEquals("abcXYZ", this.validation.filterControlAndCoalesceSpaces(" abcXYZ "));
     }
 
     @Test
     public void testTextTrimLots() {
-        Assert.assertEquals("abcXYZ", this.validation.textSanitizer("            abcXYZ             "));
+        Assert.assertEquals("abcXYZ", this.validation.filterControlAndCoalesceSpaces("            abcXYZ             "));
     }
 
     @Test
     public void testTextDedupeWhitespace() {
-        Assert.assertEquals("a b cX Y Z", this.validation.textSanitizer("a   b cX\tY\t\t\tZ"));
+        Assert.assertEquals("a b cX Y Z", this.validation.filterControlAndCoalesceSpaces("a   b cX\tY\t\t\tZ"));
     }
 
     /***
@@ -41,7 +41,7 @@ public class TestValidationTextSanitizer {
      */
     @Test
     public void testTextParenthesesAllowed() {
-        Assert.assertEquals("(abc)[X]<YZ>", this.validation.textSanitizer("(abc)[X]<YZ>"));
+        Assert.assertEquals("(abc)[X]<YZ>", this.validation.filterControlAndCoalesceSpaces("(abc)[X]<YZ>"));
     }
 
     /***
@@ -50,37 +50,37 @@ public class TestValidationTextSanitizer {
      */
     @Test
     public void testTextNotEscapedQuotes() {
-        Assert.assertEquals("\'abcXYZ\"", this.validation.textSanitizer("\'abcXYZ\""));
+        Assert.assertEquals("\'abcXYZ\"", this.validation.filterControlAndCoalesceSpaces("\'abcXYZ\""));
     }
 
     @Test
     public void testTextNonAsciiAllowed() {
-        Assert.assertEquals("abc日本語XYZ", this.validation.textSanitizer("abc日本語XYZ"));
+        Assert.assertEquals("abc日本語XYZ", this.validation.filterControlAndCoalesceSpaces("abc日本語XYZ"));
     }
 
     @Test
     public void testTextEmpty() {
-        Assert.assertEquals("", this.validation.textSanitizer(""));
+        Assert.assertEquals("", this.validation.filterControlAndCoalesceSpaces(""));
     }
 
     @Test
     public void testTextNull() {
-        Assert.assertEquals("", this.validation.textSanitizer(null));
+        Assert.assertEquals("", this.validation.filterControlAndCoalesceSpaces(null));
     }
 
     @Test
     public void testTextWhitespaceOnly() {
-        Assert.assertEquals("", this.validation.textSanitizer(" "));
+        Assert.assertEquals("", this.validation.filterControlAndCoalesceSpaces(" "));
     }
 
     @Test
     public void testTextWithAmpersandAllowed() {
-        Assert.assertEquals("&hello", this.validation.textSanitizer("&hello"));
+        Assert.assertEquals("&hello", this.validation.filterControlAndCoalesceSpaces("&hello"));
     }
 
     @Test
     public void testTextWithAtSymbolAllowed() {
-        Assert.assertEquals("test@test.com", this.validation.textSanitizer("test@test.com"));
+        Assert.assertEquals("test@test.com", this.validation.filterControlAndCoalesceSpaces("test@test.com"));
     }
 
 }

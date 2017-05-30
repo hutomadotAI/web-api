@@ -4,6 +4,7 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.endpoints.IntentEndpoint;
 import com.hutoma.api.logic.AILogic;
@@ -18,6 +19,7 @@ import org.junit.Test;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
+import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
@@ -38,6 +40,9 @@ public class TestServiceIntents extends ServiceTestBase {
                 String.join("", Collections.nCopies(250, "A"))));
         intent.setWebHook(new WebHook(TestDataHelper.AIID, "name",
                 String.join("", Collections.nCopies(2048, "A")), true));
+        intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
+                3, "somevalue", false)
+                .addPrompt(String.join("", Collections.nCopies(250, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -58,6 +63,17 @@ public class TestServiceIntents extends ServiceTestBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setUserSays(Collections.singletonList(
                 String.join("", Collections.nCopies(250 + 1, "A"))));
+        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
+                this.serializeObject(intent));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testSaveIntent_LongPrompt() {
+        ApiIntent intent = TestIntentLogic.getIntent();
+        intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
+                3, "somevalue", false)
+                .addPrompt(String.join("", Collections.nCopies(250 + 1, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());

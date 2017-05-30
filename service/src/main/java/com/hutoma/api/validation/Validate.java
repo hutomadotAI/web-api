@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -43,7 +44,7 @@ public class Validate {
      * @param input abc[]&lt;&gt;&amp;  abc
      * @return abc abc
      */
-    public String textSanitizer(final String input) {
+    public String filterControlAndCoalesceSpaces(final String input) {
         // null check, fast bail
         if (null == input) {
             return "";
@@ -107,6 +108,17 @@ public class Validate {
             validateFieldLength(maxLength, paramName, item);
         }
         return paramList;
+    }
+
+    /***
+     * For each string in the list, filter control characters and coalesce spaces
+     * @param paramList list of strings
+     * @return new list of strings
+     */
+    public List<String> filterCoalesceSpacesInList(List<String> paramList) {
+        return paramList.stream()
+                .map(x -> filterControlAndCoalesceSpaces(x))
+                .collect(Collectors.toList());
     }
 
     /***
@@ -318,7 +330,7 @@ public class Validate {
         if (null == param) {
             throw new ParameterValidationException("missing parameter", paramName);
         }
-        final String result = textSanitizer(param);
+        final String result = filterControlAndCoalesceSpaces(param);
         if (result.isEmpty()) {
             throw new ParameterValidationException("parameter cannot be empty", paramName);
         }
@@ -326,7 +338,7 @@ public class Validate {
     }
 
     String validateOptionalSanitized(final String param) throws ParameterValidationException {
-        return textSanitizer(param);
+        return filterControlAndCoalesceSpaces(param);
     }
 
     String validateAiName(final String paramName, final String param)

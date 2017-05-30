@@ -161,7 +161,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         if (checkList.contains(APIParameter.AIDescription)) {
             request.setProperty(APIParameter.AIDescription.toString(),
                     this.validateFieldLength(250, AIDESC,
-                            this.validateOptionalDescription(AIDESC, getFirst(form.get(AIDESC)))));
+                            this.filterControlAndCoalesceSpaces(getFirst(form.get(AIDESC)))));
         }
         if (checkList.contains(APIParameter.AiConfidence)) {
             request.setProperty(APIParameter.AiConfidence.toString(),
@@ -203,11 +203,15 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
                 this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
 
-                // validate responses
-                this.validateFieldLengthsInList(250, INTENT_RESPONSES, intent.getResponses());
+                // for each response, filter and check against size limit
+                intent.setResponses(
+                        this.validateFieldLengthsInList(250, INTENT_RESPONSES,
+                                this.filterCoalesceSpacesInList(intent.getResponses())));
 
-                // validate user expressions
-                this.validateFieldLengthsInList(250, INTENT_USERSAYS, intent.getUserSays());
+                // for each user expression, filter and check against size limit
+                intent.setUserSays(
+                        this.validateFieldLengthsInList(250, INTENT_USERSAYS,
+                                this.filterCoalesceSpacesInList(intent.getUserSays())));
 
                 // for each variable
                 if (null != intent.getVariables()) {
@@ -215,10 +219,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         // validate the name
                         this.validateFieldLength(250, ENTITYNAME, variable.getEntityName());
                         this.validateEntityName(ENTITYNAME, variable.getEntityName());
+
                         // the list of prompts
-                        this.validateFieldLengthsInList(250, INTENT_PROMPTLIST, variable.getPrompts());
-                        variable.setPrompts(this.validateOptionalDescriptionList(INTENT_PROMPTLIST,
-                                variable.getPrompts()));
+                        variable.setPrompts(
+                                this.validateFieldLengthsInList(250, INTENT_PROMPTLIST,
+                                        this.filterCoalesceSpacesInList(variable.getPrompts())));
+
                         // the value
                         this.validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
                         this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());

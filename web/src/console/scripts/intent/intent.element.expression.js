@@ -27,7 +27,7 @@ function activeButtonCreateUserExpression() {
 
 function addUserExpression() {
     if (isInputInvalid($("#user-expression").val(), 'user_expression')) {
-        msgAlertUserExpression(ALERT.DANGER.value, 'The user expression can contain only alphanumeric characters.');
+        msgAlertUserExpression(ALERT.DANGER.value, 'The user expression cannot contain invalid characters.');
         return;
     }
 
@@ -38,7 +38,7 @@ function addUserExpression() {
     }
 
     if(isNameExists($("#user-expression").val(),expressions)){
-        msgAlertUserExpression(ALERT.DANGER.value, 'User expression already exists. Please choose a different expression.');
+        msgAlertUserExpression(ALERT.DANGER.value, 'That user expression already exists. Please choose a different expression.');
         return;
     }
 

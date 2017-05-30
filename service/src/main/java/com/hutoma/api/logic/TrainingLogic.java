@@ -465,7 +465,7 @@ public class TrainingLogic {
         // recombine the lines after they've been sanitised
         StringBuilder sb = new StringBuilder();
         for (String line : text) {
-            sb.append(this.validate.textSanitizer(line)).append(EOL);
+            sb.append(this.validate.filterControlAndCoalesceSpaces(line)).append(EOL);
         }
         return sb.toString();
     }
@@ -515,7 +515,7 @@ public class TrainingLogic {
                 lineSize = line.length() + 2;
                 // if the line doesn't push us over the upload limit
                 if ((fileSize + lineSize) < maxUploadSize) {
-                    source.add(this.validate.textSanitizer(line));
+                    source.add(this.validate.filterControlAndCoalesceSpaces(line));
                     fileSize += lineSize;
                 } else {
                     throw new UploadTooLargeException();
