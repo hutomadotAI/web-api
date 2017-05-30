@@ -3733,6 +3733,11 @@ table.text-center th {
     border: 0;
 }
 
+.modal-dialog.width600{
+    min-width:600px;
+    max-width:600px;
+}
+
 @media (min-width: 768px) {
     .modal-content {
         -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.125);
