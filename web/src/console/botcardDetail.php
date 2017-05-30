@@ -33,8 +33,7 @@ unset($session);
             $metadata = $botstoreItem['item']['metadata'];
             $developer = $botstoreItem['item']['developer'];
 
-            $wHtml = '';
-            $wHtml .= '<title>hu:toma | Botstore | ' . $metadata['name'] . '</title>';
+            $wHtml = '<title>hu:toma | Botstore | ' . $metadata['name'] . '</title>';
             $wHtml .= '<meta name="description" content="Hutoma Botstore,';
             $wHtml .= 'Bot name=' . $metadata['name'] . ',';
             $wHtml .= 'Category=' . $metadata['category'] . ',';
