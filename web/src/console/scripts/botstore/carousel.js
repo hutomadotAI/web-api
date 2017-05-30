@@ -4,9 +4,8 @@ window.addEventListener('resize', function () {
     if (document.getElementsByName('bot_list')[0].childElementCount > 0 ) {
         var node = document.getElementById('botsCarousels');
         var nCarousel = node.childElementCount;
-        if (document.getElementsByName('bot_list')[0].childElementCount > 0)
-            for (var i = 0; i < nCarousel; i++)
-                showSeeMoreButton(node.children[i]);
+        for (var i = 0; i < nCarousel; i++)
+            showSeeMoreButton(node.children[i]);
     }
 });
 
