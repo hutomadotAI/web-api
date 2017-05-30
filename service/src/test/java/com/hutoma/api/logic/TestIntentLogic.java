@@ -33,14 +33,21 @@ import static org.mockito.Mockito.*;
  */
 public class TestIntentLogic {
 
-    private final String INTENTNAME = "intent";
-    private final String TOPICIN = "topicin";
-    private final String TOPICOUT = "topicout";
+    public static final String INTENTNAME = "intent";
+    public static final String TOPICIN = "topicin";
+    public static final String TOPICOUT = "topicout";
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     IntentLogic intentLogic;
     ILogger fakeLogger;
     TrainingLogic trainingLogic;
+
+    public static ApiIntent getIntent() {
+        return new ApiIntent(INTENTNAME, TOPICIN, TOPICOUT)
+                .addResponse("response").addUserSays("usersays")
+                .addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
+                        3, "somevalue", false).addPrompt("prompt"));
+    }
 
     @Before
     public void setup() {
@@ -213,11 +220,5 @@ public class TestIntentLogic {
 
     private List<String> getIntentsList() {
         return Arrays.asList(this.INTENTNAME, "intent2");
-    }
-
-    private ApiIntent getIntent() {
-        return new ApiIntent(this.INTENTNAME, this.TOPICIN, this.TOPICOUT)
-                .addResponse("response").addUserSays("usersays")
-                .addVariable(new IntentVariable("entity", UUID.randomUUID(), true, 3, "somevalue", false).addPrompt("prompt"));
     }
 }

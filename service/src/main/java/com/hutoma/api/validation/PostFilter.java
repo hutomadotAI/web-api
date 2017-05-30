@@ -202,6 +202,13 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 // validate name
                 this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
                 this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
+
+                // validate responses
+                this.validateFieldLengthsInList(250, INTENT_RESPONSES, intent.getResponses());
+
+                // validate user expressions
+                this.validateFieldLengthsInList(250, INTENT_USERSAYS, intent.getUserSays());
+
                 // for each variable
                 if (null != intent.getVariables()) {
                     for (IntentVariable variable : intent.getVariables()) {
