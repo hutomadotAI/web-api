@@ -14,6 +14,7 @@ import com.hutoma.api.memory.IEntityRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -94,9 +95,15 @@ public class EntityLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("Entity", entityName);
-            if (!this.database.deleteEntity(devid, entityName)) {
+            OptionalInt entityId = this.database.getEntityIdForDev(devid, entityName);
+            if (!entityId.isPresent()){
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devidString, logMap);
                 return ApiError.getNotFound();
+            }
+
+            if (!this.database.deleteEntity(devid, entityId.getAsInt())) {
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - in use, not deleted", devidString, logMap);
+                return ApiError.getConflict("Entity is in use");
             }
             stopTrainingIfEntityInUse(devid, entityName);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devidString, logMap);

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.*;
 public class TestEntityLogic {
 
     private final String ENTNAME = "entity";
+    private final OptionalInt ENTITY_ID = OptionalInt.of(123);
     DatabaseEntitiesIntents fakeDatabase;
     Config fakeConfig;
     EntityLogic entityLogic;
@@ -130,21 +132,24 @@ public class TestEntityLogic {
 
     @Test
     public void testDeleteEntity_Success() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteEntity(any(), anyString())).thenReturn(true);
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
         final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
         Assert.assertEquals(200, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteEntity_Error() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteEntity(any(), anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(Database.DatabaseException.class);
         final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
         Assert.assertEquals(500, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteEntity_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteEntity(any(), anyString())).thenReturn(false);
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(OptionalInt.empty());
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(false);
         final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
         Assert.assertEquals(404, result.getStatus().getCode());
     }
@@ -153,7 +158,8 @@ public class TestEntityLogic {
     public void testDeleteEntity_entityInUse_triggersStopTraining() throws Database.DatabaseException {
         UUID aiid = UUID.randomUUID();
         when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(Collections.singletonList(aiid));
-        when(this.fakeDatabase.deleteEntity(any(), anyString())).thenReturn(true);
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
         this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
         verify(this.trainingLogic).stopTraining(DEVID_UUID, aiid);
     }
@@ -161,7 +167,8 @@ public class TestEntityLogic {
     @Test
     public void testDeleteEntity_entityNotInUse_doesNotStopTraining() throws Database.DatabaseException {
         when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(new ArrayList<>());
-        when(this.fakeDatabase.deleteEntity(any(), anyString())).thenReturn(true);
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
         this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
@@ -169,7 +176,8 @@ public class TestEntityLogic {
     @Test
     public void testDeleteEntity_dbError_doesNotStopTraining() throws Database.DatabaseException {
         when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(Collections.singletonList(UUID.randomUUID()));
-        when(this.fakeDatabase.deleteEntity(any(), anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(Database.DatabaseException.class);
         this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }

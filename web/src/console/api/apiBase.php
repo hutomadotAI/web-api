@@ -44,7 +44,7 @@ class apiBase
     }
 
     /**
-     * Handles API "errors" (statuses that are not 200, 400 and 404) or if the request did not reach the API.
+     * Handles API "errors" (statuses that are not 200, 400, 404 or 409) or if the request did not reach the API.
      * @param $response - the API response
      * @param $errorCode - the error code to be used on the error page
      */
@@ -57,10 +57,19 @@ class apiBase
         }
 
         $responseJson = json_decode($response);
-        if (isset($responseJson) && $responseJson->status->code != 200 && $responseJson->status->code != 404 && $responseJson->status->code != 400) {
-            telemetry::getInstance()->log(TelemetryEvent::ERROR, "api", json_encode($responseJson->status));
-            $this->cleanup();
-            $this->redirectToErrorPage($errorCode);
+        if (isset($responseJson)) {
+            switch ($responseJson->status->code) {
+                case 200:
+                case 404:
+                case 400:
+                case 409:
+                    // allowable codes
+                    break;
+                default:
+                    telemetry::getInstance()->log(TelemetryEvent::ERROR, "api", json_encode($responseJson->status));
+                    $this->cleanup();
+                    $this->redirectToErrorPage($errorCode);
+            }
         }
     }
 

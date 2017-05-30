@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -214,9 +215,26 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public boolean deleteEntity(UUID devid, String entityName) throws DatabaseException {
+    public OptionalInt getEntityIdForDev(UUID devid, String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityName).executeUpdate();
+            ResultSet rs;
+            try {
+                call.initialise("getEntityIdForDev", 2).add(devid).add(entityName);
+                rs = call.executeQuery();
+                OptionalInt entityId = OptionalInt.empty();
+                if (rs.next()) {
+                    entityId = OptionalInt.of(rs.getInt("id"));
+                }
+                return entityId;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean deleteEntity(UUID devid, int entityId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityId).executeUpdate();
             return rowCount > 0;
         }
     }
