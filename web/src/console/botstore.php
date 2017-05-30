@@ -100,10 +100,9 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     </form>
 
     <script>
-
         window.document.addEventListener('BotstoreFinishPaintEvent', function() {
             var iFrame = document.getElementById('contentFrame');
-            iFrame.height = window.frames[0].document.body.scrollHeight + 'px';
+            iFrame.height = window.frames[0].document.body.clientHeight + 'px';
             iFrame.style.width = '100%';
         }, false);
 
