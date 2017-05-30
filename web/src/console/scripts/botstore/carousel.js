@@ -75,7 +75,7 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
             else
                 botIconPath = BOT_ICON.PATH.value + bot['metadata']['botIcon'];
 
-            if (category === botCategory) {
+            if (category.toLowerCase() === botCategory.toLowerCase()) {
                 wHTML += '<span id="card' + botId + '" data-pos="' + x + '">';
                 wHTML += '<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">';
                 // we need to have an href tag to allow crawlers to reach each bot's details
