@@ -230,7 +230,8 @@ function getCarousels(category, optionFlow) {
             }
             if (carouselsShown === 0) {
                 if (category !== "") {
-                    showCarousel(null, category, optionFlow, (category !== undefined && category !== ''));
+                    var safe_category = htmlEncode(category);
+                    showCarousel(null, safe_category, optionFlow, (safe_category !== undefined && safe_category !== ''));
                 }
             }
             hideOverlay(true);
