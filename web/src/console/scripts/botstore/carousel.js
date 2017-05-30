@@ -230,8 +230,7 @@ function getCarousels(category, optionFlow) {
             }
             if (carouselsShown === 0) {
                 if (category !== "") {
-                    var html_category = $.parseHTML(category);
-                    var safe_category = $(html_category).text();
+                    var safe_category = htmlEncode(category);
                     showCarousel(null, safe_category, optionFlow, (safe_category !== undefined && safe_category !== ''));
                 }
             }
