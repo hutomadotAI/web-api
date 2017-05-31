@@ -29,7 +29,7 @@ unset($session);
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <?php
-        if (isset($botstoreItem) && $botstoreItem != null) {
+        if (isset($botstoreItem)) {
             $metadata = $botstoreItem['item']['metadata'];
             $developer = $botstoreItem['item']['developer'];
 
