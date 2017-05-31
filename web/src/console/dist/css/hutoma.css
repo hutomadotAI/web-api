@@ -6652,7 +6652,7 @@ ul.pagination li a {
 }
 
 .card-purchased {
-    width: 80px;
+    line-width: 80px;
     height: 20px;
     font-size: 12px;
     font-weight: bold;
