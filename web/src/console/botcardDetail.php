@@ -19,8 +19,7 @@ if (isset($_GET['origin'])) {
 $session = new hutoma\sessionObject();
 $botstoreApi = new \hutoma\api\botstoreApi(false, $session->getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
-$metadata = $botstoreItem['item']['metadata'];
-$developer = $botstoreItem['item']['developer'];
+
 unset($botstoreApi);
 unset($session);
 ?>
@@ -29,12 +28,25 @@ unset($session);
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Botstore | <?php echo $metadata['name'] ?></title>
-    <meta name="description" content="Hutoma Botstore, Bot name=<?php
-    echo $metadata['name'] ?>, Category=<?php
-    echo $metadata['category'] ?>, Description=<?php
-    echo $metadata['description'] ?>, Developer=<?php
-    echo $developer['company'] ?>">
+    <?php
+        if (isset($botstoreItem)) {
+            $metadata = $botstoreItem['item']['metadata'];
+            $developer = $botstoreItem['item']['developer'];
+
+            $wHtml = '<title>hu:toma | Botstore | ' . $metadata['name'] . '</title>';
+            $wHtml .= '<meta name="description" content="Hutoma Botstore,';
+            $wHtml .= 'Bot name=' . $metadata['name'] . ',';
+            $wHtml .= 'Category=' . $metadata['category'] . ',';
+            $wHtml .= 'Description=' . $metadata['description'] . ',';
+            $wHtml .= 'Developer=' . $developer['company'] . '">';
+            echo $wHtml;
+            unset ($metadata);
+            unset ($developer);
+            unset ($wHtml);
+        }else{
+            echo '<title>hu:toma | Botstore </title><meta name="description" content="Hutoma Botstore"';
+        }
+    ?>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
@@ -344,7 +356,7 @@ unset($session);
 <script src="./scripts/shared/shared.js"></script>
 
 <?php
-if (isset($botstoreItem) && $botstoreItem != null) {
+if (isset($botstoreItem)) {
     ?>
     <script>
         var responseCode = <?php echo $botstoreItem['status']['code']; ?>;
@@ -353,7 +365,6 @@ if (isset($botstoreItem) && $botstoreItem != null) {
             if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem)))
                 $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
             echo json_encode($botItem->toJSON());
-            unset($botstoreItem);
             unset($botItem);
             ?>;
     </script>
@@ -363,7 +374,7 @@ if (isset($botstoreItem) && $botstoreItem != null) {
         var nodeContainerAlert = document.getElementById('containerMsgAlertBotcardDetail');
         var nodeMessageAlert = document.getElementById('msgAlertBotcardDetail');
 
-        <?php if (isset($botId)) {?>
+        <?php if ( isset($botId,$botstoreItem) ) { unset($botstoreItem);?>
         switch (responseCode) {
             case 200:
                 populateBotFields(
