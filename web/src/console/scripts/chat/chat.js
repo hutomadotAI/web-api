@@ -148,14 +148,14 @@ function requestAnswerAI(ai_name, question, chatId) {
                 var JSONnode = document.getElementById('msgJSON');
                 JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
                 var JSONdata = response;
-                var safeAnswer = htmlEncode(JSONdata['result']['answer']);
                 if (JSONdata['chatId'] === '') {
                     createRightMsg(ai_name, 'no chat id returned', '', -1, true);
                 } else {
                     var chatId = JSONdata['chatId'];
-                    if (JSONdata['status']['code'] === 200)
-
+                    if (JSONdata['status']['code'] === 200) {
+                        var safeAnswer = htmlEncode(JSONdata['result']['answer']);
                         createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                    }
                     else
                         createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                 }
