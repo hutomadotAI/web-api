@@ -11,6 +11,7 @@ import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookPayload;
 import com.hutoma.api.containers.sub.WebHookResponse;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 
 import java.io.IOException;
@@ -86,6 +87,8 @@ public class WebHooks {
             response = this.jerseyClient.target(webHook.getEndpoint())
                     .property("Content-Type", "application/json")
                     .property("Content-Length", String.valueOf(jsonPayload.length()))
+                    .property(ClientProperties.CONNECT_TIMEOUT, 10000)
+                    .property(ClientProperties.READ_TIMEOUT, 10000)
                     .request()
                     .post(Entity.json(jsonPayload));
         } catch (Exception e) {

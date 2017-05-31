@@ -191,7 +191,7 @@ public class TestWebhooks {
         JerseyInvocation.Builder builder = Mockito.mock(JerseyInvocation.Builder.class);
         when(this.fakeClient.target(any(String.class))).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.path(anyString())).thenReturn(jerseyWebTarget);
-        when(jerseyWebTarget.property(anyString(), anyString())).thenReturn(jerseyWebTarget);
+        when(jerseyWebTarget.property(anyString(), any())).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.queryParam(anyString(), anyString())).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.request()).thenReturn(builder);
         return builder;
