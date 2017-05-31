@@ -16,7 +16,7 @@ COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
 
 # Expose the following environment variables
 ENV API_ENCODING_KEY encodingKey
-ENV API_MAX_UPLOAD_SIZE_KB 16384
+ENV API_MAX_UPLOAD_SIZE_KB 512
 ENV API_CONNECTION_STRING jdbc:mysql://server:3306/hutoma?user=user&password=password&zeroDateTimeBehavior=convertToNull
 ENV API_DBCONNECTIONPOOL_MIN_SIZE 8
 ENV API_DBCONNECTIONPOOL_MAX_SIZE 64
