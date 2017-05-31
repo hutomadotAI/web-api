@@ -383,9 +383,6 @@ if (isset($botstoreItem)) {
                     "<?php if (isset($_GET['category'])) echo $_GET['category'];?>",
                     DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value
                 );
-                var isInIFrame = (window.location != window.parent.location);
-                if(isInIFrame === true)
-                    window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
                 break;
             case 404:
                 nodeContainerAlert.style.display = 'block';
