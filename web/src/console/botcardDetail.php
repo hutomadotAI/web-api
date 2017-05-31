@@ -356,7 +356,7 @@ unset($session);
 <script src="./scripts/shared/shared.js"></script>
 
 <?php
-if (isset($botstoreItem) && $botstoreItem != null) {
+if (isset($botstoreItem)) {
     ?>
     <script>
         var responseCode = <?php echo $botstoreItem['status']['code']; ?>;
@@ -374,7 +374,7 @@ if (isset($botstoreItem) && $botstoreItem != null) {
         var nodeContainerAlert = document.getElementById('containerMsgAlertBotcardDetail');
         var nodeMessageAlert = document.getElementById('msgAlertBotcardDetail');
 
-        <?php if ( isset($botId) && isset($botstoreItem) ) { unset($botstoreItem);?>
+        <?php if ( isset($botId,$botstoreItem) ) { unset($botstoreItem);?>
         switch (responseCode) {
             case 200:
                 populateBotFields(
