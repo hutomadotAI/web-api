@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/aiApi.php";
+require_once "api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -17,6 +18,9 @@ if ($response['status']['code'] !== 200) {
 } else {
     $response = $response["integration_list"];
 }
+
+$aiName = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
+$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 
 ?>
 <!DOCTYPE html>
@@ -81,11 +85,12 @@ if ($response['status']['code'] !== 200) {
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init([
-            "<?php if (isset( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'])) 
-                        echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'];
-                else
-                    echo ''?>",
-            "integrations",3,true,false]);
+            "<?php echo $aiName;?>",
+            "integrations",
+            3,
+            true,
+            <?php echo $isExistAiId ? "false" : "true" ?>
+        ]);
     </script>
 </form>
 
