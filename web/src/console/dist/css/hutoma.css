@@ -6533,7 +6533,7 @@ ul.pagination li a {
 }
 
 .card-icon {
-    width: 170px;
+    line-width: 170px;
     height: 150px;
     display: block;
     margin: auto;
@@ -6563,7 +6563,7 @@ ul.pagination li a {
     top:160px;
     left:0;
     height:20px;
-    width:167px;
+    line-width: 168px;
     background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
     position: absolute;
     content: '';
@@ -6652,7 +6652,7 @@ ul.pagination li a {
 }
 
 .card-purchased {
-    width: 80px;
+    line-width: 80px;
     height: 20px;
     font-size: 12px;
     font-weight: bold;
