@@ -68,7 +68,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `entity` WRITE;
 /*!40000 ALTER TABLE `entity` DISABLE KEYS */;
-INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.geopolitical', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.places', '2017-05-12 00:00:00', '1');
 INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.person', '2017-05-12 00:00:00', '1');
 INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.group', '2017-05-12 00:00:00', '1');
 INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.date', '2017-05-12 00:00:00', '1');
