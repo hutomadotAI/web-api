@@ -6534,7 +6534,7 @@ ul.pagination li a {
 
 .card-icon {
     line-width: 170px;
-    line-height: 150px;
+    height: 150px;
     display: block;
     margin: auto;
     background: rgba(0, 0, 0, 0.2);
