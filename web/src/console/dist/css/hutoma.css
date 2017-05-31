@@ -6533,8 +6533,8 @@ ul.pagination li a {
 }
 
 .card-icon {
-    width: 170px;
-    height: 150px;
+    line-width: 170px;
+    line-height: 150px;
     display: block;
     margin: auto;
     background: rgba(0, 0, 0, 0.2);
@@ -6563,7 +6563,7 @@ ul.pagination li a {
     top:160px;
     left:0;
     height:20px;
-    width:167px;
+    line-width: 168px;
     background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
     position: absolute;
     content: '';
