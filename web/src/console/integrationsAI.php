@@ -21,7 +21,6 @@ if ($response['status']['code'] !== 200) {
 
 $aiName = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
 $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -41,7 +40,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntegrations('')">
 <div class="wrapper">
     <header class="main-header">
-      <?php include './dynamic/header.html.php'; ?>
+        <?php include './dynamic/header.html.php'; ?>
     </header>
 
     <!-- ================ MENU CONSOLE ================= -->
@@ -53,13 +52,13 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-    <section class="content">
+        <section class="content">
 
 
-        <?php include './dynamic/integrations.content.html.php'; ?>
+            <?php include './dynamic/integrations.content.html.php'; ?>
 
-     
-    </section>
+
+        </section>
     </div>
 
     <!--
@@ -68,7 +67,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     -->
 
     <footer class="main-footer">
-       <?php include './dynamic/footer.inc.html.php'; ?>
+        <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 </div>
 
@@ -96,18 +95,15 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 
 
 <script>
-  // JSON RESPONSE NEEDS API CALL
-  //var integrations = <?php  //echo json_encode($response['_integrationList']);  unset($response); ?>;
-  var integrations = <?php  echo json_encode($response);  unset($response); ?>;
-
-  var newNode = document.createElement('div');
-  newNode.className = 'row';
-  newNode.id = 'integrations_list';
+    var integrations = <?php  echo json_encode($response);  unset($response); ?>;
+    var newNode = document.createElement('div');
+    newNode.className = 'row';
+    newNode.id = 'integrations_list';
 </script>
 <script>
-  function searchIntegration(str) {
-    showIntegrations(str);
-  }
+    function searchIntegration(str) {
+        showIntegrations(str);
+    }
 </script>
 </body>
 </html>
