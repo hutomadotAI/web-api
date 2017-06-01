@@ -1,7 +1,7 @@
 <?php
 
-include_once __DIR__ . "../console/api/signupCodeApi.php";
-include_once __DIR__ . "../console/common/config.php";
+include_once __DIR__ . "/../console/api/signupCodeApi.php";
+include_once __DIR__ . "/../console/common/config.php";
 
 include "config.php";
 
