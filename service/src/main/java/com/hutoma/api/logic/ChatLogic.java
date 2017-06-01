@@ -329,7 +329,7 @@ public class ChatLogic {
         List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
                 currentIntent.getVariables());
         if (!entities.isEmpty()) {
-            intentLog.put("Entities retrieved", StringUtils.join(entities, ","));
+            intentLog.put("Entities retrieved", StringUtils.join(entities, ','));
             currentIntent.fulfillVariables(entities);
 
             // Write recognised persistent entities.
