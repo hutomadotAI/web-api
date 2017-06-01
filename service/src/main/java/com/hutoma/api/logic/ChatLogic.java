@@ -112,6 +112,7 @@ public class ChatLogic {
             if (processIntent(devId, aiidForMemoryIntents, currentIntent, question, result)) {
                 // Intent was handled, confidence is high
                 result.setScore(1.0d);
+                this.telemetryMap.add("AnsweredBy", "IntentProcessor");
             } else {
                 // Otherwise just go through the regular chat flow
 
