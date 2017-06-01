@@ -64,7 +64,6 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     wHTML += ('</a>');
     wHTML += ('<ul class="treeview-menu">');
     wHTML += ('<li id="menu_documentation"><a href="https://docs.hutoma.com" id="link_documentation" target="_blank"><i class="fa fa-briefcase text-default"></i>The Hutoma Platform</a></li>');
-    wHTML += ('<li id="menu_integrations"><a href="./integrationsAI.php" id="link_integrations"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>');
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
