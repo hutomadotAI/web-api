@@ -15,9 +15,9 @@ class botstoreListParam
         
     }
 
-    public function getStartForm()
+    public function getStartFrom()
     {
-        return $this->startFrom;
+        return isset($this->startFrom) ? $this->startFrom : 0;
     }
 
     public function setStartForm($startFrom)
@@ -27,7 +27,7 @@ class botstoreListParam
 
     public function getPageSize()
     {
-        return $this->pageSize;
+        return isset($this->pageSize) ? $this->pageSize : 10;
     }
 
     public function setPageSize($pageSize)
@@ -37,7 +37,7 @@ class botstoreListParam
 
     public function addFilter($filterName, $filterValue)
     {
-        array_push($this->filters, $filterName . "%3D%27" . $filterValue. "%27");
+        array_push($this->filters, $filterName . "='" . $filterValue. "'");
     }
 
     public function getFilters()
@@ -45,12 +45,12 @@ class botstoreListParam
         return $this->filters;
     }
 
-    public function getOrderFilter()
+    public function getOrderField()
     {
         return $this->orderField;
     }
 
-    public function setOrderFilter($orderField)
+    public function setOrderField($orderField)
     {
         $this->orderField = $orderField;
     }
@@ -63,22 +63,6 @@ class botstoreListParam
     public function setOrderDir($orderDir)
     {
         $this->orderDir = $orderDir;
-    }
-
-    public function getQueryParameter()
-    {
-        $tmp_list_filters = array();
-        foreach ($this->filters as $value) {
-            array_push($tmp_list_filters,$value);
-        }
-
-        return array(
-            'startFrom' => $this->getStartForm(),
-            'pageSize' => $this->getPageSize(),
-            'filter' => implode(',', $tmp_list_filters),
-            'orderField' => $this->getOrderFilter(),
-            'orderDir' => $this->getOrderDir(),
-        );
     }
 
     public function __destruct()

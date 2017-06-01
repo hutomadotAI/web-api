@@ -197,6 +197,58 @@ public class Config {
     }
 
     /***
+     * Every n milliseconds we check the queue status to see
+     * if there are tasks to run or reschedule
+     * @return
+     */
+    public long getProcessQueueIntervalDefault() {
+        return 2 * 1000;
+    }
+
+    /***
+     * The time to wait if a command needs to be scheduled
+     * immediately after this one (in ms)
+     * i.e. minimum interval between queue checks
+     * @return
+     */
+    public long getProcessQueueIntervalShort() {
+        return 1000;
+    }
+
+    /***
+     * The time to wait if nothing much is going on
+     * and we can wait a while before checking the queue again
+     * @return
+     */
+    public long getProcessQueueIntervalLong() {
+        return 10 * 1000;
+    }
+
+    /***
+     * How far in the future to schedule a command
+     * (in seconds)
+     */
+    public int getProcessQueueScheduleFutureCommand() {
+        return 30;
+    }
+
+    /***
+     * If this many seconds pass and no update is received for an active training slot
+     * then we consider it 'interrupted' and reallocate the training job to a server with space
+     */
+    public int getProcessQueueInterruptedSeconds() {
+        return 2 * 60;
+    }
+
+    /***
+     * Do not attempt slot recovery for the first n seconds after the API has started up
+     * This gives servers enough time to re-register and reclaim their training tasks
+     */
+    public int getProcessQueueDelayRecoveryForFirstSeconds() {
+        return 2 * 60;
+    }
+
+    /***
      * The total number of milliseconds that we wait for backend
      * requests to complete.
      * N.B. this value is not 'per request'.
@@ -207,6 +259,10 @@ public class Config {
         return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
     }
 
+    /**
+     * The botstore icon storage path. This will typically be a NFS mount point.
+     * @return the botstore icon storage path
+     */
     public String getBotIconStoragePath() {
         return getConfigFromProperties("bot_icon_path", "/boticon");
     }
@@ -215,12 +271,8 @@ public class Config {
         return getConfigFromProperties("logging_es_url", "");
     }
 
-    public void dumpApiEnvironmentVars() {
-        System.getenv().entrySet().stream().forEach(e -> {
-            if (e.getKey().startsWith(API_ENV_PREFIX)) {
-                this.logger.logInfo(LOGFROM, e.getKey() + "=" + e.getValue());
-            }
-        });
+    public String getEntityRecognizerUrl() {
+        return getConfigFromProperties("entity_recognizer_url", "");
     }
 
     public void validateConfigPresent() throws Exception {

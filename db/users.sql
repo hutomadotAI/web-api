@@ -13,6 +13,8 @@ GRANT EXECUTE ON `hutoma`.* TO 'aiDeleter'@'127.0.0.1';
 
 GRANT SELECT, UPDATE, DELETE ON `hutoma`.`ai` TO 'aiDeleter'@'127.0.0.1';
 
+GRANT SELECT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiDeleter'@'127.0.0.1';
+
 
 # Privileges for `aiReader`@`127.0.0.1`
 
@@ -32,7 +34,11 @@ GRANT SELECT ON `hutoma`.`bot_ai` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`webhooks` TO `aiReader`@'127.0.0.1';
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiReader'@'127.0.0.1';
+
 GRANT SELECT ON `hutoma`.`developerInfo` TO `aiReader`@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`controller_state` TO 'aiReader'@'127.0.0.1';
 
 
 # Privileges for `aiWriter`@`127.0.0.1`
@@ -88,6 +94,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity_value` TO 'entityUser'@
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity` TO 'entityUser'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`intent_variable` TO 'entityUser'@'127.0.0.1';
 
 # Privileges for `hutoma_caller`@`%`
 
@@ -171,6 +178,8 @@ GRANT SELECT ON `hutoma`.`developerInfo` TO `userTableReader`@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`invite_codes` TO `userTableReader`@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`resetTokens` TO `userTableReader`@`127.0.0.1`;
+
 
 # Privileges for `userTableWriter`@`127.0.0.1`
 
@@ -187,6 +196,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`developerInfo` TO 'userTableWr
 GRANT SELECT, UPDATE ON `hutoma`.`invite_codes` TO `userTableWriter`@'127.0.0.1';
 
 GRANT INSERT ON `hutoma`.`invite_code_uses` TO `userTableWriter`@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`resetTokens` TO `userTableWriter`@`127.0.0.1`;
 
 
 # Privileges for `botStoreReader`@`127.0.0.1`
@@ -218,3 +229,11 @@ GRANT INSERT, DELETE ON `hutoma`.`botIcon` TO 'botStoreWriter'@'127.0.0.1';
 CREATE USER 'analytics'@'%' IDENTIFIED BY '*2F308CADE7BCAFDE8273D8DA24246FFC892588AF';
 
 GRANT SELECT,CREATE TEMPORARY TABLES  ON hutoma.* to 'analytics'@'%';
+
+
+# Privileges for `dataLookup`@`%`
+
+GRANT USAGE ON `data_storage`.* TO 'dataLookup'@'%' IDENTIFIED BY PASSWORD '*C313F8BCB6FC67A062F11A728A4DBA9675B5BF90';
+
+GRANT EXECUTE, SELECT ON `data_storage`.* TO 'dataLookup'@'%';
+

@@ -55,6 +55,22 @@ public class CentralLogger implements ILogger {
         this.serializer = serializer;
     }
 
+    private static LogEvent generateErrorEvent(final String message, final LogEvent original) {
+        LogEvent err = new LogEvent();
+        err.timestamp = System.currentTimeMillis();
+        err.dateTime = new DateTime(DateTimeZone.UTC);
+        err.type = EventType.ERROR.name();
+        err.message = message;
+        err.tag = "centrallogger";
+        if (original != null) {
+            err.params.put("orig date", original.dateTime);
+            err.params.put("orig type", original.type);
+            err.params.put("orig tag", original.tag);
+            err.params.put("orig message", original.message);
+        }
+        return err;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -74,6 +90,13 @@ public class CentralLogger implements ILogger {
      */
     public void logInfo(String fromLabel, String logComment) {
         logOutput(EventType.INFO, fromLabel, logComment);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logInfo(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.INFO, fromLabel, logComment, properties);
     }
 
     /**
@@ -112,8 +135,19 @@ public class CentralLogger implements ILogger {
     /**
      * {@inheritDoc}
      */
-    public void logError(String fromLabel, String logComment) {
-        logOutput(EventType.ERROR, fromLabel, logComment);
+    public void logError(final String fromLabel, final String logComment) {
+        logError(fromLabel, logComment, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logError(final String fromLabel, final String logComment, final LogMap properties) {
+        logOutput(EventType.ERROR, fromLabel, logComment, properties);
+    }
+
+    public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
+        logOutput(EventType.PERF, fromLabel, logComment, logMap);
     }
 
     public void initialize(final Config config) {
@@ -135,6 +169,21 @@ public class CentralLogger implements ILogger {
      */
     public void logUserTraceEvent(final String logFrom, final String event, final String user) {
         this.logOutput(EventType.TRACE, logFrom, event, addUserToMap(user, null));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserInfoEvent(final String logFrom, final String event, final String user,
+                                 final LogMap properties) {
+        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, properties));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void logUserInfoEvent(final String logFrom, final String event, final String user) {
+        this.logOutput(EventType.INFO, logFrom, event, addUserToMap(user, null));
     }
 
     /**
@@ -182,10 +231,9 @@ public class CentralLogger implements ILogger {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
-    public void logPerf(final String fromLabel, final String logComment, final LogMap logMap) {
-        logOutput(EventType.PERF, fromLabel, logComment, logMap);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     public void logWarnEvent(String logFrom, String event, String user, LogMap properties) {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
@@ -213,20 +261,34 @@ public class CentralLogger implements ILogger {
         try {
             List<String> docs = new ArrayList<>();
             for (LogEvent event : events) {
-                docs.add(this.serializer.serialize(event));
+                String doc = this.serializer.serialize(event);
+                if (doc == null || doc.isEmpty()) {
+                    docs.add(this.serializer.serialize(generateErrorEvent("Error serialising logging event", event)));
+                } else {
+                    docs.add(doc);
+                }
             }
             ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
             response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
+            response.bufferEntity();
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                response.bufferEntity();
                 LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",
                         response.getStatus(), response.readEntity(String.class)));
+            } else {
+                ElasticSearchClient.BulkResponse br =
+                        (ElasticSearchClient.BulkResponse) this.serializer.deserialize(
+                                response.readEntity(String.class),
+                                ElasticSearchClient.BulkResponse.class);
+                List<String> errors = br.getErrors(events.size());
+                if (!errors.isEmpty()) {
+                    LOGGER.error(String.format("There were errors uploading the logs: %s ",
+                            String.join("; ", errors)));
+                }
             }
         } catch (JsonParseException ex) {
             LOGGER.error(ex.getMessage());
         } finally {
             if (response != null) {
-                response.bufferEntity();
                 response.close();
             }
         }

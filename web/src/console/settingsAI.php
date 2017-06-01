@@ -4,6 +4,7 @@ require_once "api/apiBase.php";
 require_once "api/aiApi.php";
 require_once "api/botApi.php";
 require_once "common/bot.php";
+require_once "api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -15,7 +16,7 @@ if (!isSessionVariablesAvailable()) {
 }
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$puchasedBots = $botApi->getPurchasedBots();
+$purchasedBots = $botApi->getPurchasedBots();
 
 $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
@@ -56,6 +57,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -146,16 +148,16 @@ function isSessionVariablesAvailable()
 <script>
     var purchasedBots = <?php
         $tmp_list = [];
-        if (isset($puchasedBots) && (array_key_exists("bots", $puchasedBots))) {
-            foreach ($puchasedBots['bots'] as $botDetails) {
-                $puchasedBot = \hutoma\bot::fromObject($botDetails);
-                $tmp_bot = $puchasedBot->toJSON();
+        if (isset($purchasedBots) && (array_key_exists("bots", $purchasedBots))) {
+            foreach ($purchasedBots['bots'] as $botDetails) {
+                $purchasedBots = \hutoma\bot::fromObject($botDetails);
+                $tmp_bot = $purchasedBots->toJSON();
                 if ($botDetails['aiid'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
                     array_push($tmp_list, $tmp_bot);
             }
         }
         echo json_encode($tmp_list);
-        unset($puchasedBots);
+        unset($purchasedBots);
         unset($tmp_list);
         unset($botApi);
         ?>;
@@ -170,7 +172,7 @@ function isSessionVariablesAvailable()
             }
         }
         echo json_encode($tmp_linked_list);
-        unset($puchasedBots);
+        unset($purchasedBots);
         unset($tmp_linked_list);
         ?>;
 </script>
@@ -180,12 +182,12 @@ function isSessionVariablesAvailable()
     newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
     function searchBots(str) {
-        showBots(str, DRAW_BOTCARDS.ADD_SKILL_FLOW.value,purchasedBots,linkedBots);
+        showAddSkills(str, purchasedBots,linkedBots);
     }
 </script>
 <script>
     $(document).ready(function () {
-        showBots('',  DRAW_BOTCARDS.ADD_SKILL_FLOW.value,purchasedBots,linkedBots);
+        showAddSkills('', purchasedBots,linkedBots);
     });
 </script>
 </body>

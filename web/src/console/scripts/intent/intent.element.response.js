@@ -27,7 +27,7 @@ function activeButtonCreateIntentResponse() {
 
 function addIntentResponse() {
     if (isInputInvalid($("#intent-response").val(), 'intent_response')) {
-        msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response can contain only alphanumeric characters.');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'The intent response contains invalid characters.');
         return;
     }
 
@@ -38,7 +38,7 @@ function addIntentResponse() {
     }
 
     if(isNameExists($("#intent-response").val(),responses)){
-        msgAlertIntentResponse(ALERT.DANGER.value, 'Response string already exists. Please choose a different string.');
+        msgAlertIntentResponse(ALERT.DANGER.value, 'Response already exists. Please add a different response.');
         return;
     }
 
@@ -111,6 +111,6 @@ $(document).ready(function () {
         var value = list_responses[x];
         var parent = document.getElementById('intentresponse-list');
         document.getElementById('intent-response').value = '';
-        createNewIntentResponseRow(value, parent);
+        createNewIntentResponseRow(htmlEncode(value), parent);
     }
 });

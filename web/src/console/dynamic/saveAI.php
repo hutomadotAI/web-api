@@ -38,7 +38,7 @@ switch ($response['status']['code']) {
         }
         break;
     case 400:
-        \hutoma\console::redirect('../newAI.php?err=true');
+        \hutoma\console::redirect('../newAI.php?err=true&errObj='. json_encode($response['status']['info']));
         break;
     default:
         if (isset($response)) {

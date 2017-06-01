@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -18,10 +19,11 @@ import javax.inject.Inject;
 public class Validate {
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
-    private static final Pattern alphaNumericAndMoreDesc =
-            Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\@\\? ]+$");
-    private static final Pattern alphaNumericAndMoreNoAt =
-            Pattern.compile("^[a-zA-Z0-9_\\.\\,\\+\\-\\(\\)\\!\\£\\$\\%\\&\\? ]+$");
+    private static final Pattern entityNames = Pattern.compile("^[\\.a-zA-Z0-9_-]+$");
+    private static final Pattern printableAscii =
+            Pattern.compile("^[\\x20-\\x7E]+$");
+    private static final Pattern printableAsciiNoAt =
+            Pattern.compile("^[\\x20-\\x3f\\x41-\\x7E]+$");
     private static final Pattern uuidPattern =
             Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private static final Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
@@ -42,7 +44,7 @@ public class Validate {
      * @param input abc[]&lt;&gt;&amp;  abc
      * @return abc abc
      */
-    public String textSanitizer(final String input) {
+    public String filterControlAndCoalesceSpaces(final String input) {
         // null check, fast bail
         if (null == input) {
             return "";
@@ -61,21 +63,11 @@ public class Validate {
                     lastCharWasSpace = true;
                 }
             } else {
-                // ignore out of range characters
-                if ((ch >= 32) && (ch < 127)) {
-                    switch (ch) {
-                        // characters to omit
-                        case '[':
-                        case ']':
-                        case '<':
-                        case '>':
-                        case '&':
-                            break;
-                        // characters to retain unchanged
-                        default:
-                            sb.append(ch);
-                            lastCharWasSpace = false;
-                    }
+                // silently omit control characters
+                // i.e. 00-1f, 7f-9f
+                if (!Character.isISOControl(ch)) {
+                    sb.append(ch);
+                    lastCharWasSpace = false;
                 }
             }
         }
@@ -84,6 +76,49 @@ public class Validate {
             sb.setLength((sb.length() - 1));
         }
         return sb.toString();
+    }
+
+    /***
+     * Throw a validation exception if the string is too long
+     * @param maxLength
+     * @param paramName
+     * @param param
+     * @return
+     * @throws ParameterValidationException
+     */
+    public String validateFieldLength(final int maxLength, final String paramName, final String param)
+            throws ParameterValidationException {
+        if ((null != param) && param.length() > maxLength) {
+            throw new ParameterValidationException("parameter too long", paramName);
+        }
+        return param;
+    }
+
+    /***
+     * * Throw a validation exception if any of the strings are too long
+     * @param maxLength
+     * @param paramName
+     * @param paramList
+     * @return
+     * @throws ParameterValidationException
+     */
+    public List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
+            throws ParameterValidationException {
+        for (String item : paramList) {
+            validateFieldLength(maxLength, paramName, item);
+        }
+        return paramList;
+    }
+
+    /***
+     * For each string in the list, filter control characters and coalesce spaces
+     * @param paramList list of strings
+     * @return new list of strings
+     */
+    public List<String> filterCoalesceSpacesInList(List<String> paramList) {
+        return paramList.stream()
+                .map(x -> filterControlAndCoalesceSpaces(x))
+                .collect(Collectors.toList());
     }
 
     /***
@@ -187,14 +222,11 @@ public class Validate {
     }
 
     /***
-     * Validates an optional floating point number
-     * @param paramName parameter name used for exception
-     * @param min valid range lowest value
-     * @param max valid range highest value
-     * @param fallback return this if the field is empty or missing
-     * @param param the parameter value
-     * @return valid float representing the input, or fallback
-     * @throws ParameterValidationException if the float was invalid or out of range
+     * Interpret training source type and ensure it is valid
+     * @param paramName
+     * @param param
+     * @return
+     * @throws ParameterValidationException
      */
     TrainingLogic.TrainingType validateTrainingSourceType(final String paramName, final String param)
             throws ParameterValidationException {
@@ -290,11 +322,15 @@ public class Validate {
         return validatePattern(alphaNumericDashes, paramName, param);
     }
 
+    String validateEntityName(final String paramName, final String param) throws ParameterValidationException {
+        return validatePattern(entityNames, paramName, param);
+    }
+
     String validateRequiredSanitized(final String paramName, final String param) throws ParameterValidationException {
         if (null == param) {
             throw new ParameterValidationException("missing parameter", paramName);
         }
-        final String result = textSanitizer(param);
+        final String result = filterControlAndCoalesceSpaces(param);
         if (result.isEmpty()) {
             throw new ParameterValidationException("parameter cannot be empty", paramName);
         }
@@ -302,27 +338,27 @@ public class Validate {
     }
 
     String validateOptionalSanitized(final String param) throws ParameterValidationException {
-        return textSanitizer(param);
+        return filterControlAndCoalesceSpaces(param);
     }
 
     String validateAiName(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
+        return validatePatternOptionalField(printableAscii, paramName, param);
     }
 
     String validateOptionalDescription(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(alphaNumericAndMoreDesc, paramName, param);
+        return validatePatternOptionalField(printableAscii, paramName, param);
     }
 
     List<String> validateOptionalDescriptionList(String paramName, List<String> paramList)
             throws ParameterValidationException {
-        return validatePatternUniqueList(alphaNumericAndMoreDesc, paramName, paramList);
+        return validatePatternUniqueList(printableAscii, paramName, paramList);
     }
 
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(alphaNumericAndMoreNoAt, paramName, param);
+        return validatePatternOptionalField(printableAsciiNoAt, paramName, param);
     }
 
     List<String> validateOptionalObjectValues(String paramName, List<String> paramList)

@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
-<div class="modal fade" id="buyBot" role="dialog" style="padding-top:100px;">
-    <div class="modal-dialog flat">
+<div class="modal fade" id="buyBot" role="dialog">
+    <div class="modal-dialog flat width600" id="modalDialog">
 
         <div class="modal-content bot-shadow">
 
@@ -54,7 +54,7 @@
                         </div>
                         <div class="col-xs-4 bot-buy-purchase">
                                 <!--purchased button-->
-                                <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal" id="btnPayment" style="width:130px;">
+                                <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal" data-flow="" style="width:130px;">
                                     <b>Use Bot </b>
                                     <span class="fa fa-arrow-circle-right"></span>
                                 </button>
@@ -68,5 +68,5 @@
 
     </div>
 </div>
-<input type="hidden" id="purchase_state" name="purchase_state" value="0" style="display:none;">
+<input type="hidden" id="purchase_state" name="purchase_state" value="false" style="display:none;">
 <input type="hidden" id="bot_id" name="bot_id" style="display:none;">

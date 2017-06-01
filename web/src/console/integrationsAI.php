@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/aiApi.php";
+require_once "api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -18,6 +19,8 @@ if ($response['status']['code'] !== 200) {
     $response = $response["integration_list"];
 }
 
+$aiName = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
+$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -31,12 +34,13 @@ if ($response['status']['code'] !== 200) {
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntegrations('')">
 <div class="wrapper">
     <header class="main-header">
-      <?php include './dynamic/header.html.php'; ?>
+        <?php include './dynamic/header.html.php'; ?>
     </header>
 
     <!-- ================ MENU CONSOLE ================= -->
@@ -48,13 +52,13 @@ if ($response['status']['code'] !== 200) {
 
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
-    <section class="content">
+        <section class="content">
 
 
-        <?php include './dynamic/integrations.content.html.php'; ?>
+            <?php include './dynamic/integrations.content.html.php'; ?>
 
-     
-    </section>
+
+        </section>
     </div>
 
     <!--
@@ -63,7 +67,7 @@ if ($response['status']['code'] !== 200) {
     -->
 
     <footer class="main-footer">
-       <?php include './dynamic/footer.inc.html.php'; ?>
+        <?php include './dynamic/footer.inc.html.php'; ?>
     </footer>
 </div>
 
@@ -80,28 +84,26 @@ if ($response['status']['code'] !== 200) {
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init([
-            "<?php if (isset( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'])) 
-                        echo $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'];
-                else
-                    echo ''?>",
-            "integrations",4,true,false]);
+            "<?php echo $aiName;?>",
+            "integrations",
+            3,
+            true,
+            <?php echo $isExistAiId ? "false" : "true" ?>
+        ]);
     </script>
 </form>
 
 
 <script>
-  // JSON RESPONSE NEEDS API CALL
-  //var integrations = <?php  //echo json_encode($response['_integrationList']);  unset($response); ?>;
-  var integrations = <?php  echo json_encode($response);  unset($response); ?>;
-
-  var newNode = document.createElement('div');
-  newNode.className = 'row';
-  newNode.id = 'integrations_list';
+    var integrations = <?php  echo json_encode($response);  unset($response); ?>;
+    var newNode = document.createElement('div');
+    newNode.className = 'row';
+    newNode.id = 'integrations_list';
 </script>
 <script>
-  function searchIntegration(str) {
-    showIntegrations(str);
-  }
+    function searchIntegration(str) {
+        showIntegrations(str);
+    }
 </script>
 </body>
 </html>

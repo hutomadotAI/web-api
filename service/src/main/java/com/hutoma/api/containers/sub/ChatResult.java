@@ -14,20 +14,24 @@ public class ChatResult {
     private final String topicIn = "";
     private double score;
     @SerializedName("query")
-    private String query = "";
+    private String query;
     private String answer = "";
     private String history = "";
     @SerializedName("elapsedTime")
     private double elapsedTime;
     private String action;
     private String context;
-    @SerializedName("topicOut")
+    @SerializedName("topic_out")
     private String topicOut = "";
     private UUID chatId;
     private List<MemoryIntent> intents;
+
+    // the actual bot ID that provided the result
+    private transient UUID aiid;
     private transient boolean resetConversation;
 
-    public ChatResult() {
+    public ChatResult(final String query) {
+        this.query = query;
     }
 
     /***
@@ -36,10 +40,12 @@ public class ChatResult {
      * @param source
      */
     public ChatResult(final ChatResult source) {
+        this.query = source.query;
         this.score = source.score;
         this.answer = source.answer;
         this.elapsedTime = source.elapsedTime;
         this.topicOut = source.topicOut;
+        this.aiid = source.aiid;
     }
 
     public String getAnswer() {
@@ -50,9 +56,9 @@ public class ChatResult {
         this.answer = answer;
     }
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
+    public void setQuery(final String query) { this.query = query; }
+
+    public final String getQuery() { return this.query; }
 
     public void setAction(String action) {
         this.action = action;
@@ -109,6 +115,10 @@ public class ChatResult {
     public void setHistory(String history) {
         this.history = history;
     }
+
+    public UUID getAiid() { return this.aiid; }
+
+    public void setAiid(UUID aiid) { this.aiid = aiid; }
 
     public boolean isResetConversation() {
         return this.resetConversation;

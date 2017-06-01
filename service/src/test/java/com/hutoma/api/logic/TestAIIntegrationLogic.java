@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +44,7 @@ public class TestAIIntegrationLogic {
     public void testGetIntegrations() throws Database.DatabaseException {
         List<Integration> list = Collections.singletonList(new Integration(1, "name", "desc", "icon", true));
         when(this.fakeDatabase.getAiIntegrationList()).thenReturn(list);
-        ApiIntegrationList integ = (ApiIntegrationList) this.integLogic.getIntegrations(DEVID);
+        ApiIntegrationList integ = (ApiIntegrationList) this.integLogic.getIntegrations(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(list, integ.getIntegrationList());
     }
@@ -51,14 +52,14 @@ public class TestAIIntegrationLogic {
     @Test
     public void testGetIntegrations_emptyList() throws Database.DatabaseException {
         when(this.fakeDatabase.getAiIntegrationList()).thenReturn(new ArrayList<>());
-        ApiResult result = this.integLogic.getIntegrations(DEVID);
+        ApiResult result = this.integLogic.getIntegrations(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetIntegrations_dbException() throws Database.DatabaseException {
         when(this.fakeDatabase.getAiIntegrationList()).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.integLogic.getIntegrations(DEVID);
+        ApiResult result = this.integLogic.getIntegrations(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 }

@@ -11,9 +11,7 @@ import org.joda.time.DateTime;
 
 import java.util.Locale;
 
-/**
- * Created by David MG on 15/08/2016.
- */
+
 public class ApiAi extends ApiResult {
 
     private final String aiid;
@@ -38,9 +36,12 @@ public class ApiAi extends ApiResult {
     // transient because this should never be serialized along with the ApiAi object
     private transient BackendStatus backendStatus;
 
-    // this is a single status that represents the ai state on multiple backend servers
+    // a single real status that represents the ai state on multiple backend servers
+    private transient TrainingStatus summaryStatusReal;
+
+    // a public version of summaryStatus, with requeueing phases masked as "training"
     @SerializedName("ai_status")
-    private TrainingStatus summaryStatus;
+    private TrainingStatus summaryStatusPublic;
 
     // value from 0.0 to 1.0 representing training progress on the WNET server
     @SerializedName("phase_1_progress")
@@ -113,6 +114,15 @@ public class ApiAi extends ApiResult {
         return TrainingStatus.AI_TRAINING_COMPLETE;
     }
 
+    /***
+     * Get the version of training status that will be reported to the caller
+     * Note that this masks some of the internal workings (requeuing of bot training)
+     * @return
+     */
+    public TrainingStatus getSummaryStatusPublic() {
+        return summaryStatusPublic;
+    }
+
     public String getAiid() {
         return this.aiid;
     }
@@ -122,16 +132,20 @@ public class ApiAi extends ApiResult {
     }
 
     public TrainingStatus getSummaryAiStatus() {
-        return this.summaryStatus;
+        return this.summaryStatusReal;
     }
 
     public void setPublishingState(final AiBot.PublishingState publishingState) {
         this.publishingState = publishingState;
     }
 
+    public BackendStatus getBackendStatus() {
+        return this.backendStatus;
+    }
+
     private void populateExtendedStatus() {
         if (this.backendStatus == null) {
-            this.summaryStatus = TrainingStatus.AI_UNDEFINED;
+            this.summaryStatusReal = TrainingStatus.AI_UNDEFINED;
             this.phase1Progress = 0.0d;
             this.phase2Progress = 0.0d;
         } else {
@@ -141,10 +155,18 @@ public class ApiAi extends ApiResult {
             TrainingStatus wnetStatus = wnet.getTrainingStatus();
             TrainingStatus rnnStatus = rnn.getTrainingStatus();
 
-            this.summaryStatus = getSummaryTrainingStatus(wnetStatus, rnnStatus);
+            this.summaryStatusReal = getSummaryTrainingStatus(wnetStatus, rnnStatus);
             this.phase1Progress = clampProgress(wnetStatus, wnet.getTrainingProgress());
             this.phase2Progress = clampProgress(rnnStatus, rnn.getTrainingProgress());
             this.deepLearningError = rnn.getTrainingError();
+        }
+
+        // if the bot has been requeued, i.e. training started but paused for any reason
+        if ((this.summaryStatusReal == TrainingStatus.AI_TRAINING_QUEUED) && this.phase2Progress > 0.001) {
+            // then we hide the pause by reporting this bot as "training..."
+            this.summaryStatusPublic = TrainingStatus.AI_TRAINING;
+        } else {
+            this.summaryStatusPublic = this.summaryStatusReal;
         }
     }
 

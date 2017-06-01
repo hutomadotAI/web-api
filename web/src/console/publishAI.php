@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/aiApi.php";
+require_once "api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -104,7 +105,7 @@ function setSessionVariables($singleAI)
 </script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "","home",0,true,true]);
+        MENU.init([ "","home",0,false,true]);
     </script>
 </form>
 

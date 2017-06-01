@@ -6,6 +6,10 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AILogic;
 import junitparams.JUnitParamsRunner;
@@ -53,7 +57,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAIs() throws Database.DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabase.getAllAIs(any(), any())).thenReturn(Collections.singletonList(ai));
+        when(this.fakeDatabase.getAllAIs(any())).thenReturn(Collections.singletonList(ai));
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiList list = deserializeResponse(response, ApiAiList.class);
@@ -64,16 +68,41 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAI() throws Database.DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
         Assert.assertEquals(ai.getAiid(), responseAi.getAiid());
     }
 
+    public ApiAi checkMaskedTrainingStatus(
+            TrainingStatus trainingStatus, double trainingProgress) throws Database.DatabaseException {
+        BackendStatus status = new BackendStatus();
+        status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
+                trainingStatus, 0.0, trainingProgress));
+        status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
+                trainingStatus, 0.0, trainingProgress));
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(TestDataHelper.getAi(status));
+        final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
+        return deserializeResponse(response, ApiAi.class);
+    }
+
+    @Test
+    public void testGetSingle_QueuedNotMasked() throws Database.DatabaseException {
+        ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0);
+        Assert.assertEquals(TrainingStatus.AI_TRAINING_QUEUED, result.getSummaryStatusPublic());
+    }
+
+    @Test
+    public void testGetSingle_QueuedMasked() throws Database.DatabaseException {
+        ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.1);
+        Assert.assertEquals(TrainingStatus.AI_TRAINING, result.getSummaryStatusPublic());
+    }
+
     @Test
     public void testDeleteAI() throws Database.DatabaseException {
         when(this.fakeDatabase.deleteAi(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(TestDataHelper.getAI());
         final Response response = target(AI_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
@@ -82,7 +111,7 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCreateAI() throws Database.DatabaseException {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), anyString(), anyBoolean(), anyObject(),
+        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), anyObject())).thenReturn(uuid);
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
@@ -92,8 +121,8 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testUpdateAI() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAI());
-        when(this.fakeDatabase.updateAI(anyString(), any(), anyString(), anyBoolean(),
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabase.updateAI(any(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt())).thenReturn(true);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
@@ -134,7 +163,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testGetLinkedBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         final Response response = target(BOTS_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBotList botList = deserializeResponse(response, ApiAiBotList.class);
@@ -150,11 +179,11 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testLinkBotToAi() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
-        when(this.fakeDatabase.getPurchasedBots(anyString())).thenReturn(Collections.singletonList(SAMPLEBOT));
-        when(this.fakeDatabase.getBotsLinkedToAi(anyString(), any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.linkBotToAi(anyString(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt())).thenReturn(true);
         final Response response = target(BOT_PATH)
                 .request()
                 .headers(defaultHeaders)
@@ -173,8 +202,8 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testUnlinkBotToAi() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(anyString(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
-        when(this.fakeDatabase.unlinkBotFromAi(anyString(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getAI(any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabase.unlinkBotFromAi(any(), any(), anyInt())).thenReturn(true);
         final Response response = target(BOT_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
@@ -187,7 +216,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testGetPublishedBotForAI() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBotForAI(anyString(), any())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabase.getPublishedBotForAI(any(), any())).thenReturn(SAMPLEBOT);
         final Response response = target(BOT_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }

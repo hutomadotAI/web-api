@@ -13,8 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.UUID;
 
-import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class TestAdminLogic {
 
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
-    private static final String VALIDDEVID = "DevidExists";
+    private static final UUID VALIDDEVID = UUID.fromString("b97b80cb-6d6d-4dc6-88a7-061c3b6282a0");
     private static final String DEVTOKEN = "wieqejqwkjeqwejqlkejqwejwldslkfhslkdhflkshflskfh-sdfjdf";
 
     private JsonSerializer fakeSerializer;
@@ -89,47 +90,47 @@ public class TestAdminLogic {
 
     @Test
     public void testDelete_Success() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteDev(anyString())).thenReturn(true);
+        when(this.fakeDatabase.deleteDev(any())).thenReturn(true);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, deleteDev(VALIDDEVID).getStatus().getCode());
     }
 
     @Test
     public void testDelete_NullDevid() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteDev(anyString())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.deleteDev(any())).thenThrow(Database.DatabaseException.class);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, deleteDev(null).getStatus().getCode());
     }
 
     @Test
     public void testDelete_NonExistentDevid() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteDev(anyString())).thenReturn(false);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, deleteDev("other").getStatus().getCode());
+        when(this.fakeDatabase.deleteDev(any())).thenReturn(false);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, deleteDev(UUID.randomUUID()).getStatus().getCode());
     }
 
     @Test
     public void testDelete_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteDev(anyString())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.adminLogic.deleteDev(DEVID);
+        when(this.fakeDatabase.deleteDev(any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.adminLogic.deleteDev(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetDevToken() throws Database.DatabaseException {
         when(this.fakeDatabase.getDevToken(any())).thenReturn(DEVTOKEN);
-        ApiAdmin admin = (ApiAdmin) this.adminLogic.getDevToken(DEVID);
+        ApiAdmin admin = (ApiAdmin) this.adminLogic.getDevToken(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, admin.getStatus().getCode());
     }
 
     @Test
     public void testGetDevToken_dbException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDevToken(any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = this.adminLogic.getDevToken(DEVID);
+        ApiResult result = this.adminLogic.getDevToken(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetDevToken_devTokenEmpty() throws Database.DatabaseException {
         when(this.fakeDatabase.getDevToken(any())).thenReturn(null);
-        ApiResult result = this.adminLogic.getDevToken(DEVID);
+        ApiResult result = this.adminLogic.getDevToken(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
@@ -142,7 +143,7 @@ public class TestAdminLogic {
         return this.adminLogic.createDev("ROLE", "username", "email", "password", "passSalt", "firt_name", "last_time", 0);
     }
 
-    private ApiResult deleteDev(String devid) {
+    private ApiResult deleteDev(UUID devid) {
         return this.adminLogic.deleteDev(devid);
     }
 }

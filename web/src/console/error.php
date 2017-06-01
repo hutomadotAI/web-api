@@ -1,5 +1,6 @@
 <?php
 require "../pages/config.php";
+require_once "../console/api/botstoreApi.php";
 
 \hutoma\telemetry::getInstance()->log(\hutoma\TelemetryEvent::ERROR, "errorpage", $_GET['err'],
     array(

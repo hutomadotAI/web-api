@@ -1,20 +1,28 @@
 <?php
 require '../pages/config.php';
 require_once "./api/apiBase.php";
+require_once "./api/adminApi.php";
 require_once "./api/aiApi.php";
 require_once "./api/botApi.php";
 require_once "./common/bot.php";
+require_once "./common/utils.php";
+require_once "./common/config.php";
+require_once "./api/botstoreApi.php";
 
-if (!\hutoma\console::checkSessionIsActive()) {
+if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
-if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])) {
-    $_SESSION[$_SESSION['navigation_id']]['user_details'] = \hutoma\console::getUser();
+$api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
+$userInfo = $api->getUserInfo($_SESSION['navigation_id']);
+unset($api);
+
+if(!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])){
+    $_SESSION[$_SESSION['navigation_id']]['user_details'] = $userInfo;
     $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[$_SESSION['navigation_id']]['user_details']);
 }
 
-if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai'])) {
+if(isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai'])){
     unset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']);
     unset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']);
 }
@@ -38,6 +46,7 @@ unset($aiApi);
     <link rel="stylesheet" href="scripts/external/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -63,7 +72,8 @@ unset($aiApi);
             if (!isset($response_getAIs) || !(array_key_exists("ai_list", $response_getAIs))) {
                 include './dynamic/home.content.first.html.php';
                 include './dynamic/home.content.start.html.php';
-            } else {
+            }
+            else {
                 include './dynamic/home.content.start.html.php';
                 include './dynamic/home.viewall.html.php';
             }
@@ -96,12 +106,19 @@ unset($aiApi);
             $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 
             foreach ($response_getAIs['ai_list'] as $ai) {
+                $publishingState = "NOT_PUBLISHED";
+                $publishedBot = $botApi->getPublishedBot($ai['aiid']);
+
+                if (isset($publishedBot) && $publishedBot['status']['code'] == 200) {
+                    $publishingState = $publishedBot['bot']['publishingState'];
+                }
+
                 $v = array(
                     'aiid' => $ai['aiid'],
                     'name' => $ai['name'],
                     'description' => $ai['description'],
                     'ai_status' => $ai['ai_status'],
-                    'publishing_state' => isset($ai['publishing_state']) ? $ai['publishing_state'] : "NOT_PUBLISHED"
+                    'publishing_state' => $publishingState
                 );
                 array_push($tmp_list, $v);
             }
@@ -115,7 +132,7 @@ unset($aiApi);
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["", "home", 0, true, true]);
+        MENU.init(["", "home", 0, false, true]);
     </script>
 </form>
 

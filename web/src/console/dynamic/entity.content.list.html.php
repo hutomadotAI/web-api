@@ -15,7 +15,7 @@
             <div class="overlay center-block">
                 <section class="content-info" >
                     <div class="box-body">
-                        This is a list of the entities that you have created for your bot so far.  These can be shared between your bots.
+                        All the entities available to your bots are listed here.
                     </div>
                 </section>
             </div>

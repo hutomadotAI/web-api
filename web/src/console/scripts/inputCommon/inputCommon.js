@@ -45,7 +45,7 @@ function setSliderValue(id,value){
         case (value < 0.25):
             confidence_index = 2;
             break;
-        case (value < 0.45):
+        case (value < 0.6):
             confidence_index = 3;
             break;
         default:
@@ -58,7 +58,7 @@ function setSliderValue(id,value){
 }
 
 function getValueFromConfidence(confidence_text){
-    var values = {"never":0.0, "rarely":0.1, "sometimes":0.2, "often":0.3, "always":0.6};
+    var values = {"never":0.0, "rarely":0.1, "sometimes":0.2, "often":0.55, "always":0.7};
     return values[confidence_text];
 }
 

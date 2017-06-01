@@ -5,6 +5,7 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -28,14 +30,16 @@ public class DatabaseEntitiesIntents extends Database {
         super(logger, callProvider, transactionProvider);
     }
 
-    public List<String> getEntities(final String devid) throws DatabaseException {
+    public List<Entity> getEntities(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntities", 1).add(devid);
             final ResultSet rs = call.executeQuery();
             try {
-                final ArrayList<String> entities = new ArrayList<>();
+                List<Entity> entities = new ArrayList<>();
                 while (rs.next()) {
-                    entities.add(rs.getString("name"));
+                    entities.add(new Entity(
+                            rs.getString("name"),
+                            rs.getBoolean("isSystem")));
                 }
                 return entities;
             } catch (final SQLException sqle) {
@@ -44,7 +48,7 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public List<UUID> getAisForEntity(final String devid, final String entityName) throws DatabaseException {
+    public List<UUID> getAisForEntity(final UUID devid, final String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAIsForEntity", 2).add(devid).add(entityName);
             final ResultSet rs = call.executeQuery();
@@ -60,23 +64,33 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public ApiEntity getEntity(final String devid, final String entityName) throws DatabaseException {
+    public ApiEntity getEntity(final UUID devid, final String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntityValues", 2).add(devid).add(entityName);
-            final ResultSet rs = call.executeQuery();
+            ResultSet rs;
             try {
-                final ArrayList<String> entityValues = new ArrayList<>();
-                while (rs.next()) {
-                    entityValues.add(rs.getString("value"));
+                call.initialise("getEntityDetails", 2).add(devid).add(entityName);
+                rs = call.executeQuery();
+                boolean isSystem = false;
+                if (rs.next()) {
+                    isSystem = rs.getBoolean("isSystem");
                 }
-                return new ApiEntity(entityName, entityValues);
+                final ArrayList<String> entityValues = new ArrayList<>();
+                // only custom entities have values as ystem entities are handled externally
+                if (!isSystem) {
+                    call.initialise("getEntityValues", 2).add(devid).add(entityName);
+                    rs = call.executeQuery();
+                    while (rs.next()) {
+                        entityValues.add(rs.getString("value"));
+                    }
+                }
+                return new ApiEntity(entityName, devid, entityValues, isSystem);
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
         }
     }
 
-    public List<String> getIntents(String devid, UUID aiid) throws DatabaseException {
+    public List<String> getIntents(final UUID devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getIntents", 2).add(devid).add(aiid);
             ResultSet rs = call.executeQuery();
@@ -93,16 +107,15 @@ public class DatabaseEntitiesIntents extends Database {
     /***
      * Gets a fully populated intent object
      * including intent, usersays, variables and prompts
-     * @param devid owner dev
      * @param aiid the aiid that owns the intent
      * @param intentName
      * @return an intent
      * @throws DatabaseException if things go wrong
      */
-    public ApiIntent getIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
+    public ApiIntent getIntent(final UUID aiid, final String intentName) throws DatabaseException {
 
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 3).add(devid).add(aiid).add(intentName)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 2).add(aiid).add(intentName)
                     .executeQuery();
             if (!rs.next()) {
                 // the intent was not found at all
@@ -113,31 +126,37 @@ public class DatabaseEntitiesIntents extends Database {
             ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
 
             // get the user triggers
-            ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
+                    .add(aiid).add(intentName).executeQuery();
             while (saysRs.next()) {
                 intent.addUserSays(saysRs.getString("says"));
             }
 
             // get the list of responses
-            ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 2)
+                    .add(aiid).add(intentName).executeQuery();
             while (intentResponseRs.next()) {
                 intent.addResponse(intentResponseRs.getString("response"));
             }
 
             // get each intent variable
-            ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                    .add(devid).add(aiid).add(intentName).executeQuery();
+            ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 2)
+                    .add(aiid).add(intentName).executeQuery();
             while (varRs.next()) {
                 int varID = varRs.getInt("id");
+                String uuidString = varRs.getString("dev_id");
+                UUID devOwnerUUID = UUID.fromString(uuidString);
                 IntentVariable variable = new IntentVariable(
-                        varRs.getString("entity_name"), varRs.getBoolean("required"), varRs.getInt("n_prompts"),
-                        varRs.getString("value"));
+                        varRs.getString("entity_name"),
+                        devOwnerUUID,
+                        varRs.getBoolean("required"),
+                        varRs.getInt("n_prompts"),
+                        varRs.getString("value"),
+                        varRs.getBoolean("isPersistent"));
 
                 // for each variable get all its prompts
-                ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                        .add(devid).add(aiid).add(varID).executeQuery();
+                ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
+                        .add(aiid).add(varID).executeQuery();
                 while (promptRs.next()) {
                     variable.addPrompt(promptRs.getString("prompt"));
                 }
@@ -153,7 +172,8 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public void writeEntity(String devid, String entityOldName, ApiEntity entity) throws DatabaseException {
+    public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity)
+            throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
             // add or update the entity
@@ -195,9 +215,26 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
-    public boolean deleteEntity(String devid, String entityName) throws DatabaseException {
+    public OptionalInt getEntityIdForDev(UUID devid, String entityName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityName).executeUpdate();
+            ResultSet rs;
+            try {
+                call.initialise("getEntityIdForDev", 2).add(devid).add(entityName);
+                rs = call.executeQuery();
+                OptionalInt entityId = OptionalInt.empty();
+                if (rs.next()) {
+                    entityId = OptionalInt.of(rs.getInt("id"));
+                }
+                return entityId;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean deleteEntity(UUID devid, int entityId) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityId).executeUpdate();
             return rowCount > 0;
         }
     }
@@ -212,7 +249,8 @@ public class DatabaseEntitiesIntents extends Database {
      * @param intent the new data
      * @throws DatabaseException
      */
-    public void writeIntent(String devid, UUID aiid, String intentName, ApiIntent intent) throws DatabaseException {
+    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent)
+            throws DatabaseException {
 
         // start the transaction
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
@@ -246,7 +284,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @return
      * @throws DatabaseException
      */
-    public boolean deleteIntent(String devid, UUID aiid, String intentName) throws DatabaseException {
+    public boolean deleteIntent(final UUID devid, final UUID aiid, final String intentName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             int rowCount = call.initialise("deleteIntent", 3).add(devid).add(aiid).add(intentName).executeUpdate();
             return rowCount > 0;
@@ -262,12 +300,13 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentUserSays(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
+    private void updateIntentUserSays(final UUID devid, final UUID aiid, final ApiIntent intent,
+                                      final DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
 
         // read current
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 3)
-                .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
+                .add(aiid).add(intent.getIntentName()).executeQuery();
 
         HashSet<String> currentSet = new HashSet<>();
         // put them into a set
@@ -303,13 +342,14 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentResponses(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
+    private void updateIntentResponses(final UUID devid, final UUID aiid, final ApiIntent intent,
+                                       final DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
 
 
         // read current
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 3)
-                .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 2)
+                .add(aiid).add(intent.getIntentName()).executeQuery();
 
         // put them into a set
         HashSet<String> currentSet = new HashSet<>();
@@ -346,21 +386,26 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void updateIntentVariables(String devid, UUID aiid, ApiIntent intent, DatabaseTransaction transaction)
+    private void updateIntentVariables(final UUID devid, final UUID aiid, final ApiIntent intent,
+                                       final DatabaseTransaction transaction)
             throws DatabaseException, SQLException {
 
         // read the existing intent variables from the database
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariables", 3)
-                .add(devid).add(aiid).add(intent.getIntentName()).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariables", 2)
+                .add(aiid).add(intent.getIntentName()).executeQuery();
 
         // put them into a set
         HashMap<String, IntentVariable> currentSet = new HashMap<>();
         while (readCurrentRs.next()) {
+            String uuidString = readCurrentRs.getString("dev_id");
+            UUID devOwnerUUID = UUID.fromString(uuidString);
             IntentVariable old = new IntentVariable(
                     readCurrentRs.getString("entity_name"),
+                    devOwnerUUID,
                     readCurrentRs.getBoolean("required"), readCurrentRs.getInt("n_prompts"),
                     readCurrentRs.getString("value"),
-                    readCurrentRs.getInt("id"));
+                    readCurrentRs.getInt("id"),
+                    readCurrentRs.getBoolean("isPersistent"));
             currentSet.put(old.getEntityName(), old);
         }
 
@@ -391,8 +436,9 @@ public class DatabaseEntitiesIntents extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private void intentVariableCreateOrUpdate(DatabaseTransaction transaction, String devid, UUID aiid,
-                                              ApiIntent intent, IntentVariable intentVariable)
+    private void intentVariableCreateOrUpdate(final DatabaseTransaction transaction, final UUID devid,
+                                              final UUID aiid, final ApiIntent intent,
+                                              final IntentVariable intentVariable)
             throws DatabaseException, SQLException {
 
         // generate the call params
@@ -416,8 +462,8 @@ public class DatabaseEntitiesIntents extends Database {
         int varId = updateVarRs.getInt("affected_id");
 
         // what prompts do we have now?
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 3)
-                .add(devid).add(aiid).add(varId).executeQuery();
+        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
+                .add(aiid).add(varId).executeQuery();
         // put them into a set
         HashSet<String> currentSet = new HashSet<>();
         while (readCurrentRs.next()) {
@@ -450,7 +496,7 @@ public class DatabaseEntitiesIntents extends Database {
      * @param variable
      * @throws DatabaseException
      */
-    private void intentVariableDeleteOld(DatabaseTransaction transaction, String devid, UUID aiid,
+    private void intentVariableDeleteOld(final DatabaseTransaction transaction, final UUID devid, final UUID aiid,
                                          ApiIntent intent, IntentVariable variable) throws DatabaseException {
         transaction.getDatabaseCall().initialise("deleteIntentVariable", 3)
                 .add(devid).add(aiid).add(variable.getId())

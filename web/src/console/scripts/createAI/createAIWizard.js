@@ -21,12 +21,11 @@ function backPage() {
 function deactiveButtons() {
     document.getElementById('btnBack').setAttribute('disabled', 'disabled');
     document.getElementById('btnNext').setAttribute('disabled', 'disabled');
-    document.getElementById('botSearch').setAttribute('disabled', 'disabled');
 }
 
 function getAllBotsLinked() {
     var userActivedBots = {};
-    var i, $list = $("[data-linked=\"1\"]");
+    var i, $list = $("[data-linked=\"true\"]");
 
     userActivedBots.bots = new Array();
 
@@ -43,7 +42,7 @@ function getAllBotsLinked() {
 
 $('#buyBot').on('hide.bs.modal', function (e) {
     var purchase_state = document.getElementById('purchase_state').value;
-    if (purchase_state == 1)
+    if (purchase_state ==='true')
         switchCard(document.getElementById('bot_id').value, DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value);
 });
 

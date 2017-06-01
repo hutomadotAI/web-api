@@ -1,4 +1,8 @@
 <?php
+
+include_once __DIR__ . "../console/api/signupCodeApi.php";
+include_once __DIR__ . "../console/common/config.php";
+
 include "config.php";
 
 if(isset($_POST['submit'])) {
@@ -29,7 +33,7 @@ if(isset($_POST['submit'])) {
             $passwordmismatch .='</div>';
 
             $termsmsg  ='<div class="alert alert-warning text-white flat">';
-            $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read and agree to the <a href="https://www.hutoma.com/terms_and_conditions.pdf" target="_blank">Terms and Conditions</a>,<a href="https://www.hutoma.com/subscription_agreement.pdf" target="_blank"> Platform Usage</a> and <a href="https://www.hutoma.com/privacy.pdf" target="_blank">Privacy Policy</a>';
+            $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.';
             $termsmsg .='</div>';
 
             $userexists  ='<div class="alert alert-warning text-white flat">';
@@ -47,10 +51,12 @@ if(isset($_POST['submit'])) {
 
             $msg= $missingfields;
 
+            $api = new \hutoma\api\signupCodeApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
+
             if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
             elseif($password != $retyped_password) $msg= $passwordmismatch;
             elseif($terms != 'True') $msg= $termsmsg;
-            elseif(\hutoma\console::inviteCodeValid($invite_code) !== 200) $msg=$invalidcode;
+            elseif($api->inviteCodeValid($invite_code) !== 200) $msg=$invalidcode;
             else{
                 $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
@@ -62,12 +68,13 @@ if(isset($_POST['submit'])) {
                     // Register succeeded
                     if ($createAccount === 200) {
                         // Redeem invite code.
-                        \hutoma\console::redeemInviteCode($invite_code, $email);
+
+                        $api->redeemInviteCode($invite_code, $email);
 
                         setcookie('logSyscuruser', $email);
                         $login = \hutoma\console::login($email, $password, false);
                         if ($login === false) {
-                            $msg = array("Error", $loginerror);
+                            $msg = array("Error", "There was an error creating the user - please try again later");
                         } elseif (is_array($login) && $login['status'] == "blocked") {
                             $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
                             exit();
@@ -78,6 +85,8 @@ if(isset($_POST['submit'])) {
                     }
                 }
             }
+
+            unset($api);
 
         }
     }
@@ -211,7 +220,7 @@ if(isset($_POST['submit'])) {
                 <div class="col-xs-8">
                     <div class="checkbox icheck">
                         <label>
-                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to hutoma <a href="https://www.hutoma.com/terms_and_conditions.pdf" target="_blank">terms</a>, <a href="https://www.hutoma.com/subscription_agreement.pdf" target="_blank">usage</a>, and <a href="https://www.hutoma.com/privacy.pdf" target="_blank">privacy</a> policies.
+                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the terms stated in the Subscription <a href="https://www.hutoma.com/Hutoma_WebPlatformSaaSAgreement.pdf" target="_blank">Agreement.</a>.
                         </label>
                         </label>
                     </div>

@@ -24,8 +24,11 @@ public class ControllerAiml extends ControllerBase {
 
     @Inject
     public ControllerAiml(final Config config, final ThreadSubPool threadSubPool,
-                          final ServiceLocator serviceLocator, final AiServiceStatusLogger logger) {
+                          final ServiceLocator serviceLocator, final AiServiceStatusLogger logger,
+                          final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
+        this.queueProcessor = queueProcessor;
+        this.queueProcessor.initialise(this, BackendServerType.AIML);
     }
 
     /***
@@ -51,6 +54,11 @@ public class ControllerAiml extends ControllerBase {
             throws Database.DatabaseException {
         // do nothing.
         // AIML AIs are placeholders and should not be synced
+    }
+
+    @Override
+    public boolean logErrorIfNoTrainingCapacity() {
+        return false;
     }
 
     /***

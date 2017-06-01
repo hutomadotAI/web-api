@@ -73,6 +73,12 @@ public class ServerConnector {
             this.responseStatus = responseStatus;
         }
 
+        public static void throwWithSuppressed(String message, Exception suppressed) throws AiServicesException {
+            AiServicesException ex = new AiServicesException(message);
+            ex.addSuppressed(suppressed);
+            throw ex;
+        }
+
         public int getResponseStatus() {
             return this.responseStatus;
         }

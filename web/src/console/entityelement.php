@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "api/apiBase.php";
 require_once "api/entityApi.php";
+require_once "api/botstoreApi.php";
 
 
 if(!\hutoma\console::checkSessionIsActive()){
@@ -55,7 +56,7 @@ function isPostInputAvailable()
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">

@@ -4,6 +4,7 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
@@ -50,7 +51,7 @@ import static org.mockito.Mockito.when;
  */
 public class TestAiServicesClient {
 
-    private static final String DEVID = "devid";
+    private static final UUID DEVID = UUID.fromString("1a5c55e7-6492-4d08-8dfd-d167ac9f3330");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String COMMAND_PARAM = "command";
     private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9090";
@@ -61,7 +62,7 @@ public class TestAiServicesClient {
 
     private static HttpServer httpServer;
     private JsonSerializer fakeSerializer;
-    private Database fakeDatabase;
+    private DatabaseAiStatusUpdates fakeDatabase;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
@@ -70,6 +71,7 @@ public class TestAiServicesClient {
     private ControllerWnet fakeControllerWnet;
     private ControllerRnn fakeControllerRnn;
     private ThreadPool threadPool;
+    private AIQueueServices fakeQueueServices;
 
     @BeforeClass
     public static void initializeClass() {
@@ -87,10 +89,11 @@ public class TestAiServicesClient {
     public void setup() throws ServerMetadata.NoServerAvailable {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
+        this.fakeQueueServices = mock(AIQueueServices.class);
 
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerRnn = mock(ControllerRnn.class);
@@ -99,27 +102,29 @@ public class TestAiServicesClient {
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         this.threadPool = new ThreadPool(this.fakeConfig);
 
-        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
-        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(LOCAL_WEB_ENDPOINT);
+        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(
+                TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
+        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
+                TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn);
+                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
 
     @Test
     public void testStartTraining() throws AIServices.AiServicesException, Database.DatabaseException {
         when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
-        this.aiServices.startTraining(DEVID, AIID);
+        this.aiServices.startTraining(null, DEVID, AIID);
     }
 
     @Test
     public void testStopTraining() throws AIServices.AiServicesException {
-        this.aiServices.stopTraining(DEVID, AIID);
+        this.aiServices.stopTraining(null, DEVID, AIID);
     }
 
     @Test
     public void testDeleteAi() throws AIServices.AiServicesException {
-        this.aiServices.deleteAI(DEVID, AIID);
+        this.aiServices.deleteAI(null, DEVID, AIID);
     }
 
     @Test
@@ -132,8 +137,8 @@ public class TestAiServicesClient {
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn);
-        thisAiServices.uploadTraining(DEVID, AIID, TRAINING_MATERIALS);
+                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
+        thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }
 
     @Path("/training")
@@ -148,7 +153,7 @@ public class TestAiServicesClient {
                 @PathParam("aiid") String aiid,
                 @QueryParam(COMMAND_PARAM) String command) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
                 checkParameterValue(AIID.toString(), aiid);
                 checkParameterValue(Arrays.asList("start", "stop", "wake"), command);
             } catch (Exception ex) {
@@ -164,7 +169,7 @@ public class TestAiServicesClient {
                 @PathParam("devId") String devId,
                 @PathParam("aiid") String aiid) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
                 checkParameterValue(AIID.toString(), aiid);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
@@ -178,7 +183,7 @@ public class TestAiServicesClient {
         public Response sendOkForDevIdDelete(
                 @PathParam("devId") String devId) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
             }
@@ -192,7 +197,7 @@ public class TestAiServicesClient {
                 @PathParam("devId") String devId,
                 @PathParam("aiid") String aiid) {
             try {
-                checkParameterValue(DEVID, devId);
+                checkParameterValue(DEVID.toString(), devId);
                 checkParameterValue(AIID.toString(), aiid);
             } catch (Exception ex) {
                 return ApiError.getBadRequest(ex.getMessage()).getResponse(this.serializer).build();
@@ -209,7 +214,7 @@ public class TestAiServicesClient {
             try {
                 AIServices.AiInfo info = (AIServices.AiInfo) this.serializer.deserialize(
                         infoPart.getValueAs(String.class), AIServices.AiInfo.class);
-                checkParameterValue(DEVID, info.getDevId());
+                checkParameterValue(DEVID.toString(), info.getDevId());
                 checkParameterValue(AIID.toString(), info.getAiid());
                 checkParameterValue(TRAINING_MATERIALS, trainingMaterials);
             } catch (Exception ex) {

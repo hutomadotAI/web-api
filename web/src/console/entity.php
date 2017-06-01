@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/entityApi.php";
+require_once "../console/api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -12,7 +13,11 @@ $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\co
 if (isset($_REQUEST['deleteentity'])) {
     $entityName = $_REQUEST['deleteentity'];
     $result = $entityApi->deleteEntity($entityName);
-    if ($result['status']['code'] != 200) {
+    if ($result['status']['code'] === 409) {
+        unset($result);
+        \hutoma\console::redirect('./error.php?err=327');
+    }
+    elseif ($result['status']['code'] !== 200) {
         unset($result);
         \hutoma\console::redirect('./error.php?err=326');
     }
@@ -30,7 +35,7 @@ if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) 
 function echoJsonEntitiesResponse($entities)
 {
     if ($entities['status']['code'] !== 404) {
-        echo json_encode($entities['entity_name']);
+        echo json_encode($entities['entities']);
     }
     else
         echo '""'; // return empty string
@@ -48,7 +53,7 @@ function echoJsonEntitiesResponse($entities)
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showEntities('')">

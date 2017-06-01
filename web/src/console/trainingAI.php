@@ -2,6 +2,7 @@
 require "../pages/config.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/aiApi.php";
+require_once "../console/api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -85,6 +86,7 @@ function localeToLanguage($locale)
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">

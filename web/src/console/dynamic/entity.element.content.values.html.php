@@ -17,7 +17,7 @@
                 <section class="content-info">
                     <div class="box-body">
                         <dd>
-                            Entities are the set of strings you want your Bot to recognise and extract from a conversation.
+                            Entities are the sets of strings you want your bot to recognise and extract from a conversation.
                         </dd>
                     </div>
                 </section>
@@ -45,7 +45,7 @@
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertEntityValues" style="margin-bottom:10px;">
             <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
             <i class="icon fa fa-check" id="iconAlertEntityValues"></i>
-            <span id="msgAlertEntityValues">You can add additional values for the current entity.</span>
+            <span id="msgAlertEntityValues">You can add additional values to the current entity.</span>
         </div>
 
         <div class="row" id="entityValues-list"></div>

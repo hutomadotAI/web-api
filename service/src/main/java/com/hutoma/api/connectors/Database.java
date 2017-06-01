@@ -1,9 +1,9 @@
 package com.hutoma.api.connectors;
 
-import com.google.gson.JsonParseException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
@@ -15,6 +15,7 @@ import org.joda.time.DateTime;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -47,13 +48,15 @@ public class Database {
             for (LinkedTreeMap<String, Object> e : list) {
                 @SuppressWarnings("unchecked")
                 MemoryVariable memoryVariable = new MemoryVariable(
-                        e.get("name").toString(),
-                        e.containsKey("currentValue") ? e.get("currentValue").toString() : null,
-                        (boolean) e.get("isMandatory"),
-                        (List<String>) e.get("entityKeys"),
+                        e.get("entity").toString(),
+                        e.containsKey("value") ? e.get("value").toString() : null,
+                        (boolean) e.get("mandatory"),
+                        (List<String>) e.get("entity_keys"),
                         (List<String>) e.get("prompts"),
-                        (int) Math.round((double) e.get("timesToPrompt")),
-                        (int) Math.round((double) e.get("timesPrompted")));
+                        (int) Math.round((double) e.get("max_prompts")),
+                        (int) Math.round((double) e.get("times_prompted")),
+                        (boolean) e.get("system_entity"),
+                        (boolean) e.get("persistent"));
                 variables.add(memoryVariable);
             }
             return new MemoryIntent(rs.getString("name"),
@@ -66,29 +69,6 @@ public class Database {
         }
     }
 
-    /***
-     * Try to deserialize json to create a valid BackendStatus
-     * or return a blank BackendStatus if the json field was null or empty
-     * @param statusJson json string
-     * @param jsonSerializer serialiser
-     * @return valid BackendStatus object
-     * @throws DatabaseException if there was data it did not parse correctly
-     */
-    protected static BackendStatus getBackendStatus(final String statusJson, final JsonSerializer jsonSerializer)
-            throws DatabaseException {
-        BackendStatus backendStatus = null;
-        // try to deserialize
-        if (statusJson != null && !statusJson.isEmpty()) {
-            try {
-                backendStatus = (BackendStatus) jsonSerializer.deserialize(statusJson, BackendStatus.class);
-            } catch (JsonParseException jpe) {
-                throw new DatabaseException("Error parsing JSON in BackendStatus field");
-            }
-        }
-        // if the field was empty then use an empty structure
-        return (backendStatus == null) ? new BackendStatus() : backendStatus;
-    }
-
     public boolean createDev(final String username, final String email, final String password,
                              final String passwordSalt, final String firstName, final String lastName,
                              final String devToken, final int planId, final String devId, final String clientToken)
@@ -96,6 +76,122 @@ public class Database {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt)
                     .add(firstName).add(lastName).add(devToken).add(planId).add(devId).add(clientToken);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Gets the user information.
+     * @param username the username
+     * @return the user information
+     * @throws DatabaseException
+     */
+    public UserInfo getUser(final String username) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getUserDetails", 1).add(username);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return new UserInfo(
+                            rs.getString("first_name"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            new DateTime(rs.getTimestamp("created")),
+                            rs.getBoolean("valid"),
+                            rs.getBoolean("internal"),
+                            rs.getString("password"),
+                            rs.getString("password_salt"),
+                            rs.getString("dev_id"),
+                            rs.getString("attempt"),
+                            rs.getInt("id"),
+                            rs.getString("dev_token"));
+                }
+                return null;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean updateUserPassword(final int userId, final String password, final String passwordSalt)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateUserPassword", 3)
+                    .add(userId).add(password).add(passwordSalt);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean isPasswordResetTokenValid(final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("isPasswordResetTokenValid", 1).add(token);
+            final ResultSet rs = call.executeQuery();
+            try {
+                return rs.next();
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public int getUserIdForResetToken(final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getUserIdForResetToken", 1).add(token);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getInt("uid");
+                }
+                return -1;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean deletePasswordResetToken(final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deletePasswordResetToken", 1).add(token);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean insertPasswordResetToken(final int userId, final String token) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("insertResetToken", 2).add(token).add(userId);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Gets whether the user already exists or not.
+     * @param username   the username to check
+     * @param checkEmail whether to check the email field as well or not
+     * @return whether the user already exists or not
+     * @throws DatabaseException
+     */
+    public boolean userExists(final String username, final boolean checkEmail) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("userExists", 2).add(username).add(checkEmail);
+            final ResultSet rs = call.executeQuery();
+            try {
+                return rs.next();
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    /**
+     * Updates the user login attempts.
+     * @param devId    the developer id
+     * @param attempts the number of attempts, or a 'magic code' (this comes from the PHP code)
+     * @return whether the update succeeded or not
+     * @throws DatabaseException
+     */
+    public boolean updateUserLoginAttempts(final String devId, final String attempts) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateUserLoginAttempts", 2).add(devId).add(attempts);
             return call.executeUpdate() > 0;
         }
     }
@@ -144,7 +240,7 @@ public class Database {
      * @return the plan, or null if there is no developer Id or not plan associated to it
      * @throws DatabaseException database exception
      */
-    public DevPlan getDevPlan(final String devId) throws DatabaseException {
+    public DevPlan getDevPlan(final UUID devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDevPlan", 1).add(devId);
             final ResultSet rs = call.executeQuery();
@@ -166,12 +262,12 @@ public class Database {
      * @return true if the user was found and deleted, false if no user was found
      * @throws DatabaseException
      */
-    public boolean deleteDev(final String devid) throws DatabaseException {
+    public boolean deleteDev(final UUID devid) throws DatabaseException {
 
         int updateCount = 0;
         // start a transaction
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            // delete the user's AIs
+            // delete the user's AIs and status for those AIs
             transaction.getDatabaseCall().initialise("deleteAllAIs", 1).add(devid).executeUpdate();
             // delete the user
             updateCount = transaction.getDatabaseCall().initialise("deleteUser", 1).add(devid).executeUpdate();
@@ -187,13 +283,15 @@ public class Database {
      * @return the developer info
      * @throws DatabaseException
      */
-    public DeveloperInfo getDeveloperInfo(final String devId) throws DatabaseException {
+    public DeveloperInfo getDeveloperInfo(final UUID devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDeveloperInfo", 1).add(devId);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
+                final String devIdString = rs.getString("dev_id");
+                final UUID devIdDb = UUID.fromString(devIdString);
                 return new DeveloperInfo(
-                        rs.getString("dev_id"),
+                        devIdDb,
                         rs.getString("name"),
                         rs.getString("company"),
                         rs.getString("email"),
@@ -239,7 +337,6 @@ public class Database {
      * @param description ai_description
      * @param devid the owner dev
      * @param isPrivate private ai
-     * @param backendStatus status of this ai in back end servers
      * @param clientToken a guest token that the dev can give out to users
      * @param language UI parameter
      * @param timezoneString UI parameter
@@ -249,22 +346,20 @@ public class Database {
      * @return
      * @throws DatabaseException
      */
-    public UUID createAI(final UUID aiid, final String name, final String description, final String devid,
+    public UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
                          final boolean isPrivate,
-                         final BackendStatus backendStatus,
                          final String clientToken,
                          final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice,
                          final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addAi", 12)
+            call.initialise("addAi", 11)
                     .add(aiid)
                     .add(name)
                     .add(description)
                     .add(devid)
                     .add(isPrivate)
-                    .add(jsonSerializer.serialize(backendStatus))
                     .add(clientToken)
                     .add(language == null ? null : language.toLanguageTag())
                     .add(timezoneString)
@@ -284,7 +379,7 @@ public class Database {
         }
     }
 
-    public boolean updateAI(final String devId, final UUID aiid, final String description, final boolean isPrivate,
+    public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
                             final Locale language, final String timezoneString, final double confidence,
                             final int personality, final int voice)
             throws DatabaseException {
@@ -303,71 +398,76 @@ public class Database {
         }
     }
 
-    public BackendStatus getAIStatusReadOnly(final String devId, final UUID aiid, final JsonSerializer jsonSerializer)
+    /***
+     * Combines the statuses of one AI and returns them as a BackendStatus object
+     * @param devId
+     * @param aiid
+     * @return
+     * @throws DatabaseException
+     */
+    public BackendStatus getAIStatusReadOnly(final UUID devId, final UUID aiid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            ResultSet rs = call.initialise("getAiStatus", 2)
-                    .add(aiid).add(devId).executeQuery();
-
-            // return null if the AI was not found
-            if (!rs.next()) {
-                return null;
-            }
-
-            // retrieve the status
-            return getBackendStatus(rs.getString("backend_status"), jsonSerializer);
+            return getBackendStatus(devId, aiid, call);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
     }
 
-    public boolean updateAIStatus(final AiStatus status, final JsonSerializer jsonSerializer)
+    public boolean updateAIStatus(BackendServerType serverType, UUID aiid, TrainingStatus trainingStatus,
+                                  String endpoint, double trainingProgress, double trainingError)
             throws DatabaseException {
 
         // open a transaction since this is a read/modify/write operation and we need consistency
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-
-            // read the status json for all the servers
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAiStatusForUpdate", 2)
-                    .add(status.getAiid()).add(status.getDevId()).executeQuery();
-
-            // if there is nothing then end here (not found)
-            if (!rs.next()) {
-                return false;
-            }
-
-            // retrieve the status
-            BackendStatus backendStatus = getBackendStatus(rs.getString("backend_status"), jsonSerializer);
-
-            // modify the bit of the structure that relates to the server we are updating
-            backendStatus.setEngineStatus(status);
-
-            // write the json block back to the AI table
-            transaction.getDatabaseCall().initialise("updateAiStatus", 3)
-                    .add(status.getAiid())
-                    .add(status.getDevId())
-                    .add(jsonSerializer.serialize(backendStatus))
+            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
+                    .add(serverType.value())
+                    .add(aiid)
+                    .add(trainingStatus)
+                    .add(endpoint)
+                    .add(trainingProgress)
+                    .add(trainingError)
                     .executeUpdate();
 
             // if all goes well, commit
             transaction.commit();
-
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
         }
+
         // flag success
         return true;
+
     }
 
-    public List<ApiAi> getAllAIs(final String devid, final JsonSerializer jsonSerializer) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAIs", 1).add(devid);
-            final ResultSet rs = call.executeQuery();
+    public boolean updateAIStatus(final AiStatus status)
+            throws DatabaseException {
+        return updateAIStatus(status.getAiEngine(), status.getAiid(), status.getTrainingStatus(),
+                status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
+    }
+
+    /***
+     * Get data for all the dev's AIs
+     * @param devid
+     * @return
+     * @throws DatabaseException
+     */
+    public List<ApiAi> getAllAIs(final UUID devid) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            // load a hashmap with all the dev's statuses
+            HashMap<UUID, BackendStatus> backendStatuses = getAllAIsStatusHashMap(
+                    devid, transaction.getDatabaseCall());
+
+            // load all the dev's AIs
+            ResultSet rs = transaction.getDatabaseCall()
+                    .initialise("getAIs", 1)
+                    .add(devid)
+                    .executeQuery();
             final ArrayList<ApiAi> res = new ArrayList<>();
             try {
                 while (rs.next()) {
-                    ApiAi bot = getAiFromResultset(rs, jsonSerializer);
+                    // combine status data with AI
+                    UUID aiid = UUID.fromString(rs.getString("aiid"));
+                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid));
                     int publishingStateOnDb = rs.getInt("publishing_state");
                     // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
                     // we always get it right regardless of the default value
@@ -387,22 +487,50 @@ public class Database {
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         }
     }
 
-    public ApiAi getAI(final String devid, final UUID aiid, final JsonSerializer jsonSerializer)
+    /***
+     * Load data for an AI and populate its backend server statuses
+     * @param devid
+     * @param aiid
+     * @return an ai, or null if it was not found
+     * @throws DatabaseException
+     */
+    public ApiAi getAI(final UUID devid, final UUID aiid)
             throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAi", 2).add(devid).add(aiid);
-            final ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    return getAiFromResultset(rs, jsonSerializer);
-                }
-                return null;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            // load the statuses first
+            BackendStatus backendStatus = getBackendStatus(devid, aiid, transaction.getDatabaseCall());
+            // then load the AI
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAi", 2)
+                    .add(devid)
+                    .add(aiid)
+                    .executeQuery();
+            if (rs.next()) {
+                return getAiFromResultset(rs, backendStatus);
             }
+            return null;
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public boolean checkAIBelongsToDevId(final UUID devId, final UUID aiid) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            // then load the AI
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAiSimple", 2)
+                    .add(devId.toString())
+                    .add(aiid)
+                    .executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+            return false;
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
         }
     }
 
@@ -421,7 +549,7 @@ public class Database {
         }
     }
 
-    public String getDevToken(final String devid) throws DatabaseException {
+    public String getDevToken(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getDevTokenFromDevID", 1).add(devid);
             final ResultSet rs = call.executeQuery();
@@ -436,14 +564,14 @@ public class Database {
         }
     }
 
-    public boolean deleteAi(final String devid, final UUID aiid) throws DatabaseException {
+    public boolean deleteAi(final UUID devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAi", 2).add(devid).add(aiid);
             return call.executeUpdate() > 0;
         }
     }
 
-    public List<AiBot> getBotsLinkedToAi(final String devId, final UUID aiid) throws DatabaseException {
+    public List<AiBot> getBotsLinkedToAi(final UUID devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotsLinkedToAi", 2).add(devId).add(aiid);
             final ResultSet rs = call.executeQuery();
@@ -467,21 +595,21 @@ public class Database {
         }
     }
 
-    public boolean linkBotToAi(final String devId, final UUID aiid, final int botId) throws DatabaseException {
+    public boolean linkBotToAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("linkBotToAi", 3).add(devId).add(aiid).add(botId);
             return call.executeUpdate() > 0;
         }
     }
 
-    public boolean unlinkBotFromAi(final String devId, final UUID aiid, final int botId) throws DatabaseException {
+    public boolean unlinkBotFromAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("unlinkBotFromAi", 3).add(devId).add(aiid).add(botId);
             return call.executeUpdate() > 0;
         }
     }
 
-    public AiBot getPublishedBotForAI(final String devId, final UUID aiid) throws DatabaseException {
+    public AiBot getPublishedBotForAI(final UUID devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPublishedBotForAi", 2).add(devId).add(aiid);
             final ResultSet rs = call.executeQuery();
@@ -551,7 +679,7 @@ public class Database {
         }
     }
 
-    public List<AiBot> getPurchasedBots(final String devId) throws DatabaseException {
+    public List<AiBot> getPurchasedBots(final UUID devId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPurchasedBots", 1).add(devId);
             final ResultSet rs = call.executeQuery();
@@ -563,7 +691,7 @@ public class Database {
         }
     }
 
-    public boolean purchaseBot(final String devId, final int botId) throws DatabaseException {
+    public boolean purchaseBot(final UUID devId, final int botId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("purchaseBot", 2).add(devId).add(botId);
             return call.executeUpdate() > 0;
@@ -583,7 +711,7 @@ public class Database {
         }
     }
 
-    public boolean saveBotIconPath(final String devId, final int botId, final String filename)
+    public boolean saveBotIconPath(final UUID devId, final int botId, final String filename)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("saveBotIcon", 3).add(devId).add(botId).add(filename);
@@ -604,7 +732,7 @@ public class Database {
         return false;
     }
 
-    public RateLimitStatus checkRateLimit(final String devId, final String rateKey, final double burst,
+    public RateLimitStatus checkRateLimit(final UUID devId, final String rateKey, final double burst,
                                           final double frequency) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("rateLimitCheck", 4).add(devId).add(rateKey).add(burst).add(frequency);
@@ -659,15 +787,26 @@ public class Database {
         }
     }
 
-    public ChatState getChatState(final String devId, final UUID chatId) throws DatabaseException {
+    public ChatState getChatState(final UUID devId, final UUID chatId, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getChatState", 2).add(devId).add(chatId);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
+                String entitiesJson = rs.getString("entity_values");
+                HashMap<String, String> entities;
+                if (entitiesJson == null) {
+                    entities = new HashMap<>();
+                } else {
+                    entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
+                }
+
+                String locked_aiid = rs.getString("locked_aiid");
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),
                         rs.getString("topic"),
-                        UUID.fromString(rs.getString("locked_aiid"))
+                        locked_aiid != null ? UUID.fromString(locked_aiid) : null,
+                        entities
                 );
             }
             return ChatState.getEmpty();
@@ -676,15 +815,17 @@ public class Database {
         }
     }
 
-    public boolean saveChatState(final String devId, final UUID chatId, final ChatState chatState)
+    public boolean saveChatState(final UUID devId, final UUID chatId, final ChatState chatState, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("setChatState", 5)
+            String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
+            call.initialise("setChatState", 6)
                     .add(devId)
                     .add(chatId)
                     .add(chatState.getTimestamp())
                     .add(chatState.getTopic())
-                    .add(chatState.getLockedAiid().toString());
+                    .add(lockedAiid)
+                    .add(chatState.getEntityValues().isEmpty() ? null : jsonSerializer.serialize(chatState.getEntityValues()));
             return call.executeUpdate() > 0;
         }
     }
@@ -797,21 +938,19 @@ public class Database {
         return bots;
     }
 
-    private ApiAi getAiFromResultset(final ResultSet rs, JsonSerializer jsonSerializer)
+    private ApiAi getAiFromResultset(final ResultSet rs, BackendStatus backendStatus)
             throws SQLException, DatabaseException {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
-        // deserialize the backend-status block of JSON
-        BackendStatus backendStatus = getBackendStatus(rs.getString("backend_status"), jsonSerializer);
-        // create one summary trainign status from the block of data
+        // create one summary training status from the block of data
         return new ApiAi(
                 rs.getString("aiid"),
                 rs.getString("client_token"),
                 rs.getString("ai_name"),
                 rs.getString("ai_description"),
-                new DateTime(rs.getDate("created_on")),
+                new DateTime(rs.getTimestamp("created_on")),
                 rs.getBoolean("is_private"),
-                backendStatus,
+                (backendStatus == null) ? new BackendStatus() : backendStatus,
                 rs.getBoolean("has_training_file"),
                 rs.getInt("ui_ai_personality"),
                 rs.getDouble("ui_ai_confidence"),
@@ -845,7 +984,7 @@ public class Database {
 
     protected AiBot getAiBotFromResultset(final ResultSet rs) throws SQLException {
         return new AiBot(
-                rs.getString("dev_id"),
+                UUID.fromString(rs.getString("dev_id")),
                 UUID.fromString(rs.getString("aiid")),
                 rs.getInt("id"),
                 rs.getString("name"),
@@ -865,5 +1004,89 @@ public class Database {
                 AiBot.PublishingState.from(rs.getInt("publishing_state")),
                 rs.getString("botIcon")
         );
+    }
+
+    /***
+     * Interpret a row from the ai_status table
+     * @param rs resultset
+     * @return a pair of (type, update)
+     * @throws DatabaseException
+     */
+    protected Pair<BackendServerType, BackendEngineStatus> getBackendEngineStatus(ResultSet rs)
+            throws DatabaseException {
+
+        try {
+            BackendServerType serverType = BackendServerType.forValue(rs.getString("server_type"));
+            TrainingStatus trainingStatus = TrainingStatus.forValue(rs.getString("training_status"));
+            double trainingProgress = rs.getDouble("training_progress");
+            double trainingError = rs.getDouble("training_error");
+            if (serverType == null) {
+                throw new DatabaseException("bad servertype");
+            }
+            if (trainingStatus == null) {
+                throw new DatabaseException("bad trainingstatus");
+            }
+            UUID aiid = UUID.fromString(rs.getString("aiid"));
+
+            // queue status
+            QueueAction action = QueueAction.forValue(rs.getString("queue_action"));
+            String serverIdentifier = rs.getString("server_endpoint");
+            java.sql.Timestamp updateTimeObject = rs.getTimestamp("update_time");
+            DateTime updateTime = (updateTimeObject == null) ? null : new DateTime(updateTimeObject);
+
+            BackendEngineStatus status = new BackendEngineStatus(aiid, trainingStatus, trainingError,
+                    trainingProgress, action, serverIdentifier, updateTime);
+            return new Pair<>(serverType, status);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+
+    /***
+     * Calls the database to get the status of all back-end servers for the AI
+     * @param devId dev
+     * @param aiid ai
+     * @param call a database call in transaction
+     * @return BackendStatus
+     * @throws DatabaseException
+     * @throws SQLException
+     */
+    protected BackendStatus getBackendStatus(final UUID devId, final UUID aiid, final DatabaseCall call)
+            throws DatabaseException, SQLException {
+        ResultSet rs = call.initialise("getAiStatus", 2)
+                .add(aiid).add(devId).executeQuery();
+
+        BackendStatus status = new BackendStatus();
+        while (rs.next()) {
+            Pair<BackendServerType, BackendEngineStatus> update = getBackendEngineStatus(rs);
+            status.setEngineStatus(update.getA(), update.getB());
+        }
+
+        return status;
+    }
+
+    /***
+     * Reads the whole status table for a dev and returns a hashmap of BackendStatuses
+     * @param devid the dev
+     * @param call a database call in transaction
+     * @return hashmap
+     * @throws DatabaseException
+     */
+    protected HashMap<UUID, BackendStatus> getAllAIsStatusHashMap(
+            final UUID devid,
+            final DatabaseCall call) throws DatabaseException, SQLException {
+        ResultSet rs = call.initialise("getAIsStatus", 1)
+                .add(devid)
+                .executeQuery();
+
+        HashMap<UUID, BackendStatus> statuses = new HashMap<>();
+        while (rs.next()) {
+            UUID aiid = UUID.fromString(rs.getString("aiid"));
+            Pair<BackendServerType, BackendEngineStatus> serverStatus =
+                    getBackendEngineStatus(rs);
+            statuses.computeIfAbsent(aiid, x -> new BackendStatus())
+                    .setEngineStatus(serverStatus.getA(), serverStatus.getB());
+        }
+        return statuses;
     }
 }

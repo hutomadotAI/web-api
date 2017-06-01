@@ -10,8 +10,7 @@ public class BackendStatus {
     private HashMap<BackendServerType, BackendEngineStatus> engines;
 
     /***
-     * Initialising BackendStatus effectively sets all engines to state AI_UNDEFINED,
-     * which means that the AI has no training file
+     * Initialising BackendStatus effectively sets all engines to state AI_UNDEFINED
      */
     public BackendStatus() {
         this.engines = new HashMap<>();
@@ -22,19 +21,11 @@ public class BackendStatus {
         return (status == null) ? new BackendEngineStatus() : status;
     }
 
-    /***
-     * For a specific engine, change the training status to the one provided
-     * without affecting the other parameters
-     * @param engine
-     * @param trainingStatus
-     */
-    public void updateEngineStatus(BackendServerType engine, TrainingStatus trainingStatus) {
-        this.engines.computeIfAbsent(engine, key -> new BackendEngineStatus())
-                .setTrainingStatus(trainingStatus);
-    }
-
     public void setEngineStatus(AiStatus aiStatus) {
         this.engines.put(aiStatus.getAiEngine(), new BackendEngineStatus(aiStatus));
     }
 
+    public void setEngineStatus(final BackendServerType engine, final BackendEngineStatus status) {
+        this.engines.put(engine, status);
+    }
 }

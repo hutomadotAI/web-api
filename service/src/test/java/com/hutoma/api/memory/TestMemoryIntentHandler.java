@@ -32,8 +32,8 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(JUnitParamsRunner.class)
 public class TestMemoryIntentHandler {
-
-    private static final String DEVID = "devid";
+    public static final UUID DEVID_UUID = UUID.fromString("113d39cb-7f43-40d7-8dee-17b25b205581");
+    public static final String DEVID = DEVID_UUID.toString();
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final UUID CHATID = UUID.fromString("cee37b17-8cb3-4678-b8ba-91924eb98272");
     private static final String INTENT_NAME = "intent1";
@@ -69,15 +69,15 @@ public class TestMemoryIntentHandler {
     @Test
     public void testGetIntent() throws Database.DatabaseException {
         ApiIntent intent = new ApiIntent(INTENT_NAME, "", "");
-        when(this.fakeDatabaseEntities.getIntent(any(), any(), any())).thenReturn(intent);
-        ApiIntent result = this.memoryIntentHandler.getIntent(DEVID, AIID, INTENT_NAME);
+        when(this.fakeDatabaseEntities.getIntent(any(), any())).thenReturn(intent);
+        ApiIntent result = this.memoryIntentHandler.getIntent(AIID, INTENT_NAME);
         Assert.assertEquals(intent.getIntentName(), result.getIntentName());
     }
 
     @Test
     public void testGetIntent_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabaseEntities.getIntent(any(), any(), any())).thenThrow(Database.DatabaseException.class);
-        Assert.assertNull(this.memoryIntentHandler.getIntent(DEVID, AIID, INTENT_NAME));
+        when(this.fakeDatabaseEntities.getIntent(any(), any())).thenThrow(Database.DatabaseException.class);
+        Assert.assertNull(this.memoryIntentHandler.getIntent(AIID, INTENT_NAME));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class TestMemoryIntentHandler {
 
     @Test
     public void testRecognizeNoIntent() {
-        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, "@this is not");
+        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, "@this is not");
         Assert.assertNull(mi);
     }
 
@@ -123,13 +123,13 @@ public class TestMemoryIntentHandler {
     public void testMemoryIntentULoadNotExistYet() throws Database.DatabaseException {
         final String entityName = "entity1";
         ApiIntent apiIntent = new ApiIntent(INTENT_NAME, "in", "out");
-        IntentVariable iv = new IntentVariable(entityName, true, 1, null);
-        ApiEntity apiEntity = new ApiEntity(entityName, Arrays.asList("a", "b"));
+        IntentVariable iv = new IntentVariable(entityName, DEVID_UUID, true, 1, null, false);
+        ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false);
         apiIntent.addVariable(iv);
-        when(this.fakeDatabaseEntities.getIntent(anyString(), any(), anyString())).thenReturn(apiIntent);
+        when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
         when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
-        when(this.fakeDatabaseEntities.getEntity(anyString(), anyString())).thenReturn(apiEntity);
-        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, DEFAULT_INTENT);
+        when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);
+        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, DEFAULT_INTENT);
         Assert.assertNotNull(mi.getVariables());
         Assert.assertEquals(1, mi.getVariables().size());
         Assert.assertEquals(entityName, mi.getVariables().get(0).getName());
@@ -157,7 +157,7 @@ public class TestMemoryIntentHandler {
     public void testLoadIntentForAiDBException() throws Database.DatabaseException {
         Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
         when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
-        this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, DEFAULT_INTENT);
+        this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, DEFAULT_INTENT);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
@@ -193,7 +193,9 @@ public class TestMemoryIntentHandler {
                 values,
                 Collections.singletonList("prompt"),
                 123,
-                5);
+                5,
+                false,
+                false);
         Assert.assertEquals("name", mv.getName());
         Assert.assertEquals("currentValue", mv.getCurrentValue());
         Assert.assertEquals(values, mv.getEntityKeys());
@@ -223,10 +225,25 @@ public class TestMemoryIntentHandler {
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
+    @Test
+    public void testIntent_clearIntents() throws Database.DatabaseException {
+        List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
+        this.memoryIntentHandler.clearIntents(intents);
+        verify(this.fakeDatabaseEntities).deleteMemoryIntent(intents.get(0));
+    }
+
+    @Test
+    public void testIntent_clearIntents_dbException() throws Database.DatabaseException {
+        List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
+        when(this.fakeDatabaseEntities.deleteMemoryIntent(any())).thenThrow(Database.DatabaseException.class);
+        this.memoryIntentHandler.clearIntents(intents);
+        verify(this.fakeLogger).logException(anyString(), any());
+    }
+
     private MemoryIntent setDummyMemoryIntent(final String response) throws Database.DatabaseException {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
                 Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
         when(this.fakeDatabase.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
-        return this.memoryIntentHandler.parseAiResponseForIntent(DEVID, AIID, CHATID, response);
+        return this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, response);
     }
 }

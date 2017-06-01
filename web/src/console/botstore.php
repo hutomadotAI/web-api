@@ -1,18 +1,17 @@
 <?php
 require "../pages/config.php";
 require_once "api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
 require_once "api/botstoreApi.php";
-require_once "common/bot.php";
-require_once "common/developer.php";
-require_once "common/botstoreItem.php";
-require_once "common/botstoreListParam.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
+if (!\hutoma\console::checkSessionIsActive()) {
     exit;
 }
 
+$botId = $_REQUEST["botId"];
+$category = $_REQUEST["category"];
+
+$aiName = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
+$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -28,6 +27,7 @@ if(!\hutoma\console::checkSessionIsActive()){
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -46,49 +46,77 @@ if(!\hutoma\console::checkSessionIsActive()){
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper">
+   <div class="content-wrapper">
         <section class="content">
-            <div class="overlay carousel-ovelay" id ="carousel-overlay">
-                <i class="fa fa-refresh fa-spin center-block"></i>
+            <div class="row">
+                <div class="col-md-12">
+                    <?php
+                    $innerPage = "";
+                    if (isset($botId)) {
+                        $innerPage = "botcardDetail.php?botId=" . $botId . "&origin=botstore";
+                    } else {
+                        $innerPage = "botstoreList.php?category=" . urlencode($category);
+                    }
+                    ?>
+                    <iframe src="<?php echo $innerPage ?>"
+                            class="iframe-full-height"
+                            frameBorder="0"
+                            scrolling="no"
+                            id="contentFrame">
+                    </iframe>
+                </div>
             </div>
-            <p id="botsCarousels"/>
-            <p/>
-            <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
         </section>
-    </div>
-</div>
+   </div>
 
-<footer class="main-footer">
-    <?php include './dynamic/footer.inc.html.php'; ?>
-</footer>
+    <footer class="main-footer">
+        <?php include './dynamic/footer.inc.html.php'; ?>
+    </footer>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "botstore", 2, false, false]);
+    <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
+    <script src="./bootstrap/js/bootstrap.min.js"></script>
+    <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
+    <script src="scripts/external/fastclick/fastclick.min.js"></script>
+    <script src="./dist/js/app.min.js"></script>
+    <script src="scripts/external/select2/select2.full.js"></script>
+
+    <script src="./scripts/botstore/botstoreWizard.js"></script>
+    <script src="./scripts/botcard/botcard.js"></script>
+
+    <script src="./scripts/messaging/messaging.js"></script>
+    <script src="./scripts/shared/shared.js"></script>
+
+    <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+    <form action="" method="post" enctype="multipart/form-data">
+        <script type="text/javascript">
+            MENU.init([
+                "<?php echo $aiName;?>",
+                "<?php echo $category;?>",
+                2,
+                false,
+                <?php echo $isExistAiId ? "false" : "true" ?>
+            ]);
+        </script>
+    </form>
+
+    <script>
+        window.document.addEventListener('BotstoreFinishPaintEvent', function() {
+            var iFrame = document.getElementById('contentFrame');
+            iFrame.height = window.frames[0].document.body.clientHeight + 'px';
+            iFrame.style.width = '100%';
+        }, false);
+
+        window.document.addEventListener('BotstoreCategoryChanged', function(e) {
+            var menu = document.getElementById('botstoreMenu');
+            menu.childNodes.forEach(function(elem) {elem.classList.remove('active');});
+            document.getElementById('menu_' + removeSpecialCharacters(decodeURIComponent(e.detail.category))).classList.add('active');
+        }, false);
+
+        <?php
+        unset($aiName);
+        unset($category);
+        unset($isExistAiId);
+        ?>
     </script>
-</form>
-
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
-<script src="scripts/external/select2/select2.full.js"></script>
-
-<script src="./scripts/botstore/botstoreWizard.js"></script>
-<script src="./scripts/botstore/botstore.js"></script>
-<script src="./scripts/botstore/carousel.js"></script>
-<script src="./scripts/botcard/botcard.js"></script>
-<script src="./scripts/botcard/buyBot.js"></script>
-
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
-
-<script>
-    $(document).ready(function () {
-        getCarousels(<?php if( isset($_GET['category']) ) echo json_encode($_GET['category']);?>);
-    });
-</script>
 </body>
 </html>

@@ -35,44 +35,52 @@ public class IntentLogic {
         this.trainingLogic = trainingLogic;
     }
 
-    public ApiResult getIntents(final String devid, final UUID aiid) {
+    public ApiResult getIntents(final UUID devid, final UUID aiid) {
+        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
             final List<String> intentList = this.database.getIntents(devid, aiid);
             if (intentList.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devid, logMap.put("Num Intents", "0"));
+                this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devidString, logMap.put("Num Intents", "0"));
                 return ApiError.getNotFound();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devid,
+            this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devidString,
                     logMap.put("Num Intents", intentList.size()));
             return new ApiIntentList(aiid, intentList).setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetIntents", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetIntents", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult getIntent(final String devid, final UUID aiid, final String intentName) {
+    public ApiResult getIntent(final UUID devid, final UUID aiid, final String intentName) {
+        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
-            ApiIntent intent = this.database.getIntent(devid, aiid, intentName);
+            boolean aiidValid = this.database.checkAIBelongsToDevId(devid, aiid);
+            if (!aiidValid) {
+                return ApiError.getBadRequest("AI not found for this Dev ID");
+            }
+
+            ApiIntent intent = this.database.getIntent(aiid, intentName);
             if (null == intent) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devid, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
             WebHook webHook = this.database.getWebHook(aiid, intentName);
             intent.setWebHook(webHook);
 
-            this.logger.logUserTraceEvent(LOGFROM, "GetIntent", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "GetIntent", devidString, logMap);
 
             return intent.setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetIntent", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "GetIntent", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult writeIntent(String devid, UUID aiid, ApiIntent intent) {
+    public ApiResult writeIntent(final UUID devid, UUID aiid, ApiIntent intent) {
+        String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
         try {
             this.database.writeIntent(devid, aiid, intent.getIntentName(), intent);
@@ -81,44 +89,45 @@ public class IntentLogic {
                 if (this.database.getWebHook(aiid, intent.getIntentName()) != null) {
                     this.database.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(),
                             webHook.isEnabled());
-                    this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devid, logMap);
+                    this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devidString, logMap);
                 } else {
                     this.database.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(),
                             webHook.isEnabled());
-                    this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devid, logMap);
+                    this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devidString, logMap);
                 }
             }
             this.trainingLogic.stopTraining(devid, aiid);
-            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devidString, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
-            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - entity duplicate or non existent", devid,
+            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - entity duplicate or non existent", devidString,
                     logMap.put("Message", dmee.getMessage()));
             return ApiError.getBadRequest("Duplicate or missing entity_name");
         } catch (Database.DatabaseIntegrityViolationException dive) {
-            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - attempt to rename existing name", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - attempt to rename existing name", devidString, logMap);
             return ApiError.getBadRequest("Intent name already in use");
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WriteIntent", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "WriteIntent", devidString, e);
             return ApiError.getInternalServerError();
         }
     }
 
-    public ApiResult deleteIntent(String devid, UUID aiid, String intentName) {
+    public ApiResult deleteIntent(final UUID devid, UUID aiid, String intentName) {
+        String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
             if (!this.database.deleteIntent(devid, aiid, intentName)) {
-                this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - not found", devid, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
             if (this.database.getWebHook(aiid, intentName) != null) {
                 this.database.deleteWebHook(aiid, intentName);
             }
             this.trainingLogic.stopTraining(devid, aiid);
-            this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent", devid, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent", devidString, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devid, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devidString, e);
             return ApiError.getInternalServerError();
         }
     }

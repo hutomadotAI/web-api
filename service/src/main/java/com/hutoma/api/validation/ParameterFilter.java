@@ -8,7 +8,6 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
-import com.hutoma.api.containers.sub.WebHook;
 
 import java.util.List;
 import java.util.Locale;
@@ -20,7 +19,6 @@ public class ParameterFilter extends Validate {
 
     // parameter names
     protected static final String AIID = "aiid";
-    protected static final String AIID_MESH = "aiid_mesh";
     protected static final String DEVID = "_developer_id";
     protected static final String AICONFIDENCE = "confidence";
     protected static final String TIMEZONE = "timezone";
@@ -59,16 +57,14 @@ public class ParameterFilter extends Validate {
     }
 
     // static accessors to retrieve validated parameters from the request context
-    public static String getDevid(final ContainerRequestContext requestContext) {
-        return (String) requestContext.getProperty(APIParameter.DevID.toString());
+    public static UUID getDevid(final ContainerRequestContext requestContext) {
+        final String str = (String) requestContext.getProperty(APIParameter.DevID.toString());
+        UUID uuid = UUID.fromString(str);
+        return uuid;
     }
 
     public static UUID getAiid(final ContainerRequestContext requestContext) {
         return (UUID) requestContext.getProperty(APIParameter.AIID.toString());
-    }
-
-    public static UUID getAiidMesh(final ContainerRequestContext requestContext) {
-        return (UUID) requestContext.getProperty(APIParameter.AIID_MESH.toString());
     }
 
     public static String getChatID(final ContainerRequestContext requestContext) {

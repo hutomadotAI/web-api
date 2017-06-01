@@ -4,6 +4,7 @@ require "../pages/config.php";
 require_once "../console/api/apiBase.php";
 require_once "../console/api/intentsApi.php";
 require_once "../console/api/aiApi.php";
+require_once "../console/api/botstoreApi.php";
 
 if(!\hutoma\console::checkSessionIsActive()){
     exit;
@@ -58,7 +59,7 @@ function echoJsonIntentsResponse($intents)
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntents('')">

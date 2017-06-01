@@ -18,6 +18,14 @@ class botstoreItem
         $this->developer = new developer();
     }
 
+    public function getMetadata() {
+        return $this->metadata;
+    }
+
+    public function getDeveloper() {
+        return $this->developer;
+    }
+
     public function getOrder()
     {
         return $this->order;
@@ -41,8 +49,8 @@ class botstoreItem
     public function toJSON()
     {
         $json = array(
-            'metadata' => $this->metadata,
-            'developer' => $this->developer,
+            'metadata' => $this->getMetadata(),
+            'developer' => $this->getDeveloper(),
             'order' => $this->getOrder(),
             'owned' => $this->getOwned()
         );

@@ -16,6 +16,7 @@ import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -109,6 +110,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected WebHooks fakeWebHooks;
     @Mock
     protected AccessLogger fakeAccessLogger;
+    @Mock
+    protected EntityRecognizerService fakeEntityRecognizer;
 
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -161,6 +164,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAccessLogger)).to(AccessLogger.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeEntityRecognizer)).to(EntityRecognizerService.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -220,10 +224,11 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeControllerRnn = mock(ControllerRnn.class);
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAccessLogger = mock(AccessLogger.class);
+        this.fakeEntityRecognizer = mock(EntityRecognizerService.class);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {
-            when(this.fakeDatabase.checkRateLimit(anyString(), anyString(), anyDouble(), anyDouble()))
+            when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                     .thenReturn(new RateLimitStatus(false, 1.0, true));
         } catch (Database.DatabaseException e) {
             // this will never happen, but on the zero in a million chance that it does ....

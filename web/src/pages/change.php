@@ -1,4 +1,8 @@
 <?php
+
+require_once "../console/common/utils.php";
+require_once "../console/common/config.php";
+
 require "config.php";
 ?>
 <!DOCTYPE html>
@@ -16,10 +20,14 @@ require "config.php";
         $curpass = $_POST['current_password'];
         $new_password = $_POST['new_password'];
         $retype_password = $_POST['retype_password'];
-          
+
+          $api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
+          $userInfo = $api->getUserInfo(\hutoma\console::$user);
+          unset($api);
+
         if($new_password != $retype_password){
           echo "<p><h2>Password don't match</h2><p>The passwords you entered don't match. Try again.</p></p>";
-        }else if(\hutoma\console::login(\hutoma\console::getUser("username"), "", false, false) == false){
+        }else if(\hutoma\console::login($userInfo['username'], "", false, false) == false){
           echo "<h2>Incorrect Password</h2><p>The password you entered for your account is wrong.</p>";
         }else{
           $change_password = \hutoma\console::changePassword($new_password);
@@ -32,7 +40,7 @@ require "config.php";
       }
     }
     ?>
-    <form action="<?php echo \hutoma\console::curPageURL();?>" method='POST'>
+    <form action="<?php echo \hutoma\utils::curPageURL();?>" method='POST'>
       <label>
         <p>Current Password</p>
         <input type='password' name='current_password' />

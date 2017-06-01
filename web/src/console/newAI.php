@@ -2,6 +2,7 @@
     require '../pages/config.php';
     require_once "../console/api/apiBase.php";
     require_once "../console/api/aiApi.php";
+    require_once "../console/api/botstoreApi.php";
 
     if(!\hutoma\console::checkSessionIsActive()){
         exit;
@@ -49,8 +50,7 @@
     <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.css">
     <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
-    
-    
+    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
@@ -86,6 +86,7 @@
     var previousFilled = <?php if (isPreviousFieldsFilled()) echo('true'); else echo ('false'); ?>;
     var previousGeneralInfo  = <?php if (isPreviousFieldsFilled()) echo json_encode($_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']); else echo 'false';?>;
     var err = <?php if(isset($_GET['err'])) echo($_GET['err']); else echo ('false'); ?>;
+    var errObj = <?php if(isset($_GET['errObj'])) echo($_GET['errObj']); else echo json_encode('');?>;
 </script>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
@@ -106,7 +107,7 @@
 <script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init([ "","home",0,true,true]);
+        MENU.init(["", "home", 0, false, true]);
     </script>
 </form>
 </body>

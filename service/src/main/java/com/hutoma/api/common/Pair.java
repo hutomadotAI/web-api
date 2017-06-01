@@ -80,4 +80,8 @@ public class Pair<A, B> {
         Pair<?, ?> castedOther = (Pair<?, ?>) other;
         return eq(this.partA, castedOther.getA()) && eq(this.partB, castedOther.getB());
     }
+
+    public String toString() {
+        return String.format("%s:%s", this.partA.toString(), this.partB.toString());
+    }
 }

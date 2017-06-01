@@ -12,12 +12,11 @@ import java.util.UUID;
 public interface IMemoryIntentHandler {
     /**
      * Parses the AI response in search for an intent.
-     * @param aiid     the AI ID
      * @param chatId   the Chat ID
      * @param response the AI response
      * @return the MemoryIntent, or null if no intent was found
      */
-    MemoryIntent parseAiResponseForIntent(String devid, UUID aiid, UUID chatId, String response);
+    MemoryIntent parseAiResponseForIntent(UUID aiid, UUID chatId, String response);
 
     /**
      * Gets the current intents state for this chat
@@ -47,10 +46,9 @@ public interface IMemoryIntentHandler {
 
     /**
      * Gets the original intent for this memory intent.
-     * @param devid      the dev id
      * @param aiid       the AI ID
      * @param intentName the intent name
      * @return the intent
      */
-    ApiIntent getIntent(String devid, UUID aiid, String intentName);
+    ApiIntent getIntent(UUID aiid, String intentName);
 }

@@ -102,5 +102,10 @@ public class TestController {
         protected ServerTracker createNewServerTracker() {
             return mock(ServerTracker.class);
         }
+
+        @Override
+        public boolean logErrorIfNoTrainingCapacity() {
+            return true;
+        }
     }
 }

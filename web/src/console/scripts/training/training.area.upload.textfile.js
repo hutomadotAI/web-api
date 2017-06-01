@@ -1,5 +1,5 @@
 function uploadTextFile() {
-    var maximumFileSize = 4 * 1024 * 1024; // 4Mb
+    var maximumFileSize = 512 * 1024; // 512k
 
     disableRestartBoxButton(true);
 

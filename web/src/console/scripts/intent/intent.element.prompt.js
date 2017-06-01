@@ -15,7 +15,7 @@ function activeButtonCreateIntentPrompt() {
     var limitTextInputSize = 250;
     switch (limitText($("#intent-prompt"), limitTextInputSize)) {
         case 0:
-            msgAlertIntentPrompt(ALERT.BASIC.value, 'Enter one or more prompts.');
+            msgAlertIntentPrompt(ALERT.BASIC.value, 'Please enter one or more prompts.');
             return true;
         case 1:
             msgAlertIntentPrompt(ALERT.WARNING.value, 'Intent prompt is too long!');
@@ -27,14 +27,14 @@ function activeButtonCreateIntentPrompt() {
 
 function addIntentPrompt() {
     if (isInputInvalid($("#intent-prompt").val(), 'intent_prompt')) {
-        msgAlertIntentPrompt(ALERT.DANGER.value, 'The intent prompt can contain only alphanumeric characters.');
+        msgAlertIntentPrompt(ALERT.DANGER.value, 'The intent prompt contains invalid characters.');
         return;
     }
 
     var prompts = getMultipleElementValues('intent-prompt-row', 'value');
 
     if (isNameExists($("#intent-prompt").val(), prompts)) {
-        msgAlertIntentPrompt(ALERT.DANGER.value, 'Intent prompt name already exists. Please choose a different name.');
+        msgAlertIntentPrompt(ALERT.DANGER.value, 'Duplicate intent prompt.');
         return;
     }
 

@@ -6,10 +6,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -43,7 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -91,7 +88,7 @@ public class TestChatLogic {
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
                 this.fakeChatStateHandler);
 
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     /***
@@ -256,7 +253,7 @@ public class TestChatLogic {
     @Test
     public void testChat_RejectedNeuralDueToAIStatus() throws RequestBase.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
         chatResult.setAnswer(null);
         Map<UUID, ChatResult> map = new HashMap<UUID, ChatResult>() {{
             this.put(AIID, chatResult);
@@ -376,7 +373,7 @@ public class TestChatLogic {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(miList);
         ApiResult result = getChat(0.5f);
         ChatResult r = ((ApiChat) result).getResult();
@@ -395,10 +392,10 @@ public class TestChatLogic {
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
         Assert.assertFalse(mi.isFulfilled());
         ApiChat result = (ApiChat) getChat(0.5f);
@@ -436,11 +433,10 @@ public class TestChatLogic {
         ChatResult r = ((ApiChat) result).getResult();
         // The answer is NOT the prompt
         Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
-        // The intent status is updated to storage
-        verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is not incremented
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
-        verify(this.fakeIntentHandler, never()).clearIntents(any());
+        // we need to clear the intent if we exceeded the number of prompts
+        verify(this.fakeIntentHandler, times(1)).clearIntents(any());
     }
 
     /***
@@ -489,6 +485,87 @@ public class TestChatLogic {
         Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
         // And timesPrompted is decremented
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
+    }
+
+    /***
+     * Memory intent with multiple entities is fulfilled from persisted value.
+     */
+    @Test
+    public void testChat_multiLineIntent_fulfilledFromPersistence()
+            throws RequestBase.AiControllerException, Database.DatabaseException {
+        MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
+
+        // Make sure all variables are clean
+        for (MemoryVariable mv : mi.getVariables()) {
+            mv.setCurrentValue(null);
+        }
+
+        HashMap<String, String> entityValues = new HashMap<>();
+        entityValues.put("persistent_var", "persistentValue");
+        ChatState state = new ChatState(DateTime.now(), null, null, entityValues);
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(state);
+
+        // First question, triggers the intent but without the right entity value
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        // Verify intent is triggered
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
+        // Second question, the answer to the prompt with the right entity value
+        final String varValue = "_value_";
+        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
+            this.add(new Pair<>(mi.getVariables().get(0).getName(), varValue));
+        }};
+        when(this.fakeRecognizer.retrieveEntities(anyString(), any())).thenReturn(entities);
+        result = getChat(0.5f, "nothing to see here.");
+        r = ((ApiChat) result).getResult();
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        // Is fulfilled
+        Assert.assertTrue(r.getIntents().get(0).isFulfilled());
+    }
+
+    /***
+     * Memory intent is not fulfilled when persistent variable has not been set.
+     */
+    @Test
+    public void testChat_multiLineIntent_notFulfilledWithNonPersistedValue()
+            throws RequestBase.AiControllerException, Database.DatabaseException {
+        MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
+
+        // Make sure all variables are clean
+        for (MemoryVariable mv : mi.getVariables()) {
+            mv.setCurrentValue(null);
+        }
+
+        // First question, triggers the intent but without the right entity value
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        // Verify intent is triggered
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
+        // Second question, the answer to the prompt with the right entity value
+        final String varValue = "_value_";
+        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
+            this.add(new Pair<>(mi.getVariables().get(0).getName(), varValue));
+        }};
+        when(this.fakeRecognizer.retrieveEntities(anyString(), any())).thenReturn(entities);
+        result = getChat(0.5f, "nothing to see here.");
+        r = ((ApiChat) result).getResult();
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
+        // Is not fulfilled.
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
     }
 
     /***
@@ -566,8 +643,8 @@ public class TestChatLogic {
 
         // Next answer should exit intent handling and go through normal chat processing
         final String wnetAnswer = "wnet answer";
-        when(this.fakeIntentHandler.parseAiResponseForIntent(anyString(), any(), any(), anyString())).thenReturn(null);
-        ChatResult wnetResult = new ChatResult();
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(null);
+        ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(0.9f);
         wnetResult.setAnswer(wnetAnswer);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
@@ -631,7 +708,7 @@ public class TestChatLogic {
     public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -640,7 +717,7 @@ public class TestChatLogic {
     public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -649,7 +726,7 @@ public class TestChatLogic {
     public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(Exception.class)
-                .when(this.fakeChatServices).startChatRequests(anyString(), any(), any(), anyString(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -666,7 +743,7 @@ public class TestChatLogic {
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException {
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID()));
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(new ChatState(DateTime.now(), null, UUID.randomUUID(), new HashMap<String, String>()));
         ApiChat result = (ApiChat) getChat(0.1f);
         // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -674,9 +751,9 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_noPreviousLock_lockToHighestBot() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.4);
         UUID cr1Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
@@ -689,26 +766,26 @@ public class TestChatLogic {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
             put(cr1Uuid, cr1);
             put(UUID.randomUUID(), cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
     }
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
@@ -716,17 +793,17 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr2, cr2Uuid);
     }
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException {
-        ChatResult cr1 = new ChatResult();
+        ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.2);
-        ChatResult cr2 = new ChatResult();
+        ChatResult cr2 = new ChatResult("question");
         cr2.setScore(0.3);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
@@ -734,12 +811,42 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid);
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
-        ChatResult cr1Aiml = new ChatResult();
+        ChatResult cr1Aiml = new ChatResult("question");
         cr1Aiml.setScore(0.6);
-        ChatResult cr2Aiml = new ChatResult();
+        ChatResult cr2Aiml = new ChatResult("question");
+        cr2Aiml.setScore(0.7);
+        when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1Aiml);
+            put(cr2Uuid, cr2Aiml);
+        }});
+        // We now expect to get the AIML one with the highest score
+        validateStateSaved(cr2Aiml, cr2Uuid);
+    }
+
+    @Test
+    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws RequestBase.AiControllerException {
+        // BOT1 has higher score in WNET
+        ChatResult cr1 = new ChatResult("question");
+        cr1.setScore(0.3);
+        ChatResult cr2 = new ChatResult("question");
+        cr2.setScore(0.2);
+        UUID cr1Uuid = UUID.randomUUID();
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
+            put(cr1Uuid, cr1);
+            put(cr2Uuid, cr2);
+        }};
+        ChatState initialChatState = new ChatState(DateTime.now(), null, cr1Uuid, new HashMap<>());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+
+        // BOT2 has higher score in AIML
+        ChatResult cr1Aiml = new ChatResult("question");
+        cr1Aiml.setScore(0.6);
+        ChatResult cr2Aiml = new ChatResult("question");
         cr2Aiml.setScore(0.7);
         when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
             put(cr1Uuid, cr1Aiml);
@@ -769,10 +876,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
 
         Assert.assertFalse(mi.isFulfilled());
@@ -799,10 +906,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.activeWebhookExists(any(), any())).thenReturn(true);
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
         Assert.assertFalse(mi.isFulfilled());
         ApiChat result = (ApiChat) getChat(0.5f);
@@ -828,10 +935,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
 
         Assert.assertFalse(mi.isFulfilled());
@@ -857,10 +964,10 @@ public class TestChatLogic {
         when(this.fakeWebHooks.executeWebHook(any(), any(), any())).thenReturn(null);
 
         setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
 
         Assert.assertFalse(mi.isFulfilled());
@@ -874,7 +981,7 @@ public class TestChatLogic {
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertEquals(returnedResult.getScore(), result.getResult().getScore(), 0.0001);
         ArgumentCaptor<ChatState> argumentCaptor = ArgumentCaptor.forClass(ChatState.class);
-        verify(this.fakeChatStateHandler).saveState(anyString(), any(), argumentCaptor.capture());
+        verify(this.fakeChatStateHandler).saveState(any(), any(), argumentCaptor.capture());
         // And that the contains the lockedAiid value for the aiid with the highest score
         Assert.assertEquals(usedAiid, argumentCaptor.getValue().getLockedAiid());
 
@@ -894,7 +1001,7 @@ public class TestChatLogic {
     }
 
     private ApiResult getChat(float min_p, String question) {
-        return this.chatLogic.chat(AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
+        return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
     private ApiResult getAssistantChat(float min_p) {
@@ -903,7 +1010,7 @@ public class TestChatLogic {
 
     private ApiResult getAssistantChat(float min_p, String
             question) {
-        return this.chatLogic.assistantChat(AIID, DEVID, question, CHATID.toString(), "history", "topic", min_p);
+        return this.chatLogic.assistantChat(AIID, DEVID_UUID, question, CHATID.toString(), "history", "topic", min_p);
     }
 
     /***
@@ -921,19 +1028,20 @@ public class TestChatLogic {
                                double rnnConfidence, String rnnResponse) throws
             RequestBase.AiControllerException {
 
-        ChatResult wnetResult = new ChatResult();
+        ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(wnetConfidence);
         wnetResult.setAnswer(wnetResponse);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
-        when(this.fakeChatServices.getLinkedBotsAiids(anyString(), any())).thenReturn(Collections.singletonList(new Pair<>(DEVID, AIML_BOT_AIID)));
-        ChatResult aimlResult = new ChatResult();
+        when(this.fakeChatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.singletonList(
+                new AiDevId(DEVID_UUID, AIML_BOT_AIID)));
+        ChatResult aimlResult = new ChatResult("Hi2");
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);
         when(this.fakeChatServices.awaitAiml()).thenReturn(getChatResultMap(AIML_BOT_AIID, aimlResult));
 
-        ChatResult rnnResult = new ChatResult();
+        ChatResult rnnResult = new ChatResult("Hi3");
         rnnResult.setScore(rnnConfidence);
         rnnResult.setAnswer(rnnResponse);
         when(this.fakeChatServices.awaitRnn()).thenReturn(getChatResultMap(AIID, rnnResult));
@@ -959,11 +1067,51 @@ public class TestChatLogic {
                 Arrays.asList(promptTrigger, "b"),
                 Collections.singletonList(prompt),
                 maxPrompts,
-                0);
+                0,
+                false,
+                false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         setupFakeChat(0.9d, "@meta.intent." + intentName, 0.3d, "", 0.3d, "");
-        when(this.fakeIntentHandler.parseAiResponseForIntent(anyString(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);
+        return mi;
+    }
+
+    private MemoryIntent getMultiEntityMemoryIntentForPrompt(
+            int maxPrompts, String currentValue) throws
+            RequestBase.AiControllerException {
+        final String intentName = "intent1";
+        final String promptTrigger = "variableValue";
+        final String prompt = "prompt1";
+        MemoryVariable mv = new MemoryVariable(
+                "var",
+                currentValue,
+                true,
+                Arrays.asList(promptTrigger, "b"),
+                Collections.singletonList(prompt),
+                maxPrompts,
+                0,
+                false,
+                false);
+        final String persistentTrigger = "persistentValue";
+        final String persistentPrompt = "persistentPrompt";
+        MemoryVariable persistentVariable = new MemoryVariable(
+                "persistent_var",
+                currentValue,
+                true,
+                Arrays.asList(persistentTrigger),
+                Collections.singletonList(persistentPrompt),
+                maxPrompts,
+                0,
+                false,
+                true);
+        List<MemoryVariable> variables = new ArrayList<>();
+        variables.add(mv);
+        variables.add(persistentVariable);
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, variables);
+
+        setupFakeChat(0.9d, "@meta.intent." + intentName, 0.3d, "", 0.3d, "");
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);
         return mi;
     }
 

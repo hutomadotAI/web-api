@@ -1,18 +1,32 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
  * Created by pedrotei on 06/10/16.
  */
 public class MemoryVariable {
+    @SerializedName("entity")
     private String name;
+    @SerializedName("value")
     private String currentValue;
+    @SerializedName("mandatory")
     private boolean isMandatory;
+    // TODO: entity_keys should not be sent back to the user
+    @SerializedName("entity_keys")
     private List<String> entityKeys;
+    // TODO: prompts should not be sent back to the user
+    @SerializedName("prompts")
     private List<String> prompts;
+    @SerializedName("times_prompted")
     private int timesPrompted;
+    @SerializedName("max_prompts")
     private int timesToPrompt;
+    private boolean persistent;
+    @SerializedName("system_entity")
+    private boolean isSystem;
 
     /**
      * Ctor.
@@ -24,14 +38,17 @@ public class MemoryVariable {
         this.entityKeys = entityKeys;
     }
 
-    public MemoryVariable(String name, String currentValue, boolean isMandatory, List<String> entityKeys,
-                          List<String> prompts, int timesToPrompt, int timesPrompted) {
+    public MemoryVariable(final String name, final String currentValue, final boolean isMandatory, final List<String> entityKeys,
+                          final List<String> prompts, final int timesToPrompt, final int timesPrompted, final boolean isSystem,
+                          final boolean persistent) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
         this.prompts = prompts;
         this.timesPrompted = timesPrompted;
         this.timesToPrompt = timesToPrompt;
+        this.persistent = persistent;
+        this.isSystem = isSystem;
     }
 
     /**
@@ -118,12 +135,32 @@ public class MemoryVariable {
         return this.timesToPrompt;
     }
 
+    /*
+     * Gets whether the entity is persistent.
+     * @return true if true, else false.
+     */
+    public boolean getIsPersistent() { return this.persistent; }
+
+    /*
+     * Sets whether the entity is persistent.
+     * @param persistent Whether the entity should be persistent.
+     */
+    public void setIsPersistent(boolean persistent) { this.persistent = persistent; }
+
     /**
      * Gets the prompts.
      * @return the prompts
      */
     public List<String> getPrompts() {
         return this.prompts;
+    }
+
+    /**
+     * Gets whether this is a system variable or a custom one.
+     * @return whether this is a system variable or a custom one
+     */
+    public boolean isSystem() {
+        return this.isSystem;
     }
 
     /**

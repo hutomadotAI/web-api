@@ -4,6 +4,7 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnitParamsRunner.class)
 public class TestAiServices {
 
-    private static final String DEVID = "devid";
+    private static final UUID DEVID =  UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
     private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
@@ -46,7 +47,7 @@ public class TestAiServices {
     private static final String AI_ENGINE = "MOCKENGINE";
 
     private JsonSerializer fakeSerializer;
-    private Database fakeDatabase;
+    private DatabaseAiStatusUpdates fakeDatabase;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
@@ -55,77 +56,33 @@ public class TestAiServices {
     private ControllerWnet fakeControllerWnet;
     private ControllerRnn fakeControllerRnn;
 
+    private AIQueueServices fakeQueueServices;
     private AIServices aiServices;
 
     @Before
     public void setup() throws ServerMetadata.NoServerAvailable {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerRnn = mock(ControllerRnn.class);
+        this.fakeQueueServices = mock(AIQueueServices.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         ThreadPool threadPool = new ThreadPool(this.fakeConfig);
 
-        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(WNET_ENDPOINT);
-        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(RNN_ENDPOINT);
+        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(
+                TestDataHelper.getEndpointFor(WNET_ENDPOINT));
+        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
+                TestDataHelper.getEndpointFor(RNN_ENDPOINT));
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, this.fakeClient, new ThreadSubPool(threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn);
-    }
-
-    @Test
-    public void testStartTraining() throws AIServices.AiServicesException, Database.DatabaseException {
-        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
-        testCommand((a, b) -> this.aiServices.startTraining(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testStartTraining_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
-        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
-        testCommand_serverError((a, b) -> this.aiServices.startTraining(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testStartTraining_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
-        when(this.fakeDatabase.getDevPlan(DEVID)).thenReturn(DEVPLAN);
-        testCommand_response_noEntity((a, b) -> this.aiServices.startTraining(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test
-    public void testStopTraining() throws AIServices.AiServicesException, Database.DatabaseException {
-        testCommand((a, b) -> this.aiServices.stopTraining(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testStopTraining_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
-        testCommand_serverError((a, b) -> this.aiServices.stopTraining(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testStopTraining_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
-        testCommand_response_noEntity((a, b) -> this.aiServices.stopTraining(DEVID, AIID), HttpMethod.POST);
-    }
-
-    @Test
-    public void testDeleteAI() throws AIServices.AiServicesException, Database.DatabaseException {
-        testCommand((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteAI_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
-        testCommand_serverError((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
-    }
-
-    @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteAI_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
-        testCommand_response_noEntity((a, b) -> this.aiServices.deleteAI(DEVID, AIID), HttpMethod.DELETE);
+                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
 
     @Test
@@ -147,10 +104,10 @@ public class TestAiServices {
     public void testUploadTraining() throws AIServices.AiServicesException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
-        this.aiServices.uploadTraining(DEVID, AIID, "training materials");
+        this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
     }
 
-    private void testCommand(CheckedByConsumer<String, UUID> logicMethod, String verb)
+    private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
@@ -169,7 +126,7 @@ public class TestAiServices {
         logicMethod.apply(DEVID, AIID);
     }
 
-    private void testCommand_serverError(CheckedByConsumer<String, UUID> logicMethod, String verb)
+    private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
@@ -188,7 +145,7 @@ public class TestAiServices {
         logicMethod.apply(DEVID, AIID);
     }
 
-    private void testCommand_response_noEntity(CheckedByConsumer<String, UUID> logicMethod, String verb)
+    private void testCommand_response_noEntity(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, Database.DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {

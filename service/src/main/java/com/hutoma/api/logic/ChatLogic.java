@@ -24,8 +24,11 @@ import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,11 +73,11 @@ public class ChatLogic {
         this.chatStateHandler = chatStateHandler;
     }
 
-    public ApiResult chat(final UUID aiid, final String devId, final String question, final String chatId,
+    public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
                           final String history, final String topic, final float minP) {
 
         // TODO: Bug#1349 - topic is now ignored if passed from the caller
-
+        final String devIdString = devId.toString();
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
         this.minP = minP;
@@ -96,17 +99,20 @@ public class ChatLogic {
                 .put("Q", question)
                 .put("MinP", minP);
 
-        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiid, chatUuid);
+        UUID aiidForMemoryIntents = this.chatState.getLockedAiid() == null ? aiid : this.chatState.getLockedAiid();
+        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(aiidForMemoryIntents, chatUuid);
+
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
-        ChatResult result = new ChatResult();
+        ChatResult result = new ChatResult(question);
 
         try {
 
             // Check if we're in the middle of an intent flow and process it.
-            if (processIntent(devId, aiid, currentIntent, question, result)) {
+            if (processIntent(devId, aiidForMemoryIntents, currentIntent, question, result)) {
                 // Intent was handled, confidence is high
                 result.setScore(1.0d);
+                this.telemetryMap.add("AnsweredBy", "IntentProcessor");
             } else {
                 // Otherwise just go through the regular chat flow
 
@@ -115,7 +121,7 @@ public class ChatLogic {
                         this.chatState.getTopic());
 
                 // wait for WNET to return
-                result = this.interpretSemanticResult();
+                result = this.interpretSemanticResult(question);
 
                 boolean wnetConfident = false;
                 if (result != null) {
@@ -126,14 +132,15 @@ public class ChatLogic {
 
                     if (wnetConfident) {
                         // if we are taking WNET's reply then process intents
+                        UUID aiidFromResult = result.getAiid();
                         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                                devId, aiid, chatUuid, result.getAnswer());
+                                aiidFromResult, chatUuid, result.getAnswer());
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
-                            this.telemetryMap.add("IntentRecognized", memoryIntent.getName());
+                            this.telemetryMap.add("IntentRecognized", true);
 
-                            if (processIntent(devId, aiid, memoryIntent, question, result)) {
+                            if (processIntent(devId, aiidFromResult, memoryIntent, question, result)) {
                                 this.telemetryMap.add("AnsweredBy", "WNET");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
@@ -149,8 +156,10 @@ public class ChatLogic {
 
                 if (!wnetConfident) {
                     // otherwise,
+                    // clear the locked AI
+                    this.chatState.setLockedAiid(null);
                     // wait for the AIML server to respond
-                    ChatResult aimlResult = this.interpretAimlResult();
+                    ChatResult aimlResult = this.interpretAimlResult(question);
 
                     boolean aimlConfident = false;
                     // If we don't have AIML available (not linked)
@@ -168,8 +177,11 @@ public class ChatLogic {
                     this.telemetryMap.add("AIMLAnswered", aimlResult != null);
 
                     if (aimlResult == null || !aimlConfident) {
+                        // clear the locked AI
+                        this.chatState.setLockedAiid(null);
+
                         // get a response from the RNN
-                        ChatResult rnnResult = this.interpretRnnResult();
+                        ChatResult rnnResult = this.interpretRnnResult(question);
 
                         // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
                         this.telemetryMap.add("AnsweredWithConfidence", false);
@@ -194,7 +206,7 @@ public class ChatLogic {
                             } else {
                                 // TODO we need to figure out something
                                 this.telemetryMap.add("AnsweredBy", "NONE");
-                                result = getImCompletelyLostChatResult(chatUuid);
+                                result = getImCompletelyLostChatResult(chatUuid, question);
                             }
                         }
 
@@ -202,9 +214,6 @@ public class ChatLogic {
                     }
                 }
             }
-
-            // add the question
-            result.setQuery(question);
 
             // set the history to the answer, unless we have received a reset command,
             // in which case send an empty string
@@ -219,27 +228,26 @@ public class ChatLogic {
             apiChat.setResult(result);
 
         } catch (RequestBase.AiNotFoundException notFoundException) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devId,
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devIdString,
                     LogMap.map("Message", notFoundException.getMessage()).put("AIID", aiid));
-            this.chatLogger.logChatError(LOGFROM, devId, notFoundException, this.telemetryMap);
+            this.chatLogger.logChatError(LOGFROM, devIdString, notFoundException, this.telemetryMap);
             return ApiError.getNotFound("Bot not found");
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devId, LogMap.map("AIID", aiid));
-            this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devIdString, LogMap.map("AIID", aiid));
+            this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getBadRequest(
                     "This bot is not ready to chat. It needs to train and/or be linked to other bots");
 
         } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
-                    devId, ex, LogMap.map("AIID", aiid));
-            this.chatLogger.logChatError(LOGFROM, devId, ex, this.telemetryMap);
+                    devIdString, ex, LogMap.map("AIID", aiid));
+            this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "Chat", devId, e);
-            this.chatLogger.logChatError(LOGFROM, devId, e, this.telemetryMap);
+            this.logger.logUserExceptionEvent(LOGFROM, "Chat", devIdString, e);
+            this.chatLogger.logChatError(LOGFROM, devIdString, e, this.telemetryMap);
             return ApiError.getInternalServerError();
-
         } finally {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
@@ -255,14 +263,13 @@ public class ChatLogic {
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
 
         // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devId, this.telemetryMap);
-        this.logger.logUserTraceEvent(LOGFROM, "Chat", devId, LogMap.map("AIID", aiid).put("SessionId", chatId));
+        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
+        this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid).put("SessionId", chatId));
         return apiChat.setSuccessStatus();
     }
 
-    public ApiResult assistantChat(UUID aiid, String devId, String question, String chatId,
+    public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId,
                                    String history, String topic, float minP) {
-
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
@@ -276,9 +283,8 @@ public class ChatLogic {
                 .put("History", history)
                 .put("Q", question);
 
-        ChatResult result = new ChatResult();
+        ChatResult result = new ChatResult(question);
         result.setElapsedTime(this.tools.getTimestamp() - startTime);
-        result.setQuery(question);
 
         // Set a fixed response.
         result.setAnswer("Hello");
@@ -293,45 +299,72 @@ public class ChatLogic {
         apiChat.setResult(result);
 
         // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId, this.telemetryMap);
+        this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId.toString(), this.telemetryMap);
         return apiChat.setSuccessStatus();
     }
 
-    private boolean processIntent(final String devId, final UUID aiid, final MemoryIntent currentIntent,
+    private boolean processIntent(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
                                   final String question, ChatResult chatResult)
             throws IntentException {
+        final String devIdString = devId.toString();
         if (currentIntent == null) {
             // no intent to process
             return false;
         }
 
+        Map<String, Object> intentLog = new HashMap<>();
+        intentLog.put("Name", currentIntent.getName());
+
         List<MemoryIntent> intentsToClear = new ArrayList<>();
         boolean handledIntent = false;
+
+        // Populate persistent entities.
+        for (MemoryVariable variable : currentIntent.getVariables()) {
+            String persistentValue = this.chatState.getEntityValue(variable.getName());
+            if (persistentValue != null) {
+                variable.setCurrentValue(persistentValue);
+            }
+        }
 
         // Attempt to retrieve entities from the question
         List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
                 currentIntent.getVariables());
         if (!entities.isEmpty()) {
+            intentLog.put("Entities retrieved", StringUtils.join(entities, ','));
             currentIntent.fulfillVariables(entities);
+
+            // Write recognised persistent entities.
+            for (Object entity : currentIntent.getVariables()
+                    .stream()
+                    .filter(x -> x.getIsPersistent() && x.getCurrentValue() != null)
+                    .toArray()) {
+                MemoryVariable memoryVariable = (MemoryVariable) entity;
+                this.chatState.setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
+            }
         }
 
         // Check if there still are mandatory entities not currently fulfilled
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
+        intentLog.put("Fulfilled", vars.isEmpty());
         if (vars.isEmpty()) {
-            notifyIntentFulfilled(chatResult, currentIntent, devId, aiid);
+            notifyIntentFulfilled(chatResult, currentIntent, aiid);
 
             // If the webhook returns a text response, overwrite the answer.
             if (this.webHooks.activeWebhookExists(currentIntent, devId)) {
+                intentLog.put("Webhook run", true);
                 WebHookResponse response = this.webHooks.executeWebHook(currentIntent, chatResult, devId);
 
                 if (response == null) {
                     this.logger.logUserErrorEvent(LOGFROM,
                             "Error occured executing WebHook for intent %s for aiid %s.",
-                            devId,
+                            devIdString,
                             LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
                 } else if (response.getText() != null && !response.getText().isEmpty()) {
                     chatResult.setAnswer(response.getText());
+                    intentLog.put("Webhook response", response.getText());
                 }
+            } else {
+                intentLog.put("Webhook run", false);
             }
 
             intentsToClear.add(currentIntent);
@@ -346,7 +379,7 @@ public class ChatLogic {
                 if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                     // Should not happen as this should be validated during creation
                     this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
-                            devId, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
+                            devIdString, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
                                     .put("Variable", variable.getName()));
                     throw new IntentException(
                             String.format("Entity %s for intent %s does not specify any prompts",
@@ -359,17 +392,16 @@ public class ChatLogic {
                     chatResult.setAnswer(variable.getPrompts().get(pos));
                     // and decrement the number of prompts
                     variable.setTimesPrompted(variable.getTimesPrompted() + 1);
-                    this.telemetryMap.add("IntentPrompt",
-                            String.format("intent:'%s' variable:'%s' currentPrompt:%d/%d",
-                                    currentIntent.getName(), variable.getName(),
-                                    variable.getTimesPrompted(),
-                                    variable.getTimesToPrompt()));
+                    intentLog.put("Variable name", variable.getName());
+                    intentLog.put("Variable times prompted", variable.getTimesPrompted());
+                    intentLog.put("Variable times to prompt", variable.getTimesToPrompt());
                     handledIntent = true;
                 }
             } else { // intent not fulfilled but no variables left to handle
                 // if we run out of n_prompts we just stop asking.
                 // the user can still answer the question ... or not
                 this.telemetryMap.add("IntentNotFulfilled", currentIntent.getName());
+                intentsToClear.add(currentIntent);
             }
         }
 
@@ -380,46 +412,58 @@ public class ChatLogic {
             this.intentHandler.updateStatus(currentIntent);
         }
 
-        // Clear fulfilled intents so they can be triggered again
+        // Clear fulfilled intents or intents which have exhausted their prompts, so they can be triggered again
         if (!intentsToClear.isEmpty()) {
             this.intentHandler.clearIntents(intentsToClear);
         }
 
+        intentLog.put("Handled", handledIntent);
+        this.telemetryMap.add("Intent", intentLog);
+
         return handledIntent;
     }
 
-    private Pair<UUID, ChatResult> getTopScore(final Map<UUID, ChatResult> chatResults) {
+    private ChatResult getTopScore(final Map<UUID, ChatResult> chatResults, final String question) {
         // Check if the currently locked bot still has an acceptable response
+        ChatResult chatResult = null;
         if (this.chatState.getLockedAiid() != null && chatResults.containsKey(this.chatState.getLockedAiid())) {
             ChatResult result = chatResults.get(this.chatState.getLockedAiid());
             if (result.getScore() >= this.minP) {
-                return new Pair<>(this.chatState.getLockedAiid(), result);
+                chatResult = result;
+                chatResult.setAiid(this.chatState.getLockedAiid());
             }
         }
-        UUID responseFromAi = null;
-        ChatResult chatResult = new ChatResult();
-        for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
-            if (entry.getValue().getScore() >= chatResult.getScore()) {
-                chatResult = entry.getValue();
-                responseFromAi = entry.getKey();
+
+        if (chatResult == null) {
+            for (Map.Entry<UUID, ChatResult> entry : chatResults.entrySet()) {
+                if (chatResult == null || entry.getValue().getScore() >= chatResult.getScore()) {
+                    chatResult = entry.getValue();
+                    chatResult.setAiid(entry.getKey());
+                }
             }
         }
+
+        if (chatResult == null) {
+            chatResult = new ChatResult(question);
+        }
+
         // lock to this AI
-        this.chatState.setLockedAiid(responseFromAi);
-        return new Pair<>(responseFromAi, chatResult);
+        this.chatState.setLockedAiid(chatResult.getAiid());
+        chatResult.setQuery(question);
+        return chatResult;
     }
 
-    private ChatResult interpretSemanticResult() throws RequestBase.AiControllerException {
+    private ChatResult interpretSemanticResult(final String question) throws RequestBase.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitWnet();
         if (allResults == null) {
             return null;
         }
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
+        ChatResult chatResult = getTopScore(allResults, question);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
-        ChatResult chatResult = result.getB();
         if (chatResult.getAnswer() != null) {
             // if we receive a reset command then remove the command and flag the status
             if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
@@ -447,7 +491,7 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretAimlResult() throws RequestBase.AiControllerException {
+    private ChatResult interpretAimlResult(final String question) throws RequestBase.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitAiml();
         if (allResults == null) {
@@ -455,10 +499,9 @@ public class ChatLogic {
         }
 
         // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
-
-        ChatResult chatResult = result.getB();
+        ChatResult chatResult = getTopScore(allResults, question);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
         // always reset the conversation if we have gone with a non-wnet result
         chatResult.setResetConversation(true);
@@ -474,17 +517,18 @@ public class ChatLogic {
         return chatResult;
     }
 
-    private ChatResult interpretRnnResult() throws RequestBase.AiControllerException {
+    private ChatResult interpretRnnResult(final String question) throws RequestBase.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitRnn();
         if (allResults == null) {
             return null;
         }
-        // Get the top score
-        Pair<UUID, ChatResult> result = getTopScore(allResults);
-        this.telemetryMap.add("ResponseFromAI", result.getA() == null ? "" : result.getA().toString());
 
-        ChatResult chatResult = result.getB();
+        // Get the top score
+        ChatResult chatResult = getTopScore(allResults, question);
+        UUID aiid = chatResult.getAiid();
+        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
+
         if (chatResult.getAnswer() != null) {
             // always reset the conversation if we have gone with a non-wnet result
             chatResult.setResetConversation(true);
@@ -509,9 +553,9 @@ public class ChatLogic {
         return Math.round(input * 10.0d) / 10.0d;
     }
 
-    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, String devId, UUID aiid) {
+    private void notifyIntentFulfilled(ChatResult chatResult, MemoryIntent memoryIntent, UUID aiid) {
         memoryIntent.setIsFulfilled(true);
-        ApiIntent intent = this.intentHandler.getIntent(devId, aiid, memoryIntent.getName());
+        ApiIntent intent = this.intentHandler.getIntent(aiid, memoryIntent.getName());
         if (intent != null) {
             List<String> responses = intent.getResponses();
             chatResult.setAnswer(responses.get((int) (Math.random() * responses.size())));
@@ -520,8 +564,8 @@ public class ChatLogic {
 
     }
 
-    private ChatResult getImCompletelyLostChatResult(final UUID chatId) {
-        ChatResult result = new ChatResult();
+    private ChatResult getImCompletelyLostChatResult(final UUID chatId, final String question) {
+        ChatResult result = new ChatResult(question);
         result.setChatId(chatId);
         result.setScore(0.0);
         result.setAnswer("Erm... What?");

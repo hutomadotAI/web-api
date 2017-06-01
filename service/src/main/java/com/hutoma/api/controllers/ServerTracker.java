@@ -27,7 +27,7 @@ import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 /**
  * Created by David MG on 01/02/2017.
  */
-public class ServerTracker implements Callable {
+public class ServerTracker implements Callable, IServerEndpoint {
 
     private static final String LOGFROM = "servertracker";
     private final HashSet<UUID> affinity;
@@ -82,20 +82,20 @@ public class ServerTracker implements Callable {
     }
 
     /***
+     * How many training slots does this server have?
+     * @return
+     */
+    public int getTrainingCapacity() {
+        return this.registration.getTrainingCapacity();
+    }
+
+    /***
      * True if we have managed at least one ping,
      * therefore the path to the server is correct and the server is reachable
      * @return
      */
     public boolean isEndpointVerified() {
         return this.endpointVerified.get();
-    }
-
-    /***
-     * Uniquely identifies a server across sessions.
-     * @return
-     */
-    public String getServerIdentifier() {
-        return this.serverIdentity;
     }
 
     @Override
@@ -195,6 +195,14 @@ public class ServerTracker implements Callable {
         return this.registration.getServerUrl();
     }
 
+    /***
+     * Uniquely identifies a server across sessions.
+     * @return
+     */
+    public String getServerIdentifier() {
+        return this.serverIdentity;
+    }
+
     public synchronized Set<UUID> getChatAffinity() {
         return new HashSet<>(this.affinity);
     }
@@ -211,6 +219,14 @@ public class ServerTracker implements Callable {
         return this.serverSessionID;
     }
 
+    /***
+     * Return the number of chat slots that this server can support
+     * @return
+     */
+    public int getChatCapacity() {
+        return this.registration.getChatCapacity();
+    }
+
     private synchronized int getChatAffinityCount() {
         return this.affinity.size();
     }
@@ -222,7 +238,7 @@ public class ServerTracker implements Callable {
     protected boolean beatHeart() {
         LogMap logMap = LogMap.map("Op", "heartbeat")
                 .put("Url", this.registration.getServerUrl())
-                .put("Type", this.registration.getServerType())
+                .put("Type", this.registration.getServerType().value())
                 .put("Server", this.serverIdentity)
                 .put("SessionId", this.serverSessionID);
         try {
@@ -251,10 +267,11 @@ public class ServerTracker implements Callable {
                     this.endServerSession();
                     this.logger.logWarning(LOGFROM,
                             String.format("%s has closed the session remotely", this.serverIdentity),
-                            logMap.put("Status", response.getStatus()));
+                            logMap.put("Status", Integer.toString(response.getStatus())));
                 } else {
                     this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
-                            this.serverIdentity, response.getStatus()), logMap.put("Status", response.getStatus()));
+                            this.serverIdentity, response.getStatus()), logMap.put("Status",
+                            Integer.toString(response.getStatus())));
                 }
             }
         } catch (Exception e) {

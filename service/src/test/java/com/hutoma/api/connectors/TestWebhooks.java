@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class TestWebhooks {
     private static final UUID AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
-    private static final String DEVID = "devid";
+    private static final UUID DEVID = UUID.fromString("ef1593e6-503f-481c-a1fd-071a32c69271");
 
     private JsonSerializer serializer;
     private Database fakeDatabase;
@@ -94,7 +94,7 @@ public class TestWebhooks {
     public void testExecuteWebHook_InvalidIntent() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
         WebHookResponse response = this.webHooks.executeWebHook(null, chatResult, DEVID);
@@ -109,7 +109,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
@@ -126,7 +126,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
 
@@ -144,7 +144,7 @@ public class TestWebhooks {
     public void testExecuteWebHook_NoWebHook() throws Database.DatabaseException, IOException {
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
         Assert.assertNull(response);
@@ -158,7 +158,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
@@ -175,7 +175,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        ChatResult chatResult = new ChatResult();
+        ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
@@ -191,7 +191,7 @@ public class TestWebhooks {
         JerseyInvocation.Builder builder = Mockito.mock(JerseyInvocation.Builder.class);
         when(this.fakeClient.target(any(String.class))).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.path(anyString())).thenReturn(jerseyWebTarget);
-        when(jerseyWebTarget.property(anyString(), anyString())).thenReturn(jerseyWebTarget);
+        when(jerseyWebTarget.property(anyString(), any())).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.queryParam(anyString(), anyString())).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.request()).thenReturn(builder);
         return builder;

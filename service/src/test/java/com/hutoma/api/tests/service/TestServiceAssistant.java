@@ -51,7 +51,7 @@ public class TestServiceAssistant extends ServiceTestBase {
     @Before
     public void setup() {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
-        when(this.fakeChatStateHandler.getState(anyString(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     /***
@@ -61,7 +61,7 @@ public class TestServiceAssistant extends ServiceTestBase {
     @Test
     public void testStubbedChat() throws ServerConnector.AiServicesException {
         final String answer = "Hello";
-        ChatResult semanticAnalysisResult = new ChatResult();
+        ChatResult semanticAnalysisResult = new ChatResult("Hi");
         semanticAnalysisResult.setAnswer(answer);
         semanticAnalysisResult.setScore(1.0);
 

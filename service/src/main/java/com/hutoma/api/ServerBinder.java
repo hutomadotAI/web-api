@@ -2,14 +2,7 @@ package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.DatabaseUI;
-import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -17,16 +10,17 @@ import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.QueueProcessor;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestRnn;
 import com.hutoma.api.controllers.RequestWnet;
 import com.hutoma.api.controllers.ServerTracker;
 import com.hutoma.api.logic.*;
 import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ExternalEntityRecognizer;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
-import com.hutoma.api.memory.SimpleEntityRecognizer;
 import com.hutoma.api.validation.Validate;
 
 import org.glassfish.hk2.api.Factory;
@@ -78,7 +72,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AIBotStoreLogic.class).to(AIBotStoreLogic.class);
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(MemoryIntentHandler.class).to(MemoryIntentHandler.class).to(IMemoryIntentHandler.class);
-        bind(SimpleEntityRecognizer.class).to(SimpleEntityRecognizer.class).to(IEntityRecognizer.class);
+        bind(ExternalEntityRecognizer.class).to(ExternalEntityRecognizer.class).to(IEntityRecognizer.class);
         bind(TrainingLogic.class).to(TrainingLogic.class);
         bind(EntityLogic.class).to(EntityLogic.class);
         bind(IntentLogic.class).to(IntentLogic.class);
@@ -104,6 +98,7 @@ public class ServerBinder extends AbstractBinder {
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
+        bind(AIQueueServices.class).to(AIQueueServices.class);
         bind(AIChatServices.class).to(AIChatServices.class);
         bind(RequestWnet.class).to(RequestWnet.class);
         bind(RequestRnn.class).to(RequestRnn.class);
@@ -111,6 +106,8 @@ public class ServerBinder extends AbstractBinder {
         bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
         bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
+        bind(QueueProcessor.class).to(QueueProcessor.class);
+        bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);

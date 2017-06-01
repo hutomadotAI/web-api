@@ -1,6 +1,5 @@
 package com.hutoma.api.validation;
 
-import com.hutoma.api.validation.Validate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,35 +13,35 @@ public class TestValidationTextSanitizer {
 
     @Before
     public void setup() {
-        validation = new Validate();
+        this.validation = new Validate();
     }
 
     @Test
     public void testTextNormal() {
-        Assert.assertEquals("abcXYZ", validation.textSanitizer("abcXYZ"));
+        Assert.assertEquals("abcXYZ", this.validation.filterControlAndCoalesceSpaces("abcXYZ"));
     }
 
     @Test
     public void testTextTrim() {
-        Assert.assertEquals("abcXYZ", validation.textSanitizer(" abcXYZ "));
+        Assert.assertEquals("abcXYZ", this.validation.filterControlAndCoalesceSpaces(" abcXYZ "));
     }
 
     @Test
     public void testTextTrimLots() {
-        Assert.assertEquals("abcXYZ", validation.textSanitizer("            abcXYZ             "));
+        Assert.assertEquals("abcXYZ", this.validation.filterControlAndCoalesceSpaces("            abcXYZ             "));
     }
 
     @Test
     public void testTextDedupeWhitespace() {
-        Assert.assertEquals("a b cX Y Z", validation.textSanitizer("a   b cX\tY\t\t\tZ"));
+        Assert.assertEquals("a b cX Y Z", this.validation.filterControlAndCoalesceSpaces("a   b cX\tY\t\t\tZ"));
     }
 
     /***
      * Test now ensures that only round parentheses are retained
      */
     @Test
-    public void testTextRemoveInvalidParentheses() {
-        Assert.assertEquals("(abc)XYZ", validation.textSanitizer("(abc)[X]<YZ>"));
+    public void testTextParenthesesAllowed() {
+        Assert.assertEquals("(abc)[X]<YZ>", this.validation.filterControlAndCoalesceSpaces("(abc)[X]<YZ>"));
     }
 
     /***
@@ -51,32 +50,37 @@ public class TestValidationTextSanitizer {
      */
     @Test
     public void testTextNotEscapedQuotes() {
-        Assert.assertEquals("\'abcXYZ\"", validation.textSanitizer("\'abcXYZ\""));
+        Assert.assertEquals("\'abcXYZ\"", this.validation.filterControlAndCoalesceSpaces("\'abcXYZ\""));
     }
 
     @Test
-    public void testTextRemoveNonAscii() {
-        Assert.assertEquals("abcXYZ", validation.textSanitizer("abc日本語XYZ"));
+    public void testTextNonAsciiAllowed() {
+        Assert.assertEquals("abc日本語XYZ", this.validation.filterControlAndCoalesceSpaces("abc日本語XYZ"));
     }
 
     @Test
     public void testTextEmpty() {
-        Assert.assertEquals("", validation.textSanitizer(""));
+        Assert.assertEquals("", this.validation.filterControlAndCoalesceSpaces(""));
     }
 
     @Test
     public void testTextNull() {
-        Assert.assertEquals("", validation.textSanitizer(null));
+        Assert.assertEquals("", this.validation.filterControlAndCoalesceSpaces(null));
     }
 
     @Test
     public void testTextWhitespaceOnly() {
-        Assert.assertEquals("", validation.textSanitizer(" "));
+        Assert.assertEquals("", this.validation.filterControlAndCoalesceSpaces(" "));
     }
 
     @Test
-    public void testTextWithAmpersand() {
-        Assert.assertEquals("hello", validation.textSanitizer("&hello"));
+    public void testTextWithAmpersandAllowed() {
+        Assert.assertEquals("&hello", this.validation.filterControlAndCoalesceSpaces("&hello"));
+    }
+
+    @Test
+    public void testTextWithAtSymbolAllowed() {
+        Assert.assertEquals("test@test.com", this.validation.filterControlAndCoalesceSpaces("test@test.com"));
     }
 
 }
