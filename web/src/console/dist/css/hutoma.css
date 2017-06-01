@@ -6533,7 +6533,7 @@ ul.pagination li a {
 }
 
 .card-icon {
-    line-width: 170px;
+    width: 170px;
     height: 150px;
     display: block;
     margin: auto;
