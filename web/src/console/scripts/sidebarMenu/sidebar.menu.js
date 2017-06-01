@@ -58,15 +58,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
-    wHTML += ('<li class="unselectable" id="level3">');
-    wHTML += ('<a href="#">');
-    wHTML += ('<i class="fa fa-book text-purple"></i><span>Documentation</span><i class="fa fa-ellipsis-v pull-right"></i>');
-    wHTML += ('</a>');
-    wHTML += ('<ul class="treeview-menu">');
-    wHTML += ('<li id="menu_integrations"><a href="./integrationsAI.php" id="link_integrations"><i class="glyphicon glyphicon-list-alt text-default"></i>integrations</a></li>');
-    wHTML += ('</ul>');
-    wHTML += ('</li>');
-
+    wHTML += ('<li id="menu_documentation" class="unselectable"><a href="https://docs.hutoma.com" id="link_documentation" target="_blank"><i class="fa fa-book text-purple"></i><span>Documentation</span></a></li>');
 
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);
