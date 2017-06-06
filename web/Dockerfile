@@ -10,9 +10,9 @@ RUN \
     libcurl4-gnutls-dev curl lynx-cur wget libsasl2-modules postfix mailutils
 
 
-# Install PHP's curl, PDO and mysql connection stuff
+# Install PHP's curl
 RUN \
-  	/usr/local/bin/docker-php-ext-install curl json mysqli pdo pdo_mysql
+  	/usr/local/bin/docker-php-ext-install curl json
   	
 # Enable apache SSL module
 RUN \
@@ -51,9 +51,6 @@ COPY src /var/www/html
 EXPOSE 80 443
 
 # Expose environment variables for the console
-ENV HUTOMA_API_DB_CONNECTION_STRING mysql:dbname=hutoma;host=localhost;port=3306;charset=utf8
-ENV HUTOMA_API_DB_USERNAME username
-ENV HUTOMA_API_DB_PASSWORD password
 ENV HUTOMA_API_URL http://server/v1
 
 # Copy the script that launches all the required services
