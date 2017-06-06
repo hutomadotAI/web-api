@@ -40,7 +40,7 @@ function hideOverlay(state) {
 function showAlertMessage(code, intent_action) {
     switch (intent_action) {
         case INTENT_ACTION.DELETE_INTENT.value:
-            if (code == 200) {
+            if (code === 200) {
                 msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
                 removeWarningIntentAlert();
             }
@@ -51,7 +51,7 @@ function showAlertMessage(code, intent_action) {
             }
             break;
         case INTENT_ACTION.SAVE_INTENT.value:
-            if (code == 200) {
+            if (code === 200) {
                 msgAlertIntentElement(ALERT.BASIC.value, 'Use intents to map what a user says and what action should be taken by your business logic.');
                 removeWarningIntentAlert();
             } else {
@@ -77,7 +77,7 @@ function startTraining() {
             showAlertMessage(response['status']['code'], getIntentAction());
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+            if (getIntentAction() === INTENT_ACTION.DELETE_INTENT.value)
                 msgAlertIntent(ALERT.DANGER.value, ERROR_MESSAGE);
             else {
                 msgAlertIntentElement(ALERT.DANGER.value, ERROR_MESSAGE);
@@ -97,11 +97,22 @@ function updateTraining() {
         dataType: 'json',
         processData: false,
         contentType: "application/json; charset=utf-8",
-        success: function (response) {
-            startTraining();
+        success: function (xhr) {
+            if (xhr.status !== null) {
+                if (xhr.status.code === 200) {
+                    startTraining();
+                    return;
+                } else {
+                    msgAlertIntentElement(ALERT.DANGER.value, xhr.status.info);
+                }
+            } else {
+                msgAlertIntentElement(ALERT.DANGER.value, ERROR_MESSAGE);
+            }
+            deactiveRestartButton(false);
+            hideOverlay(true);
         },
         error: function () {
-            if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+            if (getIntentAction() === INTENT_ACTION.DELETE_INTENT.value)
                 msgAlertIntent(ALERT.DANGER.value, ERROR_MESSAGE);
             else {
                 msgAlertIntentElement(ALERT.DANGER.value, ERROR_MESSAGE);
@@ -115,12 +126,13 @@ function updateTraining() {
 
 function restartTraining() {
     deactiveRestartButton(true);
-    if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+    if (getIntentAction() === INTENT_ACTION.DELETE_INTENT.value)
         msgAlertIntent(ALERT.WARNING.value, 'Please wait...');
     else {
         deactiveSaveButton(true);
         msgAlertIntentElement(ALERT.WARNING.value, 'Please wait...');
     }
+    updateTraining();
     hideOverlay(false);
     startPollForStatus();
 }
@@ -137,14 +149,14 @@ function botStatusCall() {
             if (jsonData['api_status']['code'] === 200)
                 setBotStatus(jsonData["ai_status"]);
             else {
-                if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+                if (getIntentAction() === INTENT_ACTION.DELETE_INTENT.value)
                     msgAlertIntent(ALERT.DANGER.value, msg);
                 else
                     msgAlertIntentElement(ALERT.DANGER.value, msg);
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            if (getIntentAction() == INTENT_ACTION.DELETE_INTENT.value)
+            if (getIntentAction() === INTENT_ACTION.DELETE_INTENT.value)
                 msgAlertIntent(ALERT.DANGER.value, 'Cannot contact server.');
             else
                 msgAlertIntentElement(ALERT.DANGER.value, 'Cannot contact server.');
@@ -169,9 +181,9 @@ function isBotStopped() {
     var status = document.getElementById('bot-status').value;
     setBotStatus(UI_STATE.LISTENING_MODE.value); // listening mode only for UI polling
 
-    if (status == API_AI_STATE.STOPPED.value ||
-        status == API_AI_STATE.READY_TO_TRAIN.value ||
-        status == API_AI_STATE.COMPLETED.value) {
+    if (status === API_AI_STATE.STOPPED.value ||
+        status === API_AI_STATE.READY_TO_TRAIN.value ||
+        status === API_AI_STATE.COMPLETED.value) {
         stopPollForStatus();
         updateTraining();
     }

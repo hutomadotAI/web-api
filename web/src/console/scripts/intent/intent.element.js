@@ -44,11 +44,11 @@ function saveIntent() {
     var variables = [];
 
     var hasErrors = false;
-    if (expressions.length == 0) {
+    if (expressions.length === 0) {
         msgAlertUserExpression(ALERT.DANGER.value, 'At least one user expression is required.');
         hasErrors = true;
     }
-    if (responses.length == 0) {
+    if (responses.length === 0) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required.');
         hasErrors = true;
     }
@@ -66,7 +66,7 @@ function saveIntent() {
         //*** check validation entity name
         var node_entity = node.children[i].children[0].children[0].children[0];
         var elem = $(node_entity).find("ul").find("li.selected");
-        if (elem.text() == '') {
+        if (elem.text() === '') {
             node.children[i].children[0].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Cannot save. Missing entity.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
@@ -78,7 +78,7 @@ function saveIntent() {
         //*** check validation n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
-        if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
+        if (node_nprompt.value !== '' && node_nprompt.value !== 'undefined') {
             if (isInputInvalid(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
                 msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be between 1 and 99.');
@@ -88,7 +88,7 @@ function saveIntent() {
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
         }
 
-        if (node_nprompt.getAttribute('placeholder') == 'n° prompt') {
+        if (node_nprompt.getAttribute('placeholder') === 'n° prompt') {
             node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Cannot save. Missing n° prompt value.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
@@ -102,7 +102,7 @@ function saveIntent() {
         var list_prompt = node_prompt.getAttribute('data-prompts');
         var prompts_split = list_prompt.split(',');
 
-        if (list_prompt == '' || prompts_split.length == 0) {
+        if (list_prompt === '' || prompts_split.length === 0) {
             node.children[i].children[2].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Please add at least one prompt before saving.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
@@ -148,17 +148,13 @@ function saveIntent() {
                 case 200:
                     msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
                     enableSaving(false);
-                    if (trainingFile)
-                        createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
+                    createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
                     break;
-                case 400:
-                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-                case 500:
-                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
+                case 400: // fallthrough
+                case 500: // fallthrough
                 default:
                     msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
+                    break;
             }
         },
         complete: function () {

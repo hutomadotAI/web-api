@@ -4,6 +4,7 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.TrainingEndpoint;
 import com.hutoma.api.logic.AILogic;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -106,6 +108,7 @@ public class TestServiceTraining extends ServiceTestBase {
     public void testTrainingUpdate() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
+        when(this.fakeDatabaseEntitiesIntents.getAiTrainingFile(any())).thenReturn("Q1\nA1");
         final Response response = testTraining("update", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
@@ -138,6 +141,20 @@ public class TestServiceTraining extends ServiceTestBase {
                 .headers(noDevIdHeaders)
                 .get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testTrainingUpdate_intentOnly() throws Database.DatabaseException, IOException {
+        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
+        when(this.fakeDatabaseEntitiesIntents.getAiTrainingFile(any())).thenReturn(null);
+        ApiIntent intent = new ApiIntent("intent1", "", "");
+        intent.setUserSays(Collections.singletonList("userSays"));
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(intent);
+        final Response response = testTraining("update", defaultHeaders);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     private Response testTraining(final String path, final MultivaluedHashMap<String, Object> headers) {

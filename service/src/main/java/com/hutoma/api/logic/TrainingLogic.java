@@ -293,22 +293,36 @@ public class TrainingLogic {
                 case AI_READY_TO_TRAIN:     // fallthrough
                 case AI_TRAINING_STOPPED:   // fallthrough
                 case AI_TRAINING_COMPLETE:  // fallthrough
-                case AI_TRAINING_QUEUED:
+                case AI_TRAINING_QUEUED:    // fallthrough
+                case AI_UNDEFINED:
                     try {
                         String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
+                        if (trainingMaterials == null || trainingMaterials.isEmpty()) {
+                            this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
+                                    devidString, logMap);
+                            return ApiError.getNotFound("There is no training data.");
+                        }
+                        // We only support AI_UNDEFINED when it's an intent-only AI (no training file)
+                        if (ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED && ai.trainingFileUploaded()) {
+                            this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
+                                    devidString, logMap);
+                            return ApiError.getBadRequest("Invalid training status - make sure you have uploaded a "
+                                    + "training file and/or added intents.");
+                        }
                         this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
                         this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devidString, logMap);
-                        return new ApiResult().setSuccessStatus("Training updated");
+                        return new ApiResult().setSuccessStatus("Training updated.");
                     } catch (AIServices.AiServicesException ex) {
-                        this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devidString, ex);
-                        return ApiError.getInternalServerError("Could not update training");
+                        this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devidString, ex);
+                        return ApiError.getInternalServerError("Could not update training.");
                     }
 
                 default:
-                    this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - could not update training", devidString, logMap);
-                    return ApiError.getInternalServerError("Could not update the current training session.");
+                    this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - could not update training",
+                            devidString, logMap);
+                    return ApiError.getBadRequest("Invalid training status");
             }
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devidString, e);

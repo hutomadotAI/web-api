@@ -349,7 +349,7 @@ public class TestTrainingLogic {
     @Test
     @Parameters(method = "updateTraining_failureStates")
     public void testUpdateTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
-        testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_INTERNAL_ERROR);
+        testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
@@ -536,9 +536,12 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabase.getIntents(DEVID_UUID, AIID)).thenReturn(Collections.emptyList());
         ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices).uploadTraining(any(),
-                eq(DEVID_UUID), eq(AIID), eq(fileToUpload == null ? "" : fileToUpload));
+        if (fileToUpload == null) {
+            Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+        } else {
+            Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+            verify(this.fakeAiServices).uploadTraining(any(), eq(DEVID_UUID), eq(AIID), eq(fileToUpload));
+        }
     }
 
     private void verifyUpdateTraining_withIntents(final String fileToUpload)
@@ -604,6 +607,7 @@ public class TestTrainingLogic {
     private void testUpdateTraining_initialStates_common(TrainingStatus initialState, int expectedCode)
             throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any())).thenReturn(getAi(initialState, false));
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn("Q1\nA1");
         ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
         Assert.assertEquals(expectedCode, result.getStatus().getCode());
     }
