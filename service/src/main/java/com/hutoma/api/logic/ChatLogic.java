@@ -288,7 +288,7 @@ public class ChatLogic {
             String uid = URLEncoder.encode(Integer.toString(sessionData(this.chatId).getUserid()), "UTF-8");
             String aid = URLEncoder.encode("384", "UTF-8");
             String q = URLEncoder.encode(message, "UTF-8");
-            URL url = new URL("https://www.hutoma.com:8443/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
+            URL url = new URL("http://52.44.202.141:8080/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
 
             connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("GET");
@@ -508,7 +508,7 @@ public class ChatLogic {
                 String chatHistory = URLEncoder.encode(sessionData(this.chatId).getHist(), "UTF-8");
                 String currentTopic = URLEncoder.encode(sessionData(this.chatId).getT(), "UTF-8");
                 String q = URLEncoder.encode(message, "UTF-8");
-                URL url = new URL("https://api.hutoma.com/nokia/ai/8fa2a7c0-b681-4d5a-9b60-b61babfaf9ce/chat?confidence_threshold=0.55&chat_history=" + chatHistory + "&current_topic=" + currentTopic + "&uid=87142473&q=" + q);
+                URL url = new URL("http://52.44.215.190:8080/nokia/ai/8fa2a7c0-b681-4d5a-9b60-b61babfaf9ce/chat?confidence_threshold=0.55&chat_history=" + chatHistory + "&current_topic=" + currentTopic + "&uid=87142473&q=" + q);
 
                 connection = (HttpURLConnection)url.openConnection();
                 connection.setRequestMethod("GET");
