@@ -1,7 +1,7 @@
 const MAX_BOTCARDS_VISIBLE_FOR_CAROUSEL = 10;
 
 window.addEventListener('resize', function () {
-    if (document.getElementsByName('bot_list')[0].childElementCount > 0 ) {
+    if (document.getElementsByName('bot_list')[0].childElementCount > 0) {
         var node = document.getElementById('botsCarousels');
         var nCarousel = node.childElementCount;
         for (var i = 0; i < nCarousel; i++)
@@ -163,7 +163,7 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 
 
         wHTML += ('<span class="carousel-see-more">');
-        wHTML += ('<a href="botstoreList.php' + buildCategoryURIparameter(category) + '" onclick=\"triggerCategoryChanged(\''+ encodeURIComponent(category) + '\')\">');
+        wHTML += ('<a href="botstoreList.php' + buildCategoryURIparameter(category) + '" onclick=\"triggerCategoryChanged(\'' + encodeURIComponent(category) + '\')\">');
         wHTML += ('<button class="btn btn-primary flat" value="' + category + '"><b>see more</b></button>');
         wHTML += ('</a></span>');
         wHTML += ('</div>');
@@ -178,8 +178,10 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
 }
 
 function triggerCategoryChanged(category) {
-    var event = new CustomEvent('BotstoreCategoryChanged', { detail : { 'category' : category } });
-    window.parent.document.dispatchEvent(event);
+    if (window.parent !== null) {
+        var event = new CustomEvent('BotstoreCategoryChanged', {detail: {category: category}});
+        window.parent.document.dispatchEvent(event);
+    }
 }
 
 function showSeeMoreButton(node) {
@@ -236,7 +238,10 @@ function getCarousels(category, optionFlow) {
             }
             hideOverlay(true);
             // Notify any parent that we've finished painting
-            window.parent.document.dispatchEvent(new CustomEvent('BotstoreFinishPaintEvent'));
+            if (window.parent !== null) {
+                var event = new CustomEvent('BotstoreFinishPaintEvent',{detail: {height: document.body.scrollHeight}});
+                window.parent.document.dispatchEvent(event);
+            }
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
@@ -246,29 +251,6 @@ function getCarousels(category, optionFlow) {
     });
 }
 
-function resizeIFrame() {
-    var carouselBotcardListNode = document.getElementsByName('bot_list');
-    if ( carouselBotcardListNode.length === 1 ){
-
-        var carouselNode = carouselBotcardListNode[0];
-        if ( carouselNode.childElementCount > 0 ) {
-            var firstBotCarouselNode = carouselNode.children[0];
-            var lastBotCarouselNode = carouselNode.lastChild;
-
-            if (parseInt(lastBotCarouselNode.children[0].offsetTop) > parseInt(firstBotCarouselNode.children[0].offsetTop)) {
-                var iFrame = parent.document.getElementById('contentFrame');
-                iFrame.height = lastBotCarouselNode.children[0].offsetTop + lastBotCarouselNode.children[0].scrollHeight + 'px';
-            }
-        }
-    }
-}
-
 function hideOverlay(state) {
     document.getElementById('carousel-overlay').style.display = (state) ? 'none' : '';
 }
-
-$(document).ready(function() {
-    window.addEventListener('resize', function () {
-        resizeIFrame();
-    });
-});

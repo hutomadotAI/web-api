@@ -57,6 +57,12 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('botcardDetailContent').style.display = 'block';
         addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
 
+        // Notify any parent that we've finished painting
+        if (window.parent !== null) {
+            var event = new CustomEvent('BotstoreFinishPaintEvent', {detail: {height: document.body.scrollHeight}})
+            window.parent.document.dispatchEvent(event);
+        }
+
     } catch (e) {
         document.getElementById('containerMsgAlertBotcardDetail').style.display = 'block';
         document.getElementById('msgAlertBotcardDetail').innerText = 'Missing required arguments';
