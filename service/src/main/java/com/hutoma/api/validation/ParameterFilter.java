@@ -25,10 +25,8 @@ public class ParameterFilter extends Validate {
     protected static final String LOCALE = "locale";
     protected static final String CHATID = "chatId";
     protected static final String CHATQUESTION = "q";
-    protected static final String CHATHISTORY = "chat_history";
     protected static final String AIDESC = "description";
     protected static final String AINAME = "name";
-    protected static final String TOPIC = "current_topic";
     protected static final String MINP = "confidence_threshold";
     protected static final String ENTITYNAME = "entity_name";
     protected static final String INTENTNAME = "intent_name";
@@ -75,20 +73,12 @@ public class ParameterFilter extends Validate {
         return (String) requestContext.getProperty(APIParameter.ChatQuestion.toString());
     }
 
-    public static String getChatHistory(final ContainerRequestContext requestContext) {
-        return (String) requestContext.getProperty(APIParameter.ChatHistory.toString());
-    }
-
     public static String getAiName(final ContainerRequestContext requestContext) {
         return (String) requestContext.getProperty(APIParameter.AIName.toString());
     }
 
     public static String getAiDescription(final ContainerRequestContext requestContext) {
         return (String) requestContext.getProperty(APIParameter.AIDescription.toString());
-    }
-
-    public static String getTopic(final ContainerRequestContext requestContext) {
-        return (String) requestContext.getProperty(APIParameter.ChatTopic.toString());
     }
 
     public static float getMinP(final ContainerRequestContext requestContext) {

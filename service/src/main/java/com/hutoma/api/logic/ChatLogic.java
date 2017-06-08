@@ -74,7 +74,7 @@ public class ChatLogic {
     }
 
     public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
-                          final String history, final String topic, final float minP) {
+                          final float minP) {
 
         // TODO: Bug#1349 - topic is now ignored if passed from the caller
         final String devIdString = devId.toString();
@@ -92,10 +92,10 @@ public class ChatLogic {
         this.telemetryMap = LogMap.map("DevId", devId)
                 .put("AIID", aiid)
                 .put("Topic", this.chatState.getTopic())
+                .put("History", this.chatState.getHistory())
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid)
-                .put("History", history)
                 .put("Q", question)
                 .put("MinP", minP);
 
@@ -117,7 +117,8 @@ public class ChatLogic {
                 // Otherwise just go through the regular chat flow
 
                 // async start requests to all servers
-                this.chatServices.startChatRequests(devId, aiid, chatUuid, question, history,
+                this.chatServices.startChatRequests(devId, aiid, chatUuid, question,
+                        this.chatState.getHistory(),
                         this.chatState.getTopic());
 
                 // wait for WNET to return
@@ -254,6 +255,7 @@ public class ChatLogic {
         }
 
         this.chatState.setTopic(apiChat.getResult().getTopicOut());
+        this.chatState.setHistory(apiChat.getResult().getAnswer());
         this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
 
         this.telemetryMap.add("RequestDuration", result.getElapsedTime());
@@ -269,18 +271,16 @@ public class ChatLogic {
     }
 
     public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId,
-                                   String history, String topic, float minP) {
+                                   float minP) {
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
         // Add telemetry for the request
         this.telemetryMap = LogMap.map("DevId", devId)
                 .put("AIID", aiid)
-                .put("Topic", topic)
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid.toString())
-                .put("History", history)
                 .put("Q", question);
 
         ChatResult result = new ChatResult(question);

@@ -10,8 +10,6 @@ public enum APIParameter {
     AIName,
     AIDescription,
     ChatQuestion,
-    ChatHistory,
-    ChatTopic,
     Min_P,
     IntentName,
     EntityName,

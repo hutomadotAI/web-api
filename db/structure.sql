@@ -223,6 +223,7 @@ CREATE TABLE `chatState` (
   `chat_id` varchar(50) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `topic` varchar(250) DEFAULT NULL,
+  `history` varchar(1024) DEFAULT NULL,
   `locked_aiid` varchar(50) DEFAULT NULL,
   `entity_values` text,
   PRIMARY KEY (`dev_id`,`chat_id`),
@@ -3217,12 +3218,13 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
   IN `param_chatId` VARCHAR(50),
   IN `param_timestamp` TIMESTAMP,
   IN `param_topic` VARCHAR(250),
+  IN `param_history` VARCHAR(1024),
   IN `param_locked_aiid` VARCHAR(50),
   IN `param_entity_values` TEXT)
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, locked_aiid, entity_values)
-    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_locked_aiid, param_entity_values)
-    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, locked_aiid = param_locked_aiid, entity_values = param_entity_values;
+    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, history, locked_aiid, entity_values)
+    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_history, param_locked_aiid, param_entity_values)
+    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, history = param_history, locked_aiid = param_locked_aiid, entity_values = param_entity_values;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

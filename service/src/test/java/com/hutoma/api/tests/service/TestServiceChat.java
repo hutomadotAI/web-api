@@ -112,38 +112,9 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat_chatTopicTooLong() {
-        String topic = String.join("", Collections.nCopies(250 + 1, "A"));
-        final Response response = target(CHAT_PATH)
-                .queryParam("q", "question")
-                .queryParam("chatId", "")
-                .queryParam("current_topic", topic)
-                .request().headers(defaultHeaders).get();
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
-    }
-
-    @Test
-    public void testChat_chatHistoryTooLong() {
-        String history = String.join("", Collections.nCopies(1024 + 1, "A"));
-        final Response response = target(CHAT_PATH)
-                .queryParam("q", "question")
-                .queryParam("chatId", "")
-                .queryParam("chat_history", history)
-                .request().headers(defaultHeaders).get();
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
-    }
-
-    @Test
     @Parameters(method = "invalidMinPDataProvider")
     public void testChat_invalidMinP(final String minP) {
         final Response response = buildChatDefaultParams(target(CHAT_PATH)).queryParam("confidence_threshold", minP)
-                .request().headers(defaultHeaders).get();
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
-    }
-
-    @Test
-    public void testChat_invalidChatTopic() {
-        final Response response = buildChatDefaultParams(target(CHAT_PATH)).queryParam("current_topic", "@topic")
                 .request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }

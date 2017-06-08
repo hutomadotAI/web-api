@@ -88,11 +88,6 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                                 this.validateRequiredSanitized("question",
                                         getFirst(queryParameters.get(CHATQUESTION)))));
             }
-            if (checkList.contains(APIParameter.ChatHistory)) {
-                requestContext.setProperty(APIParameter.ChatHistory.toString(),
-                        this.validateFieldLength(1024, CHATHISTORY,
-                                this.validateOptionalSanitized(getFirst(queryParameters.get(CHATHISTORY)))));
-            }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
                         this.validateFieldLength(250, AINAME,
@@ -102,11 +97,6 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                 requestContext.setProperty(APIParameter.AIDescription.toString(),
                         this.validateFieldLength(250, AIDESC,
                                 this.validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC)))));
-            }
-            if (checkList.contains(APIParameter.ChatTopic)) {
-                requestContext.setProperty(APIParameter.ChatTopic.toString(),
-                        this.validateFieldLength(250, TOPIC,
-                                this.validateOptionalSanitizeRemoveAt(TOPIC, getFirst(queryParameters.get(TOPIC)))));
             }
             if (checkList.contains(APIParameter.Min_P)) {
                 requestContext.setProperty(APIParameter.Min_P.toString(),

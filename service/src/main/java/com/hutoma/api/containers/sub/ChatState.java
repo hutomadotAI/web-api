@@ -2,9 +2,7 @@ package com.hutoma.api.containers.sub;
 
 import org.joda.time.DateTime;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,10 +12,11 @@ public class ChatState {
     private DateTime timestamp;
     private UUID lockedAiid;
     private String topic;
+    private String history;
     private HashMap<String, String> entityValues;
 
-    public ChatState(final DateTime timestamp, final String topic, final UUID lockedAiid,
-                         final HashMap<String, String> entityValues) {
+    public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
+                     final HashMap<String, String> entityValues) {
         this.timestamp = timestamp;
         this.topic = topic;
         this.lockedAiid = lockedAiid;
@@ -25,7 +24,7 @@ public class ChatState {
     }
 
     public static ChatState getEmpty() {
-        return new ChatState(null, null, null, new HashMap<>());
+        return new ChatState(null, null, null, null, new HashMap<>());
     }
 
     public DateTime getTimestamp() {
@@ -50,6 +49,14 @@ public class ChatState {
 
     public void setTopic(final String topic) {
         this.topic = topic;
+    }
+
+    public String getHistory() {
+        return this.history;
+    }
+
+    public void setHistory(final String history) {
+        this.history = history;
     }
 
     public String getEntityValue(String entityName) {

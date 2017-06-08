@@ -40,6 +40,16 @@ public class Database {
         this.transactionProvider = transactionProvider;
     }
 
+    /***
+     * Truncate strings if they are too long for the database field
+     * @param field source data
+     * @param maxLength
+     * @return
+     */
+    protected static String limitSize(String field, int maxLength) {
+        return ((field == null) || (field.length() <= maxLength)) ? field : field.substring(0, maxLength);
+    }
+
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try {
@@ -805,6 +815,7 @@ public class Database {
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),
                         rs.getString("topic"),
+                        rs.getString("history"),
                         locked_aiid != null ? UUID.fromString(locked_aiid) : null,
                         entities
                 );
@@ -819,11 +830,12 @@ public class Database {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 6)
+            call.initialise("setChatState", 7)
                     .add(devId)
                     .add(chatId)
                     .add(chatState.getTimestamp())
-                    .add(chatState.getTopic())
+                    .add(limitSize(chatState.getTopic(), 250))
+                    .add(limitSize(chatState.getHistory(), 1024))
                     .add(lockedAiid)
                     .add(chatState.getEntityValues().isEmpty() ? null : jsonSerializer.serialize(chatState.getEntityValues()));
             return call.executeUpdate() > 0;

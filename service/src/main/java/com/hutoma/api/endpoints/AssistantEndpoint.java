@@ -47,8 +47,8 @@ public class AssistantEndpoint {
     @GET
     @Path("{aiid}/chat")
     @RateLimit(RateKey.Chat)
-    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion, APIParameter.ChatHistory,
-            APIParameter.ChatTopic, APIParameter.Min_P})
+    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion,
+            APIParameter.Min_P})
     @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
             Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,8 +59,8 @@ public class AssistantEndpoint {
             @RequestHeader(name = "Authorization", description = "Developer token")
     })
     @ResourceMethodSignature(
-            queryParams = {@QueryParam("q"), @QueryParam("chatId"), @QueryParam("chat_history"),
-                    @QueryParam("current_topic"), @QueryParam("confidence_threshold")},
+            queryParams = {@QueryParam("q"), @QueryParam("chatId"),
+                    @QueryParam("confidence_threshold")},
             output = ChatResult.class
     )
     public
@@ -72,8 +72,6 @@ public class AssistantEndpoint {
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
                 ParameterFilter.getChatID(requestContext),
-                ParameterFilter.getChatHistory(requestContext),
-                ParameterFilter.getTopic(requestContext),
                 ParameterFilter.getMinP(requestContext));
         return result.getResponse(this.serializer).build();
     }

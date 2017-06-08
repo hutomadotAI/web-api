@@ -29,6 +29,12 @@ public class TestChatStateHandler {
     private ChatStateHandler chatStateHandler;
     private JsonSerializer fakeJsonSerializer;
 
+    private static void assertChatStateEquals(final ChatState expected, final ChatState actual) {
+        Assert.assertEquals(expected.getLockedAiid(), actual.getLockedAiid());
+        Assert.assertEquals(expected.getTimestamp(), actual.getTimestamp());
+        Assert.assertEquals(expected.getTopic(), actual.getTopic());
+    }
+
     @Before
     public void setup() {
         this.fakeDatabase = mock(Database.class);
@@ -40,7 +46,7 @@ public class TestChatStateHandler {
     public void testChatStateHandler_getState() throws Database.DatabaseException {
         final String topic = "theTopic";
         final DateTime timestamp = DateTime.now();
-        ChatState chatState = new ChatState(timestamp, topic, AIID, new HashMap<>());
+        ChatState chatState = new ChatState(timestamp, topic, "theHistory", AIID, new HashMap<>());
         when(this.fakeDatabase.getChatState(any(), any(), any())).thenReturn(chatState);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, UUID.randomUUID());
         assertChatStateEquals(chatState, result);
@@ -57,7 +63,7 @@ public class TestChatStateHandler {
     @Test
     public void testChatStateHandler_saveState() throws Database.DatabaseException {
         final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", AIID, new HashMap<>());
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic","theHistory", AIID, new HashMap<>());
         this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
         verify(this.fakeDatabase).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
     }
@@ -65,16 +71,10 @@ public class TestChatStateHandler {
     @Test
     public void testChatStateHandler_saveState_dbException() throws Database.DatabaseException {
         final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", AIID, new HashMap<>());
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic","theHistory", AIID, new HashMap<>());
         when(this.fakeDatabase.saveChatState(any(), any(), any(), any())).thenThrow(Database.DatabaseException.class);
         this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
-    }
-
-    private static void assertChatStateEquals(final ChatState expected, final ChatState actual) {
-        Assert.assertEquals(expected.getLockedAiid(), actual.getLockedAiid());
-        Assert.assertEquals(expected.getTimestamp(), actual.getTimestamp());
-        Assert.assertEquals(expected.getTopic(), actual.getTopic());
     }
 }
 
