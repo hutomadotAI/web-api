@@ -86,6 +86,10 @@ public class ApiAi extends ApiResult {
         populateExtendedStatus();
     }
 
+    public void setConfidence(final double confidence) {
+        this.confidence = confidence;
+    }
+
     /***
      * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
      * @param wnetStatus
@@ -137,6 +141,10 @@ public class ApiAi extends ApiResult {
 
     public void setPublishingState(final AiBot.PublishingState publishingState) {
         this.publishingState = publishingState;
+    }
+
+    public double getConfidence() {
+        return this.confidence;
     }
 
     public BackendStatus getBackendStatus() {

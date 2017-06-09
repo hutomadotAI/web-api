@@ -226,6 +226,7 @@ CREATE TABLE `chatState` (
   `history` varchar(1024) DEFAULT NULL,
   `locked_aiid` varchar(50) DEFAULT NULL,
   `entity_values` text,
+  `confidence_threshold` DOUBLE DEFAULT NULL,
   PRIMARY KEY (`dev_id`,`chat_id`),
   UNIQUE KEY `chat_id_UNIQUE` (`chat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -3220,11 +3221,13 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
   IN `param_topic` VARCHAR(250),
   IN `param_history` VARCHAR(1024),
   IN `param_locked_aiid` VARCHAR(50),
-  IN `param_entity_values` TEXT)
+  IN `param_entity_values` TEXT,
+  IN `param_confidence_threshold` DOUBLE)
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, history, locked_aiid, entity_values)
-    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_history, param_locked_aiid, param_entity_values)
-    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, history = param_history, locked_aiid = param_locked_aiid, entity_values = param_entity_values;
+    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, history, locked_aiid, entity_values, confidence_threshold)
+    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold)
+    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, history = param_history,
+      locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

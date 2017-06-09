@@ -53,7 +53,8 @@ public class Database {
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try {
-            List<LinkedTreeMap<String, Object>> list = jsonSerializer.deserializeList(rs.getString("variables"));
+            List<LinkedTreeMap<String, Object>> list =
+                    jsonSerializer.deserializeList(rs.getString("variables"));
             List<MemoryVariable> variables = new ArrayList<>();
             for (LinkedTreeMap<String, Object> e : list) {
                 @SuppressWarnings("unchecked")
@@ -84,8 +85,17 @@ public class Database {
                              final String devToken, final int planId, final String devId, final String clientToken)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addUser", 10).add(username).add(email).add(password).add(passwordSalt)
-                    .add(firstName).add(lastName).add(devToken).add(planId).add(devId).add(clientToken);
+            call.initialise("addUser", 10)
+                    .add(username)
+                    .add(email)
+                    .add(password)
+                    .add(passwordSalt)
+                    .add(firstName)
+                    .add(lastName)
+                    .add(devToken)
+                    .add(planId)
+                    .add(devId)
+                    .add(clientToken);
             return call.executeUpdate() > 0;
         }
     }
@@ -256,8 +266,8 @@ public class Database {
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return new DevPlan(rs.getInt("maxai"), rs.getInt("monthlycalls"), rs.getLong("maxmem"),
-                            rs.getInt("maxtraining"));
+                    return new DevPlan(rs.getInt("maxai"), rs.getInt("monthlycalls"),
+                            rs.getLong("maxmem"), rs.getInt("maxtraining"));
                 }
                 return null;
             } catch (final SQLException sqle) {
@@ -278,9 +288,11 @@ public class Database {
         // start a transaction
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             // delete the user's AIs and status for those AIs
-            transaction.getDatabaseCall().initialise("deleteAllAIs", 1).add(devid).executeUpdate();
+            transaction.getDatabaseCall().initialise("deleteAllAIs", 1)
+                    .add(devid).executeUpdate();
             // delete the user
-            updateCount = transaction.getDatabaseCall().initialise("deleteUser", 1).add(devid).executeUpdate();
+            updateCount = transaction.getDatabaseCall().initialise("deleteUser", 1)
+                    .add(devid).executeUpdate();
             // if all goes well, commit
             transaction.commit();
         }
@@ -745,7 +757,8 @@ public class Database {
     public RateLimitStatus checkRateLimit(final UUID devId, final String rateKey, final double burst,
                                           final double frequency) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("rateLimitCheck", 4).add(devId).add(rateKey).add(burst).add(frequency);
+            call.initialise("rateLimitCheck", 4)
+                    .add(devId).add(rateKey).add(burst).add(frequency);
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
@@ -766,7 +779,8 @@ public class Database {
                                         final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getMemoryIntent", 3).add(intentName).add(aiid).add(chatId);
+            call.initialise("getMemoryIntent", 3)
+                    .add(intentName).add(aiid).add(chatId);
             ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
@@ -797,7 +811,8 @@ public class Database {
         }
     }
 
-    public ChatState getChatState(final UUID devId, final UUID chatId, final JsonSerializer jsonSerializer)
+    public ChatState getChatState(final UUID devId, final UUID aiid, final UUID chatId,
+                                  final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getChatState", 2).add(devId).add(chatId);
@@ -811,22 +826,30 @@ public class Database {
                     entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
                 }
 
-                String locked_aiid = rs.getString("locked_aiid");
+                String lockedAiid = rs.getString("locked_aiid");
+                double confidenceThreshold = rs.getDouble("confidence_threshold");
+                if (rs.wasNull()) {
+                    confidenceThreshold = this.getAI(devId, aiid).getConfidence();
+                }
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),
                         rs.getString("topic"),
                         rs.getString("history"),
-                        locked_aiid != null ? UUID.fromString(locked_aiid) : null,
-                        entities
+                        lockedAiid != null ? UUID.fromString(lockedAiid) : null,
+                        entities,
+                        confidenceThreshold
                 );
             }
-            return ChatState.getEmpty();
+            ChatState chatState = ChatState.getEmpty();
+            chatState.setConfidenceThreshold(this.getAI(devId, aiid).getConfidence());
+            return chatState;
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
     }
 
-    public boolean saveChatState(final UUID devId, final UUID chatId, final ChatState chatState, final JsonSerializer jsonSerializer)
+    public boolean saveChatState(final UUID devId, final UUID chatId, final ChatState chatState,
+                                 final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
@@ -837,7 +860,9 @@ public class Database {
                     .add(limitSize(chatState.getTopic(), 250))
                     .add(limitSize(chatState.getHistory(), 1024))
                     .add(lockedAiid)
-                    .add(chatState.getEntityValues().isEmpty() ? null : jsonSerializer.serialize(chatState.getEntityValues()));
+                    .add(chatState.getEntityValues().isEmpty()
+                            ? null : jsonSerializer.serialize(chatState.getEntityValues()))
+                    .add(chatState.getConfidenceThreshold());
             return call.executeUpdate() > 0;
         }
     }
@@ -930,7 +955,8 @@ public class Database {
     public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateWebhook", 4).add(aiid).add(intentName).add(endpoint).add(enabled);
+            call.initialise("updateWebhook", 4)
+                    .add(aiid).add(intentName).add(endpoint).add(enabled);
             return call.executeUpdate() > 0;
         }
     }

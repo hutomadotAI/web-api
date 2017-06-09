@@ -25,7 +25,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +50,7 @@ public class TestServiceAssistant extends ServiceTestBase {
     @Before
     public void setup() {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     /***

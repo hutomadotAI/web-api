@@ -11,7 +11,6 @@ import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
@@ -27,7 +26,6 @@ import java.util.UUID;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -48,19 +46,10 @@ public class TestServiceChat extends ServiceTestBase {
     @Mock
     protected ChatStateHandler fakeChatStateHandler;
 
-    private static Object[] invalidMinPDataProvider() {
-        return $(
-                $("1.1"),
-                $("-0.1"),
-                $("abc"),
-                $("-")
-        );
-    }
-
     @Before
     public void setup() {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     @Test
@@ -107,14 +96,6 @@ public class TestServiceChat extends ServiceTestBase {
         final Response response = target(CHAT_PATH)
                 .queryParam("q", question)
                 .queryParam("chatId", "")
-                .request().headers(defaultHeaders).get();
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
-    }
-
-    @Test
-    @Parameters(method = "invalidMinPDataProvider")
-    public void testChat_invalidMinP(final String minP) {
-        final Response response = buildChatDefaultParams(target(CHAT_PATH)).queryParam("confidence_threshold", minP)
                 .request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }

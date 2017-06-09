@@ -47,8 +47,7 @@ public class ChatEndpoint {
     @GET
     @Path("{aiid}/chat")
     @RateLimit(RateKey.Chat)
-    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion,
-            APIParameter.Min_P})
+    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion})
     @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
             Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -75,16 +74,14 @@ public class ChatEndpoint {
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
-                ParameterFilter.getChatID(requestContext),
-                ParameterFilter.getMinP(requestContext));
+                ParameterFilter.getChatID(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
     @GET
     @Path("load/{aiid}/chat")
     @RateLimit(RateKey.LoadTest)
-    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion,
-            APIParameter.Min_P})
+    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion})
     @Secured({Role.ROLE_TEST})
     @Produces(MediaType.APPLICATION_JSON)
     public Response chatLoadTest(
@@ -93,8 +90,7 @@ public class ChatEndpoint {
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
-                ParameterFilter.getChatID(requestContext),
-                ParameterFilter.getMinP(requestContext));
+                ParameterFilter.getChatID(requestContext));
         return result.getResponse(this.serializer).build();
     }
 }

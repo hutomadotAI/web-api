@@ -14,17 +14,22 @@ public class ChatState {
     private String topic;
     private String history;
     private HashMap<String, String> entityValues;
+    private double confidenceThreshold;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
-                     final HashMap<String, String> entityValues) {
+                     final HashMap<String, String> entityValues, final double confidenceThreshold) {
         this.timestamp = timestamp;
         this.topic = topic;
+        this.history = history;
         this.lockedAiid = lockedAiid;
         this.entityValues = entityValues;
+        this.confidenceThreshold = confidenceThreshold;
     }
 
     public static ChatState getEmpty() {
-        return new ChatState(null, null, null, null, new HashMap<>());
+        return new ChatState(
+                null, null, null, null, new HashMap<>(), 0.0d
+        );
     }
 
     public DateTime getTimestamp() {
@@ -69,5 +74,13 @@ public class ChatState {
 
     public void setEntityValue(String entityName, String value) {
         this.entityValues.put(entityName, value);
+    }
+
+    public void setConfidenceThreshold(final double confidenceThreshold) {
+        this.confidenceThreshold = confidenceThreshold;
+    }
+
+    public double getConfidenceThreshold() {
+        return this.confidenceThreshold;
     }
 }

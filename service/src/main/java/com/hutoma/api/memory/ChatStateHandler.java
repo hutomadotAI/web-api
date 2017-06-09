@@ -28,9 +28,9 @@ public class ChatStateHandler {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ChatState getState(final UUID devId, final UUID chatId) {
+    public ChatState getState(final UUID devId, final UUID aiid, final UUID chatId) {
         try {
-            return this.database.getChatState(devId, chatId, jsonSerializer);
+            return this.database.getChatState(devId, aiid, chatId, jsonSerializer);
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
         }

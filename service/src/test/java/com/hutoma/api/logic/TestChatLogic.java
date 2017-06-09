@@ -92,7 +92,7 @@ public class TestChatLogic {
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
                 this.fakeChatStateHandler);
 
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
     }
 
     /***
@@ -506,8 +506,8 @@ public class TestChatLogic {
 
         HashMap<String, String> entityValues = new HashMap<>();
         entityValues.put("persistent_var", "persistentValue");
-        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues);
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(state);
+        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
 
         // First question, triggers the intent but without the right entity value
         ApiResult result = getChat(0.5f, "nothing to see here.");
@@ -626,7 +626,7 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_multiLineIntent_promptsExhausted()
-            throws RequestBase.AiControllerException {
+            throws RequestBase.AiControllerException, Database.DatabaseException {
         final int maxPrompts = 3;
         MemoryIntent mi = getMemoryIntentForPrompt(maxPrompts, "prompt");
         // Make sure all variables are clean
@@ -747,8 +747,8 @@ public class TestChatLogic {
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException {
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<String, String>()));
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(new ChatState(DateTime.now(),
+                null, null, UUID.randomUUID(), new HashMap<String, String>(), 0.1d));
         ApiChat result = (ApiChat) getChat(0.1f);
         // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -780,8 +780,8 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(UUID.randomUUID(), cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>());
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
     }
@@ -798,8 +798,8 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>());
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr2, cr2Uuid);
     }
@@ -816,8 +816,8 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>());
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ChatResult cr1Aiml = new ChatResult("question");
         cr1Aiml.setScore(0.6);
@@ -844,8 +844,8 @@ public class TestChatLogic {
             put(cr1Uuid, cr1);
             put(cr2Uuid, cr2);
         }};
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>());
-        when(this.fakeChatStateHandler.getState(any(), any())).thenReturn(initialChatState);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
 
         // BOT2 has higher score in AIML
@@ -1006,7 +1006,19 @@ public class TestChatLogic {
     }
 
     private ApiResult getChat(float min_p, String question) {
-        return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString(), min_p);
+        // We need to check if the tests are already mocking the chat state or not, so that
+        // we set up a new fake state with the give confidence threshold (min_p)
+        ChatState existingMockedState = this.fakeChatStateHandler.getState(any(), any(), any());
+        if (existingMockedState.getTimestamp() == null) {
+            ChatState chatState = ChatState.getEmpty();
+            chatState.setConfidenceThreshold(min_p);
+            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(chatState);
+        } else {
+            existingMockedState.setConfidenceThreshold(min_p);
+            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(existingMockedState);
+        }
+
+        return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString());
     }
 
     private ApiResult getAssistantChat(float min_p) {
