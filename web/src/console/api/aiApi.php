@@ -154,9 +154,7 @@ class aiApi extends apiBase
                 array(
                     'q' => $q,
                     'chatId' => $chatId,
-                    'chat_history' => $history,
-                    'confidence_threshold' => $min_p,
-                    'current_topic' => $topic
+                    'confidence_threshold' => $min_p
                 )
             ));
             $this->curl->setVerbGet();

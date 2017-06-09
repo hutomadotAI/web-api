@@ -26,16 +26,16 @@ function start() {
 }
 
 function keyboardChat(e) {
-    if (e.keyCode == 13 && document.getElementById("message").value)
+    if (e.keyCode === 13 && document.getElementById("message").value)
         createNodeChat(human, AI);
 }
 
 function createNodeChat(human_name, ai_name) {
-    if (chatSemaphore == 0) {
+    if (chatSemaphore === 0) {
         chatSemaphore = (chatSemaphore + 1) % (2);
         var msg = $('#message').val();
         var chatId = $('#chatId').val();
-        if (msg.length != 0) {
+        if (msg.length !== 0) {
             disableChat();
             deactiveSpeechButton();
             lockSpeechOption();
@@ -45,6 +45,10 @@ function createNodeChat(human_name, ai_name) {
     }
 }
 
+function getPrintableLocalDateTime() {
+    return new Date().toString().split(' ').slice(0, 5).join(' ');
+}
+
 function createLeftMsg(human_name, msg) {
     var height = parseInt($('#chat').scrollTop());
     var interval = window.setInterval(animate, 10);
@@ -52,17 +56,17 @@ function createLeftMsg(human_name, msg) {
     var newLeftMsg = document.createElement('div');
     newLeftMsg.className = 'direct-chat-msg';
     newLeftMsg.id = 'left_message';
-    var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = '';
     wHTML += ('<div class="direct-chat-info clearfix">');
     wHTML += ('<span class="direct-chat-name pull-left" style="color:gray;">');
     wHTML += (human_name);
     wHTML += ('</span>');
-    wHTML += ('<span class="direct-chat-timestamp pull-right">' + date + '</span>');
+    wHTML += ('<span class="direct-chat-timestamp pull-right">' + getPrintableLocalDateTime() + '</span>');
     wHTML += ('</div>');
     wHTML += ('<img class="direct-chat-img" src="./dist/img/human.jpg" alt="User image">');
     wHTML += ('<div class="direct-chat-text">');
-    wHTML += cleanChat(msg);
+    // Print out the string cleared of any html and adding a break on each line break
+    wHTML += cleanChat(msg).trim().replace(/(?:\r\n|\r|\n)/g, '<br />');
     wHTML += ('</div>');
     newLeftMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newLeftMsg);
@@ -87,7 +91,7 @@ function cutText(phrase) {
 
 function createRightMsg(ai_name, msg, chatId, score, error) {
     // Update chatId if needed
-    if ($("#chatId").val() == '') {
+    if ($("#chatId").val() === '') {
         $("#chatId").val(chatId);
     }
 
@@ -98,13 +102,12 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
     newRightMsg.className = 'direct-chat-msg right';
     newRightMsg.id = 'right_message';
 
-    var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = "";
     wHTML += ('<div class="direct-chat-info clearfix">');
     wHTML += ('<span class="direct-chat-name pull-right" style="color:gray;">');
     wHTML += (ai_name);
     wHTML += ('</span>');
-    wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
+    wHTML += ('<span class="direct-chat-timestamp pull-left">' + getPrintableLocalDateTime() + '</span>');
     wHTML += ('</div>');
     wHTML += ('<img class="direct-chat-img" src="./dist/img/bot.jpg" alt="AI image">');
     if (error)
@@ -113,7 +116,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         wHTML += ('<div class="direct-chat-text chat-success">');
     wHTML += msg;
     wHTML += ('</div>');
-    if (error == false)
+    if (error === false)
         wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">confidence score: ' + score + '</span>');
     newRightMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newRightMsg);
@@ -135,7 +138,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
 }
 
 function requestAnswerAI(ai_name, question, chatId) {
-    if (question != '') {
+    if (question !== '') {
         jQuery.ajax({
             url: 'chat.php',
             contentType: "application/json; charset=utf-8",
@@ -161,7 +164,7 @@ function requestAnswerAI(ai_name, question, chatId) {
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                if (xhr.status == 200) {
+                if (xhr.status === 200) {
                     // We're most likely being redirected to the login page due to session having expired
                     window.location.href = "/";
                 } else {
@@ -257,7 +260,7 @@ function copyJsonToClipboard(elementId) {
     var node = document.getElementById('msgJSON');
     var content = (node.innerHTML);
 
-    if (content.length != 0 && content.trim()) {
+    if (content.length !== 0 && content.trim()) {
         var aux = document.createElement('input');
 
         document.getElementById('message').value = '';
