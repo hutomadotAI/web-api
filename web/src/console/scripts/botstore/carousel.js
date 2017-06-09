@@ -89,7 +89,8 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) 
                 wHTML += 'by ' + botAuthor;
                 wHTML += '</div>';
 
-                wHTML += '<a class="card-testBotLink" id="cardTestBotLink' + botId + '" href="./newAI.php" target="_top">';
+
+                wHTML += '<a class="card-testBotLink" id="cardTestBotLink' + botId + '" href="./newAI.php" target="_top" style="display:' + (( botOwned ) ? 'block;' : 'none;') + '">';
                 wHTML += 'Test Bot';
                 wHTML += '</a>';
 
