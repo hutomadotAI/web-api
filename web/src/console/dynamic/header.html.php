@@ -8,8 +8,9 @@
     <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button" tabindex="-1"></a>
 </nav>
 
-
 <script type="text/javascript">
     var category_list = <?php echo (CAROUSEL_CATEGORIES);?>;
     var category_list_icons = <?php echo (CAROUSEL_CATEGORIES_ICONS);?>;
 </script>
+
+<?php include_once "./hotjar.inc.php" ?>

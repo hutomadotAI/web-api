@@ -52,7 +52,7 @@ unset($session);
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./scripts/switch/switch.css">
+    <<?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
 <body class="hold-transition fixed">
 

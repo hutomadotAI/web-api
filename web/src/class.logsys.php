@@ -47,9 +47,6 @@ class console
             "email_callback" => 0
         ),
 
-        /** Intercom ID acquired */
-        "intercom_app_id" => "ts64euf8",
-
         /**
          * Keys used for encryption
          * DONT MAKE THIS PUBLIC

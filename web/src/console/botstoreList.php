@@ -16,6 +16,7 @@ session_start();
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
 <body class="hold-transition skin-blue fixed ">
 <?php include_once "../console/common/google_analytics.php"; ?>
