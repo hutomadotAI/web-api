@@ -428,12 +428,5 @@ function fieldsBotValidation() {
         return false;
     }
 
-    elem = document.getElementById('bot_privacyPolicy');
-    if (elem.value == '') {
-        elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The privacy Policy field cannot be empty!');
-        return false;
-    }
-
     return true;
 }
