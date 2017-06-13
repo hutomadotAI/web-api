@@ -27,7 +27,13 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         document.getElementById('botCategory').innerText = bot['category'];
         document.getElementById('botVersion').innerText = bot['version'];
         document.getElementById('botClassification').innerText = bot['classification'];
-        document.getElementById('botPrivacyPolicy').setAttribute('href', checkLink(bot['privacyPolicy']));
+
+        var privacyNode = document.getElementById('botPrivacyPolicy');
+        if (bot['privacyPolicy'] === null || bot['privacyPolicy'] === '') {
+            document.getElementById('botPrivacyPolicySection').style.display = 'none';
+        } else {
+            privacyNode.setAttribute('href', checkLink(bot['privacyPolicy']));
+        }
         var botIconPath = "";
         if (!bot.hasOwnProperty('botIcon') || bot['botIcon'] === "")
             botIconPath = BOT_ICON.DEFAULT_IMAGE.value;

@@ -52,7 +52,7 @@ unset($session);
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <<?php include_once "./dynamic/hotjar.inc.php" ?>
+    <?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
 <body class="hold-transition fixed">
 
@@ -233,16 +233,13 @@ unset($session);
                         <span id="botClassification"></span>
                     </div>
                 </div>
-                <div class="col-xs-4 unselectable">
+                <div class="col-xs-4 unselectable" id="botPrivacyPolicySection">
                     <div class="bot-more-details">Privacy</div>
                     <div class="text-left">
                         <a class="dev-link" id="botPrivacyPolicy" href="" rel="nofollow" target="_blank">View Privacy
                             Policy</a>
                     </div>
                 </div>
-            </div>
-
-            <div class="row no-margin">
                 <div class="col-xs-4" id="developerInfo">
                     <div class="bot-more-details unselectable">Developer</div>
                     <div class="text-left">
@@ -250,9 +247,8 @@ unset($session);
                             Website</a>
                     </div>
                 </div>
-                <div class="col-xs-4 unselectable">
-                </div>
             </div>
+
             <br>
             <a href="./botstore.php" id="btnBackToBotstore" class="btn btn-primary pull-left flat" target="_top">Go to
                 Botstore</a>
