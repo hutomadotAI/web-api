@@ -63,7 +63,6 @@ public class TestChatLogic {
     private static final String AIMLRESULT = "aimlresult";
     private static final String QUESTION = "question";
     private static final String MEMORY_VARIABLE_PROMPT = "prompt1";
-    private static final String HISTORY_REST_DIRECTIVE = "@reset";
     private static final String COMPLETELY_LOST_RESULT = "Erm... What?";
 
     private AIChatServices fakeChatServices;
@@ -284,10 +283,11 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_History_Semantic() throws RequestBase.AiControllerException {
-        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
+        String historyValue = "History is made now";
+        setupFakeChatWithHistory(0.7d, SEMANTICRESULT, historyValue, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getHistory());
+        Assert.assertEquals(historyValue, ((ApiChat) result).getResult().getHistory());
     }
 
     /***
@@ -310,61 +310,6 @@ public class TestChatLogic {
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
-    }
-
-    /***
-     * Reset command is processed and removed when text is at the beginning of the string
-     */
-    @Test
-    public void testChat_History_Semantic_Reset_Pre() throws RequestBase.AiControllerException {
-        historySemanticReset(SEMANTICRESULT + HISTORY_REST_DIRECTIVE);
-    }
-
-    /***
-     * Reset command is processed and removed when text is in the middle of the string
-     */
-    @Test
-    public void testChat_History_Semantic_Reset_Mid() throws RequestBase.AiControllerException {
-        historySemanticReset(SEMANTICRESULT.substring(0, 3) + HISTORY_REST_DIRECTIVE + SEMANTICRESULT.substring(3));
-    }
-
-    /***
-     * Reset command is processed and removed when text is at the end of the string
-     */
-    @Test
-    public void testChat_History_Semantic_Reset_Post() throws RequestBase.AiControllerException {
-        historySemanticReset(HISTORY_REST_DIRECTIVE + SEMANTICRESULT);
-    }
-
-    /***
-     * Semantic server sends reset command. History is cleared but if neuralnet wins the confidence contest then neuralnet response is returned unmodified.
-     */
-    @Test
-    public void testChat_History_Semantic_Reset_NeuralNet_Wins() throws
-            RequestBase.AiControllerException {
-        setupFakeChat(0.7d, HISTORY_REST_DIRECTIVE + SEMANTICRESULT,
-                0.0d, AIMLRESULT,
-                0.3d, NEURALRESULT);
-        ApiResult result = getChat(0.9f);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
-        Assert.assertEquals(NEURALRESULT, ((ApiChat) result).getResult().getAnswer());
-    }
-
-    /***
-     * Semantic server sends reset command. History is cleared but if neuralnet wins the confidence contest then neuralnet response is returned unmodified.
-     */
-    @Test
-    public void testChat_History_NeuralNet_Reset_Ignored() throws
-            RequestBase.AiControllerException {
-        String neuralResetCommand = NEURALRESULT + HISTORY_REST_DIRECTIVE;
-        setupFakeChat(0.7d, HISTORY_REST_DIRECTIVE + SEMANTICRESULT,
-                0.0d, AIMLRESULT,
-                0.3d, neuralResetCommand);
-        ApiResult result = getChat(0.9f);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
-        Assert.assertEquals(neuralResetCommand, ((ApiChat) result).getResult().getAnswer());
     }
 
     /***
@@ -1044,10 +989,30 @@ public class TestChatLogic {
                                double aimlConfidence, String aimlResponse,
                                double rnnConfidence, String rnnResponse) throws
             RequestBase.AiControllerException {
+        setupFakeChatWithHistory(wnetConfidence, wnetResponse, "", aimlConfidence, aimlResponse,
+                rnnConfidence, rnnResponse);
+    }
+
+    /***
+     * Sets up fake responses from the AiChatServices layer
+     * @param wnetConfidence
+     * @param wnetResponse
+     * @param wnetHistory
+     * @param aimlConfidence
+     * @param aimlResponse
+     * @param rnnConfidence
+     * @param rnnResponse
+     * @throws ServerConnector.AiServicesException
+     */
+    private void setupFakeChatWithHistory(double wnetConfidence, String wnetResponse, String wnetHistory,
+                               double aimlConfidence, String aimlResponse,
+                               double rnnConfidence, String rnnResponse) throws
+            RequestBase.AiControllerException {
 
         ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(wnetConfidence);
         wnetResult.setAnswer(wnetResponse);
+        wnetResult.setHistory(wnetHistory);
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));

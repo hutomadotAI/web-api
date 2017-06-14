@@ -11,7 +11,7 @@ import java.util.UUID;
 public class ChatResult {
 
     @SerializedName("topicIn")
-    private final String topicIn = "";
+    private String topicIn = "";
     private double score;
     @SerializedName("query")
     private String query;
@@ -40,11 +40,16 @@ public class ChatResult {
      * @param source
      */
     public ChatResult(final ChatResult source) {
-        this.query = source.query;
+        this.topicIn = source.topicIn;
         this.score = source.score;
+        this.query = source.query;
         this.answer = source.answer;
+        this.history = source.history;
         this.elapsedTime = source.elapsedTime;
+        this.action = source.action;
+        this.context = source.context;
         this.topicOut = source.topicOut;
+        this.chatId = source.chatId;
         this.aiid = source.aiid;
     }
 
