@@ -295,7 +295,7 @@ public class AIQueueServices extends ServerConnector {
                           UUID devid, UUID aiid)
             throws Database.DatabaseException, ServerConnector.AiServicesException {
         // if we are training then stop immediately
-        stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, false);
+        stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, true);
         // queue the action to delete, only run this some time in the future after the ai is fully stopped
         this.databaseAiStatusUpdates.queueUpdate(serverType, aiid,
                 true, 10, QueueAction.DELETE);

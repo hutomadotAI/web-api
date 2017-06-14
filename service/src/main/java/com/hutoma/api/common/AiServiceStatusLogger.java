@@ -42,7 +42,7 @@ public class AiServiceStatusLogger extends CentralLogger {
         return (uuid == null) ? "null" : uuid.toString().substring(0, 7);
     }
 
-    public void logStatusUpdate(final String logFrom, final AiStatus status) {
+    public void logStatusUpdate(final String logFrom, final AiStatus status, final boolean actioned) {
         LogParameters logParameters = new LogParameters("UpdateAIStatus") {{
             this.put(AIENGINE, status.getAiEngine());
             this.put(AIID, status.getAiid());
@@ -53,7 +53,8 @@ public class AiServiceStatusLogger extends CentralLogger {
             this.put(SERVER, status.getServerIdentifier());
             this.put("AIHash", status.getAiHash());
         }};
-        String narrative = String.format("%s status update %s %d%% on ai %s from %s",
+        String narrative = String.format("%s%s status update %s %d%% on ai %s from %s",
+                (actioned ? "" : "IGNORED "),
                 logParameters.get(AIENGINE),
                 logParameters.get(STATUS),
                 (int) (status.getTrainingProgress() * 100.0),

@@ -100,20 +100,26 @@ public class AIServicesLogic {
             }
             status.setServerIdentifier(serverIdentifier);
 
-            // does the new status make sense?
-            if (!checkIfStatusTransitionIsValid(status)) {
-                return ApiError.getNotFound();
+            try {
+                // does the new status make sense?
+                if (!checkIfStatusTransitionIsValid(status)) {
+                    return ApiError.getNotFound();
+                }
+
+                // we accept the update. log it.
+                this.serviceStatusLogger.logStatusUpdate(LOGFROM, status, true);
+
+                // commit the update
+                this.database.updateAIStatus(status);
+
+                // update the ai hashcode
+                controller.setHashCodeFor(status.getAiid(), status.getAiHash());
+
+            } catch (StatusTransitionIgnoredException ignore) {
+                this.serviceStatusLogger.logStatusUpdate(LOGFROM, status, false);
             }
-
-            // we accept the update. log it.
-            this.serviceStatusLogger.logStatusUpdate(LOGFROM, status);
-
-            // commit the update
-            this.database.updateAIStatus(status);
             controller.kickQueueProcessor();
 
-            // update the ai hashcode
-            controller.setHashCodeFor(status.getAiid(), status.getAiHash());
             return new ApiResult().setSuccessStatus();
 
         } catch (StatusTransitionRejectedException rejected) {
@@ -188,7 +194,7 @@ public class AIServicesLogic {
      * @throws StatusTransitionRejectedException
      */
     private boolean checkIfStatusTransitionIsValid(final AiStatus statusUpdate)
-            throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException {
+            throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException, StatusTransitionIgnoredException {
 
         // load the status
         BackendEngineStatus botStatus = this.database.getAiQueueStatus(statusUpdate.getAiEngine(),
@@ -249,9 +255,7 @@ public class AIServicesLogic {
                                 TrainingStatus.AI_READY_TO_TRAIN,
                                 TrainingStatus.AI_TRAINING_QUEUED,
                                 TrainingStatus.AI_TRAINING_STOPPED});
-                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
-                        false, 0, QueueAction.NONE);
-                break;
+                throw new StatusTransitionIgnoredException();
             case AI_TRAINING_COMPLETE:
                 // we only accept COMPLETE if the ai was either recently queued or training
                 // any other state means that we never told the backend to train in the first place
@@ -354,6 +358,9 @@ public class AIServicesLogic {
         public OriginatingServerRejectedException(final String message) {
             super(message);
         }
+    }
+
+    public static class StatusTransitionIgnoredException extends Exception {
     }
 
 }

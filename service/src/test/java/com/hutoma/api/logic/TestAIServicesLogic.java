@@ -215,5 +215,15 @@ public class TestAIServicesLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_CONFLICT, result.getStatus().getCode());
     }
 
+    @Test
+    public void testUpdateAiStatus_ignore_status_trainingstopped() throws Database.DatabaseException {
+        AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
+                TrainingStatus.AI_TRAINING_STOPPED, AI_ENGINE,
+                0.0, 0.0, "hash",
+                TestDataHelper.SESSIONID);
+        ApiResult result = this.aiServicesLogic.updateAIStatus(status);
+        verify(this.fakeDatabase, never()).updateAIStatus(any());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
 
 }

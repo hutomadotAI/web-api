@@ -99,7 +99,8 @@ public class AIServices extends ServerConnector {
             this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.controllerWnet,
                     devId, aiid);
             this.controllerWnet.kickQueueProcessor();
-            this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
+            this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.controllerRnn,
+                    devId, aiid);
             this.controllerRnn.kickQueueProcessor();
         } catch (Database.DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
