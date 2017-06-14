@@ -41,7 +41,6 @@ import javax.inject.Inject;
 public class ChatLogic {
 
     private static final String LOGFROM = "chatlogic";
-    private static final String HISTORY_REST_DIRECTIVE = "@reset";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Tools tools;
@@ -116,8 +115,7 @@ public class ChatLogic {
 
                 // async start requests to all servers
                 this.chatServices.startChatRequests(devId, aiid, chatUuid, question,
-                        this.chatState.getHistory(),
-                        this.chatState.getTopic());
+                        this.chatState);
 
                 // wait for WNET to return
                 result = this.interpretSemanticResult(question, this.chatState.getConfidenceThreshold());
@@ -216,10 +214,6 @@ public class ChatLogic {
                 }
             }
 
-            // set the history to the answer, unless we have received a reset command,
-            // in which case send an empty string
-            result.setHistory(result.isResetConversation() ? "" : result.getAnswer());
-
             // prepare to send back a result
             result.setScore(toOneDecimalPlace(result.getScore()));
 
@@ -255,7 +249,7 @@ public class ChatLogic {
         }
 
         this.chatState.setTopic(apiChat.getResult().getTopicOut());
-        this.chatState.setHistory(apiChat.getResult().getAnswer());
+        this.chatState.setHistory(apiChat.getResult().getHistory());
         this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
 
         this.telemetryMap.add("RequestDuration", result.getElapsedTime());
@@ -467,15 +461,6 @@ public class ChatLogic {
         this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
         if (chatResult.getAnswer() != null) {
-            // if we receive a reset command then remove the command and flag the status
-            if (chatResult.getAnswer().contains(HISTORY_REST_DIRECTIVE)) {
-                chatResult.setResetConversation(true);
-                chatResult.setAnswer(chatResult.getAnswer()
-                        .replace(HISTORY_REST_DIRECTIVE, ""));
-            } else {
-                chatResult.setResetConversation(false);
-            }
-
             // remove trailing newline
             chatResult.setAnswer(chatResult.getAnswer().trim());
         } else {

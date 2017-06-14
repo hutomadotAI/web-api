@@ -8,6 +8,7 @@ import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiDevId;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -57,14 +58,20 @@ public abstract class RequestBase {
     }
 
     public List<RequestInProgress> issueChatRequests(final Map<String, String> chatParams,
-                                                     final List<AiDevId> ais)
+                                                     final List<AiDevId> ais, ChatState chatState)
             throws ServerMetadata.NoServerAvailable {
         List<RequestCallable> callables = new ArrayList<>();
 
         for (AiDevId ai : ais) {
+            Map<String, String> chatParamsThisAi = chatParams;
+            if (ai.ai.equals(chatState.getLockedAiid())) {
+                chatParamsThisAi = new HashMap<>(chatParams);
+                chatParamsThisAi.put("history", chatState.getHistory());
+                chatParamsThisAi.put("topic", chatState.getTopic());
+            }
             IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.ai, RequestFor.Chat);
             callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.dev, ai.ai, chatParams,
+                    createCallable(endpoint.getServerUrl(), ai.dev, ai.ai, chatParamsThisAi,
                             this.controller.getHashCodeFor(ai.ai)),
                     endpoint.getServerIdentifier()));
         }

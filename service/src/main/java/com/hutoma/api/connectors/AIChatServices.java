@@ -6,11 +6,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
@@ -63,12 +59,11 @@ public class AIChatServices extends ServerConnector {
      * @param aiid
      * @param chatId
      * @param question
-     * @param history
-     * @param topicIn
+     * @param chatState
      * @throws AiServicesException
      */
     public void startChatRequests(final UUID devId, final UUID aiid, final UUID chatId, final String question,
-                                  final String history, final String topicIn)
+                                  final ChatState chatState)
             throws AiServicesException, RequestBase.AiControllerException, ServerMetadata.NoServerAvailable {
 
         // calculate the exact deadline for this group of requests
@@ -77,8 +72,6 @@ public class AIChatServices extends ServerConnector {
         // generate the parameters to send
         HashMap<String, String> parameters = new HashMap<String, String>() {{
             put("chatId", chatId.toString());
-            put("history", history);
-            put("topic", topicIn);
             put("q", question);
         }};
         List<AiDevId> ais = this.getLinkedBotsAiids(devId, aiid);
@@ -93,7 +86,7 @@ public class AIChatServices extends ServerConnector {
             if (!usedAimlAis.isEmpty()) {
                 List<AiDevId> listAis = new ArrayList<>();
                 usedAimlAis.forEach(x -> listAis.add(new AiDevId(/* ignored at the moment */devId, x)));
-                this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis);
+                this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis, chatState);
                 usedAimlBot = true;
                 // remove the aiml bots ais from the list of ais
                 List<AiDevId> newList = new ArrayList<>();
@@ -127,10 +120,10 @@ public class AIChatServices extends ServerConnector {
         }
 
         if (!wnetAIs.isEmpty()) {
-            this.wnetFutures = this.requestWnet.issueChatRequests(parameters, wnetAIs);
+            this.wnetFutures = this.requestWnet.issueChatRequests(parameters, wnetAIs, chatState);
         }
         if (!rnnAIs.isEmpty()) {
-            this.rnnFutures = this.requestRnn.issueChatRequests(parameters, rnnAIs);
+            this.rnnFutures = this.requestRnn.issueChatRequests(parameters, rnnAIs, chatState);
         }
     }
 
