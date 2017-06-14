@@ -853,7 +853,7 @@ public class Database {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 7)
+            call.initialise("setChatState", 8)
                     .add(devId)
                     .add(chatId)
                     .add(chatState.getTimestamp())
