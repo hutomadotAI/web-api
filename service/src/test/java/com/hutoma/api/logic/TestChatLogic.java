@@ -657,7 +657,7 @@ public class TestChatLogic {
     public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
-                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -666,7 +666,7 @@ public class TestChatLogic {
     public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
-                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -675,7 +675,7 @@ public class TestChatLogic {
     public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(Exception.class)
-                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }

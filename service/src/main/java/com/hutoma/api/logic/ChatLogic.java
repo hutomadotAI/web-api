@@ -115,8 +115,7 @@ public class ChatLogic {
 
                 // async start requests to all servers
                 this.chatServices.startChatRequests(devId, aiid, chatUuid, question,
-                        this.chatState.getHistory(),
-                        this.chatState.getTopic());
+                        this.chatState);
 
                 // wait for WNET to return
                 result = this.interpretSemanticResult(question, this.chatState.getConfidenceThreshold());

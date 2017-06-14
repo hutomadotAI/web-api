@@ -9,6 +9,8 @@ import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.ChatState;
+
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
@@ -68,9 +70,9 @@ public class TestAiChatServices {
         when(this.fakeDatabase.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
-        verify(this.fakeRequestWnet).issueChatRequests(any(), any());
-        verify(this.fakeRequestRnn).issueChatRequests(any(), any());
-        verify(this.fakeRequestAiml, never()).issueChatRequests(any(), any());
+        verify(this.fakeRequestWnet).issueChatRequests(any(), any(), any());
+        verify(this.fakeRequestRnn).issueChatRequests(any(), any(), any());
+        verify(this.fakeRequestAiml, never()).issueChatRequests(any(), any(), any());
     }
 
     @Test(expected = AIChatServices.AiNotReadyToChat.class)
@@ -90,9 +92,9 @@ public class TestAiChatServices {
         when(this.fakeDatabase.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();
-        verify(this.fakeRequestWnet, never()).issueChatRequests(any(), any());
-        verify(this.fakeRequestRnn, never()).issueChatRequests(any(), any());
-        verify(this.fakeRequestAiml).issueChatRequests(any(), any());
+        verify(this.fakeRequestWnet, never()).issueChatRequests(any(), any(), any());
+        verify(this.fakeRequestRnn, never()).issueChatRequests(any(), any(), any());
+        verify(this.fakeRequestAiml).issueChatRequests(any(), any(), any());
     }
 
     @Test
@@ -103,9 +105,9 @@ public class TestAiChatServices {
         when(this.fakeDatabase.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
-        verify(this.fakeRequestWnet).issueChatRequests(any(), any());
-        verify(this.fakeRequestRnn).issueChatRequests(any(), any());
-        verify(this.fakeRequestAiml).issueChatRequests(any(), any());
+        verify(this.fakeRequestWnet).issueChatRequests(any(), any(), any());
+        verify(this.fakeRequestRnn).issueChatRequests(any(), any(), any());
+        verify(this.fakeRequestAiml).issueChatRequests(any(), any(), any());
     }
 
     @Test
@@ -140,6 +142,9 @@ public class TestAiChatServices {
     }
 
     private void issueStartChatRequests() throws ServerConnector.AiServicesException, RequestBase.AiControllerException, ServerMetadata.NoServerAvailable {
-        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", "history", "topic");
+        ChatState chatState = ChatState.getEmpty();
+        chatState.setHistory("history");
+        chatState.setTopic("topic");
+        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", chatState);
     }
 }
