@@ -102,7 +102,7 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else {
-        setSliderValue('ai_confidence', 0.2); // default value "sometimes"
+        setSliderValue('ai_confidence', 0.4); // default value "sometimes"
     }
     if(err) {
         document.getElementById('containerMsgAlertNewAI').style.display = 'block';
