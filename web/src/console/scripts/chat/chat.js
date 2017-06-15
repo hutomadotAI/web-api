@@ -117,7 +117,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
     wHTML += msg;
     wHTML += ('</div>');
     if (error === false)
-        wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">confidence score: ' + score + '</span>');
+        wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">score: ' + score + '</span>');
     newRightMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newRightMsg);
 

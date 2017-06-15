@@ -147,15 +147,13 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
-    public function chatAI($aiid, $chatId, $q, $history, $fs, $min_p, $topic)
+    public function chatAI($aiid, $chatId, $q)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/chat',
                 array(
                     'q' => $q,
-                    'chatId' => $chatId,
-                    'confidence_threshold' => $min_p
-                )
+                    'chatId' => $chatId)
             ));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();

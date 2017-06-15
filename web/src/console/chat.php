@@ -12,30 +12,11 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']))
     exit;
 }
 
-$hist = "";
-if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['history'])) {
-    $hist = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['history'];
-}
-
-$confidence = "0.0";
-if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'])) {
-    $confidence = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'];
-}
-
-$topic = "";
-if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'])) {
-    $topic = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['topic'];
-}
-
 $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $response = $aiApi->chatAI(
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], // aiid
     $_GET['chatId'], // chatId
-    $_GET['q'], // question
-    $hist, // history
-    false, // fs
-    $confidence, // min_p
-    $topic);
+    $_GET['q']);
 unset($aiApi);
 
 if ($response['status']['code'] !== 200) {
