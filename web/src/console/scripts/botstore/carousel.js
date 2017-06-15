@@ -7,6 +7,8 @@ window.addEventListener('resize', function () {
         for (var i = 0; i < nCarousel; i++)
             showSeeMoreButton(node.children[i]);
     }
+    notifyParentOfPaintEnd(document.getElementsByClassName('carousel-content').length === 0);
+
 });
 
 function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more) {
@@ -238,11 +240,7 @@ function getCarousels(category, optionFlow) {
                 }
             }
             hideOverlay(true);
-            // Notify any parent that we've finished painting
-            if (window.parent !== null) {
-                var event = new CustomEvent('BotstoreFinishPaintEvent',{detail: {height: document.body.scrollHeight}});
-                window.parent.document.dispatchEvent(event);
-            }
+            notifyParentOfPaintEnd(category === "");
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
@@ -250,6 +248,27 @@ function getCarousels(category, optionFlow) {
         error: function (xhr, ajaxOptions, thrownError) {
         }
     });
+}
+
+function notifyParentOfPaintEnd(hasMultipleCategories) {
+    // Notify any parent that we've finished painting
+    var carousels = document.getElementsByClassName('carousel-content');
+    if (carousels !== null) {
+        var lastCarousel = carousels[carousels.length - 1];
+        var height;
+        if (hasMultipleCategories) {
+            height = lastCarousel.getBoundingClientRect().bottom;
+        } else {
+            var cards = lastCarousel.getElementsByClassName('box-card');
+            var lastCard = cards[cards.length -1];
+            height = lastCard.getBoundingClientRect().bottom;
+        }
+
+        if (window.parent !== null) {
+            var event = new CustomEvent('BotstoreFinishPaintEvent', {detail: {height: height}});
+            window.parent.document.dispatchEvent(event);
+        }
+    }
 }
 
 function hideOverlay(state) {

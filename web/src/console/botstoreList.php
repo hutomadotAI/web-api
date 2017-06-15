@@ -18,7 +18,7 @@ session_start();
     <link rel="stylesheet" href="./scripts/star/star.css">
     <?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
-<body class="hold-transition skin-blue fixed ">
+<body class="hold-transition skin-blue fixed " onload="top.scrollTo(0,0)">
 <?php include_once "../console/common/google_analytics.php"; ?>
 
     <!-- ================ PAGE CONTENT ================= -->

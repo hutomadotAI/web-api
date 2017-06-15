@@ -54,7 +54,7 @@ unset($session);
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
-<body class="hold-transition fixed">
+<body class="hold-transition fixed" onload="top.scrollTo(0,0)">
 
 <!-- ================ ALERT MESSAGE BOX ================= -->
 <div class="row center-block bot-card-alert" id="containerMsgAlertBotcardDetail" style="display:none;">

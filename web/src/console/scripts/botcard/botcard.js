@@ -64,8 +64,9 @@ function populateBotFields(botstoreItem, menu_title, carousel_category, current_
         addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
 
         // Notify any parent that we've finished painting
+        var cardHeight = document.getElementById('botcardDetailContent').offsetHeight;
         if (window.parent !== null) {
-            var event = new CustomEvent('BotstoreFinishPaintEvent', {detail: {height: document.body.scrollHeight}})
+            var event = new CustomEvent('BotstoreFinishPaintEvent', {detail: {height: cardHeight}});
             window.parent.document.dispatchEvent(event);
         }
 
