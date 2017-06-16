@@ -67,9 +67,12 @@ function activeButtonCreate() {
 }
 
 function setConfidenceValueBeforePosting(){
+    // copy from the slider to the hidden input variable
     var element = document.getElementById('ai_confidence');
-    var confidence_text = element.value;
-    element.value = getValueFromConfidence(confidence_text);
+    var confidence_value = getValueFromConfidence(element.value);
+    var param_element = document.getElementById('ai_confidence_param');
+    param_element.value = confidence_value;
+
 }
 
 function checkDescriptionLength() {

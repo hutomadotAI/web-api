@@ -8,7 +8,8 @@ if(!\hutoma\console::checkSessionIsActive()) {
 }
 
 if (!isPostInputAvailable()) {
-    echo json_encode(prepareResponse(500, 'Missing post data.'), true);
+    error_log("missing post data after stage 1 create AI");
+    \hutoma\console::redirect('../error.php?err=301');
     exit;
 }
 
