@@ -27,14 +27,15 @@ public class FacebookIntegrationLogic {
 
     public Response verify(final String mode, final String challenge, final String verifyToken) {
         if (verifyToken.equals(this.config.getFacebookVerifyToken())) {
-            this.logger.logInfo(LOGFROM, String.format("webhook verification mode=%s passed", mode));
+            this.logger.logInfo(LOGFROM, String.format("webhook subscription verification passed"));
             return Response.ok(challenge, MediaType.TEXT_HTML_TYPE).build();
         }
-        this.logger.logError(LOGFROM, String.format("webhook verification failed. expected verify token %s received %s",
+        this.logger.logError(LOGFROM, String.format(
+                "webhook subscription verification failed. expected verify token \"%s\" received \"%s\"",
                 this.config.getFacebookVerifyToken(), verifyToken));
         return Response.status(HttpURLConnection.HTTP_BAD_REQUEST).build();
     }
-    
+
     public Response chatRequest(final FacebookNotification facebookNotification) {
         this.logger.logInfo(LOGFROM, String.format("incoming facebook message \n%s",
                 this.serializer.serialize(facebookNotification)));
