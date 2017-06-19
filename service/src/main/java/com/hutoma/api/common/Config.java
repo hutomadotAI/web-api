@@ -282,6 +282,14 @@ public class Config {
         }
     }
 
+    /***
+     * The String that we expect Facebook to pass to us when we are verifying that a webhook endpoint is valid
+     * @return
+     */
+    public String getFacebookVerifyToken() {
+        return "oYfoYghfwj1p0i7f";
+    }
+
     private List<String> getCSList(final String propertyName) {
         String instances = getConfigFromProperties(propertyName, null);
         if (instances == null) {
