@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
@@ -72,6 +73,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case AiStatusJson:
                 case ServerRegistration:
                 case ServerAffinity:
+                case FacebookNotification:
                     expectingJson = true;
                     break;
                 case AIName:
@@ -275,6 +277,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
                 checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
                 request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
+            }
+
+            if (checkList.contains(APIParameter.FacebookNotification)) {
+                FacebookNotification facebookNotification = (FacebookNotification)
+                        this.serializer.deserialize(request.getEntityStream(), FacebookNotification.class);
+                request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);
             }
 
         } catch (JsonParseException jpe) {

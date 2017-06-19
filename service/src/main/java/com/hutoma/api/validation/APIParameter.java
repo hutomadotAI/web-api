@@ -22,5 +22,6 @@ public enum APIParameter {
     // Backend
     AiStatusJson,
     ServerRegistration,
-    ServerAffinity
+    ServerAffinity,
+    FacebookNotification
 }
