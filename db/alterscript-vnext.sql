@@ -5,25 +5,17 @@ required for the next deployment.
 
 USE `hutoma`;
 
-ALTER TABLE `chatState` ADD COLUMN `history` VARCHAR(1024) DEFAULT NULL AFTER `topic`;
-ALTER TABLE `chatState` ADD COLUMN `confidence_threshold` DOUBLE DEFAULT NULL AFTER `entity_values`;
+ALTER TABLE `botStore` ADD COLUMN featured tinyint(1) NOT NULL DEFAULT 0 AFTER `botIcon`;
 
 
-DROP PROCEDURE IF EXISTS `setChatState`;
+DROP PROCEDURE IF EXISTS `getAisLinkedToAi`;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAisLinkedToAi`(
   IN `param_devId` VARCHAR(50),
-  IN `param_chatId` VARCHAR(50),
-  IN `param_timestamp` TIMESTAMP,
-  IN `param_topic` VARCHAR(250),
-  IN `param_history` VARCHAR(1024),
-  IN `param_locked_aiid` VARCHAR(50),
-  IN `param_entity_values` TEXT,
-  IN `param_confidence_threshold` DOUBLE)
+  IN `param_aiid` VARCHAR(50))
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, history, locked_aiid, entity_values, confidence_threshold)
-    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold)
-    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, history = param_history,
-      locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold;
-  END ;;
+	SELECT bai.aiid as 'ai', bs.aiid as 'linked_ai', bai.dev_id as 'linked_ai_devId', ai.ui_ai_confidence as 'minP'
+	FROM bot_ai bai INNER JOIN botStore bs ON bs.id = bai.botId INNER JOIN ai ai ON ai.aiid = bs.aiid
+	WHERE bai.aiid=param_aiid AND bai.dev_id=param_devId;
+END ;;
 DELIMITER ;
