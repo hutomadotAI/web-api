@@ -183,6 +183,7 @@ CREATE TABLE `botStore` (
   `video_link` varchar(1800) DEFAULT NULL,
   `publishing_state` tinyint(1) NOT NULL,
   `botIcon` varchar(255) DEFAULT NULL,
+  `featured` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `dev_id` (`dev_id`),
   KEY `aiid` (`aiid`),
