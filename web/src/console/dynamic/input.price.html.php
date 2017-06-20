@@ -4,7 +4,7 @@
         <div class="input-group-addon">
             <i class="fa fa-euro"></i>
         </div>
-        <input type="text" class="form-control flat no-shadow unselectable"  id="bot_price" name="bot_price" placeholder="Enter the price" style=" text-align: right;" readonly="readonly">
+        <input type="text" class="form-control flat no-shadow unselectable"  id="bot_price" name="bot_price" placeholder="Enter the price" style=" text-align: right;">
     </div>
 </div>
 
