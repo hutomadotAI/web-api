@@ -8,9 +8,8 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.containers.sub.ChatState;
-
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
@@ -66,7 +65,7 @@ public class TestAiChatServices {
     @Test
     public void startChatRequests_noLinkedBots_aiIsTrained() throws ServerConnector.AiServicesException,
             RequestBase.AiControllerException, Database.DatabaseException, ServerMetadata.NoServerAvailable {
-        when(this.chatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.emptyList());
+        when(this.chatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
@@ -78,7 +77,7 @@ public class TestAiChatServices {
     @Test(expected = AIChatServices.AiNotReadyToChat.class)
     public void startChatRequests_noLinkedBots_aiIsNotTrained() throws ServerConnector.AiServicesException,
             RequestBase.AiControllerException, Database.DatabaseException, ServerMetadata.NoServerAvailable {
-        when(this.chatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.emptyList());
+        when(this.chatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();

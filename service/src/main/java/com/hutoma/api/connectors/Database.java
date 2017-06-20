@@ -605,6 +605,28 @@ public class Database {
         }
     }
 
+    public List<AiMinP> getAisLinkedToAi(final UUID devId, final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getAisLinkedToAi", 2)
+                    .add(devId)
+                    .add(aiid);
+            try {
+                final ResultSet rs = call.executeQuery();
+                List<AiMinP> ais = new ArrayList<>();
+                while (rs.next()) {
+                    ais.add(new AiMinP(
+                            UUID.fromString(rs.getString("linked_ai_devId")),
+                            UUID.fromString(rs.getString("linked_ai")),
+                            rs.getDouble("minP")
+                    ));
+                }
+                return ais;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
     public List<AiBot> getPublishedBots() throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPublishedBots", 0);

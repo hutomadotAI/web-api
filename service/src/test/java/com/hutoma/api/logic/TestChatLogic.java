@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
@@ -7,13 +8,13 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AiDevId;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -706,10 +706,9 @@ public class TestChatLogic {
         ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.4);
         UUID cr1Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
-            put(cr1Uuid, cr1);
-            put(UUID.randomUUID(), cr2);
-        }};
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
     }
@@ -721,11 +720,10 @@ public class TestChatLogic {
         ChatResult cr2 = new ChatResult("Hi2");
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = new HashMap<UUID, ChatResult>() {{
-            put(cr1Uuid, cr1);
-            put(UUID.randomUUID(), cr2);
-        }};
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
@@ -739,12 +737,10 @@ public class TestChatLogic {
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
-            put(cr1Uuid, cr1);
-            put(cr2Uuid, cr2);
-        }};
+        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
+        when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         validateStateSaved(cr2, cr2Uuid);
     }
@@ -757,11 +753,9 @@ public class TestChatLogic {
         cr2.setScore(0.3);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
-            put(cr1Uuid, cr1);
-            put(cr2Uuid, cr2);
-        }};
+        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ChatResult cr1Aiml = new ChatResult("question");
@@ -785,11 +779,9 @@ public class TestChatLogic {
         cr2.setScore(0.2);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = new LinkedHashMap<UUID, ChatResult>() {{
-            put(cr1Uuid, cr1);
-            put(cr2Uuid, cr2);
-        }};
+        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
 
@@ -798,10 +790,7 @@ public class TestChatLogic {
         cr1Aiml.setScore(0.6);
         ChatResult cr2Aiml = new ChatResult("question");
         cr2Aiml.setScore(0.7);
-        when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
-            put(cr1Uuid, cr1Aiml);
-            put(cr2Uuid, cr2Aiml);
-        }});
+        when(this.fakeChatServices.awaitAiml()).thenReturn(ImmutableMap.of(cr1Uuid, cr1Aiml, cr2Uuid, cr2Aiml));
         // We now expect to get the AIML one with the highest score
         validateStateSaved(cr2Aiml, cr2Uuid);
     }
@@ -927,6 +916,24 @@ public class TestChatLogic {
         Assert.assertTrue(mi.isFulfilled());
     }
 
+    @Test
+    public void testChat_linkedBots_allUnderMinP_noAnswer() throws RequestBase.AiControllerException {
+        final double minP1 = 0.7;
+        final double minP2 = 0.8;
+        ChatResult cr1 = new ChatResult("Hi");
+        cr1.setScore(minP1 - 0.1);
+        ChatResult cr2 = new ChatResult("Hi2");
+        cr2.setScore(minP2 - 0.1);
+        UUID cr1Uuid = UUID.randomUUID();
+        UUID cr2Uuid = UUID.randomUUID();
+        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, minP1, cr2Uuid, minP2));
+        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        ApiChat result = (ApiChat) getChat(0.0);
+        Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
+        Assert.assertEquals("", result.getResult().getAnswer());
+    }
+
     private void validateStateSaved(final ChatResult returnedResult, final UUID usedAiid) {
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertEquals(returnedResult.getScore(), result.getResult().getScore(), 0.0001);
@@ -946,21 +953,19 @@ public class TestChatLogic {
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
     }
 
-    private ApiResult getChat(float min_p) {
-        return this.getChat(min_p, QUESTION);
+    private ApiResult getChat(double minP) {
+        return this.getChat(minP, QUESTION);
     }
 
-    private ApiResult getChat(float min_p, String question) {
-        // We need to check if the tests are already mocking the chat state or not, so that
-        // we set up a new fake state with the give confidence threshold (min_p)
-        ChatState existingMockedState = this.fakeChatStateHandler.getState(any(), any(), any());
-        if (existingMockedState.getTimestamp() == null) {
-            ChatState chatState = ChatState.getEmpty();
-            chatState.setConfidenceThreshold(min_p);
-            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(chatState);
+    private ApiResult getChat(double minP, String question) {
+        // We need to check if the tests are already mocking the chat services' individual
+        // confidence threshold (min_p)
+        if (this.fakeChatServices.getMinPMap() != null) {
+            Map<UUID, Double> map = new HashMap<>(this.fakeChatServices.getMinPMap());
+            map.put(AIID, minP);
+            when(this.fakeChatServices.getMinPMap()).thenReturn(map);
         } else {
-            existingMockedState.setConfidenceThreshold(min_p);
-            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(existingMockedState);
+            when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(AIID, minP));
         }
 
         return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString());
@@ -1005,8 +1010,8 @@ public class TestChatLogic {
      * @throws ServerConnector.AiServicesException
      */
     private void setupFakeChatWithHistory(double wnetConfidence, String wnetResponse, String wnetHistory,
-                               double aimlConfidence, String aimlResponse,
-                               double rnnConfidence, String rnnResponse) throws
+                                          double aimlConfidence, String aimlResponse,
+                                          double rnnConfidence, String rnnResponse) throws
             RequestBase.AiControllerException {
 
         ChatResult wnetResult = new ChatResult("Hi");
@@ -1016,8 +1021,8 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
-        when(this.fakeChatServices.getLinkedBotsAiids(any(), any())).thenReturn(Collections.singletonList(
-                new AiDevId(DEVID_UUID, AIML_BOT_AIID)));
+        when(this.fakeChatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(
+                new AiMinP(DEVID_UUID, AIML_BOT_AIID, 1.0)));
         ChatResult aimlResult = new ChatResult("Hi2");
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);

@@ -1,5 +1,6 @@
 package com.hutoma.api.tests.service;
 
+import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -21,7 +22,6 @@ import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.UUID;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -55,12 +55,12 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat() throws RequestBase.AiControllerException {
         final String answer = "the answer";
+        final double score = 0.9;
         ChatResult semanticAnalysisResult = new ChatResult("Hi");
         semanticAnalysisResult.setAnswer(answer);
-        semanticAnalysisResult.setScore(0.9);
-        when(this.fakeAiChatServices.awaitWnet()).thenReturn(new HashMap<UUID, ChatResult>() {{
-            this.put(AIID, semanticAnalysisResult);
-        }});
+        semanticAnalysisResult.setScore(score);
+        when(this.fakeAiChatServices.getMinPMap()).thenReturn(ImmutableMap.of(AIID, score - 0.1));
+        when(this.fakeAiChatServices.awaitWnet()).thenReturn(ImmutableMap.of(AIID, semanticAnalysisResult));
 
         final Response response = buildChatDefaultParams(target(CHAT_PATH)).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());

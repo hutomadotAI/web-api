@@ -3,10 +3,14 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiMinP;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.RequestAiml;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.RequestRnn;
@@ -38,6 +42,7 @@ public class AIChatServices extends ServerConnector {
     private List<RequestBase.RequestInProgress> wnetFutures;
     private List<RequestBase.RequestInProgress> rnnFutures;
     private List<RequestBase.RequestInProgress> aimlFutures;
+    private Map<UUID, Double> minPMap = new HashMap<>();
 
     private long requestDeadline;
 
@@ -74,37 +79,42 @@ public class AIChatServices extends ServerConnector {
             put("chatId", chatId.toString());
             put("q", question);
         }};
-        List<AiDevId> ais = this.getLinkedBotsAiids(devId, aiid);
+        List<AiMinP> ais = this.getAIsLinkedToAi(devId, aiid);
+        minPMap = ais.stream().collect(Collectors.toMap(AiMinP::getAiid, AiMinP::getMinP));
 
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;
         HashSet<UUID> aimlBotIdsSet = new HashSet<>(this.config.getAimlBotAiids());
+
+        List<AiDevId> listAis = new ArrayList<>();
+
         if (!aimlBotIdsSet.isEmpty()) {
-            Set<UUID> usedAimlAis = ais.stream().map(aiDevId -> aiDevId.ai).collect(Collectors.toSet());
-            // intersect the two sets to usedAimlAis retains only the AIML ais in use
-            usedAimlAis.retainAll(aimlBotIdsSet);
-            if (!usedAimlAis.isEmpty()) {
-                List<AiDevId> listAis = new ArrayList<>();
-                usedAimlAis.forEach(x -> listAis.add(new AiDevId(/* ignored at the moment */devId, x)));
-                this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis, chatState);
-                usedAimlBot = true;
-                // remove the aiml bots ais from the list of ais
-                List<AiDevId> newList = new ArrayList<>();
-                for (AiDevId ai : ais) {
-                    if (!usedAimlAis.contains(ai.ai)) {
-                        newList.add(ai);
-                    }
+            Map<UUID, AiDevId> map = ais.stream().collect(Collectors.toMap(AiDevId::getAiid, x -> x));
+            for (Map.Entry<UUID, AiDevId> entry : map.entrySet()) {
+                if (aimlBotIdsSet.contains(entry.getKey())) {
+                    listAis.add(new AiDevId(entry.getValue().getDevId(), entry.getValue().getAiid()));
                 }
-                ais = newList;
             }
+            this.aimlFutures = this.requestAiml.issueChatRequests(parameters, listAis, chatState);
+            usedAimlBot = true;
+            // remove the aiml bots ais from the list of ais
+            List<AiDevId> newList = new ArrayList<>();
+            for (Map.Entry<UUID, AiDevId> entry : map.entrySet()) {
+                if (!aimlBotIdsSet.contains(entry.getKey())) {
+                    newList.add(entry.getValue());
+                }
+            }
+            listAis = newList;
+        } else {
+            listAis = ais.stream().map(x -> new AiDevId(x.getDevId(), x.getAiid())).collect(Collectors.toList());
         }
 
         // find out which servers can chat with this AI
         Set<BackendServerType> canChatWith = canChatWithAi(devId, aiid);
 
         // make copies of the AI lists
-        List<AiDevId> wnetAIs = new ArrayList<>(ais);
-        List<AiDevId> rnnAIs = new ArrayList<>(ais);
+        List<AiDevId> wnetAIs = new ArrayList<>(listAis);
+        List<AiDevId> rnnAIs = new ArrayList<>(listAis);
 
         // add the AI to the list if the server can chat
         if (canChatWith.contains(BackendServerType.WNET)) {
@@ -169,18 +179,13 @@ public class AIChatServices extends ServerConnector {
         this.requestAiml.abandonCalls();
     }
 
-    public List<AiDevId> getLinkedBotsAiids(final UUID devId, final UUID aiid)
+    public List<AiMinP> getAIsLinkedToAi(final UUID devId, final UUID aiid)
             throws RequestBase.AiControllerException {
-        List<AiDevId> ais = new ArrayList<>();
         try {
-            List<AiBot> bots = this.database.getBotsLinkedToAi(devId, aiid);
-            for (AiBot bot : bots) {
-                ais.add(new AiDevId(bot.getDevId(), bot.getAiid()));
-            }
+            return this.database.getAisLinkedToAi(devId, aiid);
         } catch (Database.DatabaseException ex) {
             throw new RequestBase.AiControllerException("Couldn't get the list of linked bots");
         }
-        return ais;
     }
 
     /***
@@ -217,6 +222,10 @@ public class AIChatServices extends ServerConnector {
             }
         }
         return chatSet;
+    }
+
+    public Map<UUID, Double> getMinPMap() {
+        return this.minPMap;
     }
 
     /***

@@ -64,15 +64,15 @@ public abstract class RequestBase {
 
         for (AiDevId ai : ais) {
             Map<String, String> chatParamsThisAi = chatParams;
-            if (ai.ai.equals(chatState.getLockedAiid())) {
+            if (ai.getAiid().equals(chatState.getLockedAiid())) {
                 chatParamsThisAi = new HashMap<>(chatParams);
                 chatParamsThisAi.put("history", chatState.getHistory());
                 chatParamsThisAi.put("topic", chatState.getTopic());
             }
-            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.ai, RequestFor.Chat);
+            IServerEndpoint endpoint = this.controller.getBackendEndpoint(ai.getAiid(), RequestFor.Chat);
             callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.dev, ai.ai, chatParamsThisAi,
-                            this.controller.getHashCodeFor(ai.ai)),
+                    createCallable(endpoint.getServerUrl(), ai.getDevId(), ai.getAiid(), chatParamsThisAi,
+                            this.controller.getHashCodeFor(ai.getAiid())),
                     endpoint.getServerIdentifier()));
         }
 

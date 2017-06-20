@@ -92,8 +92,7 @@ public class ChatLogic {
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid)
-                .put("Q", question)
-                .put("MinP", this.chatState.getConfidenceThreshold());
+                .put("Q", question);
 
         UUID aiidForMemoryIntents = this.chatState.getLockedAiid() == null ? aiid : this.chatState.getLockedAiid();
         List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(
@@ -103,6 +102,7 @@ public class ChatLogic {
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
         ChatResult result = new ChatResult(question);
 
+        double minP = 0.0;
         try {
 
             // Check if we're in the middle of an intent flow and process it.
@@ -120,11 +120,14 @@ public class ChatLogic {
                 // wait for WNET to return
                 result = this.interpretSemanticResult(question, this.chatState.getConfidenceThreshold());
 
+
                 boolean wnetConfident = false;
                 if (result != null) {
                     // are we confident enough with this reply?
-                    wnetConfident = (result.getScore() >= this.chatState.getConfidenceThreshold())
-                            && (result.getScore() > 0.00001d);
+                    Map<UUID, Double> m = this.chatServices.getMinPMap();
+                    minP = this.chatServices.getMinPMap().get(result.getAiid());
+                    this.chatState.setConfidenceThreshold(minP);
+                    wnetConfident = (result.getScore() >= minP && (result.getScore() > 0.00001d));
                     this.telemetryMap.add("WNETScore", result.getScore());
                     this.telemetryMap.add("WNETConfident", wnetConfident);
 
@@ -252,6 +255,7 @@ public class ChatLogic {
         this.chatState.setHistory(apiChat.getResult().getHistory());
         this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
 
+        this.telemetryMap.add("MinP", minP);
         this.telemetryMap.add("RequestDuration", result.getElapsedTime());
         this.telemetryMap.add("ResponseSent", result.getAnswer());
         this.telemetryMap.add("Score", result.getScore());
