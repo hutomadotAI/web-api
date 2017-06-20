@@ -69,15 +69,22 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         for (APIParameter param : checkList) {
             switch (param) {
                 case IntentJson:
+                    //fallthrough
                 case EntityJson:
+                    //fallthrough
                 case AiStatusJson:
+                    //fallthrough
                 case ServerRegistration:
+                    //fallthrough
                 case ServerAffinity:
+                    //fallthrough
                 case FacebookNotification:
                     expectingJson = true;
                     break;
                 case AIName:
+                    //fallthrough
                 case AIDescription:
+                    //fallthrough
                 case AIID:
                     expectingForm = true;
                     break;

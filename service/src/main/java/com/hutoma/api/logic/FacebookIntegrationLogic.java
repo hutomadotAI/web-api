@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 
 public class FacebookIntegrationLogic {
 
-    private static final String LOGFROM = "integrationlogic";
+    private static final String LOGFROM = "fbintegrationlogic";
     private final ILogger logger;
     private final Config config;
     private final JsonSerializer serializer;
