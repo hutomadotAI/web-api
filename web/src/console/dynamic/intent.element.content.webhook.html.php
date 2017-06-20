@@ -30,7 +30,8 @@
                 <h5 class="box-title">
                     <div class="input-group-addon no-padding no-border">
                         <div class="col-lg-12 no-margin no-padding">
-                            <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook" placeholder="Type endpoint address..." onkeydown="enableSaving(true);">
+                            <input type="text" class="form-control flat no-shadow" id="webhook" name="webhook" placeholder="Type endpoint address..."
+                                   onkeydown="enableSaving(true); msgAlertWebHook(ALERT.BASIC.value, 'Provide the WebHook endpoint.');">
                         </div>
                     </div>
                 </h5>

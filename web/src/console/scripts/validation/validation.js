@@ -53,6 +53,7 @@ function isInputInvalid(txt,field) {
         case 'developer_country': letters = /^[a-zA-Z0-9\-_'\s]+$/;             break;
         case 'developer_company': letters = /^[a-zA-Z0-9\-_.,?!+()£$%&@'\s]+$/;             break;
         case 'developer_email' :  letters = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;break;
+        case 'webhook': letters =   /^((http|https):\/\/)(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/; break;
         case 'URI': letters =   /^(?:(http|https)?:\/\/)?(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/; break;
         default:
     }
