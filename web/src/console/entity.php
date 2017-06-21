@@ -9,20 +9,6 @@ if(!\hutoma\console::checkSessionIsActive()){
 }
 
 $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-/*
-if (isset($_REQUEST['deleteentity'])) {
-    $entityName = $_REQUEST['deleteentity'];
-    $result = $entityApi->deleteEntity($entityName);
-    if ($result['status']['code'] === 409) {
-        unset($result);
-        \hutoma\console::redirect('./error.php?err=327');
-    }
-    elseif ($result['status']['code'] !== 200) {
-        unset($result);
-        \hutoma\console::redirect('./error.php?err=326');
-    }
-}
-*/
 $entities = $entityApi->getEntities();
 unset($entityApi);
 
