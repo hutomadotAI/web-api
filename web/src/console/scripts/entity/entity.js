@@ -48,8 +48,6 @@ function postingEntityName() {
 }
 
 function showEntities(str) {
-
-
     if (entities.length < 1) {
         msgAlertEntity(ALERT.BASIC.value, 'No entities yet. Create the first one.');
         return;
@@ -109,7 +107,35 @@ function showEntities(str) {
 }
 
 function deleteEntity(elem) {
-    this.location.href = 'entity.php?deleteentity=' + entities[elem]['entity_name'];
+    var prevCursor = document.body.style.cursor;
+    document.body.style.cursor = 'wait';
+
+    msgAlertEntity(ALERT.WARNING.value, 'Deleting...');
+
+    $.ajax({
+        url: './dynamic/deleteEntity.php',
+        data: {
+            deleteentity: entities[elem]['entity_name']
+        },
+        type: 'POST',
+        success: function (response) {
+            var JSONdata = JSON.parse(response);
+            switch (JSONdata['status']['code']) {
+                case 200:
+                    entities.splice(elem, 1);
+                    showEntities('');
+                    break;
+                default:
+                    msgAlertEntity(ALERT.DANGER.value, JSONdata['status']['info']);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            msgAlertEntity(ALERT.DANGER.value, 'Something unexpected occurred - entity not deleted.');
+        },
+        complete: function () {
+            document.body.style.cursor = prevCursor;
+        }
+    });
 }
 
 function OnMouseIn(elem) {
