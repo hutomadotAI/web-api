@@ -53,7 +53,7 @@ function saveIntent() {
         hasErrors = true;
     }
     if (webhook['enabled'] && isInputInvalid(webhook['endpoint'], 'webhook')){
-        msgAlertWebHook(ALERT.DANGER.value, 'Please enter a valid URI.');
+        msgAlertWebHook(ALERT.DANGER.value, 'Please enter a valid URL.');
         hasErrors = true;
     }
     if (hasErrors) {
