@@ -110,7 +110,7 @@ function deleteEntity(elem) {
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
 
-    //msgAlertEntityValues(ALERT.WARNING.value, 'Deleting...');
+    msgAlertEntity(ALERT.WARNING.value, 'Deleting...');
 
     $.ajax({
         url: './dynamic/deleteEntity.php',
