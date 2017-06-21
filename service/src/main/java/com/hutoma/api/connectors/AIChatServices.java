@@ -81,6 +81,8 @@ public class AIChatServices extends ServerConnector {
         }};
         List<AiMinP> ais = this.getAIsLinkedToAi(devId, aiid);
         minPMap = ais.stream().collect(Collectors.toMap(AiMinP::getAiid, AiMinP::getMinP));
+        // add self
+        minPMap.put(aiid, chatState.getConfidenceThreshold());
 
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;

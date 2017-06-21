@@ -124,9 +124,11 @@ public class ChatLogic {
                 boolean wnetConfident = false;
                 if (result != null) {
                     // are we confident enough with this reply?
-                    Map<UUID, Double> m = this.chatServices.getMinPMap();
-                    minP = this.chatServices.getMinPMap().get(result.getAiid());
-                    this.chatState.setConfidenceThreshold(minP);
+                    minP = this.chatServices.getMinPMap().getOrDefault(result.getAiid(), 0.0);
+                    if (!this.chatServices.getMinPMap().containsKey(result.getAiid())) {
+                        this.logger.logWarning(LOGFROM, String.format(
+                                "Could not obtain minP for AIID %s, defaulting to 0.0", result.getAiid()));
+                    }
                     wnetConfident = (result.getScore() >= minP && (result.getScore() > 0.00001d));
                     this.telemetryMap.add("WNETScore", result.getScore());
                     this.telemetryMap.add("WNETConfident", wnetConfident);
