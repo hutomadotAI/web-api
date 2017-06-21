@@ -223,11 +223,7 @@ function msgAlertEntity(alarm, msg) {
             $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-danger');
             $("#icongAlertEntity").attr('class', 'icon fa fa-warning');
             document.getElementById('inputEntityName').style.borderColor = "red";
-            break;
-        case ALERT.PRIMARY.value:
-            $("#containerMsgAlertEntity").attr('class', 'alert alert-dismissable flat alert-primary');
-            $("#icongAlertEntity").attr('class', 'icon fa fa fa-check');
-            break;
+            break
     }
     document.getElementById('msgAlertEntity').innerText = msg;
 }
