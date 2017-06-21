@@ -66,7 +66,7 @@ function createLeftMsg(human_name, msg) {
     wHTML += ('<img class="direct-chat-img" src="./dist/img/human.jpg" alt="User image">');
     wHTML += ('<div class="direct-chat-text">');
     // Print out the string cleared of any html and adding a break on each line break
-    wHTML += cleanChat(msg).trim().replace(/(?:\r\n|\r|\n)/g, '<br />');
+    wHTML += cleanChat(msg);
     wHTML += ('</div>');
     newLeftMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newLeftMsg);
@@ -114,7 +114,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         wHTML += ('<div class="direct-chat-text chat-warning">');
     else
         wHTML += ('<div class="direct-chat-text chat-success">');
-    wHTML += msg;
+    wHTML += cleanChat(msg).replace(/(?:\r\n|\r|\n)/g, '<br />');
     wHTML += ('</div>');
     if (error === false)
         wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">score: ' + score + '</span>');
@@ -295,7 +295,7 @@ function copyJsonToClipboard(elementId) {
 function cleanChat(msg) {
     msg = msg.replace('\&', '&#38');
     msg = msg.replace('\/', '&#47');
-    return msg.replace('\<', '&#60').replace('\>', '&#62;');
+    return msg.replace('\<', '&#60').replace('\>', '&#62;').trim();
 }
 
 String.prototype.toHtmlEntities = function () {
