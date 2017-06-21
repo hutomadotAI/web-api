@@ -9,7 +9,7 @@ if(!\hutoma\console::checkSessionIsActive()){
 }
 
 $entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-
+/*
 if (isset($_REQUEST['deleteentity'])) {
     $entityName = $_REQUEST['deleteentity'];
     $result = $entityApi->deleteEntity($entityName);
@@ -22,7 +22,7 @@ if (isset($_REQUEST['deleteentity'])) {
         \hutoma\console::redirect('./error.php?err=326');
     }
 }
-
+*/
 $entities = $entityApi->getEntities();
 unset($entityApi);
 
