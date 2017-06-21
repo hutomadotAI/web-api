@@ -215,10 +215,6 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - DELETE ENTITY FAILED';
             $details = ' We could not find the data you were looking for';
             break;
-        case 327 :
-            $msg = 'DELETE ENTITY FAILED';
-            $details = ' The entity is in use, please remove it from all intents, and try again.';
-            break;
         case 330 :
             $msg = 'INTERNAL ERROR - REQUEST CHATTING FAILED';
             $details = ' We could not find the data you were looking for';
