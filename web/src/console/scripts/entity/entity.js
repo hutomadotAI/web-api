@@ -130,7 +130,7 @@ function deleteEntity(elem) {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            msgAlertEntity(ALERT.DANGER.value, 'Entity not deleted.');
+            msgAlertEntity(ALERT.DANGER.value, 'Something unexpected occurred - entity not deleted.');
         },
         complete: function () {
             document.body.style.cursor = prevCursor;
