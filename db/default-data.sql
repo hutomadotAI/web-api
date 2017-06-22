@@ -48,15 +48,19 @@ UNLOCK TABLES;
 
 LOCK TABLES `botStore` WRITE;
 /*!40000 ALTER TABLE `botStore` DISABLE KEYS */;
-INSERT INTO `botStore` VALUES (1,'d14b441b-e2a2-4b9f-be9b-4301647e1265','e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','Chit-Chat','Free Chit-Chat bot','Just include this bot in your AI to get instant chit-chat','','','Free',0,'Hi
+INSERT INTO `botStore` (`id`,`dev_id`,`aiid`,`name`,`description`,`long_description`,`alert_message`,`badge`,`license_type`,`price`,`sample`,`last_update`,`category`,`privacy_policy`,`classification`,`version`,`video_link`,`publishing_state`,`botIcon`)
+VALUES (1,'d14b441b-e2a2-4b9f-be9b-4301647e1265','e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','Chit-Chat','Free Chit-Chat bot','Just include this bot in your AI to get instant chit-chat','','','Free',0,'Hi
 What''s your name?
 What is MY name?','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',2,'_chat.png');
-INSERT INTO `botStore` VALUES (2,'d14b441b-e2a2-4b9f-be9b-4301647e1265','491091b1-5458-4d87-b7e9-0ccf3002970c','Knowledge Bot','Free general knowledge bot','Include this bot and your AI will be able to answer simple general knowledge questions','','','Free',0,'What can i do with a hammer
+INSERT INTO `botStore` (`id`,`dev_id`,`aiid`,`name`,`description`,`long_description`,`alert_message`,`badge`,`license_type`,`price`,`sample`,`last_update`,`category`,`privacy_policy`,`classification`,`version`,`video_link`,`publishing_state`,`botIcon`)
+VALUES (2,'d14b441b-e2a2-4b9f-be9b-4301647e1265','491091b1-5458-4d87-b7e9-0ccf3002970c','Knowledge Bot','Free general knowledge bot','Include this bot and your AI will be able to answer simple general knowledge questions','','','Free',0,'What can i do with a hammer
 Where can i find a chair
 What has legs','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',2,'_generalknowledge.png');
-INSERT INTO `botStore` VALUES (3,'d14b441b-e2a2-4b9f-be9b-4301647e1265','9a7a3376-e872-463e-aaa5-9f7e0e8c3380','Jokes','Free jokes dispenser','Ask for a joke','','','Free',0,'Tell me a joke
+INSERT INTO `botStore` (`id`,`dev_id`,`aiid`,`name`,`description`,`long_description`,`alert_message`,`badge`,`license_type`,`price`,`sample`,`last_update`,`category`,`privacy_policy`,`classification`,`version`,`video_link`,`publishing_state`,`botIcon`)
+VALUES (3,'d14b441b-e2a2-4b9f-be9b-4301647e1265','9a7a3376-e872-463e-aaa5-9f7e0e8c3380','Jokes','Free jokes dispenser','Ask for a joke','','','Free',0,'Tell me a joke
 Joke','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',2,'_jokes.png');
-INSERT INTO `botStore` VALUES (4,'d14b441b-e2a2-4b9f-be9b-4301647e1265','873e61b9-9b75-449b-9532-821fcea6f864','Mika','Multi-purpose Intuitive Knowledge Assistant Personality','Small talk support for MIKA. Trained to help with telecom specific tasks. An extra hour of productive time, every day.','','','Free',0,'Who is Mika?','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',0,'_mika.png');
+INSERT INTO `botStore` (`id`,`dev_id`,`aiid`,`name`,`description`,`long_description`,`alert_message`,`badge`,`license_type`,`price`,`sample`,`last_update`,`category`,`privacy_policy`,`classification`,`version`,`video_link`,`publishing_state`,`botIcon`)
+VALUES (4,'d14b441b-e2a2-4b9f-be9b-4301647e1265','873e61b9-9b75-449b-9532-821fcea6f864','Mika','Multi-purpose Intuitive Knowledge Assistant Personality','Small talk support for MIKA. Trained to help with telecom specific tasks. An extra hour of productive time, every day.','','','Free',0,'Who is Mika?','2017-01-31 00:00:00','Other','https://www.hutoma.com/privacy.pdf','EVERYONE','1.0','',0,'_mika.png');
 /*!40000 ALTER TABLE `botStore` ENABLE KEYS */;
 UNLOCK TABLES;
 
