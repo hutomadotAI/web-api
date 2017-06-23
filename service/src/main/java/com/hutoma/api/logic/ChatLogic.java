@@ -51,7 +51,7 @@ public class ChatLogic {
     private final ChatLogger chatLogger;
     private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
-    private final String sysAny = "sys.any";
+    private final String SYSANY = "sys.any";
     private LogMap telemetryMap;
     private ChatState chatState;
 
@@ -383,7 +383,7 @@ public class ChatLogic {
                 // we check if the variable is sys.any but also if the we prompted at least once
                 // the prompt check is necessary otherwise the entity will be immediately recognised
                 // before we even prompt for it.
-                if (variable.getName().equalsIgnoreCase(this.sysAny) && (variable.getTimesPrompted() > 0))
+                if (variable.getName().equalsIgnoreCase(this.SYSANY) && (variable.getTimesPrompted() > 0))
                     variable.setCurrentValue(question);
                 else {
                     if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
