@@ -51,6 +51,7 @@ public class ChatLogic {
     private final ChatLogger chatLogger;
     private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
+    private final String sysAny = "sys.any";
     private LogMap telemetryMap;
     private ChatState chatState;
 
@@ -329,6 +330,7 @@ public class ChatLogic {
         // Attempt to retrieve entities from the question
         List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
                 currentIntent.getVariables());
+
         if (!entities.isEmpty()) {
             intentLog.put("Entities retrieved", StringUtils.join(entities, ','));
             currentIntent.fulfillVariables(entities);
@@ -375,27 +377,36 @@ public class ChatLogic {
             Optional<MemoryVariable> optVariable = vars.stream()
                     .filter(x -> x.getTimesPrompted() < x.getTimesToPrompt()).findFirst();
             if (optVariable.isPresent()) {
+
                 MemoryVariable variable = optVariable.get();
-                if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
-                    // Should not happen as this should be validated during creation
-                    this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
-                            devIdString, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
-                                    .put("Variable", variable.getName()));
-                    throw new IntentException(
-                            String.format("Entity %s for intent %s does not specify any prompts",
-                                    currentIntent.getName(), variable.getName()));
-                } else {
-                    // And prompt the user for the value for that variable
-                    int pos = variable.getTimesPrompted() < variable.getPrompts().size()
-                            ? variable.getTimesPrompted()
-                            : 0;
-                    chatResult.setAnswer(variable.getPrompts().get(pos));
-                    // and decrement the number of prompts
-                    variable.setTimesPrompted(variable.getTimesPrompted() + 1);
-                    intentLog.put("Variable name", variable.getName());
-                    intentLog.put("Variable times prompted", variable.getTimesPrompted());
-                    intentLog.put("Variable times to prompt", variable.getTimesToPrompt());
-                    handledIntent = true;
+
+                // we check if the variable is sys.any but also if the we prompted at least once
+                // the prompt check is necessary otherwise the entity will be immediately recognised
+                // before we even prompt for it.
+                if (variable.getName().equals(this.sysAny) && (variable.getTimesPrompted() > 0))
+                    variable.setCurrentValue(question);
+                else {
+                    if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
+                        // Should not happen as this should be validated during creation
+                        this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
+                                devIdString, LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
+                                        .put("Variable", variable.getName()));
+                        throw new IntentException(
+                                String.format("Entity %s for intent %s does not specify any prompts",
+                                        currentIntent.getName(), variable.getName()));
+                    } else {
+                        // And prompt the user for the value for that variable
+                        int pos = variable.getTimesPrompted() < variable.getPrompts().size()
+                                ? variable.getTimesPrompted()
+                                : 0;
+                        chatResult.setAnswer(variable.getPrompts().get(pos));
+                        // and decrement the number of prompts
+                        variable.setTimesPrompted(variable.getTimesPrompted() + 1);
+                        intentLog.put("Variable name", variable.getName());
+                        intentLog.put("Variable times prompted", variable.getTimesPrompted());
+                        intentLog.put("Variable times to prompt", variable.getTimesToPrompt());
+                        handledIntent = true;
+                    }
                 }
             } else { // intent not fulfilled but no variables left to handle
                 // if we run out of n_prompts we just stop asking.
