@@ -19,6 +19,7 @@ import junitparams.JUnitParamsRunner;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
 @RunWith(JUnitParamsRunner.class)
 public class TestAiServices {
 
-    private static final UUID DEVID =  UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
+    private static final UUID DEVID = UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
     private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
@@ -105,6 +106,15 @@ public class TestAiServices {
         JerseyInvocation.Builder builder = getFakeBuilder();
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
         this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
+    }
+
+    // Bug:2300
+    @Test
+    public void testUpload_hack_removeIntentExpressions() {
+        Assert.assertEquals("line1\nline2", this.aiServices.removeIntentExpressions("line1\nline2\n\nintent expr\n@meta.intent.name"));
+        Assert.assertEquals("line1\nline2", this.aiServices.removeIntentExpressions("intent expr\n@meta.intent.name\n\nline1\nline2"));
+        Assert.assertEquals("", this.aiServices.removeIntentExpressions("intent expr\n@meta.intent.name"));
+        Assert.assertEquals("line1\nline2", this.aiServices.removeIntentExpressions("line1\nline2\n"));
     }
 
     private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)

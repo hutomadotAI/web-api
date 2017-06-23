@@ -14,6 +14,7 @@ import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.InvocationResult;
 import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.memory.MemoryIntentHandler;
 
 import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
@@ -24,6 +25,7 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
@@ -147,13 +149,26 @@ public class AIServices extends ServerConnector {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getListOfPrimaryEndpoints(aiid)) {
+
+            // HACK! HACK!- temporarily pro-process the training file for RNN so that
+            // it doesn't contain any intent-generated lines
+            // Bug:2300
+            String trainingToSend = trainingMaterials;
+            try {
+                if (endpoint.equals(this.controllerRnn.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl())) {
+                    trainingToSend = removeIntentExpressions(trainingMaterials);
+                }
+            } catch (ServerMetadata.NoServerAvailable ex) {
+                // Shouldn't happen as this would first fail on getListOfPrimaryEndpoints()
+            }
+
             this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
                     .fileName("training.txt")
-                    .size(trainingMaterials.getBytes(Charsets.UTF_8).length)
+                    .size(trainingToSend.getBytes(Charsets.UTF_8).length)
                     .build();
-            FormDataBodyPart bodyPart = new FormDataBodyPart(dispo, trainingMaterials);
+            FormDataBodyPart bodyPart = new FormDataBodyPart(dispo, trainingToSend);
             AiInfo info = new AiInfo(devId, aiid);
             FormDataMultiPart multipart = (FormDataMultiPart) new FormDataMultiPart()
                     .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
@@ -168,6 +183,38 @@ public class AIServices extends ServerConnector {
                     0));
         }
         executeAndWait(callables);
+    }
+
+    /**
+     * HACK! HACK!
+     * Removes the intent expressions from a given training text
+     * @param text the training text
+     * @return the text with the intent expressions stripped out
+     * <p>
+     * Note - public so it can be unit tested
+     * Bug:2300
+     */
+    public String removeIntentExpressions(final String text) {
+        StringBuilder sb = new StringBuilder();
+        Scanner scanner = new Scanner(text);
+        String eol = System.getProperty("line.separator");
+        while (scanner.hasNextLine()) {
+            String line1 = scanner.nextLine();
+            if (line1.isEmpty()) {
+                sb.append(eol);
+                continue;
+            }
+            if (scanner.hasNextLine()) {
+                String line2 = scanner.nextLine();
+                if (!line2.startsWith(MemoryIntentHandler.META_INTENT_TAG)) {
+                    sb.append(line1).append(eol).append(line2).append(eol);
+                }
+            } else {
+                sb.append(line1).append(eol);
+            }
+        }
+        scanner.close();
+        return sb.toString().trim();
     }
 
     /***
