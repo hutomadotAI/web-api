@@ -295,10 +295,14 @@ class console
     public static function init()
     {
         self::construct();
-        if (self::$loggedIn === true && array_search(utils::curPage(), self::$config['pages']['no_login']) !== false) {
-            utils::redirect(self::$config['pages']['home_page']);
-        } elseif (self::$loggedIn === false && array_search(utils::curPage(), self::$config['pages']['no_login']) === false) {
-            utils::redirect(self::$config['pages']['login_page']);
+        if (isset($_REQUEST['redirect'])) {
+            utils::redirect($_REQUEST['redirect']);
+        } else {
+            if (self::$loggedIn === true && array_search(utils::curPage(), self::$config['pages']['no_login']) !== false) {
+                utils::redirect(self::$config['pages']['home_page']);
+            } elseif (self::$loggedIn === false && array_search(utils::curPage(), self::$config['pages']['no_login']) === false) {
+                utils::redirect(self::$config['pages']['login_page']);
+            }
         }
         self::$init_called = true;
     }
@@ -603,7 +607,7 @@ class console
      * As of version 0.4, it is required to include the remember_me parameter
      * when calling this function to avail the "Remember Me" feature.
      */
-    public static function login($username, $password, $remember_me = false, $cookies = true)
+    public static function login($username, $password, $remember_me = false, $cookies = true, $redirect)
     {
         self::construct("login");
 
@@ -676,7 +680,7 @@ class console
 
                     // Redirect
                     if (self::$init_called) {
-                        utils::redirect(self::$config['pages']['home_page']);
+                        utils::redirect(isset($redirect) ? $redirect : self::$config['pages']['home_page']);
                     }
                     return true;
                 } else {

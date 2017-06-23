@@ -46,7 +46,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     </aside>
 
     <!-- ================ PAGE CONTENT ================= -->
-   <div class="content-wrapper">
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
@@ -67,7 +67,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                 </div>
             </div>
         </section>
-   </div>
+    </div>
 
     <footer class="main-footer">
         <?php include './dynamic/footer.inc.html.php'; ?>
@@ -100,17 +100,24 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     </form>
 
     <script>
-        window.document.addEventListener('BotstoreFinishPaintEvent', function(e) {
-            var iFrame = document.getElementById('contentFrame');
-            iFrame.height = e.detail.height + 'px';
-            iFrame.style.width = '100%';
-        }, false);
+        document.domain = "localhost";
 
-        window.document.addEventListener('BotstoreCategoryChanged', function(e) {
-            var menu = document.getElementById('botstoreMenu');
-            menu.childNodes.forEach(function(elem) {elem.classList.remove('active');});
-            document.getElementById('menu_' + removeSpecialCharacters(decodeURIComponent(e.detail.category))).classList.add('active');
-        }, false);
+        window.addEventListener('message', function (e) {
+            switch (e.data.event) {
+                case 'BotstoreFinishPaintEvent':
+                    var iFrame = document.getElementById('contentFrame');
+                    iFrame.height = e.data.height + 'px';
+                    iFrame.style.width = '100%';
+                    break;
+                case 'BotstoreCategoryChanged':
+                    var menu = document.getElementById('botstoreMenu');
+                    menu.childNodes.forEach(function (elem) {
+                        elem.classList.remove('active');
+                    });
+                    document.getElementById('menu_' + removeSpecialCharacters(decodeURIComponent(e.detail.category))).classList.add('active');
+                    break;
+            }
+        });
 
         <?php
         unset($aiName);

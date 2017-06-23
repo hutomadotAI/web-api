@@ -47,7 +47,12 @@ if (!isset($category) || empty($category)) {
     }
 
 } else {
-    $botstoreListParam->addFilter('category',$category);
+    // Hack since 'featured' is not really a category
+    if ($category == 'featured') {
+        $botstoreListParam->addFilter('featured',1);
+    } else {
+        $botstoreListParam->addFilter('category', $category);
+    }
     $botstoreItems = $botstoreApi->getBotstoreList($botstoreListParam);
     if (isset($botstoreItems) && (array_key_exists("items", $botstoreItems)) && sizeof($botstoreItems['items']) > 0 ) {
         $tmp_category_botItems = [];

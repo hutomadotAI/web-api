@@ -1,8 +1,12 @@
 <?php
+
 require "config.php";
+
+
 if(isset($_POST['action_login'])){
     $identification = $_POST['login'];
     $password = $_POST['password'];
+    $redirect = $_POST['redirect'];
 
     $loginerror  ='<div class="alert alert-danger text-white flat">';
     $loginerror .='<i class="icon fa fa-warning"></i> The username or password you entered is incorrect';
@@ -12,7 +16,7 @@ if(isset($_POST['action_login'])){
         $msg = array("Error", $loginerror);
     }else{
         try {
-            $login = \hutoma\console::login($identification, $password, isset($_POST['remember_me']));
+            $login = \hutoma\console::login($identification, $password, isset($_POST['remember_me']), true, $redirect);
             if ($login === false) {
                 $msg = array("Error", $loginerror);
             } else if (is_array($login) && $login['status'] == "blocked") {
@@ -32,6 +36,7 @@ if(isset($_POST['action_login'])){
         }
     }
 }
+
 
 ?>
 <!DOCTYPE html>
@@ -93,7 +98,14 @@ if(isset($_POST['action_login'])){
             <p class="login-box-msg"><b>sign in and start creating awesomeness</b></p>
 
             <form action="login.php" method="POST">
-                <?php if(isset($msg)){echo "$msg[1]";}?>
+                <?php
+                if (isset($msg)) {
+                    echo "$msg[1]";
+                }
+                if (isset($_REQUEST['redirect'])) {
+                    echo '<input type="hidden" name="redirect" value="' . $_REQUEST['redirect'] . '">';
+                }
+                ?>
                 <div class="form-group has-feedback">
                     <input name="login" type="email" class="form-control flat" placeholder="Email">
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>

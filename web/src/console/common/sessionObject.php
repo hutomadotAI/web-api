@@ -14,7 +14,7 @@ class sessionObject
 
     public static function getDevToken()
     {
-        return isset($_SESSION) ? $_SESSION['devToken'] : null;
+        return (isset($_SESSION) &&  isset($_SESSION['devToken'])) ? $_SESSION['devToken'] : null;
     }
 
     public static function setDevToken($devToken)
