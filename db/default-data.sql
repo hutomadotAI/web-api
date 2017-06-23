@@ -80,5 +80,6 @@ INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677
 INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.percent', '2017-05-12 00:00:00', '1');
 INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.number', '2017-05-12 00:00:00', '1');
 INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.ordinal', '2017-05-12 00:00:00', '1');
+INSERT INTO `entity` (`dev_id`, `name`, `created`, `isSystem`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.any', '2017-05-12 00:00:00', '1');
 /*!40000 ALTER TABLE `entity` ENABLE KEYS */;
 UNLOCK TABLES;

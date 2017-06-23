@@ -422,6 +422,31 @@ public class TestChatLogic {
         verify(this.fakeIntentHandler, never()).updateStatus(mi);
     }
 
+
+    /***
+     * Memory intent is fulfilled with one sys.any variable
+     */
+    @Test
+    public void testChat_IntentPrompt_unfulfilled_SysAny()
+            throws RequestBase.AiControllerException {
+
+        final String intentName = "intent1";
+        MemoryVariable mv = new MemoryVariable("sys.any", null, true, Arrays.asList("a", "b"), Arrays.asList("prompt"), 3, 0, true, false);
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+        setupFakeChat(0.7d, "@meta.intent." + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        ApiChat result = (ApiChat) getChat(0.5f);
+        Assert.assertFalse(mi.isFulfilled());
+        result = (ApiChat) getChat(0.5f, "nothing to see here.");
+        Assert.assertTrue(mi.getVariables().get(0).getCurrentValue().equals("nothing to see here."));
+        verify(this.fakeIntentHandler).clearIntents(any());
+    }
+
+
     /***
      * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
      */
