@@ -383,7 +383,7 @@ public class ChatLogic {
                 // we check if the variable is sys.any but also if the we prompted at least once
                 // the prompt check is necessary otherwise the entity will be immediately recognised
                 // before we even prompt for it.
-                if (variable.getName().equals(this.sysAny) && (variable.getTimesPrompted() > 0))
+                if (variable.getName().equalsIgnoreCase(this.sysAny) && (variable.getTimesPrompted() > 0))
                     variable.setCurrentValue(question);
                 else {
                     if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
