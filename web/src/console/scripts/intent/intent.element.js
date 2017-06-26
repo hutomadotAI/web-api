@@ -52,6 +52,10 @@ function saveIntent() {
         msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required.');
         hasErrors = true;
     }
+    if (webhook['enabled'] && isInputInvalid(webhook['endpoint'], 'webhook')){
+        msgAlertWebHook(ALERT.DANGER.value, 'Please enter a valid URL.');
+        hasErrors = true;
+    }
     if (hasErrors) {
         msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
         return false;
