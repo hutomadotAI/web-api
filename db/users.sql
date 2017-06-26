@@ -237,3 +237,6 @@ GRANT USAGE ON `data_storage`.* TO 'dataLookup'@'%' IDENTIFIED BY PASSWORD '*C31
 
 GRANT EXECUTE, SELECT ON `data_storage`.* TO 'dataLookup'@'%';
 
+GRANT USAGE ON `data_storage`.* TO 'dataLookup'@'127.0.0.1' IDENTIFIED BY PASSWORD '*C313F8BCB6FC67A062F11A728A4DBA9675B5BF90';
+
+GRANT EXECUTE, SELECT ON `data_storage`.* TO 'dataLookup'@'127.0.0.1';
