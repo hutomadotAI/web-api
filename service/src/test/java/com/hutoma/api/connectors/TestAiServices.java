@@ -111,10 +111,18 @@ public class TestAiServices {
     // Bug:2300
     @Test
     public void testUpload_hack_removeIntentExpressions() {
-        Assert.assertEquals("line1\nline2", this.aiServices.removeIntentExpressions("line1\nline2\n\nintent expr\n@meta.intent.name"));
-        Assert.assertEquals("line1\nline2", this.aiServices.removeIntentExpressions("intent expr\n@meta.intent.name\n\nline1\nline2"));
-        Assert.assertEquals("", this.aiServices.removeIntentExpressions("intent expr\n@meta.intent.name"));
-        Assert.assertEquals("line1\nline2", this.aiServices.removeIntentExpressions("line1\nline2\n"));
+        Assert.assertEquals(sysIndependent("line1\nline2"),
+                this.aiServices.removeIntentExpressions(sysIndependent("line1\nline2\n\nintent expr\n@meta.intent.name")));
+        Assert.assertEquals(sysIndependent("line1\nline2"),
+                this.aiServices.removeIntentExpressions(sysIndependent("intent expr\n@meta.intent.name\n\nline1\nline2")));
+        Assert.assertEquals(sysIndependent(""),
+                this.aiServices.removeIntentExpressions(sysIndependent("intent expr\n@meta.intent.name")));
+        Assert.assertEquals(sysIndependent("line1\nline2"),
+                this.aiServices.removeIntentExpressions(sysIndependent("line1\nline2\n")));
+    }
+
+    public static String sysIndependent(String data) {
+        return data.replace("\n", System.getProperty("line.separator"));
     }
 
     private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)

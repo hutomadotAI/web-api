@@ -42,6 +42,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static com.hutoma.api.connectors.TestAiServices.sysIndependent;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -57,8 +58,10 @@ public class TestAiServicesClient {
     private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9090";
     private static final String LOCAL_ENDPOINT_PATH = "training";
     private static final String LOCAL_WEB_ENDPOINT = LOCAL_WEB_SERVER + "/" + LOCAL_ENDPOINT_PATH;
-    private static final String TRAINING_MATERIALS_NO_INTENT = "question1\nanswer1\nquestion2\nanswer2";
-    private static final String TRAINING_MATERIALS = TRAINING_MATERIALS_NO_INTENT + "\n\nintent expression\n@meta.intent.myintent";
+    private static final String TRAINING_MATERIALS_NO_INTENT = sysIndependent(
+            "question1\nanswer1\nquestion2\nanswer2");
+    private static final String TRAINING_MATERIALS = TRAINING_MATERIALS_NO_INTENT +
+            sysIndependent("\n\nintent expression\n@meta.intent.myintent");
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
     private static HttpServer httpServer;
