@@ -264,7 +264,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(map);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(AIMLRESULT, result.getResult().getAnswer());
+        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     /***
@@ -675,7 +675,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals("aiml", result.getResult().getAnswer());
+        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -956,7 +956,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
-        Assert.assertEquals("", result.getResult().getAnswer());
+        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     private void validateStateSaved(final ChatResult returnedResult, final UUID usedAiid) {

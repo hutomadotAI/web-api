@@ -41,6 +41,7 @@ import javax.inject.Inject;
 public class ChatLogic {
 
     private static final String LOGFROM = "chatlogic";
+    private static final double JUST_ABOVE_ZERO = 0.00001d;
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Tools tools;
@@ -130,7 +131,7 @@ public class ChatLogic {
                         this.logger.logWarning(LOGFROM, String.format(
                                 "Could not obtain minP for AIID %s, defaulting to 0.0", result.getAiid()));
                     }
-                    wnetConfident = (result.getScore() >= minP && (result.getScore() > 0.00001d));
+                    wnetConfident = (result.getScore() >= minP && (result.getScore() > JUST_ABOVE_ZERO));
                     this.telemetryMap.add("WNETScore", result.getScore());
                     this.telemetryMap.add("WNETConfident", wnetConfident);
 
@@ -169,7 +170,7 @@ public class ChatLogic {
                     // If we don't have AIML available (not linked)
                     if (aimlResult != null) {
                         // are we confident enough with this reply?
-                        aimlConfident = aimlResult.getScore() > 0.00001d;
+                        aimlConfident = aimlResult.getScore() > JUST_ABOVE_ZERO;
                         this.telemetryMap.add("AIMLScore", aimlResult.getScore());
                         this.telemetryMap.add("AIMLConfident", aimlConfident);
                         if (aimlConfident) {
@@ -204,7 +205,10 @@ public class ChatLogic {
                         }
 
                         if (!answeredByRnn) {
-                            if (aimlResult != null) {
+                            // Fallback to AIML only if we have an answer available (regardless of whether
+                            // it's confidence is above minP or not) and there's actually a response
+                            if (aimlResult != null && aimlResult.getScore() > JUST_ABOVE_ZERO
+                                    && !aimlResult.getAnswer().isEmpty()) {
                                 this.telemetryMap.add("FellBackToAIML", "true");
                                 this.telemetryMap.add("AnsweredBy", "AIML");
                                 result = aimlResult;
