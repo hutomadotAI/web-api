@@ -100,8 +100,6 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     </form>
 
     <script>
-        document.domain = "localhost";
-
         window.addEventListener('message', function (e) {
             switch (e.data.event) {
                 case 'BotstoreFinishPaintEvent':
