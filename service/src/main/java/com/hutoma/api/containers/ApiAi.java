@@ -86,10 +86,6 @@ public class ApiAi extends ApiResult {
         populateExtendedStatus();
     }
 
-    public void setConfidence(final double confidence) {
-        this.confidence = confidence;
-    }
-
     /***
      * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
      * @param wnetStatus
@@ -124,7 +120,7 @@ public class ApiAi extends ApiResult {
      * @return
      */
     public TrainingStatus getSummaryStatusPublic() {
-        return summaryStatusPublic;
+        return this.summaryStatusPublic;
     }
 
     public String getAiid() {
@@ -145,6 +141,10 @@ public class ApiAi extends ApiResult {
 
     public double getConfidence() {
         return this.confidence;
+    }
+
+    public void setConfidence(final double confidence) {
+        this.confidence = confidence;
     }
 
     public BackendStatus getBackendStatus() {

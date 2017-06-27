@@ -7,6 +7,7 @@ import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
+import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
@@ -96,6 +97,9 @@ public class ServerBinder extends AbstractBinder {
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
         bind(ChatStateHandler.class).to(ChatStateHandler.class);
         bind(WebHooks.class).to(WebHooks.class);
+        bind(FacebookConnector.class).to(FacebookConnector.class);
+        bind(FacebookMachineID.class).to(FacebookMachineID.class).in(Singleton.class);
+        bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);

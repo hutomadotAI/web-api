@@ -17,6 +17,7 @@ import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.EntityRecognizerService;
+import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseCall;
@@ -28,6 +29,7 @@ import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.logic.FacebookChatHandler;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
@@ -112,6 +114,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected AccessLogger fakeAccessLogger;
     @Mock
     protected EntityRecognizerService fakeEntityRecognizer;
+    @Mock
+    protected FacebookConnector fakefacebookConnector;
 
     private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -165,6 +169,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAccessLogger)).to(AccessLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeEntityRecognizer)).to(EntityRecognizerService.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakefacebookConnector)).to(FacebookConnector.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -175,6 +180,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(JerseyClient.class).to(JerseyClient.class);
                 bind(ThreadPool.class).to(ThreadPool.class);
                 bind(ThreadSubPool.class).to(ThreadSubPool.class);
+                bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
                 // Bind a mock of HttpServletRequest
                 bind(mock(HttpServletRequest.class)).to(HttpServletRequest.class);
 

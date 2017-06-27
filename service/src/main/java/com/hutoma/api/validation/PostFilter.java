@@ -10,6 +10,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -77,6 +78,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case ServerRegistration:
                     //fallthrough
                 case ServerAffinity:
+                    //fallthrough
+                case FacebookConnect:
                     //fallthrough
                 case FacebookNotification:
                     expectingJson = true;
@@ -286,10 +289,17 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
             }
 
+            if (checkList.contains(APIParameter.FacebookConnect)) {
+                FacebookConnect facebookConnect = (FacebookConnect)
+                        this.serializer.deserialize(request.getEntityStream(), FacebookConnect.class);
+                checkParameterNotNull(FACEBOOK_CONNECT, facebookConnect);
+                request.setProperty(APIParameter.FacebookConnect.toString(), facebookConnect);
+            }
+            
             if (checkList.contains(APIParameter.FacebookNotification)) {
                 FacebookNotification facebookNotification = (FacebookNotification)
                         this.serializer.deserialize(request.getEntityStream(), FacebookNotification.class);
-                request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);
+                request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);            
             }
 
         } catch (JsonParseException jpe) {

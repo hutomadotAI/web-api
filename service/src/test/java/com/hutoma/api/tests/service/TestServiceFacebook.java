@@ -22,6 +22,11 @@ public class TestServiceFacebook extends ServiceTestBase {
     private static final String CHALLENGE = "challenge";
     private static final String FBVERIFY = "fbverify";
 
+    String fbMessage = "{\"object\":\"page\",\"entry\":[{\"id\":\"page_id\",\"time\":1497884978923,"
+            + "\"messaging\":[{\"sender\":{\"id\":\"from_fb_user\"},\"recipient\":{\"id\":\"page_id\"},"
+            + "\"timestamp\":1497884978787,\"message\":{\"mid\":\"mid.$cAAZ8W3FgXCZi8iw2Y1cwObp3IKnj\","
+            + "\"seq\":128,\"text\":\"random user chat\"}}]}]}";
+
     @Test
     public void testFBWebhookVerifyOk() {
         when(this.fakeConfig.getFacebookVerifyToken()).thenReturn(FBVERIFY);
@@ -48,13 +53,9 @@ public class TestServiceFacebook extends ServiceTestBase {
 
     @Test
     public void testFBChat() {
-        String fbMessage = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\",\"time\":1497884978923,"
-                + "\"messaging\":[{\"sender\":{\"id\":\"1317000771747763\"},\"recipient\":{\"id\":\"1731355550428969\"},"
-                + "\"timestamp\":1497884978787,\"message\":{\"mid\":\"mid.$cAAZ8W3FgXCZi8iw2Y1cwObp3IKnj\","
-                + "\"seq\":128,\"text\":\"random user chat\"}}]}]}";
         final Response response = target(BASEPATH)
                 .request()
-                .post(Entity.json(fbMessage));
+                .post(Entity.json(this.fbMessage));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 

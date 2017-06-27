@@ -990,6 +990,82 @@ public class Database {
         }
     }
 
+    public boolean updateIntegration(final UUID aiid, final UUID devid, final IntegrationType integration,
+                                     final String integratedResource, final String integratedUserid,
+                                     final String data, final String status,
+                                     boolean active) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateAiIntegration", 8)
+                    .add(aiid)
+                    .add(devid)
+                    .add(integration.value())
+                    .add(integratedResource)
+                    .add(integratedUserid)
+                    .add(data)
+                    .add(status)
+                    .add(active);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public IntegrationRecord getIntegration(final UUID aiid, final UUID devid, final IntegrationType integration)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getAiIntegration", 3)
+                    .add(aiid)
+                    .add(devid)
+                    .add(integration.value());
+            ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return new IntegrationRecord(
+                        rs.getString("integrated_resource"),
+                        rs.getString("integrated_userid"),
+                        rs.getString("data"),
+                        rs.getString("status"),
+                        rs.getBoolean("active"));
+            }
+            return null;
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public IntegrationRecord getIntegrationResource(final IntegrationType integration,
+                                                    final String integratedResource)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIntegratedResource", 2)
+                    .add(integration.value())
+                    .add(integratedResource);
+            ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return new IntegrationRecord(
+                        UUID.fromString(rs.getString("aiid")),
+                        UUID.fromString(rs.getString("devid")),
+                        rs.getString("integrated_userid"),
+                        rs.getString("data"),
+                        rs.getString("status"),
+                        rs.getBoolean("active"));
+            }
+            return null;
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public void updateIntegrationStatus(final UUID aiid, final IntegrationType integration,
+                                        final String status, boolean setChatTimeNow)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("updateIntegrationStatus", 4)
+                    .add(aiid)
+                    .add(integration.value())
+                    .add(status)
+                    .add(setChatTimeNow);
+            call.executeUpdate();
+        }
+    }
+
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
         final ArrayList<AiBot> bots = new ArrayList<>();
         while (rs.next()) {

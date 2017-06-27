@@ -152,6 +152,34 @@ public class Config {
     }
 
     /***
+     * Gets the AppID for the hu:toma facebook app that we are using to integrate chat
+     * The default value links to a private, developer only app called hu:toma-test
+     * https://developers.facebook.com/apps/843873759109923
+     * @return
+     */
+    public String getFacebookAppId() {
+        return getConfigFromProperties("fb_app_id", "843873759109923");
+    }
+
+    /***
+     * Gets the AppID secret key for the facebook app that we are using to integrate chat
+     * The default key belongs to the test AppID
+     * https://developers.facebook.com/apps/843873759109923
+     * @return
+     */
+    public String getFacebookAppSecret() {
+        return getConfigFromProperties("fb_app_secret", "fe63413659258d447bff34c048978d9d");
+    }
+
+    /***
+     * How many ms to wait before giving up on Facebook
+     * @return
+     */
+    public int getFacebookGraphAPITimeout() {
+        return 5000;
+    }
+
+    /***
      * The maximum number of active threads in the threadpool
      * after which anyone requesting a thread will get an exception
      * @return

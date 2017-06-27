@@ -5,6 +5,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
@@ -41,6 +42,7 @@ public class ParameterFilter extends Validate {
     protected static final String AI_LIST = "ai_list";
     protected static final String SERVER_SESSION_ID = "server_session_id";
     protected static final String SERVER_URL = "server_url";
+    protected static final String FACEBOOK_CONNECT = "facebook_connect";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -124,6 +126,10 @@ public class ParameterFilter extends Validate {
 
     public static ServerAffinity getServerAffinity(final ContainerRequestContext requestContext) {
         return (ServerAffinity) requestContext.getProperty(APIParameter.ServerAffinity.toString());
+    }
+
+    public static FacebookConnect getFacebookConnect(final ContainerRequestContext requestContext) {
+        return (FacebookConnect) requestContext.getProperty(APIParameter.FacebookConnect.toString());
     }
 
     public static FacebookNotification getFacebookNotification(final ContainerRequestContext requestContext) {

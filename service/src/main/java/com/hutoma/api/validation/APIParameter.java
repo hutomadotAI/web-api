@@ -19,6 +19,7 @@ public enum APIParameter {
     Timezone,
     Locale,
     TrainingSourceType,
+    FacebookConnect,
     // Backend
     AiStatusJson,
     ServerRegistration,

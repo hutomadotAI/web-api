@@ -2,6 +2,8 @@ package com.hutoma.api.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
@@ -10,6 +12,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.InputStream;
@@ -28,12 +31,7 @@ public class JsonSerializer {
     public JsonSerializer() {
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(DateTime.class, new com.google.gson.JsonSerializer<DateTime>() {
-                    @Override
-                    public JsonElement serialize(DateTime json, Type typeOfSrc, JsonSerializationContext context) {
-                        return new JsonPrimitive(ISODateTimeFormat.dateTime().print(json));
-                    }
-                })
+                .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
                 .enableComplexMapKeySerialization()
                 .create();
     }
@@ -76,6 +74,24 @@ public class JsonSerializer {
             return list;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
+        }
+    }
+
+    public class DateTimeSerializer implements JsonDeserializer<DateTime>, com.google.gson.JsonSerializer<DateTime> {
+
+        private final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
+
+        @Override
+        public DateTime deserialize(final JsonElement je, final Type type,
+                                    final JsonDeserializationContext jdc) throws JsonParseException {
+            final String dateAsString = je.getAsString();
+            return dateAsString.length() == 0 ? null : this.DATE_FORMAT.parseDateTime(dateAsString);
+        }
+
+        @Override
+        public JsonElement serialize(final DateTime src, final Type typeOfSrc,
+                                     final JsonSerializationContext context) {
+            return new JsonPrimitive(src == null ? "" : this.DATE_FORMAT.print(src));
         }
     }
 }
