@@ -5,6 +5,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -123,6 +124,10 @@ public class ParameterFilter extends Validate {
 
     public static ServerAffinity getServerAffinity(final ContainerRequestContext requestContext) {
         return (ServerAffinity) requestContext.getProperty(APIParameter.ServerAffinity.toString());
+    }
+
+    public static FacebookNotification getFacebookNotification(final ContainerRequestContext requestContext) {
+        return (FacebookNotification) requestContext.getProperty(APIParameter.FacebookNotification.toString());
     }
 
     /***

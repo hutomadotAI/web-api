@@ -282,6 +282,15 @@ public class Config {
         }
     }
 
+    /***
+     * The string that we expect Facebook to pass to us when we are verifying that a webhook endpoint is valid
+     * This is typically needed only once when we manually link the Hutoma Facebook App to a webhook
+     * @return
+     */
+    public String getFacebookVerifyToken() {
+        return getConfigFromProperties("fb_verify_token", "oYfoYghfwj1p0i7f");
+    }
+
     private List<String> getCSList(final String propertyName) {
         String instances = getConfigFromProperties(propertyName, null);
         if (instances == null) {

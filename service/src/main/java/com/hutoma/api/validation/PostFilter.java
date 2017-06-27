@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
@@ -68,14 +69,22 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         for (APIParameter param : checkList) {
             switch (param) {
                 case IntentJson:
+                    //fallthrough
                 case EntityJson:
+                    //fallthrough
                 case AiStatusJson:
+                    //fallthrough
                 case ServerRegistration:
+                    //fallthrough
                 case ServerAffinity:
+                    //fallthrough
+                case FacebookNotification:
                     expectingJson = true;
                     break;
                 case AIName:
+                    //fallthrough
                 case AIDescription:
+                    //fallthrough
                 case AIID:
                     expectingForm = true;
                     break;
@@ -275,6 +284,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
                 checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
                 request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
+            }
+
+            if (checkList.contains(APIParameter.FacebookNotification)) {
+                FacebookNotification facebookNotification = (FacebookNotification)
+                        this.serializer.deserialize(request.getEntityStream(), FacebookNotification.class);
+                request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);
             }
 
         } catch (JsonParseException jpe) {
