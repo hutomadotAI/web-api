@@ -26,7 +26,7 @@
         document.cookie = "facebookRedir=" + htmlEncode(facebookRedir) + "; expires=0; path=/";
         var fbLogin = "https://www.facebook.com/v2.9/dialog/oauth"
             + "?client_id=" + appid
-            + "&scope=email,manage_pages,pages_messaging,pages_messaging_subscriptions"
+            + "&scope=manage_pages,pages_show_list,pages_messaging,public_profile"
             + "&redirect_uri=" + facebookRedir;
         window.location.href = fbLogin;
     }
