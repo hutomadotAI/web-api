@@ -443,6 +443,7 @@ public class TestChatLogic {
         Assert.assertFalse(mi.isFulfilled());
         result = (ApiChat) getChat(0.5f, "nothing to see here.");
         Assert.assertTrue(mi.getVariables().get(0).getCurrentValue().equals("nothing to see here."));
+        Assert.assertTrue(mi.isFulfilled());
         verify(this.fakeIntentHandler).clearIntents(any());
     }
 
