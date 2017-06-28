@@ -128,4 +128,21 @@ UPDATE `ai_integration` SET
 END;;
 DELIMITER ;
 
-GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai_integration` TO 'aiReader'@'127.0.0.1';
+DROP PROCEDURE IF EXISTS `deleteIntegration`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `deleteIntegration`(
+  IN `in_aiid` VARCHAR(50),
+  IN `in_devid` VARCHAR(50),
+  IN `in_integration` VARCHAR(50))
+BEGIN
+
+DELETE `ai_integration` 
+FROM `ai_integration` INNER JOIN `ai` ON `ai`.`aiid` = `ai_integration`.`aiid`
+WHERE `ai`.`dev_id` = `in_devid`
+AND `ai_integration`.`aiid`=`in_aiid` 
+AND `integration`=`in_integration`;
+
+  END;;
+DELIMITER ;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_integration` TO 'aiReader'@'127.0.0.1';

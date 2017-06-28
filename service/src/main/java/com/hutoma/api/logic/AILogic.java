@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 
 /**
@@ -40,16 +41,19 @@ public class AILogic {
     private final AIServices aiServices;
     private final ILogger logger;
     private final Tools tools;
+    private Provider<AIIntegrationLogic> integrationLogicProvider;
 
     @Inject
     public AILogic(final Config config, final JsonSerializer jsonSerializer, final Database database,
-                   final AIServices aiServices, final ILogger logger, final Tools tools) {
+                   final AIServices aiServices, final ILogger logger, final Tools tools,
+                   Provider<AIIntegrationLogic> integrationLogicProvider) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.logger = logger;
         this.tools = tools;
         this.aiServices = aiServices;
+        this.integrationLogicProvider = integrationLogicProvider;
     }
 
     public ApiResult createAI(
@@ -205,6 +209,9 @@ public class AILogic {
             }
             this.database.deleteAi(devid, aiid);
 
+            // if there are integrations, get rid of them
+            this.integrationLogicProvider.get().deleteIntegrations(aiid, devid);
+
             try {
                 this.aiServices.deleteAI(ai.getBackendStatus(), devid, aiid);
             } catch (ServerConnector.AiServicesException ex) {
@@ -314,4 +321,5 @@ public class AILogic {
             return ApiError.getInternalServerError();
         }
     }
+
 }

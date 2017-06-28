@@ -198,4 +198,44 @@ public class TestAIIntegrationLogic {
         verify(this.fakeDatabase, times(1)).updateIntegration(any(), any(), any(),
                 any(), any(), any(), any(), Matchers.eq(false));
     }
+
+    @Test
+    public void testIntegrationDelete_None() throws Database.DatabaseException, FacebookConnector.FacebookException {
+        when(this.fakeDatabase.getIntegration(any(), any(), any())).thenReturn(null);
+        this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        verify(this.fakeConnector, times(0)).pageUnsubscribe(any(), any());
+        verify(this.fakeDatabase, times(0)).deleteIntegration(any(), any(), any());
+    }
+
+    @Test
+    public void testIntegrationDelete_NoToken() throws Database.DatabaseException, FacebookConnector.FacebookException {
+        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
+                "access", "username", DateTime.now().plusHours(1));
+        metadata.setPageToken("");
+        when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
+        this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        verify(this.fakeConnector, times(0)).pageUnsubscribe(any(), any());
+        verify(this.fakeDatabase, times(1)).deleteIntegration(any(), any(), any());
+    }
+
+    @Test
+    public void testIntegrationDelete_UnsubscribeFailed() throws Database.DatabaseException, FacebookConnector.FacebookException {
+        doThrow(new FacebookConnector.FacebookException("fake")).when(this.fakeConnector).pageUnsubscribe(any(), any());
+        this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        verify(this.fakeDatabase, times(1)).deleteIntegration(any(), any(), any());
+    }
+
+    @Test
+    public void testIntegrationDelete_DeleteFailed() throws Database.DatabaseException, FacebookConnector.FacebookException {
+        doThrow(new Database.DatabaseException("fake")).when(this.fakeDatabase).deleteIntegration(any(), any(), any());
+        this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        verify(this.fakeConnector, times(1)).pageUnsubscribe(any(), any());
+    }
+
+    @Test
+    public void testIntegrationDelete_OK() throws Database.DatabaseException, FacebookConnector.FacebookException {
+        this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        verify(this.fakeConnector, times(1)).pageUnsubscribe(any(), any());
+        verify(this.fakeDatabase, times(1)).deleteIntegration(any(), any(), any());
+    }
 }

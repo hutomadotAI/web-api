@@ -1066,6 +1066,17 @@ public class Database {
         }
     }
 
+    public void deleteIntegration(final UUID aiid, final UUID devid,
+                                  final IntegrationType integrationType) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteIntegration", 3)
+                    .add(aiid)
+                    .add(devid)
+                    .add(integrationType.value());
+            call.executeUpdate();
+        }
+    }
+
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
         final ArrayList<AiBot> bots = new ArrayList<>();
         while (rs.next()) {

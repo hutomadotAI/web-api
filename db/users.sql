@@ -40,7 +40,7 @@ GRANT SELECT ON `hutoma`.`developerInfo` TO `aiReader`@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`controller_state` TO 'aiReader'@'127.0.0.1';
 
-GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai_integration` TO 'aiReader'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_integration` TO 'aiReader'@'127.0.0.1';
 
 
 # Privileges for `aiWriter`@`127.0.0.1`

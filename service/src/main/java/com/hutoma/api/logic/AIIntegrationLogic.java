@@ -245,6 +245,47 @@ public class AIIntegrationLogic {
     }
 
     /***
+     * Unsubscribe or cancel any integrations once the bot is being deleted
+     * If an error occurs, log it but carry on regardless
+     * @param aiid
+     * @param devid
+     */
+    public void deleteIntegrations(UUID aiid, UUID devid) {
+
+        LogMap logMap = LogMap.map("Op", "facebook integration")
+                .put("aiid", aiid)
+                .put("devid", devid)
+                .put("action", "delete");
+
+        try {
+            IntegrationRecord record = this.database.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            if (record == null) {
+                // there was no integration; nothing to delete
+                return;
+            }
+
+            try {
+                // load the metadata
+                FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                        record.getData(), FacebookIntegrationMetadata.class);
+
+                // try to unsubscribe
+                unsubscribeToFacebookPage(logMap, record, metadata);
+            } finally {
+                // delete the integration
+                this.database.deleteIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            }
+            // log the result
+            this.logger.logUserTraceEvent(LOGFROM, String.format("deleted facebook integration for bot %s",
+                    aiid.toString()), devid.toString(), logMap);
+
+        } catch (Database.DatabaseException dbe) {
+            this.logger.logUserExceptionEvent(LOGFROM, "error deleting facebook integration",
+                    devid.toString(), dbe, logMap);
+        }
+    }
+
+    /***
      * Disconnect a bot from facebook
      * @param logMap
      * @param devid
@@ -259,10 +300,8 @@ public class AIIntegrationLogic {
                                  final IntegrationRecord record, final FacebookIntegrationMetadata metadata)
             throws Database.DatabaseException, FacebookConnector.FacebookException {
 
-        // if we have a token, use it to unsubscribe
-        if (!Strings.isNullOrEmpty(metadata.getPageToken())) {
-            this.facebookConnector.pageUnsubscribe(record.getIntegrationResource(), metadata.getPageToken());
-        }
+        unsubscribeToFacebookPage(logMap, record, metadata);
+
         // clear the database record
         this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
                 null, null,
@@ -271,6 +310,24 @@ public class AIIntegrationLogic {
         this.logger.logUserTraceEvent(LOGFROM, "facebook integration disconnected",
                 devid.toString(), logMap);
         return new ApiResult().setSuccessStatus("Bot disconnected");
+    }
+
+    private void unsubscribeToFacebookPage(final LogMap logMap, final IntegrationRecord record,
+                                           final FacebookIntegrationMetadata metadata) {
+        try {
+            // if we have a token, use it to unsubscribe
+            if ((record != null) && (metadata != null) && !Strings.isNullOrEmpty(metadata.getPageToken())) {
+                this.facebookConnector.pageUnsubscribe(record.getIntegrationResource(), metadata.getPageToken());
+                logMap.add("unsubscribe", "succeeded");
+            } else {
+                // otherwise log the fact that we don't
+                logMap.add("unsubscribe", "not necessary");
+            }
+        } catch (FacebookConnector.FacebookException fbe) {
+            // if we fail, log the failure
+            logMap.add("unsubscribe", "failed");
+            logMap.add("unsubscribe_error", fbe.toString());
+        }
     }
 
     /***

@@ -11,6 +11,7 @@ import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
+import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
 import junitparams.JUnitParamsRunner;
 
@@ -234,6 +235,7 @@ public class TestServiceAi extends ServiceTestBase {
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(AIServices.class).to(AIServices.class);
         binder.bind(AILogic.class).to(AILogic.class);
+        binder.bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
         return binder;
     }
 }

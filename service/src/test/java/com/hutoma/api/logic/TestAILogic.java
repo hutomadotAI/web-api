@@ -24,11 +24,11 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
+import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestBotHelper.BOTID;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -46,7 +46,7 @@ public class TestAILogic {
 
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final UUID VALIDDEVID = UUID.fromString("0a5c30c3-cd10-45da-9be9-e57942660215");
-
+    Provider<AIIntegrationLogic> fakeAiIntegrationLogicProvider;
     private Database fakeDatabase;
     private AIServices fakeAiServices;
     private Config fakeConfig;
@@ -64,11 +64,13 @@ public class TestAILogic {
         this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(ILogger.class);
+        this.fakeAiIntegrationLogicProvider = mock(Provider.class);
+        when(this.fakeAiIntegrationLogicProvider.get()).thenReturn(mock(AIIntegrationLogic.class));
 
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeAiServices,
-                this.fakeLogger, this.fakeTools);
+                this.fakeLogger, this.fakeTools, this.fakeAiIntegrationLogicProvider);
     }
 
     @Test
