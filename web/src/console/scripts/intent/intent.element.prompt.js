@@ -151,7 +151,7 @@ function loadPromptsForEntity(elem) {
             createNewPromptRow(prompt, parent);
         }
     } else {
-        node.setAttribute('placeholder', 'click to enter');
+        inputNode.setAttribute('placeholder', 'click to enter');
     }
 }
 
