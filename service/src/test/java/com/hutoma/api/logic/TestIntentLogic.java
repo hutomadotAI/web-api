@@ -15,14 +15,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -46,7 +44,7 @@ public class TestIntentLogic {
         return new ApiIntent(INTENTNAME, TOPICIN, TOPICOUT)
                 .addResponse("response").addUserSays("usersays")
                 .addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
-                        3, "somevalue", false).addPrompt("prompt"));
+                        3, "somevalue", false, "").addPrompt("prompt"));
     }
 
     @Before
@@ -70,7 +68,7 @@ public class TestIntentLogic {
         when(this.fakeDatabase.getIntents(any(), any())).thenReturn(getIntentsList());
         final ApiResult result = this.intentLogic.getIntents(DEVID_UUID, AIID);
         Assert.assertEquals(2, ((ApiIntentList) result).getIntentNames().size());
-        Assert.assertEquals(this.INTENTNAME, ((ApiIntentList) result).getIntentNames().get(0));
+        Assert.assertEquals(INTENTNAME, ((ApiIntentList) result).getIntentNames().get(0));
     }
 
     @Test

@@ -14,7 +14,7 @@ function getWebHookValues() {
     var webhook = {};
     webhook['intent_name'] = document.getElementById('intent-name').value;
     webhook['endpoint'] = document.getElementById('webhook').value;
-    webhook['enabled'] = !(webhook['endpoint'].trim()=="");
+    webhook['enabled'] = !(webhook['endpoint'].trim()==="");
     return webhook;
 }
 
@@ -82,7 +82,7 @@ function saveIntent() {
         //*** check validation n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
-        if (node_nprompt.value !== '' && node_nprompt.value !== 'undefined') {
+        if (node_nprompt.value !== '' && typeof node_nprompt.value !== 'undefined') {
             if (isInputInvalid(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
                 msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be between 1 and 99.');
@@ -122,6 +122,12 @@ function saveIntent() {
         //*** check required checkbox
         var node_required = node.children[i].children[3].children[0].children[0].children[0];
         v['required'] = node_required.checked;
+
+        var labelElement = node.children[i].children[4].children[0].children[0].children[0];
+        if (labelElement.value !== labelElement.getAttribute('placeholder')) {
+            labelElement.setAttribute('placeholder', labelElement.value);
+        }
+        v['label'] = labelElement.getAttribute('placeholder');
 
         variables.push(v);
     }
@@ -188,7 +194,7 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected
     var node_n_prompts = parent.children().eq(1).children().children();
     var curr_n_prompts;
-    if (node_n_prompts.val() == '' || node_n_prompts.val() == 'n° prompt')
+    if (node_n_prompts.val() === '' || node_n_prompts.val() === 'n° prompt')
         curr_n_prompts = node_n_prompts.attr('placeholder');
     else
         curr_n_prompts = node_n_prompts.val();
@@ -198,6 +204,6 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     curr_entity = curr_entity.replace(/[@]/g, "");
 
     cleanupromptDialogbox();
-    loadPromptsForEntity(curr_entity)
+    loadPromptsForEntity(elem);
 });
 

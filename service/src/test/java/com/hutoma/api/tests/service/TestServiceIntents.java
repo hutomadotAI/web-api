@@ -41,7 +41,7 @@ public class TestServiceIntents extends ServiceTestBase {
         intent.setWebHook(new WebHook(TestDataHelper.AIID, "name",
                 String.join("", Collections.nCopies(2048, "A")), true));
         intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
-                3, "somevalue", false)
+                3, "somevalue", false, "")
                 .addPrompt(String.join("", Collections.nCopies(250, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
@@ -72,7 +72,7 @@ public class TestServiceIntents extends ServiceTestBase {
     public void testSaveIntent_LongPrompt() {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
-                3, "somevalue", false)
+                3, "somevalue", false, "")
                 .addPrompt(String.join("", Collections.nCopies(250 + 1, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));

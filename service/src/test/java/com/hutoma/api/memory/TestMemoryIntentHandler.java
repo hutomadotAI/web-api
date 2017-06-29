@@ -123,7 +123,7 @@ public class TestMemoryIntentHandler {
     public void testMemoryIntentULoadNotExistYet() throws Database.DatabaseException {
         final String entityName = "entity1";
         ApiIntent apiIntent = new ApiIntent(INTENT_NAME, "in", "out");
-        IntentVariable iv = new IntentVariable(entityName, DEVID_UUID, true, 1, null, false);
+        IntentVariable iv = new IntentVariable(entityName, DEVID_UUID, true, 1, null, false, "");
         ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);

@@ -2,7 +2,7 @@ document.getElementById("btnAddIntentPrompt").addEventListener("click", addInten
 document.getElementById("btnModelPromptClose").addEventListener("click", setNewListPrompts);
 
 function checkInputPromptCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if (activeButtonCreateIntentPrompt())
             addIntentPrompt();
     }
@@ -113,7 +113,7 @@ function setNewListPrompts() {
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
 
-    if (curr_entity == '') {
+    if (curr_entity === '') {
         var first_node_prompt = node.children[0].children[2].children[0].children[0];
         first_node_prompt.setAttribute('data-prompts', intentNewPromptList);
         first_node_prompt.setAttribute('placeholder', ' ... ');
@@ -125,11 +125,11 @@ function setNewListPrompts() {
         var node_entity = node.children[i].children[0].children[0].children[0];
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var elem = $(node_entity).find("ul").find("li.selected");
-        if (elem.text() == curr_entity) {
+        if (elem.text() === curr_entity) {
             node_prompt.setAttribute('data-prompts', intentNewPromptList);
 
             var list_prompt = node_prompt.getAttribute('data-prompts');
-            if (list_prompt != '')
+            if (list_prompt !== '')
                 node_prompt.setAttribute('placeholder', ' ... ');
             else
                 node_prompt.setAttribute('placeholder', 'click to enter');
@@ -138,31 +138,14 @@ function setNewListPrompts() {
     }
 }
 
-function loadPromptsForEntity(curr_entity) {
-    var node = document.getElementById('parameter-list');
-    var len = node.childNodes.length;
+function loadPromptsForEntity(elem) {
+    // Joining the madness...
+    var inputNode = elem.context.parentNode.parentNode.parentNode.children[2].children[0].children[0];
 
-    if (curr_entity == '' && len > 0) {
-        var first_node_prompt = node.children[0].children[2].children[0].children[0];
-        splitPromptStringArray(first_node_prompt);
-        return;
-    }
-    for (var i = 0; i < len; i++) {
-        // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
-        var node_entity = node.children[i].children[0].children[0].children[0];
-        var elem = $(node_entity).find("ul").find("li.selected");
-        if (elem.text().replace(/[@]/g, "") == curr_entity) {   // remove character @
-            var node_prompt = node.children[i].children[2].children[0].children[0];
-            splitPromptStringArray(node_prompt);
-        }
-    }
-}
-
-function splitPromptStringArray(node) {
     var parent = document.getElementById('prompts-list');
-    var list_prompt = node.getAttribute('data-prompts');
+    var list_prompt = inputNode.getAttribute('data-prompts');
     var prompts_split = list_prompt.split(',');
-    if (list_prompt != '') {
+    if (list_prompt !== '') {
         for (var j = 0; j < prompts_split.length; j++) {
             var prompt = removeEscapeCharacter(prompts_split[j]);
             createNewPromptRow(prompt, parent);
@@ -171,8 +154,4 @@ function splitPromptStringArray(node) {
         node.setAttribute('placeholder', 'click to enter');
     }
 }
-
-$(document).ready(function () {
-    loadPromptsForEntity(document.getElementById('curr_entity').value);
-});
 

@@ -476,8 +476,9 @@ CREATE TABLE `intent_variable` (
   `value` varchar(250) DEFAULT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dummy` int(1) DEFAULT '0',
+  `label` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `intent_id` (`intent_id`,`entity_id`),
+  KEY `intent_id` (`intent_id`),
   KEY `entity_id` (`entity_id`),
   CONSTRAINT `intent_variable_ibfk_1` FOREIGN KEY (`intent_id`) REFERENCES `intent` (`id`) ON DELETE CASCADE,
   CONSTRAINT `intent_variable_ibfk_2` FOREIGN KEY (`entity_id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
@@ -889,13 +890,14 @@ CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `addUpdateIntentVariable`(
   IN in_entity_name VARCHAR(250),
   IN in_required int(1),
   IN in_n_prompts int,
-  IN in_value varchar(250)
+  IN in_value varchar(250),
+  IN in_label varchar(50)
 )
 BEGIN
     DECLARE update_count INT;
 
-    INSERT INTO `intent_variable` (`intent_id`, `entity_id`, `required`, `n_prompts`, `value`)
-      SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`
+    INSERT INTO `intent_variable` (`intent_id`, `entity_id`, `required`, `n_prompts`, `value`, `label`)
+      SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`, `in_label`
       FROM `intent`, `entity`
       WHERE `intent`.`id` =
             (SELECT `id` FROM `intent` 
@@ -906,7 +908,7 @@ BEGIN
 					(`entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1)
 					AND `in_entity_name`=`name`)
     ON DUPLICATE KEY UPDATE
-      `required`=`in_required`, `n_prompts`=`in_n_prompts`, `value`=`in_value`,
+      `required`=`in_required`, `n_prompts`=`in_n_prompts`, `value`=`in_value`, `label`=`in_label`,
       `entity_id`= (SELECT `id` FROM `entity` WHERE (`entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1) AND `in_entity_name`=`name`),
       `dummy` = NOT `dummy`,
       `id` = LAST_INSERT_ID(`intent_variable`.`id`);
@@ -2593,7 +2595,8 @@ BEGIN
       `intent_variable`.`n_prompts` AS `n_prompts`,
       `intent_variable`.`value` AS `value`,
       `entity`.`dev_id` AS `dev_id`,
-      `entity`.`isPersistent` as `isPersistent`
+      `entity`.`isPersistent` as `isPersistent`,
+      `intent_variable`.`label` as `label`
     FROM `intent_variable`, `entity`
     WHERE `intent_variable`.`intent_id` =
           (SELECT `id` FROM `intent`

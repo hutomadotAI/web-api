@@ -15,18 +15,24 @@ public class IntentVariable {
     private final String entityName;
     @SerializedName("dev_owner")
     private final UUID devOwner;
-
+    @SerializedName("required")
     private final boolean required;
     @SerializedName("n_prompts")
     private final int numberOfPrompts;
     @SerializedName("value")
     private String value;
+    @SerializedName("id")
     private int id;
+    @SerializedName("persistent")
     private boolean persistent;
-
+    @SerializedName("prompts")
     private List<String> prompts;
+    @SerializedName("label")
+    private String label;
 
-    public IntentVariable(String entityName, UUID devOwner, boolean required, int numPrompts, String value, boolean persistent) {
+
+    public IntentVariable(final String entityName, final UUID devOwner, final boolean required, final int numPrompts,
+                          final String value, final boolean persistent, final String label) {
         this.entityName = entityName;
         this.devOwner = devOwner;
         this.required = required;
@@ -34,14 +40,16 @@ public class IntentVariable {
         this.value = value;
         this.prompts = new ArrayList<>();
         this.persistent = persistent;
+        this.label = label;
     }
 
-    public IntentVariable(String entityName, UUID devOwner, boolean required, int numPrompts, String value, int id, boolean persistent) {
-        this(entityName, devOwner, required, numPrompts, value, persistent);
+    public IntentVariable(final String entityName, final UUID devOwner, final boolean required, final int numPrompts,
+                          final String value, final int id, final boolean persistent, final String label) {
+        this(entityName, devOwner, required, numPrompts, value, persistent, label);
         this.id = id;
     }
 
-    public IntentVariable addPrompt(String prompt) {
+    public IntentVariable addPrompt(final String prompt) {
         this.prompts.add(prompt);
         return this;
     }
@@ -66,7 +74,7 @@ public class IntentVariable {
         return this.prompts;
     }
 
-    public void setPrompts(List<String> prompts) {
+    public void setPrompts(final List<String> prompts) {
         this.prompts = prompts;
     }
 
@@ -74,15 +82,23 @@ public class IntentVariable {
         return this.value;
     }
 
-    public void setValue(String value) {
+    public void setValue(final String value) {
         this.value = value;
     }
 
-    public boolean isPersistent() { return this.persistent; }
+    public boolean isPersistent() {
+        return this.persistent;
+    }
 
-    public void setPersistent(boolean persistent) { this.persistent = persistent; }
+    public void setPersistent(final boolean persistent) {
+        this.persistent = persistent;
+    }
 
     public int getId() {
         return this.id;
+    }
+
+    public String getLabel() {
+        return this.label;
     }
 }

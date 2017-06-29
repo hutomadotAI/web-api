@@ -152,7 +152,8 @@ public class DatabaseEntitiesIntents extends Database {
                         varRs.getBoolean("required"),
                         varRs.getInt("n_prompts"),
                         varRs.getString("value"),
-                        varRs.getBoolean("isPersistent"));
+                        varRs.getBoolean("isPersistent"),
+                        varRs.getString("label"));
 
                 // for each variable get all its prompts
                 ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
@@ -395,7 +396,7 @@ public class DatabaseEntitiesIntents extends Database {
                 .add(aiid).add(intent.getIntentName()).executeQuery();
 
         // put them into a set
-        HashMap<String, IntentVariable> currentSet = new HashMap<>();
+        HashMap<Integer, IntentVariable> currentSet = new HashMap<>();
         while (readCurrentRs.next()) {
             String uuidString = readCurrentRs.getString("dev_id");
             UUID devOwnerUUID = UUID.fromString(uuidString);
@@ -405,15 +406,16 @@ public class DatabaseEntitiesIntents extends Database {
                     readCurrentRs.getBoolean("required"), readCurrentRs.getInt("n_prompts"),
                     readCurrentRs.getString("value"),
                     readCurrentRs.getInt("id"),
-                    readCurrentRs.getBoolean("isPersistent"));
-            currentSet.put(old.getEntityName(), old);
+                    readCurrentRs.getBoolean("isPersistent"),
+                    readCurrentRs.getString("label"));
+            currentSet.put(old.getId(), old);
         }
 
         if (intent.getVariables() != null) {
             // for every variable in the new data ...
             for (IntentVariable newValue : intent.getVariables()) {
                 // mark it as done if there was already one using that entity
-                currentSet.remove(newValue.getEntityName());
+                currentSet.remove(newValue.getId());
                 // and create or update it
                 intentVariableCreateOrUpdate(transaction, devid, aiid, intent, newValue);
             }
@@ -442,10 +444,15 @@ public class DatabaseEntitiesIntents extends Database {
             throws DatabaseException, SQLException {
 
         // generate the call params
-        ResultSet updateVarRs = transaction.getDatabaseCall().initialise("addUpdateIntentVariable", 7)
-                .add(devid).add(aiid).add(intent.getIntentName())
+        ResultSet updateVarRs = transaction.getDatabaseCall().initialise("addUpdateIntentVariable", 8)
+                .add(devid)
+                .add(aiid)
+                .add(intent.getIntentName())
                 .add(intentVariable.getEntityName())
-                .add(intentVariable.isRequired()).add(intentVariable.getNumPrompts()).add(intentVariable.getValue())
+                .add(intentVariable.isRequired())
+                .add(intentVariable.getNumPrompts())
+                .add(intentVariable.getValue())
+                .add(intentVariable.getLabel())
                 .executeQuery();
 
         // we are expecting some results; if not then something has gone very wrong

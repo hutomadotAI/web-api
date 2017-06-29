@@ -42,12 +42,12 @@ public class ApiIntent extends ApiResult {
         return this;
     }
 
-    public ApiIntent addVariable(IntentVariable variable) {
+    public ApiIntent addVariable(final IntentVariable variable) {
         this.variables.add(variable);
         return this;
     }
 
-    public ApiIntent addResponse(String response) {
+    public ApiIntent addResponse(final String response) {
         this.responses.add(response);
         return this;
     }
@@ -87,4 +87,5 @@ public class ApiIntent extends ApiResult {
     public void setWebHook(final WebHook webHook) {
         this.webHook = webHook;
     }
+
 }
