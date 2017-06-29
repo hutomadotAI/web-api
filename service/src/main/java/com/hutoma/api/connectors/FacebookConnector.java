@@ -291,11 +291,10 @@ public class FacebookConnector {
                 // otherwise try to interpret the result
                 default:
                     throw response.hasEntity() ?
-                            // if there is an entity try to deserialize it
-                            new FacebookException(statusInfo.getStatusCode(), statusInfo.getReasonPhrase(),
+                            FacebookException.exceptionMapper(statusInfo.getStatusCode(), statusInfo.getReasonPhrase(),
                                     response.readEntity(String.class), this.jsonSerializer) :
-                            // otherwise this is an HTTP error
-                            new FacebookException(statusInfo.getStatusCode(), statusInfo.getReasonPhrase());
+                            FacebookException.exceptionMapper(statusInfo.getStatusCode(), statusInfo.getReasonPhrase(),
+                                    null, this.jsonSerializer);
             }
         } catch (FacebookException fe) {
             throw fe;
@@ -309,70 +308,6 @@ public class FacebookConnector {
         PUT,
         POST,
         DELETE,
-    }
-
-    public static class FacebookException extends Exception {
-
-        private int httpErrorCode;
-        private String httpError;
-        private String facebookErrorType;
-        private String facebookErrorMessage;
-        private int facebookErrorCode;
-        private String genericError = null;
-
-        // if we have only text
-        public FacebookException(String genericError) {
-            this.genericError = genericError;
-        }
-
-        // if this is an http error
-        public FacebookException(int httpErrorCode, String httpError) {
-            this.httpError = httpError;
-            this.httpErrorCode = httpErrorCode;
-        }
-
-        // if this is an error from Graph API
-        public FacebookException(int httpErrorCode, String httpError, String response, JsonSerializer deserializer) {
-            this(httpErrorCode, httpError);
-            FacebookErrorResponse errorResponse = null;
-            try {
-                errorResponse = (FacebookErrorResponse)
-                        deserializer.deserialize(response, FacebookErrorResponse.class);
-            } catch (JsonParseException jpe) {
-                // fall through with error still null
-            }
-            if ((errorResponse == null) || (errorResponse.error == null)) {
-                this.facebookErrorType = "None";
-            } else {
-                this.facebookErrorType = errorResponse.error.errorType;
-                this.facebookErrorMessage = errorResponse.error.message;
-                this.facebookErrorCode = errorResponse.error.code;
-            }
-        }
-
-        @Override
-        public String getMessage() {
-            // compose depending on how much information we have
-            return (this.genericError != null) ? this.genericError :
-                    ((this.facebookErrorType != null) && (this.facebookErrorMessage != null)) ?
-                            String.format("%s %d: %s",
-                                    this.facebookErrorType, this.facebookErrorCode, this.facebookErrorMessage) :
-                            String.format("%d: %s", this.httpErrorCode, this.httpError);
-        }
-
-        private class FacebookErrorResponse {
-            @SerializedName("error")
-            FacebookError error;
-        }
-
-        private class FacebookError {
-            @SerializedName("code")
-            int code;
-            @SerializedName("message")
-            String message;
-            @SerializedName("type")
-            String errorType;
-        }
     }
 
     public class SendMessage {

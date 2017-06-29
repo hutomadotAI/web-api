@@ -6,6 +6,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
+import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookNode;
@@ -45,7 +46,7 @@ public class TestFacebookChatHandler {
     private ChatLogic fakeChatLogic;
 
     @Before
-    public void setup() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void setup() throws Database.DatabaseException, FacebookException {
         this.fakeConfig = mock(Config.class);
         this.serializer = new JsonSerializer();
         this.fakeDatabase = mock(Database.class);

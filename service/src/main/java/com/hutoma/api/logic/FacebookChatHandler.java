@@ -6,6 +6,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
+import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
@@ -137,7 +138,7 @@ public class FacebookChatHandler implements Callable {
                     // chat worked. save the status
                     status = "Chat active.";
                     chatSuccess = true;
-                } catch (FacebookConnector.FacebookException fe) {
+                } catch (FacebookException fe) {
                     // something went wrong. log it and save the status
                     status = fe.getMessage();
                     this.logger.logWarning(LOGFROM, status, logMap);
@@ -183,12 +184,12 @@ public class FacebookChatHandler implements Callable {
      * @param metadata
      * @param messageOriginatorId
      * @param responseText
-     * @throws FacebookConnector.FacebookException
+     * @throws FacebookException
      */
     private void sendChatResponseToFacebook(final IntegrationRecord integrationRecord,
                                             final FacebookIntegrationMetadata metadata,
                                             final String messageOriginatorId,
-                                            final String responseText) throws FacebookConnector.FacebookException {
+                                            final String responseText) throws FacebookException {
         // this is where we would create JSON to send back a richer format messsage
         // but it's just text passthrough for now
         this.facebookConnector.sendFacebookMessage(messageOriginatorId, responseText, metadata.getPageToken());

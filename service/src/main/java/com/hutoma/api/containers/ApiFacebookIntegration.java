@@ -36,6 +36,9 @@ public class ApiFacebookIntegration extends ApiResult {
     @SerializedName("facebook_app_id")
     String facebookAppId;
 
+    @SerializedName("success")
+    boolean success;
+
     public ApiFacebookIntegration(final String facebookAppId, final boolean hasAccessToken, final DateTime tokenExpiry,
                                   final String username, final boolean integrationActive, final String integrationStatus) {
         this.facebookAppId = facebookAppId;
@@ -44,6 +47,7 @@ public class ApiFacebookIntegration extends ApiResult {
         this.username = username;
         this.integrationActive = integrationActive;
         this.integrationStatus = integrationStatus;
+        this.success = true;
     }
 
     public boolean hasAccessToken() {
@@ -65,5 +69,17 @@ public class ApiFacebookIntegration extends ApiResult {
     public void setPageIntegrated(final String pageId, final String pageName) {
         this.pageIntegratedId = pageId;
         this.pageIntegratedName = pageName;
+    }
+
+    public void setIntegrationStatus(final String integrationStatus) {
+        this.integrationStatus = integrationStatus;
+    }
+
+    public boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(final boolean success) {
+        this.success = success;
     }
 }

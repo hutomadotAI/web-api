@@ -6,6 +6,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
+import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.ApiFacebookIntegration;
 import com.hutoma.api.containers.ApiIntegrationList;
 import com.hutoma.api.containers.ApiResult;
@@ -46,7 +47,7 @@ public class TestAIIntegrationLogic {
     private IntegrationRecord fakeIntegrationRecord;
 
     @Before
-    public void setup() throws FacebookConnector.FacebookException, Database.DatabaseException {
+    public void setup() throws FacebookException, Database.DatabaseException {
         this.fakeConfig = mock(Config.class);
         this.serializer = new JsonSerializer();
         this.fakeDatabase = mock(Database.class);
@@ -98,7 +99,7 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testFacebookState_NoRecord() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookState_NoRecord() throws Database.DatabaseException, FacebookException {
         when(this.fakeDatabase.getIntegration(any(), any(), any())).thenReturn(null);
         ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
@@ -106,14 +107,14 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testFacebookState_NoMetadata() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookState_NoMetadata() throws Database.DatabaseException, FacebookException {
         when(this.fakeIntegrationRecord.getData()).thenReturn("");
         ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, integ.getStatus().getCode());
     }
 
     @Test
-    public void testFacebookState_TokenExpired() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookState_TokenExpired() throws Database.DatabaseException, FacebookException {
         FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
                 "access", "username", DateTime.now().minusHours(1));
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
@@ -123,7 +124,7 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testFacebookState_PageList() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookState_PageList() throws Database.DatabaseException, FacebookException {
         FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
                 "access", "username", DateTime.now().plusHours(1));
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
@@ -131,10 +132,23 @@ public class TestAIIntegrationLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(true, ((ApiFacebookIntegration) integ).hasAccessToken());
         Assert.assertEquals(1, ((ApiFacebookIntegration) integ).getPageList().size());
+        Assert.assertTrue(((ApiFacebookIntegration) integ).getSuccess());
     }
 
     @Test
-    public void testFacebookState_Page() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookState_PageList_BadToken() throws Database.DatabaseException, FacebookException {
+        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
+                "access", "username", DateTime.now().plusHours(1));
+        when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
+        when(this.fakeConnector.getUserPages(anyString())).thenThrow(
+                new FacebookException.FacebookAuthException(400, "fake", "OAuthException", "fake", 190));
+        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
+        Assert.assertFalse(((ApiFacebookIntegration) integ).getSuccess());
+    }
+
+    @Test
+    public void testFacebookState_Page() throws Database.DatabaseException, FacebookException {
         when(this.fakeIntegrationRecord.getIntegrationResource()).thenReturn(TestDataHelper.ALT_SESSIONID.toString());
         ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
@@ -144,14 +158,14 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testFacebookConnect() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookConnect() throws Database.DatabaseException, FacebookException {
         FacebookConnect connect = new FacebookConnect();
         ApiResult integ = this.integLogic.facebookConnect(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, connect);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
     }
 
     @Test
-    public void testFacebookConnect_ShortLived() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookConnect_ShortLived() throws Database.DatabaseException, FacebookException {
         when(this.fakeConnector.isShortLivedToken(any())).thenReturn(true);
         when(this.fakeConnector.getLongFromShortLivedToken(any())).thenReturn(this.fakeToken);
         FacebookConnect connect = new FacebookConnect();
@@ -160,28 +174,28 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testFacebookConnect_Error() throws Database.DatabaseException, FacebookConnector.FacebookException {
-        when(this.fakeConnector.getFacebookUserToken(any())).thenThrow(new FacebookConnector.FacebookException("fake error"));
+    public void testFacebookConnect_Error() throws Database.DatabaseException, FacebookException {
+        when(this.fakeConnector.getFacebookUserToken(any())).thenThrow(new FacebookException("fake error"));
         FacebookConnect connect = new FacebookConnect();
         ApiResult integ = this.integLogic.facebookConnect(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, connect);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, integ.getStatus().getCode());
     }
 
     @Test
-    public void testFacebookAction_BadAction() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookAction_BadAction() throws Database.DatabaseException, FacebookException {
         ApiResult integ = this.integLogic.facebookAction(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, "bad", "none");
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, integ.getStatus().getCode());
     }
 
     @Test
-    public void testFacebookAction_NoValidIntegration() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookAction_NoValidIntegration() throws Database.DatabaseException, FacebookException {
         when(this.fakeDatabase.getIntegration(any(), any(), any())).thenReturn(null);
         ApiResult integ = this.integLogic.facebookAction(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, "bad", "none");
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, integ.getStatus().getCode());
     }
 
     @Test
-    public void testFacebookAction_Page() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookAction_Page() throws Database.DatabaseException, FacebookException {
         ApiResult integ = this.integLogic.facebookAction(TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
                 "page", TestDataHelper.ALT_SESSIONID.toString());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
@@ -190,7 +204,7 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testFacebookAction_Disconnect() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testFacebookAction_Disconnect() throws Database.DatabaseException, FacebookException {
         ApiResult integ = this.integLogic.facebookAction(TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
                 "disconnect", "");
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
@@ -200,7 +214,7 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testIntegrationDelete_None() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testIntegrationDelete_None() throws Database.DatabaseException, FacebookException {
         when(this.fakeDatabase.getIntegration(any(), any(), any())).thenReturn(null);
         this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         verify(this.fakeConnector, times(0)).pageUnsubscribe(any(), any());
@@ -208,7 +222,7 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testIntegrationDelete_NoToken() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testIntegrationDelete_NoToken() throws Database.DatabaseException, FacebookException {
         FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
                 "access", "username", DateTime.now().plusHours(1));
         metadata.setPageToken("");
@@ -219,21 +233,21 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testIntegrationDelete_UnsubscribeFailed() throws Database.DatabaseException, FacebookConnector.FacebookException {
-        doThrow(new FacebookConnector.FacebookException("fake")).when(this.fakeConnector).pageUnsubscribe(any(), any());
+    public void testIntegrationDelete_UnsubscribeFailed() throws Database.DatabaseException, FacebookException {
+        doThrow(new FacebookException("fake")).when(this.fakeConnector).pageUnsubscribe(any(), any());
         this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         verify(this.fakeDatabase, times(1)).deleteIntegration(any(), any(), any());
     }
 
     @Test
-    public void testIntegrationDelete_DeleteFailed() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testIntegrationDelete_DeleteFailed() throws Database.DatabaseException, FacebookException {
         doThrow(new Database.DatabaseException("fake")).when(this.fakeDatabase).deleteIntegration(any(), any(), any());
         this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         verify(this.fakeConnector, times(1)).pageUnsubscribe(any(), any());
     }
 
     @Test
-    public void testIntegrationDelete_OK() throws Database.DatabaseException, FacebookConnector.FacebookException {
+    public void testIntegrationDelete_OK() throws Database.DatabaseException, FacebookException {
         this.integLogic.deleteIntegrations(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         verify(this.fakeConnector, times(1)).pageUnsubscribe(any(), any());
         verify(this.fakeDatabase, times(1)).deleteIntegration(any(), any(), any());

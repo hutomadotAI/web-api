@@ -28,6 +28,7 @@ if (isset($_GET["action"])) {
     }
 }
 $facebook_state = $integrationApi->getFacebookConnectState($aiid);
+$fb_success = $facebook_state["success"];
 $fb_app_id = $facebook_state["facebook_app_id"];
 if (!isset($facebook_msg)) {
     $facebook_msg = $facebook_state["integration_status"];
@@ -80,7 +81,14 @@ if (isset($facebook_state)) {
         </div>
         <?php
         if ($fb_no_page_selected) {
-            if ($fb_empty_pagelist) {
+
+            if (!$fb_success) {
+                ?>
+                <div class="alert alert-base flat no-shadow">
+                    Could not get a list of pages from Facebook.
+                </div>
+                <?php
+            } elseif ($fb_empty_pagelist) {
                 ?>
                 <div class="alert alert-base flat no-shadow">
                     This account has no Facebook pages to integrate with. Create a page or connect to a different Facebook account.

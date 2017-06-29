@@ -7,6 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
+import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiFacebookIntegration;
 import com.hutoma.api.containers.ApiIntegrationList;
@@ -105,9 +106,12 @@ public class AIIntegrationLogic {
                         // if we have no page token then get a list of available pages
                         // that the user can select
                         if (Strings.isNullOrEmpty(metadata.getPageToken())) {
+                            // get nodes and convert to an id->name map
                             Map<String, String> pages = getListOfUserPages(metadata).stream().collect(
                                     Collectors.toMap(FacebookNode::getId, FacebookNode::getName));
+                            // set the structure in the response object
                             facebookIntegration.setPageList(pages);
+                            // log success
                             logMap.add("state", "listing available pages");
                         } else {
                             // otherwise just list the page that we are integrated with
@@ -125,7 +129,14 @@ public class AIIntegrationLogic {
                 logMap.add("state", "none");
             }
             this.logger.logUserTraceEvent(LOGFROM, "facebook integration getState", devid.toString(), logMap);
-        } catch (FacebookConnector.FacebookException e) {
+        } catch (FacebookException.FacebookAuthException authException) {
+            facebookIntegration.setIntegrationStatus(String.format("Error: %s",
+                    authException.getFacebookErrorMessage()));
+            // and flag an error
+            facebookIntegration.setSuccess(false);
+            // and log it
+            logMap.add("error", authException.getMessage());
+        } catch (FacebookException e) {
             this.logger.logError(LOGFROM, e.getMessage(), logMap);
             return ApiError.getInternalServerError(e.getMessage());
         } catch (Database.DatabaseException dbe) {
@@ -230,7 +241,7 @@ public class AIIntegrationLogic {
             this.logger.logUserExceptionEvent(LOGFROM, "error performing facebook action",
                     devid.toString(), dbe, logMap);
             return ApiError.getInternalServerError();
-        } catch (FacebookConnector.FacebookException fbe) {
+        } catch (FacebookException fbe) {
             this.logger.logUserExceptionEvent(LOGFROM, "error performing facebook action",
                     devid.toString(), fbe, logMap);
             return ApiError.getBadRequest(fbe.getMessage());
@@ -294,11 +305,11 @@ public class AIIntegrationLogic {
      * @param metadata
      * @return
      * @throws Database.DatabaseException
-     * @throws FacebookConnector.FacebookException
+     * @throws FacebookException
      */
     private ApiResult disconnect(final LogMap logMap, final UUID devid, final UUID aiid,
                                  final IntegrationRecord record, final FacebookIntegrationMetadata metadata)
-            throws Database.DatabaseException, FacebookConnector.FacebookException {
+            throws Database.DatabaseException, FacebookException {
 
         unsubscribeToFacebookPage(logMap, record, metadata);
 
@@ -323,7 +334,7 @@ public class AIIntegrationLogic {
                 // otherwise log the fact that we don't
                 logMap.add("unsubscribe", "not necessary");
             }
-        } catch (FacebookConnector.FacebookException fbe) {
+        } catch (FacebookException fbe) {
             // if we fail, log the failure
             logMap.add("unsubscribe", "failed");
             logMap.add("unsubscribe_error", fbe.toString());
@@ -334,9 +345,9 @@ public class AIIntegrationLogic {
      * Get a list of the user's pages that we can integrate with this bot
      * @param metadata
      * @return
-     * @throws FacebookConnector.FacebookException
+     * @throws FacebookException
      */
-    private List<FacebookNode> getListOfUserPages(final FacebookIntegrationMetadata metadata) throws FacebookConnector.FacebookException {
+    private List<FacebookNode> getListOfUserPages(final FacebookIntegrationMetadata metadata) throws FacebookException {
         FacebookNodeList nodeList = this.facebookConnector.getUserPages(metadata.getAccessToken());
         if (nodeList != null && nodeList.getData() != null) {
             return nodeList.getData();
@@ -355,12 +366,12 @@ public class AIIntegrationLogic {
      * @param page
      * @return
      * @throws Database.DatabaseException
-     * @throws FacebookConnector.FacebookException
+     * @throws FacebookException
      */
     private ApiResult pageSelect(final LogMap logMap, final UUID devid, final UUID aiid,
                                  final IntegrationRecord record, final FacebookIntegrationMetadata metadata,
                                  final String page)
-            throws Database.DatabaseException, FacebookConnector.FacebookException {
+            throws Database.DatabaseException, FacebookException {
 
         logMap.add("facebook_page_id", page);
         // get a list of pages and filter out the one the user has selected
