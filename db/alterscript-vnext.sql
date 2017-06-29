@@ -7,6 +7,7 @@ USE `hutoma`;
 
 ALTER TABLE `botStore` ADD COLUMN featured tinyint(1) NOT NULL DEFAULT 0 AFTER `botIcon`;
 ALTER TABLE intent_variable DROP KEY intent_id, ADD KEY intent_id(intent_id);
+ALTER TABLE `intent_variable` ADD COLUMN `label` varchar(50) DEFAULT NULL AFTER `dummy`;
 
 
 DROP PROCEDURE IF EXISTS `getAisLinkedToAi`;
