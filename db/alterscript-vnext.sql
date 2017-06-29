@@ -216,3 +216,6 @@ AND `integration`=`in_integration`;
 DELIMITER ;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_integration` TO 'aiReader'@'127.0.0.1';
+
+INSERT INTO `hutoma`.`entity` (`dev_id`, `name`, `created`, `isSystem`, `isPersistent`) VALUES ('192a1677-551f-46bb-9188-04ed8a658926', 'sys.any', '2017-05-12 00:00:00', '1', '0');
+
