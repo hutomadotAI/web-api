@@ -19,6 +19,7 @@
     });
 
     var appid = "unknown";
+    var permissions = "unknown";
 
     function facebookConnect() {
         <?php // https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow  ?>
@@ -26,7 +27,7 @@
         document.cookie = "facebookRedir=" + htmlEncode(facebookRedir) + "; expires=0; path=/";
         var fbLogin = "https://www.facebook.com/v2.9/dialog/oauth"
             + "?client_id=" + appid
-            + "&scope=manage_pages,pages_show_list,pages_messaging,public_profile"
+            + "&scope=" + permissions
             + "&redirect_uri=" + facebookRedir;
         window.location.href = fbLogin;
     }

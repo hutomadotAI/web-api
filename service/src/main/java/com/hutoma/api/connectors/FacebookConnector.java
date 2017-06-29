@@ -149,6 +149,15 @@ public class FacebookConnector {
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
+    public FacebookNodeList getUserGrantedPermissions(String userid, String accessToken) throws FacebookException {
+        JerseyWebTarget target = getGraphApiTarget()
+                .path(userid)
+                .path("permissions")
+                .queryParam("access_token", accessToken);
+        String body = webCall(target, RequestMethod.GET);
+        return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
+    }
+
     /***
      * Disconnect a Facebook account altogether
      * This is not currently in use because we cannot guarantee that it will not

@@ -81,7 +81,7 @@ public class AIIntegrationEndpoint {
     public Response facebookState(
             @Context ContainerRequestContext requestContext
     ) {
-        ApiResult result = this.aiIntegrationLogic.facebookState(
+        ApiResult result = this.aiIntegrationLogic.getFacebookState(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();

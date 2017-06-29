@@ -36,11 +36,16 @@ public class ApiFacebookIntegration extends ApiResult {
     @SerializedName("facebook_app_id")
     String facebookAppId;
 
+    @SerializedName("facebook_request_permissions")
+    String requestPermissions;
+
     @SerializedName("success")
     boolean success;
 
-    public ApiFacebookIntegration(final String facebookAppId, final boolean hasAccessToken, final DateTime tokenExpiry,
+    public ApiFacebookIntegration(final String requestPermissions,
+                                  final String facebookAppId, final boolean hasAccessToken, final DateTime tokenExpiry,
                                   final String username, final boolean integrationActive, final String integrationStatus) {
+        this.requestPermissions = requestPermissions;
         this.facebookAppId = facebookAppId;
         this.hasAccessToken = hasAccessToken;
         this.tokenExpiry = tokenExpiry;
@@ -76,7 +81,7 @@ public class ApiFacebookIntegration extends ApiResult {
     }
 
     public boolean getSuccess() {
-        return success;
+        return this.success;
     }
 
     public void setSuccess(final boolean success) {

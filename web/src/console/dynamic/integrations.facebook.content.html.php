@@ -30,6 +30,7 @@ if (isset($_GET["action"])) {
 $facebook_state = $integrationApi->getFacebookConnectState($aiid);
 $fb_success = $facebook_state["success"];
 $fb_app_id = $facebook_state["facebook_app_id"];
+$fb_permissions = $facebook_state["facebook_request_permissions"];
 if (!isset($facebook_msg)) {
     $facebook_msg = $facebook_state["integration_status"];
 }
@@ -45,11 +46,18 @@ if (isset($facebook_state)) {
 }
 
 ?>
-<script> appid = "<?php
+<script><?php
+
     // we get the facebook app id from the API call
     // so we can put it here to be picked up by the facebookConnect call
-    echo $fb_app_id;
-?>";</script>
+    echo "\nappid = \"$fb_app_id\";";
+
+    // this is the list of permissions that we need to request from
+    // facebook when making a connect call
+    echo "\npermissions = \"$fb_permissions\";";
+
+?>
+</script>
 
     <?php
 

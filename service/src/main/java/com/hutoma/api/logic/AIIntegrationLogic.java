@@ -23,9 +23,12 @@ import com.hutoma.api.containers.sub.IntegrationType;
 
 import org.joda.time.DateTime;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -70,10 +73,12 @@ public class AIIntegrationLogic {
      * @param aiid
      * @return
      */
-    public ApiResult facebookState(final UUID devid, final UUID aiid) {
+    public ApiResult getFacebookState(final UUID devid, final UUID aiid) {
 
         // an empty structure to begin with
-        ApiFacebookIntegration facebookIntegration = new ApiFacebookIntegration(this.config.getFacebookAppId(),
+        ApiFacebookIntegration facebookIntegration = new ApiFacebookIntegration(
+                String.join(",", this.getRequiredPermissions()),
+                this.config.getFacebookAppId(),
                 false,
                 new DateTime(), "", false, "");
 
@@ -97,12 +102,18 @@ public class AIIntegrationLogic {
                     boolean tokenValid = metadata.getAccessTokenExpiry().isAfter(DateTime.now());
 
                     // ok, we have enough data to send back a non-empty state
-                    facebookIntegration = new ApiFacebookIntegration(this.config.getFacebookAppId(),
+                    facebookIntegration = new ApiFacebookIntegration(
+                            String.join(",", this.getRequiredPermissions()),
+                            this.config.getFacebookAppId(),
                             tokenPresent && tokenValid,
                             metadata.getAccessTokenExpiry(), metadata.getUserName(),
                             record.isActive(), record.getStatus());
 
                     if (tokenPresent && tokenValid) {
+
+                        // do we still have access rights?
+                        checkGrantedPermissions(record.getIntegrationUserid(), metadata.getAccessToken());
+
                         // if we have no page token then get a list of available pages
                         // that the user can select
                         if (Strings.isNullOrEmpty(metadata.getPageToken())) {
@@ -129,6 +140,13 @@ public class AIIntegrationLogic {
                 logMap.add("state", "none");
             }
             this.logger.logUserTraceEvent(LOGFROM, "facebook integration getState", devid.toString(), logMap);
+        } catch (FacebookException.FacebookMissingPermissionsException missing) {
+            facebookIntegration.setIntegrationStatus(String.format("Error: %s",
+                    missing.getMessage()));
+            // and flag an error
+            facebookIntegration.setSuccess(false);
+            // and log it
+            logMap.add("error", missing.getMessage());
         } catch (FacebookException.FacebookAuthException authException) {
             facebookIntegration.setIntegrationStatus(String.format("Error: %s",
                     authException.getFacebookErrorMessage()));
@@ -185,8 +203,17 @@ public class AIIntegrationLogic {
                     null, userNode.getId(), this.serializer.serialize(metadata),
                     String.format("Connected to \"%s\" Facebook account", userNode.getName()), false);
 
+            // make sure we got the permissions we require
+            checkGrantedPermissions(userNode.getId(), token.getAccessToken());
+
             this.logger.logUserTraceEvent(LOGFROM, "facebook account connect", devid.toString(), logMap);
 
+        } catch (FacebookException.FacebookMissingPermissionsException missing) {
+            // log but return success status anyway
+            // to allow getState to warn the user
+            this.logger.logUserWarnEvent(LOGFROM, "facebook account connect with missing permissions",
+                    devid.toString(), logMap.put("missing", missing.getMessage()));
+            // fallthrough to return success
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "error connecting an account to facebook",
                     devid.toString(), e, logMap);
@@ -236,11 +263,6 @@ public class AIIntegrationLogic {
             } else {
                 failReason = "Your account is not connected to Facebook.";
             }
-            // TODO distinguish between different classes of error messages
-        } catch (Database.DatabaseException dbe) {
-            this.logger.logUserExceptionEvent(LOGFROM, "error performing facebook action",
-                    devid.toString(), dbe, logMap);
-            return ApiError.getInternalServerError();
         } catch (FacebookException fbe) {
             this.logger.logUserExceptionEvent(LOGFROM, "error performing facebook action",
                     devid.toString(), fbe, logMap);
@@ -408,6 +430,44 @@ public class AIIntegrationLogic {
                 aiid.toString(), metadata.getPageName(), metadata.getUserName()), devid.toString(), logMap);
 
         return new ApiResult().setSuccessStatus("Link successful.");
+    }
+
+    /***
+     * Checks the permissions that we have been granted against the ones that we requested
+     * and throws an exception if there are missing permissions
+     * @param id
+     * @param accessToken
+     * @return
+     * @throws FacebookException.FacebookMissingPermissionsException
+     */
+    protected void checkGrantedPermissions(final String id, final String accessToken) throws FacebookException {
+
+        // get permissions from facebook
+        FacebookNodeList nodeList = this.facebookConnector.getUserGrantedPermissions(id, accessToken);
+        // extract the list
+        List<FacebookNode> nodes = ((nodeList == null) || (nodeList.getData() == null)) ?
+                Collections.EMPTY_LIST : nodeList.getData();
+        // filter only the granted ones and convert to a word list
+        List<String> granted = nodes.stream()
+                .filter(permission -> permission.getStatus().equals("granted"))
+                .map(FacebookNode::getPermission)
+                .collect(Collectors.toList());
+        // get a set of permissions that we require to function
+        Set<String> required = new HashSet<String>(Arrays.asList(getRequiredPermissions()));
+        // subtract the granted from the required
+        required.removeAll(granted);
+        // if any required are left over then throw an exception
+        if (!required.isEmpty()) {
+            throw new FacebookException.FacebookMissingPermissionsException(
+                    String.format("Required permissions not granted: %s",
+                            String.join(",", required)));
+        }
+    }
+
+    protected String[] getRequiredPermissions() {
+        return new String[]{
+                "manage_pages", "pages_show_list", "pages_messaging"
+        };
     }
 
 }

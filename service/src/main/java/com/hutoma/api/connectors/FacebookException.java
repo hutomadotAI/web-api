@@ -106,6 +106,12 @@ public class FacebookException extends Exception {
         }
     }
 
+    public static class FacebookMissingPermissionsException extends FacebookException {
+        public FacebookMissingPermissionsException(final String genericError) {
+            super(genericError);
+        }
+    }
+
     private class FacebookErrorResponse {
         @SerializedName("error")
         FacebookError error;

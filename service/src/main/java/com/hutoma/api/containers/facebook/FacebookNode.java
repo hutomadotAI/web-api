@@ -10,6 +10,9 @@ public class FacebookNode {
     private String name;
     private List<String> perms;
 
+    private String permission;
+    private String status;
+
     @SerializedName("access_token")
     private String accessToken;
 
@@ -34,5 +37,13 @@ public class FacebookNode {
 
     public String getAccessToken() {
         return this.accessToken;
+    }
+
+    public String getPermission() {
+        return this.permission;
+    }
+
+    public String getStatus() {
+        return this.status;
     }
 }

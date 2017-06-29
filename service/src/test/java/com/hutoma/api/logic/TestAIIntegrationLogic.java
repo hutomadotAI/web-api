@@ -66,10 +66,18 @@ public class TestAIIntegrationLogic {
                 "access", "username", DateTime.now().plusHours(1));
         metadata.setPageToken("validpagetoken");
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
+        when(this.fakeIntegrationRecord.getIntegrationUserid()).thenReturn("userid");
         when(this.fakeConnector.getUserPages(anyString())).thenReturn(
                 new FacebookNodeList(Collections.singletonList(
                         new FacebookNode(TestDataHelper.ALT_SESSIONID.toString(), "pagename",
                                 Collections.singletonList("perm"), "token"))));
+
+        when(this.fakeConnector.getUserGrantedPermissions(anyString(), anyString()))
+                .thenReturn((FacebookNodeList) this.serializer.deserialize("{\"data\":[{\n" +
+                        "\"permission\":\"manage_pages\",\"status\":\"granted\"},\n" +
+                        "{\"permission\":\"pages_show_list\",\"status\":\"granted\"},\n" +
+                        "{\"permission\":\"pages_messaging\",\"status\":\"granted\"},\n" +
+                        "{\"permission\":\"public_profile\",\"status\":\"granted\"}]}", FacebookNodeList.class));
 
         this.integLogic = new AIIntegrationLogic(this.fakeConfig, this.fakeDatabase,
                 this.serializer, this.fakeConnector, this.fakeLogger);
@@ -101,7 +109,7 @@ public class TestAIIntegrationLogic {
     @Test
     public void testFacebookState_NoRecord() throws Database.DatabaseException, FacebookException {
         when(this.fakeDatabase.getIntegration(any(), any(), any())).thenReturn(null);
-        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        ApiResult integ = this.integLogic.getFacebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(false, ((ApiFacebookIntegration) integ).hasAccessToken());
     }
@@ -109,7 +117,7 @@ public class TestAIIntegrationLogic {
     @Test
     public void testFacebookState_NoMetadata() throws Database.DatabaseException, FacebookException {
         when(this.fakeIntegrationRecord.getData()).thenReturn("");
-        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        ApiResult integ = this.integLogic.getFacebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, integ.getStatus().getCode());
     }
 
@@ -118,7 +126,7 @@ public class TestAIIntegrationLogic {
         FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
                 "access", "username", DateTime.now().minusHours(1));
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
-        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        ApiResult integ = this.integLogic.getFacebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(false, ((ApiFacebookIntegration) integ).hasAccessToken());
     }
@@ -128,7 +136,7 @@ public class TestAIIntegrationLogic {
         FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
                 "access", "username", DateTime.now().plusHours(1));
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
-        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        ApiResult integ = this.integLogic.getFacebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(true, ((ApiFacebookIntegration) integ).hasAccessToken());
         Assert.assertEquals(1, ((ApiFacebookIntegration) integ).getPageList().size());
@@ -142,7 +150,7 @@ public class TestAIIntegrationLogic {
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
         when(this.fakeConnector.getUserPages(anyString())).thenThrow(
                 new FacebookException.FacebookAuthException(400, "fake", "OAuthException", "fake", 190));
-        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        ApiResult integ = this.integLogic.getFacebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertFalse(((ApiFacebookIntegration) integ).getSuccess());
     }
@@ -150,7 +158,7 @@ public class TestAIIntegrationLogic {
     @Test
     public void testFacebookState_Page() throws Database.DatabaseException, FacebookException {
         when(this.fakeIntegrationRecord.getIntegrationResource()).thenReturn(TestDataHelper.ALT_SESSIONID.toString());
-        ApiResult integ = this.integLogic.facebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
+        ApiResult integ = this.integLogic.getFacebookState(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
         Assert.assertEquals(true, ((ApiFacebookIntegration) integ).hasAccessToken());
         Assert.assertEquals(TestDataHelper.ALT_SESSIONID.toString(),
@@ -252,4 +260,50 @@ public class TestAIIntegrationLogic {
         verify(this.fakeConnector, times(1)).pageUnsubscribe(any(), any());
         verify(this.fakeDatabase, times(1)).deleteIntegration(any(), any(), any());
     }
+
+    @Test
+    public void testPermissions_Match() throws FacebookException {
+        TestPermissions integ = new TestPermissions(new String[]{"A", "B"});
+        when(this.fakeConnector.getUserGrantedPermissions(anyString(), anyString()))
+                .thenReturn((FacebookNodeList) this.serializer.deserialize("{\"data\":[{\n" +
+                        "\"permission\":\"A\",\"status\":\"granted\"},\n" +
+                        "{\"permission\":\"B\",\"status\":\"granted\"}]}", FacebookNodeList.class));
+        integ.checkGrantedPermissions("1", "2");
+    }
+
+    @Test(expected = FacebookException.FacebookMissingPermissionsException.class)
+    public void testPermissions_Missing() throws FacebookException {
+        TestPermissions integ = new TestPermissions(new String[]{"X", "Y"});
+        when(this.fakeConnector.getUserGrantedPermissions(anyString(), anyString()))
+                .thenReturn((FacebookNodeList) this.serializer.deserialize("{\"data\":[{\n" +
+                        "\"permission\":\"A\",\"status\":\"granted\"},\n" +
+                        "{\"permission\":\"D\",\"status\":\"granted\"}]}", FacebookNodeList.class));
+        integ.checkGrantedPermissions("1", "2");
+    }
+
+    @Test(expected = FacebookException.FacebookMissingPermissionsException.class)
+    public void testPermissions_Denied() throws FacebookException {
+        TestPermissions integ = new TestPermissions(new String[]{"A", "B"});
+        when(this.fakeConnector.getUserGrantedPermissions(anyString(), anyString()))
+                .thenReturn((FacebookNodeList) this.serializer.deserialize("{\"data\":[{\n" +
+                        "\"permission\":\"A\",\"status\":\"granted\"},\n" +
+                        "{\"permission\":\"B\",\"status\":\"not granted\"}]}", FacebookNodeList.class));
+        integ.checkGrantedPermissions("1", "2");
+    }
+
+    class TestPermissions extends AIIntegrationLogic {
+
+        String[] required;
+
+        public TestPermissions(String[] required) {
+            super(TestAIIntegrationLogic.this.fakeConfig, TestAIIntegrationLogic.this.fakeDatabase, TestAIIntegrationLogic.this.serializer, TestAIIntegrationLogic.this.fakeConnector, TestAIIntegrationLogic.this.fakeLogger);
+            this.required = required;
+        }
+
+        @Override
+        protected String[] getRequiredPermissions() {
+            return this.required;
+        }
+    }
+
 }
