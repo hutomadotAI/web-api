@@ -123,8 +123,9 @@ public class FacebookChatHandler implements Callable {
                 this.logger.logInfo(LOGFROM, String.format("facebook message for %s",
                         integrationRecord.getAiid()), logMap);
 
-                // hash the page and the aiid together to get a chatID
-                UUID chatID = generateChatId(integrationRecord.getAiid(), recipientPageId);
+                // hash the sender ID and the aiid together to get a chatID
+                // that is unique to each user-page pair
+                UUID chatID = generateChatId(integrationRecord.getAiid(), messageOriginatorId);
 
                 // TODO: rate limiting
                 // TODO: load chat state and check sequence number
