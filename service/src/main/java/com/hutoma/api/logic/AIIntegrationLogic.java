@@ -198,15 +198,27 @@ public class AIIntegrationLogic {
             FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(token.getAccessToken(),
                     userNode.getName(), token.getExpires());
 
-            // save it
-            this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
-                    null, userNode.getId(), this.serializer.serialize(metadata),
-                    String.format("Connected to \"%s\" Facebook account", userNode.getName()), false);
+            // check if anyone else has already connected this Facebook account
+            if (this.database.isIntegratedUserAlreadyRegistered(
+                    IntegrationType.FACEBOOK, userNode.getId(), devid)) {
+                // if so, save an empty record
+                this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
+                        null, "", "{}",
+                        "Cannot connect. Another user has already registered that Facebook account.", false);
+                // and log
+                this.logger.logUserWarnEvent(LOGFROM, "facebook account already in use", devid.toString(),
+                        logMap);
+            } else {
+                // otherwise, save it
+                this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
+                        null, userNode.getId(), this.serializer.serialize(metadata),
+                        String.format("Connected to \"%s\" Facebook account", userNode.getName()), false);
 
-            // make sure we got the permissions we require
-            checkGrantedPermissions(userNode.getId(), token.getAccessToken());
+                // make sure we got the permissions we require
+                checkGrantedPermissions(userNode.getId(), token.getAccessToken());
 
-            this.logger.logUserTraceEvent(LOGFROM, "facebook account connect", devid.toString(), logMap);
+                this.logger.logUserInfoEvent(LOGFROM, "facebook account connect", devid.toString(), logMap);
+            }
 
         } catch (FacebookException.FacebookMissingPermissionsException missing) {
             // log but return success status anyway

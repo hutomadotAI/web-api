@@ -1077,6 +1077,23 @@ public class Database {
         }
     }
 
+    public boolean isIntegratedUserAlreadyRegistered(final IntegrationType integration, final String userID, final UUID devid)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("checkIntegrationUser", 3)
+                    .add(integration.value())
+                    .add(userID)
+                    .add(devid);
+            ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("use_count") > 0;
+            }
+            return false;
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
         final ArrayList<AiBot> bots = new ArrayList<>();
         while (rs.next()) {

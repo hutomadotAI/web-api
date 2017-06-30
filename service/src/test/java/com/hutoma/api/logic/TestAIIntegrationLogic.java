@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -190,6 +191,17 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
+    public void testFacebookConnect_AlreadyInUse() throws Database.DatabaseException, FacebookException {
+        when(this.fakeDatabase.isIntegratedUserAlreadyRegistered(any(), any(), any())).thenReturn(true);
+        FacebookConnect connect = new FacebookConnect();
+        ApiResult integ = this.integLogic.facebookConnect(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, connect);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
+        verify(this.fakeDatabase, times(1)).updateIntegration(
+                any(), any(), any(), any(), not(Matchers.eq("userid")),
+                Matchers.eq("{}"), any(), Matchers.eq(false));
+    }
+
+    @Test
     public void testFacebookAction_BadAction() throws Database.DatabaseException, FacebookException {
         ApiResult integ = this.integLogic.facebookAction(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, "bad", "none");
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, integ.getStatus().getCode());
@@ -296,7 +308,9 @@ public class TestAIIntegrationLogic {
         String[] required;
 
         public TestPermissions(String[] required) {
-            super(TestAIIntegrationLogic.this.fakeConfig, TestAIIntegrationLogic.this.fakeDatabase, TestAIIntegrationLogic.this.serializer, TestAIIntegrationLogic.this.fakeConnector, TestAIIntegrationLogic.this.fakeLogger);
+            super(TestAIIntegrationLogic.this.fakeConfig, TestAIIntegrationLogic.this.fakeDatabase,
+                    TestAIIntegrationLogic.this.serializer, TestAIIntegrationLogic.this.fakeConnector,
+                    TestAIIntegrationLogic.this.fakeLogger);
             this.required = required;
         }
 
