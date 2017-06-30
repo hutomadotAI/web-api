@@ -26,7 +26,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     }
     
     wHTML += ('<li class="header unselectable" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
-    wHTML += ('<li id="menu_home" class="unselectable"><a href="./home.php"><i class="fa fa-home text-light-blue" id="level0"></i><span>home</span></a></li>');
+    wHTML += ('<li id="menu_home"><a href="./home.php"><i class="fa fa-home text-light-blue" id="level0"> </i><span>Home</span></a></li>');
 
     if (!limitedMenu) {
         wHTML += ('<li class="unselectable" id="level1">');
@@ -38,19 +38,19 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
 
         wHTML += ('</a>');
         wHTML += ('<ul class="treeview-menu">');
-        wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>training</span></a></li>');
-        wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>entities</span></a></li>');
-        wHTML += ('<li id="menu_intents"><a href="./intent.php" id="link_intents"><i class="fa fa-commenting-o text-green"></i> <span>intents</span></a></li>');
-        wHTML += ('<li id="menu_integrations"><a href="./integrations.php" id="link_integrations"><i class="fa fa-puzzle-piece text-blue"></i> <span>integrations</span></a></li>');
-        wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>settings</span></a></li>');
+        wHTML += ('<li id="menu_training"><a href="./trainingAI.php" id="link_training"><i class="fa fa-graduation-cap"></i> <span>Training</span></a></li>');
+        wHTML += ('<li id="menu_entities"><a href="./entity.php" id="link_entities"><i class="fa fa-sitemap text-yellow"></i> <span>Entities</span></a></li>');
+        wHTML += ('<li id="menu_intents"><a href="./intent.php" id="link_intents"><i class="fa fa-commenting-o text-green"></i> <span>Intents</span></a></li>');
+        wHTML += ('<li id="menu_integrations"><a href="./integrations.php" id="link_integrations"><i class="fa fa-puzzle-piece text-blue"></i> <span>Integrations</span></a></li>');
+        wHTML += ('<li id="menu_settings"><a href="./settingsAI.php" id="link_settings"><i class="fa fa-gear text-red"></i> <span>Settings</span></a></li>');
         wHTML += ('</ul>');
         wHTML += ('</li>');
     }
     var loc = "botstore.php";
     wHTML += ('<li class="unselectable" id="level2">');
-    wHTML += ('<a href="#"><i class="fa fa-shopping-cart text-green"></i><span> botstore</span><i class="fa fa-ellipsis-v pull-right"></i></a>');
+    wHTML += ('<a href="#"><i class="fa fa-shopping-cart text-green"></i> <span>Botstore</span><i class="fa fa-ellipsis-v pull-right"></i></a>');
     wHTML += ('<ul class="treeview-menu" id="botstoreMenu">');
-    wHTML += ('<li id="menu_botstore" ><a href="' + loc + '"><i class="fa fa-globe text-gray text-center"></i> All</a></li>');
+    wHTML += ('<li id="menu_botstore" ><a href="' + loc + '"> <i class="fa fa-globe text-gray text-center"></i>All</a></li>');
     for (var key in category_list) {
         var category = category_list[key];
         wHTML += ('<li id="menu_' + removeSpecialCharacters(category) + '" ><a href="' + loc + buildCategoryURIparameter(category) + '"><i class="fa ' + category_list_icons[key] + ' text-gray text-center"></i> ' + category + '</a></li>');
@@ -59,7 +59,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     wHTML += ('</ul>');
     wHTML += ('</li>');
 
-    wHTML += ('<li id="menu_documentation" class="unselectable"><a href="https://docs.hutoma.com" id="link_documentation" target="_blank"><i class="fa fa-book text-purple"></i><span>Documentation</span></a></li>');
+    wHTML += ('<li id="menu_documentation" class="unselectable"><a href="https://docs.hutoma.com" id="link_documentation" target="_blank"><i class="fa fa-book text-purple"></i> <span>Documentation</span></a></li>');
 
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);
