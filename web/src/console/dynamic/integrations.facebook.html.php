@@ -3,11 +3,6 @@
 <div class="box-header with-border">
     <i class="fa fa-facebook text-blue"></i>
     <div class="box-title"><b>Facebook</b></div>
-    <a data-toggle="collapse" href="#collapseEntitiesInfo">
-        <div class=" pull-right">more info
-            <i class="fa fa-question-circle text-sm text-yellow"></i>
-        </div>
-    </a>
 </div>
 
 <div id="facebookState">

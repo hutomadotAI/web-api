@@ -66,10 +66,11 @@ if (isset($facebook_state)) {
         <div class="box-header with-border">
 
             <div class="alert alert-base flat no-shadow">
-                <p>To integrate this bot with Facebook you need allow Hutoma to access your Facebook Page.</p>
-            </div>
+                Integrate this bot with a Facebook Page to allow it to respond on your behalf.
+                Users can talk to the bot over Facebook Messenger, both in the app and on the web.
+           </div>
             <div style="padding-bottom: 20px">
-                <button class="btn btn-primary flat" id="fb-int-connect" style="width: 260px; " alt="disconnect">
+                <button class="btn btn-primary flat center-block" id="fb-int-connect" style="width: 260px; " alt="disconnect">
                     <i class="fa fa-facebook text-blue"></i>
                     Connect to Facebook
                 </button>
@@ -77,14 +78,15 @@ if (isset($facebook_state)) {
         </div>
         <?php
     } else {
+        $fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
     ?>
     <div class="box-header with-border ">
         <div class="alert alert-base flat no-shadow">
-            <p>Connected to account <?php echo $facebook_state["facebook_username"];?></p>
-            <p>The access token for this account expires on <?php echo $facebook_state["access_token_expiry"];?></p>
+            <p>Connected to "<?php echo $facebook_state["facebook_username"];?>" Facebook account</p>
+            <p>The access token for this account expires on <?php echo $fb_token_expiry->format("r"); ?></p>
         </div>
         <div style="padding-bottom: 20px">
-            <button class="btn btn-primary flat" id="fb-disconnect" style="width: 130px; " alt="disconnect">disconnect
+            <button class="btn btn-primary flat center-block" id="fb-disconnect" style="width: 260px; " alt="disconnect">disconnect
             </button>
         </div>
         <?php
@@ -99,17 +101,18 @@ if (isset($facebook_state)) {
             } elseif ($fb_empty_pagelist) {
                 ?>
                 <div class="alert alert-base flat no-shadow">
-                    This account has no Facebook pages to integrate with. Create a page or connect to a different Facebook account.
+                    This account has no Facebook pages that are suitable for bot integration.
+                    Create a new Facebook page or connect to a different Facebook account.
                 </div>
                 <?php
             } else {
                 ?>
                 <div class="alert alert-base flat no-shadow">
-                    <p>Select a page to integrate this bot with</p>
+                    <p>Select a Facebook page to attach this bot to</p>
                     <ul>
                         <?php
                         foreach ($facebook_state["page_list"] as $page_id => $page_name) {
-                            echo "<li><a class='fb-page-list' id='_fb_$page_id'>$page_name</a></li>";
+                            echo "<li><a class='fb-page-list' onmouseover=\"this.style.cursor='pointer'\" id=\"_fb_$page_id\">$page_name</a></li>";
                         }
                         ?>
                     </ul>
@@ -118,9 +121,17 @@ if (isset($facebook_state)) {
             }
         } else {
             ?>
-            <div>
-                Bot is integrated with page <?php echo $facebook_state["page_integrated_name"]; ?>
+
+            <div id="containerMsgAlertProgressBar" style="margin-bottom: 0px; padding-right: 0px; display: block;" class="alert alert-dismissable flat alert-base">
+                <i id="iconAlertProgressBar" class="icon fa fa-check"></i>
+                <span id="msgAlertProgressBar">
+                    Integrated with page <a target="_facebook" href="https://www.facebook.com/<?php echo $facebook_state["page_integrated_id"]; ?>">
+                    <?php echo $facebook_state["page_integrated_name"]; ?></a>.
+                    The bot will respond to all messages sent to that page.
+                </span>
             </div>
+
+
             <?php
         }
         }
