@@ -7,10 +7,10 @@
                 <div class="footer-single">
                     <h6>About</h6>
                     <ul>
-                        <li><a class="new-link" href="https://www.hutoma.com/about.html">About Hutoma</a></li>
-                        <li><a class="new-link" href="https://www.hutoma.com/privacy.pdf">Privacy Policy</a></li>
-                        <li><a class="new-link" href="https://www.hutoma.com/terms_and_conditions.pdf">Terms and Conditions</a></li>
-                        <li><a class="new-link" href="https://www.hutoma.com/contactus.html">Contact Us</a></li>
+                        <li><a class="new-link" href="https://www.hutoma.ai/about.html">About Hutoma</a></li>
+                        <li><a class="new-link" href="https://www.hutoma.ai/privacy.pdf">Privacy Policy</a></li>
+                        <li><a class="new-link" href="https://www.hutoma.ai/terms_and_conditions.pdf">Terms and Conditions</a></li>
+                        <li><a class="new-link" href="https://www.hutoma.ai/contactus.html">Contact Us</a></li>
                     </ul>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                 <div class="footer-single">
                     <h6>Enterprise Customers</h6>
                     <ul>
-                        <li><a class="new-link" href="mailto:hello@hutoma.com?subject=hutoma demo request">Schedule Demo</a></li>
+                        <li><a class="new-link" href="mailto:hello@hutoma.ai ?subject=hutoma demo request">Schedule Demo</a></li>
 
                     </ul>
                 </div>

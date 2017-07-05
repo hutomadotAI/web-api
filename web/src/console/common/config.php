@@ -45,8 +45,8 @@ class config
 
     public static function getRegistrationEmailDetails() {
         $details = array(
-            "from" => "hello@hutoma.com",
-            "reply-to" => "hello@hutoma.com",
+            "from" => "hello@hutoma.ai ",
+            "reply-to" => "hello@hutoma.ai ",
         );
         return $details;
     }

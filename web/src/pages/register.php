@@ -128,7 +128,7 @@ if(isset($_POST['submit'])) {
     <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="../console/scripts/cookiePolicyBar/cookiePolicyBar.css">
 
-    <link rel="stylesheet" href="https://www.hutoma.com/css/main.css">
+    <link rel="stylesheet" href="https://www.hutoma.ai/css/main.css">
 
     <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
@@ -220,7 +220,7 @@ if(isset($_POST['submit'])) {
                 <div class="col-xs-8">
                     <div class="checkbox icheck">
                         <label>
-                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the terms stated in the Subscription <a href="https://www.hutoma.com/Hutoma_WebPlatformSaaSAgreement.pdf" target="_blank">Agreement.</a>.
+                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the terms stated in the Subscription <a href="https://www.hutoma.ai/Hutoma_WebPlatformSaaSAgreement.pdf" target="_blank">Agreement.</a>.
                         </label>
                         </label>
                     </div>
@@ -236,7 +236,7 @@ if(isset($_POST['submit'])) {
             </div>
         </form>
         <a href="login.php" class="text-center new-link">I already have an account</a><br/>
-        <a href="https://www.hutoma.com" class="text-center new-link">I need an invitation code</a>
+        <a href="https://www.hutoma.ai" class="text-center new-link">I need an invitation code</a>
     </div><!-- /.form-box -->
     </div><!-- /.register-box -->
 </section>
