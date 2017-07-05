@@ -112,7 +112,7 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     newNode.style.backgroundColor = '#404446';
     newNode.style.marginTop = '1px';
     newNode.innerHTML = wHTML;
-    parent.insertBefore(newNode, parent.firstChild);
+    parent.appendChild(newNode);
 }
 
 function drawObj(value) {

@@ -179,31 +179,8 @@ function saveIntent() {
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
-    var parent = $(e.relatedTarget).parent().parent().parent();
-
-    //send to modal current entity name selected from first node in the current variables row selected
-    var node_entity = parent.children().children().children();
-    var elem = $(node_entity).find("ul").find("li.selected");
-    var curr_entity = elem.text();
-    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
-
-    //send to modal current intent store in data-intent html
-    var curr_intent = document.getElementById('intent-name').value;
-    $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
-
-    //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected
-    var node_n_prompts = parent.children().eq(1).children().children();
-    var curr_n_prompts;
-    if (node_n_prompts.val() === '' || node_n_prompts.val() === 'n° prompt')
-        curr_n_prompts = node_n_prompts.attr('placeholder');
-    else
-        curr_n_prompts = node_n_prompts.val();
-    $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
-
-    // remove character @
-    curr_entity = curr_entity.replace(/[@]/g, "");
-
+    var rowElement = $(e.relatedTarget).parent().parent().parent();
     cleanupromptDialogbox();
-    loadPromptsForEntity(elem);
+    loadPromptsForEntity(rowElement, e.currentTarget);
 });
 

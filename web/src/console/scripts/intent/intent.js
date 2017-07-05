@@ -1,7 +1,7 @@
 document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
 function checkIntentCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if (activeButtonCreateIntent())
             postingIntentName();
     }
@@ -56,7 +56,7 @@ function showIntents(str) {
 
 
     for (var x in intents) {
-        if ((str != " ") && ( (str.length == 0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
+        if ((str !== " ") && ( (str.length === 0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase()) !== -1 )) {
 
             wHTML += ('<div class="col-xs-12">');
             wHTML += ('<div class="box-body flat no-padding" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
@@ -137,7 +137,7 @@ $("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
 });
 
 $( document ).ready(function() {
-    if ( (trainingFile && intent_deleted) || ai_state == API_AI_STATE.STOPPED.value)
+    if ( (trainingFile && intent_deleted) || ai_state === API_AI_STATE.STOPPED.value)
         createWarningIntentAlert(INTENT_ACTION.DELETE_INTENT.value);
     
 });

@@ -32,7 +32,8 @@
                 </tr>
                 <tr style="padding-top: 5px;">
                     <td class="text-center" style="width:33.3333336%; padding-left:10px;" >
-                        <input type="text-center" class="form-control flat no-shadow no-border text-center" name="curr_intent" value="" style="text-align:center;  background-color: #515151;" disabled/>
+                        <input type="hidden" id="var_row" name="var_row" value=""/>
+                        <input type="text" class="form-control flat no-shadow no-border text-center" name="curr_intent" value="" style="text-align:center;  background-color: #515151;" disabled/>
                     </td>
                     <td class="text-center" style="width:33.3333336%;">
                         <input type="text" class="form-control flat no-shadow" name="curr_entity" id="curr_entity" value="" style="text-align:center; background-color: #515151;" disabled/>

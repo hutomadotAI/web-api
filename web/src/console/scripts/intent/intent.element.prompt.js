@@ -81,7 +81,7 @@ function createNewPromptRow(value, parent) {
     newNode.setAttribute('class', 'col-xs-12 no-padding');
     newNode.setAttribute('style', 'col-xs-12');
     newNode.innerHTML = wHTML;
-    parent.insertBefore(newNode, parent.firstChild);
+    parent.appendChild(newNode);
 }
 
 function deleteRowPrompt(element) {
@@ -107,50 +107,72 @@ function addSepatator(arr, len, separator) {
 }
 
 function setNewListPrompts() {
-    var entity_selected = false;
-    var curr_entity = document.getElementById('curr_entity').value;
-    var intentNewPromptList = getMultipleElementValues('intent-prompt-row');
-    var node = document.getElementById('parameter-list');
-    var len = node.childNodes.length;
 
-    if (curr_entity === '') {
-        var first_node_prompt = node.children[0].children[2].children[0].children[0];
-        first_node_prompt.setAttribute('data-prompts', intentNewPromptList);
-        first_node_prompt.setAttribute('placeholder', ' ... ');
+    var intentNewPromptList = getMultipleElementValues('intent-prompt-row');
+    var entityRowNumber = document.getElementById('var_row').value;
+    if (entityRowNumber === null) {
+        return;
+    }
+    var entityRow = document.getElementById('parameter-list').children[entityRowNumber];
+    var node_prompt = entityRow.children[2].children[0].children[0];
+    var list_prompt = node_prompt.getAttribute('data-prompts');
+    node_prompt.setAttribute('data-prompts', intentNewPromptList);
+    if (list_prompt !== '')
+        node_prompt.setAttribute('placeholder', ' ... ');
+    else
+        node_prompt.setAttribute('placeholder', 'click to enter');
+}
+
+function loadPromptsForEntity(rowElement, targetModal) {
+    // Find the position of the row
+    var rowPosition = -1;
+    for (var i = 0; i < rowElement.parent().children().length; i++) {
+        if (rowElement.parent().children()[i] === rowElement[0]) {
+            rowPosition = i;
+            break;
+        }
+    }
+    if (rowPosition === -1) { // Should not happen
         return;
     }
 
-    for (var i = 0; i < len; i++) {
-        // be carefull - the node is tree for prompts list access variable->fieldvariable->textdiv->attribute
-        var node_entity = node.children[i].children[0].children[0].children[0];
-        var node_prompt = node.children[i].children[2].children[0].children[0];
-        var elem = $(node_entity).find("ul").find("li.selected");
-        if (elem.text() === curr_entity) {
-            node_prompt.setAttribute('data-prompts', intentNewPromptList);
+    $(targetModal).find('input[name="var_row"]').val(rowPosition);
 
-            var list_prompt = node_prompt.getAttribute('data-prompts');
-            if (list_prompt !== '')
-                node_prompt.setAttribute('placeholder', ' ... ');
-            else
-                node_prompt.setAttribute('placeholder', 'click to enter');
-            entity_selected = true;
-        }
+    //send to modal current entity name selected from first node in the current variables row selected
+    var node_entity = rowElement.children().children().children();
+    var entityNode = $(node_entity).find("ul").find("li.selected");
+    var curr_entity = entityNode.text();
+    $(targetModal).find('input[name="curr_entity"]').val(curr_entity);
+
+    //send to modal current intent store in data-intent html
+    var curr_intent = document.getElementById('intent-name').value;
+    $(targetModal).find('input[name="curr_intent"]').val(curr_intent);
+
+    //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected
+    var node_n_prompts = rowElement.children().eq(1).children().children();
+    var curr_n_prompts;
+    if (node_n_prompts.val() === '' || node_n_prompts.val() === 'n° prompt') {
+        curr_n_prompts = node_n_prompts.attr('placeholder');
+    } else {
+        curr_n_prompts = node_n_prompts.val();
     }
-}
+    $(targetModal).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
 
-function loadPromptsForEntity(elem) {
-    // Joining the madness...
-    var inputNode = elem.context.parentNode.parentNode.parentNode.children[2].children[0].children[0];
+    var promptsNode = rowElement.children().eq(2).children().children();
+    var promptsListAsString = promptsNode.context.getAttribute('data-prompts');
+
+    // remove character @
+    curr_entity = curr_entity.replace(/[@]/g, "");
 
     var parent = document.getElementById('prompts-list');
-    var list_prompt = inputNode.getAttribute('data-prompts');
-    var prompts_split = list_prompt.split(',');
-    if (list_prompt !== '') {
+    var prompts_split = promptsListAsString.split(',');
+    if (promptsListAsString !== '') {
         for (var j = 0; j < prompts_split.length; j++) {
             var prompt = removeEscapeCharacter(prompts_split[j]);
             createNewPromptRow(prompt, parent);
         }
     } else {
+        var inputNode = rowElement.children().children().eq(2).children()[0];
         inputNode.setAttribute('placeholder', 'click to enter');
     }
 }
