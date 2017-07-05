@@ -210,6 +210,15 @@ function htmlEncode(value){
     return $('<div/>').text(value).html();
 }
 
+function getMultipleElementValues(elementName) {
+    var values = [];
+    var elements = document.getElementsByName(elementName);
+    for (var i = 0; i < elements.length; i++) {
+        values.push(addEscapeCharacter(elements[i].value));
+    }
+    return values;
+}
+
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;

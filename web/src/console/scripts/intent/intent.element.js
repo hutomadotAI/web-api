@@ -1,15 +1,6 @@
 var variables = [];
 var ID_pool;
 
-function getMultipleElementValues(elementName) {
-    var values = [];
-    var elements = document.getElementsByName(elementName);
-    for (var i = 0; i < elements.length; i++) {
-        values.push(addEscapeCharacter(elements[i].value));
-    }
-    return values;
-}
-
 function getWebHookValues() {
     var webhook = {};
     webhook['intent_name'] = document.getElementById('intent-name').value;
