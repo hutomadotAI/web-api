@@ -87,7 +87,7 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('</div>');
     wHTML += ('</div>');
 
-    wHTML += ('<div class="col-xs-2" style="padding-top:7px;">');
+    wHTML += ('<div class="col-xs-2"');
     wHTML += ('<div class="text-left" >');
     wHTML += ('<div class="text-gray no-padding">');
     wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-nprompt" '
