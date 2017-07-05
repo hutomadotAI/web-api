@@ -115,7 +115,7 @@ function saveIntent() {
         var node_required = node.children[i].children[3].children[0].children[0].children[0];
         v['required'] = node_required.checked;
 
-        var labelElement = node.children[i].children[4].children[0].children[0].children[0];
+        var labelElement = node.children[i].children[4].children[0].children[0];
         if (labelElement.value !== labelElement.getAttribute('placeholder')) {
             labelElement.setAttribute('placeholder', labelElement.value);
         }
