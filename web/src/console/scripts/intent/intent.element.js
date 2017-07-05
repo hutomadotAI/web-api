@@ -54,6 +54,7 @@ function saveIntent() {
 
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
+    var labelsMap = new Object();
 
     for (var i = 0; i < len; i++) {
         var v = {};
@@ -121,6 +122,32 @@ function saveIntent() {
         v['label'] = labelElement.getAttribute('placeholder');
 
         variables.push(v);
+
+        var labelArray = [];
+        if(labelsMap.hasOwnProperty(v['entity_name'])) {
+            labelArray = labelsMap[v['entity_name']];
+        }
+        labelArray.push(v['label']);
+        labelsMap[v['entity_name']] = labelArray;
+    }
+
+
+    for (var entityName in labelsMap) {
+        if (labelsMap.hasOwnProperty(entityName)) {
+            var labelArr = labelsMap[entityName];
+            if (labelArr.length > 1) {
+                var usedLabels = new Object();
+                for (var x in labelArr) {
+                    var label = labelArr[x];
+                    if (label === "" || usedLabels.hasOwnProperty(label)) {
+                        msgAlertIntentVariable(ALERT.DANGER.value, 'With multiple entries for an entity you need to provide a unique label for each');
+                        msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
+                        return false;
+                    }
+                    usedLabels[label] = true;
+                }
+            }
+        }
     }
 
     if (!isDataChanged()) {
