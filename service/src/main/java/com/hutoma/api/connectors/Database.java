@@ -67,7 +67,9 @@ public class Database {
                         (int) Math.round((double) e.get("max_prompts")),
                         (int) Math.round((double) e.get("times_prompted")),
                         (boolean) e.get("system_entity"),
-                        (boolean) e.get("persistent"));
+                        (boolean) e.get("persistent"),
+                        e.get("label").toString());
+                memoryVariable.setRequested((boolean) e.get("requested"));
                 variables.add(memoryVariable);
             }
             return new MemoryIntent(rs.getString("name"),

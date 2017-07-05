@@ -27,6 +27,19 @@ public class MemoryVariable {
     private boolean persistent;
     @SerializedName("system_entity")
     private boolean isSystem;
+    @SerializedName("label")
+    private String label;
+    @SerializedName("requested")
+    private boolean requested;
+
+    public boolean isRequested() {
+        return requested;
+    }
+
+    public void setRequested(final boolean beingRequested) {
+        this.requested = beingRequested;
+    }
+
 
     /**
      * Ctor.
@@ -40,7 +53,7 @@ public class MemoryVariable {
 
     public MemoryVariable(final String name, final String currentValue, final boolean isMandatory, final List<String> entityKeys,
                           final List<String> prompts, final int timesToPrompt, final int timesPrompted, final boolean isSystem,
-                          final boolean persistent) {
+                          final boolean persistent, final String label) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
@@ -49,6 +62,7 @@ public class MemoryVariable {
         this.timesToPrompt = timesToPrompt;
         this.persistent = persistent;
         this.isSystem = isSystem;
+        this.label = label;
     }
 
     /**
@@ -139,13 +153,17 @@ public class MemoryVariable {
      * Gets whether the entity is persistent.
      * @return true if true, else false.
      */
-    public boolean getIsPersistent() { return this.persistent; }
+    public boolean getIsPersistent() {
+        return this.persistent;
+    }
 
     /*
      * Sets whether the entity is persistent.
      * @param persistent Whether the entity should be persistent.
      */
-    public void setIsPersistent(boolean persistent) { this.persistent = persistent; }
+    public void setIsPersistent(boolean persistent) {
+        this.persistent = persistent;
+    }
 
     /**
      * Gets the prompts.
@@ -171,4 +189,19 @@ public class MemoryVariable {
         this.prompts = prompts;
     }
 
+    /**
+     * Gets the label.
+     * @return the label
+     */
+    public String getLabel() {
+        return this.label;
+    }
+
+    /**
+     * Sets the label.
+     * @param label the label to set
+     */
+    public void setLabel(final String label) {
+        this.label = label;
+    }
 }

@@ -91,6 +91,7 @@ public class MemoryIntent {
             if (optVariable.isPresent()) {
                 MemoryVariable variable = optVariable.get();
                 variable.setCurrentValue(entity.getB());
+                variable.setRequested(false);
             }
         }
     }

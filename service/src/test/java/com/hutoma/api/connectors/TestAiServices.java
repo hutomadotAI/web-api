@@ -14,6 +14,7 @@ import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.memory.MemoryIntentHandler;
 import junitparams.JUnitParamsRunner;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -112,11 +113,14 @@ public class TestAiServices {
     @Test
     public void testUpload_hack_removeIntentExpressions() {
         Assert.assertEquals(sysIndependent("line1\nline2"),
-                this.aiServices.removeIntentExpressions(sysIndependent("line1\nline2\n\nintent expr\n@meta.intent.name")));
+                this.aiServices.removeIntentExpressions(sysIndependent("line1\nline2\n\nintent expr\n"
+                        + MemoryIntentHandler.META_INTENT_TAG + "name")));
         Assert.assertEquals(sysIndependent("line1\nline2"),
-                this.aiServices.removeIntentExpressions(sysIndependent("intent expr\n@meta.intent.name\n\nline1\nline2")));
+                this.aiServices.removeIntentExpressions(sysIndependent("intent expr\n"
+                        + MemoryIntentHandler.META_INTENT_TAG + "name\n\nline1\nline2")));
         Assert.assertEquals(sysIndependent(""),
-                this.aiServices.removeIntentExpressions(sysIndependent("intent expr\n@meta.intent.name")));
+                this.aiServices.removeIntentExpressions(sysIndependent("intent expr\n"
+                        + MemoryIntentHandler.META_INTENT_TAG + "name")));
         Assert.assertEquals(sysIndependent("line1\nline2"),
                 this.aiServices.removeIntentExpressions(sysIndependent("line1\nline2\n")));
     }

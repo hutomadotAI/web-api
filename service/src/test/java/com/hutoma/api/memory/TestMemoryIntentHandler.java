@@ -37,7 +37,7 @@ public class TestMemoryIntentHandler {
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final UUID CHATID = UUID.fromString("cee37b17-8cb3-4678-b8ba-91924eb98272");
     private static final String INTENT_NAME = "intent1";
-    private static final String DEFAULT_INTENT = "@meta.intent." + INTENT_NAME;
+    private static final String DEFAULT_INTENT = MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME;
 
     private MemoryIntentHandler memoryIntentHandler;
     private JsonSerializer fakeSerializer;
@@ -48,10 +48,10 @@ public class TestMemoryIntentHandler {
 
     private static Object[] recognizeIntentDataProvider() {
         return $(
-                $("@meta.intent." + INTENT_NAME),
-                $("@meta.intent." + INTENT_NAME + " "),
-                $("@meta.intent." + INTENT_NAME + " this is something else"),
-                $("@meta.intent." + INTENT_NAME + " line1\nline2")
+                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME),
+                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " "),
+                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " this is something else"),
+                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " line1\nline2")
         );
     }
 
@@ -195,7 +195,8 @@ public class TestMemoryIntentHandler {
                 123,
                 5,
                 false,
-                false);
+                false,
+                "label");
         Assert.assertEquals("name", mv.getName());
         Assert.assertEquals("currentValue", mv.getCurrentValue());
         Assert.assertEquals(values, mv.getEntityKeys());

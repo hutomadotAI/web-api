@@ -14,6 +14,7 @@ import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.memory.MemoryIntentHandler;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -61,7 +62,7 @@ public class TestAiServicesClient {
     private static final String TRAINING_MATERIALS_NO_INTENT = sysIndependent(
             "question1\nanswer1\nquestion2\nanswer2");
     private static final String TRAINING_MATERIALS = TRAINING_MATERIALS_NO_INTENT +
-            sysIndependent("\n\nintent expression\n@meta.intent.myintent");
+            sysIndependent("\n\nintent expression\n" + MemoryIntentHandler.META_INTENT_TAG + "myintent");
     private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
 
     private static HttpServer httpServer;
