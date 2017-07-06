@@ -202,3 +202,14 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     loadPromptsForEntity(rowElement, e.currentTarget);
 });
 
+window.onbeforeunload = function (e) {
+    var e = e || window.event;
+    // For IE and Firefox prior to version 4
+    if (e && data_changed) {
+        e.returnValue = 'Are you sure you want to leave this page?';
+    }
+    // For Safari
+    if (data_changed) {
+        return 'Are you sure you want to leave this page?';
+    }
+};
