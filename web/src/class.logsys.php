@@ -43,7 +43,7 @@ class console
          */
         "basic" => array(
             "company" => "hutoma",
-            "email" => "hello@hutoma.ai ",
+            "email" => "hello@hutoma.com",
             "email_callback" => 0
         ),
 
