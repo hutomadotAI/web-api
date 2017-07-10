@@ -40,7 +40,7 @@ class signupCodeApi extends apiBase
         );
 
         $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $code . '/redeem', $params));
-        $this->curl->setVerbGet();
+        $this->curl->setVerbPost();
         $curl_response = $this->curl->exec();
         $json_response = json_decode($curl_response, true);
         if (isset($json_response) && $json_response !== false) {
