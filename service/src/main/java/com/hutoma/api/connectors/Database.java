@@ -68,7 +68,7 @@ public class Database {
                         (int) Math.round((double) e.get("times_prompted")),
                         (boolean) e.get("system_entity"),
                         (boolean) e.get("persistent"),
-                        e.get("label").toString());
+                        e.containsKey("label") ? e.get("label").toString() : "");
                 memoryVariable.setRequested((boolean) e.get("requested"));
                 variables.add(memoryVariable);
             }
