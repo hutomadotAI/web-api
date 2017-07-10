@@ -114,7 +114,7 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         wHTML += ('<div class="direct-chat-text chat-warning">');
     else
         wHTML += ('<div class="direct-chat-text chat-success">');
-    wHTML += cleanChat(msg).replace(/(?:\r\n|\r|\n)/g, '<br />');
+    wHTML += stripHtml(msg).replace(/(?:\r\n|\r|\n)/g, '<br />');
     wHTML += ('</div>');
     if (error === false)
         wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">score: ' + score + '</span>');
@@ -135,6 +135,10 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
 
     if (isChrome)
         unlockSpeechOption();
+}
+
+function stripHtml(text) {
+    return $('<div>' + text + '</div>').text();
 }
 
 function requestAnswerAI(ai_name, question, chatId) {
