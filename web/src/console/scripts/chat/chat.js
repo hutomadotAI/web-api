@@ -137,34 +137,39 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         unlockSpeechOption();
 }
 
+
 function stripHtml(text) {
     return $('<div>' + text + '</div>').text();
 }
 
-function requestAnswerAI(ai_name, question, chatId) {
+function requestAnswerAI(ai_name, question, previousChatId) {
     if (question !== '') {
         jQuery.ajax({
             url: 'chat.php',
             contentType: "application/json; charset=utf-8",
             type: 'GET',
             dataType: 'json',
-            data: {chatId: chatId, q: question},
+            data: {chatId: previousChatId, q: question},
             success: function (response) {
 
-                // Write response in JSON message box
-                var JSONnode = document.getElementById('msgJSON');
-                JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
-                var JSONdata = response;
-                if (JSONdata['chatId'] === '') {
-                    createRightMsg(ai_name, 'no chat id returned', '', -1, true);
+                if (response === null) {
+                    createRightMsg(ai_name, "Oops, there was an error...", previousChatId, -1, true);
                 } else {
-                    var chatId = JSONdata['chatId'];
-                    if (JSONdata['status']['code'] === 200) {
-                        var safeAnswer = htmlEncode(JSONdata['result']['answer']);
-                        createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                    // Write response in JSON message box
+                    var JSONnode = document.getElementById('msgJSON');
+                    JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
+                    var JSONdata = response;
+                    if (JSONdata['chatId'] === '') {
+                        createRightMsg(ai_name, 'no chat id returned', '', -1, true);
+                    } else {
+                        var chatId = JSONdata['chatId'];
+                        if (JSONdata['status']['code'] === 200) {
+                            var safeAnswer = htmlEncode(JSONdata['result']['answer']);
+                            createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                        }
+                        else
+                            createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                     }
-                    else
-                        createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
