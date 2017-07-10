@@ -327,11 +327,6 @@ class console
 
             $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
             if ($api->register($id, $username, $saltedPass, $randomSalt, $fullname)) {
-                $subject = "Welcome to Hu:toma!";
-                $body = "Congrats, you are all set! Your Hu:toma account is confirmed. Check our intro video at https://www.youtube.com/watch?v=__pO6wVvBEY, which will guide you through using the Hu:toma platform. You will also find a chat icon on every page, which should be your go-to place for support.\r\nThanks\r\n-The Hu:toma team";
-                if (!utils::sendMail($id, $subject, $body)) {
-                    self::log_error("registration", "Could not send welcome email to " . $id);
-                }
                 return 200;
             }
             return "unknown";
