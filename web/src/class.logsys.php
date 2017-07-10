@@ -607,7 +607,7 @@ class console
      * As of version 0.4, it is required to include the remember_me parameter
      * when calling this function to avail the "Remember Me" feature.
      */
-    public static function login($username, $password, $remember_me = false, $cookies = true, $redirect)
+    public static function login($username, $password, $remember_me = false, $cookies = true, $redirect = NULL)
     {
         self::construct("login");
 
