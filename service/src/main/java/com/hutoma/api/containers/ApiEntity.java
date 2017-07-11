@@ -22,22 +22,23 @@ public class ApiEntity extends ApiResult {
     /**
      * Ctor.
      * @param entityName the entity name
-     * @param devOwner the owner of the entity
+     * @param devOwner   the owner of the entity
      */
     public ApiEntity(final String entityName, final UUID devOwner) {
         this.entityName = entityName;
-	this.devOwner = devOwner;
+        this.devOwner = devOwner;
         this.isSystem = false;
     }
 
-/**
+    /**
      * Ctor.
-     * @param entityName the entity name
-     * @param devOwner the owner of the entity
+     * @param entityName   the entity name
+     * @param devOwner     the owner of the entity
      * @param entityValues list of entity values
-     * @param isSystem whether it's a system entity or not
+     * @param isSystem     whether it's a system entity or not
      */
-    public ApiEntity(final String entityName, final UUID devOwner, final List<String> entityValues, final boolean isSystem) {
+    public ApiEntity(final String entityName, final UUID devOwner, final List<String> entityValues,
+                     final boolean isSystem) {
         this.entityName = entityName;
         this.devOwner = devOwner;
         this.entityValues = entityValues;
@@ -72,5 +73,7 @@ public class ApiEntity extends ApiResult {
      * Gets the UUID of the dev that owns this entity
      * @return the UUID of the dev that owns this entity
      */
-    public UUID getDevOwner() { return this.devOwner; }
+    public UUID getDevOwner() {
+        return this.devOwner;
+    }
 }

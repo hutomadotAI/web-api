@@ -44,7 +44,8 @@ public class ApiFacebookIntegration extends ApiResult {
 
     public ApiFacebookIntegration(final String requestPermissions,
                                   final String facebookAppId, final boolean hasAccessToken, final DateTime tokenExpiry,
-                                  final String username, final boolean integrationActive, final String integrationStatus) {
+                                  final String username, final boolean integrationActive,
+                                  final String integrationStatus) {
         this.requestPermissions = requestPermissions;
         this.facebookAppId = facebookAppId;
         this.hasAccessToken = hasAccessToken;

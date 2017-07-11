@@ -52,7 +52,7 @@ public class ChatLogic {
     private final ChatLogger chatLogger;
     private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
-    private final String SYSANY = "sys.any";
+    private static final String SYSANY = "sys.any";
     private LogMap telemetryMap;
     private ChatState chatState;
 

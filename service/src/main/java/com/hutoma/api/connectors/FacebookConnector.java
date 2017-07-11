@@ -299,11 +299,13 @@ public class FacebookConnector {
                     return response.readEntity(String.class);
                 // otherwise try to interpret the result
                 default:
-                    throw response.hasEntity() ?
-                            FacebookException.exceptionMapper(statusInfo.getStatusCode(), statusInfo.getReasonPhrase(),
-                                    response.readEntity(String.class), this.jsonSerializer) :
-                            FacebookException.exceptionMapper(statusInfo.getStatusCode(), statusInfo.getReasonPhrase(),
-                                    null, this.jsonSerializer);
+                    throw response.hasEntity()
+                            ? FacebookException.exceptionMapper(statusInfo.getStatusCode(),
+                            statusInfo.getReasonPhrase(),
+                            response.readEntity(String.class), this.jsonSerializer)
+                            : FacebookException.exceptionMapper(statusInfo.getStatusCode(),
+                            statusInfo.getReasonPhrase(),
+                            null, this.jsonSerializer);
             }
         } catch (FacebookException fe) {
             throw fe;
@@ -319,12 +321,12 @@ public class FacebookConnector {
         DELETE,
     }
 
-    public class SendMessage {
+    public static class SendMessage {
 
         @SerializedName("recipient")
-        public Recipient recipient;
+        private Recipient recipient;
         @SerializedName("message")
-        public MessagePayload message;
+        private MessagePayload message;
 
         public SendMessage(final String recipient, final String text) {
             this.recipient = new Recipient();
@@ -333,14 +335,14 @@ public class FacebookConnector {
             this.message.text = text;
         }
 
-        private class Recipient {
+        private static class Recipient {
             @SerializedName("id")
-            public String id;
+            private String id;
         }
 
-        private class MessagePayload {
+        private static class MessagePayload {
             @SerializedName("text")
-            public String text;
+            private String text;
         }
     }
 

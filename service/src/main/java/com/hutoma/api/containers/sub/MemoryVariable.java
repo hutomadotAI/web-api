@@ -51,9 +51,10 @@ public class MemoryVariable {
         this.entityKeys = entityKeys;
     }
 
-    public MemoryVariable(final String name, final String currentValue, final boolean isMandatory, final List<String> entityKeys,
-                          final List<String> prompts, final int timesToPrompt, final int timesPrompted, final boolean isSystem,
-                          final boolean persistent, final String label) {
+    public MemoryVariable(final String name, final String currentValue, final boolean isMandatory,
+                          final List<String> entityKeys, final List<String> prompts, final int timesToPrompt,
+                          final int timesPrompted, final boolean isSystem, final boolean persistent,
+                          final String label) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;

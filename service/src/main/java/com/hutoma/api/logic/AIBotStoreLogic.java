@@ -142,7 +142,8 @@ public class AIBotStoreLogic {
             }
             AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
             if (bot != null) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot", devIdString, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot",
+                        devIdString, logMap);
                 return ApiError.getBadRequest("Bot already has a published bot");
             }
             ApiAi ai = this.database.getAI(devId, aiid);

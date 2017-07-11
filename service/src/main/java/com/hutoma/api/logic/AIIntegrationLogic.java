@@ -94,51 +94,48 @@ public class AIIntegrationLogic {
                 // interpret the JSON block of data
                 FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
                         record.getData(), FacebookIntegrationMetadata.class);
-                if (metadata != null) {
 
-                    // do we have a token?
-                    boolean tokenPresent = !Strings.isNullOrEmpty(metadata.getAccessToken());
-                    // is it expired?
-                    boolean tokenValid = metadata.getAccessTokenExpiry().isAfter(DateTime.now());
+                // do we have a token?
+                boolean tokenPresent = !Strings.isNullOrEmpty(metadata.getAccessToken());
+                // is it expired?
+                boolean tokenValid = metadata.getAccessTokenExpiry().isAfter(DateTime.now());
 
-                    // ok, we have enough data to send back a non-empty state
-                    facebookIntegration = new ApiFacebookIntegration(
-                            String.join(",", this.getRequiredPermissions()),
-                            this.config.getFacebookAppId(),
-                            tokenPresent && tokenValid,
-                            metadata.getAccessTokenExpiry(), metadata.getUserName(),
-                            record.isActive(), record.getStatus());
+                // ok, we have enough data to send back a non-empty state
+                facebookIntegration = new ApiFacebookIntegration(
+                        String.join(",", this.getRequiredPermissions()),
+                        this.config.getFacebookAppId(),
+                        tokenPresent && tokenValid,
+                        metadata.getAccessTokenExpiry(), metadata.getUserName(),
+                        record.isActive(), record.getStatus());
 
-                    if (tokenPresent && tokenValid) {
+                if (tokenPresent && tokenValid) {
 
-                        // do we still have access rights?
-                        checkGrantedPermissions(record.getIntegrationUserid(), metadata.getAccessToken());
+                    // do we still have access rights?
+                    checkGrantedPermissions(record.getIntegrationUserid(), metadata.getAccessToken());
 
-                        // if we have no page token then get a list of available pages
-                        // that the user can select
-                        if (Strings.isNullOrEmpty(metadata.getPageToken())) {
-                            // get nodes and convert to an id->name map
-                            Map<String, String> pages = getListOfUserPages(metadata).stream().collect(
-                                    Collectors.toMap(FacebookNode::getId, FacebookNode::getName));
-                            // set the structure in the response object
-                            facebookIntegration.setPageList(pages);
-                            // log success
-                            logMap.add("state", "listing available pages");
-                        } else {
-                            // otherwise just list the page that we are integrated with
-                            facebookIntegration.setPageIntegrated(
-                                    record.getIntegrationResource(), metadata.getPageName());
-                            logMap.add("state", "integration active");
-                        }
+                    // if we have no page token then get a list of available pages
+                    // that the user can select
+                    if (Strings.isNullOrEmpty(metadata.getPageToken())) {
+                        // get nodes and convert to an id->name map
+                        Map<String, String> pages = getListOfUserPages(metadata).stream().collect(
+                                Collectors.toMap(FacebookNode::getId, FacebookNode::getName));
+                        // set the structure in the response object
+                        facebookIntegration.setPageList(pages);
+                        // log success
+                        logMap.add("state", "listing available pages");
                     } else {
-                        logMap.add("state", "token missing or expired");
+                        // otherwise just list the page that we are integrated with
+                        facebookIntegration.setPageIntegrated(
+                                record.getIntegrationResource(), metadata.getPageName());
+                        logMap.add("state", "integration active");
                     }
                 } else {
-                    logMap.add("state", "no metadata");
+                    logMap.add("state", "token missing or expired");
                 }
             } else {
-                logMap.add("state", "none");
+                logMap.add("state", "no metadata");
             }
+
             this.logger.logUserTraceEvent(LOGFROM, "facebook integration getState", devid.toString(), logMap);
         } catch (FacebookException.FacebookMissingPermissionsException missing) {
             facebookIntegration.setIntegrationStatus(String.format("Error: %s",
@@ -457,8 +454,8 @@ public class AIIntegrationLogic {
         // get permissions from facebook
         FacebookNodeList nodeList = this.facebookConnector.getUserGrantedPermissions(id, accessToken);
         // extract the list
-        List<FacebookNode> nodes = ((nodeList == null) || (nodeList.getData() == null)) ?
-                Collections.EMPTY_LIST : nodeList.getData();
+        List<FacebookNode> nodes = ((nodeList == null) || (nodeList.getData() == null))
+                ? Collections.EMPTY_LIST : nodeList.getData();
         // filter only the granted ones and convert to a word list
         List<String> granted = nodes.stream()
                 .filter(permission -> permission.getStatus().equals("granted"))

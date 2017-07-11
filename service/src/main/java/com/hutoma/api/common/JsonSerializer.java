@@ -77,21 +77,22 @@ public class JsonSerializer {
         }
     }
 
-    public class DateTimeSerializer implements JsonDeserializer<DateTime>, com.google.gson.JsonSerializer<DateTime> {
+    public static class DateTimeSerializer implements JsonDeserializer<DateTime>,
+            com.google.gson.JsonSerializer<DateTime> {
 
-        private final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
+        private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
         @Override
         public DateTime deserialize(final JsonElement je, final Type type,
                                     final JsonDeserializationContext jdc) throws JsonParseException {
             final String dateAsString = je.getAsString();
-            return dateAsString.length() == 0 ? null : this.DATE_FORMAT.parseDateTime(dateAsString);
+            return dateAsString.length() == 0 ? null : DATE_FORMAT.parseDateTime(dateAsString);
         }
 
         @Override
         public JsonElement serialize(final DateTime src, final Type typeOfSrc,
                                      final JsonSerializationContext context) {
-            return new JsonPrimitive(src == null ? "" : this.DATE_FORMAT.print(src));
+            return new JsonPrimitive(src == null ? "" : DATE_FORMAT.print(src));
         }
     }
 }

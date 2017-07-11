@@ -57,17 +57,17 @@ public class FacebookNotification {
         }
 
 
-        class Sender {
+        static class Sender {
             @SerializedName("id")
             public String id;
         }
 
-        class Recipient {
+        static class Recipient {
             @SerializedName("id")
             public String id;
         }
 
-        class Message {
+        static class Message {
             @SerializedName("mid")
             public String mid;
             @SerializedName("seq")
@@ -77,7 +77,7 @@ public class FacebookNotification {
         }
     }
 
-    public class Entry {
+    public static class Entry {
 
         @SerializedName("id")
         private String id;

@@ -61,9 +61,13 @@ public class ChatResult {
         this.answer = answer;
     }
 
-    public void setQuery(final String query) { this.query = query; }
+    public void setQuery(final String query) {
+        this.query = query;
+    }
 
-    public final String getQuery() { return this.query; }
+    public final String getQuery() {
+        return this.query;
+    }
 
     public void setAction(String action) {
         this.action = action;
@@ -121,9 +125,13 @@ public class ChatResult {
         this.history = history;
     }
 
-    public UUID getAiid() { return this.aiid; }
+    public UUID getAiid() {
+        return this.aiid;
+    }
 
-    public void setAiid(UUID aiid) { this.aiid = aiid; }
+    public void setAiid(UUID aiid) {
+        this.aiid = aiid;
+    }
 
     public boolean isResetConversation() {
         return this.resetConversation;

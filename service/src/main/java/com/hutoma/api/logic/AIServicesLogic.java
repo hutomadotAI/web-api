@@ -194,7 +194,8 @@ public class AIServicesLogic {
      * @throws StatusTransitionRejectedException
      */
     private boolean checkIfStatusTransitionIsValid(final AiStatus statusUpdate)
-            throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException, StatusTransitionIgnoredException {
+            throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException,
+            StatusTransitionIgnoredException {
 
         // load the status
         BackendEngineStatus botStatus = this.database.getAiQueueStatus(statusUpdate.getAiEngine(),

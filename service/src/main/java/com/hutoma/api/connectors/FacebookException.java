@@ -43,8 +43,8 @@ public class FacebookException extends Exception {
             return new FacebookHttpException(httpErrorCode, httpError);
         }
         // at this point we have data back from Graph API
-        if ("OAuthException".equals(errorResponse.error.errorType) ||
-                "OAuthAccessTokenException".equals(errorResponse.error.errorType)) {
+        if ("OAuthException".equals(errorResponse.error.errorType)
+                || "OAuthAccessTokenException".equals(errorResponse.error.errorType)) {
             return new FacebookAuthException(httpErrorCode, httpError,
                     errorResponse.error.errorType,
                     errorResponse.error.message,
@@ -117,7 +117,7 @@ public class FacebookException extends Exception {
         FacebookError error;
     }
 
-    private class FacebookError {
+    private static class FacebookError {
         @SerializedName("code")
         int code;
         @SerializedName("message")

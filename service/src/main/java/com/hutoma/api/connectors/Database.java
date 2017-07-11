@@ -1078,7 +1078,8 @@ public class Database {
         }
     }
 
-    public boolean isIntegratedUserAlreadyRegistered(final IntegrationType integration, final String userID, final UUID devid)
+    public boolean isIntegratedUserAlreadyRegistered(final IntegrationType integration, final String userID,
+                                                     final UUID devid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("checkIntegrationUser", 3)

@@ -212,7 +212,11 @@ public abstract class RequestBase {
         // e.g.
         //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
         //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae
-        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId.toString()).path(aiid.toString()).path("chat");
+        JerseyWebTarget target = this.jerseyClient
+                .target(endpoint)
+                .path(devId.toString())
+                .path(aiid.toString())
+                .path("chat");
         for (Map.Entry<String, String> param : params.entrySet()) {
             target = target.queryParam(param.getKey(), param.getValue());
         }

@@ -104,7 +104,8 @@ public class IntentLogic {
                     logMap.put("Message", dmee.getMessage()));
             return ApiError.getBadRequest("Duplicate or missing entity_name");
         } catch (Database.DatabaseIntegrityViolationException dive) {
-            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - attempt to rename existing name", devidString, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - attempt to rename existing name",
+                    devidString, logMap);
             return ApiError.getBadRequest("Intent name already in use");
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WriteIntent", devidString, e);

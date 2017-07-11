@@ -96,7 +96,7 @@ public class EntityLogic {
         try {
             LogMap logMap = LogMap.map("Entity", entityName);
             OptionalInt entityId = this.database.getEntityIdForDev(devid, entityName);
-            if (!entityId.isPresent()){
+            if (!entityId.isPresent()) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devidString, logMap);
                 return ApiError.getNotFound();
             }

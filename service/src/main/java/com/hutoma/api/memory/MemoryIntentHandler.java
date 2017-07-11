@@ -123,7 +123,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 // This intent is not yet available in the db, so we need to initialize it from the existing
                 // intent configuration
                 for (IntentVariable intentVar : apiIntent.getVariables()) {
-                    ApiEntity apiEntity = this.databaseIntents.getEntity(intentVar.getDevOwner(), intentVar.getEntityName());
+                    ApiEntity apiEntity = this.databaseIntents.getEntity(intentVar.getDevOwner(),
+                            intentVar.getEntityName());
                     MemoryVariable variable = new MemoryVariable(
                             intentVar.getEntityName(),
                             null,

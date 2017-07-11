@@ -296,7 +296,8 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
-                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked", devIdString, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked",
+                        devIdString, logMap);
                 return ApiError.getNotFound("Bot not found, or not currently linked");
             }
         } catch (Database.DatabaseException ex) {
