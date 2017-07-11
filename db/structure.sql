@@ -604,7 +604,6 @@ CREATE TABLE `users` (
   `dev_token` varchar(250) NOT NULL,
   `plan_id` int(11) NOT NULL DEFAULT '0',
   `dev_id` varchar(50) NOT NULL,
-  `client_token` varchar(250) NOT NULL,
   `last_name` varchar(30) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `valid` tinyint(1) NOT NULL DEFAULT '1',
@@ -933,11 +932,20 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `addUser`(IN `username` VARCHAR(50), IN `email` TINYTEXT, IN `password` VARCHAR(64), IN `password_salt` VARCHAR(250), IN `first_name` VARCHAR(30), IN `last_name` VARCHAR(30), IN `dev_token` VARCHAR(250), IN `plan_id` INT, IN `dev_id` VARCHAR(50), IN `client_token` VARCHAR(250))
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `addUser`(
+  IN `username` VARCHAR(50),
+  IN `email` TINYTEXT,
+  IN `password` VARCHAR(64),
+  IN `password_salt` VARCHAR(250),
+  IN `first_name` VARCHAR(30),
+  IN `last_name` VARCHAR(30),
+  IN `dev_token` VARCHAR(250),
+  IN `plan_id` INT,
+  IN `dev_id` VARCHAR(50))
     MODIFIES SQL DATA
 BEGIN
-    INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`, `client_token`)
-    VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id, client_token);
+    INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`)
+    VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id);
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2112,48 +2120,6 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `getChatState`(
 BEGIN
     SELECT * FROM chatState WHERE dev_id = param_devId AND chat_id = param_chatId;
   END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getClientToken` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`hutoma_caller`@`127.0.0.1` PROCEDURE `getClientToken`(IN `id` INT)
-    NO SQL
-BEGIN
-    SELECT `client_token` FROM `users`
-    WHERE `id`=id;
-  END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getDebug` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`127.0.0.1` PROCEDURE `getDebug`(IN `l1` INT UNSIGNED)
-    READS SQL DATA
-    COMMENT 'this is a test procedure to help confirm functionality'
-SELECT *
-  FROM `debug`
-  LIMIT 0 , l1 ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

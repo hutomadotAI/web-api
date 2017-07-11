@@ -16,7 +16,8 @@ import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,28 +63,28 @@ public class TestAdminLogic {
     @Test
     public void testCreate_KeyNull() throws Database.DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(null);
-        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
 
     @Test
     public void testCreate_InvalidKey() throws Database.DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn("[]");
-        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
 
     @Test
     public void testCreate_ValidKeyUpdateFail() throws Database.DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
-        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any(), any())).thenReturn(false);
+        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(false);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
 
     @Test
     public void testCreate_ValidKeyDBFail() throws Database.DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
-        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any(), any()))
+        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any()))
                 .thenThrow(Database.DatabaseException.class);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
@@ -136,11 +137,11 @@ public class TestAdminLogic {
 
     private void validKeyDBSuccess() throws Database.DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
-        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
     }
 
     private ApiResult createDev() {
-        return this.adminLogic.createDev("ROLE", "username", "email", "password", "passSalt", "firt_name", "last_time", 0);
+        return this.adminLogic.createDev("ROLE", "username", "email", "password", "passSalt", "first_name", "last_time", 0);
     }
 
     private ApiResult deleteDev(UUID devid) {

@@ -109,6 +109,14 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
+    public void testDeleteAI_clientToken_forbidden() throws Database.DatabaseException {
+        UUID aiid = UUID.randomUUID();
+        MultivaluedHashMap<String, Object> authHeaders = getClientAuthHeaders(UUID.randomUUID(), aiid);
+        final Response response = target(AI_BASEPATH + "/" + aiid).request().headers(authHeaders).delete();
+        Assert.assertEquals(HttpURLConnection.HTTP_FORBIDDEN, response.getStatus());
+    }
+
+    @Test
     public void testCreateAI() throws Database.DatabaseException {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);

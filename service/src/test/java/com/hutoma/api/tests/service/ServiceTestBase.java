@@ -70,11 +70,21 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
 
     protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
-    private static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
+    public static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     @SuppressWarnings("unchecked")
-    protected static final MultivaluedHashMap<String, Object> defaultHeaders = new MultivaluedHashMap<String, Object>() {{
-        put("Authorization", Collections.singletonList("Bearer " + getDevToken(DEVID, Role.ROLE_PLAN_1)));
-    }};
+    protected static final MultivaluedHashMap<String, Object> defaultHeaders = getDevIdAuthHeaders(Role.ROLE_PLAN_1, DEVID);
+
+    public static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
+        return new MultivaluedHashMap<String, Object>() {{
+            put("Authorization", Collections.singletonList("Bearer " + getDevToken(devId, role)));
+        }};
+    }
+
+    public MultivaluedHashMap<String, Object> getClientAuthHeaders(final UUID devId, final UUID aiid) {
+        return new MultivaluedHashMap<String, Object>() {{
+            put("Authorization", Collections.singletonList("Bearer " + getClientToken(devId, aiid)));
+        }};
+    }
 
     @Mock
     protected DatabaseCall fakeDatabaseCall;
@@ -117,9 +127,19 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected FacebookConnector fakefacebookConnector;
 
-    private static String getDevToken(final UUID devId, final Role role) {
+    public static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
                 .claim("ROLE", role)
+                .setSubject(devId.toString())
+                .compressWith(CompressionCodecs.DEFLATE)
+                .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY)
+                .compact();
+    }
+
+    public static String getClientToken(final UUID devId, final UUID aiid) {
+        return Jwts.builder()
+                .claim("ROLE", Role.ROLE_CLIENTONLY)
+                .claim("AIID", aiid.toString())
                 .setSubject(devId.toString())
                 .compressWith(CompressionCodecs.DEFLATE)
                 .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY)

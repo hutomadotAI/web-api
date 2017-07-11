@@ -1,6 +1,5 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -66,15 +65,8 @@ public class AdminLogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
-            String clientToken = Jwts.builder()
-                    .claim("ROLE", Role.ROLE_CLIENTONLY)
-                    .setSubject(devId.toString())
-                    .compressWith(CompressionCodecs.DEFLATE)
-                    .signWith(SignatureAlgorithm.HS256, encodingKey)
-                    .compact();
-
             if (!this.database.createDev(username, email, password, passwordSalt, firstName, lastName,
-                    devToken, planId, devId.toString(), clientToken)) {
+                    devToken, planId, devId.toString())) {
                 this.logger.logUserErrorEvent(LOGFROM, "CreateDev - failed to create", ADMIN_DEVID_LOG,
                         LogMap.map("Email", email));
                 return ApiError.getInternalServerError();

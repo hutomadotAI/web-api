@@ -84,7 +84,7 @@ public class Database {
 
     public boolean createDev(final String username, final String email, final String password,
                              final String passwordSalt, final String firstName, final String lastName,
-                             final String devToken, final int planId, final String devId, final String clientToken)
+                             final String devToken, final int planId, final String devId)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("addUser", 10)
@@ -96,8 +96,7 @@ public class Database {
                     .add(lastName)
                     .add(devToken)
                     .add(planId)
-                    .add(devId)
-                    .add(clientToken);
+                    .add(devId);
             return call.executeUpdate() > 0;
         }
     }

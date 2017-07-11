@@ -24,6 +24,7 @@ import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.UUID;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Matchers.any;
@@ -81,6 +82,19 @@ public class TestServiceChat extends ServiceTestBase {
     public void testChat_invalidAiId() {
         final Response response = buildChatDefaultParams(target("/ai/myaiid/chat")).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_clientToken_canChat() {
+        UUID aiid = UUID.randomUUID();
+        UUID devId = UUID.randomUUID();
+        MultivaluedHashMap<String, Object> authHeader = getClientAuthHeaders(devId, aiid);
+        // Chat request needs to have client id containing the AIID for the Ai we want to chat with
+        final Response response = buildChatDefaultParams(target(String.format("/ai/%s/chat", aiid)))
+                .request()
+                .headers(authHeader)
+                .get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
