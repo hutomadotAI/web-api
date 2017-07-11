@@ -116,10 +116,7 @@ function saveIntent() {
         v['required'] = node_required.checked;
 
         var labelElement = node.children[i].children[4].children[0].children[0];
-        if (labelElement.value !== labelElement.getAttribute('placeholder')) {
-            labelElement.setAttribute('placeholder', labelElement.value);
-        }
-        v['label'] = labelElement.getAttribute('placeholder');
+        v['label'] = labelElement.value;
 
         variables.push(v);
 
@@ -127,7 +124,7 @@ function saveIntent() {
         if(labelsMap.hasOwnProperty(v['entity_name'])) {
             labelArray = labelsMap[v['entity_name']];
         }
-        labelArray.push(v['label']);
+        labelArray.push({label: v['label'].trim(), node: labelElement});
         labelsMap[v['entity_name']] = labelArray;
     }
 
@@ -135,17 +132,16 @@ function saveIntent() {
     for (var entityName in labelsMap) {
         if (labelsMap.hasOwnProperty(entityName)) {
             var labelArr = labelsMap[entityName];
-            if (labelArr.length > 1) {
-                var usedLabels = new Object();
-                for (var x in labelArr) {
-                    var label = labelArr[x];
-                    if (label === "" || usedLabels.hasOwnProperty(label)) {
-                        msgAlertIntentVariable(ALERT.DANGER.value, 'With multiple entries for an entity you need to provide a unique label for each');
-                        msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
-                        return false;
-                    }
-                    usedLabels[label] = true;
+            var usedLabels = new Object();
+            for (var x in labelArr) {
+                var label = labelArr[x].label;
+                if (label === "" || usedLabels.hasOwnProperty(label)) {
+                    labelArr[x].node.style.border = "thin dotted red";
+                    msgAlertIntentVariable(ALERT.DANGER.value, 'You need to provide a unique label for each entity type.');
+                    msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
+                    return false;
                 }
+                usedLabels[label] = true;
             }
         }
     }

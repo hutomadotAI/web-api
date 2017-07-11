@@ -107,7 +107,6 @@ function addSepatator(arr, len, separator) {
 }
 
 function setNewListPrompts() {
-
     var intentNewPromptList = getMultipleElementValues('intent-prompt-row');
     var entityRowNumber = document.getElementById('var_row').value;
     if (entityRowNumber === null) {
@@ -115,12 +114,12 @@ function setNewListPrompts() {
     }
     var entityRow = document.getElementById('parameter-list').children[entityRowNumber];
     var node_prompt = entityRow.children[2].children[0].children[0];
-    var list_prompt = node_prompt.getAttribute('data-prompts');
     node_prompt.setAttribute('data-prompts', intentNewPromptList);
-    if (list_prompt !== '')
+    if (intentNewPromptList.length > 0) {
         node_prompt.setAttribute('placeholder', ' ... ');
-    else
+    } else {
         node_prompt.setAttribute('placeholder', 'click to enter');
+    }
 }
 
 function loadPromptsForEntity(rowElement, targetModal) {
