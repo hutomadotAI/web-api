@@ -82,6 +82,7 @@ public class ServerBinder extends AbstractBinder {
         bind(InviteLogic.class).to(InviteLogic.class);
         bind(AIServicesLogic.class).to(AIServicesLogic.class);
         bind(FacebookIntegrationLogic.class).to(FacebookIntegrationLogic.class);
+        bind(AnalyticsLogic.class).to(AnalyticsLogic.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

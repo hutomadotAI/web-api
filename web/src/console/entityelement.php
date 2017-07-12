@@ -21,7 +21,7 @@ if (isset($_POST['entity_name'])) {
     $retValue = $entityApi->updateEntity($entityName, $_POST['entity_values']);
 
     if (isset($retvalue) && $retvalue['status']['code'] != 200) {
-        \hutoma\console::redirect('./error.php?errObj=' . $retvalue['status']['info']);
+        \hutoma\console::redirect('./error.php?errObj=' . urlencode($retvalue), null);
         exit;
     }
 } else {

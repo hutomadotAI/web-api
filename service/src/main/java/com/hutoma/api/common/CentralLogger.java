@@ -268,21 +268,24 @@ public class CentralLogger implements ILogger {
                     docs.add(doc);
                 }
             }
-            ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
-            response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
-            response.bufferEntity();
-            if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",
-                        response.getStatus(), response.readEntity(String.class)));
-            } else {
-                ElasticSearchClient.BulkResponse br =
-                        (ElasticSearchClient.BulkResponse) this.serializer.deserialize(
-                                response.readEntity(String.class),
-                                ElasticSearchClient.BulkResponse.class);
-                List<String> errors = br.getErrors(events.size());
-                if (!errors.isEmpty()) {
-                    LOGGER.error(String.format("There were errors uploading the logs: %s ",
-                            String.join("; ", errors)));
+            
+            if (this.esLoggingUrl != null && !this.esLoggingUrl.isEmpty()) {
+                ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
+                response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
+                response.bufferEntity();
+                if (response.getStatus() != HttpURLConnection.HTTP_OK) {
+                    LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",
+                            response.getStatus(), response.readEntity(String.class)));
+                } else {
+                    ElasticSearchClient.BulkResponse br =
+                            (ElasticSearchClient.BulkResponse) this.serializer.deserialize(
+                                    response.readEntity(String.class),
+                                    ElasticSearchClient.BulkResponse.class);
+                    List<String> errors = br.getErrors(events.size());
+                    if (!errors.isEmpty()) {
+                        LOGGER.error(String.format("There were errors uploading the logs: %s ",
+                                String.join("; ", errors)));
+                    }
                 }
             }
         } catch (JsonParseException ex) {

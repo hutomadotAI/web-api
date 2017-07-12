@@ -12,7 +12,6 @@ import com.hutoma.api.validation.ParameterFilter;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.UUID;
-
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -84,6 +83,10 @@ public class RateLimitCheck implements ContainerRequestFilter {
                 case Botstore_Publish:
                     burst = this.config.getRateLimit_BotstorePublish_BurstRequests();
                     frequency = this.config.getRateLimit_BotstorePublish_Frequency();
+                    break;
+                case Analytics:
+                    burst = this.config.getRateLimit_Analytics_BurstRequests();
+                    frequency = this.config.getRateLimit_Analytics_Frequency();
                     break;
                 case None:
                     skipRateLimit = true;

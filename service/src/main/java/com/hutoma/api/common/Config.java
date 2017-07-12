@@ -133,6 +133,14 @@ public class Config {
         return Double.parseDouble(getConfigFromProperties("ratelimit_botstore_publish_frequency", "120.0"));
     }
 
+    public double getRateLimit_Analytics_BurstRequests() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_burst", "4.0"));
+    }
+
+    public double getRateLimit_Analytics_Frequency() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_frequency", "5.0"));
+    }
+
     public List<UUID> getAimlBotAiids() {
         List<String> stringList = getCSList("ai_aiml_bot_aiids");
         if (stringList == null) {
@@ -297,6 +305,10 @@ public class Config {
 
     public String getElasticSearchLoggingUrl() {
         return getConfigFromProperties("logging_es_url", "");
+    }
+
+    public String getElasticSearchAnalyticsUrl() {
+        return getConfigFromProperties("analytics_es_url", "");
     }
 
     public String getEntityRecognizerUrl() {
