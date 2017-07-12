@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import java.util.Collections;
 import java.util.UUID;
 import javax.inject.Provider;
 
@@ -64,22 +65,7 @@ public class TestFacebookChatHandler {
         when(this.fakeIntegrationRecord.isActive()).thenReturn(true);
         when(this.fakeIntegrationRecord.getAiid()).thenReturn(TestDataHelper.AIID);
 
-        String apiChat = "{  \"chatId\": \"" + TestDataHelper.ALT_SESSIONID.toString()
-                + "\",  \"timestamp\": 1498561280892,  "
-                + "\"result\": {    \"score\": 0.3,    \"query\": \"" + MESSAGE + "\",   "
-                + " \"answer\": \"" + ANSWER + "\","
-                + "\"elapsedTime\": 2.926  },  \"status\": {    \"code\": 200,    \"info\": \"OK\"  }}";
-        ApiChat chatResult = (ApiChat) this.serializer.deserialize(apiChat, ApiChat.class);
-        this.fakeChatLogicProvider = mock(Provider.class);
-        this.fakeChatLogic = mock(ChatLogic.class);
-        when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
-        when(this.fakeChatLogic.chat(Matchers.eq(TestDataHelper.AIID), any(), any(), any()))
-                .thenReturn(chatResult);
-
-        this.chatHandler = new FacebookChatHandler(this.fakeDatabase, this.fakeLogger,
-                this.serializer, this.fakeConnector, this.fakeChatLogicProvider);
-        this.chatHandler.initialise(
-                new FacebookNotification.Messaging(SENDER, PAGEID, MESSAGE));
+        configureMockChat(ANSWER);
     }
 
     @Test
@@ -107,6 +93,32 @@ public class TestFacebookChatHandler {
         this.chatHandler.call();
         verifyZeroInteractions(this.fakeChatLogic);
         verifyZeroInteractions(this.fakeConnector);
+    }
+
+    @Test
+    public void testChat_OK_NotTruncated() throws Exception {
+        String answer = String.join("", Collections.nCopies(640, "A"));
+        configureMockChat(answer);
+        final String[] sentMessage = {null};
+        doAnswer(invocation -> {
+            sentMessage[0] = invocation.getArgument(1);
+            return true;
+        }).when(this.fakeConnector).sendFacebookMessage(anyString(), anyString(), anyString());
+        this.chatHandler.call();
+        Assert.assertEquals(answer, sentMessage[0]);
+    }
+
+    @Test
+    public void testChat_OK_Truncated() throws Exception {
+        String answer = String.join("", Collections.nCopies(1000, "A"));
+        configureMockChat(answer);
+        final String[] sentMessage = {null};
+        doAnswer(invocation -> {
+            sentMessage[0] = invocation.getArgument(1);
+            return true;
+        }).when(this.fakeConnector).sendFacebookMessage(anyString(), anyString(), anyString());
+        this.chatHandler.call();
+        Assert.assertEquals(640, sentMessage[0].length());
     }
 
     @Test
@@ -143,5 +155,24 @@ public class TestFacebookChatHandler {
         UUID uuid2 = this.chatHandler.generateChatId(
                 TestDataHelper.AIID, "223");
         Assert.assertNotEquals(uuid1, uuid2);
+    }
+
+    private void configureMockChat(String answer) {
+        String apiChat = "{  \"chatId\": \"" + TestDataHelper.ALT_SESSIONID.toString()
+                + "\",  \"timestamp\": 1498561280892,  "
+                + "\"result\": {    \"score\": 0.3,    \"query\": \"" + MESSAGE + "\",   "
+                + " \"answer\": \"" + answer + "\","
+                + "\"elapsedTime\": 2.926  },  \"status\": {    \"code\": 200,    \"info\": \"OK\"  }}";
+        ApiChat chatResult = (ApiChat) this.serializer.deserialize(apiChat, ApiChat.class);
+        this.fakeChatLogicProvider = mock(Provider.class);
+        this.fakeChatLogic = mock(ChatLogic.class);
+        when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
+        when(this.fakeChatLogic.chat(Matchers.eq(TestDataHelper.AIID), any(), any(), any()))
+                .thenReturn(chatResult);
+        this.chatHandler = new FacebookChatHandler(this.fakeDatabase, this.fakeLogger,
+                this.serializer, this.fakeConnector, this.fakeChatLogicProvider);
+
+        this.chatHandler.initialise(
+                new FacebookNotification.Messaging(SENDER, PAGEID, MESSAGE));
     }
 }
