@@ -71,12 +71,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more, 
             var botAuthor = bot['developer']['company'];
             var botOwned = bot['owned'];
 
-            var openBotDetails = '';
-            if (see_more)
-                openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '","' + adjustURIEscapingCategoryValue(category) + '");';
-            else
-                openBotDetails = 'onClick=openSingleBot(this,' + optionFlow + ',"' + botId + '");';
-
             var botIconPath = '';
             if (!bot['metadata'].hasOwnProperty('botIcon') || bot['metadata']['botIcon'] === '')
                 botIconPath = BOT_ICON.DEFAULT_IMAGE.value;
@@ -86,15 +80,16 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more, 
 
             wHTML += '<span id="card' + botId + '" data-pos="' + x + '">';
             wHTML += '<div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">';
+
             // we need to have an href tag to allow crawlers to reach each bot's details
             if (openFullStore) {
-                wHTML += '<a href="/pages/login.php?redirect=' + encodeURIComponent('/console/botstore.php?botId=' + botId) + '" target="_top">';
+                wHTML += '<a href="/pages/login.php?redirect=' + adjustURIEscapingCategoryValue('/console/botstore.php?botId=' + botId + '&category=' + botCategory) + '" target="_top">';
             } else {
-                wHTML += '<a href="/console/botcardDetail.php?botId=' + botId + '">';
+                wHTML += '<a href="/console/botstore.php?botId=' + botId + '&category=' + adjustURIEscapingCategoryValue(botCategory) + '" target="_top">';
             }
-            wHTML += '<img class="card-icon unselectable" src="' + botIconPath + '"' + openBotDetails + '>';
+            wHTML += '<img class="card-icon unselectable" src="' + botIconPath + '">';
             wHTML += '</a>';
-            wHTML += '<div class="card-title unselectable no-shadow"' + openBotDetails + '>';
+            wHTML += '<div class="card-title unselectable no-shadow">';
             wHTML += botName;
             wHTML += '</div>';
             wHTML += '<div class="card-author unselectable no-shadow">';
@@ -129,9 +124,6 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more, 
                 case DRAW_BOTCARDS.CREATE_NEW_BOT_FLOW.value:
                     wHTML += ('<span class="card-linked" data-botid = "' + botId + '" data-linked="">');
                     if (botOwned) {
-                        /*wHTML += ('<div class="switch" id="btnSwitch' + botId
-                         + '" style="margin-top:10px;" onclick=toggleAddBotSkill(this,'
-                         + optionFlow + ',"' + botId + '"); data-link="0"></div>');*/
                         wHTML += ('<div class="card-purchased pull-right">');
                         wHTML += ('purchased');
                         wHTML += ('</div>');
