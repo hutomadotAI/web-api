@@ -358,6 +358,8 @@ public class ChatLogic {
                 if (mv.getTimesPrompted() >= mv.getTimesToPrompt()) {
                     mv.setRequested(false);
                     handledIntent = false;
+                    // clear the intent whenever a mandatory variable is not set within the allowed number of prompts
+                    intentsToClear.add(currentIntent);
                 } else {
                     promptForVariable(mv, chatResult, intentLog);
                     handledIntent = true;
@@ -468,7 +470,7 @@ public class ChatLogic {
                 // we check if the variable is sys.any but also if the we prompted at least once
                 // the prompt check is necessary otherwise the entity will be immediately recognised
                 // before we even prompt for it.
-                if (variable.getName().equalsIgnoreCase(this.SYSANY) && (variable.getTimesPrompted() > 0)) {
+                if (variable.getName().equalsIgnoreCase(SYSANY) && (variable.getTimesPrompted() > 0)) {
                     variable.setCurrentValue(question);
                     variable.setRequested(false);
                 } else {
