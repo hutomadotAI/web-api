@@ -34,7 +34,7 @@ function purchaseBot() {
                                 break;
                         }
                     } catch (err) {
-                        location.href = "/pages/login.php?redirect=/console/botstore.php?botId=" + botId;
+                        top.location.href = "/pages/login.php?redirect=/console/botstore.php?botId=" + botId;
                     }
                 },
                 complete: function () {
