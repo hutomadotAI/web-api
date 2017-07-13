@@ -1,7 +1,7 @@
 document.getElementById("btnAddIntentResponse").addEventListener("click", addIntentResponse);
 
 function checkIntentResponseCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if( activeButtonCreateIntentResponse())
             addIntentResponse();
     }
@@ -61,7 +61,9 @@ function createNewIntentResponseRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comments-o text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-response-row" name="intent-response-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '" onkeydown="enableSaving(true);">');
+    var escapedValue = value.replace(/"/g, '&quot;');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="intent-response-row" name="intent-response-row" style="padding-left: 35px;background-color: #404446; " value="'
+        + escapedValue + '" placeholder="' + escapedValue + '" onkeydown="enableSaving(true);">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -103,7 +105,7 @@ function responseOnMouseOut(elem) {
 }
 
 $(document).ready(function () {
-    if (typeof intent['responses'] == "undefined" || !(intent['responses'] instanceof Array))
+    if (typeof intent['responses'] === "undefined" || !(intent['responses'] instanceof Array))
         return;
 
     var list_responses = intent['responses'];
