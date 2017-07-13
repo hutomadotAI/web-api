@@ -3,13 +3,15 @@ package com.hutoma.api.containers.sub;
 import com.hutoma.api.common.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Created by pedrotei on 06/10/16.
+ * Memory Intents.
  */
 public class MemoryIntent {
 
@@ -18,6 +20,7 @@ public class MemoryIntent {
     private final UUID aiid;
     private List<MemoryVariable> variables = new ArrayList<>();
     private boolean isFulfilled;
+    private Map<String, MemoryVariable> variablesMap;
 
     /**
      * Ctor.
@@ -34,6 +37,8 @@ public class MemoryIntent {
         this.chatId = chatId;
         this.variables = variables;
         this.isFulfilled = isFulfilled;
+        this.variablesMap = getMapFromVariablesList(this.variables);
+
     }
 
     /**
@@ -102,6 +107,17 @@ public class MemoryIntent {
      */
     public List<MemoryVariable> getVariables() {
         return this.variables;
+    }
+
+    public Map<String, MemoryVariable> getVariablesMap() {
+        return this.variablesMap;
+    }
+
+    private static Map<String, MemoryVariable> getMapFromVariablesList(final List<MemoryVariable> vars) {
+        if (vars == null) {
+            return new HashMap<>();
+        }
+        return vars.stream().collect(Collectors.toMap(MemoryVariable::getLabel, x -> x));
     }
 
     /**

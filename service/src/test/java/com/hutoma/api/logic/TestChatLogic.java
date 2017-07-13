@@ -1218,7 +1218,7 @@ public class TestChatLogic {
                 0,
                 false,
                 false,
-                "label");
+                "label1");
         final String persistentTrigger = "persistentValue";
         final String persistentPrompt = "persistentPrompt";
         MemoryVariable persistentVariable = new MemoryVariable(
@@ -1231,7 +1231,7 @@ public class TestChatLogic {
                 0,
                 false,
                 true,
-                "label");
+                "label2");
         List<MemoryVariable> variables = new ArrayList<>();
         variables.add(mv);
         variables.add(persistentVariable);

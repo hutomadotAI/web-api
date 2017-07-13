@@ -5,6 +5,8 @@ import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logic.ChatLogic;
@@ -21,7 +23,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -112,6 +116,37 @@ public class TestServiceChat extends ServiceTestBase {
                 .queryParam("chatId", "")
                 .request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_response_includesVariablesMap() {
+        UUID chatId = UUID.randomUUID();
+        String label1 = "label1";
+        String label2 = "label2";
+        MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
+                Collections.singletonList("prompt1"), 2, 0, false, false, label1);
+        MemoryVariable mv2 = new MemoryVariable("entity2", null, true, Collections.singletonList("2"),
+                Collections.singletonList("prompt2"), 2, 0, false, false, label2);
+        List<MemoryVariable> vars = Arrays.asList(mv1, mv2);
+        MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, vars, false);
+        List<MemoryIntent> intents = Collections.singletonList(mi);
+        when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(intents);
+
+        final Response response = target(CHAT_PATH)
+                .queryParam("q", "blablabla")
+                .queryParam("chatId", "")
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiChat apiChat = deserializeResponse(response, ApiChat.class);
+        Assert.assertEquals(intents.size(), apiChat.getResult().getIntents().size());
+        MemoryIntent resultIntent = apiChat.getResult().getIntents().get(0);
+        Assert.assertEquals(vars.size(), resultIntent.getVariables().size());
+        Assert.assertNotNull(resultIntent.getVariablesMap());
+        Assert.assertEquals(vars.size(), resultIntent.getVariablesMap().entrySet().size());
+        Assert.assertTrue(resultIntent.getVariablesMap().containsKey(label1));
+        Assert.assertTrue(resultIntent.getVariablesMap().containsKey(label2));
+        Assert.assertEquals(mv1.getName(), resultIntent.getVariablesMap().get(label1).getName());
+        Assert.assertEquals(mv2.getName(), resultIntent.getVariablesMap().get(label2).getName());
     }
 
     private WebTarget buildChatDefaultParams(WebTarget webTarget) {
