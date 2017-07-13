@@ -587,6 +587,21 @@ public class Database {
         }
     }
 
+    public String getWebhookSecretForBot(final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getWebhookSecretForBot", 1).add(aiid);
+            final ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return rs.getString("client_token");
+                }
+                throw new DatabaseException("Webhook secret not found");
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
     public boolean deleteAi(final UUID devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteAi", 2).add(devid).add(aiid);

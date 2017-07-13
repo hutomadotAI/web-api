@@ -14,11 +14,7 @@ import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
@@ -512,9 +508,10 @@ public class ChatLogic {
     private void checkAndExecuteWebhook(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
                                         final ChatResult chatResult, final Map<String, Object> log) {
         // If the webhook returns a text response, overwrite the answer.
-        if (this.webHooks.activeWebhookExists(currentIntent, devId)) {
+        WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, devId);
+        if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            WebHookResponse response = this.webHooks.executeWebHook(currentIntent, chatResult, devId);
+            WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult, devId);
 
             if (response == null) {
                 this.logger.logUserErrorEvent(LOGFROM,
