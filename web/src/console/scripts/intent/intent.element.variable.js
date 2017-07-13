@@ -87,11 +87,17 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('</div>');
     wHTML += ('</div>');
 
+    var labelToDisplay = label === null
+        // if label is null then this is a new row
+        ? 'placeholder="enter a label"'
+        // If the label is empty then it must be a legacy entity, and we auto-generate a label based on the entity name
+        // otherwise just use the already stored label
+        : 'value="' + (label === '' ? entity.replace(/[@]/g, "") + '_label' : label) + '"';
     wHTML += ('<div class="col-xs-2"');
     wHTML += ('<div class="text-left" >');
     wHTML += ('<div class="text-gray no-padding">');
     wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-nprompt" '
-        + 'style="background-color: transparent; margin:0;" value="' + label
+        + 'style="background-color: transparent; margin:0;"' + labelToDisplay
         + '" onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">');
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -187,7 +193,7 @@ function variableOnMouseOut(elem) {
 
 function addEmptyVariableRow() {
     var node = document.getElementById('parameter-list');
-    createNewParameterRow('', 3, '', 0, '', 1, '', node);
+    createNewParameterRow('', 3, '', 0, '', 1, null, node);
 }
 
 function deleteIntentVariable(element) {
