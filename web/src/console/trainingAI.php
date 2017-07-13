@@ -159,7 +159,7 @@ function localeToLanguage($locale)
 <script src="./scripts/chat/voice.js"></script>
 <script src="./scripts/clipboard/copyToClipboard.js"></script>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">

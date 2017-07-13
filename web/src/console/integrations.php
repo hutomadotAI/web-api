@@ -91,7 +91,7 @@ if (isset($connect_token)) {
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
