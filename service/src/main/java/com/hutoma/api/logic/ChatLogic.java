@@ -521,6 +521,11 @@ public class ChatLogic {
             } else if (response.getText() != null && !response.getText().isEmpty()) {
                 chatResult.setAnswer(response.getText());
                 log.put("Webhook response", response.getText());
+            } else {
+                this.logger.logUserInfoEvent(LOGFROM,
+                        "Executing WebHook for intent for aiid: empty response.",
+                        devId.toString(),
+                        LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
             }
         } else {
             log.put("Webhook run", false);
