@@ -44,8 +44,8 @@
 
     <div class="box-footer">
         <span>
-            If you’re stuck email <a href='mailto:support@hutoma.com?subject=Invite%20to%20slack%20channel'
-                                     tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
+            If you’re stuck email <a href='mailto:support@hutoma.ai?subject=Invite%20to%20slack%20channel'
+                                     tabindex="-1">support@hutoma.ai</a> for an invite to our slack channel.
         </span>
         <p></p>
 

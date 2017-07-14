@@ -64,7 +64,7 @@ var BOT_ICON = {
 };
 
 var URLS = {
-    HUTOMA_CONSOLE : 'https://console.hutoma.com'
+    HUTOMA_CONSOLE : 'https://console.hutoma.ai'
 };
 
 function switchCard(botId,optionFlow) {

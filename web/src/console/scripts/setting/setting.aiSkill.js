@@ -69,11 +69,11 @@ function updateAISkill() {
                     callback(jsonString);
                     break;
                 case 404:
-                    msgAlertAiSkill(ALERT.DANGER.value, 'Bot cannot be found or not currently linked. Please retry or contact support@hutoma.com.');
+                    msgAlertAiSkill(ALERT.DANGER.value, 'Bot cannot be found or not currently linked. Please retry or contact support@hutoma.ai.');
                     activeAiSkillButtons();
                     break;
                 case 500:
-                    msgAlertAiSkill(ALERT.DANGER.value, 'Please try again. If the problem persists, contact support@hutoma.com.');
+                    msgAlertAiSkill(ALERT.DANGER.value, 'Please try again. If the problem persists, contact support@hutoma.ai.');
                     activeAiSkillButtons();
                     break;
             }
