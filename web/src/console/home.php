@@ -96,7 +96,7 @@ unset($aiApi);
 
 <script src="./scripts/home/home.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 
 <script>
     var aiList = <?php

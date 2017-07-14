@@ -96,7 +96,7 @@ function setSessionVariables($singleAI)
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 <script>
     $(function () {
         $('.select2').select2();

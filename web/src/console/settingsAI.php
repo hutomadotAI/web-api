@@ -134,7 +134,7 @@ function isSessionVariablesAvailable()
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, false, false]);
