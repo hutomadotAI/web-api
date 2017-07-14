@@ -26,6 +26,8 @@ import static java.net.HttpURLConnection.HTTP_OK;
 public class FacebookChatHandler implements Callable {
 
     private static final String LOGFROM = "fbchathandler";
+    private static final int FB_MESSAGE_SIZE_LIMIT = 640;
+
     private final Database database;
     private final ILogger logger;
     private Provider<ChatLogic> chatLogicProvider;
@@ -191,9 +193,10 @@ public class FacebookChatHandler implements Callable {
                                             final FacebookIntegrationMetadata metadata,
                                             final String messageOriginatorId,
                                             final String responseText) throws FacebookException {
-        // this is where we would create JSON to send back a richer format messsage
-        // but it's just text passthrough for now
-        this.facebookConnector.sendFacebookMessage(messageOriginatorId, responseText, metadata.getPageToken());
+        // truncate the message to be smaller than the limit
+        String output = responseText.length() > FB_MESSAGE_SIZE_LIMIT ?
+                responseText.substring(0, FB_MESSAGE_SIZE_LIMIT) : responseText;
+        this.facebookConnector.sendFacebookMessage(messageOriginatorId, output, metadata.getPageToken());
     }
 
     private String getChatResponse(final IntegrationRecord integrationRecord, final UUID chatID) {
