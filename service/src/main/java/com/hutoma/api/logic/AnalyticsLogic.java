@@ -7,10 +7,12 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiListMap;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiString;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
@@ -20,6 +22,10 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.joda.time.DateTime;
@@ -46,6 +52,11 @@ import javax.inject.Inject;
 public class AnalyticsLogic {
 
     private static final String LOGFROM = "analyticslogic";
+    private static final String CHATLOGS_INDEX = "api-chatlog-v1";
+    private static final String CHATLOGS_DATETIME_FIELD = "dateTime";
+    private static final int DEFAULT_PAGE_SIZE = 100;
+    private static final String RESULT_DATE_FIELD_NAME = "date";
+    private static final String RESULT_COUNT_FIELD_NAME = "count";
 
     private final Config config;
     private final ILogger logger;
@@ -53,7 +64,7 @@ public class AnalyticsLogic {
 
     // Immutable map maintains the order of the inserts, so we can use this as the order of fields to show on the CSV
     private static final Map<String, String> CHATLOGS_MAP = ImmutableMap.of(
-            "dateTime", "date",
+            CHATLOGS_DATETIME_FIELD, "date",
             "params.ChatId", "session",
             "params.Q", "question",
             "params.ResponseSent", "response",
@@ -85,28 +96,8 @@ public class AnalyticsLogic {
                                  final AnalyticsResponseFormat format) {
         TransportClient client = null;
         try {
-            DateTime dateFrom;
-            DateTime dateTo;
-
-            // If start date is not specified default to 30 days ago
-            if (fromTime == null || fromTime.isEmpty()) {
-                dateFrom = DateTime.now().minusDays(30);
-            } else {
-                dateFrom = DateTime.parse(fromTime);
-            }
-
-            // If end date is not specified, use 'now' otherwise select the last hour+min+sec of the specified day
-            if (toTime == null || toTime.isEmpty()) {
-                dateTo = DateTime.now();
-            } else {
-                DateTime tempDate = DateTime.parse(toTime);
-                dateTo = new DateTime(tempDate.getYear(), tempDate.getMonthOfYear(), tempDate.getDayOfMonth(),
-                        23, 59, 59);
-            }
-
-            // Convert the dates to UTC
-            dateFrom = dateFrom.toDateTime(DateTimeZone.UTC);
-            dateTo = dateTo.toDateTime(DateTimeZone.UTC);
+            DateTime dateFrom = getDateFrom(fromTime);
+            DateTime dateTo = getDateTo(toTime);
 
             if (dateTo.isBefore(dateFrom)) {
                 this.logger.logUserInfoEvent(LOGFROM, "Request for end date prior to start date",
@@ -116,31 +107,25 @@ public class AnalyticsLogic {
             }
 
             client = getESClient();
-            QueryBuilder query = org.elasticsearch.index.query.QueryBuilders.boolQuery()
-                    .must(QueryBuilders.termQuery("type.keyword", "TRACE"))
-                    .must(QueryBuilders.termQuery("tag.keyword", "chatlogic"))
-                    .must(QueryBuilders.termQuery("params.AIID.keyword", aiid.toString()))
-                    .must(QueryBuilders.termQuery("params.DevId.keyword", devId.toString()));
+            QueryBuilder query = getChatLogsTermQuery(devId, aiid);
             SearchResponse response;
             StringBuilder sb = new StringBuilder();
-            final int pageSize = 100;
             int startItem = 0;
             do {
-                response = client.prepareSearch("api-chatlog-v1")
+                response = client.prepareSearch(CHATLOGS_INDEX)
                         .setSearchType(SearchType.DEFAULT)
                         .setQuery(query)
-                        .setPostFilter(QueryBuilders.rangeQuery("dateTime")
+                        .setPostFilter(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD)
                                 .from(dateFrom.toString()).to(dateTo.toString()))
                         .addSort("timestamp", SortOrder.ASC)
-                        .setSize(pageSize)
+                        .setSize(DEFAULT_PAGE_SIZE)
                         .setFrom(startItem)
                         .get();
 
                 boolean includeHeaders = format == AnalyticsResponseFormat.CSV && startItem == 0;
                 sb.append(getResultForFormat(response.getHits(), format, CHATLOGS_MAP, includeHeaders));
-                startItem += pageSize;
+                startItem += DEFAULT_PAGE_SIZE;
             } while (startItem < response.getHits().totalHits);
-
             return new ApiString(sb.toString()).setSuccessStatus();
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex, LogMap.map("aiid", aiid));
@@ -150,6 +135,139 @@ public class AnalyticsLogic {
                 client.close();
             }
         }
+    }
+
+    private static DateTime getDateFrom(final String fromTime) {
+        DateTime dateFrom;
+        // If start date is not specified default to 30 days ago
+        if (fromTime == null || fromTime.isEmpty()) {
+            dateFrom = DateTime.now().minusDays(30);
+        } else {
+            dateFrom = DateTime.parse(fromTime);
+        }
+        // Convert the date to UTC
+        return dateFrom.toDateTime(DateTimeZone.UTC);
+    }
+
+    private static DateTime getDateTo(final String toTime) {
+        DateTime dateTo;
+        // If end date is not specified, use 'now' otherwise select the last hour+min+sec of the specified day
+        if (toTime == null || toTime.isEmpty()) {
+            dateTo = DateTime.now();
+        } else {
+            DateTime tempDate = DateTime.parse(toTime);
+            dateTo = new DateTime(tempDate.getYear(), tempDate.getMonthOfYear(), tempDate.getDayOfMonth(),
+                    23, 59, 59);
+        }
+        // Convert the date to UTC
+        return dateTo.toDateTime(DateTimeZone.UTC);
+    }
+
+    public ApiResult getSessions(final UUID devId, final UUID aiid, final String fromTime, final String toTime) {
+        TransportClient client = null;
+        try {
+            DateTime dateFrom = getDateFrom(fromTime);
+            DateTime dateTo = getDateTo(toTime);
+            client = getESClient();
+            QueryBuilder query = getChatLogsTermQuery(devId, aiid);
+            SearchRequestBuilder requestBuilder = client.prepareSearch(CHATLOGS_INDEX)
+                    .setSearchType(SearchType.DEFAULT)
+                    .setQuery(query)
+                    .addAggregation(
+                            AggregationBuilders.dateHistogram("by-date")
+                                    .field(CHATLOGS_DATETIME_FIELD)
+                                    .dateHistogramInterval(DateHistogramInterval.DAY)
+                                    .subAggregation(
+                                            AggregationBuilders.cardinality("ChatId")
+                                                    .field("params.ChatId.keyword")
+                                                    .precisionThreshold(100)))
+                    .setPostFilter(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD)
+                            .from(dateFrom.toString()).to(dateTo.toString()));
+
+            List<Map<String, Object>> listMap = new ArrayList<>();
+            SearchResponse response;
+            final int pageSize = DEFAULT_PAGE_SIZE;
+            int startItem = 0;
+            do {
+                response = requestBuilder
+                        .setSize(pageSize)
+                        .setFrom(startItem)
+                        .get();
+
+                Histogram dateHistogram = response.getAggregations().get("by-date");
+                for (Histogram.Bucket bucket : dateHistogram.getBuckets()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(RESULT_DATE_FIELD_NAME, bucket.getKeyAsString());
+                    Cardinality cardinality = bucket.getAggregations().get("ChatId");
+                    map.put(RESULT_COUNT_FIELD_NAME, cardinality.getValue());
+                    listMap.add(map);
+                }
+                startItem += pageSize;
+            } while (startItem < response.getHits().totalHits);
+
+
+            return new ApiListMap(listMap).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex, LogMap.map("aiid", aiid));
+            return ApiError.getInternalServerError();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    public ApiResult getInteractions(final UUID devId, final UUID aiid, final String fromTime, final String toTime) {
+        TransportClient client = null;
+        try {
+            DateTime dateFrom = getDateFrom(fromTime);
+            DateTime dateTo = getDateTo(toTime);
+            client = getESClient();
+            QueryBuilder query = getChatLogsTermQuery(devId, aiid);
+            SearchRequestBuilder requestBuilder = client.prepareSearch(CHATLOGS_INDEX)
+                    .setSearchType(SearchType.DEFAULT)
+                    .setQuery(query)
+                    .addAggregation(AggregationBuilders.dateHistogram("by-date")
+                            .field(CHATLOGS_DATETIME_FIELD).dateHistogramInterval(DateHistogramInterval.DAY))
+                    .setPostFilter(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD)
+                            .from(dateFrom.toString()).to(dateTo.toString()));
+            List<Map<String, Object>> listMap = new ArrayList<>();
+            SearchResponse response;
+            final int pageSize = 100;
+            int startItem = 0;
+            do {
+                response = requestBuilder
+                        .setSize(pageSize)
+                        .setFrom(startItem)
+                        .get();
+
+                Histogram dateHistogram = response.getAggregations().get("by-date");
+                for (Histogram.Bucket bucket : dateHistogram.getBuckets()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(RESULT_DATE_FIELD_NAME, bucket.getKeyAsString());
+                    map.put(RESULT_COUNT_FIELD_NAME, bucket.getDocCount());
+                    listMap.add(map);
+                }
+
+                startItem += pageSize;
+            } while (startItem < response.getHits().totalHits);
+            return new ApiListMap(listMap).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex, LogMap.map("aiid", aiid));
+            return ApiError.getInternalServerError();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    private static QueryBuilder getChatLogsTermQuery(final UUID devId, final UUID aiid) {
+        return org.elasticsearch.index.query.QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("type.keyword", "TRACE"))
+                .must(QueryBuilders.termQuery("tag.keyword", "chatlogic"))
+                .must(QueryBuilders.termQuery("params.AIID.keyword", aiid.toString()))
+                .must(QueryBuilders.termQuery("params.DevId.keyword", devId.toString()));
     }
 
     private String getResultForFormat(final SearchHits hits, final AnalyticsResponseFormat format,
