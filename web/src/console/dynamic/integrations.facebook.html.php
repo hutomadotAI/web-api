@@ -19,7 +19,7 @@
     function facebookConnect() {
         <?php // https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow  ?>
         var facebookRedir = htmlEncode(window.location.href.split('#')[0]);
-        document.cookie = "facebookRedir=" + htmlEncode(facebookRedir) + "; expires=0; path=/";
+        document.cookie = "facebookRedir=" + htmlEncode(facebookRedir) + "; path=/";
         var fbLogin = "https://www.facebook.com/v2.9/dialog/oauth"
             + "?client_id=" + appid
             + "&scope=" + permissions
