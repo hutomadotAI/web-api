@@ -56,36 +56,15 @@ public class TestWebhooks {
      * activeWebhookExists returns true if a webhook exists for an intent, and is enabled.
      */
     @Test
-    public void testActiveWebHookExists_Exists() throws Database.DatabaseException {
+    public void testGetWebHook_PassThrough() throws Database.DatabaseException {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
 
-        Assert.assertTrue(this.webHooks.activeWebhookExists(mi, DEVID));
+        WebHook retrieved = this.webHooks.getWebHookForIntent(mi, DEVID);
+        Assert.assertEquals(wh, retrieved);
     }
 
-    /*
-     * activeWebhookExists returns false if a webhook exists for an intent, and is disabled.
-     */
-    @Test
-    public void testActiveWebHookExists_ExistsInactive() throws Database.DatabaseException {
-        MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
-
-        Assert.assertFalse(this.webHooks.activeWebhookExists(mi, DEVID));
-    }
-
-    /*
-     * activeWebhookExists returns true if a webhook does not exist for an intent.
-     */
-    @Test
-    public void testActiveWebHookExists_DoesntExist() throws Database.DatabaseException {
-        MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
-
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
-        Assert.assertFalse(this.webHooks.activeWebhookExists(mi, DEVID));
-    }
 
     /*
      * executeWebHook returns false if it is provided with an invalid intent.
@@ -93,11 +72,10 @@ public class TestWebhooks {
     @Test
     public void testExecuteWebHook_InvalidIntent() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
         ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
-        WebHookResponse response = this.webHooks.executeWebHook(null, chatResult, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, null, chatResult, DEVID);
         Assert.assertNull(response);
     }
 
@@ -107,14 +85,14 @@ public class TestWebhooks {
     @Test
     public void testExecuteWebHook_InvalidEndpoint() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "", false);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
+        when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
-        WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, DEVID);
         Assert.assertNull(response);
     }
 
@@ -124,16 +102,15 @@ public class TestWebhooks {
     @Test
     public void testExecuteWebHook_ValidResponse() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+        when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
-
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeWebHook(mi, chatResult, DEVID);
+        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, DEVID);
         Assert.assertNotNull(response);
     }
 
@@ -142,11 +119,10 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_NoWebHook() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(null);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
-        WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(null, mi, chatResult, DEVID);
         Assert.assertNull(response);
     }
 
@@ -156,14 +132,14 @@ public class TestWebhooks {
     @Test
     public void testExecuteWebHook_ResponseDeserialiseFailed() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
+        when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
-        WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, DEVID);
         Assert.assertNull(response);
     }
 
@@ -173,14 +149,25 @@ public class TestWebhooks {
     @Test
     public void testExecuteWebHook_InvalidErrorCode() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
+        when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = this.webHooks.executeWebHook(mi, chatResult, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, DEVID);
         Assert.assertNull(response);
+    }
+
+    /*
+     * test that the message hashes correctly
+     */
+    @Test
+    public void testHashWebHook_CalculatesOk() throws Database.DatabaseException, IOException {
+        String hashString = this.webHooks.getMessageHash(DEVID.toString(), "123456", "ThisIsAMessage".getBytes());
+
+        // Here's what Python calculated this should be using HMAC SHA256
+        assert(hashString).equals("13f5ef193847035a837ef7123ffe2efd4748f57f0be74c3897f82064443457f2");
     }
 
     /*
