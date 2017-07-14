@@ -39,6 +39,44 @@ class analyticsApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function getChatSessions($aiid, $from, $to) {
+
+        $params = array(
+            'from' => $from,
+            'to' => $to
+        );
+
+        $url = $this->buildRequestUrl(self::$insightsPath . '/' . $aiid . '/graph/sessions', $params);
+
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($url);
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $this->handleApiCallError($curl_response, 999);
+            return json_decode($curl_response);
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function getChatInteractions($aiid, $from, $to) {
+
+        $params = array(
+            'from' => $from,
+            'to' => $to
+        );
+
+        $url = $this->buildRequestUrl(self::$insightsPath . '/' . $aiid . '/graph/interactions', $params);
+
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($url);
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $this->handleApiCallError($curl_response, 999);
+            return json_decode($curl_response);
+        }
+        return $this->getDefaultResponse();
+    }
+
     public function __destruct()
     {
         parent::__destruct();
