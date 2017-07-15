@@ -26,6 +26,9 @@ public class ChatResult {
     private UUID chatId;
     private List<MemoryIntent> intents;
 
+    // result of a webhook call if one was made
+    private transient WebHookResponse webHookResponse;
+
     // the actual bot ID that provided the result
     private transient UUID aiid;
     private transient boolean resetConversation;
@@ -53,6 +56,16 @@ public class ChatResult {
         this.aiid = source.aiid;
     }
 
+    public ChatResult(final UUID chatId, final double score, final String query, final String answer,
+                      final double elapsedTime, final WebHookResponse webHookResponse) {
+        this.score = score;
+        this.query = query;
+        this.answer = answer;
+        this.elapsedTime = elapsedTime;
+        this.chatId = chatId;
+        this.webHookResponse = webHookResponse;
+    }
+
     public String getAnswer() {
         return this.answer;
     }
@@ -61,12 +74,12 @@ public class ChatResult {
         this.answer = answer;
     }
 
-    public void setQuery(final String query) {
-        this.query = query;
-    }
-
     public final String getQuery() {
         return this.query;
+    }
+
+    public void setQuery(final String query) {
+        this.query = query;
     }
 
     public void setAction(String action) {
@@ -133,11 +146,19 @@ public class ChatResult {
         this.aiid = aiid;
     }
 
+    public void setWebHookResponse(final WebHookResponse webHookResponse) {
+        this.webHookResponse = webHookResponse;
+    }
+
     public boolean isResetConversation() {
         return this.resetConversation;
     }
 
     public void setResetConversation(final boolean resetConversation) {
         this.resetConversation = resetConversation;
+    }
+
+    public WebHookResponse getWebhookResponse() {
+        return this.webHookResponse;
     }
 }

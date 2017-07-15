@@ -4,15 +4,17 @@ import com.google.common.base.Strings;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
+import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
-import com.hutoma.api.containers.ApiChat;
-import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookNotification;
+import com.hutoma.api.containers.facebook.FacebookRichContentNode;
+import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.IntegrationType;
+import com.hutoma.api.containers.sub.WebHookResponse;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -20,8 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import static java.net.HttpURLConnection.HTTP_OK;
 
 public class FacebookChatHandler implements Callable {
 
@@ -133,11 +133,13 @@ public class FacebookChatHandler implements Callable {
                 // TODO: load chat state and check sequence number
 
                 // call the chat logic to get a response
-                String responseText = getChatResponse(integrationRecord, chatID);
+                Pair<String, FacebookRichContentNode> response = getChatResponse(integrationRecord, chatID);
 
                 try {
                     // send the response back to Facebook
-                    sendChatResponseToFacebook(integrationRecord, metadata, messageOriginatorId, responseText);
+                    sendChatResponseToFacebook(integrationRecord, metadata, messageOriginatorId,
+                            response.getA(), response.getB());
+
                     // chat worked. save the status
                     status = "Chat active.";
                     chatSuccess = true;
@@ -187,30 +189,49 @@ public class FacebookChatHandler implements Callable {
      * @param metadata
      * @param messageOriginatorId
      * @param responseText
+     * @param richContent
      * @throws FacebookException
      */
     private void sendChatResponseToFacebook(final IntegrationRecord integrationRecord,
                                             final FacebookIntegrationMetadata metadata,
                                             final String messageOriginatorId,
-                                            final String responseText) throws FacebookException {
-        // truncate the message to be smaller than the limit
-        String output = responseText.length() > FB_MESSAGE_SIZE_LIMIT ?
-                responseText.substring(0, FB_MESSAGE_SIZE_LIMIT) : responseText;
-        this.facebookConnector.sendFacebookMessage(messageOriginatorId, output, metadata.getPageToken());
+                                            final String responseText,
+                                            final FacebookRichContentNode richContent) throws FacebookException {
+        String acceptedText = null;
+        FacebookRichContentNode acceptedRichContent = null;
+
+        if ((richContent != null) && (richContent.getContentType() != null)) {
+            // if we accepted the rich-content
+            acceptedRichContent = richContent;
+        } else {
+            // otherwise, use the text version
+            // and truncate the message to be smaller than the limit
+            acceptedText = responseText.length() > FB_MESSAGE_SIZE_LIMIT ?
+                    responseText.substring(0, FB_MESSAGE_SIZE_LIMIT) : responseText;
+        }
+
+        // send to facebook
+        this.facebookConnector.sendFacebookMessage(messageOriginatorId, metadata.getPageToken(),
+                acceptedText, acceptedRichContent);
     }
 
-    private String getChatResponse(final IntegrationRecord integrationRecord, final UUID chatID) {
-
+    private Pair<String, FacebookRichContentNode> getChatResponse(final IntegrationRecord integrationRecord, final UUID chatID) {
         // call chat logic to create a response
-        ApiResult apiResult = this.chatLogicProvider.get().chat(
-                integrationRecord.getAiid(), integrationRecord.getDevid(),
-                this.messaging.getMessageText(), chatID.toString());
+        try {
+            // if everything went well then get the answer
+            ChatResult chatResult = this.chatLogicProvider.get().chatFacebook(
+                    integrationRecord.getAiid(), integrationRecord.getDevid(),
+                    this.messaging.getMessageText(), chatID.toString());
 
-        // if everything went well then get the answer
-        if ((apiResult.getStatus().getCode() == HTTP_OK) && (apiResult instanceof ApiChat)) {
-            return ((ApiChat) apiResult).getResult().getAnswer();
+            // was there a webhook response with rich content for facebook?
+            WebHookResponse webhookResponse = chatResult.getWebhookResponse();
+            FacebookRichContentNode richContent = (webhookResponse == null) ? null : webhookResponse.getFacebookNode();
+
+            return new Pair<>(chatResult.getAnswer(), richContent);
+
+        } catch (ChatLogic.ChatFailedException e) {
+            // otherwise get a status message
+            return new Pair<>(e.getApiError().getStatus().getInfo(), null);
         }
-        // otherwise get a status message
-        return apiResult.getStatus().getInfo();
     }
 }

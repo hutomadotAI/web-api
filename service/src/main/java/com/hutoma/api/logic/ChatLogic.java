@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.google.common.base.Strings;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
@@ -14,7 +15,12 @@ import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
@@ -38,6 +44,7 @@ public class ChatLogic {
 
     private static final String LOGFROM = "chatlogic";
     private static final double JUST_ABOVE_ZERO = 0.00001d;
+    private static final String SYSANY = "sys.any";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Tools tools;
@@ -48,7 +55,6 @@ public class ChatLogic {
     private final ChatLogger chatLogger;
     private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
-    private static final String SYSANY = "sys.any";
     private LogMap telemetryMap;
     private ChatState chatState;
 
@@ -70,6 +76,54 @@ public class ChatLogic {
     }
 
     public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId) {
+        try {
+            return chatCall(ChatOrigin.API, aiid, devId, question, chatId).setSuccessStatus();
+        } catch (ChatFailedException fail) {
+            return fail.getApiError();
+        }
+    }
+
+    public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId)
+            throws ChatFailedException {
+        return chatCall(ChatOrigin.API, aiid, devId, question, chatId).getResult();
+    }
+
+    public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId,
+                                   float minP) {
+        final long startTime = this.tools.getTimestamp();
+        UUID chatUuid = UUID.fromString(chatId);
+
+        // Add telemetry for the request
+        this.telemetryMap = LogMap.map("DevId", devId)
+                .put("AIID", aiid)
+                // TODO: potentially PII info, we may need to mask this later, but for
+                // development purposes log this
+                .put("ChatId", chatUuid.toString())
+                .put("Q", question);
+
+        ChatResult result = new ChatResult(question);
+        result.setElapsedTime(this.tools.getTimestamp() - startTime);
+
+        // Set a fixed response.
+        result.setAnswer("Hello");
+        result.setScore(1.0);
+
+        // set the chat response time to the whole duration since the start of the request until now
+        result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+        this.telemetryMap.add("RequestDuration", result.getElapsedTime());
+
+        // prepare the result container
+        ApiChat apiChat = new ApiChat(chatUuid, 0);
+        apiChat.setResult(result);
+
+        // log the results
+        this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId.toString(), this.telemetryMap);
+        return apiChat.setSuccessStatus();
+    }
+
+    private ApiChat chatCall(ChatOrigin chatOrigin,
+                             final UUID aiid, final UUID devId, final String question, final String chatId)
+            throws ChatFailedException {
 
         final String devIdString = devId.toString();
         final long startTime = this.tools.getTimestamp();
@@ -232,23 +286,23 @@ public class ChatLogic {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devIdString,
                     LogMap.map("Message", notFoundException.getMessage()).put("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, notFoundException, this.telemetryMap);
-            return ApiError.getNotFound("Bot not found");
+            throw new ChatFailedException(ApiError.getNotFound("Bot not found"));
 
         } catch (AIChatServices.AiNotReadyToChat ex) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not ready", devIdString, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
-            return ApiError.getBadRequest(
-                    "This bot is not ready to chat. It needs to train and/or be linked to other bots");
+            throw new ChatFailedException(ApiError.getBadRequest(
+                    "This bot is not ready to chat. It needs to train and/or be linked to other bots"));
 
         } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
                     devIdString, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
-            return ApiError.getInternalServerError();
+            throw new ChatFailedException(ApiError.getInternalServerError());
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat", devIdString, e);
             this.chatLogger.logChatError(LOGFROM, devIdString, e, this.telemetryMap);
-            return ApiError.getInternalServerError();
+            throw new ChatFailedException(ApiError.getInternalServerError());
         } finally {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
@@ -268,40 +322,7 @@ public class ChatLogic {
         // log the results
         this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
         this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid).put("SessionId", chatId));
-        return apiChat.setSuccessStatus();
-    }
-
-    public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId,
-                                   float minP) {
-        final long startTime = this.tools.getTimestamp();
-        UUID chatUuid = UUID.fromString(chatId);
-
-        // Add telemetry for the request
-        this.telemetryMap = LogMap.map("DevId", devId)
-                .put("AIID", aiid)
-                // TODO: potentially PII info, we may need to mask this later, but for
-                // development purposes log this
-                .put("ChatId", chatUuid.toString())
-                .put("Q", question);
-
-        ChatResult result = new ChatResult(question);
-        result.setElapsedTime(this.tools.getTimestamp() - startTime);
-
-        // Set a fixed response.
-        result.setAnswer("Hello");
-        result.setScore(1.0);
-
-        // set the chat response time to the whole duration since the start of the request until now
-        result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
-        this.telemetryMap.add("RequestDuration", result.getElapsedTime());
-
-        // prepare the result container
-        ApiChat apiChat = new ApiChat(chatUuid, 0);
-        apiChat.setResult(result);
-
-        // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "AssistantChat", devId.toString(), this.telemetryMap);
-        return apiChat.setSuccessStatus();
+        return apiChat;
     }
 
     /**
@@ -512,20 +533,32 @@ public class ChatLogic {
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
             WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult, devId);
-
             if (response == null) {
                 this.logger.logUserErrorEvent(LOGFROM,
                         "Error occured executing WebHook for intent %s for aiid %s.",
                         devId.toString(),
                         LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
-            } else if (response.getText() != null && !response.getText().isEmpty()) {
-                chatResult.setAnswer(response.getText());
-                log.put("Webhook response", response.getText());
             } else {
-                this.logger.logUserInfoEvent(LOGFROM,
-                        "Executing WebHook for intent for aiid: empty response.",
-                        devId.toString(),
-                        LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
+                // first store the whole deserialized webhook in a transient field
+                chatResult.setWebHookResponse(response);
+
+                // log and set the text if there was any
+                if (!Strings.isNullOrEmpty(response.getText())) {
+                    chatResult.setAnswer(response.getText());
+                    log.put("Webhook response", response.getText());
+                } else {
+                    // otherwise we got no text
+                    this.logger.logUserInfoEvent(LOGFROM,
+                            "Executing WebHook for intent for aiid: empty response.",
+                            devId.toString(),
+                            LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
+                }
+                // log the Facebook rich-content type if available
+                if ((response.getFacebookNode() != null) &&
+                        (response.getFacebookNode().getContentType() != null)) {
+                    log.put("Webhook facebook response",
+                            response.getFacebookNode().getContentType().name());
+                }
             }
         } else {
             log.put("Webhook run", false);
@@ -726,9 +759,27 @@ public class ChatLogic {
         return result;
     }
 
+    public enum ChatOrigin {
+        API,
+        Facebook
+    }
+
     static class IntentException extends Exception {
         public IntentException(final String message) {
             super(message);
+        }
+    }
+
+    public static class ChatFailedException extends Exception {
+
+        private ApiError apiError;
+
+        public ChatFailedException(final ApiError apiError) {
+            this.apiError = apiError;
+        }
+
+        public ApiError getApiError() {
+            return this.apiError;
         }
     }
 

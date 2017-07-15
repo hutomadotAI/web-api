@@ -9,6 +9,7 @@ import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
+import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.facebook.FacebookToken;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -99,11 +100,13 @@ public class FacebookConnector {
     /***
      * Reply to a message on behalf of a Facebook page
      * @param toFacebookID
-     * @param message
      * @param pageToken
+     * @param textMessage
+     * @param richContent
      * @throws FacebookException
      */
-    public void sendFacebookMessage(String toFacebookID, String message, String pageToken)
+    public void sendFacebookMessage(String toFacebookID, String pageToken,
+                                    String textMessage, FacebookRichContentNode richContent)
             throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
@@ -112,7 +115,11 @@ public class FacebookConnector {
                 .queryParam("client_secret", this.config.getFacebookAppSecret())
                 .queryParam("access_token", pageToken);
         // generate the structure
-        SendMessage sendMessage = new SendMessage(toFacebookID, message);
+        SendMessage sendMessage = new SendMessage(toFacebookID);
+        sendMessage.setText(textMessage);
+        sendMessage.setRichContent(richContent);
+
+
         // send the serialized payload to facebook
         webCall(target, RequestMethod.POST, Entity.json(this.jsonSerializer.serialize(sendMessage)));
     }
@@ -328,11 +335,18 @@ public class FacebookConnector {
         @SerializedName("message")
         private MessagePayload message;
 
-        public SendMessage(final String recipient, final String text) {
+        public SendMessage(final String recipient) {
             this.recipient = new Recipient();
             this.recipient.id = recipient;
             this.message = new MessagePayload();
+        }
+
+        public void setText(final String text) {
             this.message.text = text;
+        }
+
+        public void setRichContent(FacebookRichContentNode content) {
+            this.message.richContent = content;
         }
 
         private static class Recipient {
@@ -343,6 +357,9 @@ public class FacebookConnector {
         private static class MessagePayload {
             @SerializedName("text")
             private String text;
+
+            @SerializedName("attachment")
+            private FacebookRichContentNode richContent;
         }
     }
 
