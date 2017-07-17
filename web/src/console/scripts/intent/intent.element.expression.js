@@ -1,7 +1,7 @@
 document.getElementById("btnAddExpression").addEventListener("click", addUserExpression);
 
 function checkExpressionCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if( activeButtonCreateUserExpression())
             addUserExpression();
     }
@@ -61,7 +61,9 @@ function createNewUsersayRow(value, parent) {
     wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
     wHTML += ('<i class="fa fa-comment-o text-gray"></i>');
 
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression-row" name="user-expression-row" style="padding-left: 35px;background-color: #404446; " value="' + value + '" placeholder="' + value + '" onkeydown="enableSaving(true);">');
+    var escapedValue = value.replace(/"/g, '&quot;');
+    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" id="user-expression-row" name="user-expression-row" '
+        + 'style="padding-left: 35px;background-color: #404446; " value="' + escapedValue + '" placeholder="' + escapedValue + '" onkeydown="enableSaving(true);">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
@@ -103,7 +105,7 @@ function expressionOnMouseOut(elem) {
 }
 
 $(document).ready(function () {
-    if (typeof intent['user_says'] == "undefined" || !(intent['user_says'] instanceof Array))
+    if (typeof intent['user_says'] === "undefined" || !(intent['user_says'] instanceof Array))
         return;
 
     var list_expressions = intent['user_says'];
