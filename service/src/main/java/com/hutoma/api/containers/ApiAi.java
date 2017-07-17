@@ -18,6 +18,9 @@ public class ApiAi extends ApiResult {
     @SerializedName("client_token")
     private final String clientToken;
 
+    @SerializedName("hmac_secret")
+    private final String hmacSecret;
+
     private String name;
     private String description;
 
@@ -65,11 +68,12 @@ public class ApiAi extends ApiResult {
     public ApiAi(String aiid, String clientToken) {
         this.aiid = aiid;
         this.clientToken = clientToken;
+        this.hmacSecret = null;
     }
 
     public ApiAi(String aiid, String clientToken, String name, String description, DateTime createdOn,
                  boolean isPrivate, BackendStatus backendStatus, boolean hasTrainingFile,
-                 int personality, double confidence, int voice, Locale language, String timezone) {
+                 int personality, double confidence, int voice, Locale language, String timezone, String hmacSecret) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.name = name;
@@ -83,6 +87,7 @@ public class ApiAi extends ApiResult {
         this.language = language;
         this.timezone = timezone;
         this.trainingFileUploaded = hasTrainingFile;
+        this.hmacSecret = hmacSecret;
         populateExtendedStatus();
     }
 

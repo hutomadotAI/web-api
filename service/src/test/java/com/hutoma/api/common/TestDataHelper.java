@@ -27,7 +27,7 @@ public class TestDataHelper {
     public static ApiAi getSampleAI() {
         return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,
                 new BackendStatus(), true,
-                0, 0.0, 1, Locale.getDefault(), "UTC");
+                0, 0.0, 1, Locale.getDefault(), "UTC", null);
     }
 
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {
@@ -35,7 +35,7 @@ public class TestDataHelper {
         result.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(status, 0.0, 0.0));
         result.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(status, 0.0, 0.0));
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, result, true,
-                0, 0.0, 1, Locale.getDefault(), "UTC");
+                0, 0.0, 1, Locale.getDefault(), "UTC", null);
     }
 
     public static ApiAi getAI() {
@@ -44,7 +44,7 @@ public class TestDataHelper {
 
     public static ApiAi getAi(final BackendStatus backendStatus) {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false,
-                backendStatus, true, 1, 0.1, 1, Locale.UK, "Europe/London");
+                backendStatus, true, 1, 0.1, 1, Locale.UK, "Europe/London", null);
     }
 
     private static BackendStatus setBackendEngineStatus(final TrainingStatus status) {

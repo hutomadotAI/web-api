@@ -1144,7 +1144,8 @@ public class Database {
                 rs.getDouble("ui_ai_confidence"),
                 rs.getInt("ui_ai_voice"),
                 Locale.forLanguageTag(localeString),
-                timezoneString);
+                timezoneString,
+                rs.getString("hmac_secret"));
     }
 
     /***
