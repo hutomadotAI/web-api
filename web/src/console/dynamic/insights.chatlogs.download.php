@@ -1,7 +1,7 @@
 <div class="box box-solid box-clean flat no-shadow unselectable">
 
     <div class="box-header with-border">
-        <i class="fa fa-commenting-o text-green"></i>
+        <i class="fa fa-cloud-download text-green"></i>
         <div class="box-title"><b>Download chat logs</b></div>
     </div>
 
