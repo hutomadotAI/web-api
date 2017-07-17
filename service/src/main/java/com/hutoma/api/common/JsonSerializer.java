@@ -1,25 +1,22 @@
 package com.hutoma.api.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -32,6 +29,7 @@ public class JsonSerializer {
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
+                .registerTypeAdapter(Locale.class, new LocaleTypeAdapter())
                 .enableComplexMapKeySerialization()
                 .create();
     }
@@ -93,6 +91,29 @@ public class JsonSerializer {
         public JsonElement serialize(final DateTime src, final Type typeOfSrc,
                                      final JsonSerializationContext context) {
             return new JsonPrimitive(src == null ? "" : DATE_FORMAT.print(src));
+        }
+    }
+
+    public class LocaleTypeAdapter extends TypeAdapter<Locale> {
+        @Override
+        public void write(JsonWriter writer, Locale value) throws IOException {
+            if (value == null) {
+                writer.nullValue();
+                return;
+            }
+            String localeString = value.toLanguageTag();
+            writer.value(localeString);
+        }
+
+        @Override
+        public Locale read(JsonReader reader) throws IOException {
+            if (reader.peek() == JsonToken.NULL) {
+                reader.nextNull();
+                return null;
+            }
+            String localeString = reader.nextString();
+            Locale locale = Locale.forLanguageTag(localeString);
+            return locale;
         }
     }
 }

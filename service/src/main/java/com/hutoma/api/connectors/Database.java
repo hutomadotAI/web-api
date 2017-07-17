@@ -1143,8 +1143,7 @@ public class Database {
                 rs.getInt("ui_ai_personality"),
                 rs.getDouble("ui_ai_confidence"),
                 rs.getInt("ui_ai_voice"),
-                // Java, being funny, can't follow rfc5646 so we need to replace the separator
-                localeString == null ? null : LocaleUtils.toLocale(localeString.replace("-", "_")),
+                Locale.forLanguageTag(localeString),
                 timezoneString);
     }
 
