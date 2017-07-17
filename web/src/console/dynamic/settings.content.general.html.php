@@ -1,5 +1,5 @@
 <script>
-    var previousGeneralInfo = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']); ?>;
+    var previousGeneralInfo = <?php echo json_encode($aiInfo); ?>;
 </script>
 
 <div class="box-header with-border unselectable">
@@ -45,7 +45,7 @@
                 <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">Bot ID</i></span>
                     <input type="text" class="form-control flat no-shadow" id="aikey"
-                           value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']; ?>"
+                           value="<?php echo $aiInfo['aiid']; ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#aikey" id="aikeytooltip" title="copy to clipboard"
@@ -57,7 +57,7 @@
                 <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">Dev key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="devkey"
-                           value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_token']; ?>"
+                           value="<?php echo \hutoma\console::getDevToken(); ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard"
@@ -71,7 +71,7 @@
                 <div class="input-group">
                     <span class="input-group-addon text-gray" style="width:90px;">Client key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="clikey"
-                           value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token']; ?>"
+                           value="<?php echo $aiInfo['client_token']; ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#clikey" id="clikeytooltip" title="copy to clipboard"
@@ -94,7 +94,7 @@
     <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">revert to saved values</button>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
-            value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>"
+            value="<?php echo $aiInfo['name']; ?>"
             class="btn btn-danger flat pull-right" alt="delete">delete Bot
     </button>
 </div>

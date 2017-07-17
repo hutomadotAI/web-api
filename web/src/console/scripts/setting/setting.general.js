@@ -90,8 +90,9 @@ function deactiveGeneralButtons(){
 
 
 function updatePreviousDataLoaded(JSONdata){
+    var languageName = document.getElementById('select2-' + 'ai_language' + '-container').innerHTML;
     previousGeneralInfo.description =  document.getElementById('ai_description').value;
-    previousGeneralInfo.language = document.getElementById('select2-' + 'ai_language' + '-container').innerHTML;
+    previousGeneralInfo.language = languageReverseLookup[languageName];
     previousGeneralInfo.timezone = document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML;
     previousGeneralInfo.voice = document.getElementById('ai_voice').value;
     previousGeneralInfo.personality = getSelectIndex('ai_personality')

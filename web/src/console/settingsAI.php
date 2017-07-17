@@ -10,32 +10,25 @@ if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
-if (!isSessionVariablesAvailable()) {
-    \hutoma\console::redirect('./error.php?err=105');
-    exit;
-}
+$aiid = getAiidOrRedirect();
 
 $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
 $purchasedBots = $botApi->getPurchasedBots();
 
 $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$linkedBots = $aiApi->getLinkedBots($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-unset($aiApi);
+$aiInfo = $aiApi->getSingleAI($aiid);
+$linkedBots = $aiApi->getLinkedBots($aiid);
 
 
-function isSessionVariablesAvailable()
+
+function getAiidOrRedirect()
 {
-    return (
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']) &&
-        isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'])
-    );
+    if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
+        \hutoma\console::redirect('./error.php?err=105');
+        exit;
+    }
+
+    return $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 }
 
 ?>
@@ -137,7 +130,7 @@ function isSessionVariablesAvailable()
 <script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "settings", 1, false, false]);
+        MENU.init(["<?php echo $aiInfo['name']; ?>", "settings", 1, false, false]);
     </script>
     <script>
         $(document).ready(function () {
@@ -152,7 +145,7 @@ function isSessionVariablesAvailable()
             foreach ($purchasedBots['bots'] as $botDetails) {
                 $purchasedBots = \hutoma\bot::fromObject($botDetails);
                 $tmp_bot = $purchasedBots->toJSON();
-                if ($botDetails['aiid'] !== $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])
+                if ($botDetails['aiid'] !== $aiInfo['aiid'])
                     array_push($tmp_list, $tmp_bot);
             }
         }
