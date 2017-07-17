@@ -80,6 +80,24 @@
             </div>
         </div>
 
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon text-gray" style="width:90px;">Webhook signing secret</i></span>
+                    <input type="text" class="form-control flat no-shadow" id="webhook_secret"
+                           value="<?php echo $aiInfo['hmac_secret']; ?>"
+                           readonly>
+                    <span class="input-group-addon text-gray"  data-toggle="tooltip"
+                          id="webhook_secret_regen_tooltip" title="re-generate secret"
+                          onclick=""><i class="fa fa-refresh"></i></span>
+                    <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
+                          data-clipboard-target="#webhook_secret" id="webhook_secret_copy_tooltip" title="copy to clipboard"
+                          onclick="copyToClipboard('webhook_secret')"><i class="fa fa-clipboard"></i></span>
+                </div>
+            </div>
+        </div>
+
         <p></p>
         <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertUpdateAI">
             <i class="icon fa fa-check" id="iconAlertUploadUrl"></i>
