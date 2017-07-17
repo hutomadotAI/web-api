@@ -171,7 +171,7 @@ unset($pi);
 
 <script src="./scripts/messaging/messaging.js"></script>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 <form action="" method="post" enctype="multipart/form-data">
     <script type="text/javascript">
         MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "insights", 1, true, false]);
