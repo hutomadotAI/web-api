@@ -13,18 +13,20 @@ if(!\hutoma\console::checkSessionIsActive()){
     exit;
 }
 
-$api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
-$userInfo = $api->getUserInfo($_SESSION['navigation_id']);
-unset($api);
+
 
 if(!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])){
-    $_SESSION[$_SESSION['navigation_id']]['user_details'] = $userInfo;
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($_SESSION[$_SESSION['navigation_id']]['user_details']);
-}
+    $api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
+    $userInfo = $api->getUserInfo($_SESSION['navigation_id']);
 
-if(isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai'])){
-    unset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']);
-    unset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']);
+    // dial the amount of session information right back - we really don't want secrets stored
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['name'] = $userInfo['name'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['username'] = $userInfo['username'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'] = $userInfo['dev_id'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($userInfo['created']);
+
+    unset($api);
+    unset($userInfo);
 }
 
 $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());

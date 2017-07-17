@@ -34,40 +34,12 @@ function CallGetSingleAI($aiid)
 function setSessionVariables($singleAI)
 {
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['created_on'] = $singleAI['created_on'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = localeToLanguage($singleAI['language']);
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = $singleAI['training_file_uploaded'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_1_progress'] = $singleAI['phase_1_progress'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_2_progress'] = $singleAI['phase_2_progress'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
-}
-
-function localeToLanguage($locale)
-{
-    $languages = array(
-        'de-DE' => 'Deutsch',
-        'es-ES' => 'Español',
-        'fr-FR' => 'Français',
-        'it-IT' => 'Italiano',
-        'nl-NL' => 'Nederlands',
-        'pt-PT' => 'Português',
-        'en-US' => 'English'
-    );
-
-    if (array_key_exists($locale, $languages)) {
-        return $languages[$locale];
-    } else {
-        return $languages['en-US'];
-    }
 }
 
 ?>
