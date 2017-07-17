@@ -20,6 +20,7 @@ public enum APIParameter {
     Locale,
     TrainingSourceType,
     FacebookConnect,
+    AnalyticsResponseFormat,
     // Backend
     AiStatusJson,
     ServerRegistration,

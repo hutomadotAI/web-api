@@ -1,5 +1,6 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.common.AnalyticsResponseFormat;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -43,6 +44,7 @@ public class ParameterFilter extends Validate {
     protected static final String SERVER_SESSION_ID = "server_session_id";
     protected static final String SERVER_URL = "server_url";
     protected static final String FACEBOOK_CONNECT = "facebook_connect";
+    protected static final String ANALYTICS_RESPONSE_FORMAT = "format";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -134,6 +136,10 @@ public class ParameterFilter extends Validate {
 
     public static FacebookNotification getFacebookNotification(final ContainerRequestContext requestContext) {
         return (FacebookNotification) requestContext.getProperty(APIParameter.FacebookNotification.toString());
+    }
+
+    public static AnalyticsResponseFormat getAnalyticsResponseFormat(final ContainerRequestContext requestContext) {
+        return (AnalyticsResponseFormat) requestContext.getProperty(APIParameter.AnalyticsResponseFormat.toString());
     }
 
     /***

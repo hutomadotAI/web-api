@@ -38,11 +38,11 @@ switch ($response['status']['code']) {
         }
         break;
     case 400:
-        \hutoma\console::redirect('../newAI.php?err=true&errObj='. json_encode($response['status']['info']));
+        \hutoma\console::redirect('../newAI.php?err=true&errObj='. urldecode($response), null);
         break;
     default:
         if (isset($response)) {
-            \hutoma\console::redirect('../error.php?errObj=' . json_encode($response));
+            \hutoma\console::redirect('../error.php?errObj=' . urlencode($response), null);
             unset($_response);
         } else {
             unset($_response);

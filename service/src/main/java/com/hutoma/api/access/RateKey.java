@@ -9,5 +9,6 @@ public enum RateKey {
     LoadTest,
     QuickRead,
     Botstore_Publish,
-    Botstore_Metadata
+    Botstore_Metadata,
+    Analytics
 }

@@ -1,5 +1,6 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.common.AnalyticsResponseFormat;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
@@ -106,6 +107,15 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                 requestContext.setProperty(APIParameter.TrainingSourceType.toString(),
                         validateTrainingSourceType(TRAINING_SOURCE_TYPE,
                                 getFirst(queryParameters.get(TRAINING_SOURCE_TYPE))));
+            }
+
+            if (checkList.contains(APIParameter.AnalyticsResponseFormat)) {
+                AnalyticsResponseFormat format = AnalyticsResponseFormat
+                        .forName(getFirst(queryParameters.get(ANALYTICS_RESPONSE_FORMAT)));
+                if (format == null) {
+                    throw new ParameterValidationException("Unsupported format", ANALYTICS_RESPONSE_FORMAT);
+                }
+                requestContext.setProperty(APIParameter.AnalyticsResponseFormat.toString(), format);
             }
             this.logger.logDebug(LOGFROM, "parameter validation passed");
 

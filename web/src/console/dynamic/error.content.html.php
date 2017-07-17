@@ -279,7 +279,7 @@ if (isset($_GET['err'])) {
     }
 } else {
     if (isset($_GET['errObj'])) {
-        $errorJson = json_decode($_GET['errObj']);
+        $errorJson = json_decode(urldecode($_GET['errObj']));
         $errorCode = $errorJson->{'status'}->{'code'};
         $msg = 'API Error';
         $details = $errorJson->{'status'}->{'info'};

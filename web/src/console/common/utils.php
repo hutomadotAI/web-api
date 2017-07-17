@@ -92,4 +92,9 @@ class utils
         }
         return null;
     }
+
+    public static function toIsoDate($dateStr) {
+        $dateTime = new \DateTime($dateStr);
+        return $dateTime->format(\DateTime::ATOM);
+    }
 }
