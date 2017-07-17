@@ -593,12 +593,19 @@ public class Database {
             final ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return rs.getString("client_token");
+                    return rs.getString("hmac_secret");
                 }
                 throw new DatabaseException("Webhook secret not found");
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        }
+    }
+
+    public boolean setWebhookSecretForBot(final UUID aiid, final String secret) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setWebhookSecretForBot", 2).add(aiid).add(secret);
+            return call.executeUpdate() > 0;
         }
     }
 

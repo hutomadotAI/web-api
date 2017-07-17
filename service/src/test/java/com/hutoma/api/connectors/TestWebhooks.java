@@ -2,6 +2,7 @@ package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
@@ -23,9 +24,7 @@ import javax.ws.rs.core.Response;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for the WebHooks connector.
@@ -39,6 +38,7 @@ public class TestWebhooks {
     private Database fakeDatabase;
     private ILogger fakeLogger;
     private JerseyClient fakeClient;
+    private Tools fakeTools;
 
     private WebHooks webHooks;
 
@@ -48,8 +48,10 @@ public class TestWebhooks {
         this.fakeDatabase = mock(Database.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeClient = mock(JerseyClient.class);
+        this.fakeTools = mock(Tools.class);
 
-        this.webHooks = new WebHooks(this.fakeDatabase, this.fakeLogger, this.serializer, this.fakeClient);
+        this.webHooks = new WebHooks(this.fakeDatabase, this.fakeLogger, this.serializer, this.fakeClient,
+                this.fakeTools);
     }
 
     /*
@@ -103,6 +105,7 @@ public class TestWebhooks {
     public void testExecuteWebHook_ValidResponse() throws Database.DatabaseException, IOException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
+        when(this.fakeTools.generateRandomHexString(anyInt())).thenReturn("deadf00d");
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
@@ -111,7 +114,50 @@ public class TestWebhooks {
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
         WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, DEVID);
+        verify(spy).getMessageHash(any(), any(), any());
+        verify(this.fakeTools, Mockito.never()).generateRandomHexString(anyInt());
         Assert.assertNotNull(response);
+    }
+
+    /*
+     * executeWebHook Check that hash function not called if this is not HTTPS
+     */
+    @Test
+    public void testExecuteWebHook_HttpNoHash() throws Database.DatabaseException, IOException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "http://fakewebhookaddress/webhook", false);
+        when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
+        MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
+        ChatResult chatResult = new ChatResult("Hi");
+
+        when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
+        WebHooks spy = Mockito.spy(this.webHooks);
+        doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
+        when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
+        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, DEVID);
+        verify(spy, Mockito.never()).getMessageHash(any(), any(), any());
+        Assert.assertNotNull(response);
+    }
+
+    /*
+    * executeWebHook Check that do generate secret if there already is one
+    */
+    @Test
+    public void testExecuteWebHook_generateSecretifNull() throws Database.DatabaseException, IOException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
+        when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn(null);
+        when(this.fakeTools.generateRandomHexString(anyInt())).thenReturn("deadf00d");
+        MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
+        ChatResult chatResult = new ChatResult("Hi");
+
+        when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
+        WebHooks spy = Mockito.spy(this.webHooks);
+        doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
+        when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
+        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, DEVID);
+        verify(spy).getMessageHash(any(), any(), any());
+        verify(this.fakeTools).generateRandomHexString(anyInt());
+        Assert.assertNotNull(response);
+
     }
 
     /*
@@ -181,6 +227,7 @@ public class TestWebhooks {
         when(jerseyWebTarget.property(anyString(), any())).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.queryParam(anyString(), anyString())).thenReturn(jerseyWebTarget);
         when(jerseyWebTarget.request()).thenReturn(builder);
+        when(builder.header(any(), any())).thenReturn(builder);
         return builder;
     }
 }

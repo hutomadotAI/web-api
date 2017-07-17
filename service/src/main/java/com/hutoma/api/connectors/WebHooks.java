@@ -5,6 +5,7 @@ import com.google.gson.JsonParseException;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
@@ -14,6 +15,7 @@ import com.hutoma.api.containers.sub.WebHookResponse;
 import org.apache.commons.codec.binary.Hex;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyInvocation;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -31,20 +33,22 @@ import javax.ws.rs.core.Response;
  * Management and execution of WebHooks.
  */
 public class WebHooks {
+    public static final int HMAC_SECRET_LENGTH = 40;
     private static final String LOGFROM = "webhooks";
     private static final String HMAC_ALGORITHM = "HmacSHA256";
     private final Database database;
     private final ILogger logger;
     private final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
-
+    private final Tools tools;
     @Inject
     public WebHooks(final Database database, final ILogger logger, final JsonSerializer serializer,
-                    final JerseyClient jerseyClient) {
+                    final JerseyClient jerseyClient, final Tools tools) {
         this.database = database;
         this.logger = logger;
         this.serializer = serializer;
         this.jerseyClient = jerseyClient;
+        this.tools = tools;
     }
 
     /***
@@ -62,17 +66,22 @@ public class WebHooks {
             return null;
         }
 
-        String secret;
-        try {
-            secret = this.database.getWebhookSecretForBot(intent.getAiid());
-        } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devIdString, e);
+        String webHookEndpoint = webHook.getEndpoint();
+        String[] webHookSplit = webHookEndpoint.split(":", 2);
+        if (webHookSplit.length < 2) {
+            this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
+                    devIdString,
+                    LogMap.map("Endpoint", webHookEndpoint)
+                            .put("Intent", intent.getName())
+                            .put("AIID", intent.getAiid())
+                            .put("Endpoint", webHook.getEndpoint()));
             return null;
         }
+        boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
         WebHookPayload payload = new WebHookPayload(intent, chatResult);
 
-        String jsonPayload = null;
+        String jsonPayload;
         try {
             jsonPayload = this.serializer.serialize(payload);
         } catch (JsonIOException e) {
@@ -89,19 +98,39 @@ public class WebHooks {
             return null;
         }
 
-        String calculatedHash = getMessageHash(devIdString, secret, payloadBytes);
-        if (calculatedHash == null) return null;
+        String calculatedHash = null;
+        if (isHttps) {
+            String secret;
+            try {
+                secret = this.database.getWebhookSecretForBot(intent.getAiid());
+                if (secret == null) {
+                    this.logger.logUserWarnEvent(LOGFROM, "Webhook secret null, regenerating", devIdString,
+                            LogMap.map("AIID", intent.getAiid()));
+                    secret = this.tools.generateRandomHexString(HMAC_SECRET_LENGTH);
+                    this.database.setWebhookSecretForBot(intent.getAiid(), secret);
+                }
+            } catch (Database.DatabaseException e) {
+                this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devIdString, e);
+                return null;
+            }
 
-        Response response = null;
+            // getMessageHash logs internally, no need to log again
+            calculatedHash = getMessageHash(devIdString, secret, payloadBytes);
+            if (calculatedHash == null) return null;
+        }
+
+        Response response;
         try {
-            response = this.jerseyClient.target(webHook.getEndpoint())
+            JerseyInvocation.Builder builder = this.jerseyClient.target(webHookEndpoint)
                     .property("Content-Type", "application/json")
                     .property("Content-Length", String.valueOf(payloadBytes.length))
-                    .property("X-Hub-Signature", "sha256=" + calculatedHash)
                     .property(ClientProperties.CONNECT_TIMEOUT, 10000)
                     .property(ClientProperties.READ_TIMEOUT, 10000)
-                    .request()
-                    .post(Entity.json(payloadBytes));
+                    .request();
+            if (isHttps) {
+                builder = builder.header("X-Hub-Signature", "sha256=" + calculatedHash);
+            }
+            response = builder.post(Entity.json(payloadBytes));
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WebHook Execution Failed", devIdString, e);
             return null;
@@ -111,8 +140,10 @@ public class WebHooks {
             this.logger.logUserWarnEvent(LOGFROM,
                     "WebHook Failed (%s): intent %s for aiid %s at %s",
                     devIdString,
-                    LogMap.map("ResponseStatus", response.getStatus()).put("Intent", intent.getName())
-                            .put("AIID", intent.getAiid()).put("Endpoint", webHook.getEndpoint()));
+                    LogMap.map("ResponseStatus", response.getStatus())
+                            .put("Intent", intent.getName())
+                            .put("AIID", intent.getAiid())
+                            .put("Endpoint", webHook.getEndpoint()));
             return null;
         }
 
