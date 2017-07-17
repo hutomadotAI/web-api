@@ -55,4 +55,42 @@ public class AnalyticsEndpoint {
                 ParameterFilter.getAnalyticsResponseFormat(requestContext));
         return result.getResponse(this.serializer).build();
     }
+
+    @GET
+    @Path("{aiid}/graph/sessions")
+    @RateLimit(RateKey.Analytics)
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    public
+    @TypeHint(ChatResult.class)
+    Response getSessions(
+            @Context ContainerRequestContext requestContext,
+            @DefaultValue("") @QueryParam("from") String fromDate,
+            @DefaultValue("") @QueryParam("to") String toDate) {
+        ApiResult result = this.analyticsLogic.getSessions(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                fromDate,
+                toDate);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @GET
+    @Path("{aiid}/graph/interactions")
+    @RateLimit(RateKey.Analytics)
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    public
+    @TypeHint(ChatResult.class)
+    Response getInteractions(
+            @Context ContainerRequestContext requestContext,
+            @DefaultValue("") @QueryParam("from") String fromDate,
+            @DefaultValue("") @QueryParam("to") String toDate) {
+        ApiResult result = this.analyticsLogic.getInteractions(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                fromDate,
+                toDate);
+        return result.getResponse(this.serializer).build();
+    }
 }
