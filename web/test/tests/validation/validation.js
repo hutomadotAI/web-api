@@ -3,7 +3,7 @@
  */
 QUnit.test("IsNameExists finds entry", function (assert) {
     var exists = validation.isNameExists("name", ["notname","name"]);
-    assert.ok(exists == true, "Passed");
+    assert.ok(exists, "Passed");
 });
 
 /*
@@ -11,45 +11,45 @@ QUnit.test("IsNameExists finds entry", function (assert) {
  */
 QUnit.test("IsNameExists does not find entry", function (assert) {
     var exists = validation.isNameExists("names", ["notname","name"]);
-    assert.ok(exists == false, "Passed");
+    assert.notOk(exists, "Passed");
 });
 
 
 /** Test that URI item is allowed. **/
 
 QUnit.test("URL with http and www is valid", function (assert) {
-    var allowed = validation.isInputInvalid('http://www.hutoma.com','URI');
-    assert.ok(allowed == false, "Passed");
+    var invalid = validation.isInputInvalid('http://www.hutoma.com','URI');
+    assert.notOk(invalid, "Passed");
 });
 
 QUnit.test("URL with http and without www is valid", function (assert) {
-    var allowed = validation.isInputInvalid('http://hutoma.com','URI');
-    assert.ok(allowed == false, "Passed");
+    var invalid = validation.isInputInvalid('http://hutoma.com','URI');
+    assert.notOk(invalid, "Passed");
 });
 
-QUnit.test("URL without http is valid", function (assert) {
-    var allowed = validation.isInputInvalid('www.hutoma.com','URI');
-    assert.ok(allowed == false, "Passed");
+QUnit.test("URL without http is not valid", function (assert) {
+    var invalid = validation.isInputInvalid('www.hutoma.com','URI');
+    assert.ok(invalid, "Passed");
 });
 
-QUnit.test("URL without http and www is valid", function (assert) {
-    var allowed = validation.isInputInvalid('hutoma.com','URI');
-    assert.ok(allowed == false, "Passed");
+QUnit.test("URL without http and www is not valid", function (assert) {
+    var invalid = validation.isInputInvalid('hutoma.com','URI');
+    assert.ok(invalid, "Passed");
 });
 
 QUnit.test("URL with http protocol is valid", function (assert) {
-    var allowed = validation.isInputInvalid('https://www.hutoma.com','URI');
-    assert.ok(allowed == false, "Passed");
+    var invalid = validation.isInputInvalid('https://www.hutoma.com','URI');
+    assert.notOk(invalid, "Passed");
 });
 
 QUnit.test("URL with a path is valid", function (assert) {
-    var allowed = validation.isInputInvalid('http://www.hutoma.com/pages','URI');
-    assert.ok(allowed == false, "Passed");
+    var invalid = validation.isInputInvalid('http://www.hutoma.com/pages','URI');
+    assert.notOk(invalid, "Passed");
 });
 
 QUnit.test("URL with a path to file is valid", function (assert) {
-    var allowed = validation.isInputInvalid('http://www.hutoma.com/pages/login.php','URI');
-    assert.ok(allowed == false, "Passed");
+    var invalid = validation.isInputInvalid('http://www.hutoma.com/pages/login.php','URI');
+    assert.notOk(invalid, "Passed");
 });
 
 
