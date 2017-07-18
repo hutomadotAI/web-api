@@ -44,6 +44,18 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function regenerateHmacSecretForAI($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/' . 'regenerate_webhook_secret'));
+            $this->curl->setVerbPost();
+            $curl_response = $this->curl->exec();
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
     public function deleteAI($aiid)
     {
         if ($this->isLoggedIn()) {

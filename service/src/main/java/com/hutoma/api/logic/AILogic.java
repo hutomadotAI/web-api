@@ -9,6 +9,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
@@ -178,6 +179,26 @@ public class AILogic {
             }
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetSingleAI", devIdString, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult regenerateWebhookSecret(final UUID devid, final UUID aiid) {
+        final String devIdString = devid.toString();
+        try {
+            LogMap logMap = LogMap.map("AIID", aiid);
+            String newSecret = tools.generateRandomHexString(WebHooks.HMAC_SECRET_LENGTH);
+            boolean isOk = this.database.setWebhookSecretForBot(aiid, newSecret);
+            if (isOk) {
+                this.logger.logUserTraceEvent(LOGFROM, "regenerateWebhookSecret", devIdString, logMap);
+                return new ApiResult().setSuccessStatus(newSecret);
+            } else {
+                this.logger.logUserTraceEvent(LOGFROM, "regenerateWebhookSecret - set webhook secret failed",
+                        devIdString, logMap);
+                return ApiError.getInternalServerError();
+            }
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "regenerateWebhookSecret", devIdString, e);
             return ApiError.getInternalServerError();
         }
     }

@@ -96,6 +96,20 @@ public class AIEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @Path("{aiid}/regenerate_webhook_secret")
+    @POST
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    @ValidatePost()
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response regenerateWebhookSecret(
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.aiLogic.regenerateWebhookSecret(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.DevID}) // Although this is always checked need to add it to trigger the filter
