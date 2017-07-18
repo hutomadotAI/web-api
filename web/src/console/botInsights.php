@@ -9,27 +9,34 @@ if (!\hutoma\console::checkSessionIsActive()) {
     exit;
 }
 if (isset($_REQUEST['from'])) {
-    $from = \hutoma\utils::toIsoDate($_REQUEST['from']);
-    $intervalString = '(from ' . date('Y-m-d');
+    $fromDate = date('Y-m-d');
+    $fromDateIso = \hutoma\utils::toIsoDate($_REQUEST['from']);
+    $intervalString = 'from ' . $fromDate;
 } else {
-    $from = \hutoma\utils::toIsoDate(date('Y-m-d', strtotime('-30 days')));
+    $fromDate = date('Y-m-d', strtotime('-30 days'));
+    $fromDateIso = \hutoma\utils::toIsoDate($fromDate);
 }
 
 if (isset($_REQUEST['to'])) {
-    $to = hutoma\utils::toIsoDate($_REQUEST['to']);
-    $intervalString = $intervalString . ' to ' . date('Y-m-d', $_REQUEST['to']) . ')';
+    $toDate = date('Y-m-d', $_REQUEST['to']);
+    $toDateIso = hutoma\utils::toIsoDate($_REQUEST['to']);
+    $intervalString = $intervalString . ' to ' . $toDate;
 } else {
-    $to = \hutoma\utils::toIsoDate(date('Y-m-d'));
+    $toDate = date('Y-m-d');
+    $toDateIso = \hutoma\utils::toIsoDate($toDate);
 }
 
 if (!isset($intervalString)) {
-    $intervalString = '(last 30 days)';
+    $intervalString = 'last 30 days';
 }
+
+$fromDateParts = explode('-', $fromDate);
+$toDateParts = explode('-', $toDate);
 
 $aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 $api = new \hutoma\api\analyticsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$sessions = $api->getChatSessions($aiid, $from, $to);
-$interactions = $api->getChatInteractions($aiid, $from, $to);
+$sessions = $api->getChatSessions($aiid, $fromDateIso, $toDateIso);
+$interactions = $api->getChatInteractions($aiid, $fromDateIso, $toDateIso);
 unset($pi);
 
 ?>
@@ -87,6 +94,9 @@ unset($pi);
             </div>
 
             <div class="row">
+
+                <?php if (sizeof($interactions->objects) > 0 && sizeof($sessions->objects) > 0) { ?>}
+
                 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
                 <script type="text/javascript">
 
@@ -98,11 +108,17 @@ unset($pi);
                             bar: {groupWidth: "95%"},
                             legend: {position: "none"},
                             backgroundColor: {fill: 'transparent'},
-                            vAxis: {textStyle: {color: '#999999'}, format: 'short', gridlines: {color: '#999999'}},
+                            vAxis: {
+                                textStyle: {color: '#999999'},
+                                format: 'short',
+                                gridlines: {color: '#404040'}
+                            },
                             hAxis: {
                                 textStyle: {color: '#999999'},
-                                gridlines: {color: "#999999"},
-                                baselineColor: '#999999'
+                                gridlines: {color: "#404040"},
+                                baselineColor: '#808080',
+                                minValue: new Date(<?php echo implode(',', $fromDateParts) ?>),
+                                maxValue: new Date(<?php echo implode(',', $toDateParts) ?>)
                             },
                             titleTextStyle: {color: 'white', fontName: 'Helvetica', fontSize: '16px'},
                             colors: [color]
@@ -116,7 +132,8 @@ unset($pi);
                             ["Date", "Sessions"],
                             <?php
                             foreach ($sessions->objects as $entry) {
-                                echo '["' . date('Y-m-d', strtotime($entry->date)) . '", ' . $entry->count . '],';
+                                $date = explode('-', date('Y-m-d', strtotime($entry->date)));
+                                echo '[new Date(' . implode(',', $date) . '), ' . $entry->count . '],';
                             }
                             ?>
                         ]);
@@ -125,18 +142,19 @@ unset($pi);
                             ["Date", "Interactions"],
                             <?php
                             foreach ($interactions->objects as $entry) {
-                                echo '["' . date('Y-m-d', strtotime($entry->date)) . '", ' . $entry->count . '],';
+                                $date = explode('-', date('Y-m-d', strtotime($entry->date)));
+                                echo '[new Date(' . implode(',', $date) . '), ' . $entry->count . '],';
                             }
                             ?>
                         ]);
 
                         <?php if ($sessions != null) {?>
                         var chartSessions = new google.visualization.ColumnChart(document.getElementById("chartSessions"));
-                        chartSessions.draw(dataSessions, getChatOptions('Chat sessions per day <?php echo $intervalString?>', '#ffa31a'));
+                        chartSessions.draw(dataSessions, getChatOptions('Chat sessions per day (<?php echo $intervalString?>)', '#ffa31a'));
                         <?php }
                         if ($interactions != null) {?>
                         var chartInteractions = new google.visualization.ColumnChart(document.getElementById("chartInteractions"));
-                        chartInteractions.draw(dataInteractions, getChatOptions('Chat interactions per day <?php echo $intervalString?>', '#4d94ff'));
+                        chartInteractions.draw(dataInteractions, getChatOptions('Chat interactions per day (<?php echo $intervalString?>)', '#4d94ff'));
                         <?php } ?>
                     }
                 </script>
@@ -150,6 +168,13 @@ unset($pi);
                 <div class="box-body"
                 <div id="chartSessions"></div>
                 <div id="chartInteractions"></div>
+                    <?php } else { ?>
+                    <div class="col-md-12">
+                        <div class="box box-solid box-clean flat no-shadow unselectable">
+                            <div class="box-header with-border">
+                        No data for the period: <?php echo $intervalString ?>
+                    <?php } ?>
+                            </div></div></div>
                 </div>
                 </div>
             </div>

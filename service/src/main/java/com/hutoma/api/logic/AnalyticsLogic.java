@@ -107,7 +107,7 @@ public class AnalyticsLogic {
             }
 
             client = getESClient();
-            QueryBuilder query = getChatLogsTermQuery(devId, aiid);
+            QueryBuilder query = getChatLogsTermQuery(devId, aiid, dateFrom, dateTo);
             SearchResponse response;
             StringBuilder sb = new StringBuilder();
             int startItem = 0;
@@ -115,8 +115,6 @@ public class AnalyticsLogic {
                 response = client.prepareSearch(CHATLOGS_INDEX)
                         .setSearchType(SearchType.DEFAULT)
                         .setQuery(query)
-                        .setPostFilter(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD)
-                                .from(dateFrom.toString()).to(dateTo.toString()))
                         .addSort("timestamp", SortOrder.ASC)
                         .setSize(DEFAULT_PAGE_SIZE)
                         .setFrom(startItem)
@@ -169,7 +167,7 @@ public class AnalyticsLogic {
             DateTime dateFrom = getDateFrom(fromTime);
             DateTime dateTo = getDateTo(toTime);
             client = getESClient();
-            QueryBuilder query = getChatLogsTermQuery(devId, aiid);
+            QueryBuilder query = getChatLogsTermQuery(devId, aiid, dateFrom, dateTo);
             SearchRequestBuilder requestBuilder = client.prepareSearch(CHATLOGS_INDEX)
                     .setSearchType(SearchType.DEFAULT)
                     .setQuery(query)
@@ -180,9 +178,7 @@ public class AnalyticsLogic {
                                     .subAggregation(
                                             AggregationBuilders.cardinality("ChatId")
                                                     .field("params.ChatId.keyword")
-                                                    .precisionThreshold(100)))
-                    .setPostFilter(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD)
-                            .from(dateFrom.toString()).to(dateTo.toString()));
+                                                    .precisionThreshold(100)));
 
             List<Map<String, Object>> listMap = new ArrayList<>();
             SearchResponse response;
@@ -223,14 +219,12 @@ public class AnalyticsLogic {
             DateTime dateFrom = getDateFrom(fromTime);
             DateTime dateTo = getDateTo(toTime);
             client = getESClient();
-            QueryBuilder query = getChatLogsTermQuery(devId, aiid);
+            QueryBuilder query = getChatLogsTermQuery(devId, aiid, dateFrom, dateTo);
             SearchRequestBuilder requestBuilder = client.prepareSearch(CHATLOGS_INDEX)
                     .setSearchType(SearchType.DEFAULT)
                     .setQuery(query)
                     .addAggregation(AggregationBuilders.dateHistogram("by-date")
-                            .field(CHATLOGS_DATETIME_FIELD).dateHistogramInterval(DateHistogramInterval.DAY))
-                    .setPostFilter(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD)
-                            .from(dateFrom.toString()).to(dateTo.toString()));
+                            .field(CHATLOGS_DATETIME_FIELD).dateHistogramInterval(DateHistogramInterval.DAY));
             List<Map<String, Object>> listMap = new ArrayList<>();
             SearchResponse response;
             final int pageSize = 100;
@@ -262,12 +256,14 @@ public class AnalyticsLogic {
         }
     }
 
-    private static QueryBuilder getChatLogsTermQuery(final UUID devId, final UUID aiid) {
+    private static QueryBuilder getChatLogsTermQuery(final UUID devId, final UUID aiid, final DateTime from,
+                                                     final DateTime to) {
         return org.elasticsearch.index.query.QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("type.keyword", "TRACE"))
                 .must(QueryBuilders.termQuery("tag.keyword", "chatlogic"))
                 .must(QueryBuilders.termQuery("params.AIID.keyword", aiid.toString()))
-                .must(QueryBuilders.termQuery("params.DevId.keyword", devId.toString()));
+                .must(QueryBuilders.termQuery("params.DevId.keyword", devId.toString()))
+                .must(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD).from(from.toString()).to(to.toString()));
     }
 
     private String getResultForFormat(final SearchHits hits, final AnalyticsResponseFormat format,
