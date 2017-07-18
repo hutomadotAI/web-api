@@ -1,10 +1,30 @@
 /**
  * Created by Hutoma on 06/10/16.
  */
+
+var languageLookup = {};
+languageLookup['de-DE'] = 'Deutsch';
+languageLookup['es-ES'] = 'Español';
+languageLookup['fr-FR'] = 'Français';
+languageLookup['it-IT'] = 'Italiano';
+languageLookup['nl-NL'] = 'Nederlands';
+languageLookup['pt-PT'] = 'Português';
+languageLookup['en-US'] = 'English';
+
+var languageReverseLookup = {};
+languageReverseLookup['Deutsch'] = 'de-DE';
+languageReverseLookup['Español'] = 'es-ES';
+languageReverseLookup['Français'] = 'fr-FR';
+languageReverseLookup['Italiano'] = 'it-IT';
+languageReverseLookup['Nederlands'] = 'nl-NL';
+languageReverseLookup['Português'] = 'pt-PT';
+languageReverseLookup['English'] = 'en-US';
+
 function resetGeneralInputFields(){
+    var languageName = languageLookup[previousGeneralInfo.language];
     setInputValue('ai_name',previousGeneralInfo.name);
     setInputValue('ai_description',previousGeneralInfo.description);
-    setSelectValue('ai_language',previousGeneralInfo.language);
+    setSelectValue('ai_language',languageName);
     setSelectValue('ai_timezone',previousGeneralInfo.timezone);
     setSelectByIndex('ai_voice',previousGeneralInfo.voice);
     setSelectByIndex('ai_personality',previousGeneralInfo.personality);

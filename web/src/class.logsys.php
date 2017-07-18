@@ -544,16 +544,8 @@ class console
     /**
      * Returns a string which shows the time since the user has joined
      */
-    public static function joinedSince($user = null)
+    public static function joinedSince($created)
     {
-        self::construct();
-        if ($user == null) {
-            $user = self::$user;
-        }
-        $api = new adminApi(self::isLoggedIn(), config::getAdminToken());
-        $userInfo = $api->getUserInfo($user);
-        $created = $userInfo['created'];
-        unset($api);
 
         $timeFirst = strtotime($created);
         $timeSecond = strtotime("now");
