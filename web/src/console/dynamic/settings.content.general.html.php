@@ -1,5 +1,38 @@
 <script>
     var previousGeneralInfo = <?php echo json_encode($aiInfo); ?>;
+    function regenerateHmacSecret() {
+        var errorMessage = 'There was a problem updating the webhook secret. Please try again later and if the issue ' +
+            'persists, please contact support.'
+        $.ajax({
+            url: './dynamic/webhook.regenerate.secret.php',
+            type: 'POST',
+            success: function (response) {
+                var parsedResponse = JSON.parse(response);
+                if (parsedResponse === null) {
+                    msgAlertUpdateAI(ALERT.DANGER.value,errorMessage);
+                }
+                else {
+                    var statusCode = parsedResponse['status']['code'];
+                    var message = parsedResponse['status']['info'];
+                    switch (statusCode) {
+                        case 200:
+                            var input = document.getElementById('webhook_secret');
+                            input.value = message;
+                            msgAlertUpdateAI(ALERT.SUCCESS.value, 'The webhook secret has been updated');
+                            break;
+                        default:
+                            msgAlertUpdateAI(ALERT.DANGER.value,errorMessage);
+                            break;
+                    }
+                }
+            },
+            complete: function () {
+            },
+            error: function () {
+                msgAlertUpdateAI(ALERT.DANGER.value,errorMessage);
+            }
+        });
+    }
 </script>
 
 <div class="box-header with-border unselectable">
@@ -67,7 +100,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6" style="padding-bottom:10px;">
                 <div class="input-group">
                     <span class="input-group-addon text-gray" style="width:90px;">Client key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="clikey"
@@ -78,17 +111,14 @@
                           onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
-        </div>
 
-
-        <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6" style="padding-bottom:10px;">
                 <div class="input-group">
                     <span class="input-group-addon text-gray" style="width:90px;">Webhook signing secret</i></span>
                     <input type="text" class="form-control flat no-shadow" id="webhook_secret"
                            value="<?php echo $aiInfo['hmac_secret']; ?>"
                            readonly>
-                    <span class="input-group-addon text-gray"  data-toggle="tooltip"
+                    <span class="input-group-addon text-gray"  data-toggle="modal" data-target="#regenHmacSecret"
                           id="webhook_secret_regen_tooltip" title="re-generate secret"
                           onclick=""><i class="fa fa-refresh"></i></span>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
@@ -138,6 +168,38 @@
                     <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
                     </button>
                     <button type="submit" class="btn btn-danger flat" id="modalDelete" data-dismiss="modal">Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Regenerate HMAC secret-->
+<div class="modal fade" id="regenHmacSecret" role="dialog">
+    <div class="modal-dialog flat"  style="border: 1px solid red;">
+        <!-- Modal content-->
+        <div class="modal-content bordered" style="background-color: #202020">
+            <div class="modal-header">
+                <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> Regenerate the webhook
+                    signing secret
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="box-body" id="delete-ai-label">
+                    Warning - if this is updated, all code relying on the existing key for signature
+                    validation must be updated.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" id="regenForm">
+                    <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger flat" id="modalDelete" data-dismiss="modal"
+                            onclick="regenerateHmacSecret()">
+                        Regenerate
                     </button>
                 </form>
             </div>
