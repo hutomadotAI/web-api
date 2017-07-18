@@ -184,7 +184,16 @@ public class Config {
      * @return
      */
     public int getFacebookGraphAPITimeout() {
-        return 5000;
+        return 10000;
+    }
+
+    /***
+     * How many ms to wait before giving up on Facebook
+     * when we are sending a message using Send API
+     * @return
+     */
+    public int getFacebookSendAPITimeout() {
+        return 60000;
     }
 
     /***

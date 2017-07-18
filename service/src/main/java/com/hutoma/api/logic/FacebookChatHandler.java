@@ -5,6 +5,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
@@ -33,6 +34,7 @@ public class FacebookChatHandler implements Callable {
     private Provider<ChatLogic> chatLogicProvider;
     private FacebookConnector facebookConnector;
     private JsonSerializer serializer;
+    private Tools tools;
 
     private FacebookNotification.Messaging messaging;
 
@@ -40,12 +42,14 @@ public class FacebookChatHandler implements Callable {
     public FacebookChatHandler(final Database database, final ILogger logger,
                                final JsonSerializer serializer,
                                final FacebookConnector facebookConnector,
-                               final Provider<ChatLogic> chatLogicProvider) {
+                               final Provider<ChatLogic> chatLogicProvider,
+                               final Tools tools) {
         this.database = database;
         this.logger = logger;
         this.chatLogicProvider = chatLogicProvider;
         this.facebookConnector = facebookConnector;
         this.serializer = serializer;
+        this.tools = tools;
     }
 
     /***
@@ -121,10 +125,6 @@ public class FacebookChatHandler implements Callable {
                 status = "Bad Facebook integration config";
             } else {
 
-                // acknowledge thhe message that we are now going to process
-                this.logger.logInfo(LOGFROM, String.format("facebook message for %s",
-                        integrationRecord.getAiid()), logMap);
-
                 // hash the sender ID and the aiid together to get a chatID
                 // that is unique to each user-page pair
                 UUID chatID = generateChatId(integrationRecord.getAiid(), messageOriginatorId);
@@ -136,6 +136,8 @@ public class FacebookChatHandler implements Callable {
                 Pair<String, FacebookRichContentNode> response = getChatResponse(integrationRecord, chatID);
 
                 try {
+                    // note the start time
+                    long startTime = this.tools.getTimestamp();
                     // send the response back to Facebook
                     sendChatResponseToFacebook(integrationRecord, metadata, messageOriginatorId,
                             response.getA(), response.getB());
@@ -143,6 +145,14 @@ public class FacebookChatHandler implements Callable {
                     // chat worked. save the status
                     status = "Chat active.";
                     chatSuccess = true;
+
+                    // how long did we wait for sendapi to complete?
+                    double duration = (double) (this.tools.getTimestamp() - startTime) / 1000.0;
+
+                    // log the message that we just processed
+                    this.logger.logDebug(LOGFROM, String.format("responded to facebook message for %s",
+                            integrationRecord.getAiid()), logMap.put("duration", duration));
+
                 } catch (FacebookException fe) {
                     // something went wrong. log it and save the status
                     status = fe.getMessage();

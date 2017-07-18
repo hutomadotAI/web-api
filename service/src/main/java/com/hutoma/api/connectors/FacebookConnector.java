@@ -121,7 +121,8 @@ public class FacebookConnector {
 
 
         // send the serialized payload to facebook
-        webCall(target, RequestMethod.POST, Entity.json(this.jsonSerializer.serialize(sendMessage)));
+        webCall(target, RequestMethod.POST, Entity.json(this.jsonSerializer.serialize(sendMessage)),
+                config.getFacebookSendAPITimeout());
     }
 
     /***
@@ -135,7 +136,7 @@ public class FacebookConnector {
                 .path("me")
                 .queryParam("fields", "id,name")
                 .queryParam("access_token", token.getAccessToken());
-        String body = webCall(target, RequestMethod.GET);
+        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
         return (FacebookNode) this.jsonSerializer.deserialize(body, FacebookNode.class);
     }
 
@@ -152,7 +153,7 @@ public class FacebookConnector {
                 .path("accounts")
                 .queryParam("fields", "id,name,perms,access_token")
                 .queryParam("access_token", accessToken);
-        String body = webCall(target, RequestMethod.GET);
+        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
@@ -161,7 +162,7 @@ public class FacebookConnector {
                 .path(userid)
                 .path("permissions")
                 .queryParam("access_token", accessToken);
-        String body = webCall(target, RequestMethod.GET);
+        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
@@ -178,7 +179,7 @@ public class FacebookConnector {
                 .path("me")
                 .path("permissions")
                 .queryParam("access_token", accessToken);
-        webCall(target, RequestMethod.DELETE);
+        webCall(target, RequestMethod.DELETE, config.getFacebookGraphAPITimeout());
     }
 
     /***
@@ -216,7 +217,7 @@ public class FacebookConnector {
                 .path(pageId)
                 .path("subscribed_apps")
                 .queryParam("access_token", pageAccessToken);
-        webCall(target, requestMethod);
+        webCall(target, requestMethod, config.getFacebookGraphAPITimeout());
     }
 
     /***
@@ -236,7 +237,7 @@ public class FacebookConnector {
      * @throws FacebookException
      */
     private FacebookToken getFacebookToken(final JerseyWebTarget target) throws FacebookException {
-        String body = webCall(target, RequestMethod.GET);
+        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
         try {
             // try to get a token
             FacebookToken token = (FacebookToken)
@@ -260,8 +261,8 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    private String webCall(JerseyWebTarget target, RequestMethod requestmethod) throws FacebookException {
-        return webCall(target, requestmethod, Entity.text(""));
+    private String webCall(JerseyWebTarget target, RequestMethod requestmethod,  int readTimeout) throws FacebookException {
+        return webCall(target, requestmethod, Entity.text(""), readTimeout);
     }
 
     /***
@@ -273,12 +274,12 @@ public class FacebookConnector {
      * @throws FacebookException
      */
     private String webCall(JerseyWebTarget target, RequestMethod requestmethod,
-                           Entity entity) throws FacebookException {
+                           Entity entity, int readTimeout) throws FacebookException {
 
         try {
             JerseyInvocation.Builder builder = target
                     .property(CONNECT_TIMEOUT, this.config.getFacebookGraphAPITimeout())
-                    .property(READ_TIMEOUT, this.config.getFacebookGraphAPITimeout())
+                    .property(READ_TIMEOUT, readTimeout)
                     .request();
 
             Response response;

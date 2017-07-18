@@ -4,6 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
@@ -70,16 +71,16 @@ public class TestFacebookChatHandler {
         when(this.fakeIntegrationRecord.isActive()).thenReturn(true);
         when(this.fakeIntegrationRecord.getAiid()).thenReturn(TestDataHelper.AIID);
 
-        chatResult = new ChatResult(TestDataHelper.ALT_SESSIONID, 0.3,
+        this.chatResult = new ChatResult(TestDataHelper.ALT_SESSIONID, 0.3,
                 MESSAGE, ANSWER, 3.296, null);
 
         this.fakeChatLogicProvider = mock(Provider.class);
         this.fakeChatLogic = mock(ChatLogic.class);
         when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
         when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any()))
-                .thenAnswer(invocation -> chatResult);
+                .thenAnswer(invocation -> this.chatResult);
         this.chatHandler = new FacebookChatHandler(this.fakeDatabase, this.fakeLogger,
-                this.serializer, this.fakeConnector, this.fakeChatLogicProvider);
+                this.serializer, this.fakeConnector, this.fakeChatLogicProvider, mock(Tools.class));
 
         this.chatHandler.initialise(
                 new FacebookNotification.Messaging(SENDER, PAGEID, MESSAGE));
@@ -166,7 +167,7 @@ public class TestFacebookChatHandler {
     @Test
     public void testChat_OK_RichContent() throws Exception {
         String answer = ANSWER;
-        WebHookResponse hookResponse = (WebHookResponse) serializer.deserialize(" {\n" +
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(" {\n" +
                 "   \"text\": \"" + WEBHOOK_ANSWER + "\",\n" +
                 "   \"facebook\": {\n" +
                 "     \"type\": \"image\",\n" +
@@ -185,7 +186,7 @@ public class TestFacebookChatHandler {
     @Test
     public void testChat_RichContentInvalid_SendTextInstead() throws Exception {
         String answer = ANSWER;
-        WebHookResponse hookResponse = (WebHookResponse) serializer.deserialize(" {\n" +
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(" {\n" +
                 "   \"text\": \"" + WEBHOOK_ANSWER + "\",\n" +
                 "   \"facebook\": {\n" +
                 "     \"type\": \"badtext\",\n" +
@@ -202,7 +203,7 @@ public class TestFacebookChatHandler {
     }
 
     private ChatOutput makeChatCall(final String answer, final WebHookResponse hookResponse) throws Exception {
-        chatResult = new ChatResult(TestDataHelper.ALT_SESSIONID, 0.3,
+        this.chatResult = new ChatResult(TestDataHelper.ALT_SESSIONID, 0.3,
                 MESSAGE, answer, 3.296, hookResponse);
         final ChatOutput chatOutput = new ChatOutput();
         doAnswer(invocation -> {
