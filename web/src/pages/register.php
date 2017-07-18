@@ -5,6 +5,13 @@ include_once __DIR__ . "/../console/common/config.php";
 
 include "config.php";
 
+function getErrorMessage($message, $alertType = 'alert-warning') {
+    $msg ='<div class="alert ' . $alertType . ' text-white flat">';
+    $msg .='<i class="icon fa fa-exclamation"></i> ' . $message;
+    $msg .='</div>';
+    return $msg;
+}
+
 if(isset($_POST['submit'])) {
 
     if(isset($_POST['g-recaptcha-response'])) {
@@ -12,9 +19,7 @@ if(isset($_POST['submit'])) {
         $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfUJhMUAAAAAF_JWYab5E1oBqZ-XWtHer5n67xO&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
         if($response['success'] == false)
         {
-            $msg ='<div class="alert alert-warning text-white flat">';
-            $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
-            $msg .='</div>';
+            $msg = getErrorMessage('You did not pass the captcha test');
         }
         else {
             $email = $_POST['email'];
@@ -24,46 +29,34 @@ if(isset($_POST['submit'])) {
             $terms = isset($_POST['terms']);
             $invite_code =$_POST['invite_code'];
 
-            $missingfields  ='<div class="alert alert-warning text-white flat">';
-            $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
-            $missingfields .='</div>';
-
-            $passwordmismatch  ='<div class="alert alert-warning text-white flat">';
-            $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
-            $passwordmismatch .='</div>';
-
-            $termsmsg  ='<div class="alert alert-warning text-white flat">';
-            $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.';
-            $termsmsg .='</div>';
-
-            $userexists  ='<div class="alert alert-warning text-white flat">';
-            $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
-            $userexists .='</div>';
-
-            $invalidcode  ='<div class="alert alert-warning text-white flat">';
-            $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
-            $invalidcode .='</div>';
-
-            $unknownErrorMessage  ='<div class="alert alert-danger text-white flat">';
-            $unknownErrorMessage .='<i class="icon fa fa-exclamation"></i> Unspecified error code.';
-            $unknownErrorMessage .='</div>';
-
-
-            $msg= $missingfields;
+            $passwordCompliance =
+                preg_match('/\d+/', $password) == 1       // at least one digit
+                && strlen($password) >= 6                         // minimum length of 6 chars
+                && preg_match('/[a-z]/', $password) == 1  // at least a lowercase letter
+                && preg_match('/[A-Z]/', $password) == 1; // at least an uppercase letter
 
             $api = new \hutoma\api\signupCodeApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
-
-            if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
-            elseif($password != $retyped_password) $msg= $passwordmismatch;
-            elseif($terms != 'True') $msg= $termsmsg;
-            elseif($api->inviteCodeValid($invite_code) !== 200) $msg=$invalidcode;
-            else{
+            if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) {
+                $msg= getErrorMessage('Some fields were left blank.');
+            }
+            elseif (!$passwordCompliance) {
+                $msg = getErrorMessage('The password needs to be at least 6 characters long, contain at least a digit and both uppercase and lowercase letters');
+            }
+            elseif($password != $retyped_password) {
+                $msg= getErrorMessage('The passwords you entered do not match.');
+            }
+            elseif($terms != 'True') {
+                $msg= getErrorMessage('Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.');
+            }
+            elseif($api->inviteCodeValid($invite_code) !== 200) {
+                $msg  = getErrorMessage('Please enter a valid invitation code.');
+            } else {
                 $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
                 if($createAccount === "exists") {
-                    $msg= $userexists;
+                    $msg = getErrorMessage('This user already exists.');
                 } elseif ($createAccount === "unknown") {
-                    $msg = $unknownErrorMessage;
+                    $msg = getErrorMessage('Unspecified error code.', 'alert-danger');
                 } else {
                     // Register succeeded
                     if ($createAccount === 200) {
@@ -74,14 +67,14 @@ if(isset($_POST['submit'])) {
                         setcookie('logSyscuruser', $email);
                         $login = \hutoma\console::login($email, $password, false);
                         if ($login === false) {
-                            $msg = array("Error", "There was an error creating the user - please try again later");
+                            $msg = getErrorMessage('There was an error creating the user - please try again later.');
                         } elseif (is_array($login) && $login['status'] == "blocked") {
-                            $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
+                            $msg = getErrorMessage('Too many login attempts. You can try again after ' . $login['minutes'] . ' minutes (' . $login['seconds'] . ' seconds)');
                             exit();
                         }
                     } else {
                         // Registration threw an error
-                        $msg = array("Error", "Error code:" . $createAccount);
+                        $msg = getErrorMessage("Error code:" . $createAccount);
                     }
                 }
             }
@@ -92,9 +85,7 @@ if(isset($_POST['submit'])) {
     }
     else
     {
-        $msg  ='<div class="alert alert-warning text-white flat">';
-        $msg.='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
-        $msg .='</div>';
+        $msg  = getErrorMessage('Please check the captcha checkbox');
     }
 
 
