@@ -35,7 +35,7 @@ class integrationApi extends apiBase
                     'redirect_uri' => $redirectUri
                 )));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 310);
+            $this->handleApiCallError($curl_response, 410);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -48,7 +48,7 @@ class integrationApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid), []));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 310);
+            $this->handleApiCallError($curl_response, 410);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -61,7 +61,7 @@ class integrationApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid), $params));
             $this->curl->setVerbPut();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 310);
+            $this->handleApiCallError($curl_response, 410);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

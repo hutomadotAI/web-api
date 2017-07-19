@@ -263,6 +263,10 @@ if (isset($_GET['err'])) {
             $msg = 'INTERNAL ERROR - REQUEST SINGLE BOT INFORMATION FAILED';
             $details = ' We could not find the data you were looking for';
             break;
+        case 410 :
+            $msg = 'INTERNAL ERROR - FACEBOOK INTEGRATION';
+            $details = 'A problem occurred while talking to Facebook\'s servers';
+            break;
         case 500 :
             $msg = 'INTERNAL ERROR - UNEXCEPTION ERROR';
             $details = ' We could not find the data you were looking for';
