@@ -75,7 +75,8 @@ public class ChatLogic {
         this.chatStateHandler = chatStateHandler;
     }
 
-    public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId) {
+    public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
+                          Map<String, String> chatVariables) {
         try {
             return chatCall(ChatOrigin.API, aiid, devId, question, chatId).setSuccessStatus();
         } catch (ChatFailedException fail) {

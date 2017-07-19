@@ -1107,7 +1107,7 @@ public class TestChatLogic {
             when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(AIID, minP));
         }
 
-        return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString());
+        return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString(), null);
     }
 
     private ApiResult getAssistantChat(float min_p) {
