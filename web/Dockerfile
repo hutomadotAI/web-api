@@ -3,7 +3,7 @@ LABEL maintainer "pedrotei@hutoma.com"
 
 # Create /etc/mailname for postfix
 RUN \
-	echo hutoma.com > /etc/mailname
+	echo hutoma.ai > /etc/mailname
 
 RUN \
 	apt-get update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get -y install \
