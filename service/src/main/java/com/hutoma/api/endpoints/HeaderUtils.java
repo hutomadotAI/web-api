@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
  * Created by paul on 19/07/17.
  */
 public final class HeaderUtils {
-    public static Map<String, String> getChatVariablesFromHeaders(MultivaluedMap<String, String> headers) {
-        final String HEADER_PREFIX = "x-hutoma-context-";
+    public static Map<String, String> getClientVariablesFromHeaders(MultivaluedMap<String, String> headers) {
+        final String HEADER_PREFIX = "x-hutoma-var-";
         final int HEADER_PREFIX_LENGTH = HEADER_PREFIX.length();
 
         Map<String, String> chatHeaders = headers.entrySet().stream()

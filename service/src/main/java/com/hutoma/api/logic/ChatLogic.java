@@ -76,9 +76,9 @@ public class ChatLogic {
     }
 
     public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
-                          Map<String, String> chatVariables) {
+                          Map<String, String> clientVariables) {
         try {
-            return chatCall(ChatOrigin.API, aiid, devId, question, chatId).setSuccessStatus();
+            return chatCall(ChatOrigin.API, aiid, devId, question, chatId, clientVariables).setSuccessStatus();
         } catch (ChatFailedException fail) {
             return fail.getApiError();
         }
@@ -86,11 +86,10 @@ public class ChatLogic {
 
     public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId)
             throws ChatFailedException {
-        return chatCall(ChatOrigin.API, aiid, devId, question, chatId).getResult();
+        return chatCall(ChatOrigin.API, aiid, devId, question, chatId, null).getResult();
     }
 
-    public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId,
-                                   float minP) {
+    public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId) {
         final long startTime = this.tools.getTimestamp();
         UUID chatUuid = UUID.fromString(chatId);
 
@@ -123,7 +122,8 @@ public class ChatLogic {
     }
 
     private ApiChat chatCall(ChatOrigin chatOrigin,
-                             final UUID aiid, final UUID devId, final String question, final String chatId)
+                             final UUID aiid, final UUID devId, final String question, final String chatId,
+                             final Map<String, String> clientVariables)
             throws ChatFailedException {
 
         final String devIdString = devId.toString();
@@ -159,7 +159,7 @@ public class ChatLogic {
         try {
 
             // Check if we're in the middle of an intent flow and process it.
-            if (processIntent(devId, aiidForMemoryIntents, currentIntent, question, result)) {
+            if (processIntent(devId, aiidForMemoryIntents, currentIntent, question, result, clientVariables)) {
                 // Intent was handled, confidence is high
                 result.setScore(1.0d);
                 this.telemetryMap.add("AnsweredBy", "IntentProcessor");
@@ -196,7 +196,7 @@ public class ChatLogic {
 
                             this.telemetryMap.add("IntentRecognized", true);
 
-                            if (processIntent(devId, aiidFromResult, memoryIntent, question, result)) {
+                            if (processIntent(devId, aiidFromResult, memoryIntent, question, result, clientVariables)) {
                                 this.telemetryMap.add("AnsweredBy", "WNET");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
@@ -337,7 +337,8 @@ public class ChatLogic {
      * @throws IntentException
      */
     private boolean processIntent(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
-                                  final String question, ChatResult chatResult)
+                                  final String question, final ChatResult chatResult,
+                                  final Map<String, String> clientVariables)
             throws IntentException {
 
         if (currentIntent == null) {
@@ -369,7 +370,7 @@ public class ChatLogic {
                     .filter(x -> x.getA().equals(mv.getName())).findFirst();
             if (entityValue.isPresent() || mv.getName().equals(SYSANY)) {
                 handledIntent = processVariables(devId, aiid, question, currentIntent, chatResult,
-                        Collections.singletonList(mv), intentsToClear, intentLog);
+                        clientVariables, Collections.singletonList(mv), intentsToClear, intentLog);
 
             } else {
                 // If we have prompted enough, then give up
@@ -407,7 +408,7 @@ public class ChatLogic {
 
             } else {
                 handledIntent = processVariables(devId, aiid, question, currentIntent, chatResult,
-                        currentIntent.getVariables(), intentsToClear, intentLog);
+                        clientVariables, currentIntent.getVariables(), intentsToClear, intentLog);
 
             }
         }
@@ -431,7 +432,8 @@ public class ChatLogic {
 
     private boolean processVariables(final UUID devId, final UUID aiid, final String question,
                                      final MemoryIntent currentIntent, final ChatResult chatResult,
-                                     List<MemoryVariable> memoryVariables,
+                                     final Map<String, String> clientVariables,
+                                     final List<MemoryVariable> memoryVariables,
                                      final List<MemoryIntent> intentsToClear, final Map<String, Object> log)
             throws IntentException {
 
@@ -519,7 +521,7 @@ public class ChatLogic {
 
         if (allVariablesFilled) {
             notifyIntentFulfilled(chatResult, currentIntent, aiid);
-            checkAndExecuteWebhook(devId, aiid, currentIntent, chatResult, log);
+            checkAndExecuteWebhook(devId, aiid, currentIntent, chatResult, clientVariables, log);
             intentsToClear.add(currentIntent);
             handledIntent = true;
         }
@@ -528,12 +530,14 @@ public class ChatLogic {
     }
 
     private void checkAndExecuteWebhook(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
-                                        final ChatResult chatResult, final Map<String, Object> log) {
+                                        final ChatResult chatResult, final Map<String, String> clientVariables,
+                                        final Map<String, Object> log) {
         // If the webhook returns a text response, overwrite the answer.
         WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, devId);
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult, devId);
+            WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult, clientVariables,
+                    devId);
             if (response == null) {
                 this.logger.logUserErrorEvent(LOGFROM,
                         "Error occured executing WebHook for intent %s for aiid %s.",

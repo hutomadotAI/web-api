@@ -72,7 +72,7 @@ public class ChatEndpoint {
     Response chat(
             @Context ContainerRequestContext requestContext) {
         MultivaluedMap<String, String> headers = requestContext.getHeaders();
-        Map<String, String> chatheaders = HeaderUtils.getChatVariablesFromHeaders(headers);
+        Map<String, String> chatheaders = HeaderUtils.getClientVariablesFromHeaders(headers);
         ApiResult result = this.chatLogic.chat(
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
