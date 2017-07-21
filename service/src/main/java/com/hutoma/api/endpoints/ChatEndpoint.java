@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import java.net.HttpURLConnection;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -27,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 /**
@@ -62,19 +64,21 @@ public class ChatEndpoint {
             @RequestHeader(name = "Authorization", description = "Developer token")
     })
     @ResourceMethodSignature(
-            queryParams = {@QueryParam("q"), @QueryParam("chatId"),
-                    @QueryParam("confidence_threshold")},
+            queryParams = {@QueryParam("q"), @QueryParam("chatId")},
             output = ChatResult.class
     )
     public
     @TypeHint(ChatResult.class)
     Response chat(
             @Context ContainerRequestContext requestContext) {
+        MultivaluedMap<String, String> headers = requestContext.getHeaders();
+        Map<String, String> chatheaders = HeaderUtils.getClientVariablesFromHeaders(headers);
         ApiResult result = this.chatLogic.chat(
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
-                ParameterFilter.getChatID(requestContext));
+                ParameterFilter.getChatID(requestContext),
+                chatheaders);
         return result.getResponse(this.serializer).build();
     }
 
@@ -90,7 +94,8 @@ public class ChatEndpoint {
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatQuestion(requestContext),
-                ParameterFilter.getChatID(requestContext));
+                ParameterFilter.getChatID(requestContext),
+                null);
         return result.getResponse(this.serializer).build();
     }
 }

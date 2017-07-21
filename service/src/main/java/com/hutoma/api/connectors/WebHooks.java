@@ -20,6 +20,7 @@ import org.glassfish.jersey.client.JerseyInvocation;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.UUID;
 
 import java.net.HttpURLConnection;
@@ -59,7 +60,8 @@ public class WebHooks {
      * @return a WebHookResponse containing the returned data.
      * @throws IOException if the endpoint cannot be accessed.
      */
-    public WebHookResponse executeWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult, final UUID devId) {
+    public WebHookResponse executeWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
+                                          final Map<String, String> clientVariables, final UUID devId) {
         final String devIdString = devId.toString();
         if (webHook == null || intent == null) {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
@@ -79,7 +81,7 @@ public class WebHooks {
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
-        WebHookPayload payload = new WebHookPayload(intent, chatResult);
+        WebHookPayload payload = new WebHookPayload(intent, chatResult, clientVariables);
 
         String jsonPayload;
         try {
@@ -138,7 +140,11 @@ public class WebHooks {
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
-                    "WebHook Failed (%s): intent %s for aiid %s at %s",
+                    String.format("WebHook Failed (%s): intent %s for aiid %s at %s",
+                            response.getStatus(),
+                            intent.getName(),
+                            intent.getAiid(),
+                            webHook.getEndpoint()),
                     devIdString,
                     LogMap.map("ResponseStatus", response.getStatus())
                             .put("Intent", intent.getName())
@@ -151,8 +157,12 @@ public class WebHooks {
         WebHookResponse webHookResponse = this.deserializeResponse(response);
         response.close();
 
-        this.logger.logInfo(LOGFROM, String.format("Successfully executed webhook for aiid %s and intent %s",
-                intent.getAiid(), intent.getName()));
+        this.logger.logInfo(LOGFROM,
+                String.format("Successfully executed webhook for aiid %s and intent %s",
+                    intent.getAiid(), intent.getName()),
+                LogMap.map("Intent", intent.getName())
+                        .put("AIID", intent.getAiid())
+                        .put("Endpoint", webHook.getEndpoint()));
         return webHookResponse;
     }
 

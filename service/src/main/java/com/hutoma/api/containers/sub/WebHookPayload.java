@@ -22,10 +22,14 @@ public class WebHookPayload {
     @SerializedName("variablesMap")
     private Map<String, MemoryVariable> variablesMap;
 
-    public WebHookPayload(MemoryIntent intent, ChatResult chatResult) {
+    @SerializedName("clientVariables")
+    private Map<String, String> clientVariables;
+
+    public WebHookPayload(MemoryIntent intent, ChatResult chatResult, Map<String, String> clientVariables) {
         this.intentName = intent.getName();
         this.variables = intent.getVariables();
         this.variablesMap = intent.getVariablesMap();
         this.chatResult = chatResult;
+        this.clientVariables = clientVariables;
     }
 }
