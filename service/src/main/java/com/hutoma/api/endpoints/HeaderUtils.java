@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Contains utility functions for manipulating web headers
  */
 public final class HeaderUtils {
-    public static Map<String, String> getClientVariablesFromHeaders(MultivaluedMap<String, String> headers) {
+    public static Map<String, String> getClientVariablesFromHeaders(final MultivaluedMap<String, String> headers) {
         final String HEADER_PREFIX = "x-hutoma-var-";
         final int HEADER_PREFIX_LENGTH = HEADER_PREFIX.length();
 

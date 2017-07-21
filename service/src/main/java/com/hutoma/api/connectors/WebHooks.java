@@ -140,7 +140,11 @@ public class WebHooks {
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
-                    "WebHook Failed: for intent or aiid",
+                    String.format("WebHook Failed (%s): intent %s for aiid %s at %s",
+                            response.getStatus(),
+                            intent.getName(),
+                            intent.getAiid(),
+                            webHook.getEndpoint()),
                     devIdString,
                     LogMap.map("ResponseStatus", response.getStatus())
                             .put("Intent", intent.getName())
@@ -153,7 +157,9 @@ public class WebHooks {
         WebHookResponse webHookResponse = this.deserializeResponse(response);
         response.close();
 
-        this.logger.logInfo(LOGFROM, "Successfully executed webhook for aiid/intent",
+        this.logger.logInfo(LOGFROM,
+                String.format("Successfully executed webhook for aiid %s and intent %s",
+                    intent.getAiid(), intent.getName()),
                 LogMap.map("Intent", intent.getName())
                         .put("AIID", intent.getAiid())
                         .put("Endpoint", webHook.getEndpoint()));
