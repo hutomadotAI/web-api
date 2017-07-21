@@ -19,7 +19,6 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.UUID;
-
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Matchers.any;
@@ -77,7 +76,7 @@ public class TestWebhooks {
         ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
-        WebHookResponse response = this.webHooks.executeWebHook(wh, null, chatResult, null, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, null, chatResult, null, AIID, DEVID);
         Assert.assertNull(response);
     }
 
@@ -94,7 +93,7 @@ public class TestWebhooks {
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
-        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, null, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, null, AIID, DEVID);
         Assert.assertNull(response);
     }
 
@@ -113,7 +112,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, null, DEVID);
+        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, null, AIID, DEVID);
         verify(spy).getMessageHash(any(), any(), any());
         verify(this.fakeTools, Mockito.never()).generateRandomHexString(anyInt());
         Assert.assertNotNull(response);
@@ -133,7 +132,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, null, DEVID);
+        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, null, AIID, DEVID);
         verify(spy, Mockito.never()).getMessageHash(any(), any(), any());
         Assert.assertNotNull(response);
     }
@@ -153,7 +152,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, null, DEVID);
+        WebHookResponse response = spy.executeWebHook(wh, mi, chatResult, null, AIID, DEVID);
         verify(spy).getMessageHash(any(), any(), any());
         verify(this.fakeTools).generateRandomHexString(anyInt());
         Assert.assertNotNull(response);
@@ -168,7 +167,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
-        WebHookResponse response = this.webHooks.executeWebHook(null, mi, chatResult, null, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(null, mi, chatResult, null, AIID, DEVID);
         Assert.assertNull(response);
     }
 
@@ -185,7 +184,7 @@ public class TestWebhooks {
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
-        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, null, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, null, AIID, DEVID);
         Assert.assertNull(response);
     }
 
@@ -201,7 +200,7 @@ public class TestWebhooks {
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, null, DEVID);
+        WebHookResponse response = this.webHooks.executeWebHook(wh, mi, chatResult, null, AIID, DEVID);
         Assert.assertNull(response);
     }
 
@@ -213,7 +212,7 @@ public class TestWebhooks {
         String hashString = this.webHooks.getMessageHash(DEVID.toString(), "123456", "ThisIsAMessage".getBytes());
 
         // Here's what Python calculated this should be using HMAC SHA256
-        assert(hashString).equals("13f5ef193847035a837ef7123ffe2efd4748f57f0be74c3897f82064443457f2");
+        assert (hashString).equals("13f5ef193847035a837ef7123ffe2efd4748f57f0be74c3897f82064443457f2");
     }
 
     /*

@@ -18,12 +18,11 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
-
-import java.net.HttpURLConnection;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
@@ -42,6 +41,7 @@ public class WebHooks {
     private final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
     private final Tools tools;
+
     @Inject
     public WebHooks(final Database database, final ILogger logger, final JsonSerializer serializer,
                     final JerseyClient jerseyClient, final Tools tools) {
@@ -61,7 +61,8 @@ public class WebHooks {
      * @throws IOException if the endpoint cannot be accessed.
      */
     public WebHookResponse executeWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
-                                          final Map<String, String> clientVariables, final UUID devId) {
+                                          final Map<String, String> clientVariables, final UUID devId,
+                                          final UUID originatingAiid) {
         final String devIdString = devId.toString();
         if (webHook == null || intent == null) {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
@@ -81,7 +82,7 @@ public class WebHooks {
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
-        WebHookPayload payload = new WebHookPayload(intent, chatResult, clientVariables);
+        WebHookPayload payload = new WebHookPayload(intent, chatResult, originatingAiid, clientVariables);
 
         String jsonPayload;
         try {
@@ -159,7 +160,7 @@ public class WebHooks {
 
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed webhook for aiid %s and intent %s",
-                    intent.getAiid(), intent.getName()),
+                        intent.getAiid(), intent.getName()),
                 LogMap.map("Intent", intent.getName())
                         .put("AIID", intent.getAiid())
                         .put("Endpoint", webHook.getEndpoint()));

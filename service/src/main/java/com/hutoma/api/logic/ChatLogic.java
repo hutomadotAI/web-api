@@ -75,6 +75,23 @@ public class ChatLogic {
         this.chatStateHandler = chatStateHandler;
     }
 
+    private static class ChatRequestInfo {
+        private UUID devId;
+        private UUID aiid;
+        private UUID chatId;
+        private String question;
+        private Map<String, String> clientVariables;
+
+        ChatRequestInfo(final UUID devId, final UUID aiid, final UUID chatId, final String question,
+                        final Map<String, String> clientVariables) {
+            this.devId = devId;
+            this.aiid = aiid;
+            this.chatId = chatId;
+            this.question = question;
+            this.clientVariables = clientVariables;
+        }
+    }
+
     public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
                           Map<String, String> clientVariables) {
         try {
@@ -126,9 +143,11 @@ public class ChatLogic {
                              final Map<String, String> clientVariables)
             throws ChatFailedException {
 
+        final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, UUID.fromString(chatId), question, clientVariables);
+
         final String devIdString = devId.toString();
         final long startTime = this.tools.getTimestamp();
-        UUID chatUuid = UUID.fromString(chatId);
+        final UUID chatUuid = chatInfo.chatId;
 
         this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
 
@@ -159,7 +178,7 @@ public class ChatLogic {
         try {
 
             // Check if we're in the middle of an intent flow and process it.
-            if (processIntent(devId, aiidForMemoryIntents, currentIntent, question, result, clientVariables)) {
+            if (processIntent(chatInfo, aiidForMemoryIntents, currentIntent, result)) {
                 // Intent was handled, confidence is high
                 result.setScore(1.0d);
                 this.telemetryMap.add("AnsweredBy", "IntentProcessor");
@@ -196,7 +215,7 @@ public class ChatLogic {
 
                             this.telemetryMap.add("IntentRecognized", true);
 
-                            if (processIntent(devId, aiidFromResult, memoryIntent, question, result, clientVariables)) {
+                            if (processIntent(chatInfo, aiidFromResult, memoryIntent, result)) {
                                 this.telemetryMap.add("AnsweredBy", "WNET");
                             } else {
                                 // if intents processing returns false then we need to ignore WNET
@@ -328,17 +347,15 @@ public class ChatLogic {
 
     /**
      * Processes a given intent.
-     * @param devId         the developer id
-     * @param aiid          the AI id
-     * @param currentIntent the intent to process
-     * @param question      user's question
-     * @param chatResult    current chat result
+     * @param chatInfo             the chat request info
+     * @param aiidForMemoryIntents the aiid for memory intents
+     * @param currentIntent        the intent to process
+     * @param chatResult           current chat result
      * @return whether there was an intent to process or not
      * @throws IntentException
      */
-    private boolean processIntent(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
-                                  final String question, final ChatResult chatResult,
-                                  final Map<String, String> clientVariables)
+    private boolean processIntent(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
+                                  final MemoryIntent currentIntent, final ChatResult chatResult)
             throws IntentException {
 
         if (currentIntent == null) {
@@ -363,14 +380,14 @@ public class ChatLogic {
             chatResult.setScore(1.0d);
 
             // Attempt to retrieve entities from the question
-            List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question,
+            List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(chatInfo.question,
                     currentIntent.getVariables());
             // Did the recognizer find something for this entity?
             Optional<Pair<String, String>> entityValue = entities.stream()
                     .filter(x -> x.getA().equals(mv.getName())).findFirst();
             if (entityValue.isPresent() || mv.getName().equals(SYSANY)) {
-                handledIntent = processVariables(devId, aiid, question, currentIntent, chatResult,
-                        clientVariables, Collections.singletonList(mv), intentsToClear, intentLog);
+                handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
+                        Collections.singletonList(mv), intentsToClear, intentLog);
 
             } else {
                 // If we have prompted enough, then give up
@@ -407,8 +424,8 @@ public class ChatLogic {
                 handledIntent = true;
 
             } else {
-                handledIntent = processVariables(devId, aiid, question, currentIntent, chatResult,
-                        clientVariables, currentIntent.getVariables(), intentsToClear, intentLog);
+                handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
+                        currentIntent.getVariables(), intentsToClear, intentLog);
 
             }
         }
@@ -430,10 +447,9 @@ public class ChatLogic {
         return handledIntent;
     }
 
-    private boolean processVariables(final UUID devId, final UUID aiid, final String question,
-                                     final MemoryIntent currentIntent, final ChatResult chatResult,
-                                     final Map<String, String> clientVariables,
-                                     final List<MemoryVariable> memoryVariables,
+    private boolean processVariables(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
+                                     final MemoryIntent currentIntent,
+                                     final ChatResult chatResult, final List<MemoryVariable> memoryVariables,
                                      final List<MemoryIntent> intentsToClear, final Map<String, Object> log)
             throws IntentException {
 
@@ -441,7 +457,8 @@ public class ChatLogic {
 
         // At this stage we're guaranteed to have variables with different entity types
         // Attempt to retrieve entities from the question
-        List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(question, memoryVariables);
+        List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(
+                chatInfo.question, memoryVariables);
 
         if (!entities.isEmpty()) {
             log.put("Entities retrieved", StringUtils.join(entities, ','));
@@ -491,14 +508,16 @@ public class ChatLogic {
                 // the prompt check is necessary otherwise the entity will be immediately recognised
                 // before we even prompt for it.
                 if (variable.getName().equalsIgnoreCase(SYSANY) && (variable.getTimesPrompted() > 0)) {
-                    variable.setCurrentValue(question);
+                    variable.setCurrentValue(chatInfo.question);
                     variable.setRequested(false);
                     allVariablesFilled = vars.size() == 1;
                 } else {
                     if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                         // Should not happen as this should be validated during creation
                         this.logger.logUserErrorEvent(LOGFROM, "HandleIntents - variable with no prompts defined",
-                                devId.toString(), LogMap.map("AIID", aiid).put("Intent", currentIntent.getName())
+                                chatInfo.devId.toString(),
+                                LogMap.map("AIID", aiidForMemoryIntents)
+                                        .put("Intent", currentIntent.getName())
                                         .put("Variable", variable.getName()));
                         throw new IntentException(
                                 String.format("Entity %s for intent %s does not specify any prompts",
@@ -521,8 +540,8 @@ public class ChatLogic {
         }
 
         if (allVariablesFilled) {
-            notifyIntentFulfilled(chatResult, currentIntent, aiid);
-            checkAndExecuteWebhook(devId, aiid, currentIntent, chatResult, clientVariables, log);
+            notifyIntentFulfilled(chatResult, currentIntent, aiidForMemoryIntents);
+            checkAndExecuteWebhook(chatInfo, aiidForMemoryIntents, currentIntent, chatResult, log);
             intentsToClear.add(currentIntent);
             handledIntent = true;
         }
@@ -530,20 +549,20 @@ public class ChatLogic {
         return handledIntent;
     }
 
-    private void checkAndExecuteWebhook(final UUID devId, final UUID aiid, final MemoryIntent currentIntent,
-                                        final ChatResult chatResult, final Map<String, String> clientVariables,
-                                        final Map<String, Object> log) {
+    private void checkAndExecuteWebhook(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
+                                        final MemoryIntent currentIntent,
+                                        final ChatResult chatResult, final Map<String, Object> log) {
         // If the webhook returns a text response, overwrite the answer.
-        WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, devId);
+        WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, chatInfo.devId);
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult, clientVariables,
-                    devId);
+            WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult,
+                    chatInfo.clientVariables, chatInfo.devId, chatInfo.aiid);
             if (response == null) {
                 this.logger.logUserErrorEvent(LOGFROM,
                         "Error occured executing WebHook for intent %s for aiid %s.",
-                        devId.toString(),
-                        LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
+                        chatInfo.devId.toString(),
+                        LogMap.map("Intent", currentIntent.getName()).put("AIID", aiidForMemoryIntents));
             } else {
                 // first store the whole deserialized webhook in a transient field
                 chatResult.setWebHookResponse(response);
@@ -556,12 +575,12 @@ public class ChatLogic {
                     // otherwise we got no text
                     this.logger.logUserInfoEvent(LOGFROM,
                             "Executing WebHook for intent for aiid: empty response.",
-                            devId.toString(),
-                            LogMap.map("Intent", currentIntent.getName()).put("AIID", aiid));
+                            chatInfo.devId.toString(),
+                            LogMap.map("Intent", currentIntent.getName()).put("AIID", aiidForMemoryIntents));
                 }
                 // log the Facebook rich-content type if available
-                if ((response.getFacebookNode() != null) &&
-                        (response.getFacebookNode().getContentType() != null)) {
+                if ((response.getFacebookNode() != null)
+                        && (response.getFacebookNode().getContentType() != null)) {
                     log.put("Webhook facebook response",
                             response.getFacebookNode().getContentType().name());
                 }
