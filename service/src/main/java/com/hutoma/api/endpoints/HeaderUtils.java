@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * Created by paul on 19/07/17.
+ * Contains utility functions for manipulating web headers
  */
 public final class HeaderUtils {
     public static Map<String, String> getClientVariablesFromHeaders(MultivaluedMap<String, String> headers) {
