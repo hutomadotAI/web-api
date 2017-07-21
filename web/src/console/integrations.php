@@ -19,7 +19,8 @@ $aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 $connect_token = $_GET["code"];
 if (isset($connect_token)) {
     $redir = $_COOKIE["facebookRedir"];
-    $integrationApi->setConnectToken($aiid, $connect_token, $redir);
+    $connect_result = $integrationApi->setConnectToken($aiid, $connect_token, $redir);
+    $_SESSION[$_SESSION['navigation_id']]['fb_connect_result'] = $connect_result;
     \hutoma\console::redirect($redir);
     exit();
 }

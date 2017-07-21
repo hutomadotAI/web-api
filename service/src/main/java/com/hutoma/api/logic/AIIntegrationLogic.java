@@ -169,7 +169,7 @@ public class AIIntegrationLogic {
      * @param devid
      * @param aiid
      * @param facebookConnect auth code
-     * @return
+     * @return a 409 if there was an error or a 200 otherwise
      */
     public ApiResult facebookConnect(final UUID devid, final UUID aiid, final FacebookConnect facebookConnect) {
 
@@ -201,10 +201,11 @@ public class AIIntegrationLogic {
                 // if so, save an empty record
                 this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
                         null, "", "{}",
-                        "Cannot connect. Another user has already registered that Facebook account.", false);
+                        "", false);
                 // and log
                 this.logger.logUserWarnEvent(LOGFROM, "facebook account already in use", devid.toString(),
                         logMap);
+                return ApiError.getConflict("Cannot connect. Another user has already registered that Facebook account.");
             } else {
                 // otherwise, save it
                 this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
@@ -218,15 +219,16 @@ public class AIIntegrationLogic {
             }
 
         } catch (FacebookException.FacebookMissingPermissionsException missing) {
-            // log but return success status anyway
-            // to allow getState to warn the user
             this.logger.logUserWarnEvent(LOGFROM, "facebook account connect with missing permissions",
                     devid.toString(), logMap.put("missing", missing.getMessage()));
-            // fallthrough to return success
+            return ApiError.getConflict(missing.getMessage());
+        } catch (FacebookException.FacebookAuthException auth) {
+            this.logger.logUserExceptionEvent(LOGFROM, "auth error while connecting facebook account",
+                    devid.toString(), auth, logMap);
+            return ApiError.getConflict(auth.getFacebookErrorMessage());
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "error connecting an account to facebook",
                     devid.toString(), e, logMap);
-            // TODO: differentiate between different kinds of errors to message back to the user
             return ApiError.getInternalServerError(e.getMessage());
         }
 

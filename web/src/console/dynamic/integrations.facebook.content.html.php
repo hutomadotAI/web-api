@@ -14,7 +14,20 @@ if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']))
     \hutoma\console::redirect('./error.php?err=200');
     exit;
 }
+
+// get the aiid from the session
 $aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
+
+// if this happens right after a connect ...
+$connect_result = $_SESSION[$_SESSION['navigation_id']]['fb_connect_result'];
+if (isset($connect_result)) {
+    // load the result of that connect
+    unset($_SESSION[$_SESSION['navigation_id']]['fb_connect_result']);
+    // if there was a connect warning message then display that
+    if (($connect_result["status"]["code"]===409) && isset($connect_result["status"]["info"])) {
+        $facebook_msg = $connect_result["status"]["info"];
+    }
+}
 
 if (isset($_GET["action"])) {
     $params = [];
@@ -23,10 +36,11 @@ if (isset($_GET["action"])) {
         $params["id"]=$_GET["id"];
     }
     $facebook_action = $integrationApi->facebookAction($aiid, $params);
-    if (isset($facebook_action["status"]["info"])) {
+    if (!isset($facebook_msg) && (isset($facebook_action["status"]["info"]))) {
         $facebook_msg = $facebook_action["status"]["info"];
     }
 }
+
 $facebook_state = $integrationApi->getFacebookConnectState($aiid);
 $fb_success = $facebook_state["success"];
 $fb_app_id = $facebook_state["facebook_app_id"];

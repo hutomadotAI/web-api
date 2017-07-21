@@ -73,7 +73,7 @@ public class TestAIIntegrationLogic {
                         new FacebookNode(TestDataHelper.ALT_SESSIONID.toString(), "pagename",
                                 Collections.singletonList("perm"), "token"))));
 
-        when(this.fakeConnector.getUserGrantedPermissions(anyString(), anyString()))
+        when(this.fakeConnector.getUserGrantedPermissions(any(), any()))
                 .thenReturn((FacebookNodeList) this.serializer.deserialize("{\"data\":[{\n" +
                         "\"permission\":\"manage_pages\",\"status\":\"granted\"},\n" +
                         "{\"permission\":\"pages_show_list\",\"status\":\"granted\"},\n" +
@@ -195,7 +195,7 @@ public class TestAIIntegrationLogic {
         when(this.fakeDatabase.isIntegratedUserAlreadyRegistered(any(), any(), any())).thenReturn(true);
         FacebookConnect connect = new FacebookConnect();
         ApiResult integ = this.integLogic.facebookConnect(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, connect);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, integ.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_CONFLICT, integ.getStatus().getCode());
         verify(this.fakeDatabase, times(1)).updateIntegration(
                 any(), any(), any(), any(), not(Matchers.eq("userid")),
                 Matchers.eq("{}"), any(), Matchers.eq(false));
