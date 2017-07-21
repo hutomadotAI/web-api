@@ -477,7 +477,7 @@ public class ChatLogic {
                 // For now get the first unfulfilled variable with numPrompts < maxPrompts
                 // or we could do random just to make it a 'surprise!' :)
                 Optional<MemoryVariable> optVariable = vars.stream()
-                        .filter(x -> x.getTimesPrompted() < x.getTimesToPrompt()).findFirst();
+                        .filter(x -> x.getTimesPrompted() <= x.getTimesToPrompt()).findFirst();
                 if (optVariable.isPresent()) {
                     variable = optVariable.get();
                 }

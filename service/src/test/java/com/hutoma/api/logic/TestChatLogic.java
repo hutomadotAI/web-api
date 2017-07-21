@@ -380,13 +380,17 @@ public class TestChatLogic {
     @Test
     public void testChat_IntentPrompt_unfullfileldVar_exceededPrompts() throws
             RequestBase.AiControllerException {
-        MemoryIntent mi = getMemoryIntentForPrompt(0, null);
+        MemoryIntent mi = getMemoryIntentForPrompt(1, null);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
+        // Answer with something unrelated to exhaust the prompts
+        result = getChat(0.5f, "nothing to see here.");
+        r = ((ApiChat) result).getResult();
         // The answer is NOT the prompt
         Assert.assertNotEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
         // And timesPrompted is not incremented
-        Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
+        Assert.assertEquals(1, mi.getVariables().get(0).getTimesPrompted());
         // we need to clear the intent if we exceeded the number of prompts
         verify(this.fakeIntentHandler, times(1)).clearIntents(any());
     }
@@ -435,7 +439,7 @@ public class TestChatLogic {
 
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("sys.any", null, true,
-                Arrays.asList("a", "b"), Collections.singletonList("prompt"), 3, 0, true, false, "label1");
+                Arrays.asList("a", "b"), Collections.singletonList("prompt"), 1, 0, true, false, "label1");
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
