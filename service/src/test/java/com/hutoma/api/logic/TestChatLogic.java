@@ -455,6 +455,52 @@ public class TestChatLogic {
         verify(this.fakeIntentHandler).clearIntents(any());
     }
 
+    /***
+     * Can use multiple sys.any variables
+     */
+    @Test
+    public void testChat_IntentPrompt_multiple_SysAny() throws RequestBase.AiControllerException {
+
+        final String intentName = "intent1";
+        final String labelSysAny1 = "sysany1";
+        final String labelSysAny2 = "sysany2";
+        MemoryVariable mv1 = new MemoryVariable("sys.any", null, true,
+                null, Collections.singletonList("prompt1"), 3, 0, true, false, labelSysAny1);
+        MemoryVariable mv2 = new MemoryVariable("sys.any", null, true,
+                null, Collections.singletonList("prompt2"), 3, 0, true, false, labelSysAny2);
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2));
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+
+        // First question triggers the intent
+        ApiChat result = (ApiChat) getChat(0.5f, "nothing to see here");
+        // The response is the 1st sys.any prompt
+        Assert.assertEquals(mv1.getPrompts().get(0), result.getResult().getAnswer());
+        // Answer with the first answer, this will fulfill the first variable
+        final String answerToFirstPrompt = "answer1";
+        result = (ApiChat) getChat(0.5f, answerToFirstPrompt);
+        // 1st sys.any now contains the question asked
+        Assert.assertEquals(answerToFirstPrompt, result.getResult().getIntents().get(0).getVariablesMap().get(labelSysAny1).getCurrentValue());
+        // The response should now be the prompt for the 2nd sys.any
+        Assert.assertEquals(mv2.getPrompts().get(0), result.getResult().getAnswer());
+        // Intent is not fulfilled
+        Assert.assertFalse(result.getResult().getIntents().get(0).isFulfilled());
+
+        // Send the answer to the second prompt
+        final String answerToSecondPrompt = "answer2";
+        result = (ApiChat) getChat(0.5f, answerToSecondPrompt);
+        // 2nd sys.any now contains the question asked
+        Assert.assertEquals(answerToSecondPrompt, result.getResult().getIntents().get(0).getVariablesMap().get(labelSysAny2).getCurrentValue());
+
+        // Intent is fulfilled
+        Assert.assertEquals(intent.getResponses().get(0), result.getResult().getAnswer());
+        Assert.assertTrue(result.getResult().getIntents().get(0).isFulfilled());
+    }
+
 
     /***
      * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.

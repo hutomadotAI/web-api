@@ -490,6 +490,7 @@ public class ChatLogic {
                 if (variable.getName().equalsIgnoreCase(SYSANY) && (variable.getTimesPrompted() > 0)) {
                     variable.setCurrentValue(question);
                     variable.setRequested(false);
+                    allVariablesFilled = vars.size() == 1;
                 } else {
                     if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                         // Should not happen as this should be validated during creation
