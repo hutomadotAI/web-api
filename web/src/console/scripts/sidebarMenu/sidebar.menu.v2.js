@@ -65,7 +65,10 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);
 
-    document.getElementById('level' + level).className = 'active';
+    var levelItem = '#level' + level;
+    if (!$(levelItem).hasClass('active')) {
+        $(levelItem).addClass('active');
+    }
     document.getElementById('menu_' + removeSpecialCharacters(label_menu)).className = 'active';
     if (block)
         document.getElementById('link_' + label_menu).href = '#';

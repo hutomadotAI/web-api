@@ -32,7 +32,7 @@
                 </td>
                 <td>
                     <div class="input-group-btn" tabindex="0">
-                        <button type="submit" id="btnDownloadChatlogs" class="btn btn-success flat" style="width: 120px;">Download Logs
+                        <button type="submit" id="btnDownloadChatlogs" class="btn btn-success flat" style="width: 150px;">Download Logs
                         </button>
                     </div>
                 </td>
