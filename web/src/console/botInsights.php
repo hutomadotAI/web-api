@@ -8,6 +8,11 @@ require_once "common/utils.php";
 if (!\hutoma\console::checkSessionIsActive()) {
     exit;
 }
+
+function toJSDate($dateParts) {
+    return 'new Date(' . $dateParts[0] . ',' . ($dateParts[1] - 1) . ',' . $dateParts[2] . ')';
+}
+
 if (isset($_REQUEST['from'])) {
     $fromDate = date('Y-m-d');
     $fromDateIso = \hutoma\utils::toIsoDate($_REQUEST['from']);
@@ -95,7 +100,7 @@ unset($pi);
 
             <div class="row">
 
-                <?php if (sizeof($interactions->objects) > 0 && sizeof($sessions->objects) > 0) { ?>}
+                <?php if (sizeof($interactions->objects) > 0 && sizeof($sessions->objects) > 0) { ?>
 
                 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
                 <script type="text/javascript">
@@ -105,7 +110,7 @@ unset($pi);
                             title: title,
                             width: "90%",
                             height: 300,
-                            bar: {groupWidth: "95%"},
+                            bar: {groupWidth: "35"},
                             legend: {position: "none"},
                             backgroundColor: {fill: 'transparent'},
                             vAxis: {
@@ -117,8 +122,8 @@ unset($pi);
                                 textStyle: {color: '#999999'},
                                 gridlines: {color: "#404040"},
                                 baselineColor: '#808080',
-                                minValue: new Date(<?php echo implode(',', $fromDateParts) ?>),
-                                maxValue: new Date(<?php echo implode(',', $toDateParts) ?>)
+                                minValue: (<?php echo toJSDate($fromDateParts) ?>),
+                                maxValue: (<?php echo toJSDate($toDateParts) ?>)
                             },
                             titleTextStyle: {color: 'white', fontName: 'Helvetica', fontSize: '16px'},
                             colors: [color]
@@ -133,7 +138,7 @@ unset($pi);
                             <?php
                             foreach ($sessions->objects as $entry) {
                                 $date = explode('-', date('Y-m-d', strtotime($entry->date)));
-                                echo '[new Date(' . implode(',', $date) . '), ' . $entry->count . '],';
+                                echo '[' . toJSDate($date) . ', ' . $entry->count . '],';
                             }
                             ?>
                         ]);
@@ -143,7 +148,7 @@ unset($pi);
                             <?php
                             foreach ($interactions->objects as $entry) {
                                 $date = explode('-', date('Y-m-d', strtotime($entry->date)));
-                                echo '[new Date(' . implode(',', $date) . '), ' . $entry->count . '],';
+                                echo '[' . toJSDate($date) . ', ' . $entry->count . '],';
                             }
                             ?>
                         ]);
