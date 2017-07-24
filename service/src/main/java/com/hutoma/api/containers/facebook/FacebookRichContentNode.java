@@ -6,6 +6,7 @@ public class FacebookRichContentNode {
 
     @SerializedName("type")
     private RichContentType contentType;
+
     @SerializedName("payload")
     private FacebookRichContentPayload payload;
 
