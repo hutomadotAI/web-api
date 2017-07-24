@@ -21,10 +21,9 @@ languageReverseLookup['Português'] = 'pt-PT';
 languageReverseLookup['English'] = 'en-US';
 
 function resetGeneralInputFields(){
-    var languageName = languageLookup[previousGeneralInfo.language];
     setInputValue('ai_name',previousGeneralInfo.name);
     setInputValue('ai_description',previousGeneralInfo.description);
-    setSelectValue('ai_language',languageName);
+    setSelectValue('ai_language',previousGeneralInfo.language);
     setSelectValue('ai_timezone',previousGeneralInfo.timezone);
     setSelectByIndex('ai_voice',previousGeneralInfo.voice);
     setSelectByIndex('ai_personality',previousGeneralInfo.personality);
