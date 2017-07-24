@@ -285,12 +285,12 @@ public class ChatLogic {
         Map output = null;
 
         try {
-            String uid = URLEncoder.encode(Integer.toString(sessionData(this.chatId).getUserid()), "UTF-8");
             String aid = URLEncoder.encode("384", "UTF-8");
             String q = URLEncoder.encode(message, "UTF-8");
-            URL url = new URL("http://52.44.202.141:8080/api/hutoma/demochat?uid=" + uid + "&aid=" + aid + "&q=" + q);
+            URL url = new URL("https://mika-api.hutoma.com/v1/ai/849e3d48-bd07-4eaa-9a98-456c47e08094/chat?chatId=" + this.chatId + "&q=" + q);
 
             connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAEQMTkyQDI-MU3SQzA0NdkxRjM11L00QLXQtzIyNDQ3OLZBNLA6VaAAAAAP__.AoZT_qmKFSYVSF9JVwQU7FXm7Frwnp_0V0HYDX-_wSU");
             connection.setRequestMethod("GET");
             connection.setReadTimeout(30*1000);
 
@@ -302,8 +302,8 @@ public class ChatLogic {
                         response.append(line);
                     }
                 }
-                String jsonp = response.toString();
-                String json = jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
+
+                String json = response.toString();
                 output = (Map) JSON.parse(json);
             }
         }
@@ -311,8 +311,9 @@ public class ChatLogic {
             throw e;
         }
 
-        String response = (String)output.get("output");
-        return response.substring(response.indexOf("]") + 1);
+        Map response = (Map)output.get("result");
+        answer = response.get("answer").toString();
+        return answer;
     }
 
     // @TODO demo hack
