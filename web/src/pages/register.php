@@ -27,7 +27,7 @@ if(isset($_POST['submit'])) {
             $retyped_password = $_POST['retyped_password'];
             $name = $_POST['username'];
             $terms = isset($_POST['terms']);
-            $invite_code =$_POST['invite_code'];
+            $invite_code = $_POST['promo_code'];
 
             $passwordCompliance =
                 preg_match('/\d+/', $password) == 1       // at least one digit
@@ -48,8 +48,8 @@ if(isset($_POST['submit'])) {
             elseif($terms != 'True') {
                 $msg= getErrorMessage('Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.');
             }
-            elseif($api->inviteCodeValid($invite_code) !== 200) {
-                $msg  = getErrorMessage('Please enter a valid invitation code.');
+            elseif($invite_code !== null && $api->inviteCodeValid($invite_code) !== 200) {
+                $msg  = getErrorMessage('Your promo code is invalid, please try again.');
             } else {
                 $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
@@ -62,7 +62,9 @@ if(isset($_POST['submit'])) {
                     if ($createAccount === 200) {
                         // Redeem invite code.
 
-                        $api->redeemInviteCode($invite_code, $email);
+                        if ($invite_code !== null) {
+                            $api->redeemInviteCode($invite_code, $email);
+                        }
 
                         setcookie('logSyscuruser', $email);
                         $login = \hutoma\console::login($email, $password, false);
@@ -204,7 +206,7 @@ if(isset($_POST['submit'])) {
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="invite_code"  type="invite_code" class="form-control flat" placeholder="Invitation Code" value="<?php if (isset($_POST['invite_code'])) echo $_POST['invite_code']?>">
+                <input name="promo_code"  type="invite_code" class="form-control flat" placeholder="Promo Code" value="<?php if (isset($_GET['code'])) echo $_GET['code']?>">
                 <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
             </div>
             <div class="row">
@@ -227,7 +229,6 @@ if(isset($_POST['submit'])) {
             </div>
         </form>
         <a href="login.php" class="text-center new-link">I already have an account</a><br/>
-        <a href="https://www.hutoma.ai" class="text-center new-link">I need an invitation code</a>
     </div><!-- /.form-box -->
     </div><!-- /.register-box -->
 </section>
