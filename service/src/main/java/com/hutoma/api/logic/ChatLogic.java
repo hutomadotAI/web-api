@@ -491,17 +491,8 @@ public class ChatLogic {
 
         if (!vars.isEmpty()) {
 
-            MemoryVariable variable = getVariableToPromptFromEntityList(currentIntent.getVariables());
+            MemoryVariable variable = getNextVariableToPrompt(currentIntent);
 
-            if (variable == null) {
-                // For now get the first unfulfilled variable with numPrompts < maxPrompts
-                // or we could do random just to make it a 'surprise!' :)
-                Optional<MemoryVariable> optVariable = vars.stream()
-                        .filter(x -> x.getTimesPrompted() <= x.getTimesToPrompt()).findFirst();
-                if (optVariable.isPresent()) {
-                    variable = optVariable.get();
-                }
-            }
             if (variable != null) {
 
                 // we check if the variable is sys.any but also if the we prompted at least once
@@ -510,7 +501,12 @@ public class ChatLogic {
                 if (variable.getName().equalsIgnoreCase(SYSANY) && (variable.getTimesPrompted() > 0)) {
                     variable.setCurrentValue(chatInfo.question);
                     variable.setRequested(false);
-                    allVariablesFilled = vars.size() == 1;
+                    MemoryVariable nextVariable = getNextVariableToPrompt(currentIntent);
+                    if (nextVariable != null) {
+                        promptForVariable(nextVariable, chatResult, log);
+                    }
+                    allVariablesFilled = nextVariable == null;
+                    handledIntent = true;
                 } else {
                     if (variable.getPrompts() == null || variable.getPrompts().isEmpty()) {
                         // Should not happen as this should be validated during creation
@@ -547,6 +543,23 @@ public class ChatLogic {
         }
 
         return handledIntent;
+    }
+
+    private MemoryVariable getNextVariableToPrompt(final MemoryIntent currentIntent) {
+        MemoryVariable variable = getVariableToPromptFromEntityList(currentIntent.getVariables());
+        List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
+
+        if (variable == null) {
+            // For now get the first unfulfilled variable with numPrompts < maxPrompts
+            // or we could do random just to make it a 'surprise!' :)
+            Optional<MemoryVariable> optVariable = vars.stream()
+                    .filter(x -> x.getTimesPrompted() <= x.getTimesToPrompt()).findFirst();
+            if (optVariable.isPresent()) {
+                variable = optVariable.get();
+            }
+        }
+
+        return variable;
     }
 
     private void checkAndExecuteWebhook(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
@@ -593,14 +606,11 @@ public class ChatLogic {
     private MemoryVariable getVariableToPromptFromEntityList(List<MemoryVariable> variables) {
         Map<String, List<MemoryVariable>> entitiesMap = new HashMap<>();
         for (MemoryVariable variable : variables) {
-            // Build the map of variables by name, ignoring SYSANY
-            if (!variable.getName().equals(SYSANY)) {
-                List<MemoryVariable> list = entitiesMap.containsKey(variable.getName())
-                        ? entitiesMap.get(variable.getName())
-                        : new ArrayList<>();
-                list.add(variable);
-                entitiesMap.put(variable.getName(), list);
-            }
+            List<MemoryVariable> list = entitiesMap.containsKey(variable.getName())
+                    ? entitiesMap.get(variable.getName())
+                    : new ArrayList<>();
+            list.add(variable);
+            entitiesMap.put(variable.getName(), list);
         }
 
         MemoryVariable variableToPrompt = null;
