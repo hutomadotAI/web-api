@@ -18,7 +18,7 @@ if(!\hutoma\console::checkSessionIsActive()){
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma |ERROR PAGE</title>
+    <title>Hu:toma | Error</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
@@ -26,7 +26,7 @@ if(!\hutoma\console::checkSessionIsActive()){
     <link rel="stylesheet" href="scripts/external/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-
+    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">

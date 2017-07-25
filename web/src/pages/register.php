@@ -108,7 +108,7 @@ if(isset($_POST['submit'])) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Hu:toma | New Account </title>
+    <title>Hu:toma | Register</title>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords" content="Deep learning, AI, Hutoma, Artificial Intelligence, Machine Learning, Siri, Cortana, Deep Learning API, AI Marketplace, Chatbots">
@@ -122,6 +122,7 @@ if(isset($_POST['submit'])) {
     <link rel="stylesheet" href="../console/scripts/cookiePolicyBar/cookiePolicyBar.css">
 
     <link rel="stylesheet" href="https://www.hutoma.ai/css/main.css">
+    <link rel="icon" href="../console/dist/img/favicon.ico" type="image/x-icon">
 
     <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>

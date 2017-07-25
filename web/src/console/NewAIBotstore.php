@@ -41,7 +41,7 @@ function isSessionVariablesAvailable()
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Add skills </title>
+    <title>Hu:toma | Add Bot Skills</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
@@ -52,6 +52,7 @@ function isSessionVariablesAvailable()
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
     <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>
 

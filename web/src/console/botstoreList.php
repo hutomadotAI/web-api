@@ -7,7 +7,7 @@ session_start();
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Botstore </title>
+    <title>Hu:toma | Botstore</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="scripts/external/select2/select2.css">
@@ -16,6 +16,7 @@ session_start();
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
+    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
     <?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
 <body class="hold-transition skin-blue fixed " onload="scrollTo(0,0)">

@@ -8,7 +8,8 @@ require "config.php";
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Change Password</title>
+    <title>Hu:toma | Change Password</title>
+    <link rel="icon" href="../console/dist/img/favicon.ico" type="image/x-icon">
   </head>
   <body>
   <?php include_once "../google_analytics.php"; ?>

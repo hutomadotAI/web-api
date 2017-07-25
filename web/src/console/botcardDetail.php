@@ -44,7 +44,7 @@ unset($session);
             unset ($developer);
             unset ($wHtml);
         }else{
-            echo '<title>hu:toma | Botstore </title><meta name="description" content="Hutoma Botstore"';
+            echo '<title>Hu:toma | Botstore</title><meta name="description" content="Hutoma Botstore"';
         }
     ?>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -52,6 +52,7 @@ unset($session);
     <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
+    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
     <?php include_once "./dynamic/hotjar.inc.php" ?>
 </head>
 <body class="hold-transition fixed" onload="scrollTo(0,0)">
