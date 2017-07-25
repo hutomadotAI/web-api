@@ -114,7 +114,7 @@ function setNewListPrompts() {
     }
     var entityRow = document.getElementById('parameter-list').children[entityRowNumber];
     var node_prompt = entityRow.children[2].children[0].children[0];
-    node_prompt.setAttribute('data-prompts', intentNewPromptList);
+    node_prompt.setAttribute('data-prompts', encodeStringArrayAsCSString(intentNewPromptList));
     if (intentNewPromptList.length > 0) {
         node_prompt.setAttribute('placeholder', ' ... ');
     } else {
@@ -164,11 +164,10 @@ function loadPromptsForEntity(rowElement, targetModal) {
     curr_entity = curr_entity.replace(/[@]/g, "");
 
     var parent = document.getElementById('prompts-list');
-    var prompts_split = promptsListAsString.split(',');
+    var prompts = decodeCSStringAsArray(promptsListAsString);
     if (promptsListAsString !== '') {
-        for (var j = 0; j < prompts_split.length; j++) {
-            var prompt = removeEscapeCharacter(prompts_split[j]);
-            createNewPromptRow(prompt, parent);
+        for (var j = 0; j < prompts.length; j++) {
+            createNewPromptRow(prompts[j], parent);
         }
     } else {
         var inputNode = rowElement.children().children().eq(2).children()[0];

@@ -219,6 +219,29 @@ function getMultipleElementValues(elementName) {
     return values;
 }
 
+function encodeStringArrayAsCSString(theArray) {
+    var result = '';
+    for (var i = 0; i < theArray.length; i++) {
+        result += encodeURIComponent(theArray[i]);
+        if (i < (theArray.length - 1)) {
+            result += ',';
+        }
+    }
+    return result;
+}
+
+function decodeCSStringAsArray(theString) {
+    var values = [];
+    if (theString === "") {
+        return values;
+    }
+    var parts = theString.split(',');
+    for (var i = 0; i < parts.length; i++) {
+        values.push(decodeURIComponent(parts[i]));
+    }
+    return values;
+}
+
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;

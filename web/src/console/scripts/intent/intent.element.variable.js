@@ -10,18 +10,11 @@ function loadVariablesFromIntent() {
         var n_prompts = v.n_prompts;
         var value = v.value;
         var required = v.required;
-        var prompts = loadPrompts(v.prompts);
+        var prompts = v.prompts;
         var parent = document.getElementById('parameter-list');
         var label = (typeof v.label !== 'undefined') ? v.label : '';
         createNewParameterRow(entity, n_prompts, prompts, prompts.length, value, required, label, parent);
     }
-}
-
-function loadPrompts(elements) {
-    var values = [];
-    for (var i = 0; i < elements.length; i++)
-        values.push(addEscapeCharacter(elements[i]));
-    return values;
 }
 
 function createNewParameterRow(entity, n_prompts, prompts, size, value, required, label, parent) {
@@ -51,25 +44,28 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('<div class="col-xs-2">');
     wHTML += ('<div class="text-center" >');
     wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-nprompt" style="background-color: transparent; margin:0;" placeholder="'
-        + n_prompts + '" onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">');
+    + n_prompts + '" onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">');
     wHTML += ('</div>');
     wHTML += ('</div>');
 
     wHTML += ('<div class="col-xs-2">');
     wHTML += ('<div class="text-center" >');
 
-    if (size > 0)
+
+    if (size > 0) {
+        var promptAsStringList = encodeStringArrayAsCSString(prompts);
         wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder=" ... " ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
-        'data-prompts="' + prompts + '"' + ' onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
-    else
+        'data-prompts="' + promptAsStringList + '"' + ' onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
+    } else {
         wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-prompts" style="background-color: transparent; margin:0;"' +
         'placeholder="click to enter" ' +
         'data-toggle="modal" ' +
         'data-target="#boxPrompts" ' +
         'data-prompts=""' + ' onMouseOver="this.style.cursor=\'pointer\'" onclick="resetBorderHighlightError(this);" readonly>');
+    }
 
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -97,8 +93,8 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('<div class="text-left" >');
     wHTML += ('<div class="text-gray no-padding">');
     wHTML += ('<input type="text" class="form-control flat no-shadow text-center" name="action-nprompt" '
-        + 'style="background-color: transparent; margin:0;"' + labelToDisplay
-        + '" onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">');
+    + 'style="background-color: transparent; margin:0;"' + labelToDisplay
+    + '" onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">');
     wHTML += ('</div>');
     wHTML += ('</div>');
     wHTML += ('</div>');
@@ -164,9 +160,17 @@ function pushEntitiesList(node) {
 
     var listEntities = [];
     // non-system entities at the top
-    entityListFromServer.map(function(entity) { if (!entity['is_system']) { listEntities.push(entity); }} );
-    entityListFromServer.map(function(entity) { if (entity['is_system']) { listEntities.push(entity); }} );
-    listEntities.map(function(entity) {
+    entityListFromServer.map(function (entity) {
+        if (!entity['is_system']) {
+            listEntities.push(entity);
+        }
+    });
+    entityListFromServer.map(function (entity) {
+        if (entity['is_system']) {
+            listEntities.push(entity);
+        }
+    });
+    listEntities.map(function (entity) {
         var name = '@' + entity['entity_name'];
         var elem = document.createElement('li');
         elem.setAttribute('data-toggle', 'tooltip');
@@ -175,7 +179,7 @@ function pushEntitiesList(node) {
         if (selected.text() === name)
             elem.className = 'selected';
         else
-            elem.setAttribute('onClick','enableSaving(true)');
+            elem.setAttribute('onClick', 'enableSaving(true)');
         elem.innerHTML = name;
         container.append(elem);
     });

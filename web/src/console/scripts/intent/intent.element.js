@@ -17,14 +17,6 @@ function isDataChanged(){
     return data_changed;
 }
 
-function addEscapeCharacter(value) {
-    return value.replace(/,/g, "||#44;");
-}
-
-function removeEscapeCharacter(value) {
-    return value.replace(/\|\|#44;/g, ",");
-}
-
 function saveIntent() {
     $(this).prop("disabled", true);
 
@@ -96,20 +88,16 @@ function saveIntent() {
         //*** check validation list prompts
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt = node_prompt.getAttribute('data-prompts');
-        var prompts_split = list_prompt.split(',');
+        var prompts = decodeCSStringAsArray(list_prompt);
 
-        if (list_prompt === '' || prompts_split.length === 0) {
+        if (list_prompt === '' || prompts.length === 0) {
             node.children[i].children[2].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Please add at least one prompt before saving.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
             return false;
         }
 
-
-        var promptsArray = [];
-        for (var j = 0; j < prompts_split.length; j++)
-            promptsArray.push(removeEscapeCharacter(prompts_split[j]));
-        v['prompts'] = promptsArray;
+        v['prompts'] = prompts;
 
         //*** check required checkbox
         var node_required = node.children[i].children[3].children[0].children[0].children[0];
