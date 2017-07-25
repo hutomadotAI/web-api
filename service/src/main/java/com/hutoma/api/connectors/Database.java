@@ -9,7 +9,6 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.*;
 
-import org.apache.commons.lang.LocaleUtils;
 import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
@@ -87,7 +86,7 @@ public class Database {
                              final String devToken, final int planId, final String devId)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("addUser", 10)
+            call.initialise("addUser", 9)
                     .add(username)
                     .add(email)
                     .add(password)

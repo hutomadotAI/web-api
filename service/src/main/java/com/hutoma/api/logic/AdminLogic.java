@@ -16,6 +16,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
+import org.apache.logging.log4j.util.Strings;
+
+import java.net.HttpURLConnection;
+import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -24,33 +28,35 @@ import javax.inject.Inject;
  */
 public class AdminLogic {
 
-    public static final String ADMIN_DEVID_LOG = "admin";
+    private static final String ADMIN_DEVID_LOG = "admin";
     private static final String LOGFROM = "adminlogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
     private final ILogger logger;
     private final AIServices aiServices;
+    private final AIBotStoreLogic botStoreLogic;
 
     @Inject
     public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database,
-                      ILogger logger, AIServices aiServices) {
+                      ILogger logger, AIServices aiServices, final AIBotStoreLogic botStoreLogic) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.logger = logger;
         this.aiServices = aiServices;
+        this.botStoreLogic = botStoreLogic;
     }
 
     public ApiResult createDev(
-            String securityRole,
-            String username,
-            String email,
-            String password,
-            String passwordSalt,
-            String firstName,
-            String lastName,
-            int planId
+            final String securityRole,
+            final String username,
+            final String email,
+            final String password,
+            final String passwordSalt,
+            final String firstName,
+            final String lastName,
+            final int planId
     ) {
 
         try {
@@ -71,12 +77,36 @@ public class AdminLogic {
                         LogMap.map("Email", email));
                 return ApiError.getInternalServerError();
             }
-            this.logger.logUserTraceEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG,
-                    LogMap.map("DevId", devId));
+
+            this.logger.logUserTraceEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, LogMap.map("DevId", devId));
+
+            // auto purchase the default bots
+            autoPurchaseBots(devId);
+
             return new ApiAdmin(devToken, devId).setSuccessStatus("created successfully");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "CreateDev", ADMIN_DEVID_LOG, e);
             return ApiError.getInternalServerError();
+        }
+    }
+
+    private void autoPurchaseBots(final UUID devId) {
+        LogMap logMap = LogMap.map("DevId", devId);
+        List<String> autoPurchaseList = config.getAutoPurchaseBotIds();
+        if (!autoPurchaseList.isEmpty()) {
+            boolean hasErrors = false;
+            for (String botId : autoPurchaseList) {
+                ApiResult result = botStoreLogic.purchaseBot(devId, Integer.parseInt(botId));
+                if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
+                    hasErrors = true;
+                    this.logger.logUserWarnEvent(LOGFROM, String.format("Failed to auto-purchase bot %s", botId),
+                            devId.toString(), logMap.put("ErrorCode", result.getStatus().getCode()));
+                }
+            }
+            if (!hasErrors) {
+                this.logger.logUserTraceEvent(LOGFROM, String.format("Auto-purchased %d bots", autoPurchaseList.size()),
+                        devId.toString(), logMap.put("BotList", Strings.join(autoPurchaseList, ',')));
+            }
         }
     }
 

@@ -6,6 +6,8 @@ required for the next deployment.
 USE `hutoma`;
 
 ALTER TABLE `ai` ADD COLUMN hmac_secret varchar(50)  DEFAULT NULL AFTER `client_token`;
+ALTER TABLE `users` DROP COLUMN `client_token`;
+
 
 DROP PROCEDURE IF EXISTS `getWebhookSecretForBot`;
 DELIMITER ;;
@@ -94,4 +96,16 @@ BEGIN
           AND `ai`.`deleted`=0;
 
   END ;;
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS `addUser`;
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `addUser`(IN `username` VARCHAR(50), IN `email` TINYTEXT, IN `password` VARCHAR(64), IN `password_salt` VARCHAR(250), IN `first_name` VARCHAR(30), IN `last_name` VARCHAR(30), IN `dev_token` VARCHAR(250), IN `plan_id` INT, IN `dev_id` VARCHAR(50))
+    MODIFIES SQL DATA
+BEGIN
+    INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`)
+    VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id);
+  END;;
 DELIMITER ;

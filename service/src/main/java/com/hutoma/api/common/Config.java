@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -139,6 +140,11 @@ public class Config {
 
     public double getRateLimit_Analytics_Frequency() {
         return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_frequency", "5.0"));
+    }
+
+    public List<String> getAutoPurchaseBotIds() {
+        List<String> stringList = getCSList("auto_purchase_botlist");
+        return stringList == null ? Collections.emptyList() : stringList;
     }
 
     public List<UUID> getAimlBotAiids() {

@@ -6,6 +6,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAdmin;
+import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 
 import org.junit.Assert;
@@ -13,13 +14,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -36,6 +38,7 @@ public class TestAdminLogic {
     private Config fakeConfig;
     private ILogger fakeLogger;
     private AdminLogic adminLogic;
+    private AIBotStoreLogic fakeBotstoreLogic;
 
     @Before
     public void setup() {
@@ -44,8 +47,9 @@ public class TestAdminLogic {
         this.fakeDatabase = mock(Database.class);
         this.fakeAiServices = mock(AIServices.class);
         this.fakeLogger = mock(ILogger.class);
+        this.fakeBotstoreLogic = mock(AIBotStoreLogic.class);
         this.adminLogic = new AdminLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger,
-                this.fakeAiServices);
+                this.fakeAiServices, this.fakeBotstoreLogic);
     }
 
     @Test
@@ -133,6 +137,37 @@ public class TestAdminLogic {
         when(this.fakeDatabase.getDevToken(any())).thenReturn(null);
         ApiResult result = this.adminLogic.getDevToken(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testAutoPurchaseBots_botsList_purchasesBots() throws Database.DatabaseException {
+        validKeyDBSuccess();
+        when(this.fakeConfig.getAutoPurchaseBotIds()).thenReturn(Arrays.asList("1", "4"));
+        when(this.fakeBotstoreLogic.purchaseBot(any(), anyInt())).thenReturn(new ApiResult().setSuccessStatus());
+        ApiAdmin result = (ApiAdmin) createDev();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeBotstoreLogic, times(2)).purchaseBot(any(), anyInt());
+        verify(this.fakeBotstoreLogic, times(1)).purchaseBot(result.getDevid(), 1);
+        verify(this.fakeBotstoreLogic, times(1)).purchaseBot(result.getDevid(), 4);
+    }
+
+    @Test
+    public void testAutoPurchaseBots_emptyBotsList_doesnotPurchaseBots() throws Database.DatabaseException {
+        validKeyDBSuccess();
+        when(this.fakeConfig.getAutoPurchaseBotIds()).thenReturn(Collections.emptyList());
+        ApiAdmin result = (ApiAdmin) createDev();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeBotstoreLogic, never()).purchaseBot(any(), anyInt());
+    }
+
+    @Test
+    public void testAutoPurchaseBots_botsList_failPurchase_silentError() throws Database.DatabaseException {
+        validKeyDBSuccess();
+        when(this.fakeBotstoreLogic.purchaseBot(any(), anyInt())).thenReturn(ApiError.getNotFound());
+        when(this.fakeConfig.getAutoPurchaseBotIds()).thenReturn(Collections.singletonList("1"));
+        ApiAdmin result = (ApiAdmin) createDev();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeDatabase, never()).purchaseBot(any(), anyInt());
     }
 
     private void validKeyDBSuccess() throws Database.DatabaseException {
