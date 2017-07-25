@@ -509,11 +509,10 @@ public class ChatLogic {
                 String chatHistory = URLEncoder.encode(sessionData(this.chatId).getHist(), "UTF-8");
                 String currentTopic = URLEncoder.encode(sessionData(this.chatId).getT(), "UTF-8");
                 String q = URLEncoder.encode(message, "UTF-8");
-                URL url = new URL("http://52.44.215.190:8080/nokia/ai/8fa2a7c0-b681-4d5a-9b60-b61babfaf9ce/chat?confidence_threshold=0.55&chat_history=" + chatHistory + "&current_topic=" + currentTopic + "&uid=87142473&q=" + q);
+                URL url = new URL("http://104.155.90.67:5000/similarity?multiprocess=y&aiid=8fa2a7c0-b681-4d5a-9b60-b61babfaf9ce&dev_id=DEMO24869e07-0d0f-4f37-b2fa-c8bf2b7130dd&uid=1&min_p=0.55&history=" + chatHistory + "&topic=" + currentTopic + "&q=" + q);
 
                 connection = (HttpURLConnection)url.openConnection();
                 connection.setRequestMethod("GET");
-                connection.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8QE-jn7xhko6SsWlSUAxF1dffyMTCzPLVANzXYMUgzRdkzRjc90ko7RE3WSLpDSjJHNDY4OUFKVaAAAAAP__.7dc5arNyLKOUk6Df-DPSuddb5HD3enC3OaQGVMYhhys");
                 connection.setReadTimeout(30*1000);
 
                 try (InputStream is = connection.getInputStream()) {
@@ -533,7 +532,7 @@ public class ChatLogic {
                 throw e;
             }
 
-            Map result = (Map)output.get("result");
+            Map result = (Map)output;
             String res = null;
 
             sessionData(this.chatId).setT("");
@@ -558,7 +557,7 @@ public class ChatLogic {
                     results.add("Nokia is informed. Your case number is NA081984827");
                 }
                 else {
-                    double sc = (double)result.get("score");
+                    double sc = Double.parseDouble(String.valueOf(result.get("score")));
                     if (sc > 0.6f) {
                         sessionData(this.chatId).setHist(((String) result.get("answer")).trim());
                     }
