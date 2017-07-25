@@ -214,7 +214,7 @@ function getMultipleElementValues(elementName) {
     var values = [];
     var elements = document.getElementsByName(elementName);
     for (var i = 0; i < elements.length; i++) {
-        values.push(addEscapeCharacter(elements[i].value));
+        values.push(elements[i].value);
     }
     return values;
 }
@@ -222,7 +222,7 @@ function getMultipleElementValues(elementName) {
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
-    var is_mac = (navigator.userAgent.indexOf('Mac OS') != -1);
+    var is_mac = (navigator.userAgent.indexOf('Mac OS') !== -1);
     var is_windows = !is_mac;
     if (is_chrome && is_safari) {
         is_safari = false;
