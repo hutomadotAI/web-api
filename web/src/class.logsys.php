@@ -23,6 +23,7 @@ require_once("console/api/adminApi.php");
 require_once("console/api/signupCodeApi.php");
 require_once("console/common/telemetry.php");
 require_once("console/common/sessionObject.php");
+require_once("console/common/emailUtil.php");
 
 use hutoma\api\adminApi;
 
@@ -500,15 +501,21 @@ class console
                     $api->insertPasswordResetToken($uid, $token);
                     $encodedToken = urlencode($token);
                     $subject = "Hu:toma Password Reset";
-                    $body = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
+                    $htmlBody = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please follow this link :
                       <blockquote>
                         <a href='" . utils::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
-                    if (!utils::sendMail($email, $subject, $body)) {
-                        echo "<p>There was a problem sending the reset e-mail. Please go back and try again.</p>";
-                        self::log_error("reset_pwd", "User '" . $identification . "' attempted to reset password, but email could not be sent");
+                    $textBody = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please enter this link in your browser :\n"
+                        . utils::curPageURL() . "?resetPassToken={$encodedToken}\n\nThanks!\n-the Hu:toma Team";
+
+                    $emailDetails = config::getRegistrationEmailDetails();
+                    $result = emailUtil::sendEmail($email, $emailDetails['from'], $subject, $htmlBody, $textBody);
+                    if (array_key_exists('error', $result['data'])) {
+                        echo "<p>There was a problem sending the password reset e-mail. Please go back and try again.</p>";
+                        self::log_error("reset_pwd", "User '" . $identification . "' attempted to reset password, but email could not be sent. Error:" . $result['data']['error']);
                         return $curStatus;
                     }
+
                     $curStatus = "emailSent"; // E-Mail has been sent
                     self::log_info("reset_pwd", "User '" . $identification . "' successfully requested password reset");
                 }

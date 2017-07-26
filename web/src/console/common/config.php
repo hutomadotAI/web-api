@@ -43,10 +43,14 @@ class config
         return null;
     }
 
+    public static function getSmtp2GoApiToken() {
+        return getenv("SMTP2GO_API_TOKEN");
+    }
+
     public static function getRegistrationEmailDetails() {
         $details = array(
-            "from" => "hello@hutoma.com",
-            "reply-to" => "hello@hutoma.com",
+            "from" => "Hutoma <hello@hutoma.ai>",
+            "reply-to" => "Hutoma <hello@hutoma.ai>",
         );
         return $details;
     }
