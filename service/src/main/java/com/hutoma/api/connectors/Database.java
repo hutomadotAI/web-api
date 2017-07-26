@@ -1016,8 +1016,9 @@ public class Database {
                                      final String integratedResource, final String integratedUserid,
                                      final String data, final String status,
                                      boolean active) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAiIntegration", 8)
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            DatabaseCall call = transaction.getDatabaseCall()
+                    .initialise("updateAiIntegration", 8)
                     .add(aiid)
                     .add(devid)
                     .add(integration.value())
@@ -1026,8 +1027,12 @@ public class Database {
                     .add(data)
                     .add(status)
                     .add(active);
-            return call.executeUpdate() > 0;
+            if (call.executeUpdate() > 0) {
+                transaction.commit();
+                return true;
+            }
         }
+        return false;
     }
 
     public IntegrationRecord getIntegration(final UUID aiid, final UUID devid, final IntegrationType integration)

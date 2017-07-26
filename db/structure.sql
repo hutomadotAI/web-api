@@ -3507,6 +3507,15 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateAiIntegration`(
   IN `in_active` TINYINT)
 BEGIN
 
+IF NOT (NULLIF(`in_integrated_resource`, '') IS NULL) THEN
+	UPDATE `ai_integration` SET 
+		`integrated_resource`='',
+		`active`=0
+        WHERE `ai_integration`.`integration`=`in_integration`
+        AND `ai_integration`.`aiid`!=`in_aiid`
+        AND `in_integrated_resource` = `ai_integration`.`integrated_resource`;
+END IF;
+
 INSERT INTO `ai_integration`
   (`aiid`, `integration`, 
   `integrated_resource`, `integrated_userid`,

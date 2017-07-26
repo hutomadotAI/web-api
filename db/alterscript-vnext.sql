@@ -109,3 +109,50 @@ BEGIN
     VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id);
   END;;
 DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS `updateAiIntegration`;
+DELIMITER $$
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateAiIntegration`(
+  IN `in_aiid` VARCHAR(50),
+  IN `in_devid` VARCHAR(50),
+  IN `in_integration` VARCHAR(50),
+  IN `in_integrated_resource` VARCHAR(250),
+  IN `in_integrated_userid` VARCHAR(250),
+  IN `in_data` JSON,
+  IN `in_status` VARCHAR(1024),
+  IN `in_active` TINYINT)
+BEGIN
+
+IF NOT (NULLIF(`in_integrated_resource`, '') IS NULL) THEN
+	UPDATE `ai_integration` SET 
+		`integrated_resource`='',
+		`active`=0
+        WHERE `ai_integration`.`integration`=`in_integration`
+        AND `ai_integration`.`aiid`!=`in_aiid`
+        AND `in_integrated_resource` = `ai_integration`.`integrated_resource`;
+END IF;
+
+INSERT INTO `ai_integration`
+  (`aiid`, `integration`, 
+  `integrated_resource`, `integrated_userid`,
+  `data`,`status`, `active`,
+  `update_time`)
+(SELECT
+  `in_aiid`, `in_integration`,
+  `in_integrated_resource`,
+  `in_integrated_userid`,
+  `in_data`, `in_status`, `in_active`,
+  now() 
+FROM `ai`
+WHERE `ai`.`aiid` = `in_aiid` AND `ai`.`dev_id` = `in_devid`)
+ON DUPLICATE KEY UPDATE
+	`integrated_resource` = `in_integrated_resource`,
+    `integrated_userid` = `in_integrated_userid`,
+	`data`=`in_data`,
+    `status`=`in_status`,
+    `active`=`in_active`,
+    `update_time`=now();
+  END$$
+DELIMITER ;

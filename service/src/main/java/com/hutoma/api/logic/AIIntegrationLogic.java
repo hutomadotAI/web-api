@@ -115,7 +115,8 @@ public class AIIntegrationLogic {
 
                     // if we have no page token then get a list of available pages
                     // that the user can select
-                    if (Strings.isNullOrEmpty(metadata.getPageToken())) {
+                    if (Strings.isNullOrEmpty(record.getIntegrationResource())
+                            || Strings.isNullOrEmpty(metadata.getPageToken())) {
                         // get nodes and convert to an id->name map
                         Map<String, String> pages = getListOfUserPages(metadata).stream().collect(
                                 Collectors.toMap(FacebookNode::getId, FacebookNode::getName));

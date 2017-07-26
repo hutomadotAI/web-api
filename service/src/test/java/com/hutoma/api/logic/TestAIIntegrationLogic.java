@@ -68,6 +68,7 @@ public class TestAIIntegrationLogic {
         metadata.setPageToken("validpagetoken");
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
         when(this.fakeIntegrationRecord.getIntegrationUserid()).thenReturn("userid");
+        when(this.fakeIntegrationRecord.getIntegrationResource()).thenReturn("pageid");
         when(this.fakeConnector.getUserPages(anyString())).thenReturn(
                 new FacebookNodeList(Collections.singletonList(
                         new FacebookNode(TestDataHelper.ALT_SESSIONID.toString(), "pagename",
