@@ -1018,7 +1018,7 @@ public class Database {
                                      boolean active) throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             DatabaseCall call = transaction.getDatabaseCall()
-                    .initialise("updateAiIntegration", 8)
+                    .initialise("updateAiIntegration", 9)
                     .add(aiid)
                     .add(devid)
                     .add(integration.value())
@@ -1026,7 +1026,8 @@ public class Database {
                     .add(integratedUserid)
                     .add(data)
                     .add(status)
-                    .add(active);
+                    .add(active)
+                    .add("Deactivated because another bot was integrated with this Facebook page.");
             if (call.executeUpdate() > 0) {
                 transaction.commit();
                 return true;

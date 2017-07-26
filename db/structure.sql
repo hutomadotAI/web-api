@@ -3504,12 +3504,14 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `updateAiIntegration`(
   IN `in_integrated_userid` VARCHAR(250),
   IN `in_data` JSON,
   IN `in_status` VARCHAR(1024),
-  IN `in_active` TINYINT)
+  IN `in_active` TINYINT,
+  IN `in_deactivate_message` VARCHAR(250))
 BEGIN
 
 IF NOT (NULLIF(`in_integrated_resource`, '') IS NULL) THEN
 	UPDATE `ai_integration` SET 
 		`integrated_resource`='',
+        `status`=`in_deactivate_message`,
 		`active`=0
         WHERE `ai_integration`.`integration`=`in_integration`
         AND `ai_integration`.`aiid`!=`in_aiid`
