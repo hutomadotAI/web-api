@@ -403,6 +403,8 @@ class console
             $html .= "<input  type='email' class='form-control flat' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
             $html .= "<span class='glyphicon glyphicon-envelope form-control-feedback'></span>";
             $html .= "</div>";
+            $html .= '<div class="form-group " style="padding: 5px 15px 15px 10px;">';
+            $html .= '<div class="g-recaptcha" data-sitekey="6LfUJhMUAAAAAJEn_XfTOR6tOeyecWX6o6i9jqiW"></div></div>';
             $html .= "<p><button name='logSysForgotPass' class='btn btn-primary btn-block btn-flat' type='submit'>Reset Password</button></p>";
             $html .= "</form>";
             echo $html;
@@ -483,6 +485,18 @@ class console
              * Check if username/email is provided and if it's valid and exists
              */
             $identification = $_POST['identification'];
+
+            if(isset($_POST['g-recaptcha-response'])) {
+                $captcha = $_POST['g-recaptcha-response'];
+                $response = json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfUJhMUAAAAAF_JWYab5E1oBqZ-XWtHer5n67xO&response=" . $captcha . "&remoteip=" . $_SERVER['REMOTE_ADDR']), true);
+                if ($response['success'] == false) {
+                    echo 'You did not pass the captcha test';
+                    self::log_error("reset_pwd", "User '" . $identification . "' attempted to reset password, but failed the captcha challenge");
+                    return $curStatus;
+                }
+            }
+
+
             if ($identification == "") {
                 header("Location: reset.php"); /* Redirect browser */
                 self::log_error("reset_pwd", "User without identification");

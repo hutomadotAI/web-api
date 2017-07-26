@@ -33,6 +33,7 @@ include "config.php";
     <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
     <script type="text/javascript" src="../console/scripts/external/iCheck/icheck.min.js"></script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
 </head>
 <body class="web-body" id="body">
 <?php include_once "../console/common/google_analytics.php"; ?>
@@ -42,9 +43,11 @@ include "config.php";
     <div class="register-box">
         <div class="register-box-body"  style="border: 1px solid #d2d6de; background-color: #202020;">
             <p class="login-box-msg"><b>password reset</b></p>
+
             <?php
             hutoma\console::forgotPassword();
             ?>
+
         </div>
     </div>
 </section>
