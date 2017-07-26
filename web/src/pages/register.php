@@ -48,7 +48,7 @@ if(isset($_POST['submit'])) {
             elseif($terms != 'True') {
                 $msg= getErrorMessage('Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.');
             }
-            elseif($invite_code !== null && $api->inviteCodeValid($invite_code) !== 200) {
+            elseif($invite_code !== '' && $api->inviteCodeValid($invite_code) !== 200) {
                 $msg  = getErrorMessage('Your promo code is invalid, please try again.');
             } else {
                 $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
@@ -207,7 +207,7 @@ if(isset($_POST['submit'])) {
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input name="promo_code"  type="invite_code" class="form-control flat" placeholder="Promo Code" value="<?php if (isset($_GET['code'])) echo $_GET['code']?>">
+                <input name="promo_code"  type="text" class="form-control flat" placeholder="Promo Code (Optional)" value="<?php if (isset($_GET['code'])) echo $_GET['code']?>">
                 <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
             </div>
             <div class="row">
