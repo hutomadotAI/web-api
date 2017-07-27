@@ -7,10 +7,9 @@
                 <div class="footer-single">
                     <h6>About</h6>
                     <ul>
-                        <li><a class="new-link" href="https://www.hutoma.ai/about.html">About Hutoma</a></li>
+                        <li><a class="new-link" href="https://www.hutoma.ai/about.php">About Hu:toma</a></li>
                         <li><a class="new-link" href="https://www.hutoma.ai/privacy.pdf">Privacy Policy</a></li>
                         <li><a class="new-link" href="https://www.hutoma.ai/terms_and_conditions.pdf">Terms and Conditions</a></li>
-                        <li><a class="new-link" href="https://www.hutoma.ai/contactus.html">Contact Us</a></li>
                     </ul>
                 </div>
             </div>
@@ -42,7 +41,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <p class="web-copyright text-center">
-                        Copyright © 2017 hu:toma</a>
+                        Copyright © 2017 Hu:toma Artificial Intelligence</a>
                     </p>
                 </div>
             </div>

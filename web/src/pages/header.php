@@ -15,8 +15,7 @@
             <ul id="nav" class="nav navbar-nav">
                 <li><a href="./login.php" class="external">Login</a></li>
                 <li><a href="https://hutoma.ai/index.html#features" class="external">Features  </a></li>
-                <li><a href="https://hutoma.ai/about.html" class="external">About</a></li>
-                <li><a href="https://hutoma.ai/contactus.html" class="external">Contacts</a></li>
+                <li><a href="https://hutoma.ai/about.php" class="external">About</a></li>
             </ul>
         </nav>
     </div>
