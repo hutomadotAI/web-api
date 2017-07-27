@@ -34,8 +34,15 @@ include "config.php";
     <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
     <script type="text/javascript" src="../console/scripts/external/iCheck/icheck.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
+
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+    </style>
 </head>
-<body class="web-body" id="body">
+<body class="web-body hold-transition register-page">
 <?php include_once "../console/common/google_analytics.php"; ?>
 <?php include_once "./header.php"; ?>
 
