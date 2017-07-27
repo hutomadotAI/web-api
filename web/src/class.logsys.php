@@ -418,13 +418,13 @@ class console
              */
             $reset_pass_token = urldecode($_GET['resetPassToken']);
             if (!$api->isPasswordResetTokenValid($reset_pass_token)) {
-                echo "<h3>Error : Wrong/Invalid Token</h3>";
+                echo "<h3>Error</h3> Wrong/Invalid Token";
                 $curStatus = "invalidToken"; // The token user gave was not valid
             } else {
                 /**
                  * The token is valid, display the new password form
                  */
-                $html = "<p>The Token key was Authorized. Now, you can change the password</p>";
+                $html = "<p>The reset token was authorized. You can now proceed with changing your password</p>";
                 $html .= "<form action='{$_SERVER['PHP_SELF']}' method='POST'>";
                 $html .= "<input type='hidden' name='token' value='{$reset_pass_token}' />";
                 $html .= "<label>";
@@ -446,14 +446,19 @@ class console
         } elseif (isset($_POST['logSysForgotPassChange']) && isset($_POST['logSysForgotPassNewPassword']) && isset($_POST['logSysForgotPassRetypedPassword'])) {
             $reset_pass_token = urldecode($_POST['token']);
             if (!$api->isPasswordResetTokenValid($reset_pass_token)) {
-                echo "<h3>Error : Wrong/Invalid Token</h3>";
+                echo "<h3>Error</h3>Wrong/Invalid Token";
                 $curStatus = "invalidToken"; // The token user gave was not valid
             } else {
-                if ($_POST['logSysForgotPassNewPassword'] == "" || $_POST['logSysForgotPassRetypedPassword'] == "") {
-                    echo "<h3>Error : Passwords Fields Left Blank</h3>";
+                $newPassword = $_POST['logSysForgotPassNewPassword'];
+                $newRetypedPassword = $_POST['logSysForgotPassRetypedPassword'];
+                if ($newPassword == "" || $newRetypedPassword == "") {
+                    echo "<h3>Error</h3>Passwords Fields Left Blank";
                     $curStatus = "fieldsLeftBlank";
-                } elseif ($_POST['logSysForgotPassNewPassword'] != $_POST['logSysForgotPassRetypedPassword']) {
-                    echo "<h3>Error : Passwords Don't Match</h3>";
+                } elseif ($newPassword != $newRetypedPassword) {
+                    echo "<h3>Error</h3>Passwords Don't Match";
+                    $curStatus = "passwordDontMatch"; // The new password and retype password submitted didn't match
+                } elseif (!\hutoma\utils::isPasswordComplex($newPassword)) {
+                    echo "<h3>Error</h3>The password needs to be at least 6 characters long, contain at least a digit and both uppercase and lowercase letters";
                     $curStatus = "passwordDontMatch"; // The new password and retype password submitted didn't match
                 } else {
                     /**
@@ -464,7 +469,7 @@ class console
                     self::$user = $api->getUserIdForToken($reset_pass_token);
                     self::$loggedIn = true;
 
-                    if (self::changePassword($_POST['logSysForgotPassNewPassword'])) {
+                    if (self::changePassword($newPassword)) {
                         self::$user = false;
                         self::$loggedIn = false;
 
@@ -474,7 +479,7 @@ class console
                         if (!$api->deletePasswordResetToken($reset_pass_token)) {
                             echo "<h3>Error</h3><p>There was a problem resetting your password.</p>";
                         } else {
-                            echo "<h3>Success : Password Reset Successful</h3><p>You may now login with your new password.</p>";
+                            echo "<h3>Password Reset Successful</h3><p>You may now login with your new password.</p>";
                             $curStatus = "passwordChanged"; // The password was successfully changed
                         }
                     }

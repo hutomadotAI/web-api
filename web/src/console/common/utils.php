@@ -97,4 +97,11 @@ class utils
         $dateTime = new \DateTime($dateStr);
         return $dateTime->format(\DateTime::ATOM);
     }
+
+    public static function isPasswordComplex($password) {
+        return preg_match('/\d+/', $password) == 1               // at least one digit
+            && strlen($password) >= 6                           // minimum length of 6 chars
+            && preg_match('/[a-z]/', $password) == 1    // at least a lowercase letter
+            && preg_match('/[A-Z]/', $password) == 1;   // at least an uppercase letter
+    }
 }
