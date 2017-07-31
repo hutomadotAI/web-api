@@ -24,6 +24,9 @@ if(!isset($_SESSION[$_SESSION['navigation_id']]['user_details'])){
     $_SESSION[$_SESSION['navigation_id']]['user_details']['username'] = $userInfo['username'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_id'] = $userInfo['dev_id'];
     $_SESSION[$_SESSION['navigation_id']]['user_details']['user_joined'] = \hutoma\console::joinedSince($userInfo['created']);
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['created'] = $userInfo['created'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['email'] = $userInfo['email'];
+    $_SESSION[$_SESSION['navigation_id']]['user_details']['id'] = $userInfo['id'];
 
     unset($api);
     unset($userInfo);
