@@ -14,6 +14,7 @@ import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
+import org.apache.commons.lang.SystemUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,9 +27,9 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestBotHelper.*;
-import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -284,8 +285,12 @@ public class TestAIBotstoreLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
+
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
+        // this test will never pass in windows because of posix file system commands
+        org.junit.Assume.assumeTrue(!SystemUtils.IS_OS_WINDOWS);
+
         prepareBotForUpload();
         when(this.fakeDatabase.saveBotIconPath(any(), anyInt(), any())).thenReturn(true);
         ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID_UUID, BOTID, this.botIconStream, this.iconContentDisp);
@@ -294,6 +299,10 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testUploadBotIcon_DBException() throws Database.DatabaseException, IOException {
+
+        // this test will never pass in windows because of posix file system commands
+        org.junit.Assume.assumeTrue(!SystemUtils.IS_OS_WINDOWS);
+
         // We need to use a different botId from the one used in testUploadBotIcon to avoid write
         // contention due to using the same final filename.
         final int botId = BOTID + 1;

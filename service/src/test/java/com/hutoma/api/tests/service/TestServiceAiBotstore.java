@@ -10,6 +10,7 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIBotStoreEndpoint;
 import com.hutoma.api.logic.AIBotStoreLogic;
 
+import org.apache.commons.lang.SystemUtils;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -30,7 +31,8 @@ import javax.ws.rs.core.Response;
 
 import static com.hutoma.api.common.TestBotHelper.BOTID;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
 /**
@@ -163,6 +165,10 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     @Test
     public void testUploadBotIcon() throws Database.DatabaseException, IOException {
+
+        // this test will never pass in windows because of posix file system commands
+        org.junit.Assume.assumeTrue(!SystemUtils.IS_OS_WINDOWS);
+
         when(this.fakeDatabase.saveBotIconPath(any(), anyInt(), any())).thenReturn(true);
         AiBot bot = new AiBot(SAMPLEBOT);
         bot.setDevId(DEVID);
