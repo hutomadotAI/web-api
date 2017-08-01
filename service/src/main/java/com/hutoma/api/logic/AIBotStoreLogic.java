@@ -27,11 +27,14 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
+
+import static java.nio.file.attribute.PosixFilePermission.*;
 
 /**
  * AI Bot Store logic.
@@ -225,6 +228,9 @@ public class AIBotStoreLogic {
             String destFilename = String.format("%d.%s", botId, extension);
             File destFile = new File(this.config.getBotIconStoragePath(), destFilename);
             Files.copy(tempFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            // Make sure the file permissions are set to ALL-READ
+            Files.setPosixFilePermissions(destFile.toPath(),
+                    EnumSet.of(OWNER_WRITE, OWNER_READ, GROUP_READ, OTHERS_READ));
 
             this.database.saveBotIconPath(devId, botId, destFilename);
             this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devIdString, logMap);
