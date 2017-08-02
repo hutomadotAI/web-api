@@ -34,6 +34,7 @@ public class TestFacebookChatHandler {
 
     private static final String PAGEID = "pageid";
     private static final String MESSAGE = "message";
+    private static final String POSTBACK = "postback";
     private static final String SENDER = "sender";
     private static final String PAGETOKEN = "validpagetoken";
     private static final String ANSWER = "answer";
@@ -51,6 +52,16 @@ public class TestFacebookChatHandler {
     private ChatLogic fakeChatLogic;
 
     private ChatResult chatResult;
+
+    private String fbPostback = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\","
+            + "\"time\":1498224298036,\"messaging\":[{\"sender\":{\"id\":\"" + SENDER + "\"},"
+            + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854,\"postback\":"
+            + "{\"title\":\"TITLE_FOR_THE_CTA\",\"payload\":\"" + POSTBACK + "\",\"referral\":{\"ref\":"
+            + "\"USER_DEFINED_REFERRAL_PARAM\",\"source\":\"SHORTLINK\",\"type\":\"OPEN_THREAD\"}}}]}]}";
+
+    private String fbUnknown = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\","
+            + "\"time\":1498224298036,\"messaging\":[{\"sender\":{\"id\":\"" + SENDER + "\"},"
+            + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854}]}]}";
 
     @Before
     public void setup() throws Database.DatabaseException, FacebookException, ChatLogic.ChatFailedException {
@@ -200,6 +211,32 @@ public class TestFacebookChatHandler {
         ChatOutput chatOutput = makeChatCall(answer, hookResponse);
         Assert.assertEquals(ANSWER, chatOutput.text);
         Assert.assertNull(chatOutput.richContentNode);
+    }
+
+    @Test
+    public void testChat_Postback() throws Exception {
+        FacebookNotification notification = (FacebookNotification)
+                this.serializer.deserialize(this.fbPostback, FacebookNotification.class);
+        this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
+        this.chatHandler.call();
+        verify(this.fakeChatLogic, times(1)).chatFacebook(
+                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(POSTBACK), anyString());
+        verify(this.fakeConnector, times(1)).sendFacebookMessage(
+                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
+                any(), any());
+    }
+
+    @Test
+    public void testChat_UnknownMessagingType() throws Exception {
+        FacebookNotification notification = (FacebookNotification)
+                this.serializer.deserialize(this.fbUnknown, FacebookNotification.class);
+        this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
+        this.chatHandler.call();
+        verify(this.fakeChatLogic, never()).chatFacebook(
+                Matchers.eq(TestDataHelper.AIID), any(), any(), anyString());
+        verify(this.fakeConnector, never()).sendFacebookMessage(
+                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
+                any(), any());
     }
 
     private ChatOutput makeChatCall(final String answer, final WebHookResponse hookResponse) throws Exception {

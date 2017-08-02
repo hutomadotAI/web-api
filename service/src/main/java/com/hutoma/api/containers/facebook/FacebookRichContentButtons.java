@@ -19,7 +19,8 @@ public class FacebookRichContentButtons {
     public enum ButtonType {
         web_url,
         phone_number,
-        element_share
+        element_share,
+        postback
     }
 
 }

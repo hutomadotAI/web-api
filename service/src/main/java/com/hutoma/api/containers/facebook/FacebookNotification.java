@@ -26,6 +26,8 @@ public class FacebookNotification {
         private long timestamp;
         @SerializedName("message")
         private Message message;
+        @SerializedName("postback")
+        private Postback postback;
 
         public Messaging(final String sender, final String recipient, final String message) {
             this.sender = new Sender();
@@ -56,6 +58,26 @@ public class FacebookNotification {
             return Strings.nullToEmpty(this.message.text);
         }
 
+        public boolean isMessage() {
+            return this.message != null;
+        }
+
+        public boolean isPostback() {
+            return this.postback != null;
+        }
+
+        public String getPostbackPayload() {
+            return Strings.nullToEmpty(this.postback.payload);
+        }
+
+        public String getPostbackTitle() {
+            return Strings.nullToEmpty(this.postback.title);
+        }
+
+        public String getPostbackReferral() {
+            return (this.postback.referral == null) ? "" :
+                    Strings.nullToEmpty(this.postback.referral.referrer);
+        }
 
         static class Sender {
             @SerializedName("id")
@@ -74,6 +96,24 @@ public class FacebookNotification {
             public long seq;
             @SerializedName("text")
             public String text;
+        }
+
+        static class Postback {
+            @SerializedName("title")
+            public String title;
+            @SerializedName("payload")
+            public String payload;
+            @SerializedName("referral")
+            public Referral referral;
+        }
+
+        static class Referral {
+            @SerializedName("ref")
+            public String referrer;
+            @SerializedName("source")
+            public String source;
+            @SerializedName("type")
+            public String referralType;
         }
     }
 

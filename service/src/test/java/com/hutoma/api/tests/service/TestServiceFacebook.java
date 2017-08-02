@@ -27,6 +27,12 @@ public class TestServiceFacebook extends ServiceTestBase {
             + "\"timestamp\":1497884978787,\"message\":{\"mid\":\"mid.$cAAZ8W3FgXCZi8iw2Y1cwObp3IKnj\","
             + "\"seq\":128,\"text\":\"random user chat\"}}]}]}";
 
+    String fbPostback = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\","
+            + "\"time\":1498224298036,\"messaging\":[{\"sender\":{\"id\":\"1707037399308287\"},"
+            + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854,\"postback\":"
+            + "{\"title\":\"TITLE_FOR_THE_CTA\",\"payload\":\"hook\",\"referral\":{\"ref\":"
+            + "\"USER_DEFINED_REFERRAL_PARAM\",\"source\":\"SHORTLINK\",\"type\":\"OPEN_THREAD\"}}}]}]}";
+
     @Test
     public void testFBWebhookVerifyOk() {
         when(this.fakeConfig.getFacebookVerifyToken()).thenReturn(FBVERIFY);
@@ -56,6 +62,14 @@ public class TestServiceFacebook extends ServiceTestBase {
         final Response response = target(BASEPATH)
                 .request()
                 .post(Entity.json(this.fbMessage));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testFBPostback() {
+        final Response response = target(BASEPATH)
+                .request()
+                .post(Entity.json(this.fbPostback));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 

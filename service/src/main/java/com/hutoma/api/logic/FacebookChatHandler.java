@@ -74,17 +74,41 @@ public class FacebookChatHandler implements Callable {
                 .put("Origin", "facebook");
         try {
 
+            String userQuery = null;
+
+            // common fields
             logMap = logMap
                     .put("Facebook_Sender", this.messaging.getSender())
                     .put("Facebook_Recipient", this.messaging.getRecipient())
-                    .put("Facebook_Sequence", this.messaging.getMessageSeq())
-                    .put("Facebook_Question", this.messaging.getMessageText())
                     .put("Facebook_Timestamp", this.messaging.getTimestamp());
+
+            if (this.messaging.isMessage()) {
+                // incoming message type event
+                userQuery = this.messaging.getMessageText();
+                logMap.add("Facebook_Sequence", this.messaging.getMessageSeq());
+                logMap.add("Facebook_Question", userQuery);
+                logMap.add("Facebook_WebhookType", "message");
+            } else if (this.messaging.isPostback()) {
+                // postback event type
+                userQuery = this.messaging.getPostbackPayload();
+                logMap.add("Facebook_WebhookType", "postback");
+                logMap.add("Facebook_Question", userQuery);
+                logMap.add("Facebook_Referrer", this.messaging.getPostbackReferral());
+                logMap.add("Facebook_ClickTitle", this.messaging.getPostbackTitle());
+            } else {
+                // some other type that we don't handle or care about
+                logMap.add("Facebook_WebhookType", "unknown");
+            }
 
             // the pageid that the message was sent to i.e. the page intgerated to the bot
             String recipientPageId = this.messaging.getRecipient();
             // the Facebook user who sent the message (we need to respond to this user)
             String messageOriginatorId = this.messaging.getSender();
+
+            if (Strings.isNullOrEmpty(userQuery)) {
+                this.logger.logDebug(LOGFROM, String.format("facebook webhook with no usable payload"), logMap);
+                return null;
+            }
 
             // look for and load the integration info from the database
             IntegrationRecord integrationRecord = this.database.getIntegrationResource(
@@ -133,7 +157,8 @@ public class FacebookChatHandler implements Callable {
                 // TODO: load chat state and check sequence number
 
                 // call the chat logic to get a response
-                Pair<String, FacebookRichContentNode> response = getChatResponse(integrationRecord, chatID);
+                Pair<String, FacebookRichContentNode> response = getChatResponse(
+                        integrationRecord, chatID, userQuery);
 
                 try {
                     // note the start time
@@ -225,13 +250,14 @@ public class FacebookChatHandler implements Callable {
                 acceptedText, acceptedRichContent);
     }
 
-    private Pair<String, FacebookRichContentNode> getChatResponse(final IntegrationRecord integrationRecord, final UUID chatID) {
+    private Pair<String, FacebookRichContentNode> getChatResponse(final IntegrationRecord integrationRecord,
+                                                                  final UUID chatID, final String userQuery) {
         // call chat logic to create a response
         try {
             // if everything went well then get the answer
             ChatResult chatResult = this.chatLogicProvider.get().chatFacebook(
                     integrationRecord.getAiid(), integrationRecord.getDevid(),
-                    this.messaging.getMessageText(), chatID.toString());
+                    userQuery, chatID.toString());
 
             // was there a webhook response with rich content for facebook?
             WebHookResponse webhookResponse = chatResult.getWebhookResponse();
@@ -244,4 +270,5 @@ public class FacebookChatHandler implements Callable {
             return new Pair<>(e.getApiError().getStatus().getInfo(), null);
         }
     }
+
 }
