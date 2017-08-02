@@ -294,6 +294,7 @@ public class TrainingLogic {
                 case AI_TRAINING_STOPPED:   // fallthrough
                 case AI_TRAINING_COMPLETE:  // fallthrough
                 case AI_TRAINING_QUEUED:    // fallthrough
+                case AI_ERROR:              // fallthrough
                 case AI_UNDEFINED:
                     try {
                         String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
@@ -302,8 +303,10 @@ public class TrainingLogic {
                                     devidString, logMap);
                             return ApiError.getNotFound("There is no training data.");
                         }
-                        // We only support AI_UNDEFINED when it's an intent-only AI (no training file)
-                        if (ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED && ai.trainingFileUploaded()) {
+                        // We only support AI_UNDEFINED when it's an intent-only AI (no training file), or when
+                        // there's a backend error, to allow re-training
+                        if ((ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED
+                                || ai.getSummaryAiStatus() == TrainingStatus.AI_ERROR) && ai.trainingFileUploaded()) {
                             this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
                                     devidString, logMap);
                             return ApiError.getBadRequest("Invalid training status - make sure you have uploaded a "
