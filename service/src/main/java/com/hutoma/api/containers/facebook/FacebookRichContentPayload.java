@@ -16,7 +16,7 @@ public class FacebookRichContentPayload {
     private String text;
 
     @SerializedName("buttons")
-    private List<FacebookRichContentButtons> buttons;
+    private List<FacebookRichContentButton> buttons;
 
     @SerializedName("elements")
     private List<FacebookRichContentElement> elements;
@@ -27,8 +27,11 @@ public class FacebookRichContentPayload {
     @SerializedName("image_aspect_ratio")
     private String imageAspectRatio;
 
+    @SerializedName("top_element_style")
+    private ElementStyle topElementStyle;
+
     FacebookRichContentPayload(final String payloadUrl, final TemplateType templateType, final String text,
-                               final List<FacebookRichContentButtons> buttons,
+                               final List<FacebookRichContentButton> buttons,
                                final List<FacebookRichContentElement> elements,
                                final Boolean sharable, final String imageAspectRatio) {
         this.payloadUrl = payloadUrl;
@@ -44,7 +47,7 @@ public class FacebookRichContentPayload {
         return templateType;
     }
 
-    public List<FacebookRichContentButtons> getButtons() {
+    public List<FacebookRichContentButton> getButtons() {
         return buttons;
     }
 
@@ -61,4 +64,10 @@ public class FacebookRichContentPayload {
         generic,
         list
     }
+
+    public enum ElementStyle {
+        large,
+        compact
+    }
+
 }

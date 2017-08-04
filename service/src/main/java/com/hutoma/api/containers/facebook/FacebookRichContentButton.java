@@ -2,7 +2,7 @@ package com.hutoma.api.containers.facebook;
 
 import com.google.gson.annotations.SerializedName;
 
-public class FacebookRichContentButtons {
+public class FacebookRichContentButton {
 
     @SerializedName("type")
     public ButtonType buttonType;
@@ -16,8 +16,8 @@ public class FacebookRichContentButtons {
     @SerializedName("payload")
     public String payload;
 
-    FacebookRichContentButtons(final ButtonType buttonType, final String title,
-                               final String buttonUrl, final String payload) {
+    FacebookRichContentButton(final ButtonType buttonType, final String title,
+                              final String buttonUrl, final String payload) {
         this.buttonType = buttonType;
         this.title = title;
         this.buttonUrl = buttonUrl;

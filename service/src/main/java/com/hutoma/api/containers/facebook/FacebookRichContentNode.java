@@ -26,8 +26,8 @@ public class FacebookRichContentNode {
      * @return
      */
     public static final FacebookRichContentNode createButtonTemplate(final String title, final List<String> buttons) {
-        List<FacebookRichContentButtons> buttonNodes = buttons.stream().map(key -> new FacebookRichContentButtons(
-                FacebookRichContentButtons.ButtonType.postback, key, null, key))
+        List<FacebookRichContentButton> buttonNodes = buttons.stream().map(key -> new FacebookRichContentButton(
+                FacebookRichContentButton.ButtonType.postback, key, null, key))
                 .collect(Collectors.toList());
         FacebookRichContentNode node = new FacebookRichContentNode(RichContentType.template,
                 new FacebookRichContentPayload(null, FacebookRichContentPayload.TemplateType.button,

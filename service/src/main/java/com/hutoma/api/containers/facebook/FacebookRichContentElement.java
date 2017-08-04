@@ -20,7 +20,7 @@ public class FacebookRichContentElement {
     private TemplateDefaultAction defaultAction;
 
     @SerializedName("buttons")
-    private List<FacebookRichContentButtons> buttons;
+    private List<FacebookRichContentButton> buttons;
 
     public enum ActionType {
         web_url
