@@ -639,6 +639,8 @@ public class ChatLogic {
                 ? variable.getTimesPrompted()
                 : 0;
         chatResult.setAnswer(variable.getPrompts().get(pos));
+        // keep a record of what this response is a prompt for
+        chatResult.setPromptForIntentVariable(variable.getLabel());
         // and decrement the number of prompts
         variable.setTimesPrompted(variable.getTimesPrompted() + 1);
         variable.setRequested(true);

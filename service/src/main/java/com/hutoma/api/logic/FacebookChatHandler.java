@@ -4,21 +4,24 @@ import com.google.common.base.Strings;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookNotification;
+import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.IntegrationType;
-import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.containers.sub.MemoryVariable;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
@@ -35,7 +38,6 @@ public class FacebookChatHandler implements Callable {
     private FacebookConnector facebookConnector;
     private JsonSerializer serializer;
     private Tools tools;
-
     private FacebookNotification.Messaging messaging;
 
     @Inject
@@ -157,15 +159,13 @@ public class FacebookChatHandler implements Callable {
                 // TODO: load chat state and check sequence number
 
                 // call the chat logic to get a response
-                Pair<String, FacebookRichContentNode> response = getChatResponse(
-                        integrationRecord, chatID, userQuery);
+                List<FacebookResponseSegment> response = getChatResponse(integrationRecord, userQuery, chatID, logMap);
 
                 try {
                     // note the start time
                     long startTime = this.tools.getTimestamp();
                     // send the response back to Facebook
-                    sendChatResponseToFacebook(integrationRecord, metadata, messageOriginatorId,
-                            response.getA(), response.getB());
+                    sendChatResponseToFacebook(metadata, messageOriginatorId, response);
 
                     // chat worked. save the status
                     status = "Chat active.";
@@ -219,56 +219,130 @@ public class FacebookChatHandler implements Callable {
     }
 
     /***
-     * Send a response back to Facebook
-     * @param integrationRecord
+     * Send a response back to Facebook in segments
      * @param metadata
      * @param messageOriginatorId
-     * @param responseText
-     * @param richContent
+     * @param response
      * @throws FacebookException
      */
-    private void sendChatResponseToFacebook(final IntegrationRecord integrationRecord,
-                                            final FacebookIntegrationMetadata metadata,
+    private void sendChatResponseToFacebook(final FacebookIntegrationMetadata metadata,
                                             final String messageOriginatorId,
-                                            final String responseText,
-                                            final FacebookRichContentNode richContent) throws FacebookException {
-        String acceptedText = null;
-        FacebookRichContentNode acceptedRichContent = null;
-
-        if ((richContent != null) && (richContent.getContentType() != null)) {
-            // if we accepted the rich-content
-            acceptedRichContent = richContent;
-        } else {
-            // otherwise, use the text version
-            // and truncate the message to be smaller than the limit
-            acceptedText = responseText.length() > FB_MESSAGE_SIZE_LIMIT ?
-                    responseText.substring(0, FB_MESSAGE_SIZE_LIMIT) : responseText;
+                                            final List<FacebookResponseSegment> response) throws FacebookException {
+        // send a message for each segment
+        for (FacebookResponseSegment segment : response) {
+            this.facebookConnector.sendFacebookMessage(messageOriginatorId, metadata.getPageToken(), segment);
         }
-
-        // send to facebook
-        this.facebookConnector.sendFacebookMessage(messageOriginatorId, metadata.getPageToken(),
-                acceptedText, acceptedRichContent);
     }
 
-    private Pair<String, FacebookRichContentNode> getChatResponse(final IntegrationRecord integrationRecord,
-                                                                  final UUID chatID, final String userQuery) {
-        // call chat logic to create a response
+    private List<FacebookResponseSegment> getChatResponse(final IntegrationRecord integrationRecord,
+                                                          final String userQuery, final UUID chatID,
+                                                          final LogMap logMap) {
+        List<FacebookResponseSegment> responseList = new ArrayList<>();
         try {
+            // call chat logic to create a response
             // if everything went well then get the answer
             ChatResult chatResult = this.chatLogicProvider.get().chatFacebook(
                     integrationRecord.getAiid(), integrationRecord.getDevid(),
                     userQuery, chatID.toString());
 
-            // was there a webhook response with rich content for facebook?
-            WebHookResponse webhookResponse = chatResult.getWebhookResponse();
-            FacebookRichContentNode richContent = (webhookResponse == null) ? null : webhookResponse.getFacebookNode();
+            // is this a prompt to fulfill an intent?
+            String intentPrompted = chatResult.getPromptForIntentVariable();
 
-            return new Pair<>(chatResult.getAnswer(), richContent);
+            // if so (and some other criteria), generate rich content
+            boolean createdContentFromIntentPrompt =
+                    expandIntentPrompt(chatResult, responseList, intentPrompted);
+
+            // otherwise, do we have rich content from a webhook?
+            boolean webhookResponseSentRichContent =
+                    chatResult.getWebhookResponse() != null
+                            && chatResult.getWebhookResponse().getFacebookNode() != null;
+
+            logMap.add("Facebook_RichIntentPrompt", createdContentFromIntentPrompt);
+            logMap.add("Facebook_RichWebhook", webhookResponseSentRichContent);
+
+            if (!createdContentFromIntentPrompt) {
+                if (webhookResponseSentRichContent) {
+                    // add the rich content
+                    responseList.add(new FacebookResponseSegment.FacebookResponseRichSegment(
+                            chatResult.getWebhookResponse().getFacebookNode()));
+                } else {
+                    // or add the text
+                    createTextResponse(responseList, chatResult.getAnswer());
+                }
+            }
 
         } catch (ChatLogic.ChatFailedException e) {
             // otherwise get a status message
-            return new Pair<>(e.getApiError().getStatus().getInfo(), null);
+            responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(
+                    e.getApiError().getStatus().getInfo()));
         }
+        return responseList;
+    }
+
+    /***
+     * Process a text message to Facebook, generating some response segments
+     * @param responseList
+     * @param answer
+     */
+    private void createTextResponse(final List<FacebookResponseSegment> responseList, final String answer) {
+        String acceptedText = answer.length() > FB_MESSAGE_SIZE_LIMIT ?
+                answer.substring(0, FB_MESSAGE_SIZE_LIMIT) : answer;
+        responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(acceptedText));
+    }
+
+    /***
+     * Check whether this is an intent prompt
+     * and if the conditions are right to expand this into a button template.
+     * If so, create the rich-content response and return true
+     * @param chatResult
+     * @param responseList
+     * @param intentPrompted
+     * @return true if we expanded the prompt to rich content
+     */
+    private boolean expandIntentPrompt(final ChatResult chatResult,
+                                       final List<FacebookResponseSegment> responseList, final String intentPrompted) {
+
+        // is this an intent prompt?
+        if (Strings.isNullOrEmpty(intentPrompted)) {
+            return false;
+        }
+        // load the memory variable
+        MemoryVariable memoryVariable = chatResult.getIntents().get(0)
+                .getVariablesMap().get(intentPrompted);
+
+        // if this is a system prompt then bail
+        if (memoryVariable == null || memoryVariable.isSystem()) {
+            return false;
+        }
+
+        // load the keys
+        List<String> keys = memoryVariable.getEntityKeys();
+
+        // we need at least one, but not more than 12
+        if (keys.size() == 0 || keys.size() > 12) {
+            return false;
+        }
+
+        boolean firstSegment = true;
+        LinkedList<String> entityKeys = new LinkedList<>(keys);
+        // create a segment for each group of three buttons
+        while (!entityKeys.isEmpty()) {
+            ArrayList<String> buttons = new ArrayList<>();
+            // every three buttons
+            while (!entityKeys.isEmpty() && buttons.size() < 3) {
+                buttons.add(entityKeys.removeFirst());
+            }
+            // create a rich segment
+            FacebookRichContentNode node =
+                    FacebookRichContentNode.createButtonTemplate(
+                            firstSegment ? chatResult.getAnswer() : "...",
+                            buttons);
+            responseList.add(new FacebookResponseSegment.FacebookResponseRichSegment(node));
+            firstSegment = false;
+        }
+
+        // signal that we generated rich content
+        return true;
     }
 
 }

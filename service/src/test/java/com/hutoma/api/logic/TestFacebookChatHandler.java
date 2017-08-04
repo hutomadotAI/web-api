@@ -11,10 +11,14 @@ import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
+import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.facebook.FacebookRichContentNode;
+import com.hutoma.api.containers.facebook.FacebookRichContentPayload;
 import com.hutoma.api.containers.facebook.FacebookToken;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHookResponse;
 
 import org.joda.time.DateTime;
@@ -23,7 +27,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import javax.inject.Provider;
 
@@ -39,6 +46,7 @@ public class TestFacebookChatHandler {
     private static final String PAGETOKEN = "validpagetoken";
     private static final String ANSWER = "answer";
     private static final String WEBHOOK_ANSWER = "webhook answer";
+    private static final String LABEL = "label";
     private FacebookChatHandler chatHandler;
     private Config fakeConfig;
     private JsonSerializer serializer;
@@ -127,15 +135,15 @@ public class TestFacebookChatHandler {
     @Test
     public void testChat_OK_NotTruncated() throws Exception {
         String answer = String.join("", Collections.nCopies(640, "A"));
-        ChatOutput chatOutput = makeChatCall(answer, null);
-        Assert.assertEquals(answer, chatOutput.text);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null);
+        Assert.assertEquals(answer, chatOutput.get(0).getText());
     }
 
     @Test
     public void testChat_OK_Truncated() throws Exception {
         String answer = String.join("", Collections.nCopies(1000, "A"));
-        ChatOutput chatOutput = makeChatCall(answer, null);
-        Assert.assertEquals(640, chatOutput.text.length());
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null);
+        Assert.assertEquals(640, chatOutput.get(0).getText().length());
     }
 
     @Test
@@ -145,7 +153,7 @@ public class TestFacebookChatHandler {
                 Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(MESSAGE), anyString());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
-                any(), any());
+                any());
     }
 
     @Test
@@ -188,29 +196,10 @@ public class TestFacebookChatHandler {
                 "   }\n" +
                 " }\n" +
                 " ", WebHookResponse.class);
-        ChatOutput chatOutput = makeChatCall(answer, hookResponse);
-        Assert.assertNull(chatOutput.text);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
         Assert.assertEquals(FacebookRichContentNode.RichContentType.image,
-                chatOutput.richContentNode.getContentType());
-    }
-
-    @Test
-    public void testChat_RichContentInvalid_SendTextInstead() throws Exception {
-        String answer = ANSWER;
-        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(" {\n" +
-                "   \"text\": \"" + WEBHOOK_ANSWER + "\",\n" +
-                "   \"facebook\": {\n" +
-                "     \"type\": \"badtext\",\n" +
-                "     \"payload\": {\n" +
-                "       \"url\": \"http://someimage.com/0.jpg\"\n" +
-                "     }\n" +
-                "   }\n" +
-                " }\n" +
-                " ", WebHookResponse.class);
-
-        ChatOutput chatOutput = makeChatCall(answer, hookResponse);
-        Assert.assertEquals(ANSWER, chatOutput.text);
-        Assert.assertNull(chatOutput.richContentNode);
+                chatOutput.get(0).getRichContentNode().getContentType());
     }
 
     @Test
@@ -222,8 +211,7 @@ public class TestFacebookChatHandler {
         verify(this.fakeChatLogic, times(1)).chatFacebook(
                 Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(POSTBACK), anyString());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
-                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
-                any(), any());
+                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
     }
 
     @Test
@@ -235,25 +223,109 @@ public class TestFacebookChatHandler {
         verify(this.fakeChatLogic, never()).chatFacebook(
                 Matchers.eq(TestDataHelper.AIID), any(), any(), anyString());
         verify(this.fakeConnector, never()).sendFacebookMessage(
-                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
-                any(), any());
+                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
     }
 
-    private ChatOutput makeChatCall(final String answer, final WebHookResponse hookResponse) throws Exception {
+    @Test
+    public void testChat_IntentExpansion_OK() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, Arrays.asList("A", "B", "C"), false);
+        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
+        Assert.assertEquals(FacebookRichContentNode.RichContentType.template,
+                chatOutput.get(0).getRichContentNode().getContentType());
+        Assert.assertEquals(FacebookRichContentPayload.TemplateType.button,
+                chatOutput.get(0).getRichContentNode().getPayload().getTemplateType());
+        Assert.assertEquals(3,
+                chatOutput.get(0).getRichContentNode().getPayload().getButtons().size());
+    }
+
+    @Test
+    public void testChat_IntentExpansion_OneButton() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, Arrays.asList("A"), false);
+        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
+        Assert.assertEquals(1,
+                chatOutput.get(0).getRichContentNode().getPayload().getButtons().size());
+    }
+
+    @Test
+    public void testChat_IntentExpansion_FourButtons() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, Arrays.asList("A", "B", "C", "D"), false);
+        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
+        Assert.assertTrue(chatOutput.get(1).isRichContentSegment());
+        Assert.assertEquals(3,
+                chatOutput.get(0).getRichContentNode().getPayload().getButtons().size());
+        Assert.assertEquals(1,
+                chatOutput.get(1).getRichContentNode().getPayload().getButtons().size());
+    }
+
+    @Test
+    public void testChat_IntentExpansion_TwelveButtons() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, Arrays.asList("A", "B", "C", "D", "E", "F",
+                        "G", "H", "I", "J", "K", "L"), false);
+        Assert.assertEquals(4, chatOutput.size());
+    }
+
+    @Test
+    public void testChat_IntentExpansion_TooManyButtons() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, Arrays.asList("A", "B", "C", "D", "E", "F",
+                        "G", "H", "I", "J", "K", "L", "X"), false);
+        Assert.assertEquals(1, chatOutput.size());
+        Assert.assertFalse(chatOutput.get(0).isRichContentSegment());
+    }
+
+    @Test
+    public void testChat_IntentExpansion_NoKeys() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, new ArrayList<>(), false);
+        Assert.assertEquals(1, chatOutput.size());
+        Assert.assertFalse(chatOutput.get(0).isRichContentSegment());
+    }
+
+    @Test
+    public void testChat_IntentExpansion_SystemEntity() throws Exception {
+        String answer = ANSWER;
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
+                LABEL, Arrays.asList("A", "B", "C"), true);
+        Assert.assertEquals(1, chatOutput.size());
+        Assert.assertFalse(chatOutput.get(0).isRichContentSegment());
+    }
+
+    private List<FacebookResponseSegment> makeChatCall(
+            final String answer, final WebHookResponse hookResponse) throws Exception {
+        return makeChatCall(answer, hookResponse, null, null, null, false);
+    }
+
+    private List<FacebookResponseSegment> makeChatCall(
+            final String answer, final WebHookResponse hookResponse,
+            String intentName, String intentLabel, List<String> keys, boolean isSystemEntity) throws Exception {
+
         this.chatResult = new ChatResult(TestDataHelper.ALT_SESSIONID, 0.3,
                 MESSAGE, answer, 3.296, hookResponse);
-        final ChatOutput chatOutput = new ChatOutput();
+        if (intentName != null) {
+            this.chatResult.setIntents(
+                    Collections.singletonList(new MemoryIntent(
+                            intentName, TestDataHelper.AIID, TestDataHelper.SESSIONID,
+                            Collections.singletonList(
+                                    new MemoryVariable(intentName, keys, isSystemEntity, intentLabel))
+                            , false)));
+            this.chatResult.setPromptForIntentVariable(intentLabel);
+        }
+        List<FacebookResponseSegment> chatOutput = new ArrayList<>();
         doAnswer(invocation -> {
-            chatOutput.text = invocation.getArgument(2);
-            chatOutput.richContentNode = invocation.getArgument(3);
+            chatOutput.add(invocation.getArgument(2));
             return true;
-        }).when(this.fakeConnector).sendFacebookMessage(anyString(), anyString(), any(), any());
+        }).when(this.fakeConnector).sendFacebookMessage(anyString(), anyString(), any());
         this.chatHandler.call();
         return chatOutput;
-    }
-
-    public class ChatOutput {
-        public String text;
-        public FacebookRichContentNode richContentNode;
     }
 }

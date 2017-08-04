@@ -27,6 +27,27 @@ public class FacebookRichContentPayload {
     @SerializedName("image_aspect_ratio")
     private String imageAspectRatio;
 
+    FacebookRichContentPayload(final String payloadUrl, final TemplateType templateType, final String text,
+                               final List<FacebookRichContentButtons> buttons,
+                               final List<FacebookRichContentElement> elements,
+                               final Boolean sharable, final String imageAspectRatio) {
+        this.payloadUrl = payloadUrl;
+        this.templateType = templateType;
+        this.text = text;
+        this.buttons = buttons;
+        this.elements = elements;
+        this.sharable = sharable;
+        this.imageAspectRatio = imageAspectRatio;
+    }
+
+    public TemplateType getTemplateType() {
+        return templateType;
+    }
+
+    public List<FacebookRichContentButtons> getButtons() {
+        return buttons;
+    }
+
     /***
      * ref: https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
      */

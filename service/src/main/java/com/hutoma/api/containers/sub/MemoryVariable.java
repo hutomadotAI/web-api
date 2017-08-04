@@ -32,15 +32,6 @@ public class MemoryVariable {
     @SerializedName("requested")
     private boolean requested;
 
-    public boolean isRequested() {
-        return requested;
-    }
-
-    public void setRequested(final boolean beingRequested) {
-        this.requested = beingRequested;
-    }
-
-
     /**
      * Ctor.
      * @param name       the name
@@ -50,6 +41,15 @@ public class MemoryVariable {
         this.name = name;
         this.entityKeys = entityKeys;
     }
+
+    public MemoryVariable(final String name, final List<String> entityKeys,
+                          final boolean isSystem, final String label) {
+        this.name = name;
+        this.entityKeys = entityKeys;
+        this.isSystem = isSystem;
+        this.label = label;
+    }
+
 
     public MemoryVariable(final String name, final String currentValue, final boolean isMandatory,
                           final List<String> entityKeys, final List<String> prompts, final int timesToPrompt,
@@ -64,6 +64,14 @@ public class MemoryVariable {
         this.persistent = persistent;
         this.isSystem = isSystem;
         this.label = label;
+    }
+
+    public boolean isRequested() {
+        return requested;
+    }
+
+    public void setRequested(final boolean beingRequested) {
+        this.requested = beingRequested;
     }
 
     /**
@@ -175,19 +183,19 @@ public class MemoryVariable {
     }
 
     /**
-     * Gets whether this is a system variable or a custom one.
-     * @return whether this is a system variable or a custom one
-     */
-    public boolean isSystem() {
-        return this.isSystem;
-    }
-
-    /**
      * Sets the prompts.
      * @param prompts the prompts
      */
     public void setPrompts(List<String> prompts) {
         this.prompts = prompts;
+    }
+
+    /**
+     * Gets whether this is a system variable or a custom one.
+     * @return whether this is a system variable or a custom one
+     */
+    public boolean isSystem() {
+        return this.isSystem;
     }
 
     /**

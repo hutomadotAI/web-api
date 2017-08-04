@@ -16,11 +16,18 @@ public class FacebookRichContentButtons {
     @SerializedName("payload")
     public String payload;
 
+    FacebookRichContentButtons(final ButtonType buttonType, final String title,
+                               final String buttonUrl, final String payload) {
+        this.buttonType = buttonType;
+        this.title = title;
+        this.buttonUrl = buttonUrl;
+        this.payload = payload;
+    }
+
     public enum ButtonType {
         web_url,
         phone_number,
         element_share,
         postback
     }
-
 }

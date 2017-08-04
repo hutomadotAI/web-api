@@ -29,6 +29,9 @@ public class ChatResult {
     // result of a webhook call if one was made
     private transient WebHookResponse webHookResponse;
 
+    // the label of the intent variable that we are prompting (or null if we are not)
+    private transient String promptForIntentVariable;
+
     // the actual bot ID that provided the result
     private transient UUID aiid;
     private transient boolean resetConversation;
@@ -160,5 +163,13 @@ public class ChatResult {
 
     public WebHookResponse getWebhookResponse() {
         return this.webHookResponse;
+    }
+
+    public String getPromptForIntentVariable() {
+        return this.promptForIntentVariable;
+    }
+
+    public void setPromptForIntentVariable(final String promptForIntentVariable) {
+        this.promptForIntentVariable = promptForIntentVariable;
     }
 }

@@ -9,6 +9,7 @@ import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
+import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.facebook.FacebookToken;
 
@@ -101,12 +102,11 @@ public class FacebookConnector {
      * Reply to a message on behalf of a Facebook page
      * @param toFacebookID
      * @param pageToken
-     * @param textMessage
-     * @param richContent
+     * @param responseSegment
      * @throws FacebookException
      */
     public void sendFacebookMessage(String toFacebookID, String pageToken,
-                                    String textMessage, FacebookRichContentNode richContent)
+                                    FacebookResponseSegment responseSegment)
             throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
@@ -116,13 +116,15 @@ public class FacebookConnector {
                 .queryParam("access_token", pageToken);
         // generate the structure
         SendMessage sendMessage = new SendMessage(toFacebookID);
-        sendMessage.setText(textMessage);
-        sendMessage.setRichContent(richContent);
-
+        if (responseSegment.isRichContentSegment()) {
+            sendMessage.setRichContent(responseSegment.getRichContentNode());
+        } else {
+            sendMessage.setText(responseSegment.getText());
+        }
 
         // send the serialized payload to facebook
         webCall(target, RequestMethod.POST, Entity.json(this.jsonSerializer.serialize(sendMessage)),
-                config.getFacebookSendAPITimeout());
+                this.config.getFacebookSendAPITimeout());
     }
 
     /***
@@ -136,7 +138,7 @@ public class FacebookConnector {
                 .path("me")
                 .queryParam("fields", "id,name")
                 .queryParam("access_token", token.getAccessToken());
-        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
+        String body = webCall(target, RequestMethod.GET, this.config.getFacebookGraphAPITimeout());
         return (FacebookNode) this.jsonSerializer.deserialize(body, FacebookNode.class);
     }
 
@@ -153,7 +155,7 @@ public class FacebookConnector {
                 .path("accounts")
                 .queryParam("fields", "id,name,perms,access_token")
                 .queryParam("access_token", accessToken);
-        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
+        String body = webCall(target, RequestMethod.GET, this.config.getFacebookGraphAPITimeout());
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
@@ -162,7 +164,7 @@ public class FacebookConnector {
                 .path(userid)
                 .path("permissions")
                 .queryParam("access_token", accessToken);
-        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
+        String body = webCall(target, RequestMethod.GET, this.config.getFacebookGraphAPITimeout());
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
@@ -179,7 +181,7 @@ public class FacebookConnector {
                 .path("me")
                 .path("permissions")
                 .queryParam("access_token", accessToken);
-        webCall(target, RequestMethod.DELETE, config.getFacebookGraphAPITimeout());
+        webCall(target, RequestMethod.DELETE, this.config.getFacebookGraphAPITimeout());
     }
 
     /***
@@ -217,7 +219,7 @@ public class FacebookConnector {
                 .path(pageId)
                 .path("subscribed_apps")
                 .queryParam("access_token", pageAccessToken);
-        webCall(target, requestMethod, config.getFacebookGraphAPITimeout());
+        webCall(target, requestMethod, this.config.getFacebookGraphAPITimeout());
     }
 
     /***
@@ -237,7 +239,7 @@ public class FacebookConnector {
      * @throws FacebookException
      */
     private FacebookToken getFacebookToken(final JerseyWebTarget target) throws FacebookException {
-        String body = webCall(target, RequestMethod.GET, config.getFacebookGraphAPITimeout());
+        String body = webCall(target, RequestMethod.GET, this.config.getFacebookGraphAPITimeout());
         try {
             // try to get a token
             FacebookToken token = (FacebookToken)
@@ -261,7 +263,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    private String webCall(JerseyWebTarget target, RequestMethod requestmethod,  int readTimeout) throws FacebookException {
+    private String webCall(JerseyWebTarget target, RequestMethod requestmethod, int readTimeout) throws FacebookException {
         return webCall(target, requestmethod, Entity.text(""), readTimeout);
     }
 
