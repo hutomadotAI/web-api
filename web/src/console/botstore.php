@@ -36,7 +36,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
 
 <div class="wrapper">
     <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
+            <?php include './dynamic/header.html.php'; ?>
     </header>
 
     <!-- ================ MENU CONSOLE ================= -->
@@ -45,12 +45,54 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
             <p id="sidebarmenu"></p>
         </section>
     </aside>
-
     <!-- ================ PAGE CONTENT ================= -->
+
+
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
+                    <div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
+                        <div class="box-header with-border">
+                            <div class="box-title"><b>Hu:toma Botstore - transfer skills to your AI in few clicks</b></div>
+                        </div>
+
+                        <div class="box-body" id="boxNewAIBotstore">
+                            <div class="alert alert-dismissable flat alert-info no-margin" id="containerMsgAlertNewAiBotstore"
+                                 style="padding-bottom: 25px;">
+                                <span id="msgAlertNewAiBotstore">
+                                    <dd>
+                                         The Hu:toma botstore allows you to purchase skills that you can then transfer to your AI. Mix and match bots together to create new functionalities. Bots purchased here will appear in the skill section when you <a href="newAI.php">create a new AI</a>.
+                                         <br/>
+                                         
+                                    </dd>
+                                </span>
+                           </div>
+                        </div>
+
+                        <div class="box-footer">
+                            <span>
+                                If you’re stuck check out our <a data-toggle="collapse" href="#collapseCreateBotVideoTutorial">video tutorial</a> or email <a href='mailto:support@hutoma.ai?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.ai</a> for an invite to our slack channel.
+                            </span>
+                            <p></p>
+
+                            <div id="collapseCreateBotVideoTutorial" class="panel-collapse collapse">
+                                <div class="box-body flat no-padding center-block" style="max-width: 700px;margin-auto;">
+                                    <div class="overlay center-block">
+                                        <div class="embed-responsive embed-responsive-16by9" id="videoCreateBot">
+                                            <iframe
+                                                src="//www.youtube.com/embed/uFj73npjhbk?controls=1&hd=1&enablejsapi=1"
+                                                frameborder="0" allowfullscreen>
+                                            </iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
                     <?php
                     $innerPage = "";
                     if (isset($botId)) {
