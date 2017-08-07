@@ -266,7 +266,7 @@ unset($session);
                 <div class="modal-body" style="margin:10px;">
                     <p></p>
                     <h4><b>Skill successfully added!</b></h4>
-                    <p>You can now augment your bots with this skill. Try for example creating a new AI. You will see this skill appear during the creation flow. </p>
+                    <p>You can now add this skill to your bots. Click "Create new Bot" on the home page. This skill will then be available for selection. </p>
 
                 </div>
                 <div class="modal-footer">
