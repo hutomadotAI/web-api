@@ -159,7 +159,9 @@ public class FacebookChatHandler implements Callable {
                 // TODO: load chat state and check sequence number
 
                 // call the chat logic to get a response
-                List<FacebookResponseSegment> response = getChatResponse(integrationRecord, userQuery, chatID, logMap);
+                List<FacebookResponseSegment> response = getChatResponse(integrationRecord,
+                        messageOriginatorId,
+                        userQuery, chatID, logMap);
 
                 try {
                     // note the start time
@@ -235,6 +237,7 @@ public class FacebookChatHandler implements Callable {
     }
 
     private List<FacebookResponseSegment> getChatResponse(final IntegrationRecord integrationRecord,
+                                                          final String facebookOriginatingUser,
                                                           final String userQuery, final UUID chatID,
                                                           final LogMap logMap) {
         List<FacebookResponseSegment> responseList = new ArrayList<>();
@@ -243,7 +246,7 @@ public class FacebookChatHandler implements Callable {
             // if everything went well then get the answer
             ChatResult chatResult = this.chatLogicProvider.get().chatFacebook(
                     integrationRecord.getAiid(), integrationRecord.getDevid(),
-                    userQuery, chatID.toString());
+                    userQuery, chatID.toString(), facebookOriginatingUser);
 
             // is this a prompt to fulfill an intent?
             String intentPrompted = chatResult.getPromptForIntentVariable();

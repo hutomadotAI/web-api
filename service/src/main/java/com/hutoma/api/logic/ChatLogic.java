@@ -75,35 +75,22 @@ public class ChatLogic {
         this.chatStateHandler = chatStateHandler;
     }
 
-    private static class ChatRequestInfo {
-        private UUID devId;
-        private UUID aiid;
-        private UUID chatId;
-        private String question;
-        private Map<String, String> clientVariables;
-
-        ChatRequestInfo(final UUID devId, final UUID aiid, final UUID chatId, final String question,
-                        final Map<String, String> clientVariables) {
-            this.devId = devId;
-            this.aiid = aiid;
-            this.chatId = chatId;
-            this.question = question;
-            this.clientVariables = clientVariables;
-        }
-    }
-
     public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
                           Map<String, String> clientVariables) {
         try {
-            return chatCall(ChatOrigin.API, aiid, devId, question, chatId, clientVariables).setSuccessStatus();
+            this.telemetryMap = LogMap.map("ChatOrigin", "API/Console");
+            return chatCall(aiid, devId, question, chatId, clientVariables).setSuccessStatus();
         } catch (ChatFailedException fail) {
             return fail.getApiError();
         }
     }
 
-    public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId)
+    public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId,
+                                   final String facebookOriginatingUser)
             throws ChatFailedException {
-        return chatCall(ChatOrigin.API, aiid, devId, question, chatId, null).getResult();
+        this.telemetryMap = LogMap.map("ChatOrigin", "Facebook")
+                .put("QFromFacebookUser", facebookOriginatingUser);
+        return chatCall(aiid, devId, question, chatId, null).getResult();
     }
 
     public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId) {
@@ -138,8 +125,7 @@ public class ChatLogic {
         return apiChat.setSuccessStatus();
     }
 
-    private ApiChat chatCall(ChatOrigin chatOrigin,
-                             final UUID aiid, final UUID devId, final String question, final String chatId,
+    private ApiChat chatCall(final UUID aiid, final UUID devId, final String question, final String chatId,
                              final Map<String, String> clientVariables)
             throws ChatFailedException {
 
@@ -157,7 +143,7 @@ public class ChatLogic {
         apiChat.setTimestamp(startTime);
 
         // Add telemetry for the request
-        this.telemetryMap = LogMap.map("DevId", devId)
+        this.telemetryMap.put("DevId", devId)
                 .put("AIID", aiid)
                 .put("Topic", this.chatState.getTopic())
                 .put("History", this.chatState.getHistory())
@@ -796,9 +782,21 @@ public class ChatLogic {
         return result;
     }
 
-    public enum ChatOrigin {
-        API,
-        Facebook
+    private static class ChatRequestInfo {
+        private UUID devId;
+        private UUID aiid;
+        private UUID chatId;
+        private String question;
+        private Map<String, String> clientVariables;
+
+        ChatRequestInfo(final UUID devId, final UUID aiid, final UUID chatId, final String question,
+                        final Map<String, String> clientVariables) {
+            this.devId = devId;
+            this.aiid = aiid;
+            this.chatId = chatId;
+            this.question = question;
+            this.clientVariables = clientVariables;
+        }
     }
 
     static class IntentException extends Exception {

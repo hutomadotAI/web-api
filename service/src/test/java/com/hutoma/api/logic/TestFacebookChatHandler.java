@@ -96,7 +96,7 @@ public class TestFacebookChatHandler {
         this.fakeChatLogicProvider = mock(Provider.class);
         this.fakeChatLogic = mock(ChatLogic.class);
         when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
-        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenAnswer(invocation -> this.chatResult);
         this.chatHandler = new FacebookChatHandler(this.fakeDatabase, this.fakeLogger,
                 this.serializer, this.fakeConnector, this.fakeChatLogicProvider, mock(Tools.class));
@@ -150,7 +150,7 @@ public class TestFacebookChatHandler {
     public void testChat_OK() throws Exception {
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(MESSAGE), anyString());
+                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(MESSAGE), anyString(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
                 any());
@@ -209,7 +209,7 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(POSTBACK), anyString());
+                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(POSTBACK), anyString(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
     }
@@ -221,7 +221,7 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, never()).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), any(), anyString());
+                Matchers.eq(TestDataHelper.AIID), any(), any(), anyString(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
     }
