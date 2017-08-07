@@ -35,13 +35,10 @@
     }
 </script>
 
-<div class="box-header with-border unselectable">
-    <i class="fa fa-sliders text-success"></i>
-    <div class="box-title"><b>General Info</b></div>
-</div>
 
 <form role="form">
-    <div class="box-body unselectable">
+
+    <div class="modal-content bordered" style="padding:10px;background-color: #202020">
         <div class="row">
             <div class="col-md-6">
                 <?php include './dynamic/input.name.html.php'; ?>

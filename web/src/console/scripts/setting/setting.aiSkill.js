@@ -1,6 +1,5 @@
-if (document.getElementById("btnAiSkillCancel") !== null) {
-    document.getElementById("btnAiSkillCancel").addEventListener("click", cancelAISkill);
-}
+document.getElementById('btnAiSkillCancel').style.visibility = 'hidden';
+
 if (document.getElementById("btnAiSkillSave") !== null) {
     document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkill);
 }
@@ -63,7 +62,7 @@ function updateAISkill() {
 
             switch (statusCode['status']['code']) {
                 case 200:
-                    msgAlertAiSkill(ALERT.PRIMARY.value, 'Your Bot has been updated with the selected skills.');
+                    msgAlertAiSkill(ALERT.PRIMARY.value, 'Your Bot has been updated with the selected skills. Go to the <a href=\'/console/trainingAI.php\'>training</a> page to test it.');
                     activeAiSkillButtons();
                     //TODO probably make difference to refresh data on redirection ( use POST not simple for messaging and cards BOT )
                     callback(jsonString);
@@ -129,7 +128,6 @@ function cancelAISkill() {
 
 function activeAiSkillButtons() {
     document.getElementById('btnAiSkillSave').removeAttribute('disabled');
-    document.getElementById('btnAiSkillCancel').removeAttribute('disabled');
 }
 
 function deactiveAiSkillButtons() {

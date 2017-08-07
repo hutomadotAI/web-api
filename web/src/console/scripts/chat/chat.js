@@ -282,22 +282,22 @@ function copyJsonToClipboard(elementId) {
         try {
             copysuccess = document.execCommand('cut');
         } catch (e) {
-            $('#btnJSON').attr('data-original-title', 'not supported').tooltip('show');
-            $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+            $('#btnJSON').attr('data-original-title', 'Not supported.').tooltip('show');
+            $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
         }
         if (!copysuccess) {
-            $('#btnJSON').attr('data-original-title', 'not supported').tooltip('show');
-            $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+            $('#btnJSON').attr('data-original-title', 'Not supported.').tooltip('show');
+            $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
         }
         else {
-            $('#btnJSON').attr('data-original-title', 'Copied!!!').tooltip('show');
-            $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+            $('#btnJSON').attr('data-original-title', 'Copied.').tooltip('show');
+            $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
         }
         document.body.removeChild(aux);
     }
     else {
-        $('#btnJSON').attr('data-original-title', 'nothing to copy').tooltip('show');
-        $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+        $('#btnJSON').attr('data-original-title', 'Nothing to copy.').tooltip('show');
+        $('#btnJSON').attr('data-original-title', 'Copy to clipboard.');
     }
 }
 
