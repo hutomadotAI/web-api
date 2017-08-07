@@ -15,6 +15,7 @@ function purchaseBotFromBotcardDetail() {
             switch (statusCode) {
                 case 200:
                     btnFromBuyToPurchased();
+                    $('#store_purchase_confirmation_popup').modal('show');
                     break;
                 default:
                     document.getElementById('msgAlertBotcardBox').style.display = 'block';

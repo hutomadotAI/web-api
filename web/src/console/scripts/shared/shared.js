@@ -185,13 +185,15 @@ function toggleAddBotSkill(node, optionFlow, botId) {
 function btnFromBuyToPurchased() {
     var wHTML = '';
     var nodeBtn = document.getElementById('btnBuyBot');
-    wHTML += ('<b>Bot purchased </b>');
+    wHTML += ('<b>Skill purchased </b>');
     wHTML += ('<span class="fa fa-check-circle-o"></span>');
     nodeBtn.setAttribute('data-toggle', '');
     nodeBtn.setAttribute('data-target', '');
     nodeBtn.innerHTML = wHTML;
     nodeBtn.setAttribute('onClick','');
     nodeBtn.className = 'btn btn-primary pull-right flat';
+    
+
 }
 
 function buildCategoryURIparameter(category){
