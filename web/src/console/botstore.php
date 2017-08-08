@@ -62,7 +62,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                                  style="padding-bottom: 25px;">
                                 <span id="msgAlertNewAiBotstore">
                                     <dd>
-                                         The Hu:toma botstore allows you to purchase skills that you can then transfer to your AI. Mix and match bots together to create new functionalities. Bots purchased here will appear in the skill section when you <a href="newAI.php">create a new AI</a>.
+                                         The Hu:toma botstore allows you to purchase skills that you can then transfer to your bot. Mix and match bots together to create new functionalities. Bots purchased here will appear in the skill section when you <a href="newAI.php">create a new AI</a>.
                                          <br/>
                                          
                                     </dd>
