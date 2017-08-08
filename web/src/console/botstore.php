@@ -54,7 +54,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                 <div class="col-md-12">
                     <div class="box box-solid box-clean flat no-shadow unselectable" id="newAicontent">
                         <div class="box-header with-border">
-                            <div class="box-title"><b>Hu:toma Botstore - transfer skills to your AI in few clicks</b></div>
+                            <div class="box-title"><b>Hu:toma Botstore - transfer skills to your bot in few clicks</b></div>
                         </div>
 
                         <div class="box-body" id="boxNewAIBotstore">
@@ -62,7 +62,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
                                  style="padding-bottom: 25px;">
                                 <span id="msgAlertNewAiBotstore">
                                     <dd>
-                                         The Hu:toma botstore allows you to purchase skills that you can then transfer to your bot. Mix and match bots together to create new functionalities. Bots purchased here will appear in the skill section when you <a href="newAI.php">create a new AI</a>.
+                                         The Hu:toma botstore allows you to purchase skills that you can then transfer to your bot. Mix and match bots together to create new functionalities. Bots purchased here will appear in the skill section when you <a href="newAI.php">create a new bot</a>.
                                          <br/>
                                          
                                     </dd>
