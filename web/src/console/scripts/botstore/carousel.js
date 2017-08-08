@@ -129,9 +129,12 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more, 
                         wHTML += ('</div>');
                     }
                     else {
-                        wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
+                        wHTML += ('<a href="/console/botstore.php?botId=' + botId + '&category=' + adjustURIEscapingCategoryValue(botCategory) + '" target="_top">');
+                        wHTML += ('<div class="card-price pull-right">');
                         wHTML += (botPrice + ' &#8364');
                         wHTML += ('</div>');
+                        wHTML += ('</a>');
+
                     }
                     break;
                 case DRAW_BOTCARDS.BOTSTORE_FLOW.value:  // botstore showed in BOTSTORE
@@ -142,9 +145,11 @@ function showCarousel(botstoreCategorizedItems, category, optionFlow, see_more, 
                         wHTML += ('</div>');
                     }
                     else {
-                        wHTML += ('<div class="card-price pull-right"' + dataBuyBot + '>');
+                        wHTML += ('<a class href="/console/botstore.php?botId=' + botId + '&category=' + adjustURIEscapingCategoryValue(botCategory) + '" target="_top">');
+                        wHTML += ('<div class="card-price pull-right">');
                         wHTML += (botPrice + ' &#8364');
                         wHTML += ('</div>');
+                        wHTML += ('</a>');
                     }
                     break;
                 default:

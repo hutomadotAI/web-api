@@ -33,7 +33,7 @@ unset($session);
             $metadata = $botstoreItem['item']['metadata'];
             $developer = $botstoreItem['item']['developer'];
 
-            $wHtml = '<title>hu:toma | Botstore | ' . $metadata['name'] . '</title>';
+            $wHtml = '<title>Hu:toma | Botstore | ' . $metadata['name'] . '</title>';
             $wHtml .= '<meta name="description" content="Hutoma Botstore,';
             $wHtml .= 'Bot name=' . $metadata['name'] . ',';
             $wHtml .= 'Category=' . $metadata['category'] . ',';
@@ -136,7 +136,7 @@ unset($session);
                     </div>
                     <div class="col-xs-4 bot-button">
                         <button class="btn btn-success pull-right flat" id="btnBuyBot" style="width:135px;">
-                            <b>Use Bot </b>
+                            <b>Add Skill</b>
                             <span class="fa fa-arrow-circle-right"></span>
                         </button>
                     </div>
@@ -257,6 +257,25 @@ unset($session);
     </div>
 
 
+
+    <!-- ================ PURCHASE CONFIRMATION POPUP ================= -->
+
+    <div class="modal fade" id="store_purchase_confirmation_popup"  role="dialog" style="padding-top:100px;">
+        <div class="modal-dialog flat">
+            <div class="modal-content bot-shadow  bot-payment flat" >
+                <div class="modal-body" style="margin:10px;">
+                    <p></p>
+                    <h4><b>Skill successfully added!</b></h4>
+                    <p>You can now add this skill to your bots. Click "Create new Bot" on the home page. This skill will then be available for selection. </p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ================ BOT MODAL POPUP BOT PURCHASE ================= -->
 
     <div class="modal fade" id="buyBot" role="dialog" style="padding-top:100px;">
@@ -321,7 +340,7 @@ unset($session);
                                 <!--purchased button-->
                                 <button class="btn btn-success pull-right flat" id="btnPayment" data-dismiss="modal"
                                         data-flow="" style="width:130px;">
-                                    <b>Use Bot </b>
+                                    <b>Add Skill</b>
                                     <span class="fa fa-arrow-circle-right"></span>
                                 </button>
                             </div>
