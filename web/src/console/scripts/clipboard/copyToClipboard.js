@@ -15,8 +15,8 @@ function copyToClipboard(elementId) {
             copysuccess = document.execCommand('cut');
         } catch (e) {
             
-            $('#' + elementId + 'tooltip').attr('data-original-title', 'not supported').tooltip('show');
-            $('#' + elementId + 'tooltip').attr('data-original-title', 'copy to clipboard');
+            $('#' + elementId + 'tooltip').attr('data-original-title', 'Not supported.').tooltip('show');
+            $('#' + elementId + 'tooltip').attr('data-original-title', 'Copy to clipboard.');
         }
 
         if (!copysuccess) {
@@ -32,12 +32,12 @@ function copyToClipboard(elementId) {
                 console.log(e);
             });
 
-            $('#' + elementId + 'tooltip').attr('data-original-title', 'Press ⌘-C to copy').tooltip('show');
-            $('#' + elementId + 'tooltip').attr('data-original-title', 'copy to clipboard');
+            $('#' + elementId + 'tooltip').attr('data-original-title', 'Press ⌘-C to copy.').tooltip('show');
+            $('#' + elementId + 'tooltip').attr('data-original-title', 'Copy to clipboard.');
         }
         else {
-            $('#' + elementId + 'tooltip').attr('data-original-title', 'Copied!!!').tooltip('show');
-            $('#' + elementId + 'tooltip').attr('data-original-title', 'copy to clipboard');
+            $('#' + elementId + 'tooltip').attr('data-original-title', 'Copied.').tooltip('show');
+            $('#' + elementId + 'tooltip').attr('data-original-title', 'Copy to clipboard.');
         }
         document.body.removeChild(aux);
     }

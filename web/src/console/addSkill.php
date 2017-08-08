@@ -73,14 +73,16 @@ function getAiidOrRedirect()
     <div class="content-wrapper">
         <section class="content">
 
-
-                <div class="tab-content" style="padding-bottom:0px;">
-                    <div class="tab-pane active" id="page_general">
-                        <?php include './dynamic/settings.content.general.html.php'; ?>
+        
+            <!-- BOT LINK TAB -->
+            <div class="tab-content" style="padding-bottom:0px;">
+            <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
+                <div class="row" style="background-color: #434343;">
+                    <div class="col-lg-12" style="background-color: #434343; padding:5px;">
+                        <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
                     </div>
-         </div>
-
-
+                </div>
+            </div>
 
         </section>
     </div>

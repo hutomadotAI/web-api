@@ -1,5 +1,6 @@
-<div class="box-header with-border unselectable">
-    <i class="fa fa-shopping-cart text-green"></i>
+<div class="modal-content bordered" style="background-color: #202020">
+    <div class="box-header with-border unselectable">
+    <i class="fa fa-plus text-purple"></i>
     <div class="box-title"><b>Add skills to your bot</b></div>
     <a data-toggle="collapse"  href="#collapseInfoDomains">
         <div class=" pull-right">more info
@@ -14,7 +15,7 @@
             <section class="content-info">
                 <div class="box-body">
                     <dl class="dl-horizontal no-margin" style="text-align:justify">
-                        You can add new capabilities to your bot by selecting pre-trained bots from our botstore.
+                        You can add new capabilities to your bot by selecting pre-trained bots from our Botstore.
                    </dl>
                 </div>
             </section>
@@ -28,11 +29,14 @@
     <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertAiSkill" style="margin-bottom:0px;">
         <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
         <i class="icon fa fa-check" id="iconAlertAiSkill"></i>
-        <span id="msgAlertAiSkill">You can power up your bot by combining and mixing existing bots from out botstore.</span>
+        <span id="msgAlertAiSkill">You can power up your bot by mixing and matching bots from our <a href="/console/botstore.php">Botstore</a>.</span>
     </div>
 </div>
 
-<div class="box-footer unselectable">
-    <button style="width:100px" type="submit" id="btnAiSkillCancel" class="btn btn-primary flat pull-left">cancel</button>
-    <button style="width:100px" type="submit" id="btnAiSkillSave" class="btn btn-success flat pull-right">save</button>
-</div>
+
+    <div class="box-footer unselectable">
+        <button style="width:100px" type="submit" id="btnAiSkillCancel" class="btn btn-primary flat pull-left">cancel</button>
+        <button style="width:100px" type="submit" id="btnAiSkillSave" class="btn btn-success flat pull-right">save</button>
+    </div>
+
+    </div>
