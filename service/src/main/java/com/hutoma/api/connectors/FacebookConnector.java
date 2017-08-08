@@ -108,23 +108,28 @@ public class FacebookConnector {
     public void sendFacebookMessage(String toFacebookID, String pageToken,
                                     FacebookResponseSegment responseSegment)
             throws FacebookException {
-        JerseyWebTarget target = getGraphApiTarget()
-                .path("me")
-                .path("messages")
-                .queryParam("client_id", this.config.getFacebookAppId())
-                .queryParam("client_secret", this.config.getFacebookAppSecret())
-                .queryParam("access_token", pageToken);
-        // generate the structure
         SendMessage sendMessage = new SendMessage(toFacebookID);
         if (responseSegment.isRichContentSegment()) {
             sendMessage.setRichContent(responseSegment.getRichContentNode());
         } else {
             sendMessage.setText(responseSegment.getText());
         }
-
-        // send the serialized payload to facebook
-        webCall(target, RequestMethod.POST, Entity.json(this.jsonSerializer.serialize(sendMessage)),
-                this.config.getFacebookSendAPITimeout());
+        sendFacebookMeMessages(toFacebookID, pageToken, sendMessage);
+    }
+    
+    /***
+     * Send a Facebook sender-action on behalf of the responding bot
+     * This can be typing-on, typing-off or mark-seen
+     * @param toFacebookID
+     * @param pageToken
+     * @param sendAction
+     * @throws FacebookException
+     */
+    public void sendFacebookSenderAction(String toFacebookID, String pageToken,
+                                         SendMessage.SenderAction sendAction)
+            throws FacebookException {
+        SendMessage sendMessage = new SendMessage(toFacebookID, sendAction);
+        sendFacebookMeMessages(toFacebookID, pageToken, sendMessage);
     }
 
     /***
@@ -204,6 +209,22 @@ public class FacebookConnector {
      */
     public void pageSubscribe(final String pageId, final String pageAccessToken) throws FacebookException {
         subscribedApps(pageId, pageAccessToken, RequestMethod.POST);
+    }
+
+    private void sendFacebookMeMessages(String toFacebookID, String pageToken,
+                                        SendMessage sendMessage)
+            throws FacebookException {
+        // set up the parameters
+        JerseyWebTarget target = getGraphApiTarget()
+                .path("me")
+                .path("messages")
+                .queryParam("client_id", this.config.getFacebookAppId())
+                .queryParam("client_secret", this.config.getFacebookAppSecret())
+                .queryParam("access_token", pageToken);
+
+        // send the serialized payload to facebook
+        webCall(target, RequestMethod.POST, Entity.json(this.jsonSerializer.serialize(sendMessage)),
+                this.config.getFacebookSendAPITimeout());
     }
 
     /***
@@ -337,11 +358,19 @@ public class FacebookConnector {
         private Recipient recipient;
         @SerializedName("message")
         private MessagePayload message;
+        @SerializedName("sender_action")
+        private SenderAction senderAction;
 
         public SendMessage(final String recipient) {
             this.recipient = new Recipient();
             this.recipient.id = recipient;
             this.message = new MessagePayload();
+        }
+
+        public SendMessage(final String recipient, final SenderAction senderAction) {
+            this.recipient = new Recipient();
+            this.recipient.id = recipient;
+            this.senderAction = senderAction;
         }
 
         public void setText(final String text) {
@@ -350,6 +379,12 @@ public class FacebookConnector {
 
         public void setRichContent(FacebookRichContentNode content) {
             this.message.richContent = content;
+        }
+
+        public enum SenderAction {
+            typing_on,
+            typing_off,
+            mark_seen
         }
 
         private static class Recipient {

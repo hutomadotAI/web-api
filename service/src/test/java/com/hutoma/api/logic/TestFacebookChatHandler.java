@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
+import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
@@ -224,6 +225,38 @@ public class TestFacebookChatHandler {
                 Matchers.eq(TestDataHelper.AIID), any(), any(), anyString(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
+    }
+
+    @Test
+    public void testSenderActions_OK() throws Exception {
+        this.chatHandler.call();
+        verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
+                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
+        verify(this.fakeConnector, never()).sendFacebookSenderAction(anyString(),
+                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
+    }
+
+    @Test
+    // chat error still sends a message back to facebook so doesn't need typing_off
+    public void testSenderActions_ChatError() throws Exception {
+        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+                .thenThrow(new ChatLogic.ChatFailedException(ApiError.getInternalServerError()));
+        this.chatHandler.call();
+        verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
+                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
+        verify(this.fakeConnector, never()).sendFacebookSenderAction(anyString(),
+                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
+    }
+
+    @Test
+    public void testSenderActions_SendError() throws Exception {
+        doThrow(new FacebookException("test"))
+                .when(this.fakeConnector).sendFacebookMessage(any(), any(), any());
+        this.chatHandler.call();
+        verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
+                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
+        verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
+                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
     }
 
     @Test

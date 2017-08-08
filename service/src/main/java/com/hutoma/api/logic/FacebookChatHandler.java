@@ -72,6 +72,7 @@ public class FacebookChatHandler implements Callable {
     @Override
     public Void call() throws Exception {
 
+        boolean facebookThinksWeAreTyping = false;
         LogMap logMap = LogMap.map("Op", "chat")
                 .put("Origin", "facebook");
         try {
@@ -151,50 +152,67 @@ public class FacebookChatHandler implements Callable {
                 status = "Bad Facebook integration config";
             } else {
 
-                // hash the sender ID and the aiid together to get a chatID
-                // that is unique to each user-page pair
-                UUID chatID = generateChatId(integrationRecord.getAiid(), messageOriginatorId);
+                // tell Facebook that we are typing ... while the servers are thinking
+                this.facebookConnector.sendFacebookSenderAction(messageOriginatorId,
+                        metadata.getPageToken(),
+                        FacebookConnector.SendMessage.SenderAction.typing_on);
+                facebookThinksWeAreTyping = true;
 
-                // TODO: rate limiting
-                // TODO: load chat state and check sequence number
+                try {
+                    // hash the sender ID and the aiid together to get a chatID
+                    // that is unique to each user-page pair
+                    UUID chatID = generateChatId(integrationRecord.getAiid(), messageOriginatorId);
 
-                // call the chat logic to get a response
+                    // TODO: rate limiting
+                    // TODO: load chat state and check sequence number
+
+                    // call the chat logic to get a response
                 List<FacebookResponseSegment> response = getChatResponse(integrationRecord,
                         messageOriginatorId,
                         userQuery, chatID, logMap);
 
-                try {
-                    // note the start time
-                    long startTime = this.tools.getTimestamp();
-                    // send the response back to Facebook
-                    sendChatResponseToFacebook(metadata, messageOriginatorId, response);
+                    try {
+                        // note the start time
+                        long startTime = this.tools.getTimestamp();
 
-                    // chat worked. save the status
-                    status = "Chat active.";
-                    chatSuccess = true;
+                        // send the response back to Facebook
+                        sendChatResponseToFacebook(metadata, messageOriginatorId, response);
 
-                    // how long did we wait for sendapi to complete?
-                    double duration = (double) (this.tools.getTimestamp() - startTime) / 1000.0;
+                        facebookThinksWeAreTyping = false;
 
-                    // log the message that we just processed
-                    this.logger.logDebug(LOGFROM, String.format("responded to facebook message for %s",
-                            integrationRecord.getAiid()), logMap.put("duration", duration));
+                        // chat worked. save the status
+                        status = "Chat active.";
+                        chatSuccess = true;
 
-                } catch (FacebookException fe) {
-                    // something went wrong. log it and save the status
-                    status = fe.getMessage();
-                    this.logger.logWarning(LOGFROM, status, logMap);
+                        // how long did we wait for sendapi to complete?
+                        double duration = (double) (this.tools.getTimestamp() - startTime) / 1000.0;
+
+                        // log the message that we just processed
+                        this.logger.logDebug(LOGFROM, String.format("responded to facebook message for %s",
+                                integrationRecord.getAiid()), logMap.put("duration", duration));
+
+                    } catch (FacebookException fe) {
+                        // something went wrong. log it and save the status
+                        status = fe.getMessage();
+                        this.logger.logWarning(LOGFROM, status, logMap);
+                    }
+                } finally {
+                    if (facebookThinksWeAreTyping) {
+                        this.facebookConnector.sendFacebookSenderAction(messageOriginatorId,
+                                metadata.getPageToken(),
+                                FacebookConnector.SendMessage.SenderAction.typing_off);
+                    }
                 }
             }
             // save the status in the integration record to feed it back to the user
             this.database.updateIntegrationStatus(integrationRecord.getAiid(),
                     IntegrationType.FACEBOOK, status, chatSuccess);
-            return null;
         } catch (Database.DatabaseException dbe) {
             this.logger.logException(LOGFROM, dbe);
         } catch (Exception e) {
             this.logger.logException(LOGFROM, e);
         }
+
         return null;
     }
 
