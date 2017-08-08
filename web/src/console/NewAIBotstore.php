@@ -88,14 +88,9 @@ function isSessionVariablesAvailable()
     <?php include './dynamic/footer.inc.html.php'; ?>
 </footer>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["", "home", 0, false, true]);
-    </script>
-</form>
-
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
+
+
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
@@ -110,7 +105,10 @@ function isSessionVariablesAvailable()
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
+<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 <script>
+
+    MENU.init(["", "home", 0, false, true]);
 
     var purchasedBots = <?php
         $tmp_list = [];
