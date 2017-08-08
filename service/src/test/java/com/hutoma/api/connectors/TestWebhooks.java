@@ -107,6 +107,7 @@ public class TestWebhooks {
         when(this.fakeTools.generateRandomHexString(anyInt())).thenReturn("deadf00d");
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setChatId(CHATID);
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         WebHooks spy = Mockito.spy(this.webHooks);
@@ -127,6 +128,7 @@ public class TestWebhooks {
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setChatId(CHATID);
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         WebHooks spy = Mockito.spy(this.webHooks);
@@ -147,6 +149,7 @@ public class TestWebhooks {
         when(this.fakeTools.generateRandomHexString(anyInt())).thenReturn("deadf00d");
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setChatId(CHATID);
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         WebHooks spy = Mockito.spy(this.webHooks);
@@ -179,6 +182,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setChatId(CHATID);
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
@@ -196,6 +200,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setChatId(CHATID);
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
