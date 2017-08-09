@@ -79,10 +79,31 @@ public class ChatLogic {
                           Map<String, String> clientVariables) {
         try {
             this.telemetryMap = LogMap.map("ChatOrigin", "API/Console");
-            return chatCall(aiid, devId, question, chatId, clientVariables).setSuccessStatus();
+            String passthrough = this.chatServices.getAIPassthroughUrl(devId, aiid);
+            if (passthrough != null) {
+                return chatPassthrough(aiid, devId, chatId, question, clientVariables, passthrough).setSuccessStatus();
+            } else {
+                return chatCall(aiid, devId, question, chatId, clientVariables).setSuccessStatus();
+            }
         } catch (ChatFailedException fail) {
             return fail.getApiError();
         }
+    }
+
+    public ApiChat chatPassthrough(final UUID aiid, final UUID devId, final String chatId, final String question,
+                                   final Map<String, String> clientVariables, String passthrough) {
+        UUID chatUuid = UUID.fromString(chatId);
+        ChatResult chatResult = new ChatResult(question);
+        WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, clientVariables, devId, aiid);
+
+        if (response != null) {
+            chatResult.setAnswer(response.getText());
+        }
+
+        ApiChat apiChat = new ApiChat(chatUuid, 0);
+        apiChat.setResult(chatResult);
+
+        return apiChat;
     }
 
     public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId,
@@ -555,7 +576,7 @@ public class ChatLogic {
         WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, chatInfo.devId);
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            WebHookResponse response = this.webHooks.executeWebHook(webHook, currentIntent, chatResult,
+            WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
                     chatInfo.clientVariables, chatInfo.devId, chatInfo.aiid);
             if (response == null) {
                 this.logger.logUserErrorEvent(LOGFROM,

@@ -40,6 +40,7 @@ CREATE TABLE `ai` (
   `ui_ai_personality` tinyint(4) DEFAULT '0',
   `ui_ai_voice` int(11) DEFAULT '0',
   `deleted` tinyint(1) DEFAULT '0',
+  `passthrough_url` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
@@ -1496,6 +1497,7 @@ BEGIN
       `ui_ai_confidence`,
       `ui_ai_personality`,
       `ui_ai_voice`,
+      `passthrough_url`,
       (SELECT COUNT(`ai_training`.`aiid`)
        FROM `ai_training`
        WHERE `ai_training`.`aiid`=`in_aiid`)

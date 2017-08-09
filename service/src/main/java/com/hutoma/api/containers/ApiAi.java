@@ -23,6 +23,7 @@ public class ApiAi extends ApiResult {
 
     private String name;
     private String description;
+    private String passthroughUrl;
 
     @SerializedName("created_on")
     private DateTime createdOn;
@@ -73,7 +74,8 @@ public class ApiAi extends ApiResult {
 
     public ApiAi(String aiid, String clientToken, String name, String description, DateTime createdOn,
                  boolean isPrivate, BackendStatus backendStatus, boolean hasTrainingFile,
-                 int personality, double confidence, int voice, Locale language, String timezone, String hmacSecret) {
+                 int personality, double confidence, int voice, Locale language, String timezone, String hmacSecret,
+                 String passthroughUrl) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.name = name;
@@ -88,6 +90,7 @@ public class ApiAi extends ApiResult {
         this.timezone = timezone;
         this.trainingFileUploaded = hasTrainingFile;
         this.hmacSecret = hmacSecret;
+        this.passthroughUrl = passthroughUrl;
         populateExtendedStatus();
     }
 
@@ -155,6 +158,8 @@ public class ApiAi extends ApiResult {
     public BackendStatus getBackendStatus() {
         return this.backendStatus;
     }
+
+    public String getPassthroughUrl() { return this.passthroughUrl; }
 
     public boolean trainingFileUploaded() {
         return this.trainingFileUploaded;

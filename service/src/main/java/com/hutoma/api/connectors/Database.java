@@ -1150,7 +1150,8 @@ public class Database {
                 rs.getInt("ui_ai_voice"),
                 Locale.forLanguageTag(localeString),
                 timezoneString,
-                rs.getString("hmac_secret"));
+                rs.getString("hmac_secret"),
+                rs.getString("passthrough_url"));
     }
 
     /***
