@@ -407,6 +407,19 @@ public class DatabaseAiStatusUpdates extends Database {
                     .add(rs.getDouble("training_progress"))
                     .add(rs.getDouble("training_error"))
                     .executeUpdate();
+
+            // if the back-end tells us that this should be queued then
+            // as well as setting it to status=QUEUED we actually queue it for training
+            if (statusOnBackend == TrainingStatus.AI_TRAINING_QUEUED) {
+                transaction.getDatabaseCall().initialise("queueUpdate", 5)
+                        .add(serverType.value())
+                        .add(aiid)
+                        .add(true)
+                        .add(0)
+                        .add(QueueAction.TRAIN.value())
+                        .executeUpdate();
+            }
+
         } else {
             this.logger.logUserWarnEvent(LOGFROM,
                     String.format("%s status mismatch. Ai is training so we are ignoring reported status %s for ai %s",

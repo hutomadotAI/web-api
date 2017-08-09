@@ -5,6 +5,15 @@ required for the next deployment.
 
 USE `hutoma`;
 
+/*
+Any bots that were set QUEUED but never actually queued due to RNN mis-reporting
+will be set to TRAINING so that the API will treat them as failed and recover them
+*/
+UPDATE hutoma.ai_status 
+SET training_status='ai_training'
+WHERE training_status='ai_training_queued'
+AND queue_time IS NULL;
+
 DROP procedure IF EXISTS `getAi`;
 
 DELIMITER $$
