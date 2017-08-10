@@ -1637,6 +1637,7 @@ BEGIN
     `ai`.`ui_ai_confidence`,
     `ai`.`ui_ai_personality`,
     `ai`.`ui_ai_voice`,
+	`ai`.`passthrough_url`,
     (SELECT COUNT(`ai_training`.`aiid`)
      FROM `ai_training`
      WHERE `ai_training`.`aiid`=`ai`.`aiid`)
