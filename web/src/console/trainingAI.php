@@ -59,11 +59,12 @@ function setSessionVariables($singleAI)
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
+    
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
-<?php include_once "../console/common/google_analytics.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
 <script>
     var deep_error = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error']);?>;

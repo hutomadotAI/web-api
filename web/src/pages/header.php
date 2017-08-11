@@ -20,4 +20,3 @@
         </nav>
     </div>
 </header>
-<?php include_once __DIR__ . "/../console/dynamic/hotjar.inc.php" ?>

@@ -67,7 +67,16 @@ if(isset($_POST['submit'])) {
                         }
 
                         setcookie('logSyscuruser', $email);
-                        $login = \hutoma\console::login($email, $password, false);
+
+                        // Try to login if successful redirect to homepage using naive register trigger
+                        $login = \hutoma\console::login(
+                            $email, 
+                            $password, 
+                            false, 
+                            true, 
+                            \hutoma\console::$config['pages']['home_page'] . '?register=1'
+                        );
+
                         if ($login === false) {
                             $msg = getErrorMessage('There was an error creating the user - please try again later.');
                         } elseif (is_array($login) && $login['status'] == "blocked") {
@@ -170,10 +179,11 @@ if(isset($_POST['submit'])) {
         }
 
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body id="body" class="web-body hold-transition register-page">
-<?php include_once "../console/common/google_analytics.php"; ?>
-<?php include_once "./header.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
+    <?php include_once "./header.php"; ?>
 
 <section>
     <div class="register-box">

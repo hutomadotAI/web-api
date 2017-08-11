@@ -5,9 +5,10 @@ require "config.php";
 <html>
   <head>
     <title>Change Password</title>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
   </head>
   <body>
-  <?php include_once "../google_analytics.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
   <?php
     if(isset($_POST['change_password'])){

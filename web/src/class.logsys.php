@@ -254,7 +254,7 @@ class console
          * Wait for the cookies to be removed, then redirect
          */
         usleep(2000);
-        utils::redirect(self::$config['pages']['login_page']);
+        utils::redirect(self::$config['pages']['login_page'] . '?logout=1');
         return true;
     }
 
@@ -693,7 +693,7 @@ class console
 
                     // Redirect
                     if (self::$init_called) {
-                        utils::redirect(isset($redirect) ? $redirect : self::$config['pages']['home_page']);
+                        utils::redirect(isset($redirect) ? $redirect : self::$config['pages']['home_page'] . '?login=1');
                     }
                     return true;
                 } else {

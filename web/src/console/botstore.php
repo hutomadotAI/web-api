@@ -28,11 +28,12 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     <link rel="stylesheet" href="./scripts/switch/switch.css">
     <link rel="stylesheet" href="./scripts/star/star.css">
     <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
+    
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
 <div class="wrapper">
     <header class="main-header">

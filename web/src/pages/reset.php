@@ -41,10 +41,11 @@ include "config.php";
             min-height: 100%;
         }
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body class="web-body hold-transition register-page">
-<?php include_once "../console/common/google_analytics.php"; ?>
-<?php include_once "./header.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
+    <?php include_once "./header.php"; ?>
 
 <section>
     <div class="register-box">

@@ -84,15 +84,6 @@ class utils
         return hash('sha256', $password . config::getSalt() . $salt);
     }
 
-    public static function getGoogleAnalyticsTrackerObject()
-    {
-        $trackerObject = getenv("GOOGLE_ANALYTICS_TRACKER");
-        if (isset($trackerObject) && $trackerObject != "") {
-            return $trackerObject;
-        }
-        return null;
-    }
-
     public static function toIsoDate($dateStr) {
         $dateTime = new \DateTime($dateStr);
         return $dateTime->format(\DateTime::ATOM);

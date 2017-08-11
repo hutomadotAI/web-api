@@ -51,11 +51,12 @@
     <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
     <link rel="stylesheet" href="scripts/external/iCheck/all.css">
     <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
+    
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
 <div class="wrapper">
     <header class="main-header" style="border:1px solid black;">

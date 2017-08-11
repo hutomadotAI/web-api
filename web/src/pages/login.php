@@ -88,10 +88,11 @@ if(isset($_POST['action_login'])){
             min-height: 100%;
         }
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body class="web-body" id="body">
-<?php include_once "../console/common/google_analytics.php"; ?>
-<?php include_once "./header.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
+    <?php include_once "./header.php"; ?>
 
 <section>
     <div class="login-box">
