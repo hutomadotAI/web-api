@@ -14,7 +14,6 @@ import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.facebook.FacebookRichContentNode;
-import com.hutoma.api.containers.facebook.FacebookRichContentPayload;
 import com.hutoma.api.containers.facebook.FacebookToken;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
@@ -137,14 +136,14 @@ public class TestFacebookChatHandler {
     public void testChat_OK_NotTruncated() throws Exception {
         String answer = String.join("", Collections.nCopies(640, "A"));
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null);
-        Assert.assertEquals(answer, chatOutput.get(0).getText());
+        Assert.assertEquals(answer, getOutput(chatOutput.get(0)).getText());
     }
 
     @Test
     public void testChat_OK_Truncated() throws Exception {
         String answer = String.join("", Collections.nCopies(1000, "A"));
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null);
-        Assert.assertEquals(640, chatOutput.get(0).getText().length());
+        Assert.assertEquals(640, getOutput(chatOutput.get(0)).getText().length());
     }
 
     @Test
@@ -198,9 +197,9 @@ public class TestFacebookChatHandler {
                 " }\n" +
                 " ", WebHookResponse.class);
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
-        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
+        Assert.assertNotNull(getOutput(chatOutput.get(0)).getRichContent());
         Assert.assertEquals(FacebookRichContentNode.RichContentType.image,
-                chatOutput.get(0).getRichContentNode().getContentType());
+                getOutput(chatOutput.get(0)).getRichContent().getContentType());
     }
 
     @Test
@@ -264,45 +263,33 @@ public class TestFacebookChatHandler {
         String answer = ANSWER;
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A", "B", "C"), false);
-        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
-        Assert.assertEquals(FacebookRichContentNode.RichContentType.template,
-                chatOutput.get(0).getRichContentNode().getContentType());
-        Assert.assertEquals(FacebookRichContentPayload.TemplateType.button,
-                chatOutput.get(0).getRichContentNode().getPayload().getTemplateType());
+        Assert.assertNotNull(getOutput(chatOutput.get(0)).getQuickReplies());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
+        Assert.assertNotNull(getOutput(chatOutput.get(0)).getText());
         Assert.assertEquals(3,
-                chatOutput.get(0).getRichContentNode().getPayload().getButtons().size());
+                getOutput(chatOutput.get(0)).getQuickReplies().size());
     }
 
     @Test
-    public void testChat_IntentExpansion_OneButton() throws Exception {
+    public void testChat_IntentExpansion_1Button() throws Exception {
         String answer = ANSWER;
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A"), false);
-        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
+        Assert.assertNotNull(getOutput(chatOutput.get(0)).getQuickReplies());
         Assert.assertEquals(1,
-                chatOutput.get(0).getRichContentNode().getPayload().getButtons().size());
+                getOutput(chatOutput.get(0)).getQuickReplies().size());
     }
 
     @Test
-    public void testChat_IntentExpansion_FourButtons() throws Exception {
-        String answer = ANSWER;
-        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
-                LABEL, Arrays.asList("A", "B", "C", "D"), false);
-        Assert.assertTrue(chatOutput.get(0).isRichContentSegment());
-        Assert.assertTrue(chatOutput.get(1).isRichContentSegment());
-        Assert.assertEquals(3,
-                chatOutput.get(0).getRichContentNode().getPayload().getButtons().size());
-        Assert.assertEquals(1,
-                chatOutput.get(1).getRichContentNode().getPayload().getButtons().size());
-    }
-
-    @Test
-    public void testChat_IntentExpansion_TwelveButtons() throws Exception {
+    public void testChat_IntentExpansion_11Buttons() throws Exception {
         String answer = ANSWER;
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A", "B", "C", "D", "E", "F",
-                        "G", "H", "I", "J", "K", "L"), false);
-        Assert.assertEquals(4, chatOutput.size());
+                        "G", "H", "I", "J", "K"), false);
+        Assert.assertEquals(1, chatOutput.size());
+        Assert.assertEquals(11,
+                getOutput(chatOutput.get(0)).getQuickReplies().size());
     }
 
     @Test
@@ -310,9 +297,10 @@ public class TestFacebookChatHandler {
         String answer = ANSWER;
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A", "B", "C", "D", "E", "F",
-                        "G", "H", "I", "J", "K", "L", "X"), false);
+                        "G", "H", "I", "J", "K", "X"), false);
         Assert.assertEquals(1, chatOutput.size());
-        Assert.assertFalse(chatOutput.get(0).isRichContentSegment());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getQuickReplies());
     }
 
     @Test
@@ -321,7 +309,8 @@ public class TestFacebookChatHandler {
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, new ArrayList<>(), false);
         Assert.assertEquals(1, chatOutput.size());
-        Assert.assertFalse(chatOutput.get(0).isRichContentSegment());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getQuickReplies());
     }
 
     @Test
@@ -330,7 +319,14 @@ public class TestFacebookChatHandler {
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A", "B", "C"), true);
         Assert.assertEquals(1, chatOutput.size());
-        Assert.assertFalse(chatOutput.get(0).isRichContentSegment());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getQuickReplies());
+    }
+
+    private FacebookConnector.SendMessage getOutput(FacebookResponseSegment segment) {
+        FacebookConnector.SendMessage sendMessage = new FacebookConnector.SendMessage("recipient");
+        segment.populateMessageContent(sendMessage);
+        return sendMessage;
     }
 
     private List<FacebookResponseSegment> makeChatCall(

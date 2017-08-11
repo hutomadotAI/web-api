@@ -18,6 +18,8 @@ import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -109,14 +111,10 @@ public class FacebookConnector {
                                     FacebookResponseSegment responseSegment)
             throws FacebookException {
         SendMessage sendMessage = new SendMessage(toFacebookID);
-        if (responseSegment.isRichContentSegment()) {
-            sendMessage.setRichContent(responseSegment.getRichContentNode());
-        } else {
-            sendMessage.setText(responseSegment.getText());
-        }
+        responseSegment.populateMessageContent(sendMessage);
         sendFacebookMeMessages(toFacebookID, pageToken, sendMessage);
     }
-    
+
     /***
      * Send a Facebook sender-action on behalf of the responding bot
      * This can be typing-on, typing-off or mark-seen
@@ -373,12 +371,30 @@ public class FacebookConnector {
             this.senderAction = senderAction;
         }
 
+        public String getText() {
+            return this.message.text;
+        }
+
         public void setText(final String text) {
             this.message.text = text;
         }
 
+        public FacebookRichContentNode getRichContent() {
+            return this.message.richContent;
+        }
+
         public void setRichContent(FacebookRichContentNode content) {
             this.message.richContent = content;
+        }
+
+        public List<QuickReply> getQuickReplies() {
+            return this.message.quickReplies;
+        }
+
+        public void setQuickReplies(final List<String> options) {
+            this.message.quickReplies = options.stream()
+                    .map(name -> new QuickReply(name, name))
+                    .collect(Collectors.toList());
         }
 
         public enum SenderAction {
@@ -398,7 +414,27 @@ public class FacebookConnector {
 
             @SerializedName("attachment")
             private FacebookRichContentNode richContent;
+
+            @SerializedName("quick_replies")
+            private List<QuickReply> quickReplies;
         }
+
+        private static class QuickReply {
+
+            @SerializedName("content_type")
+            private String contentType;
+            @SerializedName("title")
+            private String title;
+            @SerializedName("payload")
+            private String payload;
+
+            public QuickReply(final String title, final String payload) {
+                this.contentType = "text";
+                this.title = title;
+                this.payload = payload;
+            }
+        }
+
     }
 
 }
