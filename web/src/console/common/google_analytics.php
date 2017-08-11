@@ -1,8 +1,10 @@
 <?php
 
-require_once "utils.php";
+namespace hutoma;
 
-$trackerObject = \hutoma\utils::getGoogleAnalyticsTrackerObject();
+require_once __DIR__ . "/utils.php";
+
+$trackerObject = utils::getGoogleAnalyticsTrackerObject();
 
 if (isset($trackerObject)) {
     ?>

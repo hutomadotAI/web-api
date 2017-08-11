@@ -1,21 +1,25 @@
 <?php
 
-require "../pages/config.php";
-require_once "api/botstoreApi.php";
-require_once "api/analyticsApi.php";
-require_once "common/utils.php";
+namespace hutoma;
 
-if (!\hutoma\console::checkSessionIsActive()) {
-    exit;
-}
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/analyticsApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 function toJSDate($dateParts) {
     return 'new Date(' . $dateParts[0] . ',' . ($dateParts[1] - 1) . ',' . $dateParts[2] . ')';
 }
 
+$intervalString = "";
 if (isset($_REQUEST['from'])) {
     $fromDate = date('Y-m-d');
-    $fromDateIso = \hutoma\utils::toIsoDate($_REQUEST['from']);
+    $fromDateIso = utils::toIsoDate($_REQUEST['from']);
     $intervalString = 'from ' . $fromDate;
 } else {
     $fromDate = date('Y-m-d', strtotime('-30 days'));
@@ -24,7 +28,7 @@ if (isset($_REQUEST['from'])) {
 
 if (isset($_REQUEST['to'])) {
     $toDate = date('Y-m-d', $_REQUEST['to']);
-    $toDateIso = hutoma\utils::toIsoDate($_REQUEST['to']);
+    $toDateIso = utils::toIsoDate($_REQUEST['to']);
     $intervalString = $intervalString . ' to ' . $toDate;
 } else {
     $toDate = date('Y-m-d');
@@ -39,29 +43,13 @@ $fromDateParts = explode('-', $fromDate);
 $toDateParts = explode('-', $toDate);
 
 $aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
-$api = new \hutoma\api\analyticsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$api = new api\analyticsApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $sessions = $api->getChatSessions($aiid, $fromDateIso, $toDateIso);
 $interactions = $api->getChatInteractions($aiid, $fromDateIso, $toDateIso);
 unset($pi);
 
-?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Bot Insights</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./scripts/switch/switch.css">
-    <link rel="stylesheet" href="./scripts/star/star.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
-    <style>
+$header_page_title = "Bot Insights";
+$header_additional_entries = "<style>
         .datepicker table tr td.today {
             background-color: #324d64;
         }
@@ -72,30 +60,20 @@ unset($pi);
             color: #666;
             cursor: default;
         }
-    </style>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
+    </style>";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
+?>
 
 <div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/insights.chatlogs.download.php'; ?>
+                    <?php include __DIR__ . '/dynamic/insights.chatlogs.download.php'; ?>
                 </div>
             </div>
 
@@ -187,9 +165,7 @@ unset($pi);
     </section>
 </div>
 
-<footer class="main-footer">
-    <?php include './dynamic/footer.inc.html.php'; ?>
-</footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
@@ -202,12 +178,9 @@ unset($pi);
 
 <script src="./scripts/messaging/messaging.js"></script>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "insights", 1, true, false]);
-    </script>
-</form>
+<?php
+$menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "insights", 1, true, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
 
 <script>
     var todayDate = new Date();

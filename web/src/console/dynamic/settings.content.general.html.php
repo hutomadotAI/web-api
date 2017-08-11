@@ -1,5 +1,14 @@
+<?php
+
+namespace hutoma;
+
+$currentAiInfo = json_encode($aiInfo);
+
+?>
+
+
 <script>
-    var previousGeneralInfo = <?php echo json_encode($aiInfo); ?>;
+    var previousGeneralInfo = <?php echo $currentAiInfo ?>;
     function regenerateHmacSecret() {
         var errorMessage = 'There was a problem updating the webhook secret. Please try again later and if the issue ' +
             'persists, please contact support.'
@@ -41,30 +50,30 @@
     <div class="modal-content bordered" style="padding:10px;background-color: #202020">
         <div class="row">
             <div class="col-md-6">
-                <?php include './dynamic/input.name.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.name.html.php'; ?>
             </div>
             <div class="col-md-6">
-                <?php include './dynamic/input.language.html.php'; ?>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <?php include './dynamic/input.description.html.php'; ?>
-            </div>
-            <div class="col-md-6">
-                <?php include './dynamic/input.timezone.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.language.html.php'; ?>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <?php include './dynamic/input.confidence.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.description.html.php'; ?>
+            </div>
+            <div class="col-md-6">
+                <?php include __DIR__ . '/../dynamic/input.timezone.html.php'; ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <?php include __DIR__ . '/../dynamic/input.confidence.html.php'; ?>
             </div>
 
             <div class="col-md-6">
-                <?php include './dynamic/input.learn.html.php'; ?>
-                <?php include './dynamic/input.voice.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.learn.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.voice.html.php'; ?>
             </div>
 
         </div>
@@ -87,7 +96,7 @@
                 <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">Dev key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="devkey"
-                           value="<?php echo \hutoma\console::getDevToken(); ?>"
+                           value="<?php echo sessionObject::getDevToken(); ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard"
@@ -113,7 +122,7 @@
                 <div class="input-group">
                     <span class="input-group-addon text-gray" style="width:90px;">Webhook signing secret</i></span>
                     <input type="text" class="form-control flat no-shadow" id="webhook_secret"
-                           value="<?php echo $aiInfo['hmac_secret']; ?>"
+                           value="<?php echo (isset($aiInfo['hmac_secret']) ? $aiInfo['hmac_secret'] : ""); ?>"
                            readonly>
                     <span class="input-group-addon text-gray"  data-toggle="modal" data-target="#regenHmacSecret"
                           id="webhook_secret_regen_tooltip" title="re-generate secret"

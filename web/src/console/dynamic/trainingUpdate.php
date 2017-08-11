@@ -1,19 +1,18 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Hutoma
- * Date: 21/10/16
- * Time: 18:36
- */
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
-$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$status = $aiApi->trainingUpdate($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$status = $aiApi->trainingUpdate(sessionObject::getCurrentAI()['aiid']);
 unset($aiApi);
 echo json_encode($status, JSON_PRETTY_PRINT);
 unset($status);

@@ -1,51 +1,30 @@
 <?php
-require "../pages/config.php";
-require_once "api/apiBase.php";
-require_once "api/botstoreApi.php";
 
-if (!\hutoma\console::checkSessionIsActive()) {
-    exit;
-}
+namespace hutoma;
 
-$botId = $_REQUEST["botId"];
-$category = $_REQUEST["category"];
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/botstoreApi.php";
 
-$aiName = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'];
-$isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$botId = isset($_REQUEST["botId"]) ? $_REQUEST["botId"] : null;
+$category = isset($_REQUEST["category"]) ? $_REQUEST["category"] : null;
+
+$aiName = sessionObject::getCurrentAI()['name'];
+$isExistAiId = isset(sessionObject::getCurrentAI()['aiid']);
+
+$header_page_title = "Botstore";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Botstore</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./scripts/switch/switch.css">
-    <link rel="stylesheet" href="./scripts/star/star.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-    <header class="main-header">
-            <?php include './dynamic/header.html.php'; ?>
-    </header>
-
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-    <!-- ================ PAGE CONTENT ================= -->
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
 
     <div class="content-wrapper">
@@ -112,9 +91,7 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
         </section>
     </div>
 
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+<?php include __DIR__ . '/include/page_footer_default.php'; ?>
 
     <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
     <script src="./bootstrap/js/bootstrap.min.js"></script>
@@ -129,18 +106,10 @@ $isExistAiId = isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']
     <script src="./scripts/messaging/messaging.js"></script>
     <script src="./scripts/shared/shared.js"></script>
 
-    <script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
-    <form action="" method="post" enctype="multipart/form-data">
-        <script type="text/javascript">
-            MENU.init([
-                "<?php echo $aiName;?>",
-                "<?php echo $category;?>",
-                2,
-                false,
-                <?php echo $isExistAiId ? "false" : "true" ?>
-            ]);
-        </script>
-    </form>
+
+<?php
+$menuObj = new menuObj($aiName, $category, 2, false, !$isExistAiId);
+include __DIR__ . "/include/page_menu_builder.php" ?>
 
     <script>
         window.addEventListener('message', function (e) {

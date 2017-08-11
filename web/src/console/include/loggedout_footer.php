@@ -41,7 +41,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <p class="web-copyright text-center">
-                        Copyright © 2017 Hu:toma Artificial Intelligence</a>
+                        Copyright © 2017 Hu:toma Artificial Intelligence
                     </p>
                 </div>
             </div>

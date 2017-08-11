@@ -1,23 +1,20 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Andrea
- * Date: 30/09/16
- * Time: 13:21
- */
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
-    \hutoma\console::redirect('./error.php?err=110');
+    utils::redirect('./error.php?err=110');
     exit;
 }
-$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response = $aiApi->updateAI(
     $_POST['aiid'],
     $_POST['description'],
@@ -29,20 +26,14 @@ $response = $aiApi->updateAI(
 );
 unset($aiApi);
 
-updateSessionVariables();
+// Update the session variables
+sessionObject::getCurrentAI()['language'] = $_POST['language'];
+sessionObject::getCurrentAI()['voice'] = $_POST['voice'];
+
 
 echo json_encode($response);
 unset($response);
 
-function updateSessionVariables()
-{
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $_POST['description'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = $_POST['language'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $_POST['timezone'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $_POST['personality'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $_POST['voice'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $_POST['confidence'];
-}
 
 function isPostInputAvailable()
 {

@@ -1,4 +1,10 @@
-<input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
+<?php
+namespace hutoma;
+
+$currentIntent = isset($_POST['intent']) ? $_POST['intent'] : "";
+?>
+
+<input type="hidden" id="intent-name" name="intent-name" value="<?php echo $currentIntent ?>">
 <input type="hidden" id="bot-status" name="bot-status" value="0" style="display:none;"/>
 <div class="box box-solid box-clean flat no-shadow unselectable">
 

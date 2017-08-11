@@ -1,95 +1,81 @@
 <?php
-require "../pages/config.php";
-require_once "api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
-require_once "common/bot.php";
-require_once "api/botstoreApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+namespace hutoma;
 
-$aiid = getAiidOrRedirect();
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/common/bot.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/botApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
 
-$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$aiid = sessionObject::getCurrentAI()['aiid'];
+
+$botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $purchasedBots = $botApi->getPurchasedBots();
+unset($botApi);
 
-$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $aiInfo = $aiApi->getSingleAI($aiid);
 $linkedBots = $aiApi->getLinkedBots($aiid);
+unset($aiApi);
 
-
-
-function getAiidOrRedirect()
-{
-    if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
-        \hutoma\console::redirect('./error.php?err=105');
-        exit;
+$purchasedBotsList = [];
+if (isset($purchasedBots) && (array_key_exists("bots", $purchasedBots))) {
+    foreach ($purchasedBots['bots'] as $botDetails) {
+        $purchasedBots = bot::fromObject($botDetails);
+        $tmp_bot = $purchasedBots->toJSON();
+        if ($botDetails['aiid'] !== $aiInfo['aiid'])
+            array_push($purchasedBotsList, $tmp_bot);
     }
-
-    return $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 }
+unset($purchasedBots);
 
+
+$linkedBotsList = [];
+if (isset($linkedBots) && (array_key_exists("bots", $linkedBots))) {
+    foreach ($linkedBots['bots'] as $botDetails) {
+        array_push($linkedBotsList, $botDetails['botId']);
+    }
+}
+unset($linkedBots);
+
+$purchasedBotsJson = json_encode($purchasedBotsList);
+$linkedBotsJson = json_encode($linkedBotsList);
+unset($purchasedBotsList);
+unset($linkedBotsList);
+
+
+$header_page_title = "Add Skill";
+$header_additional_entries = "<link rel=\"stylesheet\" href=\"./scripts/switch/switch.css\">";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Bot Settings</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.css">
-    <link rel="stylesheet" href="scripts/external/ionslider/ion.rangeSlider.skinNice.css">
-    <link rel="stylesheet" href="scripts/external/iCheck/all.css">
-    <link rel="stylesheet" href="./scripts/switch/switch.css">
-    <link rel="stylesheet" href="./scripts/star/star.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
-
-<div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
-
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
+        <?php include __DIR__ . "/include/page_header_default.php"; ?>
         <section class="content">
-
-        
-            <!-- BOT LINK TAB -->
             <div class="tab-content" style="padding-bottom:0px;">
-            <?php include './dynamic/settings.content.aiSkill.html.php'; ?>
+                <?php include __DIR__ . '/dynamic/settings.content.aiSkill.html.php'; ?>
                 <div class="row" style="background-color: #434343;">
                     <div class="col-lg-12" style="background-color: #434343; padding:5px;">
-                        <?php include './dynamic/settings.content.aiSkill.list.html.php'; ?>
+                        <p></p>
+                        <h2></h2>
+                        <p id="botsSearch"></p>
+                        <form method="POST" name="aiSkill">
+                            <input type="hidden" name="userActivedBots" id="userActivedBots" value="" style="display:none;">
+                        </form>
                     </div>
                 </div>
             </div>
-
         </section>
     </div>
-
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+<?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
@@ -100,72 +86,31 @@ function getAiidOrRedirect()
 
 <script src="./scripts/inputCommon/inputCommon.js"></script>
 <script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/deleteAI/deleteAI.js"></script>
 <script src="scripts/external/select2/select2.full.js"></script>
 <script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="scripts/external/ionslider/ion.rangeSlider.min.js"></script>
 
-<script src="./scripts/clipboard/copyToClipboard.js"></script>
-<script src="./scripts/clipboard/clipboard.min.js"></script>
-
 <script src="./scripts/setting/setting.linkBot.js"></script>
-<script src="./scripts/setting/setting.general.js"></script>
 <script src="./scripts/setting/setting.aiSkill.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $aiInfo['name']; ?>", "settings", 1, false, false]);
-    </script>
-    <script>
-        $(document).ready(function () {
-            activeRightMenu("<?php if (isset($_GET['botstore'])) echo json_decode($_GET['botstore']);?>");
-        });
-    </script>
-</form>
-<script>
-    var purchasedBots = <?php
-        $tmp_list = [];
-        if (isset($purchasedBots) && (array_key_exists("bots", $purchasedBots))) {
-            foreach ($purchasedBots['bots'] as $botDetails) {
-                $purchasedBots = \hutoma\bot::fromObject($botDetails);
-                $tmp_bot = $purchasedBots->toJSON();
-                if ($botDetails['aiid'] !== $aiInfo['aiid'])
-                    array_push($tmp_list, $tmp_bot);
-            }
-        }
-        echo json_encode($tmp_list);
-        unset($purchasedBots);
-        unset($tmp_list);
-        unset($botApi);
-        ?>;
 
-
-    var linkedBots = <?php
-        $tmp_linked_list = [];
-        if (isset($linkedBots) && (array_key_exists("bots", $linkedBots))) {
-            foreach ($linkedBots['bots'] as $botDetails) {
-                $linkedBot = new \hutoma\bot();
-                array_push($tmp_linked_list, $botDetails['botId']);
-            }
-        }
-        echo json_encode($tmp_linked_list);
-        unset($purchasedBots);
-        unset($tmp_linked_list);
-        ?>;
-</script>
+<?php
+$menuObj = new menuObj($aiInfo['name'], "skill", 1, true, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
 
 <script>
+    var purchasedBots = <?php echo $purchasedBotsJson ?>;
+    var linkedBots = <?php echo $linkedBotsJson ?>;
+
     var newNode = document.createElement('div');
     newNode.className = 'row no-margin';
     newNode.id = 'bot_list';
     function searchBots(str) {
         showAddSkills(str, purchasedBots,linkedBots);
     }
-</script>
-<script>
+
     $(document).ready(function () {
         showAddSkills('', purchasedBots,linkedBots);
     });

@@ -1,16 +1,19 @@
 <?php
-require "../../pages/config.php";
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+namespace hutoma;
 
-if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
 
-    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $response = $aiApi->deleteAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+sessionObject::redirectToLoginIfUnauthenticated();
+
+if (isset(sessionObject::getCurrentAI()['aiid'])) {
+
+    $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+    $response = $aiApi->deleteAI(sessionObject::getCurrentAI()['aiid']);
     unset($aiApi);
 
     if ($response['status']['code'] === 200) {
@@ -18,12 +21,12 @@ if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) 
         unset($_SESSION[$_SESSION['navigation_id']]['user_details']['bot']);
     } else {
         unset($response);
-        \hutoma\console::redirect('../error.php?err=203');
+        utils::redirect('../error.php?err=203');
         exit;
     }
 
     unset($response);
-    \hutoma\console::redirect('../home.php');
+    utils::redirect('../home.php');
 }
 
 

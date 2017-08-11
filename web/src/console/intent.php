@@ -1,40 +1,44 @@
 <?php
-require "../pages/config.php";
 
-require_once "../console/api/apiBase.php";
-require_once "../console/api/intentsApi.php";
-require_once "../console/api/aiApi.php";
-require_once "../console/api/botstoreApi.php";
+namespace hutoma;
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/intentsApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
 
-$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+sessionObject::redirectToLoginIfUnauthenticated();
 
+$intentsApi = new api\intentsApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+
+$aiid = sessionObject::getCurrentAI()['aiid'];
 $intent_deleted = false;
 if (isset($_REQUEST['deleteintent'])) {
     $intentName = $_REQUEST['deleteintent'];
-    $result = $intentsApi->deleteIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+    $result = $intentsApi->deleteIntent($aiid, $intentName);
     $intent_deleted = true;
 }
 
-$intents = $intentsApi->getIntents($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$intents = $intentsApi->getIntents($aiid);
 unset($intentsApi);
 
 if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
     unset($intents);
-    \hutoma\console::redirect('./error.php?err=210');
+    utils::redirect('./error.php?err=210');
     exit;
 }
 
-$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$bot= $aiApi->getSingleAI($aiid);
 unset($aiApi);
 
 if ($bot['status']['code'] !== 200) {
     unset($bot);
-    \hutoma\console::redirect('./error.php?err=204');
+    utils::redirect('./error.php?err=204');
     exit;
 }
 
@@ -46,40 +50,16 @@ function echoJsonIntentsResponse($intents)
         echo '""'; // return empty string
 }
 
+$header_page_title = "Intents";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Intents</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntents('')">
-<?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12" id="intentElementBox">
@@ -87,22 +67,14 @@ function echoJsonIntentsResponse($intents)
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/intent.content.create.html.php'; ?>
-                    <?php include './dynamic/intent.content.list.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/intent.content.create.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/intent.content.list.html.php'; ?>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- ================ CHAT CONTENT ================= -->
-    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
-    </aside>
-
-    <footer class="main-footer" style="margin-right:350px;">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
@@ -115,18 +87,12 @@ function echoJsonIntentsResponse($intents)
 <script src="./scripts/validation/validation.js"></script>
 <script src="./scripts/intent/intent.polling.js"></script>
 <script src="./scripts/intent/intent.js"></script>
-<script src="./scripts/chat/chat.js"></script>
-<script src="./scripts/chat/voice.js"></script>
-
-
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "intents", 1, true, false]);
-    </script>
-</form>
+<?php
+$menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "intents", 1, true, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
+
 
 <script>
     var intents = <?php echoJsonIntentsResponse($intents); unset($intents); ?>;
@@ -134,14 +100,17 @@ function echoJsonIntentsResponse($intents)
     newNode.className = 'row';
     newNode.id = 'intents_list';
     
-    var intent_deleted = <?php if ($intent_deleted) echo 'true'; else echo 'false'; unset($intent_deleted)?>;
+    var intent_deleted = <?php echo ($intent_deleted ? 'true' : 'false'); unset($intent_deleted)?>;
     var ai_state = <?php echo json_encode($bot['ai_status'])?>;
-    var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
-</script>
-<script>
+    var trainingFile = <?php echo ($bot['training_file_uploaded'] ? 'true' : 'false'); unset($bot)?>;
+
     function searchIntents(str) {
         showIntents(str);
     }
+
+    $(document).ready(function () {
+        showIntents('');
+    });
 </script>
 </body>
 </html>

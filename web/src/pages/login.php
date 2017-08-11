@@ -1,12 +1,17 @@
 <?php
 
-require "config.php";
+namespace hutoma;
 
+require_once __DIR__ . "/../console/common/globals.php";
+require_once __DIR__ . "/../console/common/utils.php";
+require_once __DIR__ . "/../console/common/config.php";
+require_once __DIR__ . "/../console/common/sessionObject.php";
+require_once __DIR__ . "/../console/api/userMgmt.php";
 
 if(isset($_POST['action_login'])){
     $identification = $_POST['login'];
     $password = $_POST['password'];
-    $redirect = $_POST['redirect'];
+    $redirect = isset($_POST['redirect']) ? $_POST['redirect'] : null;
 
     $loginerror  ='<div class="alert alert-danger text-white flat">';
     $loginerror .='<i class="icon fa fa-warning"></i> The username or password you entered is incorrect';
@@ -16,7 +21,7 @@ if(isset($_POST['action_login'])){
         $msg = array("Error", $loginerror);
     }else{
         try {
-            $login = \hutoma\console::login($identification, $password, isset($_POST['remember_me']), true, $redirect);
+            $login = api\userMgmt::login($identification, $password, isset($_POST['remember_me']), true, $redirect);
             if ($login === false) {
                 $msg = array("Error", $loginerror);
             } else if (is_array($login) && $login['status'] == "blocked") {
@@ -25,7 +30,7 @@ if(isset($_POST['action_login'])){
 
             $redirectPage = $_GET["redirect"];
             if (isset($redirectPage)) {
-                \hutoma\utils::redirect(urldecode($redirectPage));
+                utils::redirect(urldecode($redirectPage));
             }
         }
         catch(Exception $e){
@@ -90,8 +95,8 @@ if(isset($_POST['action_login'])){
     </style>
 </head>
 <body class="web-body" id="body">
-<?php include_once "../console/common/google_analytics.php"; ?>
-<?php include_once "./header.php"; ?>
+<?php include_once __DIR__ . "/../console/common/google_analytics.php"; ?>
+<?php include_once __DIR__ . "/../console/include/loggedout_header.php"; ?>
 
 <section>
     <div class="login-box">
@@ -132,13 +137,13 @@ if(isset($_POST['action_login'])){
                 </div>
             </form>
             <a class="new-link" href="reset.php">I forgot my password</a><br>
-            <a class="new-link" href="register.php" class="text-center">Register a new account</a>
+            <a class="new-link text-center" href="register.php">Register a new account</a>
         </div>
         <!-- /.login-box-body -->
     </div>
 </section>
 
-<?php include_once "./footer.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_footer.php"; ?>
 
 </body>
 </html>

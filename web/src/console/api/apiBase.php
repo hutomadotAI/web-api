@@ -5,9 +5,9 @@ namespace hutoma\api;
 include_once __DIR__ . '/../common/apiConnector.php';
 include_once __DIR__ . '/../common/config.php';
 include_once __DIR__ . '/../common/utils.php';
+include_once __DIR__ . '/../common/logging.php';
 
-use hutoma\telemetry;
-use hutoma\TelemetryEvent;
+use hutoma as base;
 
 
 /**
@@ -27,7 +27,7 @@ class apiBase
     function __construct($sessionObject, $devToken)
     {
         $this->sessionObject = $sessionObject;
-        $this->curl = new \hutoma\apiConnector(null, $devToken);
+        $this->curl = new base\apiConnector(null, $devToken);
     }
 
     protected function isLoggedIn()
@@ -40,7 +40,7 @@ class apiBase
      * @param $errorCode - the error code to be used on the error page
      */
     protected function redirectToErrorPage($errorCode) {
-        \hutoma\utils::redirect(\hutoma\config::getErrorPageUrl() . '?err=' . $errorCode);
+        \hutoma\utils::redirect(base\config::getErrorPageUrl() . '?err=' . $errorCode);
     }
 
     /**
@@ -51,7 +51,7 @@ class apiBase
     protected function handleApiCallError($response, $errorCode)
     {
         if ($response === false) {
-            telemetry::getInstance()->log(TelemetryEvent::ERROR, "api", "no response from api");
+            base\logging::error("no response from api");
             $this->cleanup();
             $this->redirectToErrorPage($errorCode);
         }
@@ -66,7 +66,7 @@ class apiBase
                     // allowable codes
                     break;
                 default:
-                    telemetry::getInstance()->log(TelemetryEvent::ERROR, "api", json_encode($responseJson->status));
+                    base\logging::error("api " . json_encode($responseJson->status));
                     $this->cleanup();
                     $this->redirectToErrorPage($errorCode);
             }
@@ -99,7 +99,7 @@ class apiBase
      */
     protected function buildRequestUrl($path, $params = null)
     {
-        $finalPath = \hutoma\config::getApiRequestBaseUrl() . $path;
+        $finalPath = base\config::getApiRequestBaseUrl() . $path;
         if (isset($params)) {
             $finalPath .= '?' . http_build_query($params);
         }

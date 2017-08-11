@@ -1,17 +1,20 @@
 <?php
-require_once "api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botApi.php";
-require_once "api/botstoreApi.php";
-require_once "common/bot.php";
-require_once "common/sessionObject.php";
-require_once "common/developer.php";
-require_once "common/botstoreItem.php";
-require_once "common/botstoreListParam.php";
+namespace hutoma;
+
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/botApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/bot.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/developer.php";
+require_once __DIR__ . "/common/botstoreItem.php";
+require_once __DIR__ . "/common/botstoreListParam.php";
 
 
-header('P3P: CP="CAO PSA OUR"');
-session_start();
+//header('P3P: CP="CAO PSA OUR"');
 
 $categories = json_decode(CAROUSEL_CATEGORIES);
 $MAX_BOTCARDS_LOADED_FOR_CAROUSEL = 10;
@@ -26,8 +29,8 @@ if(isset($_GET['category']) && $_GET['category']!=''){
     $category = $_GET['category'];
 }
 
-$botstoreApi = new \hutoma\api\botstoreApi(false, \hutoma\sessionObject::getDevToken());
-$botstoreListParam = new \hutoma\botstoreListParam();
+$botstoreApi = new api\botstoreApi(false, sessionObject::getDevToken());
+$botstoreListParam = new botstoreListParam();
 $botstoreListParam->setPageSize($MAX_BOTCARDS_LOADED_FOR_CAROUSEL);
 
 
@@ -35,11 +38,12 @@ if (!isset($category) || empty($category)) {
     $botstoreItems = $botstoreApi->getBotstoreListPerCategory($botstoreListParam);
     foreach($botstoreItems['categories'] as $resultCat) {
         foreach($resultCat as $botstoreItem) {
-            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem);
+            $botItem = botstoreItem::fromObject($botstoreItem);
             $botCategory = $botItem->getMetadata()['category'];
-            $array = $botCategorizedItems[$botCategory];
-            if (!isset($array)) {
+            if (!array_key_exists($botCategory, $botCategorizedItems)) {
                 $array = [];
+            } else {
+                $array = $botCategorizedItems[$botCategory];
             }
             array_push($array, $botItem->toJSON());
             $botCategorizedItems[$botCategory] = $array;
@@ -57,7 +61,7 @@ if (!isset($category) || empty($category)) {
     if (isset($botstoreItems) && (array_key_exists("items", $botstoreItems)) && sizeof($botstoreItems['items']) > 0 ) {
         $tmp_category_botItems = [];
         foreach ($botstoreItems['items'] as $botstoreItem) {
-            $botItem = \hutoma\botstoreItem::fromObject($botstoreItem);
+            $botItem = botstoreItem::fromObject($botstoreItem);
             $tmp_botItem = $botItem->toJSON();
             array_push($tmp_category_botItems, $tmp_botItem);
         }

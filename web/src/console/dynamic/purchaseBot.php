@@ -1,20 +1,22 @@
 <?php
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/botApi.php";
-require_once "../common/utils.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/botApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isset($_POST['botId'])) {
-    \hutoma\console::redirect('./error.php?err=110');
+    utils::redirect('./error.php?err=110');
     exit;
 }
 
 $botId = $_POST['botId'];
-$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response = $botApi->purchaseBot($botId);
 unset($botApi);
 echo json_encode ($response,true);

@@ -1,9 +1,14 @@
 <?php
 
-require_once "../console/common/utils.php";
-require_once "../console/common/config.php";
+namespace hutoma;
 
-require "config.php";
+use hutoma\api\userMgmt;
+
+require_once __DIR__ . "/../console/common/globals.php";
+require_once __DIR__ . "/../console/common/utils.php";
+require_once __DIR__ . "/../console/common/config.php";
+require_once __DIR__ . "/../console/api/userMgmt.php";
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -12,7 +17,7 @@ require "config.php";
     <link rel="icon" href="../console/dist/img/favicon.ico" type="image/x-icon">
   </head>
   <body>
-  <?php include_once "../google_analytics.php"; ?>
+  <?php include_once __DIR__ . "/../console/common/google_analytics.php"; ?>
 
   <?php
     if(isset($_POST['change_password'])){
@@ -22,16 +27,16 @@ require "config.php";
         $new_password = $_POST['new_password'];
         $retype_password = $_POST['retype_password'];
 
-          $api = new \hutoma\api\adminApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
-          $userInfo = $api->getUserInfo(\hutoma\console::$user);
+          $api = new api\adminApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+          $userInfo = $api->getUserInfo(sessionObject::getCurrentUsername());
           unset($api);
 
         if($new_password != $retype_password){
           echo "<p><h2>Password don't match</h2><p>The passwords you entered don't match. Try again.</p></p>";
-        }else if(\hutoma\console::login($userInfo['username'], "", false, false) == false){
+        }else if(userMgmt::login($userInfo['username'], "", false, false) == false){
           echo "<h2>Incorrect Password</h2><p>The password you entered for your account is wrong.</p>";
         }else{
-          $change_password = \hutoma\console::changePassword($new_password);
+          $change_password = userMgmt::changePassword($new_password);
           if($change_password === true){
             echo "<h2>Password Changed Successfully</h2>";
           }
@@ -41,7 +46,7 @@ require "config.php";
       }
     }
     ?>
-    <form action="<?php echo \hutoma\utils::curPageURL();?>" method='POST'>
+    <form action="<?php echo utils::curPageURL();?>" method='POST'>
       <label>
         <p>Current Password</p>
         <input type='password' name='current_password' />

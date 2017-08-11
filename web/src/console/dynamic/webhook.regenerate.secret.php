@@ -1,20 +1,15 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: paul
- * Date: 18/07/17
- * Time: 08:43
- */
+namespace hutoma;
 
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
 
-$aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$status = $aiApi->regenerateHmacSecretForAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$status = $aiApi->regenerateHmacSecretForAI(sessionObject::getCurrentAI()['aiid']);
 unset($aiApi);
 echo json_encode($status, JSON_PRETTY_PRINT);
 unset($status);

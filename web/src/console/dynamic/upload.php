@@ -1,13 +1,16 @@
 <?php
-require "../../pages/config.php";
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
+namespace hutoma;
 
-if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+if (!isset(sessionObject::getCurrentAI()['aiid'])) {
     echo json_encode(prepareResponse(500, 'Missing AI Id info'), true);
     exit;
 }
@@ -34,8 +37,8 @@ switch ($_POST['tab']) {
 
         //$source_type = 0;
         //$url = "";
-        $aiApi = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-        $responseFile = $aiApi->uploadFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $_FILES['inputfile'], 0, '');
+        $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+        $responseFile = $aiApi->uploadFile(sessionObject::getCurrentAI()['aiid'], $_FILES['inputfile'], 0, '');
         unset($aiApi);
         echo json_encode($responseFile, true);
         unset($responseFile);
@@ -58,8 +61,8 @@ switch ($_POST['tab']) {
 
         //$source_type = 0;
         //$url = "";
-        $aiApiStructure = new hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-        $responseStructure = $aiApiStructure->uploadFile($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $_FILES['inputstructure'], 1, '');
+        $aiApiStructure = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+        $responseStructure = $aiApiStructure->uploadFile(sessionObject::getCurrentAI()['aiid'], $_FILES['inputstructure'], 1, '');
         unset($aiApiStructure);
         echo json_encode($responseStructure, true);
         unset($responseStructure);
@@ -73,15 +76,6 @@ switch ($_POST['tab']) {
         break;
 }
 
-
-/**********  EVENTUALLY copy file to server-side
- * $filename = '/path/' . time() . $_SERVER['REMOTE_ADDR'] . 'txt';
- * if (!is_uploaded_file($_FILES['inputfile']['tmp_name']) || !copy($_FILES['inputfile']['tmp_name'], $filename)) {
- * $error = "Could not save file as $filename!";
- * echo  $_SERVER['DOCUMENT_ROOT'] ;
- * exit;
- * }
- */
 
 function prepareResponse($code, $info)
 {

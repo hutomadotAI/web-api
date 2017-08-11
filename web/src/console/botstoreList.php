@@ -1,26 +1,17 @@
 <?php
-header('P3P: CP="CAO PSA OUR"');
-session_start();
+
+namespace hutoma;
+
+require_once __DIR__ . "/common/globals.php";
+
+//header('P3P: CP="CAO PSA OUR"');
+
+$header_page_title = "Botstore";
+include __DIR__ . "/include/page_head_default.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Botstore</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="./scripts/switch/switch.css">
-    <link rel="stylesheet" href="./scripts/star/star.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <?php include_once "./dynamic/hotjar.inc.php" ?>
-</head>
+
 <body class="hold-transition skin-blue fixed " onload="scrollTo(0,0)">
-<?php include_once "../console/common/google_analytics.php"; ?>
+<?php include_once __DIR__ . "/../console/common/google_analytics.php"; ?>
 
 <!-- ================ PAGE CONTENT ================= -->
 <section class="content">
@@ -28,7 +19,7 @@ session_start();
         <i class="fa fa-refresh fa-spin center-block"></i>
     </div>
     <p id="botsCarousels"></p>
-    <?php include './dynamic/botstore.content.singleBot.buy.html.php'; ?>
+    <?php include __DIR__ . '/dynamic/botstore.content.singleBot.buy.html.php'; ?>
 </section>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>

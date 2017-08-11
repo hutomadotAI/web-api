@@ -1,22 +1,24 @@
 <?php
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/botApi.php";
 
+namespace hutoma;
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/botApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isset($_POST['bot'])) {
-    \hutoma\console::redirect('./error.php?err=110');
+    utils::redirect('./error.php?err=110');
     exit;
 }
 
 $json = $_POST['bot'];
 $bot = json_decode($json, true);
 
-$botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response = $botApi->publishBot($bot);
 
 unset($botApi);

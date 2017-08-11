@@ -1,25 +1,19 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Andrea
- * Date: 30/09/16
- * Time: 13:21
- */
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
-require_once "../api/entityApi.php";
+namespace hutoma;
 
-if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/entityApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
     echo json_encode(prepareResponse(500, 'Missing post data.'), true);
     exit;
 }
 
-$entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$entityApi = new api\entityApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response = $entityApi->updateEntity(
     $_POST['entity_name'],
     $_POST['entity_values']

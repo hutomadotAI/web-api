@@ -1,21 +1,28 @@
 <?php
-require "../../pages/config.php";
-require_once "../api/analyticsApi.php";
-require_once "../common/utils.php";
 
-$aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
-$to = \hutoma\utils::toIsoDate($_REQUEST['to']);
-$from = \hutoma\utils::toIsoDate($_REQUEST['from']);
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/analyticsApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$aiid = sessionObject::getCurrentAI()['aiid'];
+$to = utils::toIsoDate($_REQUEST['to']);
+$from = utils::toIsoDate($_REQUEST['from']);
 $format = 'csv';
 
-$api = new \hutoma\api\analyticsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$api = new api\analyticsApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $chatLogs = $api->downloadChatLogs($aiid, $from, $to, $format);
 
 $chatLogsJson = json_decode($chatLogs);
 if ($chatLogsJson != null && array_key_exists('status', $chatLogsJson)) {
     if ($chatLogsJson->status->code != 200) {
         $err = '?errObj=' . urlencode($chatLogs);
-        \hutoma\utils::redirect(\hutoma\config::getErrorPageUrl() . $err, null);
+        utils::redirect(config::getErrorPageUrl() . $err, null);
         exit;
     }
 }

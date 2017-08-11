@@ -1,14 +1,22 @@
 <?php
-    if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-    }
+namespace hutoma;
+
+$currentAi = sessionObject::getCurrentAI();
+$aiName = json_encode($currentAi['name']);
+$language = json_encode($currentAi['language']);
+$voice = json_encode($currentAi['voice']);
+
+$userInfo = sessionObject::getCurrentUserInfoDetailsMap();
+$humanName = json_encode($userInfo['name']);
+$speech = isset($userInfo['speech']) ? json_encode($userInfo['speech']) : 'false';
 ?>
+
 <script>
-    var human =  <?php echo json_encode( $_SESSION[$_SESSION['navigation_id']]['user_details']['name'] ); ?>;
-    var AI = <?php echo json_encode( $_SESSION[ $_SESSION['navigation_id'] ]['user_details']['ai']['name'] ); ?>;
-    var lang = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language']); ?>;
-    var gender = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice']); ?>;
-    var speech = <?php if (isset($_SESSION[$_SESSION['navigation_id']]['user_details']['speech'])) echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['speech']); else echo 'false' ?>;
+    var human =  <?php echo $humanName ?>;
+    var AI = <?php echo $aiName ?>;
+    var lang = <?php echo $language ?>;
+    var gender = <?php echo $voice ?>;
+    var speech = <?php echo $speech ?>;
 </script>
 
 <ul class="sidebar-menu" id="console-menu">
@@ -16,15 +24,15 @@
 
         <div class="input-group">
             <div class="box-title text-gray" style="font-size: 12px; margin-left: 150px;"> CHAT</div>
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="voice options" tabindex="-1" style="margin-left: 125px;">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" title="voice options" tabindex="-1" style="margin-left: 125px;">
                 <i class="fa fa-gears text-gray text-sm "></i>
             </a>
             <ul class="dropdown-menu no-border flat" style="margin-top:5px;margin-left: 139px;">
                 <li id="speech-option" onMouseOver="this.style.cursor='pointer'">
-                    <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><spam id="speech-text" class="text-white"> Turn On Speech</spam></a>
+                    <a id="speech-type"><i id="speech-icon" class="fa fa-microphone text-white"></i><span id="speech-text" class="text-white"> Turn On Speech</span></a>
                 </li>
                 <li class="footer" id="json-option" onClick="setOptionJsonWindow()" onMouseOver="this.style.cursor='pointer'">
-                    <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-white"></i><spam id="json-text" class="text-white"> Hide JSON Message</spam></a>
+                    <a id="json-type"><i id="json-icon" class="fa fa-file-code-o text-white"></i><span id="json-text" class="text-white"> Hide JSON Message</span></a>
                 </li>
             </ul>
         </div>

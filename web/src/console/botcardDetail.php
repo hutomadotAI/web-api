@@ -1,60 +1,56 @@
 <?php
-require_once "api/apiBase.php";
-require_once "api/developerApi.php";
-require_once "api/botstoreApi.php";
-require_once "common/botstoreItem.php";
-require_once "common/sessionObject.php";
 
-header('P3P: CP="CAO PSA OUR"');
-session_start();
+namespace hutoma;
+
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/common/botstoreItem.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/developerApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+
+//header('P3P: CP="CAO PSA OUR"');
 
 $botId = $_GET['botId'];
 if (isset($_GET['origin'])) {
     $menu_title = $_GET['origin'];
 } else {
-    if (\hutoma\sessionObject::getDevToken() != null) {
+    if (sessionObject::getDevToken() != null) {
         $menu_title = "botstore";
     }
 }
-$session = new hutoma\sessionObject();
-$botstoreApi = new \hutoma\api\botstoreApi(false, $session->getDevToken());
+
+$botstoreApi = new api\botstoreApi(false, sessionObject::getDevToken());
 $botstoreItem = $botstoreApi->getBotstoreBot($botId);
-
 unset($botstoreApi);
-unset($session);
-?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <?php
-        if (isset($botstoreItem)) {
-            $metadata = $botstoreItem['item']['metadata'];
-            $developer = $botstoreItem['item']['developer'];
 
-            $wHtml = '<title>Hu:toma | Botstore | ' . $metadata['name'] . '</title>';
-            $wHtml .= '<meta name="description" content="Hutoma Botstore,';
-            $wHtml .= 'Bot name=' . $metadata['name'] . ',';
-            $wHtml .= 'Category=' . $metadata['category'] . ',';
-            $wHtml .= 'Description=' . $metadata['description'] . ',';
-            $wHtml .= 'Developer=' . $developer['company'] . '">';
-            echo $wHtml;
-            unset ($metadata);
-            unset ($developer);
-            unset ($wHtml);
-        }else{
-            echo '<title>Hu:toma | Botstore</title><meta name="description" content="Hutoma Botstore"';
-        }
-    ?>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    <?php include_once "./dynamic/hotjar.inc.php" ?>
-</head>
+$metadata = $botstoreItem['item']['metadata'];
+$developer = $botstoreItem['item']['developer'];
+
+
+$botItem = new botstoreItem();
+if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem))) {
+    $botItem = botstoreItem::fromObject($botstoreItem['item']);
+}
+$botItemJson = json_encode($botItem->toJSON());
+unset($botItem);
+
+
+$metaEntry = '<meta name="description" content="Hutoma Botstore,';
+$metaEntry .= 'Bot name=' . $metadata['name'] . ',';
+$metaEntry .= 'Category=' . $metadata['category'] . ',';
+$metaEntry .= 'Description=' . $metadata['description'] . ',';
+$metaEntry .= 'Developer=' . $developer['company'] . '">';
+
+$header_page_title = "Botstore | " . $metadata['name'];
+$header_additional_entries = $metaEntry;
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_menu.php";
+?>
+
 <body class="hold-transition fixed" onload="scrollTo(0,0)">
 
 <!-- ================ ALERT MESSAGE BOX ================= -->
@@ -376,13 +372,7 @@ if (isset($botstoreItem)) {
     ?>
     <script>
         var responseCode = <?php echo $botstoreItem['status']['code']; ?>;
-        var botstoreItem = <?php
-            $botItem = new \hutoma\botstoreItem();
-            if (isset($botstoreItem) && (array_key_exists('item', $botstoreItem)))
-                $botItem = \hutoma\botstoreItem::fromObject($botstoreItem['item']);
-            echo json_encode($botItem->toJSON());
-            unset($botItem);
-            ?>;
+        var botstoreItem = <?php echo $botItemJson ?>;
     </script>
 <?php } ?>
 <script>

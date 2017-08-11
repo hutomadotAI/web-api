@@ -1,5 +1,11 @@
 <?php
-include "config.php";
+namespace hutoma;
+
+require_once __DIR__ . "/../console/common/globals.php";
+require_once __DIR__ . "/../console/common/utils.php";
+require_once __DIR__ . "/../console/common/config.php";
+require_once __DIR__ . "/../console/common/sessionObject.php";
+require_once __DIR__ . "/../console/api/userMgmt.php";
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7]>
@@ -43,8 +49,8 @@ include "config.php";
     </style>
 </head>
 <body class="web-body hold-transition register-page">
-<?php include_once "../console/common/google_analytics.php"; ?>
-<?php include_once "./header.php"; ?>
+<?php include __DIR__ . "/../console/common/google_analytics.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_header.php"; ?>
 
 <section>
     <div class="register-box">
@@ -52,14 +58,14 @@ include "config.php";
             <p class="login-box-msg"><b>password reset</b></p>
 
             <?php
-            hutoma\console::forgotPassword();
+            api\userMgmt::forgotPassword();
             ?>
 
         </div>
     </div>
 </section>
 
-<?php include_once "./footer.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_footer.php"; ?>
 
 </body>
 </html>

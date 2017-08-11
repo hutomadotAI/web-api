@@ -1,21 +1,25 @@
 <?php
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()) {
-    exit;
-}
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/menuObj.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
     error_log("missing post data after stage 1 create AI");
-    \hutoma\console::redirect('../error.php?err=301');
+    utils::redirect('../error.php?err=301');
     exit;
 }
 
 setSessionVariablesFromPost();
 
-\hutoma\console::redirect('../NewAIBotstore.php');
+utils::redirect('../NewAIBotstore.php');
 
 function isPostInputAvailable()
 {

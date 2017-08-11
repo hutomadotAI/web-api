@@ -1,12 +1,14 @@
 <?php
-require "../../pages/config.php";
-require_once "../api/apiBase.php";
-require_once "../api/botApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
+namespace hutoma;
 
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/botApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isset($_POST['botId'])) {
     echo json_encode(prepareResponse(500, 'Missing post data.'), true);
@@ -23,7 +25,7 @@ if ($_FILES['inputfile']['error'] != UPLOAD_ERR_OK) {
     exit;
 }
 
-$botApi = new hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response = $botApi->uploadBotIcon($_POST['botId'], $_FILES['inputfile']);
 unset($botApi);
 
