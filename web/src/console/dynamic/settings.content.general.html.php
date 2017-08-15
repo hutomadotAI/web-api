@@ -69,6 +69,22 @@
 
         </div>
 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="ai_name">Default response for when the bot doesn't understand the user</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-question-sign"></i>
+                        </div>
+                        <input type="text" class="form-control flat no-shadow"
+                               id="ai_default_response" name="ai_default_response"
+                                value="<?php echo $aiInfo['default_chat_responses'][0]; ?>">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <h3><p class="text-muted">API keys</p></h3>
         <div class="row">
             <div class="col-md-6">

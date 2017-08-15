@@ -25,7 +25,8 @@ $response = $aiApi->updateAI(
     $_POST['timezone'],
     $_POST['personality'],
     $_POST['voice'],
-    $_POST['confidence']
+    $_POST['confidence'],
+    $_POST['default_chat_responses']
 );
 unset($aiApi);
 
