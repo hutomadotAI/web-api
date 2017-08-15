@@ -23,29 +23,10 @@ sessionObject::populateSessionWithUserDetails(sessionObject::getCurrentUsername(
 $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response_getAIs = $aiApi->getAIs();
 $aiList = [];
-$aiListJson = "";
 if (isset($response_getAIs) && (array_key_exists("ai_list", $response_getAIs))) {
-    $botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
-    foreach ($response_getAIs['ai_list'] as $ai) {
-        $publishedBot = $botApi->getPublishedBot($ai['aiid']);
-        if (isset($publishedBot) && $publishedBot['status']['code'] == 200) {
-            $publishingState = $publishedBot['bot']['publishingState'];
-        } else {
-            $publishingState = "NOT_PUBLISHED";
-        }
-
-        $row = array(
-            'aiid' => $ai['aiid'],
-            'name' => $ai['name'],
-            'description' => $ai['description'],
-            'ai_status' => $ai['ai_status'],
-            'publishing_state' => $publishingState
-        );
-        array_push($aiList, $row);
-    }
-    unset($botApi);
-    $aiListJson = json_encode($aiList);
+    $aiList = $response_getAIs['ai_list'];
 }
+$aiListJson = json_encode($aiList);
 unset($aiList);
 unset($response_getAIs);
 unset($aiApi);
