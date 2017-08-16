@@ -403,10 +403,11 @@ public class Database {
 
     public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
                             final Locale language, final String timezoneString, final double confidence,
-                            final int personality, final int voice)
+                            final int personality, final int voice, final List<String> defaultChatResponses,
+                            final JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAi", 9)
+            call.initialise("updateAi", 10)
                     .add(aiid)
                     .add(description)
                     .add(devId)
@@ -415,7 +416,8 @@ public class Database {
                     .add(timezoneString)
                     .add(confidence)
                     .add(personality)
-                    .add(voice);
+                    .add(voice)
+                    .add(serializer.serialize(defaultChatResponses));
             return call.executeUpdate() > 0;
         }
     }
@@ -473,7 +475,7 @@ public class Database {
      * @return
      * @throws DatabaseException
      */
-    public List<ApiAi> getAllAIs(final UUID devid) throws DatabaseException {
+    public List<ApiAi> getAllAIs(final UUID devid, final JsonSerializer serializer) throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             // load a hashmap with all the dev's statuses
             HashMap<UUID, BackendStatus> backendStatuses = getAllAIsStatusHashMap(
@@ -489,7 +491,7 @@ public class Database {
                 while (rs.next()) {
                     // combine status data with AI
                     UUID aiid = UUID.fromString(rs.getString("aiid"));
-                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid));
+                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid), serializer);
                     int publishingStateOnDb = rs.getInt("publishing_state");
                     // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
                     // we always get it right regardless of the default value
@@ -521,7 +523,7 @@ public class Database {
      * @return an ai, or null if it was not found
      * @throws DatabaseException
      */
-    public ApiAi getAI(final UUID devid, final UUID aiid)
+    public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             // load the statuses first
@@ -532,7 +534,7 @@ public class Database {
                     .add(aiid)
                     .executeQuery();
             if (rs.next()) {
-                return getAiFromResultset(rs, backendStatus);
+                return getAiFromResultset(rs, backendStatus, serializer);
             }
             return null;
         } catch (final SQLException sqle) {
@@ -547,10 +549,7 @@ public class Database {
                     .add(devId.toString())
                     .add(aiid)
                     .executeQuery();
-            if (rs.next()) {
-                return true;
-            }
-            return false;
+            return rs.next();
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -873,7 +872,7 @@ public class Database {
                 String lockedAiid = rs.getString("locked_aiid");
                 double confidenceThreshold = rs.getDouble("confidence_threshold");
                 if (rs.wasNull()) {
-                    confidenceThreshold = this.getAI(devId, aiid).getConfidence();
+                    confidenceThreshold = this.getAI(devId, aiid, jsonSerializer).getConfidence();
                 }
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),
@@ -885,7 +884,7 @@ public class Database {
                 );
             }
             ChatState chatState = ChatState.getEmpty();
-            chatState.setConfidenceThreshold(this.getAI(devId, aiid).getConfidence());
+            chatState.setConfidenceThreshold(this.getAI(devId, aiid, jsonSerializer).getConfidence());
             return chatState;
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
@@ -1131,10 +1130,12 @@ public class Database {
         return bots;
     }
 
-    private ApiAi getAiFromResultset(final ResultSet rs, BackendStatus backendStatus)
+    private ApiAi getAiFromResultset(final ResultSet rs, final BackendStatus backendStatus,
+                                     final JsonSerializer serializer)
             throws SQLException, DatabaseException {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
+        List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
         // create one summary training status from the block of data
         return new ApiAi(
                 rs.getString("aiid"),
@@ -1151,7 +1152,8 @@ public class Database {
                 Locale.forLanguageTag(localeString),
                 timezoneString,
                 rs.getString("hmac_secret"),
-                rs.getString("passthrough_url"));
+                rs.getString("passthrough_url"),
+                defaultChatResponses);
     }
 
     /***

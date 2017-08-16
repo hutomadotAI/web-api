@@ -45,6 +45,7 @@ public class ParameterFilter extends Validate {
     protected static final String SERVER_URL = "server_url";
     protected static final String FACEBOOK_CONNECT = "facebook_connect";
     protected static final String ANALYTICS_RESPONSE_FORMAT = "format";
+    protected static final String DEFAULT_CHAT_RESPONSES = "default_chat_responses";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -140,6 +141,11 @@ public class ParameterFilter extends Validate {
 
     public static AnalyticsResponseFormat getAnalyticsResponseFormat(final ContainerRequestContext requestContext) {
         return (AnalyticsResponseFormat) requestContext.getProperty(APIParameter.AnalyticsResponseFormat.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> getDefaultChatResponses(final ContainerRequestContext requestContext) {
+        return (List<String>) requestContext.getProperty(APIParameter.DefaultChatResponses.toString());
     }
 
     /***

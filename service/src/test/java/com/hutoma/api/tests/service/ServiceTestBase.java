@@ -14,6 +14,7 @@ import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -29,6 +30,7 @@ import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.logic.FacebookChatHandler;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
@@ -126,6 +128,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected EntityRecognizerService fakeEntityRecognizer;
     @Mock
     protected FacebookConnector fakefacebookConnector;
+    @Mock
+    protected AiStrings fakeAiStrings;
 
     public static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
@@ -190,6 +194,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAccessLogger)).to(AccessLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeEntityRecognizer)).to(EntityRecognizerService.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakefacebookConnector)).to(FacebookConnector.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiStrings)).to(AiStrings.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -275,6 +280,13 @@ public abstract class ServiceTestBase extends JerseyTest {
         when(this.fakeConfig.getRateLimit_Chat_Frequency()).thenReturn(1.0);
         when(this.fakeConfig.getRateLimit_BotstoreMetadata_Frequency()).thenReturn(1.0);
         when(this.fakeConfig.getRateLimit_BotstorePublish_Frequency()).thenReturn(1.0);
+
+        try {
+            when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
+        } catch (AiStrings.AiStringsException ex) {
+            // this will never happen, but on the zero in a million chance that it does ....
+            ex.printStackTrace();
+        }
 
         ResourceConfig rc = new ResourceConfig(getClassUnderTest());
         AbstractBinder binder = this.getDefaultBindings();

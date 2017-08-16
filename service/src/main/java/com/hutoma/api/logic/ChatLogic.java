@@ -9,6 +9,7 @@ import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
@@ -42,6 +43,8 @@ import javax.inject.Inject;
  */
 public class ChatLogic {
 
+    public static final String COMPLETELY_LOST_RESULT = "Erm... What?";
+
     private static final String LOGFROM = "chatlogic";
     private static final double JUST_ABOVE_ZERO = 0.00001d;
     private static final String SYSANY = "sys.any";
@@ -55,6 +58,7 @@ public class ChatLogic {
     private final ChatLogger chatLogger;
     private final WebHooks webHooks;
     private final ChatStateHandler chatStateHandler;
+    private final AiStrings aiStrings;
     private LogMap telemetryMap;
     private ChatState chatState;
 
@@ -62,7 +66,7 @@ public class ChatLogic {
     public ChatLogic(final Config config, final JsonSerializer jsonSerializer, final AIChatServices chatServices,
                      final Tools tools, final ILogger logger, final IMemoryIntentHandler intentHandler,
                      final IEntityRecognizer entityRecognizer, final ChatLogger chatLogger, final WebHooks webHooks,
-                     final ChatStateHandler chatStateHandler) {
+                     final ChatStateHandler chatStateHandler, final AiStrings aiStrings) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.chatServices = chatServices;
@@ -73,6 +77,7 @@ public class ChatLogic {
         this.chatLogger = chatLogger;
         this.webHooks = webHooks;
         this.chatStateHandler = chatStateHandler;
+        this.aiStrings = aiStrings;
     }
 
     public ApiResult chat(final UUID aiid, final UUID devId, final String question, final String chatId,
@@ -292,7 +297,7 @@ public class ChatLogic {
                             } else {
                                 // TODO we need to figure out something
                                 this.telemetryMap.add("AnsweredBy", "NONE");
-                                result = getImCompletelyLostChatResult(chatUuid, question);
+                                result = getImCompletelyLostChatResult(devId, aiid, chatUuid, question);
                             }
                         }
 
@@ -793,11 +798,18 @@ public class ChatLogic {
 
     }
 
-    private ChatResult getImCompletelyLostChatResult(final UUID chatId, final String question) {
+    private ChatResult getImCompletelyLostChatResult(final UUID devId, final UUID aiid, final UUID chatId,
+                                                     final String question) {
         ChatResult result = new ChatResult(question);
         result.setChatId(chatId);
         result.setScore(0.0);
-        result.setAnswer("Erm... What?");
+        try {
+            result.setAnswer(this.aiStrings.getRandomDefaultChatResponse(devId, aiid));
+        } catch (AiStrings.AiStringsException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Could not get default chat response",
+                    devId.toString(), ex);
+            result.setAnswer(COMPLETELY_LOST_RESULT);
+        }
         result.setContext("");
         result.setTopicOut("");
         return result;

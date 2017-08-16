@@ -8,14 +8,15 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.logic.ChatLogic;
 
 import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.message.internal.MediaTypes;
@@ -24,7 +25,9 @@ import org.glassfish.jersey.server.ContainerRequest;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -89,6 +92,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case AIDescription:
                     //fallthrough
                 case AIID:
+                    //fallthrough
+                case DefaultChatResponses:
                     expectingForm = true;
                     break;
                 default:
@@ -186,6 +191,14 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         if (checkList.contains(APIParameter.Locale)) {
             request.setProperty(APIParameter.Locale.toString(),
                     this.validateLocale(LOCALE, getFirst(form.get(LOCALE))));
+        }
+        if (checkList.contains(APIParameter.DefaultChatResponses)) {
+            // We should receive a Json list
+            String jsonList = getFirst(form.get(DEFAULT_CHAT_RESPONSES));
+            List<String> list = jsonList.isEmpty()
+                    ? Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT)
+                    : serializer.deserializeList(jsonList);
+            request.setProperty(APIParameter.DefaultChatResponses.toString(), list);
         }
     }
 
@@ -295,11 +308,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 checkParameterNotNull(FACEBOOK_CONNECT, facebookConnect);
                 request.setProperty(APIParameter.FacebookConnect.toString(), facebookConnect);
             }
-            
+
             if (checkList.contains(APIParameter.FacebookNotification)) {
                 FacebookNotification facebookNotification = (FacebookNotification)
                         this.serializer.deserialize(request.getEntityStream(), FacebookNotification.class);
-                request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);            
+                request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);
             }
 
         } catch (JsonParseException jpe) {

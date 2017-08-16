@@ -8,6 +8,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
@@ -65,7 +66,6 @@ public class TestChatLogic {
     private static final String AIMLRESULT = "aimlresult";
     private static final String QUESTION = "question";
     private static final String MEMORY_VARIABLE_PROMPT = "prompt1";
-    private static final String COMPLETELY_LOST_RESULT = "Erm... What?";
     private static final WebHook VALID_WEBHOOK = new WebHook(AIID, "intent", "endpoint", true);
 
     private AIChatServices fakeChatServices;
@@ -77,6 +77,7 @@ public class TestChatLogic {
     private Database fakeDatabase;
     private ChatStateHandler fakeChatStateHandler;
     private Config fakeConfig;
+    private AiStrings fakeAiStrings;
 
     @Before
     public void setup() {
@@ -90,11 +91,18 @@ public class TestChatLogic {
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
+        this.fakeAiStrings = mock(AiStrings.class);
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
-                this.fakeChatStateHandler);
+                this.fakeChatStateHandler, fakeAiStrings);
 
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
+        try {
+            when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
+            when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(ChatLogic.COMPLETELY_LOST_RESULT);
+        } catch (AiStrings.AiStringsException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /***
@@ -267,7 +275,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(map);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     /***
@@ -787,7 +795,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -798,7 +806,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -807,7 +815,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -816,7 +824,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -1097,7 +1105,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
 

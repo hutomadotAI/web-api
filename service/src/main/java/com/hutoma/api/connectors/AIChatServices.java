@@ -250,8 +250,8 @@ public class AIChatServices extends ServerConnector {
     public String getAIPassthroughUrl(UUID devid, UUID aiid) {
         String result = null;
         try {
-            ApiAi ai = this.database.getAI(devid, aiid);
-            result =  ai.getPassthroughUrl();
+            ApiAi ai = this.database.getAI(devid, aiid, this.serializer);
+            result = ai.getPassthroughUrl();
         } catch (Database.DatabaseException e) {
             this.logger.logException("Database exception attempting to retrieve PassthroughUrl", e);
         }

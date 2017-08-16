@@ -76,7 +76,7 @@ public class AIEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
     @ValidatePost({APIParameter.AIDescription, APIParameter.AiConfidence, APIParameter.Timezone,
-            APIParameter.Locale})
+            APIParameter.Locale, APIParameter.DefaultChatResponses})
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateAI(
             @Context ContainerRequestContext requestContext,
@@ -92,7 +92,8 @@ public class AIEndpoint {
                 ParameterFilter.getAiConfidence(requestContext),
                 voice,
                 ParameterFilter.getLocale(requestContext),
-                ParameterFilter.getTimezone(requestContext));
+                ParameterFilter.getTimezone(requestContext),
+                ParameterFilter.getDefaultChatResponses(requestContext));
         return result.getResponse(this.serializer).build();
     }
 

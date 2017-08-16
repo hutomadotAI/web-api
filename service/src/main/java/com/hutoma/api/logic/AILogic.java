@@ -119,11 +119,12 @@ public class AILogic {
             final double confidence,
             final int voice,
             final Locale language,
-            final String timezone) {
+            final String timezone,
+            final List<String> defaultChatResponses) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devId, aiid);
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -137,7 +138,9 @@ public class AILogic {
                     timezone,
                     confidence,
                     personality,
-                    voice)) {
+                    voice,
+                    defaultChatResponses,
+                    this.jsonSerializer)) {
                 this.logger.logUserErrorEvent(LOGFROM, "UpdateAI - db fail updating ai", devIdString, logMap);
                 return ApiError.getInternalServerError();
             }
@@ -152,7 +155,7 @@ public class AILogic {
     public ApiResult getAIs(final UUID devId) {
         final String devIdString = devId.toString();
         try {
-            List<ApiAi> aiList = this.database.getAllAIs(devId);
+            List<ApiAi> aiList = this.database.getAllAIs(devId, this.jsonSerializer);
             if (aiList.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetAIs - empty list", devIdString);
                 return ApiError.getNotFound();
@@ -169,7 +172,7 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devid, aiid);
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -223,7 +226,7 @@ public class AILogic {
                         logMap.put("BotId", bot.getBotId()));
             }
 
-            ApiAi ai = this.database.getAI(devid, aiid);
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
