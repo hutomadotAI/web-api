@@ -11,9 +11,9 @@ $currentAiInfo = json_encode($aiInfo);
     var previousGeneralInfo = <?php echo $currentAiInfo ?>;
     function regenerateHmacSecret() {
         var errorMessage = 'There was a problem updating the webhook secret. Please try again later and if the issue ' +
-            'persists, please contact support.'
+            'persists, please contact support.';
         $.ajax({
-            url: './dynamic/webhook.regenerate.secret.php',
+            url: './proxy/webhook.regenerate.secret.php',
             type: 'POST',
             success: function (response) {
                 var parsedResponse = JSON.parse(response);
@@ -170,7 +170,8 @@ $currentAiInfo = json_encode($aiInfo);
                 </div>
             </div>
             <div class="modal-footer">
-                <form method="POST" id="deleteForm" action="./dynamic/deleteai.php">
+                <form method="POST" id="deleteForm" action="./proxy/aiProxy.php">
+                    <input type="hidden" name="action" value="delete">
                     <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
                     </button>
                     <button type="submit" class="btn btn-danger flat" id="modalDelete" data-dismiss="modal">Delete

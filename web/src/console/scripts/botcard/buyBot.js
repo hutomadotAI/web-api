@@ -12,7 +12,7 @@ function purchaseBot() {
             var botId = document.getElementById('bot_id').value;
             document.getElementById('message').innerText = 'Sending request...';
             $.ajax({
-                url: './dynamic/purchaseBot.php',
+                url: './proxy/purchaseBot.php',
                 data: {botId: botId},
                 type: 'POST',
                 success: function (response) {

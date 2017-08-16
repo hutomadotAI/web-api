@@ -371,7 +371,7 @@ function trainingStartCall() {
 
 function trainingStatusCall() {
     jQuery.ajax({
-        url: './dynamic/trainingStatusAI.php',
+        url: './proxy/trainingStatusAI.php',
         type: 'GET',
         processData: false,  // tell jQuery not to process the data
         contentType: "application/json; charset=utf-8",

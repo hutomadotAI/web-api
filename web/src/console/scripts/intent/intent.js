@@ -63,7 +63,8 @@ function showIntents(str) {
             wHTML += ('<div class="row item-row">');
 
             wHTML += ('<div class="col-xs-10 no-padding" id="obj-intent">');
-            wHTML += ('<input type="text" class="form-control flat no-shadow" id="intent-label' + x + '"  name="intent-label" onClick="editIntent(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" style="padding-left:10px; background-color: #404446; " value="' + intents[x] + '" readonly>');
+            wHTML += ('<input type="text" class="form-control flat no-shadow" id="intent-label' + x + '"  name="intent-label" '
+                + 'onClick="editIntent(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" style="padding-left:10px; background-color: #404446; " value="' + intents[x] + '" readonly>');
             wHTML += ('</div>');
 
             wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;"" >');
@@ -88,7 +89,25 @@ function showIntents(str) {
 }
 
 function deleteIntent(elem) {
-    this.location.href = 'intent.php?deleteintent=' + intents[elem];
+    var request = {
+        url: './proxy/intentProxy.php?intent=' + intents[elem],
+        verb: 'DELETE',
+        onGenericError: function() {
+            msgAlertIntentOp(ALERT.DANGER.value, "There was a problem deleting the intent.");
+        },
+        onOK: function() {
+            msgAlertIntentOp(ALERT.SUCCESS.value, 'The intent was deleted.');
+            // Should just delete the list entry, but for now refresh the page as previously
+            location.href = 'intent.php';
+        },
+        onNotFound: function() {
+            msgAlertIntentOp(ALERT.DANGER.value, 'Intent could not be found. Please refresh the page.');
+        },
+        onShowError: function(message) {
+            msgAlertIntentOp(ALERT.DANGER.value, message);
+        }
+    };
+    commonAjaxApiRequest(request);
 }
 
 function OnMouseIn(elem) {

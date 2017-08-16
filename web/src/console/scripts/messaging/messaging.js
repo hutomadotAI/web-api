@@ -274,6 +274,24 @@ function msgAlertIntent(alarm,msg){
     document.getElementById('msgAlertIntent').innerText = msg;
 }
 
+function msgAlertIntentOp(alarm,msg){
+    switch (alarm){
+        case ALERT.BASIC.value:
+            $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-base');
+            $("#iconAlertIntent").attr('class', 'icon fa fa-check');
+            break;
+        case ALERT.WARNING.value:
+            $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-warning');
+            $("#iconAlertIntent").attr('class', 'icon fa fa-check');
+            break;
+        case ALERT.DANGER.value:
+            $("#containerMsgAlertIntent").attr('class','alert alert-dismissable flat alert-danger');
+            $("#iconAlertIntent").attr('class', 'icon fa fa-warning');
+            break;
+    }
+    document.getElementById('msgAlertIntent').innerText = msg;
+}
+
 function msgAlertIntentElement(alarm,msg){
     switch (alarm){
         case ALERT.BASIC.value:

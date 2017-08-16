@@ -113,7 +113,7 @@ function saveEntity() {
     var entityName = document.getElementById('entity-name').value;
     var elements = document.getElementsByName('value-entity-row');
 
-    if (elements.length == 0){
+    if (elements.length === 0){
         msgAlertEntityValues(ALERT.WARNING.value, 'Please enter at least one value for this entity.');
         return;
     }
@@ -128,22 +128,16 @@ function saveEntity() {
     msgAlertEntityValues(ALERT.WARNING.value, 'Saving...');
 
     $.ajax({
-        url: './dynamic/updateEntity.php',
+        url: './proxy/entityProxy.php?entity=' + entityName,
         data: {
-            entity_name: entityName, entity_values: values
+            values: values
         },
-        type: 'POST',
+        type: 'PUT',
         success: function (response) {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
                 case 200:
                     msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved.');
-                    break;
-                case 400:
-                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-                case 500:
-                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
                     break;
                 default:
                     msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);

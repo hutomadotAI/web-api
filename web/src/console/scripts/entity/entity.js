@@ -1,7 +1,7 @@
 document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
 
 function checkEntityCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if( activeButtonCreateEntity())
             postingEntityName();
     }
@@ -62,7 +62,7 @@ function showEntities(str) {
         var isSystem = entity['is_system'];
         var name = entity['entity_name'];
 
-        if ((str != " ") && ( (str.length == 0) || (name.toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
+        if ((str !== " ") && ( (str.length === 0) || (name.toLowerCase()).indexOf(str.toLowerCase()) !== -1 )) {
 
             var wHTML = "";
             wHTML += ('<div class="col-xs-12">');
@@ -113,11 +113,8 @@ function deleteEntity(elem) {
     msgAlertEntity(ALERT.WARNING.value, 'Deleting...');
 
     $.ajax({
-        url: './dynamic/deleteEntity.php',
-        data: {
-            deleteentity: entities[elem]['entity_name']
-        },
-        type: 'POST',
+        url: './proxy/entityProxy.php?entity=' + entities[elem]['entity_name'],
+        type: 'DELETE',
         success: function (response) {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {

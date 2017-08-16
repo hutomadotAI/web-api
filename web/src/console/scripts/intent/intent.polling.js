@@ -68,7 +68,7 @@ function showAlertMessage(code, intent_action) {
 function startTraining() {
     var ERROR_MESSAGE = 'Unexpected error occurred. Could not start training.';
     jQuery.ajax({
-        url: './dynamic/trainingStart.php',
+        url: './proxy/trainingStart.php',
         type: 'GET',
         dataType: 'json',
         processData: false,
@@ -92,7 +92,7 @@ function startTraining() {
 function updateTraining() {
     var ERROR_MESSAGE = 'Unexpected error occurred. Could not start training.';
     jQuery.ajax({
-        url: './dynamic/trainingUpdate.php',
+        url: './proxy/trainingUpdate.php',
         type: 'GET',
         dataType: 'json',
         processData: false,
@@ -139,7 +139,7 @@ function restartTraining() {
 
 function botStatusCall() {
     jQuery.ajax({
-        url: './dynamic/trainingStatusAI.php',
+        url: './proxy/trainingStatusAI.php',
         type: 'GET',
         processData: false,
         contentType: "application/json; charset=utf-8",

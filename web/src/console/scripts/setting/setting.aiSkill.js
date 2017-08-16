@@ -54,7 +54,7 @@ function updateAISkill() {
     }
 
     $.ajax({
-        url: './dynamic/updateBotsLinked.php',
+        url: './proxy/updateBotsLinked.php',
         type: 'POST',
         data: {'aiSkill': jsonString},
         success: function (response) {

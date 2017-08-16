@@ -17,11 +17,6 @@ $intentsApi = new api\intentsApi(sessionObject::isLoggedIn(), sessionObject::get
 
 $aiid = sessionObject::getCurrentAI()['aiid'];
 $intent_deleted = false;
-if (isset($_REQUEST['deleteintent'])) {
-    $intentName = $_REQUEST['deleteintent'];
-    $result = $intentsApi->deleteIntent($aiid, $intentName);
-    $intent_deleted = true;
-}
 
 $intents = $intentsApi->getIntents($aiid);
 unset($intentsApi);

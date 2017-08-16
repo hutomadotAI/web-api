@@ -246,7 +246,7 @@ function speechOption() {
 
 function updateVoiceSessionVariable(voiceOption){
     jQuery.ajax({
-        url: "./dynamic/sessionChat.php",
+        url: "./proxy/sessionChat.php",
         type: "POST",
         data: {speech: voiceOption},
         cache: false,

@@ -19,7 +19,7 @@ if (!isPostInputAvailable()) {
 
 setSessionVariablesFromPost();
 
-utils::redirect('../NewAIBotstore.php');
+utils::redirect('../newAIBotstore.php');
 
 function isPostInputAvailable()
 {

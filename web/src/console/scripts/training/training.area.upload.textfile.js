@@ -16,7 +16,7 @@ function uploadTextFile() {
 
     msgAlertUploadFile(ALERT.WARNING.value, 'Uploading file...');
     $.ajax({
-        url: './dynamic/upload.php',
+        url: './proxy/upload.php',
         type: 'POST',
         data: formData,
         processData: false,  // tell jQuery not to process the data

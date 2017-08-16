@@ -84,7 +84,12 @@ include __DIR__ . "/include/page_menu.php";
             <p id="botsCarousels"></p>
             <div class="row" style="background-color: #434343;">
                 <div class="col-lg-12" style="background-color: #434343; padding:5px;">
-                    <?php include __DIR__ . '/dynamic/settings.content.aiSkill.list.html.php'; ?>
+                    <p></p>
+                    <h2></h2>
+                    <p id="botsSearch"></p>
+                    <form method="POST" name="aiSkill">
+                        <input type="hidden" name="userActivedBots" id="userActivedBots" value="" style="display:none;">
+                    </form>
                 </div>
             </div>
         </section>

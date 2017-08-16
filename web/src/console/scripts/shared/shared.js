@@ -244,6 +244,48 @@ function decodeCSStringAsArray(theString) {
     return values;
 }
 
+function commonAjaxApiRequest(request) {
+    $.ajax({
+        url: request.url,
+        type: request.verb,
+        data: request.data,
+        success: function (response) {
+            var parsedResponse = JSON.parse(response);
+            if (parsedResponse === null) {
+                request.onGenericError();
+            } else {
+                var statusCode = parsedResponse['status']['code'];
+                switch (statusCode) {
+                    case 200:
+                        request.onOK();
+                        return request;
+                    case 404:
+                        if (typeof request.onNotFound() !== 'undefined') {
+                            request.onNotFound();
+                        }
+                        break;
+                    case 500:
+                        request.onGenericError();
+                        break;
+                    default:
+                        if (typeof request.onShowError() !== 'undefined') {
+                            request.onShowError(parsedResponse['status']['info']);
+                        } else {
+                            request.onGenericError();
+                        }
+                        break;
+                }
+            }
+        },
+        complete: function () {
+        },
+        error: function () {
+            request.onGenericError();
+        }
+    });
+    return null;
+}
+
 $(document).ready(function () {
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
