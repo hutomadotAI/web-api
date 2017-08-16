@@ -80,10 +80,11 @@ if (isset($botDetails)) {
     unset($dev);
     unset($devInfo);
     ?>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </script>
 
 <body class="hold-transition skin-blue fixed sidebar-mini" style="background:#2c3b41;">
-<?php include_once "../console/common/google_analytics.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
 <div class="wrapper">
     <header class="main-header">

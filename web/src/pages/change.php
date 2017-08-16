@@ -15,9 +15,10 @@ require_once __DIR__ . "/../console/api/userMgmt.php";
   <head>
     <title>Hu:toma | Change Password</title>
     <link rel="icon" href="../console/dist/img/favicon.ico" type="image/x-icon">
+    <?php include_once "../console/common/google_tag_manager.php" ?>
   </head>
   <body>
-  <?php include_once __DIR__ . "/../console/common/google_analytics.php"; ?>
+  <?php include_once __DIR__ . "/../console/common/google_tag_manager_no_js.php" ?>
 
   <?php
     if(isset($_POST['change_password'])){

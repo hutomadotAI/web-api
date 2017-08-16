@@ -52,9 +52,6 @@ class console
             "token_table" => "resetTokens"
         ),
 
-        /** Intercom ID acquired */
-        "intercom_app_id" => "ts64euf8",
-
         /**
          * Keys used for encryption
          * DONT MAKE THIS PUBLIC
@@ -617,15 +614,6 @@ class console
 
         $curl->close();
         return "unknown";
-    }
-
-    public static function getGoogleAnalyticsTrackerObject()
-    {
-        $trackerObject = getenv("GOOGLE_ANALYTICS_TRACKER");
-        if (isset($trackerObject) && $trackerObject != "") {
-            return $trackerObject;
-        }
-        return null;
     }
 
     /**

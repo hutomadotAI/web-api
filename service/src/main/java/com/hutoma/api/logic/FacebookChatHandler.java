@@ -11,7 +11,6 @@ import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.IntegrationType;
@@ -20,7 +19,6 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -167,9 +165,9 @@ public class FacebookChatHandler implements Callable {
                     // TODO: load chat state and check sequence number
 
                     // call the chat logic to get a response
-                List<FacebookResponseSegment> response = getChatResponse(integrationRecord,
-                        messageOriginatorId,
-                        userQuery, chatID, logMap);
+                    List<FacebookResponseSegment> response = getChatResponse(integrationRecord,
+                            messageOriginatorId,
+                            userQuery, chatID, logMap);
 
                     try {
                         // note the start time
@@ -339,28 +337,15 @@ public class FacebookChatHandler implements Callable {
         // load the keys
         List<String> keys = memoryVariable.getEntityKeys();
 
-        // we need at least one, but not more than 12
-        if (keys.size() == 0 || keys.size() > 12) {
+        // we need at least one, but not more than 11
+        if (keys.size() == 0 || keys.size() > 11) {
             return false;
         }
 
-        boolean firstSegment = true;
-        LinkedList<String> entityKeys = new LinkedList<>(keys);
-        // create a segment for each group of three buttons
-        while (!entityKeys.isEmpty()) {
-            ArrayList<String> buttons = new ArrayList<>();
-            // every three buttons
-            while (!entityKeys.isEmpty() && buttons.size() < 3) {
-                buttons.add(entityKeys.removeFirst());
-            }
-            // create a rich segment
-            FacebookRichContentNode node =
-                    FacebookRichContentNode.createButtonTemplate(
-                            firstSegment ? chatResult.getAnswer() : "...",
-                            buttons);
-            responseList.add(new FacebookResponseSegment.FacebookResponseRichSegment(node));
-            firstSegment = false;
-        }
+        // create quick reply segment with all the keys
+        responseList.add(
+                new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                        chatResult.getAnswer(), keys));
 
         // signal that we generated rich content
         return true;

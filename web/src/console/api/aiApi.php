@@ -69,7 +69,7 @@ class aiApi extends apiBase
         return null;
     }
 
-    public function updateAI($aiid, $description, $language, $timezone, $personality, $voice, $confidence)
+    public function updateAI($aiid, $description, $language, $timezone, $personality, $voice, $confidence, $defaultChatResponses)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
@@ -100,7 +100,9 @@ class aiApi extends apiBase
                 'confidence' => $confidence,
                 'voice' => $voice,
                 'locale' => $locale,
-                'timezone' => $timezone
+                'timezone' => $timezone,
+                // TODO: change to a true json array when we support multiple lines on the UI
+                'default_chat_responses' => '["' . $defaultChatResponses . '"]'
             );
 
             $this->curl->setVerbPost();

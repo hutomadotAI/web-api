@@ -23,6 +23,7 @@
     if (isset($header_additional_entries)) {
         echo $header_additional_entries;
     }
+
+    include_once __DIR__ . "/../common/google_tag_manager.php";
     ?>
-    <script src="scripts/external/autopilot/autopilot.js"></script>
 </head>

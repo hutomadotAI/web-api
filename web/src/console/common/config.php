@@ -27,22 +27,6 @@ class config
         return null;
     }
 
-    public static function getIntercomAppId() {
-        $token = getenv("INTERCOM_APP_ID");
-        if (isset($token) && $token != "") {
-            return $token;
-        }
-        return null;
-    }
-
-    public static function getHotjarTrackingId() {
-        $token = getenv("HOTJAR_TRACKING_ID");
-        if (isset($token) && $token != "") {
-            return $token;
-        }
-        return null;
-    }
-
     public static function getSmtp2GoApiToken() {
         return getenv("SMTP2GO_API_TOKEN");
     }

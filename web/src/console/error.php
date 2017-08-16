@@ -12,13 +12,13 @@ require_once __DIR__ . "/api/botstoreApi.php";
 logging::error(sprintf("%s - referrer: %s  errorObject: %s", $_GET['err'], $_SERVER['HTTP_REFERER'],
         isset($_GET['errObj']) ? $_GET['errObj'] : ""));
 
+
 sessionObject::redirectToLoginIfUnauthenticated();
 $header_page_title = "Error";
 include __DIR__ . "/include/page_head_default.php";
 include __DIR__ . "/include/page_body_default.php";
 include __DIR__ . "/include/page_menu.php";
 ?>
-
 
 <div class="wrapper">
     <?php include __DIR__ . "/include/page_header_default.php"; ?>

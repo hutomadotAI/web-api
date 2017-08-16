@@ -13,6 +13,5 @@
         var category_list = <?php echo (CAROUSEL_CATEGORIES);?>;
         var category_list_icons = <?php echo (CAROUSEL_CATEGORIES_ICONS);?>;
     </script>
-
-    <?php include_once __DIR__ . "/../dynamic/hotjar.inc.php" ?>
+    
 </header>

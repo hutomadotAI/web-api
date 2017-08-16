@@ -29,6 +29,7 @@ CREATE TABLE `ai` (
   `aiid` varchar(50) NOT NULL,
   `ai_name` varchar(50) DEFAULT NULL,
   `ai_description` varchar(250) DEFAULT NULL,
+  `default_chat_responses` JSON NOT NULL,
   `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `dev_id` varchar(50) NOT NULL,
   `is_private` tinyint(1) DEFAULT '1',
@@ -40,6 +41,7 @@ CREATE TABLE `ai` (
   `ui_ai_personality` tinyint(4) DEFAULT '0',
   `ui_ai_voice` int(11) DEFAULT '0',
   `deleted` tinyint(1) DEFAULT '0',
+  `passthrough_url` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
@@ -688,24 +690,26 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAi`(
     MODIFIES SQL DATA
 BEGIN
 
-    DECLARE var_exists_count INT;
-    DECLARE var_named_aiid VARCHAR(50);
+  DECLARE var_exists_count INT;
+  DECLARE var_named_aiid VARCHAR(50);
 
-    SELECT count(aiid), min(aiid) INTO var_exists_count, var_named_aiid
-    FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name` AND `ai`.`deleted` = 0;
+  SELECT count(aiid), min(aiid) INTO var_exists_count, var_named_aiid
+  FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name` AND `ai`.`deleted` = 0;
 
-    IF var_exists_count=0 THEN
-      INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private,
-                      client_token,
-                      ui_ai_language, ui_ai_timezone, ui_ai_confidence, ui_ai_personality, ui_ai_voice)
-      VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private,
-                          param_client_token,
-                          param_ui_ai_language,
-                          param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice);
-      SET var_named_aiid = `param_aiid`;
-    END IF;
+  IF var_exists_count=0 THEN
+    INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private,
+                    client_token,
+                    ui_ai_language, ui_ai_timezone, ui_ai_confidence, ui_ai_personality, ui_ai_voice,
+                    default_chat_responses)
+    VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private,
+                        param_client_token,
+                        param_ui_ai_language,
+                        param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice,
+            '["Erm...What?"]');
+    SET var_named_aiid = `param_aiid`;
+  END IF;
 
-    SELECT var_named_aiid AS aiid;
+  SELECT var_named_aiid AS aiid;
 
   END ;;
 DELIMITER ;
@@ -1496,6 +1500,8 @@ BEGIN
       `ui_ai_confidence`,
       `ui_ai_personality`,
       `ui_ai_voice`,
+      `passthrough_url`,
+      `default_chat_responses`,
       (SELECT COUNT(`ai_training`.`aiid`)
        FROM `ai_training`
        WHERE `ai_training`.`aiid`=`in_aiid`)
@@ -1635,6 +1641,8 @@ BEGIN
     `ai`.`ui_ai_confidence`,
     `ai`.`ui_ai_personality`,
     `ai`.`ui_ai_voice`,
+    `ai`.`passthrough_url`,
+    `ai`.`default_chat_responses`,
     (SELECT COUNT(`ai_training`.`aiid`)
      FROM `ai_training`
      WHERE `ai_training`.`aiid`=`ai`.`aiid`)
@@ -3465,7 +3473,8 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateAi`(
   IN `param_ui_ai_timezone` VARCHAR(50),
   IN `param_ui_ai_confidence` DOUBLE,
   IN `param_ui_ai_personality` TINYINT(4),
-  IN `param_ui_ai_voice` VARCHAR(50))
+  IN `param_ui_ai_voice` VARCHAR(50),
+  IN `param_default_chat_responses` TEXT)
     MODIFIES SQL DATA
 BEGIN
 
@@ -3477,7 +3486,8 @@ BEGIN
       ui_ai_timezone = param_ui_ai_timezone,
       ui_ai_confidence = param_ui_ai_confidence,
       ui_ai_personality = param_ui_ai_personality,
-      ui_ai_voice = param_ui_ai_voice
+      ui_ai_voice = param_ui_ai_voice,
+      default_chat_responses = param_default_chat_responses
     where aiid = param_aiid AND dev_id = param_dev_id;
 
   END ;;

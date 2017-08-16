@@ -39,10 +39,11 @@ unset($aiApi);
     <link rel="stylesheet" href="scripts/external/datatables/dataTables.bootstrap.css">
     <link rel="stylesheet" href="./dist/css/hutoma.css">
     <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 
 <body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
+    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
 <div class="wrapper">
     <header class="main-header">

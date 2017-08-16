@@ -8,6 +8,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
@@ -65,7 +66,6 @@ public class TestChatLogic {
     private static final String AIMLRESULT = "aimlresult";
     private static final String QUESTION = "question";
     private static final String MEMORY_VARIABLE_PROMPT = "prompt1";
-    private static final String COMPLETELY_LOST_RESULT = "Erm... What?";
     private static final WebHook VALID_WEBHOOK = new WebHook(AIID, "intent", "endpoint", true);
 
     private AIChatServices fakeChatServices;
@@ -77,6 +77,7 @@ public class TestChatLogic {
     private Database fakeDatabase;
     private ChatStateHandler fakeChatStateHandler;
     private Config fakeConfig;
+    private AiStrings fakeAiStrings;
 
     @Before
     public void setup() {
@@ -90,11 +91,18 @@ public class TestChatLogic {
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
+        this.fakeAiStrings = mock(AiStrings.class);
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
-                this.fakeChatStateHandler);
+                this.fakeChatStateHandler, fakeAiStrings);
 
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
+        try {
+            when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
+            when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(ChatLogic.COMPLETELY_LOST_RESULT);
+        } catch (AiStrings.AiStringsException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /***
@@ -267,7 +275,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(map);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     /***
@@ -731,6 +739,44 @@ public class TestChatLogic {
         verify(fakeIntentHandler).clearIntents(Collections.singletonList(mi));
     }
 
+    /*
+     * Tests for correct passthrough on bots that provide a valid url.
+     * @throws RequestBase.AiControllerException.
+     */
+    @Test
+    public void testChat_botPassthrough() throws RequestBase.AiControllerException {
+        String passthroughResponse = "different message.";
+        WebHookResponse response = new WebHookResponse(passthroughResponse);
+
+        when(this.fakeChatServices.getAIPassthroughUrl(any(), any())).thenReturn("http://localhost:80");
+        when(this.fakeWebHooks.executePassthroughWebhook(any(), any(), any(), any(), any())).thenReturn(response);
+
+        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
+        ApiResult result = getChat(0.2f);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(passthroughResponse, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    /*
+    * Tests that passthrough is ignored with an empty string url.
+    * @throws RequestBase.AiControllerException.
+    */
+    @Test
+    public void testChat_botPassthroughIgnored() throws RequestBase.AiControllerException {
+        String passthroughResponse = "won't see this";
+        WebHookResponse response = new WebHookResponse(passthroughResponse);
+
+        when(this.fakeChatServices.getAIPassthroughUrl(any(), any())).thenReturn(null);
+        when(this.fakeWebHooks.executePassthroughWebhook(any(), any(), any(), any(), any())).thenReturn(response);
+
+        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
+        ApiResult result = getChat(0.2f);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
     /***
      * Tests for a valid semantic response from assistant.
      * @throws ServerConnector.AiServicesException
@@ -749,7 +795,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -760,7 +806,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -769,7 +815,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -778,7 +824,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
     @Test
@@ -940,7 +986,7 @@ public class TestChatLogic {
         WebHookResponse wr = new WebHookResponse(webHookResponse);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
-        when(this.fakeWebHooks.executeWebHook(any(), any(), any(), any(), any(), any())).thenReturn(wr);
+        when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
@@ -971,7 +1017,7 @@ public class TestChatLogic {
         WebHookResponse wr = new WebHookResponse(webHookResponse);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
-        when(this.fakeWebHooks.executeWebHook(any(), any(), any(), any(), any(), any())).thenReturn(wr);
+        when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any(), any(), any())).thenReturn(wr);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
@@ -999,7 +1045,7 @@ public class TestChatLogic {
 
         WebHookResponse wr = new WebHookResponse(webHookResponse);
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(new WebHook(AIID, "intent", "endpoint", false));
-        when(this.fakeWebHooks.executeWebHook(any(), any(), any(), any(), any(), any())).thenReturn(wr);
+        when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
@@ -1028,7 +1074,7 @@ public class TestChatLogic {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
-        when(this.fakeWebHooks.executeWebHook(any(), any(), any(), any(), any(), any())).thenReturn(null);
+        when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any(), any(), any())).thenReturn(null);
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
@@ -1059,7 +1105,7 @@ public class TestChatLogic {
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
-        Assert.assertEquals(COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
     }
 
 

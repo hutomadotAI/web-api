@@ -1,5 +1,9 @@
 package com.hutoma.api.containers.facebook;
 
+import com.hutoma.api.connectors.FacebookConnector;
+
+import java.util.List;
+
 /***
  * Encapsulates a single message that we send to Facebook.
  * One or more of these could be a single complex message that results from a chat interaction.
@@ -8,15 +12,7 @@ package com.hutoma.api.containers.facebook;
  */
 public abstract class FacebookResponseSegment {
 
-    public FacebookRichContentNode getRichContentNode() {
-        return null;
-    }
-
-    public String getText() {
-        return null;
-    }
-
-    public abstract boolean isRichContentSegment();
+    public abstract void populateMessageContent(FacebookConnector.SendMessage message);
 
     public static class FacebookResponseTextSegment extends FacebookResponseSegment {
 
@@ -27,13 +23,8 @@ public abstract class FacebookResponseSegment {
         }
 
         @Override
-        public String getText() {
-            return this.text;
-        }
-
-        @Override
-        public boolean isRichContentSegment() {
-            return false;
+        public void populateMessageContent(FacebookConnector.SendMessage message) {
+            message.setText(this.text);
         }
     }
 
@@ -46,14 +37,27 @@ public abstract class FacebookResponseSegment {
         }
 
         @Override
-        public FacebookRichContentNode getRichContentNode() {
-            return this.richNode;
+        public void populateMessageContent(final FacebookConnector.SendMessage message) {
+            message.setRichContent(this.richNode);
+        }
+    }
+
+    public static class FacebookResponseQuickRepliesSegment extends FacebookResponseSegment {
+
+        private List<String> options;
+        private String text;
+
+        public FacebookResponseQuickRepliesSegment(String question, List<String> options) {
+            this.text = question;
+            this.options = options;
         }
 
         @Override
-        public boolean isRichContentSegment() {
-            return true;
+        public void populateMessageContent(final FacebookConnector.SendMessage message) {
+            message.setText(this.text);
+            message.setQuickReplies(this.options);
         }
     }
+
 }
 

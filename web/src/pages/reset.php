@@ -47,11 +47,10 @@ require_once __DIR__ . "/../console/api/userMgmt.php";
             min-height: 100%;
         }
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body class="web-body hold-transition register-page">
-<?php include __DIR__ . "/../console/common/google_analytics.php"; ?>
 <?php include __DIR__ . "/../console/include/loggedout_header.php"; ?>
-
 <section>
     <div class="register-box">
         <div class="register-box-body"  style="border: 1px solid #d2d6de; background-color: #202020;">

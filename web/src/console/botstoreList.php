@@ -4,14 +4,11 @@ namespace hutoma;
 
 require_once __DIR__ . "/common/globals.php";
 
-//header('P3P: CP="CAO PSA OUR"');
-
 $header_page_title = "Botstore";
 include __DIR__ . "/include/page_head_default.php";
 ?>
 
 <body class="hold-transition skin-blue fixed " onload="scrollTo(0,0)">
-<?php include_once __DIR__ . "/../console/common/google_analytics.php"; ?>
 
 <!-- ================ PAGE CONTENT ================= -->
 <section class="content">

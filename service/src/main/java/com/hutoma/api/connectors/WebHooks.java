@@ -60,9 +60,9 @@ public class WebHooks {
      * @return a WebHookResponse containing the returned data.
      * @throws IOException if the endpoint cannot be accessed.
      */
-    public WebHookResponse executeWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
-                                          final Map<String, String> clientVariables, final UUID devId,
-                                          final UUID originatingAiid) {
+    public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
+                                                final Map<String, String> clientVariables, final UUID devId,
+                                                final UUID originatingAiid) {
         final String devIdString = devId.toString();
         if (webHook == null || intent == null) {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
@@ -92,6 +92,37 @@ public class WebHooks {
             return null;
         }
 
+        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, originatingAiid);
+
+        if (response.getStatus() != HttpURLConnection.HTTP_OK) {
+            this.logger.logUserWarnEvent(LOGFROM,
+                    String.format("WebHook Failed (%s): intent %s for aiid %s at %s",
+                            response.getStatus(),
+                            intent.getName(),
+                            intent.getAiid(),
+                            webHook.getEndpoint()),
+                    devIdString,
+                    LogMap.map("ResponseStatus", response.getStatus())
+                            .put("Intent", intent.getName())
+                            .put("AIID", intent.getAiid())
+                            .put("Endpoint", webHook.getEndpoint()));
+            return null;
+        }
+
+        response.bufferEntity();
+        WebHookResponse webHookResponse = this.deserializeResponse(response);
+        response.close();
+
+        this.logger.logInfo(LOGFROM,
+                String.format("Successfully executed webhook for aiid %s and intent %s",
+                        intent.getAiid(), intent.getName()),
+                LogMap.map("Intent", intent.getName())
+                        .put("AIID", intent.getAiid())
+                        .put("Endpoint", webHook.getEndpoint()));
+        return webHookResponse;
+    }
+
+    private Response executeWebhook(String webHookEndpoint, String jsonPayload, String devIdString, boolean isHttps, UUID aiid) {
         byte[] payloadBytes;
         try {
             payloadBytes = jsonPayload.getBytes("UTF-8");
@@ -105,12 +136,12 @@ public class WebHooks {
         if (isHttps) {
             String secret;
             try {
-                secret = this.database.getWebhookSecretForBot(intent.getAiid());
+                secret = this.database.getWebhookSecretForBot(aiid);
                 if (secret == null) {
                     this.logger.logUserWarnEvent(LOGFROM, "Webhook secret null, regenerating", devIdString,
-                            LogMap.map("AIID", intent.getAiid()));
+                            LogMap.map("AIID", aiid));
                     secret = this.tools.generateRandomHexString(HMAC_SECRET_LENGTH);
-                    this.database.setWebhookSecretForBot(intent.getAiid(), secret);
+                    this.database.setWebhookSecretForBot(aiid, secret);
                 }
             } catch (Database.DatabaseException e) {
                 this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devIdString, e);
@@ -139,18 +170,53 @@ public class WebHooks {
             return null;
         }
 
+        return response;
+    }
+
+    public WebHookResponse executePassthroughWebhook(final String passthroughUrl, final ChatResult chatResult,
+                                                     final Map<String, String> clientVariables, final UUID devId,
+                                                     final UUID originatingAiid) {
+        final String devIdString = devId.toString();
+
+        if (passthroughUrl == null || passthroughUrl == "") {
+            this.logger.logError(LOGFROM, "Invalid url passed.");
+            return null;
+        }
+
+        String webHookEndpoint = passthroughUrl;
+        String[] webHookSplit = webHookEndpoint.split(":", 2);
+        if (webHookSplit.length < 2) {
+            this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
+                    devIdString,
+                    LogMap.map("Endpoint", webHookEndpoint)
+                            .put("AIID", originatingAiid)
+                            .put("Endpoint", webHookEndpoint));
+            return null;
+        }
+        boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
+
+        WebHookPayload payload = new WebHookPayload(chatResult, originatingAiid, clientVariables);
+
+        String jsonPayload;
+        try {
+            jsonPayload = this.serializer.serialize(payload);
+        } catch (JsonIOException e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Webhook Payload Serialisation Failed", devIdString, e);
+            return null;
+        }
+
+        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, originatingAiid);
+
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
-                    String.format("WebHook Failed (%s): intent %s for aiid %s at %s",
+                    String.format("Chat WebHook Failed (%s): aiid %s at %s",
                             response.getStatus(),
-                            intent.getName(),
-                            intent.getAiid(),
-                            webHook.getEndpoint()),
+                            originatingAiid,
+                            webHookEndpoint),
                     devIdString,
                     LogMap.map("ResponseStatus", response.getStatus())
-                            .put("Intent", intent.getName())
-                            .put("AIID", intent.getAiid())
-                            .put("Endpoint", webHook.getEndpoint()));
+                            .put("AIID", originatingAiid)
+                            .put("Endpoint", webHookEndpoint));
             return null;
         }
 
@@ -159,11 +225,10 @@ public class WebHooks {
         response.close();
 
         this.logger.logInfo(LOGFROM,
-                String.format("Successfully executed webhook for aiid %s and intent %s",
-                        intent.getAiid(), intent.getName()),
-                LogMap.map("Intent", intent.getName())
-                        .put("AIID", intent.getAiid())
-                        .put("Endpoint", webHook.getEndpoint()));
+                String.format("Successfully executed chat webhook for aiid %s",
+                        originatingAiid),
+                LogMap.map("AIID", originatingAiid)
+                        .put("Endpoint", webHookEndpoint));
         return webHookResponse;
     }
 

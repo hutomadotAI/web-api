@@ -35,6 +35,7 @@ function updateAI() {
     formData.append('timezone',document.getElementById('select2-' + 'ai_timezone' + '-container').innerHTML);
     formData.append('personality',getSelectIndex('ai_personality'));
     formData.append('voice',getSelectIndex('ai_voice'));
+    formData.append('default_chat_responses', document.getElementById('ai_default_response').value);
 
     msgAlertUpdateAI(ALERT.WARNING.value,'Updating...');
     $.ajax({

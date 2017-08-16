@@ -93,9 +93,9 @@ if(isset($_POST['action_login'])){
             min-height: 100%;
         }
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body class="web-body" id="body">
-<?php include_once __DIR__ . "/../console/common/google_analytics.php"; ?>
 <?php include_once __DIR__ . "/../console/include/loggedout_header.php"; ?>
 
 <section>

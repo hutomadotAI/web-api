@@ -9,6 +9,7 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.joda.time.DateTime;
 
+import java.util.List;
 import java.util.Locale;
 
 
@@ -23,6 +24,7 @@ public class ApiAi extends ApiResult {
 
     private String name;
     private String description;
+    private String passthroughUrl;
 
     @SerializedName("created_on")
     private DateTime createdOn;
@@ -65,15 +67,20 @@ public class ApiAi extends ApiResult {
     @SerializedName("publishing_state")
     private AiBot.PublishingState publishingState;
 
+    @SerializedName("default_chat_responses")
+    private List<String> defaultChatResponses;
+
     public ApiAi(String aiid, String clientToken) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.hmacSecret = null;
     }
 
-    public ApiAi(String aiid, String clientToken, String name, String description, DateTime createdOn,
-                 boolean isPrivate, BackendStatus backendStatus, boolean hasTrainingFile,
-                 int personality, double confidence, int voice, Locale language, String timezone, String hmacSecret) {
+    public ApiAi(final String aiid, final String clientToken, final String name, final String description,
+                 final DateTime createdOn, final boolean isPrivate, final BackendStatus backendStatus,
+                 final boolean hasTrainingFile, final int personality, final double confidence, final int voice,
+                 final Locale language, final String timezone, final String hmacSecret,
+                 String passthroughUrl, final List<String> defaultChatResponses) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.name = name;
@@ -88,6 +95,8 @@ public class ApiAi extends ApiResult {
         this.timezone = timezone;
         this.trainingFileUploaded = hasTrainingFile;
         this.hmacSecret = hmacSecret;
+        this.defaultChatResponses = defaultChatResponses;
+        this.passthroughUrl = passthroughUrl;
         populateExtendedStatus();
     }
 
@@ -156,8 +165,20 @@ public class ApiAi extends ApiResult {
         return this.backendStatus;
     }
 
+    public String getPassthroughUrl() {
+        return this.passthroughUrl;
+    }
+
     public boolean trainingFileUploaded() {
         return this.trainingFileUploaded;
+    }
+
+    public List<String> getDefaultChatResponses() {
+        return this.defaultChatResponses;
+    }
+
+    public void setDefaultChatResponses(final List<String> defaultChatResponses) {
+        this.defaultChatResponses = defaultChatResponses;
     }
 
     private void populateExtendedStatus() {

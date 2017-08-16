@@ -43,4 +43,10 @@ public class WebHookPayload {
         this.originatingAiid = originatingAiid.toString();
         this.chatSession = Tools.getHashedDigestFromUuid(chatResult.getChatId());
     }
+
+    public WebHookPayload(final ChatResult chatResult, final UUID originatingAiid, final Map<String, String> clientVariables) {
+        this.chatResult = chatResult;
+        this.originatingAiid = originatingAiid.toString();
+        this.clientVariables = clientVariables;
+    }
 }

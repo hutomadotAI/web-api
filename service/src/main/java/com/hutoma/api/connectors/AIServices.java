@@ -226,7 +226,7 @@ public class AIServices extends ServerConnector {
     public void stopTrainingIfNeeded(final UUID devId, final UUID aiid)
             throws Database.DatabaseException {
         try {
-            ApiAi ai = this.database.getAI(devId, aiid);
+            ApiAi ai = this.database.getAI(devId, aiid, this.serializer);
             if (ai != null) {
                 stopTraining(ai.getBackendStatus(), devId, aiid);
             }

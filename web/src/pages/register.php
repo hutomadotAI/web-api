@@ -74,7 +74,16 @@ if(isset($_POST['submit'])) {
                         }
 
                         setcookie('logSyscuruser', $email);
-                        $login = userMgmt::login($email, $password, false);
+
+                        // Try to login if successful redirect to homepage using naive register trigger
+                        $login = userMgmt::login(
+                            $email, 
+                            $password, 
+                            false, 
+                            true, 
+                            config::getHomePageUrl() . '?register=1'
+                        );
+
                         if ($login === false) {
                             $msg = getErrorMessage('There was an error creating the user - please try again later.');
                         } elseif (is_array($login) && $login['status'] == "blocked") {
@@ -177,9 +186,9 @@ if(isset($_POST['submit'])) {
         }
 
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body id="body" class="web-body hold-transition register-page">
-<?php include __DIR__ . "/../console/common/google_analytics.php"; ?>
 <?php include __DIR__ . "/../console/include/loggedout_header.php"; ?>
 
 <section>

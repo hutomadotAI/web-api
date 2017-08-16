@@ -21,6 +21,7 @@ public enum APIParameter {
     TrainingSourceType,
     FacebookConnect,
     AnalyticsResponseFormat,
+    DefaultChatResponses,
     // Backend
     AiStatusJson,
     ServerRegistration,

@@ -50,7 +50,6 @@ $linkedBotsJson = json_encode($linkedBotsList);
 unset($purchasedBotsList);
 unset($linkedBotsList);
 
-
 $header_page_title = "Add Skill";
 $header_additional_entries = "<link rel=\"stylesheet\" href=\"./scripts/switch/switch.css\">";
 include __DIR__ . "/include/page_head_default.php";

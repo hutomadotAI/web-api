@@ -5,6 +5,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
@@ -244,5 +245,16 @@ public class AIChatServices extends ServerConnector {
         public AiNotReadyToChat(final String message) {
             super(message);
         }
+    }
+
+    public String getAIPassthroughUrl(UUID devid, UUID aiid) {
+        String result = null;
+        try {
+            ApiAi ai = this.database.getAI(devid, aiid, this.serializer);
+            result = ai.getPassthroughUrl();
+        } catch (Database.DatabaseException e) {
+            this.logger.logException("Database exception attempting to retrieve PassthroughUrl", e);
+        }
+        return result;
     }
 }
