@@ -54,7 +54,7 @@ include __DIR__ . "/include/page_menu.php";
 <div class="wrapper">
     <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
@@ -143,13 +143,11 @@ include __DIR__ . "/include/page_menu.php";
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-
+<script src="./dist/js/mustache.min.js"></script>
 <script src="scripts/external/saveFile/FileSaver.js"></script>
 <script src="./scripts/validation/validation.js"></script>
 <script src="./scripts/entity/entity.element.js"></script>
 <script src="scripts/external/select2/select2.full.js"></script>
-<script src="./scripts/chat/chat.js"></script>
-<script src="./scripts/chat/voice.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>

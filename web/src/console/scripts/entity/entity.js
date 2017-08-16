@@ -2,10 +2,10 @@ document.getElementById("btnCreateEntity").addEventListener("click", postingEnti
 
 function checkEntityCode(element, key) {
     if (key === 13) {
-        if( activeButtonCreateEntity())
+        if (activeButtonCreateEntity()) {
             postingEntityName();
-    }
-    else {
+        }
+    } else {
         activeButtonCreateEntity();
     }
 }
@@ -23,8 +23,8 @@ function activeButtonCreateEntity() {
             return false;
         default:
             $("#btnCreateEntity").prop("disabled", true);
+            return false;
     }
-    return false;
 }
 
 function postingEntityName() {
@@ -36,8 +36,8 @@ function postingEntityName() {
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
     }
-    
-    if(isNameExists($("#inputEntityName").val(),entities)){
+
+    if (isNameExists($("#inputEntityName").val(), entities)) {
         msgAlertEntity(ALERT.DANGER.value, 'Entity name already exists. Please choose a different name.');
         document.getElementById("btnCreateEntity").addEventListener("click", postingEntityName);
         return false;
@@ -45,65 +45,39 @@ function postingEntityName() {
 
     submitElementClicked(inputEntityName.value);
     RecursiveUnbind($('#wrapper'));
+    return true;
 }
 
-function showEntities(str) {
+function showEntities(filter) {
     if (entities.length < 1) {
         msgAlertEntity(ALERT.BASIC.value, 'No entities yet. Create the first one.');
         return;
-    }
-    else
+    } else {
         msgAlertEntity(ALERT.BASIC.value, 'In this section you can create different entities.');
+    }
 
-    var entitiesUser = "";
-    var entitiesSystem = "";
-    entities.map(function(entity, index) {
+    var view = {
+        entities: entities.filter(function (item) {
+            return !(filter.trim() !== "" && item.entity_name.toLowerCase().indexOf(filter.toLowerCase()) === -1);
+        }).sort(function (a, b) {
+            if (a.is_system > b.is_system)
+                return 1;
+            else if (a.is_system > b.is_system)
+                return -1;
+            if (a.entity_name > b.entity_name)
+                return 1;
+            else if (a.entity_name < b.entity_name)
+                return -1;
+            return 0;
+        }).map(function (entity, index) {
+            entity.index = index;
+            return entity;
+        })
+    };
 
-        var isSystem = entity['is_system'];
-        var name = entity['entity_name'];
-
-        if ((str !== " ") && ( (str.length === 0) || (name.toLowerCase()).indexOf(str.toLowerCase()) !== -1 )) {
-
-            var wHTML = "";
-            wHTML += ('<div class="col-xs-12">');
-            wHTML += ('<div class="box-body flat no-padding" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
-            wHTML += ('<div class="row item-row">');
-
-            wHTML += ('<div class="col-xs-10 no-padding" id="obj-entity">');
-            wHTML += ('<input type="text" class="form-control flat no-shadow" id="entity-label' + index + '"  name="entity-label" ');
-            if (!isSystem) {
-                wHTML += ('onClick="editEntity(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" ');
-            }
-            wHTML += ('style="padding-left:10px; background-color: #404446; " value="@' + name + '" readonly>');
-
-            wHTML += ('</div>');
-
-            wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;" >');
-            wHTML += ('<div class="btn-group pull-right text-gray">');
-
-            if (!isSystem) {
-                wHTML += ('<a data-toggle="modal" data-target="#deleteEntity" id="' + index + '" style="cursor: pointer;">');
-                wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
-                wHTML += ('</a>');
-            }
-            wHTML += ('</div>');
-
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-            if (isSystem) {
-                entitiesSystem += wHTML;
-            } else {
-                entitiesUser += wHTML;
-            }
-        }
+    $.get('templates/entities_list.mst', function (template) {
+        $('#entsearch').html(Mustache.render(template, view));
     });
-    newNode.innerHTML = entitiesUser + "\n" + entitiesSystem;
-    document.getElementById('entsearch').appendChild(newNode);
-
 }
 
 function deleteEntity(elem) {
@@ -150,7 +124,7 @@ function editEntity(elem, entity) {
     submitElementClicked(entity.replace(/@/g, ""));
 }
 
-function submitElementClicked(value){
+function submitElementClicked(value) {
     var form = document.createElement('form');
     var element = document.createElement('input');
 

@@ -278,6 +278,9 @@ function commonAjaxApiRequest(request) {
             }
         },
         complete: function () {
+            if (typeof request.onComplete() !== 'undefined') {
+                request.onComplete();
+            }
         },
         error: function () {
             request.onGenericError();

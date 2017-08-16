@@ -1,0 +1,27 @@
+<div id="intents_list" class="row">
+    {{#intents}}
+    <div class="col-xs-12">
+        <div class="box-body flat no-padding" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">
+            <div class="row item-row">
+
+                <div class="col-xs-10 no-padding" id="obj-intent">
+                    <input type="text" class="form-control flat no-shadow" id="intent-label{{index}}"
+                           name="intent-label"
+                           onClick="editIntent(this,this.value)" onMouseOver="this.style.cursor='pointer'"
+                           style="padding-left:10px; background-color: #404446; " value="{{name}}" readonly>
+                </div>
+
+                <div class="col-xs-2" id="btnEnt" style="display:none;margin-top:8px;padding-right:8px;">
+                    <div class="btn-group pull-right text-gray">
+
+                        <a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">
+                            <i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/intents}}
+</div>

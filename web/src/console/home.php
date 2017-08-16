@@ -48,27 +48,54 @@ include __DIR__ . "/include/page_menu.php";
                 include __DIR__ . '/dynamic/home.content.start.html.php';
             }
             else {
-                include __DIR__ . '/dynamic/home.content.start.html.php';
-                include __DIR__ . '/dynamic/home.viewall.html.php';
-            }
-            ?>
+                include __DIR__ . '/dynamic/home.content.start.html.php'; ?>
+                <div class="box box-solid box-clean flat no-shadow unselectable">
+                    <div class="box-header with-border">
+                        <div class="box-title"><b>Your Bots</b></div>
+                    </div>
+
+                    <div class="box-body table-responsive no-border" style="padding-top:0;">
+                        <table class="table dataTable" id="tableAi">
+                            <thead>
+                            <tr disabled>
+                                <th class="text-left" style="border:0; width:20%">Bot Name</th>
+                                <th class="text-left" style="border:0; width:25%">Description</th>
+                                <th class="text-center" style="border:0; width:15%">Status</th>
+                                <th style="border:0; width:5%"></th>
+                                <th style="border:0; width:5%"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="tableAiList">
+                            </tbody>
+                        </table>
+
+                        <form method="POST" name="viewAllForm" action="">
+                            <input type="hidden" id="ai" name="ai" value="">
+                        </form>
+                    </div>
+
+                <?php
+                }
+                ?>
         </section>
     </div>
-<?php include __DIR__ . '/include/page_footer_default.php'; ?>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/datatables/jquery.dataTables.js"></script>
-<script src="scripts/external/datatables/dataTables.bootstrap.js"></script>
+<script src="./dist/js/mustache.min.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-
 <script src="./scripts/home/home.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 
 <script>
     var aiList = <?php echo $aiListJson ?>;
+
+    $(document).ready(function () {
+        drawTableRows();
+    });
 </script>
 
 
