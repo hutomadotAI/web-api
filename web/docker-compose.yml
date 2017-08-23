@@ -32,6 +32,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        DEBUG: 1
     ports:
       - "8080:80"
     environment:
@@ -39,6 +41,8 @@ services:
       # https://github.com/docker/compose/pull/3955
       API_ADMIN_DEVTOKEN: 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c'
       LOG_SERVICE_ANALYTICS_URL: 'http://log-svc:8080/log'
+      PHP_XDEBUG_ENABLED: 1
+      XDEBUG_CONFIG: remote_host=192.168.1.255
     volumes:
       - ./src:/var/www/html
 
