@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
+import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -281,9 +282,33 @@ public class FacebookChatHandler implements Callable {
 
             if (!createdContentFromIntentPrompt) {
                 if (webhookResponseSentRichContent) {
-                    // add the rich content
-                    responseList.add(new FacebookResponseSegment.FacebookResponseRichSegment(
-                            chatResult.getWebhookResponse().getFacebookNode()));
+
+                    // if the webhook returned rich data in the old format then we
+                    // have to convert it to the new format
+                    FacebookMessageNode richNode =
+                            convertDeprecatedFormat(logMap, chatResult.getWebhookResponse().getFacebookNode());
+
+                    // is this a quick reply?
+                    if (richNode.hasQuickReplies()) {
+
+                        // quick reply with attachment or with plain text?
+                        if (richNode.hasAttachment()) {
+                            responseList.add(
+                                    new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                            richNode.getQuickReplies(), richNode.getAttachment()));
+                        } else {
+                            responseList.add(
+                                    new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                            richNode.getQuickReplies(), chatResult.getAnswer()));
+
+                        }
+                    } else {
+                        // otherwise just plain attachment
+                        responseList.add(
+                                new FacebookResponseSegment.FacebookResponseAttachmentSegment(
+                                        richNode.getAttachment()));
+                    }
+
                 } else {
                     // or add the text
                     createTextResponse(responseList, chatResult.getAnswer());
@@ -296,6 +321,15 @@ public class FacebookChatHandler implements Callable {
                     e.getApiError().getStatus().getInfo()));
         }
         return responseList;
+    }
+
+    private FacebookMessageNode convertDeprecatedFormat(final LogMap logMap,
+                                                        final FacebookMessageNode facebookNode) {
+        if (facebookNode.isDeprecatedFormat()) {
+            logMap.add("Facebook_DeprecatedFormat", true);
+            return new FacebookMessageNode(facebookNode);
+        }
+        return facebookNode;
     }
 
     /***

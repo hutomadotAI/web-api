@@ -7,10 +7,10 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
+import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.facebook.FacebookToken;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -18,8 +18,6 @@ import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -355,14 +353,14 @@ public class FacebookConnector {
         @SerializedName("recipient")
         private Recipient recipient;
         @SerializedName("message")
-        private MessagePayload message;
+        private FacebookMessageNode message;
         @SerializedName("sender_action")
         private SenderAction senderAction;
 
         public SendMessage(final String recipient) {
             this.recipient = new Recipient();
             this.recipient.id = recipient;
-            this.message = new MessagePayload();
+            this.message = null;
         }
 
         public SendMessage(final String recipient, final SenderAction senderAction) {
@@ -371,32 +369,14 @@ public class FacebookConnector {
             this.senderAction = senderAction;
         }
 
-        public String getText() {
-            return this.message.text;
+        public FacebookMessageNode getMessageNode() {
+            return this.message;
         }
 
-        public void setText(final String text) {
-            this.message.text = text;
+        public void setMessageNode(FacebookMessageNode content) {
+            this.message = content;
         }
-
-        public FacebookRichContentNode getRichContent() {
-            return this.message.richContent;
-        }
-
-        public void setRichContent(FacebookRichContentNode content) {
-            this.message.richContent = content;
-        }
-
-        public List<QuickReply> getQuickReplies() {
-            return this.message.quickReplies;
-        }
-
-        public void setQuickReplies(final List<String> options) {
-            this.message.quickReplies = options.stream()
-                    .map(name -> new QuickReply(name, name))
-                    .collect(Collectors.toList());
-        }
-
+        
         public enum SenderAction {
             typing_on,
             typing_off,
@@ -406,33 +386,6 @@ public class FacebookConnector {
         private static class Recipient {
             @SerializedName("id")
             private String id;
-        }
-
-        private static class MessagePayload {
-            @SerializedName("text")
-            private String text;
-
-            @SerializedName("attachment")
-            private FacebookRichContentNode richContent;
-
-            @SerializedName("quick_replies")
-            private List<QuickReply> quickReplies;
-        }
-
-        private static class QuickReply {
-
-            @SerializedName("content_type")
-            private String contentType;
-            @SerializedName("title")
-            private String title;
-            @SerializedName("payload")
-            private String payload;
-
-            public QuickReply(final String title, final String payload) {
-                this.contentType = "text";
-                this.title = title;
-                this.payload = payload;
-            }
         }
 
     }
