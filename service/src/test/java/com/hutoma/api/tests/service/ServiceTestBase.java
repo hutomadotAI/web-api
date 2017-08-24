@@ -12,15 +12,7 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.AiStrings;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
-import com.hutoma.api.connectors.EntityRecognizerService;
-import com.hutoma.api.connectors.FacebookConnector;
-import com.hutoma.api.connectors.HTMLExtractor;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -92,6 +84,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected DatabaseCall fakeDatabaseCall;
     @Mock
     protected Database fakeDatabase;
+    @Mock
+    protected DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     @Mock
     protected DatabaseAiStatusUpdates fakeDatabaseStatusUpdates;
     @Mock
@@ -177,6 +171,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeConfig)).to(Config.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseConnectionPool)).to(DatabaseConnectionPool.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabase)).to(Database.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseEntitiesIntents)).to(DatabaseEntitiesIntents.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseStatusUpdates)).to(DatabaseAiStatusUpdates.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction)).to(DatabaseTransaction.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseCall)).to(DatabaseCall.class);
@@ -240,6 +235,7 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         // Mock all the external dependencies
         this.fakeDatabase = mock(Database.class);
+        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeDatabaseStatusUpdates = mock(DatabaseAiStatusUpdates.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabaseConnectionPool = mock(DatabaseConnectionPool.class);
@@ -260,6 +256,8 @@ public abstract class ServiceTestBase extends JerseyTest {
         when(this.fakeConfig.getEncodingKey()).thenReturn(AUTH_ENCODING_KEY);
         try {
             when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
+                    .thenReturn(new RateLimitStatus(false, 1.0, true));
+            when(this.fakeDatabaseEntitiesIntents.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                     .thenReturn(new RateLimitStatus(false, 1.0, true));
         } catch (Database.DatabaseException e) {
             // this will never happen, but on the zero in a million chance that it does ....

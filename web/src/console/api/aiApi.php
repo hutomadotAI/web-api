@@ -161,6 +161,19 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function exportAI($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/export'));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $this->handleApiCallError($curl_response, 500);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
     public function chatAI($aiid, $chatId, $q)
     {
         if ($this->isLoggedIn()) {

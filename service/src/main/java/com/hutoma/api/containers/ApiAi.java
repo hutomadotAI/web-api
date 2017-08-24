@@ -169,6 +169,10 @@ public class ApiAi extends ApiResult {
         return this.passthroughUrl;
     }
 
+    public String getName() { return this.name; }
+
+    public String getDescription() { return this.description; }
+
     public boolean trainingFileUploaded() {
         return this.trainingFileUploaded;
     }

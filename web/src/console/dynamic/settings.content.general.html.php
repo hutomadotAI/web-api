@@ -153,13 +153,15 @@
 
 <div class="box-footer unselectable">
     <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">revert to saved values</button>
+    <form action="./dynamic/downloadBotExport.php" method="post" style="display:inline; margin:0; padding:0">
+        <button type="submit" name="btnExport" id="btnExport" value="_export" class="btn btn-primary flat">export Bot</button>
+    </form>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
             value="<?php echo $aiInfo['name']; ?>"
             class="btn btn-danger flat pull-right" alt="delete">delete Bot
     </button>
 </div>
-
 
 <!-- Modal DELETE AI-->
 <div class="modal fade" id="deleteAI" role="dialog">

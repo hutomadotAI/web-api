@@ -8,20 +8,28 @@ import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
+import com.hutoma.api.containers.ApiBotStructure;
 import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.IntentVariable;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -39,6 +47,7 @@ public class AILogic {
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
+    private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final AIServices aiServices;
     private final ILogger logger;
     private final Tools tools;
@@ -46,11 +55,13 @@ public class AILogic {
 
     @Inject
     public AILogic(final Config config, final JsonSerializer jsonSerializer, final Database database,
+                   final DatabaseEntitiesIntents databaseEntitiesIntents,
                    final AIServices aiServices, final ILogger logger, final Tools tools,
                    Provider<AIIntegrationLogic> integrationLogicProvider) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
+        this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.logger = logger;
         this.tools = tools;
         this.aiServices = aiServices;
@@ -345,6 +356,40 @@ public class AILogic {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBotForAI", devIdString, ex);
             return ApiError.getInternalServerError();
         }
+    }
+
+    public ApiResult exportBotData(final UUID devId, final UUID aiid) {
+        final String devIdString = devId.toString();
+        try {
+            // Get the bot.
+            ApiAi bot = this.database.getAI(devId, aiid, this.jsonSerializer);
+            String trainingFile = this.database.getAiTrainingFile(aiid);
+            final List<String> intentList = this.databaseEntitiesIntents.getIntents(devId, aiid);
+
+            List<ApiIntent> intents = new ArrayList<ApiIntent>();
+            HashMap<String, ApiEntity> entityMap = new HashMap<String, ApiEntity>();
+            for (String intent : intentList) {
+                ApiIntent apiIntent = this.databaseEntitiesIntents.getIntent(aiid, intent);
+                intents.add(apiIntent);
+
+                for (IntentVariable intentVariable : apiIntent.getVariables()) {
+                    String entityName = intentVariable.getEntityName();
+                    if (!entityMap.containsKey(entityName)) {
+                        entityMap.put(entityName, this.databaseEntitiesIntents.getEntity(devId, entityName));
+                    }
+                }
+            }
+            BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile, entityMap);
+            return new ApiBotStructure(botStructure).setSuccessStatus();
+
+
+        } catch (Database.DatabaseException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Failed to export bot data.", devIdString, ex);
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Failed to populate bot structure for export.", devIdString, ex);
+        }
+
+        return ApiError.getInternalServerError();
     }
 
 }

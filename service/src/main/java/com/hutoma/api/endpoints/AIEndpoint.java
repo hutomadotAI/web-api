@@ -148,6 +148,18 @@ public class AIEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @Path("{aiid}/export")
+    @GET
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID})
+    public Response exportAI(
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.aiLogic.exportBotData(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
     @Path("{aiid}/bots")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
