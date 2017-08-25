@@ -228,7 +228,7 @@ public class TestFacebookChatHandler {
         String s = "{\n" +
                 "   \"text\":\"text field\",\n" +
                 "   \"facebook\":{\n" +
-                "      \"quick-replies\":[\n" +
+                "      \"quick_replies\":[\n" +
                 "         {\n" +
                 "            \"content_type\":\"text\",\n" +
                 "            \"title\":\"Search\",\n" +
@@ -259,7 +259,7 @@ public class TestFacebookChatHandler {
         String s = "{\n" +
                 "   \"text\":\"text field\",\n" +
                 "   \"facebook\":{\n" +
-                "      \"quick-replies\":[\n" +
+                "      \"quick_replies\":[\n" +
                 "         {\n" +
                 "            \"content_type\":\"text\",\n" +
                 "            \"title\":\"Search\",\n" +

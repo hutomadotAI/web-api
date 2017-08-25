@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class FacebookMessageNode extends FacebookRichContentAttachment {
 
-    @SerializedName("quick-replies")
+    @SerializedName("quick_replies")
     private List<FacebookQuickReply> quickReplies;
 
     @SerializedName("attachment")
