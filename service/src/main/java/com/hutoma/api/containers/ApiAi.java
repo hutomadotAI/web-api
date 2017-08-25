@@ -131,7 +131,7 @@ public class ApiAi extends ApiResult {
     /***
      * Get the version of training status that will be reported to the caller
      * Note that this masks some of the internal workings (requeuing of bot training)
-     * @return
+     * @return the training status
      */
     public TrainingStatus getSummaryStatusPublic() {
         return this.summaryStatusPublic;

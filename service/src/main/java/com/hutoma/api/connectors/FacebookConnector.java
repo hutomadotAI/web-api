@@ -57,7 +57,7 @@ public class FacebookConnector {
 
     /***
      * If we are sent a short-lived token then we call facebook api to swap it for a long-lived one
-     * @see https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
+     * @see <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension">Facebook docs</a>
      * @param shortToken
      * @return
      * @throws FacebookException
@@ -76,7 +76,7 @@ public class FacebookConnector {
     /***
      * On the client side we are given a code as a result of user-login and auth
      * We send the code to Facebook to get an access token.
-     * @see https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
+     * @see <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension">Facebook docs</a>
      * @param facebookConnect
      * @return
      * @throws FacebookException

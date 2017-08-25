@@ -449,7 +449,6 @@ public class AIIntegrationLogic {
      * and throws an exception if there are missing permissions
      * @param id
      * @param accessToken
-     * @return
      * @throws FacebookException.FacebookMissingPermissionsException
      */
     protected void checkGrantedPermissions(final String id, final String accessToken) throws FacebookException {

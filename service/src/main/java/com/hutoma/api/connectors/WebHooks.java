@@ -58,7 +58,6 @@ public class WebHooks {
      * @param intent The intent.
      * @param chatResult The chat result for the request.
      * @return a WebHookResponse containing the returned data.
-     * @throws IOException if the endpoint cannot be accessed.
      */
     public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
                                                 final Map<String, String> clientVariables, final UUID devId,
@@ -267,7 +266,6 @@ public class WebHooks {
      * Determines whether an active WebHook exists.
      * @param intent The intent.
      * @return the active WebHook if it exists, null otherwise.
-     * @throws Database.DatabaseException if the WebHook cannot be retrieved.
      */
     public WebHook getWebHookForIntent(final MemoryIntent intent, final UUID devId) {
         WebHook webHook = null;
