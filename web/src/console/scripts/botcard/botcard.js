@@ -1,151 +1,123 @@
-function populateBotFields(botstoreItem, menu_title, carousel_category, current_flow) {
-    var item;
-    try {
-        item = JSON.parse(botstoreItem);
-        var bot = item['metadata'];
+function displayBotCardDetail(botstoreItem, origin, carousel_category, flow) {
 
-        document.getElementById('botTitle').innerText = bot['name'];
-        document.getElementById('botBadge').innerText = bot['badge'];
-        document.getElementById('botDescription').value = bot['description'];
-        if (bot['alertMessage'] === null || bot['alertMessage'].replace(/\s/g, "") === '') {
-            document.getElementById('botMessageIcon').style.display = 'none';
-            document.getElementById('botMessage').style.display = 'none';
-        }
-        else {
-            document.getElementById('botMessage').value = bot['alertMessage'];
-        }
-        document.getElementById('botLicense').innerText = bot['licenseType'];
-        document.getElementById('botPrice').innerText = bot['price'];
-        document.getElementById('botLongDescription').innerText = bot['longDescription'];
-        document.getElementById('botSample').innerText = bot['sample'];
-        var dateString = "";
-        if (bot['lastUpdate'] !== "") {
-            var date = new Date(bot['lastUpdate']);
-            dateString = date.toLocaleDateString() + " " + date.toLocaleTimeString();
-        }
-        document.getElementById('botLastUpdate').innerText = dateString;
-        document.getElementById('botCategory').innerText = bot['category'];
-        document.getElementById('botVersion').innerText = bot['version'];
-        document.getElementById('botClassification').innerText = bot['classification'];
+    var botcard_data = JSON.parse(botstoreItem);
 
-        var privacyNode = document.getElementById('botPrivacyPolicy');
-        if (bot['privacyPolicy'] === null || bot['privacyPolicy'] === '') {
-            document.getElementById('botPrivacyPolicySection').style.display = 'none';
-        } else {
-            privacyNode.setAttribute('href', checkLink(bot['privacyPolicy']));
-        }
-        var botIconPath = "";
-        if (!bot.hasOwnProperty('botIcon') || bot['botIcon'] === "")
-            botIconPath = BOT_ICON.DEFAULT_IMAGE.value;
-        else
-            botIconPath = BOT_ICON.PATH.value + bot['botIcon'];
-        document.getElementById('botIcon').setAttribute('src', botIconPath);
-        document.getElementById('botNamePurchase').innerText = bot['name'];
-        document.getElementById('botDescriptionPurchase').innerText = bot['description'];
-        document.getElementById('botPricePurchase').innerText = bot['price'];
-        document.getElementById('botLicensePurchase').innerText = bot['licenseType'];
-        document.getElementById('botIconPurchase').setAttribute('src', botIconPath);
-        document.getElementById('bot_id').value = bot['botId'];
+    botcard_data.metadata['sample_html'] = function () {
+        return this.metadata.sample.split('\n');
+    };
 
-        var dev = JSON.parse(botstoreItem)['developer'];
-        document.getElementById('botCompany').innerText = dev['company'];
-        var elem = document.getElementById('developerInfo');
+    botcard_data['style_none_if_empty'] = function () {
+        return function (val, render) {
+            var message = render(val);
+            return (!message || 0 === message.trim().length) ? 'display: none' : '';
+        };
+    };
 
-        if (dev['website'] === null || dev['website'] === '') {
-            elem.style.display = 'none';
-        } else {
-            elem.style.display = 'block';
-            document.getElementById('botWebsite').setAttribute('href', checkLink(dev['website']));
-        }
-        var owned = (item['owned'] === null || item['owned'] === '') ? false : item['owned'];
-        setButtonParameter(menu_title, owned, carousel_category, current_flow);
+    botcard_data['empty_if_undefined'] = function () {
+        return function (val, render) {
+            var message = render(val);
+            return (!message || 0 === message.trim().length) ? '' : message;
+        };
+    };
 
-        document.getElementById('botcardDetailContent').style.display = 'block';
-        addEmbedVideoLink(JSON.parse(botstoreItem)['metadata']);
+    botcard_data['http_link'] = function () {
+        return function (val, render) {
+            var message = render(val).trim();
+            if (message.length === 0) {
+                return "";
+            }
+            var index = message.toLowerCase().indexOf('http');
+            return (message.toLowerCase().indexOf('http') === 0) ?
+                message : "http://" + message;
+        };
+    };
 
-        // Notify any parent that we've finished painting
-        var cardHeight = document.getElementById('botcardDetailContent').offsetHeight;
-        if (window.parent !== null) {
-            var event = new CustomEvent('BotstoreFinishPaintEvent', {
-                detail: {
-                    height: cardHeight,
-                    event:'BotstoreFinishPaintEvent'
-                }
-            });
-            window.parent.postMessage(event.detail, '*');
-        }
-
-    } catch (e) {
-        document.getElementById('containerMsgAlertBotcardDetail').style.display = 'block';
-        document.getElementById('msgAlertBotcardDetail').innerText = 'Missing required arguments';
-    }
-}
-
-function checkLink(link) {
-    if (link.indexOf('http') === -1)
-        link = 'http://' + link;
-    return link;
-}
-
-function addEmbedVideoLink(bot) {
-    if (bot['videoLink'] === null || videoLinkFilter(bot['videoLink']) === '')
-        document.getElementById('botVideoLinkSection').innerHTML = '';
-    else
-        document.getElementById('botVideoLink').setAttribute('src', videoLinkFilter(bot['videoLink']));
-}
-
-function videoLinkFilter(url) {
-    var src = '//www.youtube.com/embed/';
-    var param = '?controls=1&hd=1&enablejsapi=1';
-    url = url.replace(/\s/g, '');
-
-    if (url === '')
-        return '';
-
-    if (url.indexOf('https://www.youtube.com') !== -1) {
-        var pos = url.lastIndexOf('=');
-        if (pos == -1)
-            pos = url.lastIndexOf("/");
-        src += url.substring(pos + 1) + param;
-        return src;
+    botcard_data['get_bot_icon_url'] = function () {
+        var message = this.metadata.botIcon.trim();
+        return (message.length === 0) ?
+            BOT_ICON.DEFAULT_IMAGE.value :
+            BOT_ICON.PATH.value + message;
     }
 
-    if (url.indexOf('https://youtu.be/') !== -1) {
-        var pos = url.lastIndexOf("/");
-        src += url.substring(pos) + param;
-        return src;
+    botcard_data.metadata['last_update_display'] = function () {
+        var last_update = this.metadata.lastUpdate;
+        if (!last_update || 0 === last_update.length) {
+            return '';
+        }
+        var date = new Date(last_update);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    };
+
+    botcard_data['youtube_id'] = function () {
+        var url = this.metadata.videoLink;
+        var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        var match = url.match(regExp);
+        return (match && match[2].length == 11) ?
+            match[2] : '';
+    };
+
+    botcard_data['coming_from'] = origin;
+
+    botcard_data['back_button_link'] = function () {
+        switch (this.coming_from) {
+            case BOTCARD_DETAIL.SETTINGS:
+                return './settingsAI.php?botstore=1';
+            case BOTCARD_DETAIL.BOTSTORE:
+                return 'javascript:history.back()';
+            default:
+                break;
+        }
+        return './botstore.php';
     }
-    return '';
+
+    $.get('./templates/botcard_detail.mst', function (template) {
+        $('#botcardDetailContent').replaceWith(Mustache.render(template, botcard_data));
+        postRender(botcard_data, carousel_category, flow);
+    });
 }
 
-function setButtonParameter(title, owned, carousel_category, flow) {
-    var nodeCloseButtonBack = document.getElementById('btnBuyBotBack');
+function postRender(botcard_data, carousel_category, flow) {
+
+    var owned = botcard_data.owned === true;
+
     var nodeButtonBack = document.getElementById('btnBackToBotstore');
     var nodeButtonBuy = document.getElementById('btnBuyBot');
-    switch (title) {
-        case 'settings' :
-            nodeCloseButtonBack.setAttribute('href', './settingsAI.php?botstore=1');
+    switch (botcard_data['coming_from']) {
+        case BOTCARD_DETAIL.SETTINGS :
             btnFromBuyToPurchased();
             break;
-        case 'botstore' :
-            var botstoreLink = './botstore.php';
+        case BOTCARD_DETAIL.BOTSTORE :
 
-            if (owned)
+            if (owned) {
                 btnFromBuyToPurchased();
-            else
-                nodeButtonBuy.setAttribute('onClick', 'purchaseBotFromBotcardDetail()');
+            } else {
+                $('#btnBuyBot').click(purchaseBotFromBotcardDetail());
+            }
 
-
-            if (carousel_category !== '')
+            var botstoreLink = './botstore.php';
+            if (carousel_category !== '') {
                 botstoreLink += buildCategoryURIparameter(carousel_category);
+            }
 
-            nodeCloseButtonBack.setAttribute('href', 'javascript:history.back()');
-            nodeButtonBuy.setAttribute('data-flow', (flow).toString());
+            document.getElementById('btnBuyBot').setAttribute('data-flow', (flow).toString());
             break;
         default:
-            nodeCloseButtonBack.setAttribute('href', './botstore.php');
-            nodeButtonBack.innerText = 'Go back';
-            nodeButtonBack.setAttribute('href', 'javascript:history.back()');
-            nodeButtonBuy.setAttribute('onClick', 'location.href="' + URLS.HUTOMA_CONSOLE + '"');
+            $('#btnBackToBotstore').innerText('Go back');
+            $('#btnBackToBotstore').attr('href', 'javascript:history.back()');
+            $('#btnBuyBot').click(function () {
+                location.href = URLS.HUTOMA_CONSOLE;
+            })
+    }
+
+    // Notify any parent that we've finished painting
+    var cardHeight = $('#botcardDetailContent').outerHeight();
+    if (window.parent !== null) {
+        var event = new CustomEvent('BotstoreFinishPaintEvent', {
+            detail: {
+                height: cardHeight,
+                event: 'BotstoreFinishPaintEvent'
+            }
+        });
+        window.parent.postMessage(event.detail, '*');
     }
 }
