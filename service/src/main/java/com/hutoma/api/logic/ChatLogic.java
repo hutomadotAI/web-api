@@ -169,7 +169,7 @@ public class ChatLogic {
         apiChat.setTimestamp(startTime);
 
         // Add telemetry for the request
-        this.telemetryMap.put("DevId", devId)
+        this.telemetryMap = this.telemetryMap.put("DevId", devId)
                 .put("AIID", aiid)
                 .put("Topic", this.chatState.getTopic())
                 .put("History", this.chatState.getHistory())
