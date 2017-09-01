@@ -12,7 +12,7 @@ class config
 {
     public static function getApiRequestBaseUrl()
     {
-        $url = getenv("HUTOMA_API_URL");
+        $url = "http://10.132.0.4:8081/v1";//getenv("HUTOMA_API_URL");
         if (isset($url) && $url != "") {
             return $url;
         }
@@ -20,7 +20,7 @@ class config
     }
 
     public static function getAdminToken() {
-        $token = getenv("API_ADMIN_DEVTOKEN");
+        $token = "eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c"; //getenv("API_ADMIN_DEVTOKEN");
         if (isset($token) && $token != "") {
             return $token;
         }

@@ -31,7 +31,7 @@ class entityApi extends apiBase
                     'entity_values' => $entityValues
                 )));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 310);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -44,7 +44,7 @@ class entityApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$entityPath, array('entity_name' => $entityName)));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 326);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -57,7 +57,7 @@ class entityApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$entitiesPath));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 320);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -70,7 +70,7 @@ class entityApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$entityPath, array('entity_name' => $entityName)));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 325);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

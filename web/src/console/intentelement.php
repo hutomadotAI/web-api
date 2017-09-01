@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -15,7 +16,7 @@ require_once __DIR__ . "/api/botstoreApi.php";
 sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
-    utils::redirect('./error.php?err=118');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
@@ -32,21 +33,24 @@ $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken()
 $bot= $aiApi->getSingleAI(sessionObject::getCurrentAI()['aiid']);
 unset($aiApi);
 
-if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 404) {
+if ($entityList['status']['code'] !== 200) {
+    $entityList_result = clone $entityList;
     unset($entityList);
-    utils::redirect('./error.php?err=210');
+    errorRedirect::handleErrorRedirect($entityList_result);
     exit;
 }
 
-if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
+if ($intent['status']['code'] !== 200) {
+    $intent_result = clone $intent;
     unset($intent);
-    utils::redirect('./error.php?err=211');
+    errorRedirect::handleErrorRedirect($intent_result);
     exit;
 }
 
 if ($bot['status']['code'] !== 200) {
+    $bot_result = clone $bot;
     unset($bot);
-    utils::redirect('./error.php?err=204');
+    errorRedirect::handleErrorRedirect($bot_result);
     exit;
 }
 

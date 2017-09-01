@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -16,9 +17,10 @@ $entityApi = new api\entityApi(sessionObject::isLoggedIn(), sessionObject::getDe
 $entities = $entityApi->getEntities();
 unset($entityApi);
 
-if ($entities['status']['code'] !== 200 && $entities['status']['code'] !== 404) {
+if ($entities['status']['code'] !== 200) {
+    $entity_result = clone $entities;
     unset($entities);
-    utils::redirect('./error.php?err=225');
+    errorRedirect::handleErrorRedirect($entity_result);
     exit;
 }
 

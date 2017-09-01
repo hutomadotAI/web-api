@@ -24,7 +24,7 @@ class developerApi extends apiBase
             $this->curl->setVerbGet();
             $this->curl->addHeader('Content-Type', 'application/json');
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 380);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

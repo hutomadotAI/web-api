@@ -24,7 +24,7 @@ class adminApi extends apiBase
         $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $userId . '/' . 'devToken'));
         $this->curl->setVerbGet();
         $curl_response = $this->curl->exec();
-        $this->handleApiCallError($curl_response, 999);
+        $this->handleApiCallError($curl_response);
         $json_response = json_decode($curl_response, true);
         $devToken = $json_response['dev_token'];
         return isset($devToken) ? $devToken : null;
@@ -35,7 +35,7 @@ class adminApi extends apiBase
             array('username' => $username, 'checkEmail' => true)));
         $this->curl->setVerbGet();
         $curl_response = $this->curl->exec();
-        $this->handleApiCallError($curl_response, 303);
+        $this->handleApiCallError($curl_response);
         $json_response = json_decode($curl_response, true);
         return $json_response['status']['code'] != 404;
     }
@@ -51,7 +51,7 @@ class adminApi extends apiBase
         $this->curl->setUrl($this->buildRequestUrl(self::$path, $params));
         $this->curl->setVerbPost();
         $curl_response = $this->curl->exec();
-        $this->handleApiCallError($curl_response, 303);
+        $this->handleApiCallError($curl_response);
         $json_response = json_decode($curl_response, true);
         return $json_response['status']['code'] == 200;
     }
@@ -64,7 +64,7 @@ class adminApi extends apiBase
         $this->curl->setVerbPut();
         $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($params));
         $curl_response = $this->curl->exec();
-        $this->handleApiCallError($curl_response, 303);
+        $this->handleApiCallError($curl_response);
         return $this->getDefaultResponse();
     }
 
@@ -75,7 +75,7 @@ class adminApi extends apiBase
         $this->curl->setUrl($this->buildRequestUrl(self::$path . '/user', $params));
         $this->curl->setVerbGet();
         $curl_response = $this->curl->exec();
-        $this->handleApiCallError($curl_response, 999);
+        $this->handleApiCallError($curl_response);
         $json_response = json_decode($curl_response, true);
         return $json_response['status']['code'] == 200 ? $json_response['user'] : null;
     }
