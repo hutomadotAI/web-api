@@ -2,6 +2,7 @@ package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.AiBotConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -33,8 +34,11 @@ public class WebHookPayload {
     @SerializedName("chatSession")
     private String chatSession;
 
+    @SerializedName("config")
+    private AiBotConfig config;
+
     public WebHookPayload(final MemoryIntent intent, final ChatResult chatResult, final UUID originatingAiid,
-                          final Map<String, String> clientVariables) {
+                          final Map<String, String> clientVariables, final AiBotConfig config) {
         this.intentName = intent.getName();
         this.variables = intent.getVariables();
         this.variablesMap = intent.getVariablesMap();
@@ -42,11 +46,15 @@ public class WebHookPayload {
         this.clientVariables = clientVariables;
         this.originatingAiid = originatingAiid.toString();
         this.chatSession = Tools.getHashedDigestFromUuid(chatResult.getChatId());
+        this.config = config;
     }
 
-    public WebHookPayload(final ChatResult chatResult, final UUID originatingAiid, final Map<String, String> clientVariables) {
+    public WebHookPayload(final ChatResult chatResult, final UUID originatingAiid,
+                          final Map<String, String> clientVariables,
+                          final AiBotConfig config) {
         this.chatResult = chatResult;
         this.originatingAiid = originatingAiid.toString();
         this.clientVariables = clientVariables;
+        this.config = config;
     }
 }

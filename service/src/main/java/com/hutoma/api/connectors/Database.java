@@ -946,6 +946,29 @@ public class Database {
         }
     }
 
+    public AiBotConfig getBotConfigForWebhookCall(final UUID devId, final UUID originatingAiid,
+                                                      UUID aiid,
+                                                      final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotConfigForWebhookCall", 3)
+                    .add(devId)
+                    .add(originatingAiid)
+                    .add(aiid);
+            ResultSet rs = call.executeQuery();
+            try {
+                AiBotConfig config = null;
+                if (rs.next()) {
+                    String configString = rs.getString("config");
+                    config = (AiBotConfig) jsonSerializer.deserialize(configString, AiBotConfig.class);
+                }
+                return config;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
     public ChatState getChatState(final UUID devId, final UUID aiid, final UUID chatId,
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {

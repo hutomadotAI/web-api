@@ -184,3 +184,23 @@ BEGIN
     SET `api_keys_desc` = `in_api_keys_desc` 
     WHERE aiid = in_aiid AND dev_id = in_dev_id;
 END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `getBotConfigForWebhookCall`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigForWebhookCall`(
+	IN `param_devId` VARCHAR(50), 
+    IN `param_aiid` VARCHAR(50),
+    IN `param_aiidLinkedBot` VARCHAR(50))
+    NO SQL
+BEGIN
+	IF `param_aiid` = `param_aiidLinkedBot` THEN
+		SELECT bac.config AS `config` FROM bot_ai_config bac 
+		WHERE bac.aiid = param_aiid AND bac.dev_id = param_devId AND bac.botId = 0;
+    ELSE
+		SELECT bac.config AS `config` FROM bot_ai_config bac 
+		INNER JOIN botStore bs ON bac.botId = bs.id 
+		WHERE bac.aiid = param_aiid AND bac.dev_id = param_devId AND bs.aiid = param_aiidLinkedBot;
+	END IF;
+END;;
+

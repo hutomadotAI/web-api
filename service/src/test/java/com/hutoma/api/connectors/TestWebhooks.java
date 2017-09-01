@@ -116,6 +116,7 @@ public class TestWebhooks {
         WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
         verify(spy).getMessageHash(any(), any(), any());
         verify(this.fakeTools, Mockito.never()).generateRandomHexString(anyInt());
+        verify(this.fakeDatabase).getBotConfigForWebhookCall(any(), any(), any(), any());
         Assert.assertNotNull(response);
     }
 
@@ -206,6 +207,22 @@ public class TestWebhooks {
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        Assert.assertNull(response);
+    }
+
+    /*
+     * executeIntentWebHook returns a null if DB config lookup throws, webhook is NOT called.
+     */
+    @Test
+    public void testExecuteWebHook_FailureLookupConfig() throws Database.DatabaseException, IOException {
+        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
+        MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
+        ChatResult chatResult = new ChatResult("Hi");
+        when(this.fakeDatabase.getBotConfigForWebhookCall(any(), any(), any(), any())).thenThrow(new Database.DatabaseException("BAD CALL"));
+        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        verify(this.fakeDatabase).getBotConfigForWebhookCall(any(), any(), any(), any());
+        // ensure no attempt is made to build the webhook call
+        verify(this.fakeClient, never()).target(anyString());
         Assert.assertNull(response);
     }
 

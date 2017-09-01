@@ -6,6 +6,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.AiBotConfig;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
@@ -67,8 +68,24 @@ public class WebHooks {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
             return null;
         }
-
         String webHookEndpoint = webHook.getEndpoint();
+
+        AiBotConfig config = null;
+        try {
+            config = this.database.getBotConfigForWebhookCall(devId, originatingAiid, intent.getAiid(),
+                    this.serializer);
+        } catch (Database.DatabaseException e) {
+            this.logger.logException(LOGFROM, e);
+            // if the config load fails, then abort the webhook call.
+            this.logger.logUserWarnEvent(LOGFROM, "Webhook aborted due to failure to load config",
+                    devIdString,
+                    LogMap.map("Endpoint", webHookEndpoint)
+                            .put("Intent", intent.getName())
+                            .put("AIID", intent.getAiid())
+                            .put("Endpoint", webHook.getEndpoint()));
+            return null;
+        }
+
         String[] webHookSplit = webHookEndpoint.split(":", 2);
         if (webHookSplit.length < 2) {
             this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
@@ -81,7 +98,7 @@ public class WebHooks {
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
-        WebHookPayload payload = new WebHookPayload(intent, chatResult, originatingAiid, clientVariables);
+        WebHookPayload payload = new WebHookPayload(intent, chatResult, originatingAiid, clientVariables, config);
 
         String jsonPayload;
         try {
@@ -194,7 +211,7 @@ public class WebHooks {
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
-        WebHookPayload payload = new WebHookPayload(chatResult, originatingAiid, clientVariables);
+        WebHookPayload payload = new WebHookPayload(chatResult, originatingAiid, clientVariables, null);
 
         String jsonPayload;
         try {
