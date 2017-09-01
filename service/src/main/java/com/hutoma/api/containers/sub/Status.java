@@ -3,7 +3,7 @@ package com.hutoma.api.containers.sub;
 import java.net.HttpURLConnection;
 
 /**
- * Created by David MG on 15/08/2016.
+ * HTTP Status Block
  */
 public class Status {
 

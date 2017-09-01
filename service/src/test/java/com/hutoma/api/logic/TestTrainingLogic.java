@@ -669,7 +669,7 @@ public class TestTrainingLogic {
         InputStream stream = createUpload(SOMETEXT);
         ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, new BackendStatus(),
                 true,
-                0, 0.5, 1, Locale.UK, "UTC", null, "", DEFAULT_CHAT_RESPONSES) {
+                0, 0.5, 1, Locale.UK, "UTC", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC) {
             @Override
             public TrainingStatus getSummaryAiStatus() {
                 return TrainingStatus.AI_READY_TO_TRAIN;

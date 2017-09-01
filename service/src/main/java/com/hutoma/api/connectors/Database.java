@@ -6,18 +6,14 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.*;
 
 import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -533,10 +529,24 @@ public class Database {
                     .add(devid)
                     .add(aiid)
                     .executeQuery();
+
+            ApiAi apiAi = null;
             if (rs.next()) {
-                return getAiFromResultset(rs, backendStatus, serializer);
+                apiAi = getAiFromResultset(rs, backendStatus, serializer);
             }
-            return null;
+            if (apiAi != null) {
+                rs = transaction.getDatabaseCall().initialise("getAiBotConfig", 3)
+                        .add(devid)
+                        .add(aiid)
+                        .add(0)
+                        .executeQuery();
+                if (rs.next()) {
+                    String configString = rs.getString("config");
+                    AiBotConfig config = (AiBotConfig) serializer.deserialize(configString, AiBotConfig.class);
+                    apiAi = new ApiAiWithConfig(apiAi, config);
+                }
+            }
+            return apiAi;
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -623,6 +633,88 @@ public class Database {
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        }
+    }
+
+    public boolean getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIsBotLinkedToAi", 3).add(devId).add(aiid).add(botId);
+
+            try {
+                ResultSet rs = call.executeQuery();
+
+                if (!rs.next()) {
+                    return false;
+                }
+                return true;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public ApiLinkedBotData getLinkedBotData(final UUID devId, final UUID aiid, final int botId,
+                                             final JsonSerializer serializer)
+            throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            DatabaseCall call = transaction.getDatabaseCall();
+            try {
+                if (!this.getIsBotLinkedToAi(devId, aiid, botId)) {
+                    // bot not linked, not point in querying further
+                    return null;
+                }
+
+                call = transaction.getDatabaseCall();
+                call.initialise("getBotstoreItem", 1).add(botId);
+                ResultSet rs = call.executeQuery();
+                ApiLinkedBotData botData = null;
+
+                if (rs.next()) {
+                    AiBot aiBot = getAiBotFromResultset(rs);
+                    call = transaction.getDatabaseCall();
+                    call.initialise("getAiBotConfig", 3).add(devId).add(aiid).add(botId);
+                    rs = call.executeQuery();
+                    AiBotConfig config = null;
+                    if (rs.next()) {
+                        String configString = rs.getString("config");
+                        config = (AiBotConfig) serializer.deserialize(configString, AiBotConfig.class);
+                    }
+                    botData = new ApiLinkedBotData(aiBot, config);
+                }
+                return botData;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean setApiKeyDescriptions(final UUID devid, final UUID aiid,
+                                         List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions,
+                                         JsonSerializer serializer)
+            throws DatabaseException {
+        String apiKeyString = serializer.serialize(apiKeyDescriptions);
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setApiKeyDescriptions", 3)
+                    .add(devid)
+                    .add(aiid)
+                    .add(apiKeyString);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+
+    public boolean setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig,
+                                  JsonSerializer serializer)
+            throws DatabaseException {
+        String aiBotConfigString = serializer.serialize(aiBotConfig);
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setAiBotConfig", 4)
+                    .add(devid)
+                    .add(aiid)
+                    .add(botId)
+                    .add(aiBotConfigString);
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -1136,6 +1228,7 @@ public class Database {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
         List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
+        List<ApiKeyDescription> apiKeyDescriptions = serializer.deserializeList(rs.getString("api_keys_desc"));
         // create one summary training status from the block of data
         return new ApiAi(
                 rs.getString("aiid"),
@@ -1153,7 +1246,8 @@ public class Database {
                 timezoneString,
                 rs.getString("hmac_secret"),
                 rs.getString("passthrough_url"),
-                defaultChatResponses);
+                defaultChatResponses,
+                apiKeyDescriptions);
     }
 
     /***

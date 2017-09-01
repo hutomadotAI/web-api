@@ -1,21 +1,11 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiAiBotList;
-import com.hutoma.api.containers.ApiAiList;
-import com.hutoma.api.containers.ApiBotStructure;
-import com.hutoma.api.containers.ApiEntity;
-import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.WebHook;
@@ -25,12 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestBotHelper.BOTID;
@@ -508,6 +493,106 @@ public class TestAILogic {
     public void testExportBot_DoesntExist() {
         ApiResult result = this.aiLogic.exportBotData(VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_badAiLookup() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(false);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_badBotLookup() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(false);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+
+    @Test
+    public void testSetBotConfig_dbFail() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(false);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_success() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_success_bot0() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 0, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetAiBotConfiguration_failApiSet() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.setApiKeyDescriptions(any(), any(), any(), any())).thenReturn(false);
+        AiBotConfigDefinition def = this.generateAiBotConfigDefinition();
+        ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetAiBotConfiguration_success() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.setApiKeyDescriptions(any(), any(), any(), any())).thenReturn(true);
+        AiBotConfigDefinition def = this.generateAiBotConfigDefinition();
+        ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetLinkedBotData_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getLinkedBotData(any(), any(), anyInt(), any())).thenReturn(null);
+        ApiResult result = this.aiLogic.getLinkedBotData(DEVID_UUID, AIID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetLinkedBotData_success() throws Database.DatabaseException {
+        AiBot bot = TestBotHelper.SAMPLEBOT;
+        ApiLinkedBotData linkedData = new ApiLinkedBotData(bot, generateAiBotConfig());
+
+        when(this.fakeDatabase.getLinkedBotData(any(), any(), anyInt(), any())).thenReturn(linkedData);
+        ApiResult result = this.aiLogic.getLinkedBotData(DEVID_UUID, AIID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    private AiBotConfig generateAiBotConfig() {
+        Map<String,String> configApiKeys = new HashMap<>();
+        configApiKeys.put("key1", "value1");
+        configApiKeys.put("key2", "value2");
+        AiBotConfig config = new AiBotConfig(configApiKeys);
+        return config;
+    }
+
+    private AiBotConfigDefinition generateAiBotConfigDefinition() {
+        AiBotConfig config = generateAiBotConfig();
+        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = new LinkedList<>();
+        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("name", "desc", "http://blah"));
+        AiBotConfigDefinition def = new AiBotConfigDefinition(config, apiKeyDescriptions);
+        return def;
     }
 
     private void whenCreateAiReturn(UUID aiid) throws Database.DatabaseException {

@@ -11,18 +11,10 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiAiBot;
-import com.hutoma.api.containers.ApiAiBotList;
-import com.hutoma.api.containers.ApiBotStructure;
-import com.hutoma.api.containers.ApiAiList;
-import com.hutoma.api.containers.ApiEntity;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.*;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -197,6 +189,49 @@ public class AILogic {
         }
     }
 
+    public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
+                                               AiBotConfigDefinition aiBotConfigDefinition) {
+        final String devIdString = devid.toString();
+        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = aiBotConfigDefinition.getDescriptions();
+        try {
+            if (!this.database.setApiKeyDescriptions(devid, aiid, apiKeyDescriptions, this.jsonSerializer)) {
+                return ApiError.getBadRequest("Failed to write API key description");
+            }
+
+            return this.setAiBotConfig(devid, aiid, 0, aiBotConfigDefinition.getConfig());
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "setAiBotConfigDescription", devIdString, e);
+            return ApiError.getInternalServerError();
+        }
+
+    }
+
+    public ApiResult setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig) {
+        final String devIdString = devid.toString();
+
+        // if version is not specified, then change it to the current version
+        if (aiBotConfig.getVersion() != AiBotConfig.CURRENT_VERSION) {
+            aiBotConfig.setVersion(AiBotConfig.CURRENT_VERSION);
+        }
+
+        try {
+            if (!this.database.checkAIBelongsToDevId(devid, aiid)) {
+                return ApiError.getNotFound();
+            }
+
+            if (botId != 0 && !this.database.getIsBotLinkedToAi(devid, aiid, botId)) {
+                return ApiError.getNotFound();
+            }
+
+            if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer))
+                return new ApiResult().setSuccessStatus();
+            return ApiError.getBadRequest("Failed to set AI/bot config");
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "setAiConfig", devIdString, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     public ApiResult regenerateWebhookSecret(final UUID devid, final UUID aiid) {
         final String devIdString = devid.toString();
         try {
@@ -276,6 +311,24 @@ public class AILogic {
             return new ApiAiBotList(this.database.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetLinkedBots", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getLinkedBotData(final UUID devid, final UUID aiid, final int botId) {
+        final String devIdString = devid.toString();
+        try {
+            LogMap logMap = LogMap.map("AIID", aiid);
+            ApiLinkedBotData data = this.database.getLinkedBotData(devid, aiid, botId, this.jsonSerializer);
+            if (data == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "getLinkedBotData - not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            } else {
+                this.logger.logUserTraceEvent(LOGFROM, "getLinkedBotData", devIdString, logMap);
+                return data.setSuccessStatus();
+            }
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "getLinkedBotData", devIdString, e);
             return ApiError.getInternalServerError();
         }
     }

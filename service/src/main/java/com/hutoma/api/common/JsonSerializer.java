@@ -15,8 +15,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -64,12 +66,32 @@ public class JsonSerializer {
 
     public <T> List<T> deserializeList(String content) throws JsonParseException {
         try {
+            if (content == null) {
+                return null;
+            }
+
             List<T> list = this.gson.fromJson(content, new TypeToken<List<T>>() {
             }.getType());
             if (list == null) {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
             return list;
+        } catch (JsonSyntaxException jse) {
+            throw new JsonParseException(jse);
+        }
+    }
+
+    public Map<String, String> deserializeStringMap(String content) throws JsonParseException {
+        try {
+            if (content == null) {
+                return new HashMap<>();
+            }
+            Map<String, String> stringMap = this.gson.fromJson(content, new TypeToken<Map<String, String>>() {
+            }.getType());
+            if (stringMap == null) {
+                throw new JsonParseException("cannot deserialize valid object from json");
+            }
+            return stringMap;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }

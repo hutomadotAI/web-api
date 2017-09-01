@@ -1,5 +1,6 @@
 package com.hutoma.api;
 
+import com.hutoma.api.common.JerseyGsonProvider;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -19,6 +20,9 @@ public class ServerApp extends ResourceConfig {
         // initialisation
         register(ServerInit.class);
 
+        // JSON serializer using GSON
+        register(JerseyGsonProvider.class);
+
         // authorization filter
         packages(false, "com.hutoma.api.access");
 
@@ -27,7 +31,6 @@ public class ServerApp extends ResourceConfig {
 
         // endpoints
         packages(false, "com.hutoma.api.endpoints");
-
 
     }
 

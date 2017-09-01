@@ -39,7 +39,6 @@ UNLOCK TABLES;
 
 LOCK TABLES `ai` WRITE;
 /*!40000 ALTER TABLE `ai` DISABLE KEYS */;
-
 INSERT INTO `ai` (`id`, `aiid`, `ai_name`, `ai_description`, `default_chat_responses`, `created_on`, `dev_id`, `is_private`, `client_token`, `hmac_secret`, `ui_ai_language`, `ui_ai_timezone`, `ui_ai_confidence`, `ui_ai_personality`, `ui_ai_voice`, `deleted`, `passthrough_url`)
 VALUES (1,'e1bb8226-e8ce-467a-8305-bc2fcb89dd7f','AIML Chit-chat','','["Erm... What?"]','2017-01-31 18:10:17','d14b441b-e2a2-4b9f-be9b-4301647e1265',0,'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNocijEKwzAMAP-iuQLZUhypW2kyGEwCpUunEtnpB0qn0L_XdDqOuwNua5nh_MfzWvK83NelPOAEl5ynHppH8tEZnbShmBFuMURsQ5K98qbCr36_P95nNe4eAlKyhCLGqFUTEqt5lXF3GeD7AwAA__8.vLFd5SSUH37G5aFq7byG5ZBDZiX5XHs2RJLS_MfWLhg',NULL, 'en-US','Europe/London', 0.4000000059604645,0,0,0, NULL);
 
