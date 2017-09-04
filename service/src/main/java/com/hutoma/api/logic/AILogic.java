@@ -192,6 +192,13 @@ public class AILogic {
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
                                                AiBotConfigDefinition aiBotConfigDefinition) {
         final String devIdString = devid.toString();
+
+        try {
+            aiBotConfigDefinition.checkIsValid();
+        } catch (AiBotConfigException ce) {
+            return ApiError.getBadRequest(ce.getMessage());
+        }
+
         List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = aiBotConfigDefinition.getDescriptions();
         try {
             if (!this.database.setApiKeyDescriptions(devid, aiid, apiKeyDescriptions, this.jsonSerializer)) {
@@ -208,6 +215,10 @@ public class AILogic {
 
     public ApiResult setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig) {
         final String devIdString = devid.toString();
+
+        if (!aiBotConfig.isValid()) {
+            return ApiError.getBadRequest("Config is not valid");
+        }
 
         // if version is not specified, then change it to the current version
         if (aiBotConfig.getVersion() != AiBotConfig.CURRENT_VERSION) {

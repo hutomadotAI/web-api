@@ -589,8 +589,9 @@ public class TestAILogic {
 
     private AiBotConfigDefinition generateAiBotConfigDefinition() {
         AiBotConfig config = generateAiBotConfig();
-        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = new LinkedList<>();
-        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("name", "desc", "http://blah"));
+        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = new ArrayList<>();
+        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("key1", "desc", "http://blah"));
+        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("key2", "desc", "http://blah"));
         AiBotConfigDefinition def = new AiBotConfigDefinition(config, apiKeyDescriptions);
         return def;
     }
