@@ -70,7 +70,7 @@ function displayBotCardDetail(botstoreItem, origin, carousel_category, flow) {
         return './botstore.php';
     }
 
-    $.get('./templates/botcard_detail.mst', function (template) {
+    $.get('./templates/botcard_detail.mustache', function (template) {
         $('#botcardDetailContent').replaceWith(Mustache.render(template, botcard_data));
         postRender(botcard_data, carousel_category, flow);
     });
