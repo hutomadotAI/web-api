@@ -96,13 +96,11 @@ include __DIR__ . "/include/page_head_default.php";
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
 <script src="scripts/external/select2/select2.full.js"></script>
-
-<script src="./scripts/botstore/botstoreWizard.js"></script>
 <script src="./scripts/botstore/botstore.js"></script>
 <script src="./scripts/botstore/carousel.js"></script>
 <script src="./scripts/botcard/botcard.js"></script>
 <script src="./scripts/botcard/buyBot.js"></script>
-
+<script src="./dist/js/mustache.min.js"></script>
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 
@@ -115,7 +113,6 @@ $openFullStore = isset($_GET['openFullStore']) ? $_GET['openFullStore'] : 'false
     $(document).ready(function () {
         getCarousels(
             '<?php echo $category ?>',
-            DRAW_BOTCARDS.BOTSTORE_WITH_BOT_FLOW.value,
             <?php echo $showHeader?>,
             <?php echo $openFullStore?>);
     });

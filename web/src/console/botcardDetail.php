@@ -72,7 +72,6 @@ include __DIR__ . "/include/page_menu.php";
 <script src="./dist/js/app.min.js"></script>
 <script src="./dist/js/mustache.min.js"></script>
 <script src="./scripts/botcard/botcard.js"></script>
-<script src="./scripts/botstore/botstoreWizard.js"></script>
 <script src="./scripts/botcard/buyBotFromBotcardDetail.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>

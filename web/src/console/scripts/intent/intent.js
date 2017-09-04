@@ -60,7 +60,7 @@ function showIntents(filter) {
         })
     };
 
-    $.get('templates/intents_list.mst', function(template) {
+    $.get('templates/intents_list.mustache', function(template) {
         $('#intentsearch').html(Mustache.render(template, view));
     });
 }

@@ -53,7 +53,7 @@ function createNewValueEntityRow(value, parent) {
     var view = {
         value: value
     };
-    $.get('templates/entity_value_row.mst', function(template) {
+    $.get('templates/entity_value_row.mustache', function(template) {
         var newNode = document.createElement('div');
         newNode.setAttribute('class', 'col-xs-12');
         newNode.innerHTML = Mustache.render(template, view);

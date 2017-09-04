@@ -75,7 +75,7 @@ function showEntities(filter) {
         })
     };
 
-    $.get('templates/entities_list.mst', function (template) {
+    $.get('templates/entities_list.mustache', function (template) {
         $('#entsearch').html(Mustache.render(template, view));
     });
 }

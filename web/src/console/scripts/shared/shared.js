@@ -204,8 +204,8 @@ function buildCategoryURIparameter(category) {
     return '?category=' + adjustURIEscapingCategoryValue(category);
 }
 
-function adjustURIEscapingCategoryValue(value) {
-    return value.replace('&', '%26').split(' ').join('%20');
+function adjustURIEscapingCategoryValue(value){
+    return (typeof value === 'undefined' || value === null) ? null : value.replace('&', '%26').split(' ').join('%20');
 }
 
 function removeSpecialCharacters(str) {
@@ -291,6 +291,17 @@ function commonAjaxApiRequest(request) {
         }
     });
     return null;
+}
+
+function getHash(string) {
+    var hash = 0, i, chr;
+    if (string.length === 0) return hash;
+    for (i = 0; i < string.length; i++) {
+        chr   = string.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash.toString();
 }
 
 $(document).ready(function () {

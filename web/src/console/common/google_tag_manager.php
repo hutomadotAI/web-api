@@ -1,8 +1,7 @@
-<script>
-    var dataLayer = window.dataLayer || []
-</script>
+<?php
 
-<?php 
+include_once __DIR__ . '/../common/sessionObject.php';
+
     $userDetails = \hutoma\sessionObject::isLoggedIn() ? $_SESSION[$_SESSION['navigation_id']]['user_details'] : false;
 
     // Checking if all values are present to prevent JS errors
@@ -11,6 +10,7 @@
     if ($userDetails['email'] && $userDetails['name'] && $userDetails['id'] && $userDetails['created']) {
 ?>
     <script>
+        var dataLayer = window.dataLayer || [];
 
         var user = {
             email: '<?php echo $userDetails['email']; ?>',

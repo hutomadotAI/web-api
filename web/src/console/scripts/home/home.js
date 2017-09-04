@@ -36,7 +36,7 @@ function drawTableRows() {
         })
     };
 
-    $.get('templates/own_bots_list.mst', function(template) {
+    $.get('templates/own_bots_list.mustache', function(template) {
         $('#tableAiList').html(Mustache.render(template, view));
     });
 }
