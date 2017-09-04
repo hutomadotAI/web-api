@@ -124,12 +124,12 @@ public class AIEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putAiConfig(
             @Context ContainerRequestContext requestContext,
-            AiBotConfigDefinition aiBotConfigDefinition) {
+            AiBotConfigWithDefinition aiBotConfigWithDefinition) {
         // use botId=0 as this is the configuration of the main AI
         ApiResult result = this.aiLogic.setAiBotConfigDescription(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
-                aiBotConfigDefinition);
+                aiBotConfigWithDefinition);
         return result.getResponse(this.serializer).build();
     }
 

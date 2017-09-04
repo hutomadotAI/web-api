@@ -54,6 +54,9 @@ public class JsonSerializer {
 
     public Object deserialize(String content, Class resultClass) throws JsonParseException {
         try {
+            if (content == null) {
+                return null;
+            }
             Object obj = this.gson.fromJson(content, resultClass);
             if (null == obj) {
                 throw new JsonParseException("cannot deserialize valid object from json");

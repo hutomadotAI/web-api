@@ -66,8 +66,8 @@ public class ApiAi extends ApiResult {
     @SerializedName("default_chat_responses")
     private List<String> defaultChatResponses;
 
-    @SerializedName("api_key_desc")
-    private List<ApiKeyDescription> apiKeyDescriptions;
+    @SerializedName("bot_config_definition")
+    private AiBotConfigDefinition botConfigDefinition;
 
     public ApiAi(final String aiid, final String clientToken) {
         this.aiid = aiid;
@@ -80,7 +80,7 @@ public class ApiAi extends ApiResult {
                  final boolean hasTrainingFile, final int personality, final double confidence, final int voice,
                  final Locale language, final String timezone, final String hmacSecret,
                  final String passthroughUrl, final List<String> defaultChatResponses,
-                 final List<ApiKeyDescription> apiKeyDescriptions) {
+                 final AiBotConfigDefinition botConfigDefinition) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.name = name;
@@ -97,7 +97,7 @@ public class ApiAi extends ApiResult {
         this.hmacSecret = hmacSecret;
         this.defaultChatResponses = defaultChatResponses;
         this.passthroughUrl = passthroughUrl;
-        this.apiKeyDescriptions = apiKeyDescriptions;
+        this.botConfigDefinition = botConfigDefinition;
         populateExtendedStatus();
     }
 
@@ -118,7 +118,7 @@ public class ApiAi extends ApiResult {
         this.hmacSecret = other.hmacSecret;
         this.defaultChatResponses = other.defaultChatResponses;
         this.passthroughUrl = other.passthroughUrl;
-        this.apiKeyDescriptions = other.apiKeyDescriptions;
+        this.botConfigDefinition = other.botConfigDefinition;
         populateExtendedStatus();
     }
 

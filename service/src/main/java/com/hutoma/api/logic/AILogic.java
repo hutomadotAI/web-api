@@ -190,22 +190,22 @@ public class AILogic {
     }
 
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
-                                               AiBotConfigDefinition aiBotConfigDefinition) {
+                                               AiBotConfigWithDefinition aiBotConfigWithDefinition) {
         final String devIdString = devid.toString();
 
         try {
-            aiBotConfigDefinition.checkIsValid();
+            aiBotConfigWithDefinition.checkIsValid();
         } catch (AiBotConfigException ce) {
             return ApiError.getBadRequest(ce.getMessage());
         }
 
-        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = aiBotConfigDefinition.getDescriptions();
+        AiBotConfigDefinition definition = aiBotConfigWithDefinition.getDefinitions();
         try {
-            if (!this.database.setApiKeyDescriptions(devid, aiid, apiKeyDescriptions, this.jsonSerializer)) {
+            if (!this.database.setBotConfigDefinition(devid, aiid, definition, this.jsonSerializer)) {
                 return ApiError.getBadRequest("Failed to write API key description");
             }
 
-            return this.setAiBotConfig(devid, aiid, 0, aiBotConfigDefinition.getConfig());
+            return this.setAiBotConfig(devid, aiid, 0, aiBotConfigWithDefinition.getConfig());
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "setAiBotConfigDescription", devIdString, e);
             return ApiError.getInternalServerError();
@@ -234,6 +234,13 @@ public class AILogic {
                 return ApiError.getNotFound();
             }
 
+            AiBotConfigDefinition definition = this.database.getBotConfigDefinition(devid, aiid, this.jsonSerializer);
+            AiBotConfigWithDefinition withDefinition = new AiBotConfigWithDefinition(aiBotConfig, definition);
+            try {
+                withDefinition.checkIsValid();
+            } catch (AiBotConfigException configException) {
+                return ApiError.getBadRequest(configException.getMessage());
+            }
             if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer))
                 return new ApiResult().setSuccessStatus();
             return ApiError.getBadRequest("Failed to set AI/bot config");

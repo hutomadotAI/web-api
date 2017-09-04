@@ -1,5 +1,6 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.controllers.IServerEndpoint;
@@ -23,9 +24,7 @@ public class TestDataHelper {
     public static final UUID SESSIONID = UUID.fromString("e6a7d7b4-245a-44ad-8018-5c0516583713");
     public static final UUID ALT_SESSIONID = UUID.fromString("f29a1eed-6094-464a-b335-c0885a501750");
     public static final List<String> DEFAULT_CHAT_RESPONSES = Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT);
-    public static final ApiKeyDescription SINGLE_API_KEY_DESCRIPTION = new ApiKeyDescription(
-            "1name1", "2description2","3link3");
-    public static final List<ApiKeyDescription> DEFAULT_API_KEY_DESC = Collections.singletonList(SINGLE_API_KEY_DESCRIPTION);
+    public static final AiBotConfigDefinition DEFAULT_API_KEY_DESC = new AiBotConfigDefinition(null);
 
     public static ApiAi getSampleAI() {
         return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,

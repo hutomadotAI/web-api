@@ -193,20 +193,6 @@ BEGIN
 END;;
 
 DELIMITER ;
-DROP procedure IF EXISTS `setApiKeyDescriptions`;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setApiKeyDescriptions`(
-  IN `in_dev_id` VARCHAR(50),
-  IN `in_aiid` VARCHAR(50),
-  IN `in_api_keys_desc` JSON)
-    MODIFIES SQL DATA
-BEGIN
-	UPDATE ai
-    SET `api_keys_desc` = `in_api_keys_desc` 
-    WHERE aiid = in_aiid AND dev_id = in_dev_id;
-END;;
-
-DELIMITER ;
 DROP procedure IF EXISTS `getBotConfigForWebhookCall`;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigForWebhookCall`(
@@ -225,3 +211,32 @@ BEGIN
 	END IF;
 END;;
 
+#
+# DB update for validating bot configuration JSON
+#
+DELIMITER ;
+DROP procedure IF EXISTS `setApiKeyDescriptions`;
+DROP procedure IF EXISTS `setBotConfigDefinition`;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setBotConfigDefinition`(
+  IN `in_dev_id` VARCHAR(50),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_config_def` JSON)
+    MODIFIES SQL DATA
+BEGIN
+	UPDATE ai
+    SET `api_keys_desc` = `in_config_def` 
+    WHERE aiid = in_aiid AND dev_id = in_dev_id;
+END;;
+
+
+DELIMITER ;
+DROP procedure IF EXISTS `getBotConfigDefinition`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigDefinition`(
+	IN `param_devId` VARCHAR(50), 
+    IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+    SELECT api_keys_desc FROM ai WHERE aiid = param_aiid AND dev_id = param_devId;
+END;;
