@@ -4,7 +4,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.containers.sub.ApiKeyDescription;
+import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
@@ -85,13 +85,14 @@ public class DatabaseUI extends Database {
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
                 String apiKeysString = rs.getString("api_keys_desc");
-                List<ApiKeyDescription> apiKeyDescriptions = serializer.deserializeList(apiKeysString);
+                AiBotConfigDefinition definition = (AiBotConfigDefinition) serializer.deserialize(apiKeysString,
+                        AiBotConfigDefinition.class);
                 BotstoreItem bi = new BotstoreItem(
                         0,
                         this.getAiBotFromResultset(rs),
                         this.getDeveloperInfoFromBotstoreList(rs),
                         false);
-                bi.setApiKeyDescriptions(apiKeyDescriptions);
+                bi.setBotConfigDefinition(definition);
                 return bi;
             }
             return null;

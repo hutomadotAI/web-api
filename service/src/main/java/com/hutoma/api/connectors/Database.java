@@ -636,7 +636,7 @@ public class Database {
         }
     }
 
-    public boolean getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
+    public Pair<UUID,UUID> getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getIsBotLinkedToAi", 3).add(devId).add(aiid).add(botId);
@@ -644,10 +644,15 @@ public class Database {
             try {
                 ResultSet rs = call.executeQuery();
 
-                if (!rs.next()) {
-                    return false;
+                Pair<UUID, UUID> linkedDevAiidPair = null;
+                if (rs.next()) {
+                    String linkedDevidString = rs.getString("dev_id");
+                    UUID linkedDevid = UUID.fromString(linkedDevidString);
+                    String linkedAiidString = rs.getString("aiid");
+                    UUID linkedAiid = UUID.fromString(linkedAiidString);
+                    linkedDevAiidPair = new Pair<>(linkedDevid, linkedAiid);
                 }
-                return true;
+                return linkedDevAiidPair;
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
@@ -660,7 +665,7 @@ public class Database {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             DatabaseCall call = transaction.getDatabaseCall();
             try {
-                if (!this.getIsBotLinkedToAi(devId, aiid, botId)) {
+                if (this.getIsBotLinkedToAi(devId, aiid, botId) == null) {
                     // bot not linked, not point in querying further
                     return null;
                 }

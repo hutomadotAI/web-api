@@ -506,7 +506,7 @@ public class TestAILogic {
     @Test
     public void testSetBotConfig_badBotLookup() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(false);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(null);
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
@@ -516,7 +516,7 @@ public class TestAILogic {
     @Test
     public void testSetBotConfig_dbFail() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(generateLinkedBotIds());
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(false);
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
@@ -526,7 +526,7 @@ public class TestAILogic {
     @Test
     public void testSetBotConfig_success() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(generateLinkedBotIds());
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
         when(this.fakeDatabase.getBotConfigDefinition(any(), any(), any())).thenReturn(this.generateAiBotConfigDefinition());
         AiBotConfig config = this.generateAiBotConfig();
@@ -588,6 +588,10 @@ public class TestAILogic {
         configApiKeys.put("key2", "value2");
         AiBotConfig config = new AiBotConfig(configApiKeys);
         return config;
+    }
+
+    private Pair<UUID, UUID> generateLinkedBotIds() {
+        return new Pair<UUID, UUID>(UUID.randomUUID(), UUID.randomUUID());
     }
 
     private AiBotConfigDefinition generateAiBotConfigDefinition() {

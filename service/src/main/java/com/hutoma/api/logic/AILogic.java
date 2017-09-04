@@ -1,11 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.access.Role;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.LogMap;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
@@ -230,11 +226,19 @@ public class AILogic {
                 return ApiError.getNotFound();
             }
 
-            if (botId != 0 && !this.database.getIsBotLinkedToAi(devid, aiid, botId)) {
-                return ApiError.getNotFound();
+            UUID linkedDevid = devid;
+            UUID linkedAiid = aiid;
+            if (botId != 0) {
+                Pair<UUID, UUID> linkedDevidAiid = this.database.getIsBotLinkedToAi(devid, aiid, botId);
+                if (linkedDevidAiid == null) {
+                    return ApiError.getNotFound();
+                }
+                linkedDevid = linkedDevidAiid.getA();
+                linkedAiid = linkedDevidAiid.getB();
             }
 
-            AiBotConfigDefinition definition = this.database.getBotConfigDefinition(devid, aiid, this.jsonSerializer);
+            AiBotConfigDefinition definition = this.database.getBotConfigDefinition(linkedDevid, linkedAiid,
+                    this.jsonSerializer);
             AiBotConfigWithDefinition withDefinition = new AiBotConfigWithDefinition(aiBotConfig, definition);
             try {
                 withDefinition.checkIsValid();
