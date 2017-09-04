@@ -9,6 +9,27 @@ USE `hutoma`;
 ALTER TABLE `ai` ADD COLUMN `api_keys_desc` JSON DEFAULT NULL AFTER `passthrough_url`;
 ALTER TABLE `bot_ai` ADD COLUMN `config` JSON DEFAULT NULL AFTER `dev_id`;
 
+--
+-- Table structure for table `bot_ai_config`
+--
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `bot_ai_config` (
+  `dev_id` varchar(50) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `botId` int(11) NOT NULL,
+  `config` JSON NULL,
+  PRIMARY KEY (`dev_id`, `aiid`, `botId`),
+  KEY `aiid` (`aiid`),
+  KEY `dev_id` (`dev_id`),
+  KEY `botId` (`botId`),
+  CONSTRAINT `bot_ai_config_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE,
+  CONSTRAINT `bot_ai_config_ibfk_2` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+GRANT SELECT ON `hutoma`.`bot_ai_config` TO 'aiReader'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`bot_ai_config` TO 'aiWriter'@'127.0.0.1';
+
 DROP PROCEDURE `getAi`;
 
 DELIMITER ;;
