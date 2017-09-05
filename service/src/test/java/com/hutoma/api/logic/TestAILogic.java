@@ -506,7 +506,7 @@ public class TestAILogic {
     @Test
     public void testSetBotConfig_badBotLookup() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(false);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(null);
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
@@ -516,7 +516,7 @@ public class TestAILogic {
     @Test
     public void testSetBotConfig_dbFail() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(generateLinkedBotIds());
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(false);
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
@@ -526,8 +526,9 @@ public class TestAILogic {
     @Test
     public void testSetBotConfig_success() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(generateLinkedBotIds());
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getBotConfigDefinition(any(), any(), any())).thenReturn(this.generateAiBotConfigDefinition());
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -537,6 +538,7 @@ public class TestAILogic {
     public void testSetBotConfig_success_bot0() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getBotConfigDefinition(any(), any(), any())).thenReturn(this.generateAiBotConfigDefinition());
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 0, config);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -546,8 +548,8 @@ public class TestAILogic {
     public void testSetAiBotConfiguration_failApiSet() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
-        when(this.fakeDatabase.setApiKeyDescriptions(any(), any(), any(), any())).thenReturn(false);
-        AiBotConfigDefinition def = this.generateAiBotConfigDefinition();
+        when(this.fakeDatabase.setBotConfigDefinition(any(), any(), any(), any())).thenReturn(false);
+        AiBotConfigWithDefinition def = this.generateAiBotConfigWithDefinition();
         ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -556,8 +558,9 @@ public class TestAILogic {
     public void testSetAiBotConfiguration_success() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(true);
-        when(this.fakeDatabase.setApiKeyDescriptions(any(), any(), any(), any())).thenReturn(true);
-        AiBotConfigDefinition def = this.generateAiBotConfigDefinition();
+        when(this.fakeDatabase.setBotConfigDefinition(any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getBotConfigDefinition(any(), any(), any())).thenReturn(this.generateAiBotConfigDefinition());
+        AiBotConfigWithDefinition def = this.generateAiBotConfigWithDefinition();
         ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -587,11 +590,22 @@ public class TestAILogic {
         return config;
     }
 
+    private Pair<UUID, UUID> generateLinkedBotIds() {
+        return new Pair<UUID, UUID>(UUID.randomUUID(), UUID.randomUUID());
+    }
+
     private AiBotConfigDefinition generateAiBotConfigDefinition() {
+        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = new ArrayList<>();
+        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("key1", "desc", "http://blah"));
+        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("key2", "desc", "http://blah"));
+        AiBotConfigDefinition definition = new AiBotConfigDefinition(apiKeyDescriptions);
+        return definition;
+    }
+
+    private AiBotConfigWithDefinition generateAiBotConfigWithDefinition() {
         AiBotConfig config = generateAiBotConfig();
-        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = new LinkedList<>();
-        apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("name", "desc", "http://blah"));
-        AiBotConfigDefinition def = new AiBotConfigDefinition(config, apiKeyDescriptions);
+        AiBotConfigDefinition definition = generateAiBotConfigDefinition();
+        AiBotConfigWithDefinition def = new AiBotConfigWithDefinition(config, definition);
         return def;
     }
 

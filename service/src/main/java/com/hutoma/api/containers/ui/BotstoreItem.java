@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.ui;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.ApiKeyDescription;
 import com.hutoma.api.containers.sub.DeveloperInfo;
@@ -20,8 +21,8 @@ public class BotstoreItem {
     @SerializedName("owned")
     private boolean owned;
 
-    @SerializedName("api_key_desc")
-    private List<ApiKeyDescription> apiKeyDescriptions;
+    @SerializedName("bot_config_definition")
+    private AiBotConfigDefinition botConfigDefinition;
 
     public BotstoreItem(final int order, final AiBot bot, final DeveloperInfo devInfo, final boolean owned) {
         this.order = order;
@@ -46,10 +47,10 @@ public class BotstoreItem {
         return this.devInfo;
     }
 
-    public List<ApiKeyDescription> getApiKeyDescriptions() { return this.apiKeyDescriptions; }
+    public AiBotConfigDefinition getBotConfigDefinition() { return this.botConfigDefinition; }
 
-    public void setApiKeyDescriptions(List<ApiKeyDescription> apiKeyDescriptions) {
-        this.apiKeyDescriptions = apiKeyDescriptions;
+    public void setBotConfigDefinition(AiBotConfigDefinition botConfigDefinition) {
+        this.botConfigDefinition = botConfigDefinition;
     }
 
 }

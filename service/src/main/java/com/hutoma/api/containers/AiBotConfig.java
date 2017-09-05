@@ -39,4 +39,18 @@ public class AiBotConfig {
         return apiKeys;
     }
 
+    public boolean isEmpty() {
+        if (apiKeys == null || apiKeys.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isValid() {
+        // just check that the version isn't from the future
+        if (this.version > CURRENT_VERSION) {
+            return false;
+        }
+        return true;
+    }
 }

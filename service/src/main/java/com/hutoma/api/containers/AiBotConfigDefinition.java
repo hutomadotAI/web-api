@@ -1,31 +1,28 @@
 package com.hutoma.api.containers;
 
-import java.util.List;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.*;
 
 /**
- * Class describing the Bot configuration
+ * Class describing the Bot configuration's definition
  */
 public class AiBotConfigDefinition {
-    private AiBotConfig config;
-    private List<ApiKeyDescription> descriptions;
+    @SerializedName("api_keys")
+    private List<ApiKeyDescription> apiKeys;
 
-    public AiBotConfigDefinition(AiBotConfig config, List<ApiKeyDescription> descriptions) {
-        this.config = config;
-        this.descriptions = descriptions;
+    public AiBotConfigDefinition(List<ApiKeyDescription> apiKeys) {
+        this.apiKeys = apiKeys;
     }
 
-    public AiBotConfig getConfig() {
-        return config;
-    }
-
-    public List<ApiKeyDescription> getDescriptions() {
-        return descriptions;
+    public List<ApiKeyDescription> getApiKeys() {
+        return apiKeys;
     }
 
     public static class ApiKeyDescription {
-        private String name;
-        private String description;
-        private String link;
+        public String name;
+        public String description;
+        public String link;
 
         public ApiKeyDescription(String name, String description, String link) {
             this.name = name;
@@ -33,4 +30,12 @@ public class AiBotConfigDefinition {
             this.link = link;
         }
     }
+
+    public boolean isEmpty() {
+        if (apiKeys == null || apiKeys.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
 }
+

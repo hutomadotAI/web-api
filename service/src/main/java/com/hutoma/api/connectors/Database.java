@@ -636,7 +636,7 @@ public class Database {
         }
     }
 
-    public boolean getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
+    public Pair<UUID,UUID> getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getIsBotLinkedToAi", 3).add(devId).add(aiid).add(botId);
@@ -644,10 +644,15 @@ public class Database {
             try {
                 ResultSet rs = call.executeQuery();
 
-                if (!rs.next()) {
-                    return false;
+                Pair<UUID, UUID> linkedDevAiidPair = null;
+                if (rs.next()) {
+                    String linkedDevidString = rs.getString("dev_id");
+                    UUID linkedDevid = UUID.fromString(linkedDevidString);
+                    String linkedAiidString = rs.getString("aiid");
+                    UUID linkedAiid = UUID.fromString(linkedAiidString);
+                    linkedDevAiidPair = new Pair<>(linkedDevid, linkedAiid);
                 }
-                return true;
+                return linkedDevAiidPair;
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
@@ -660,7 +665,7 @@ public class Database {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             DatabaseCall call = transaction.getDatabaseCall();
             try {
-                if (!this.getIsBotLinkedToAi(devId, aiid, botId)) {
+                if (this.getIsBotLinkedToAi(devId, aiid, botId) == null) {
                     // bot not linked, not point in querying further
                     return null;
                 }
@@ -689,20 +694,41 @@ public class Database {
         }
     }
 
-    public boolean setApiKeyDescriptions(final UUID devid, final UUID aiid,
-                                         List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions,
+    public AiBotConfigDefinition getBotConfigDefinition(final UUID devid, final UUID aiid,
+                                          JsonSerializer serializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotConfigDefinition", 2)
+                    .add(devid)
+                    .add(aiid);
+            ResultSet rs = call.executeQuery();
+            try {
+                AiBotConfigDefinition definition = null;
+                if (rs.next()) {
+                    String definitionString = rs.getString("api_keys_desc");
+                    definition = (AiBotConfigDefinition) serializer.deserialize(definitionString,
+                            AiBotConfigDefinition.class);
+                }
+                return definition;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean setBotConfigDefinition(final UUID devid, final UUID aiid,
+                                         AiBotConfigDefinition definition,
                                          JsonSerializer serializer)
             throws DatabaseException {
-        String apiKeyString = serializer.serialize(apiKeyDescriptions);
+        String apiKeyString = serializer.serialize(definition);
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("setApiKeyDescriptions", 3)
+            call.initialise("setBotConfigDefinition", 3)
                     .add(devid)
                     .add(aiid)
                     .add(apiKeyString);
             return call.executeUpdate() > 0;
         }
     }
-
 
     public boolean setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig,
                                   JsonSerializer serializer)
@@ -1251,7 +1277,8 @@ public class Database {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
         List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
-        List<ApiKeyDescription> apiKeyDescriptions = serializer.deserializeList(rs.getString("api_keys_desc"));
+        AiBotConfigDefinition definition = (AiBotConfigDefinition) serializer.deserialize(
+                rs.getString("api_keys_desc"), AiBotConfigDefinition.class);
         // create one summary training status from the block of data
         return new ApiAi(
                 rs.getString("aiid"),
@@ -1270,7 +1297,7 @@ public class Database {
                 rs.getString("hmac_secret"),
                 rs.getString("passthrough_url"),
                 defaultChatResponses,
-                apiKeyDescriptions);
+                definition);
     }
 
     /***

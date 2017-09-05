@@ -1,11 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.access.Role;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.LogMap;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
@@ -190,15 +186,22 @@ public class AILogic {
     }
 
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
-                                               AiBotConfigDefinition aiBotConfigDefinition) {
+                                               AiBotConfigWithDefinition aiBotConfigWithDefinition) {
         final String devIdString = devid.toString();
-        List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = aiBotConfigDefinition.getDescriptions();
+
         try {
-            if (!this.database.setApiKeyDescriptions(devid, aiid, apiKeyDescriptions, this.jsonSerializer)) {
+            aiBotConfigWithDefinition.checkIsValid();
+        } catch (AiBotConfigException ce) {
+            return ApiError.getBadRequest(ce.getMessage());
+        }
+
+        AiBotConfigDefinition definition = aiBotConfigWithDefinition.getDefinitions();
+        try {
+            if (!this.database.setBotConfigDefinition(devid, aiid, definition, this.jsonSerializer)) {
                 return ApiError.getBadRequest("Failed to write API key description");
             }
 
-            return this.setAiBotConfig(devid, aiid, 0, aiBotConfigDefinition.getConfig());
+            return this.setAiBotConfig(devid, aiid, 0, aiBotConfigWithDefinition.getConfig());
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "setAiBotConfigDescription", devIdString, e);
             return ApiError.getInternalServerError();
@@ -208,6 +211,10 @@ public class AILogic {
 
     public ApiResult setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig) {
         final String devIdString = devid.toString();
+
+        if (!aiBotConfig.isValid()) {
+            return ApiError.getBadRequest("Config is not valid");
+        }
 
         // if version is not specified, then change it to the current version
         if (aiBotConfig.getVersion() != AiBotConfig.CURRENT_VERSION) {
@@ -219,10 +226,25 @@ public class AILogic {
                 return ApiError.getNotFound();
             }
 
-            if (botId != 0 && !this.database.getIsBotLinkedToAi(devid, aiid, botId)) {
-                return ApiError.getNotFound();
+            UUID linkedDevid = devid;
+            UUID linkedAiid = aiid;
+            if (botId != 0) {
+                Pair<UUID, UUID> linkedDevidAiid = this.database.getIsBotLinkedToAi(devid, aiid, botId);
+                if (linkedDevidAiid == null) {
+                    return ApiError.getNotFound();
+                }
+                linkedDevid = linkedDevidAiid.getA();
+                linkedAiid = linkedDevidAiid.getB();
             }
 
+            AiBotConfigDefinition definition = this.database.getBotConfigDefinition(linkedDevid, linkedAiid,
+                    this.jsonSerializer);
+            AiBotConfigWithDefinition withDefinition = new AiBotConfigWithDefinition(aiBotConfig, definition);
+            try {
+                withDefinition.checkIsValid();
+            } catch (AiBotConfigException configException) {
+                return ApiError.getBadRequest(configException.getMessage());
+            }
             if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer))
                 return new ApiResult().setSuccessStatus();
             return ApiError.getBadRequest("Failed to set AI/bot config");
