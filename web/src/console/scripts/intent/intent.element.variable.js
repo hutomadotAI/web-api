@@ -74,10 +74,8 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
     wHTML += ('<div class="text-left" >');
     wHTML += ('<div class="col-xs-7 text-gray no-padding">');
 
-    if (required === 0)
-        wHTML += ('<input class="pull-right" type="checkbox" name="action-required" onclick="enableSaving(true)"> ');
-    else
-        wHTML += ('<input class="pull-right" type="checkbox" name="action-required" onclick="enableSaving(true)" checked> ');
+    wHTML += ('<input class="pull-right" type="checkbox" name="action-required" onclick="enableSaving(true)"');
+    wHTML += required ? ' checked>' : '>';
 
     wHTML += ('</div>');
     wHTML += ('</div>');
