@@ -119,8 +119,6 @@ include __DIR__ . "/include/page_menu.php";
 
                     </div>
 
-
-
                     <?php include __DIR__ . '/dynamic/intent.element.content.expression.html.php'; ?>
                     <?php include __DIR__ . '/dynamic/intent.element.content.variable.html.php'; ?>
                     <?php include __DIR__ . '/dynamic/intent.element.content.response.html.php'; ?>
@@ -147,7 +145,6 @@ include __DIR__ . "/include/page_menu.php";
 <script src="./scripts/intent/intent.polling.js"></script>
 <script src="scripts/intent/intent.element.other.js"></script>
 <script src="./scripts/intent/intent.element.js"></script>
-<script src="./scripts/intent/intent.element.variable.js"></script>
 <script src="./dist/js/mustache.min.js"></script>
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
