@@ -50,7 +50,7 @@ public class FacebookMessengerProfile {
         return this.profileDelete;
     }
 
-    public class FacebookMessengerProfileDelete {
+    public static class FacebookMessengerProfileDelete {
         @SerializedName("fields")
         public List<String> toDelete;
 
@@ -63,7 +63,7 @@ public class FacebookMessengerProfile {
         }
     }
 
-    public class FacebookMessengerProfileSet {
+    public static class FacebookMessengerProfileSet {
 
         @SerializedName("greeting")
         public List<Greeting> greeting;
@@ -75,22 +75,22 @@ public class FacebookMessengerProfile {
         }
     }
 
-    private class GetStarted {
+    private static class GetStarted {
 
         @SerializedName("payload")
-        public String payload;
+        private String payload;
 
         public GetStarted(final String payload) {
             this.payload = payload;
         }
     }
 
-    private class Greeting {
+    private static class Greeting {
         @SerializedName("locale")
-        public String locale;
+        private String locale;
 
         @SerializedName("text")
-        public String text;
+        private String text;
 
         public Greeting(final String locale, final String text) {
             this.locale = locale;

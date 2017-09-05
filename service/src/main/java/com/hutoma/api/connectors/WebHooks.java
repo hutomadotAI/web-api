@@ -12,18 +12,16 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookPayload;
 import com.hutoma.api.containers.sub.WebHookResponse;
-
 import com.hutoma.api.logic.ChatRequestInfo;
+
 import org.apache.commons.codec.binary.Hex;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -193,7 +191,7 @@ public class WebHooks {
                                                      final ChatRequestInfo chatInfo) {
         final String devIdString = chatInfo.devId.toString();
 
-        if (passthroughUrl == null || passthroughUrl == "") {
+        if (passthroughUrl == null || passthroughUrl.isEmpty()) {
             this.logger.logError(LOGFROM, "Invalid url passed.");
             return null;
         }

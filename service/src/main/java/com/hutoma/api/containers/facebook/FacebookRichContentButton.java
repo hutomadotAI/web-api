@@ -5,16 +5,16 @@ import com.google.gson.annotations.SerializedName;
 public class FacebookRichContentButton {
 
     @SerializedName("type")
-    public ButtonType buttonType;
+    private ButtonType buttonType;
 
     @SerializedName("title")
-    public String title;
+    private String title;
 
     @SerializedName("url")
-    public String buttonUrl;
+    private String buttonUrl;
 
     @SerializedName("payload")
-    public String payload;
+    private String payload;
 
     FacebookRichContentButton(final ButtonType buttonType, final String title,
                               final String buttonUrl, final String payload) {
