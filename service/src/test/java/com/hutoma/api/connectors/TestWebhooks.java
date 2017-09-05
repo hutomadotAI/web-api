@@ -9,6 +9,7 @@ import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.ServerMetadata;
 
+import com.hutoma.api.logic.ChatRequestInfo;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -32,7 +33,7 @@ public class TestWebhooks {
     private static final UUID AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     private static final UUID DEVID = UUID.fromString("ef1593e6-503f-481c-a1fd-071a32c69271");
-
+    private static final ChatRequestInfo CHATINFO = new ChatRequestInfo(DEVID, AIID, CHATID, "hi", null);
     private JsonSerializer serializer;
     private Database fakeDatabase;
     private ILogger fakeLogger;
@@ -76,7 +77,7 @@ public class TestWebhooks {
         ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, null, chatResult, null, AIID, DEVID);
+        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, null, chatResult, CHATINFO);
         Assert.assertNull(response);
     }
 
@@ -93,7 +94,7 @@ public class TestWebhooks {
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         Assert.assertNull(response);
     }
 
@@ -113,7 +114,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         verify(spy).getMessageHash(any(), any(), any());
         verify(this.fakeTools, Mockito.never()).generateRandomHexString(anyInt());
         Assert.assertNotNull(response);
@@ -134,7 +135,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         verify(spy, Mockito.never()).getMessageHash(any(), any(), any());
         Assert.assertNotNull(response);
     }
@@ -155,7 +156,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         verify(spy).getMessageHash(any(), any(), any());
         verify(this.fakeTools).generateRandomHexString(anyInt());
         Assert.assertNotNull(response);
@@ -170,7 +171,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
-        WebHookResponse response = this.webHooks.executeIntentWebHook(null, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = this.webHooks.executeIntentWebHook(null, mi, chatResult, CHATINFO);
         Assert.assertNull(response);
     }
 
@@ -188,7 +189,7 @@ public class TestWebhooks {
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         Assert.assertNull(response);
     }
 
@@ -205,7 +206,7 @@ public class TestWebhooks {
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, null, AIID, DEVID);
+        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         Assert.assertNull(response);
     }
 
