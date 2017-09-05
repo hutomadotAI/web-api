@@ -5,6 +5,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
+import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
@@ -146,6 +147,10 @@ public class ParameterFilter extends Validate {
     @SuppressWarnings("unchecked")
     public static List<String> getDefaultChatResponses(final ContainerRequestContext requestContext) {
         return (List<String>) requestContext.getProperty(APIParameter.DefaultChatResponses.toString());
+    }
+
+    public static ApiFacebookCustomisation getFacebookCustomisations(final ContainerRequestContext requestContext) {
+        return (ApiFacebookCustomisation) requestContext.getProperty(APIParameter.FacebookCustomisations.toString());
     }
 
     /***

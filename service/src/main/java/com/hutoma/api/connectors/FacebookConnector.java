@@ -8,11 +8,13 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
+import com.hutoma.api.containers.facebook.FacebookMessengerProfile;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.facebook.FacebookToken;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -207,6 +209,48 @@ public class FacebookConnector {
         subscribedApps(pageId, pageAccessToken, RequestMethod.POST);
     }
 
+    /***
+     * Set customisations through the Messenger Profile API
+     * We need to make up to two calls here:
+     * one to set things and one to delete things
+     * @param pageToken
+     * @param messengerProfile
+     * @throws FacebookException
+     */
+    public void setFacebookMessengerProfile(final String pageToken,
+                                            final FacebookMessengerProfile messengerProfile)
+            throws FacebookException {
+
+        if (messengerProfile.getProfileSet().hasContent()) {
+            JerseyWebTarget target = getGraphApiTarget()
+                    .path("me")
+                    .path("messenger_profile")
+                    .queryParam("client_id", this.config.getFacebookAppId())
+                    .queryParam("client_secret", this.config.getFacebookAppSecret())
+                    .queryParam("access_token", pageToken);
+
+            // post the fields that we have content for
+            webCall(target, RequestMethod.POST,
+                    Entity.json(this.jsonSerializer.serialize(messengerProfile.getProfileSet())),
+                    this.config.getFacebookSendAPITimeout());
+        }
+
+        if (messengerProfile.getProfileDelete().hasContent()) {
+            JerseyWebTarget target = getGraphApiTarget()
+                    .path("me")
+                    .path("messenger_profile")
+                    .queryParam("client_id", this.config.getFacebookAppId())
+                    .queryParam("client_secret", this.config.getFacebookAppSecret())
+                    .queryParam("access_token", pageToken);
+
+            // delete the fields that we have no content for
+            webCall(target, RequestMethod.DELETE,
+                    Entity.json(this.jsonSerializer.serialize(messengerProfile.getProfileDelete())),
+                    this.config.getFacebookSendAPITimeout());
+        }
+
+    }
+
     private void sendFacebookMeMessages(String toFacebookID, String pageToken,
                                         SendMessage sendMessage)
             throws FacebookException {
@@ -310,7 +354,11 @@ public class FacebookConnector {
                     response = builder.put(entity);
                     break;
                 case DELETE:
-                    response = builder.delete();
+                    // we are not supposed to make a DELETE call with a body
+                    // however, Facebook requires it so we have to relax compliance validation
+                    // and suffer a warning on the console every time this happens
+                    builder.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true);
+                    response = builder.method("DELETE", entity);
                     break;
                 case GET:
                 default:
@@ -376,7 +424,7 @@ public class FacebookConnector {
         public void setMessageNode(FacebookMessageNode content) {
             this.message = content;
         }
-        
+
         public enum SenderAction {
             typing_on,
             typing_off,

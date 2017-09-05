@@ -33,12 +33,30 @@ public class IntegrationRecord {
         this.active = active;
     }
 
+    public IntegrationRecord(final UUID aiid, final UUID devid, final String data) {
+        this.integrationResource = "";
+        this.integrationUserid = "";
+        this.data = data;
+        this.status = "";
+        this.active = false;
+        this.aiid = aiid;
+        this.devid = devid;
+    }
+
     public String getData() {
         return this.data;
     }
 
+    public void setData(final String data) {
+        this.data = data;
+    }
+
     public boolean isActive() {
         return this.active;
+    }
+
+    public void setActive(final boolean active) {
+        this.active = active;
     }
 
     public String getStatus() {

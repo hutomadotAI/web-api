@@ -1576,7 +1576,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiIntegration`(
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiIntegrationForUpdate`(
   IN `in_aiid` VARCHAR(50),
   IN `in_devid` VARCHAR(50),
   IN `in_integration` VARCHAR(50))
@@ -1587,9 +1587,10 @@ FROM `hutoma`.`ai_integration`
 INNER JOIN `ai` ON `ai`.`aiid` = `ai_integration`.`aiid`
 WHERE `ai`.`dev_id` = `in_devid`
 AND `ai_integration`.`aiid`=`in_aiid` 
-AND `integration`=`in_integration`;
+AND `integration`=`in_integration`
+FOR UPDATE;
     
-  END ;;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

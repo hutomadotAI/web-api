@@ -9,11 +9,13 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiFacebookIntegration;
 import com.hutoma.api.containers.ApiIntegrationList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
+import com.hutoma.api.containers.facebook.FacebookMessengerProfile;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
 import com.hutoma.api.containers.facebook.FacebookToken;
@@ -65,6 +67,69 @@ public class AIIntegrationLogic {
             this.logger.logException(LOGFROM, e);
             return ApiError.getInternalServerError();
         }
+    }
+
+    public ApiResult setFacebookCustomisation(final UUID devid, final UUID aiid,
+                                              final ApiFacebookCustomisation facebookCustomisation) {
+
+        LogMap logMap = LogMap.map("Op", "writeCustomisations")
+                .put("aiid", aiid)
+                .put("devid", devid);
+        try {
+
+            IntegrationRecord updatedRecord = this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+                    (record) -> {
+                        // load a record if we have one
+                        FacebookIntegrationMetadata metadata = null;
+                        if (record != null) {
+                            metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                                    record.getData(), FacebookIntegrationMetadata.class);
+                        } else {
+                            record = new IntegrationRecord(aiid, devid, null);
+                        }
+                        // create new metadata or load the old one
+                        metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
+
+                        // set the fields we care about
+                        metadata.setPageGreeting(Strings.emptyToNull(facebookCustomisation.getPageGreeting()));
+                        metadata.setGetStartedPayload(Strings.emptyToNull(facebookCustomisation.getGetStartedPayload()));
+
+                        // set the new data
+                        record.setData(this.serializer.serialize(metadata));
+                        return record;
+                    });
+
+            sendCustomisationsToFacebook(updatedRecord, logMap);
+            this.logger.logUserTraceEvent(LOGFROM, "facebook set customisations", devid.toString(), logMap);
+
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, e.getMessage(), logMap);
+            return ApiError.getInternalServerError(e.getMessage());
+        }
+        return new ApiResult().setSuccessStatus();
+    }
+
+    public ApiResult getFacebookCustomisation(final UUID devid, final UUID aiid) {
+
+        LogMap logMap = LogMap.map("Op", "readCustomisations")
+                .put("aiid", aiid)
+                .put("devid", devid);
+        try {
+            IntegrationRecord record = this.database.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            if (record != null) {
+                FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                        record.getData(), FacebookIntegrationMetadata.class);
+                if (metadata != null) {
+                    return new ApiFacebookCustomisation(
+                            Strings.nullToEmpty(metadata.getPageGreeting()),
+                            Strings.nullToEmpty(metadata.getGetStartedPayload())).setSuccessStatus();
+                }
+            }
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, e.getMessage(), logMap);
+            return ApiError.getInternalServerError(e.getMessage());
+        }
+        return new ApiFacebookCustomisation("", "");
     }
 
     /***
@@ -192,32 +257,50 @@ public class AIIntegrationLogic {
             logMap.add("facebook_user", userNode.getName());
             logMap.add("facebook_id", userNode.getId());
 
-            // create the metadata
-            FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(token.getAccessToken(),
-                    userNode.getName(), token.getExpires());
-
             // check if anyone else has already connected this Facebook account
-            if (this.database.isIntegratedUserAlreadyRegistered(
-                    IntegrationType.FACEBOOK, userNode.getId(), devid)) {
-                // if so, save an empty record
-                this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
-                        null, "", "{}",
-                        "", false);
+            boolean userAlreadyIntegrated = this.database.isIntegratedUserAlreadyRegistered(
+                    IntegrationType.FACEBOOK, userNode.getId(), devid);
+
+            final FacebookToken finalToken = token;
+            this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+                    (record) -> {
+
+                        // load a record if we have one
+                        FacebookIntegrationMetadata metadata = null;
+                        if (record != null) {
+                            metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                                    record.getData(), FacebookIntegrationMetadata.class);
+                        }
+                        // create new metadata or load the old one
+                        metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
+
+                        // check if anyone else has already connected this Facebook account
+                        if (userAlreadyIntegrated) {
+                            return new IntegrationRecord(aiid, devid,
+                                    this.serializer.serialize(metadata));
+                        }
+
+                        metadata.connect(finalToken.getAccessToken(),
+                                userNode.getName(), finalToken.getExpires());
+
+                        return new IntegrationRecord("", userNode.getId(),
+                                this.serializer.serialize(metadata),
+                                String.format("Connected to \"%s\" Facebook account", userNode.getName()),
+                                false);
+                    });
+
+            if (userAlreadyIntegrated) {
                 // and log
                 this.logger.logUserWarnEvent(LOGFROM, "facebook account already in use", devid.toString(),
                         logMap);
                 return ApiError.getConflict("Cannot connect. Another user has already registered that Facebook account.");
-            } else {
-                // otherwise, save it
-                this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
-                        null, userNode.getId(), this.serializer.serialize(metadata),
-                        String.format("Connected to \"%s\" Facebook account", userNode.getName()), false);
-
-                // make sure we got the permissions we require
-                checkGrantedPermissions(userNode.getId(), token.getAccessToken());
-
-                this.logger.logUserInfoEvent(LOGFROM, "facebook account connect", devid.toString(), logMap);
             }
+
+            // make sure we got the permissions we require
+            checkGrantedPermissions(userNode.getId(), token.getAccessToken());
+
+            this.logger.logUserInfoEvent(LOGFROM, "facebook account connect", devid.toString(), logMap);
+
 
         } catch (FacebookException.FacebookMissingPermissionsException missing) {
             this.logger.logUserWarnEvent(LOGFROM, "facebook account connect with missing permissions",
@@ -314,6 +397,9 @@ public class AIIntegrationLogic {
                 FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
                         record.getData(), FacebookIntegrationMetadata.class);
 
+                // delete customisations
+                removeCustomisationsFromFacebook(record, logMap);
+
                 // try to unsubscribe
                 unsubscribeToFacebookPage(logMap, record, metadata);
             } finally {
@@ -327,30 +413,102 @@ public class AIIntegrationLogic {
         } catch (Database.DatabaseException dbe) {
             this.logger.logUserExceptionEvent(LOGFROM, "error deleting facebook integration",
                     devid.toString(), dbe, logMap);
+        } catch (FacebookException fe) {
+            this.logger.logUserExceptionEvent(LOGFROM, "error deactivating facebook integration",
+                    devid.toString(), fe, logMap);
         }
     }
+
+    /***
+     * Send the customisations that we stored in the database record
+     * to Facebook i.e. customise the page integration
+     * @param updatedRecord
+     * @throws FacebookException
+     */
+    private void sendCustomisationsToFacebook(final IntegrationRecord updatedRecord, final LogMap logMap)
+            throws FacebookException {
+        if ((updatedRecord != null) && (updatedRecord.isActive())) {
+            FacebookIntegrationMetadata metadata =
+                    (FacebookIntegrationMetadata) this.serializer.deserialize(
+                            updatedRecord.getData(), FacebookIntegrationMetadata.class);
+            customiseFacebookIntegration(updatedRecord.getIntegrationResource(), metadata.getPageToken(),
+                    metadata.getPageGreeting(), metadata.getGetStartedPayload(),
+                    logMap);
+        }
+    }
+
+    /***
+     * Switch off any Facebook customisations before we disconnect or delete
+     * @param updatedRecord
+     * @throws FacebookException
+     */
+    private void removeCustomisationsFromFacebook(final IntegrationRecord updatedRecord, final LogMap logMap)
+            throws FacebookException {
+        if ((updatedRecord != null) && (updatedRecord.isActive())) {
+            FacebookIntegrationMetadata metadata =
+                    (FacebookIntegrationMetadata) this.serializer.deserialize(
+                            updatedRecord.getData(), FacebookIntegrationMetadata.class);
+            customiseFacebookIntegration(updatedRecord.getIntegrationResource(), metadata.getPageToken(),
+                    null, null,
+                    logMap);
+        }
+    }
+
+    private void customiseFacebookIntegration(final String integrationResource, final String pageToken,
+                                              final String greeting, final String getStarted,
+                                              final LogMap logMap) throws FacebookException {
+
+        FacebookMessengerProfile profile = new FacebookMessengerProfile(
+                greeting, getStarted);
+        logMap.add("Facebook_Customise_Greeting", profile.isSetGreeting() ? "set" : "deleted");
+        logMap.add("Facebook_Customise_GetStarted", profile.isSetGetStarted() ? "set" : "deleted");
+        this.facebookConnector.setFacebookMessengerProfile(
+                pageToken, profile);
+    }
+
 
     /***
      * Disconnect a bot from facebook
      * @param logMap
      * @param devid
      * @param aiid
-     * @param record
-     * @param metadata
+     * @param integrationRecord
+     * @param integrationMetadata
      * @return
      * @throws Database.DatabaseException
      * @throws FacebookException
      */
     private ApiResult disconnect(final LogMap logMap, final UUID devid, final UUID aiid,
-                                 final IntegrationRecord record, final FacebookIntegrationMetadata metadata)
+                                 final IntegrationRecord integrationRecord, final FacebookIntegrationMetadata integrationMetadata)
             throws Database.DatabaseException, FacebookException {
 
-        unsubscribeToFacebookPage(logMap, record, metadata);
+        // switch off customisations
+        removeCustomisationsFromFacebook(integrationRecord, logMap);
+
+        unsubscribeToFacebookPage(logMap, integrationRecord, integrationMetadata);
 
         // clear the database record
-        this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
-                null, null,
-                this.serializer.serialize(new FacebookIntegrationMetadata()), "", false);
+        this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+                (record) -> {
+
+                    // load a record if we have one
+                    FacebookIntegrationMetadata metadata = null;
+                    if (record != null) {
+                        metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                                record.getData(), FacebookIntegrationMetadata.class);
+                    }
+                    // create new metadata or load the old one
+                    metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
+
+                    // clear the accesstoken, username, token expiry, retaining other data
+                    metadata.connect("", "", null);
+
+                    // clear the integration resource, integrationUserid and status
+                    // and set active=false
+                    return new IntegrationRecord("", "",
+                            this.serializer.serialize(metadata), "", false);
+                });
+
         // log
         this.logger.logUserTraceEvent(LOGFROM, "facebook integration disconnected",
                 devid.toString(), logMap);
@@ -395,21 +553,22 @@ public class AIIntegrationLogic {
      * @param logMap
      * @param devid
      * @param aiid
-     * @param record
-     * @param metadata
+     * @param integrationRecord
+     * @param integrationMetadata
      * @param page
      * @return
      * @throws Database.DatabaseException
      * @throws FacebookException
      */
     private ApiResult pageSelect(final LogMap logMap, final UUID devid, final UUID aiid,
-                                 final IntegrationRecord record, final FacebookIntegrationMetadata metadata,
+                                 final IntegrationRecord integrationRecord,
+                                 final FacebookIntegrationMetadata integrationMetadata,
                                  final String page)
             throws Database.DatabaseException, FacebookException {
 
         logMap.add("facebook_page_id", page);
         // get a list of pages and filter out the one the user has selected
-        FacebookNode pageNode = getListOfUserPages(metadata).stream()
+        FacebookNode pageNode = getListOfUserPages(integrationMetadata).stream()
                 .filter(node -> node.getId().equalsIgnoreCase(page))
                 .findFirst()
                 .orElse(null);
@@ -424,22 +583,35 @@ public class AIIntegrationLogic {
         // subscribe to notifications for that page
         this.facebookConnector.pageSubscribe(pageNode.getId(), pageNode.getAccessToken());
 
-        // store information for this page
-        record.setIntegrationResource(pageNode.getId());
-        metadata.setPageToken(pageNode.getAccessToken());
-        metadata.setPageName(pageNode.getName());
-        record.setStatus(String.format("Waiting for chat."));
-        logMap.add("facebook_page_name", metadata.getPageName());
-        logMap.add("facebook_user_name", metadata.getUserName());
+        logMap.add("facebook_page_name", pageNode.getName());
+        logMap.add("facebook_user_name", integrationMetadata.getUserName());
 
-        // store the new record
-        this.database.updateIntegration(aiid, devid, IntegrationType.FACEBOOK,
-                pageNode.getId(), record.getIntegrationUserid(),
-                this.serializer.serialize(metadata), record.getStatus(), true);
+        IntegrationRecord updatedRecord = this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+                (record) -> {
+                    // load a record if we have one
+                    FacebookIntegrationMetadata metadata = null;
+                    if (record != null) {
+                        metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                                record.getData(), FacebookIntegrationMetadata.class);
+                    }
+                    // create new metadata or load the old one
+                    metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
+
+                    metadata.setPageToken(pageNode.getAccessToken());
+                    metadata.setPageName(pageNode.getName());
+                    record.setIntegrationResource(pageNode.getId());
+                    record.setStatus(String.format("Waiting for chat."));
+                    record.setActive(true);
+
+                    record.setData(this.serializer.serialize(metadata));
+                    return record;
+                });
+
+        sendCustomisationsToFacebook(updatedRecord, logMap);
 
         // log
         this.logger.logUserInfoEvent(LOGFROM, String.format("integrated bot %s with Facebook page %s for user %s",
-                aiid.toString(), metadata.getPageName(), metadata.getUserName()), devid.toString(), logMap);
+                aiid.toString(), integrationMetadata.getPageName(), integrationMetadata.getUserName()), devid.toString(), logMap);
 
         return new ApiResult().setSuccessStatus("Link successful.");
     }

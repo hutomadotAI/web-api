@@ -82,7 +82,7 @@ public class TestFacebookChatHandler {
         this.fakeIntegrationRecord = mock(IntegrationRecord.class);
         when(this.fakeDatabase.getIntegrationResource(any(), any())).thenReturn(this.fakeIntegrationRecord);
 
-        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
+        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata().connect(
                 "access", "username", DateTime.now().plusHours(1));
         metadata.setPageToken(PAGETOKEN);
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
@@ -123,7 +123,7 @@ public class TestFacebookChatHandler {
 
     @Test
     public void testChat_NoPageToken() throws Exception {
-        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
+        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata().connect(
                 "access", "username", DateTime.now().plusHours(1));
         metadata.setPageToken("");
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));

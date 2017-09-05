@@ -6,14 +6,23 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.AiBotConfig;
+import com.hutoma.api.containers.AiBotConfigDefinition;
+import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiAiWithConfig;
+import com.hutoma.api.containers.ApiLinkedBotData;
 import com.hutoma.api.containers.sub.*;
 
 import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.function.UnaryOperator;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -23,6 +32,8 @@ import javax.inject.Provider;
 public class Database {
 
     protected static final String LOGFROM = "database";
+    private static final String FACEBOOK_DEACTIVATED_MESSAGE =
+            "Deactivated because another bot was integrated with this Facebook page.";
     protected final ILogger logger;
     protected final Provider<DatabaseCall> callProvider;
     protected Provider<DatabaseTransaction> transactionProvider;
@@ -973,8 +984,8 @@ public class Database {
     }
 
     public AiBotConfig getBotConfigForWebhookCall(final UUID devId, final UUID originatingAiid,
-                                                      UUID aiid,
-                                                      final JsonSerializer jsonSerializer)
+                                                  UUID aiid,
+                                                  final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotConfigForWebhookCall", 3)
@@ -1152,30 +1163,6 @@ public class Database {
         }
     }
 
-    public boolean updateIntegration(final UUID aiid, final UUID devid, final IntegrationType integration,
-                                     final String integratedResource, final String integratedUserid,
-                                     final String data, final String status,
-                                     boolean active) throws DatabaseException {
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            DatabaseCall call = transaction.getDatabaseCall()
-                    .initialise("updateAiIntegration", 9)
-                    .add(aiid)
-                    .add(devid)
-                    .add(integration.value())
-                    .add(integratedResource)
-                    .add(integratedUserid)
-                    .add(data)
-                    .add(status)
-                    .add(active)
-                    .add("Deactivated because another bot was integrated with this Facebook page.");
-            if (call.executeUpdate() > 0) {
-                transaction.commit();
-                return true;
-            }
-        }
-        return false;
-    }
-
     public IntegrationRecord getIntegration(final UUID aiid, final UUID devid, final IntegrationType integration)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
@@ -1261,6 +1248,58 @@ public class Database {
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
+    }
+
+    public IntegrationRecord updateIntegrationRecord(final UUID aiid, final UUID devid, final IntegrationType integration,
+                                                     UnaryOperator<IntegrationRecord> updater)
+            throws DatabaseException {
+
+        // open a transaction
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            // load the current integration record
+            ResultSet rs = transaction.getDatabaseCall()
+                    .initialise("getAiIntegrationForUpdate", 3)
+                    .add(aiid)
+                    .add(devid)
+                    .add(integration.value())
+                    .executeQuery();
+            IntegrationRecord record = rs.next() ? new IntegrationRecord(
+                    rs.getString("integrated_resource"),
+                    rs.getString("integrated_userid"),
+                    rs.getString("data"),
+                    rs.getString("status"),
+                    rs.getBoolean("active"))
+                    : null;
+
+            // make the changes we require
+            record = updater.apply(record);
+
+            // if the updater still wants to save the result ...
+            if (record != null) {
+
+                // write the changes to the database
+                DatabaseCall call = transaction.getDatabaseCall()
+                        .initialise("updateAiIntegration", 9)
+                        .add(aiid)
+                        .add(devid)
+                        .add(integration.value())
+                        .add(record.getIntegrationResource())
+                        .add(record.getIntegrationUserid())
+                        .add(record.getData())
+                        .add(record.getStatus())
+                        .add(record.isActive())
+                        .add(FACEBOOK_DEACTIVATED_MESSAGE);
+
+                if (call.executeUpdate() > 0) {
+                    transaction.commit();
+                    return record;
+                }
+            }
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+        return null;
     }
 
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {

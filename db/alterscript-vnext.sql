@@ -210,11 +210,11 @@ BEGIN
 		WHERE bac.aiid = param_aiid AND bac.dev_id = param_devId AND bs.aiid = param_aiidLinkedBot;
 	END IF;
 END;;
+DELIMITER ;
 
 #
 # DB update for validating bot configuration JSON
 #
-DELIMITER ;
 DROP procedure IF EXISTS `setApiKeyDescriptions`;
 DROP procedure IF EXISTS `setBotConfigDefinition`;
 DELIMITER ;;
@@ -229,7 +229,6 @@ BEGIN
     WHERE aiid = in_aiid AND dev_id = in_dev_id;
 END;;
 
-
 DELIMITER ;
 DROP procedure IF EXISTS `getBotConfigDefinition`;
 DELIMITER ;;
@@ -240,3 +239,24 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigDefinition`(
 BEGIN
     SELECT api_keys_desc FROM ai WHERE aiid = param_aiid AND dev_id = param_devId;
 END;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `getAiIntegration`;
+DROP PROCEDURE IF EXISTS `getAiIntegrationForUpdate`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiIntegrationForUpdate`(
+  IN `in_aiid` VARCHAR(50),
+  IN `in_devid` VARCHAR(50),
+  IN `in_integration` VARCHAR(50))
+BEGIN
+
+SELECT `integrated_resource`, `integrated_userid`, `data`, `status`, `active`
+FROM `hutoma`.`ai_integration`
+INNER JOIN `ai` ON `ai`.`aiid` = `ai_integration`.`aiid`
+WHERE `ai`.`dev_id` = `in_devid`
+AND `ai_integration`.`aiid`=`in_aiid` 
+AND `integration`=`in_integration`
+FOR UPDATE;
+    
+END;;
+DELIMITER ;
