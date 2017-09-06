@@ -1163,28 +1163,6 @@ public class Database {
         }
     }
 
-    public IntegrationRecord getIntegration(final UUID aiid, final UUID devid, final IntegrationType integration)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAiIntegration", 3)
-                    .add(aiid)
-                    .add(devid)
-                    .add(integration.value());
-            ResultSet rs = call.executeQuery();
-            if (rs.next()) {
-                return new IntegrationRecord(
-                        rs.getString("integrated_resource"),
-                        rs.getString("integrated_userid"),
-                        rs.getString("data"),
-                        rs.getString("status"),
-                        rs.getBoolean("active"));
-            }
-            return null;
-        } catch (SQLException sqle) {
-            throw new DatabaseException(sqle);
-        }
-    }
-
     public IntegrationRecord getIntegrationResource(final IntegrationType integration,
                                                     final String integratedResource)
             throws DatabaseException {
@@ -1250,6 +1228,36 @@ public class Database {
         }
     }
 
+    /***
+     * Load the integration record without making any changes
+     * @param aiid
+     * @param devid
+     * @param integration
+     * @return
+     * @throws DatabaseException
+     */
+    public IntegrationRecord getIntegration(final UUID aiid, final UUID devid,
+                                            final IntegrationType integration) throws DatabaseException {
+        final IntegrationRecord[] finalRecord = {null};
+
+        // load the record but do not update it
+        updateIntegrationRecord(aiid, devid, integration, (record) -> {
+            finalRecord[0] = record;
+            return null;
+        });
+        return finalRecord[0];
+    }
+
+    /***
+     * Load the integration message, make changes in a lambda and save the changes,
+     * all inside a transaction
+     * @param aiid
+     * @param devid
+     * @param integration
+     * @param updater
+     * @return
+     * @throws DatabaseException
+     */
     public IntegrationRecord updateIntegrationRecord(final UUID aiid, final UUID devid,
                                                      final IntegrationType integration,
                                                      final UnaryOperator<IntegrationRecord> updater)
@@ -1296,6 +1304,10 @@ public class Database {
                     transaction.commit();
                     return record;
                 }
+            } else {
+                // this was a read-only transaction so
+                // we can commit to release the locks now
+                transaction.commit();
             }
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
