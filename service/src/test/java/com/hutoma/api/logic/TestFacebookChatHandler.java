@@ -10,10 +10,10 @@ import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
+import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.facebook.FacebookToken;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
@@ -82,7 +82,7 @@ public class TestFacebookChatHandler {
         this.fakeIntegrationRecord = mock(IntegrationRecord.class);
         when(this.fakeDatabase.getIntegrationResource(any(), any())).thenReturn(this.fakeIntegrationRecord);
 
-        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
+        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata().connect(
                 "access", "username", DateTime.now().plusHours(1));
         metadata.setPageToken(PAGETOKEN);
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
@@ -123,7 +123,7 @@ public class TestFacebookChatHandler {
 
     @Test
     public void testChat_NoPageToken() throws Exception {
-        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata(
+        FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata().connect(
                 "access", "username", DateTime.now().plusHours(1));
         metadata.setPageToken("");
         when(this.fakeIntegrationRecord.getData()).thenReturn(this.serializer.serialize(metadata));
@@ -186,6 +186,26 @@ public class TestFacebookChatHandler {
     @Test
     public void testChat_OK_RichContent() throws Exception {
         String answer = ANSWER;
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize("{\n" +
+                "   \"text\":\"text field\",\n" +
+                "   \"facebook\":{\n" +
+                "      \"attachment\":{\n" +
+                "         \"type\":\"image\",\n" +
+                "         \"payload\":{\n" +
+                "            \"url\":\"image_url\"\n" +
+                "         }\n" +
+                "      }\n" +
+                "   }\n" +
+                "}", WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertEquals(FacebookMessageNode.RichContentType.image,
+                getOutput(chatOutput.get(0)).getAttachment().getContentType());
+    }
+
+    @Test
+    public void testChat_OK_RichContent_Deprecated() throws Exception {
+        String answer = ANSWER;
         WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(" {\n" +
                 "   \"text\": \"" + WEBHOOK_ANSWER + "\",\n" +
                 "   \"facebook\": {\n" +
@@ -197,9 +217,77 @@ public class TestFacebookChatHandler {
                 " }\n" +
                 " ", WebHookResponse.class);
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
-        Assert.assertNotNull(getOutput(chatOutput.get(0)).getRichContent());
-        Assert.assertEquals(FacebookRichContentNode.RichContentType.image,
-                getOutput(chatOutput.get(0)).getRichContent().getContentType());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertEquals(FacebookMessageNode.RichContentType.image,
+                getOutput(chatOutput.get(0)).getAttachment().getContentType());
+    }
+
+    @Test
+    public void testChat_OK_QuickReplies_Text() throws Exception {
+        String answer = ANSWER;
+        String s = "{\n" +
+                "   \"text\":\"text field\",\n" +
+                "   \"facebook\":{\n" +
+                "      \"quick_replies\":[\n" +
+                "         {\n" +
+                "            \"content_type\":\"text\",\n" +
+                "            \"title\":\"Search\",\n" +
+                "            \"payload\":\"PAYLOAD\",\n" +
+                "            \"image_url\":\"image_url\"\n" +
+                "         },\n" +
+                "         {\n" +
+                "            \"content_type\":\"location\"\n" +
+                "         },\n" +
+                "         {\n" +
+                "            \"content_type\":\"text\",\n" +
+                "            \"title\":\"Something Else\",\n" +
+                "            \"payload\":\"PAYLOAD\"\n" +
+                "         }\n" +
+                "      ]\n" +
+                "   }\n" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasQuickReplies());
+        Assert.assertNotNull(getOutput(chatOutput.get(0)).getText());
+    }
+
+    @Test
+    public void testChat_OK_QuickReplies_Attachment() throws Exception {
+        String answer = ANSWER;
+        String s = "{\n" +
+                "   \"text\":\"text field\",\n" +
+                "   \"facebook\":{\n" +
+                "      \"quick_replies\":[\n" +
+                "         {\n" +
+                "            \"content_type\":\"text\",\n" +
+                "            \"title\":\"Search\",\n" +
+                "            \"payload\":\"PAYLOAD\",\n" +
+                "            \"image_url\":\"image_url\"\n" +
+                "         },\n" +
+                "         {\n" +
+                "            \"content_type\":\"location\"\n" +
+                "         },\n" +
+                "         {\n" +
+                "            \"content_type\":\"text\",\n" +
+                "            \"title\":\"Something Else\",\n" +
+                "            \"payload\":\"PAYLOAD\"\n" +
+                "         }\n" +
+                "      ],\n" +
+                "      \"attachment\":{\n" +
+                "         \"type\":\"image\",\n" +
+                "         \"payload\":{\n" +
+                "            \"url\":\"image_url\"\n" +
+                "         }\n" +
+                "      }\n" +
+                "   }\n" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasQuickReplies());
+        Assert.assertNull(getOutput(chatOutput.get(0)).getText());
     }
 
     @Test
@@ -263,8 +351,8 @@ public class TestFacebookChatHandler {
         String answer = ANSWER;
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A", "B", "C"), false);
-        Assert.assertNotNull(getOutput(chatOutput.get(0)).getQuickReplies());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasQuickReplies());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasAttachment());
         Assert.assertNotNull(getOutput(chatOutput.get(0)).getText());
         Assert.assertEquals(3,
                 getOutput(chatOutput.get(0)).getQuickReplies().size());
@@ -275,8 +363,8 @@ public class TestFacebookChatHandler {
         String answer = ANSWER;
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A"), false);
-        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
-        Assert.assertNotNull(getOutput(chatOutput.get(0)).getQuickReplies());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasQuickReplies());
         Assert.assertEquals(1,
                 getOutput(chatOutput.get(0)).getQuickReplies().size());
     }
@@ -299,8 +387,8 @@ public class TestFacebookChatHandler {
                 LABEL, Arrays.asList("A", "B", "C", "D", "E", "F",
                         "G", "H", "I", "J", "K", "X"), false);
         Assert.assertEquals(1, chatOutput.size());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getQuickReplies());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasQuickReplies());
     }
 
     @Test
@@ -309,8 +397,8 @@ public class TestFacebookChatHandler {
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, new ArrayList<>(), false);
         Assert.assertEquals(1, chatOutput.size());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getQuickReplies());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasQuickReplies());
     }
 
     @Test
@@ -319,14 +407,14 @@ public class TestFacebookChatHandler {
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null, "intentname",
                 LABEL, Arrays.asList("A", "B", "C"), true);
         Assert.assertEquals(1, chatOutput.size());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getRichContent());
-        Assert.assertNull(getOutput(chatOutput.get(0)).getQuickReplies());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasAttachment());
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasQuickReplies());
     }
 
-    private FacebookConnector.SendMessage getOutput(FacebookResponseSegment segment) {
+    private FacebookMessageNode getOutput(FacebookResponseSegment segment) {
         FacebookConnector.SendMessage sendMessage = new FacebookConnector.SendMessage("recipient");
         segment.populateMessageContent(sendMessage);
-        return sendMessage;
+        return sendMessage.getMessageNode();
     }
 
     private List<FacebookResponseSegment> makeChatCall(

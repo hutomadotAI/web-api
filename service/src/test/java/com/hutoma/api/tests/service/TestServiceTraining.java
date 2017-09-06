@@ -40,8 +40,6 @@ public class TestServiceTraining extends ServiceTestBase {
     @Mock
     private IMemoryIntentHandler fakeMemoryIntentHandler;
     @Mock
-    private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
-    @Mock
     private AIServices fakeAiServices;
 
     @Before
@@ -192,11 +190,9 @@ public class TestServiceTraining extends ServiceTestBase {
         binder.bind(TrainingLogic.class).to(TrainingLogic.class);
         binder.bind(AILogic.class).to(AILogic.class);
 
-        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeAiServices = mock(AIServices.class);
 
-        binder.bindFactory(new InstanceFactory<>(TestServiceTraining.this.fakeDatabaseEntitiesIntents)).to(DatabaseEntitiesIntents.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceTraining.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceTraining.this.fakeAiServices)).to(AIServices.class);
         return binder;

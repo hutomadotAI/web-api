@@ -75,7 +75,7 @@ public class DatabaseEntitiesIntents extends Database {
                     isSystem = rs.getBoolean("isSystem");
                 }
                 final ArrayList<String> entityValues = new ArrayList<>();
-                // only custom entities have values as ystem entities are handled externally
+                // only custom entities have values as system entities are handled externally
                 if (!isSystem) {
                     call.initialise("getEntityValues", 2).add(devid).add(entityName);
                     rs = call.executeQuery();

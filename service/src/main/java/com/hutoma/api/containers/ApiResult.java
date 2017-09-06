@@ -6,7 +6,7 @@ import com.hutoma.api.containers.sub.Status;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by David MG on 15/08/2016.
+ * API result base class
  */
 public class ApiResult {
 

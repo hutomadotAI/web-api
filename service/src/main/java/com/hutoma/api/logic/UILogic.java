@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.DatabaseUI;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -23,11 +24,13 @@ public class UILogic {
     private static final String LOGFROM = "uilogic";
     private final DatabaseUI databaseUi;
     private final ILogger logger;
+    private final JsonSerializer serializer;
 
     @Inject
-    public UILogic(final DatabaseUI databaseUi, final ILogger logger) {
+    public UILogic(final DatabaseUI databaseUi, final ILogger logger, final JsonSerializer serializer) {
         this.databaseUi = databaseUi;
         this.logger = logger;
+        this.serializer = serializer;
     }
 
     /**
@@ -100,7 +103,7 @@ public class UILogic {
      */
     public ApiResult getBotstoreBot(final UUID devId, final int botId) {
         try {
-            BotstoreItem item = this.databaseUi.getBotstoreItem(botId);
+            BotstoreItem item = this.databaseUi.getBotstoreItem(botId, this.serializer);
             if (item == null) {
                 return ApiError.getNotFound();
             }

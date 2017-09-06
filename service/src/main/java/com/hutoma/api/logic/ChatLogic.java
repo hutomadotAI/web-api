@@ -99,7 +99,8 @@ public class ChatLogic {
                                    final Map<String, String> clientVariables, String passthrough) {
         UUID chatUuid = UUID.fromString(chatId);
         ChatResult chatResult = new ChatResult(question);
-        WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, clientVariables, devId, aiid);
+        final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, chatUuid, question, clientVariables);
+        WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
 
         if (response != null) {
             chatResult.setAnswer(response.getText());
@@ -155,7 +156,8 @@ public class ChatLogic {
                              final Map<String, String> clientVariables)
             throws ChatFailedException {
 
-        final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, UUID.fromString(chatId), question, clientVariables);
+        final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, UUID.fromString(chatId),
+                question, clientVariables);
 
         final String devIdString = devId.toString();
         final long startTime = this.tools.getTimestamp();
@@ -169,7 +171,7 @@ public class ChatLogic {
         apiChat.setTimestamp(startTime);
 
         // Add telemetry for the request
-        this.telemetryMap.put("DevId", devId)
+        this.telemetryMap = this.telemetryMap.put("DevId", devId)
                 .put("AIID", aiid)
                 .put("Topic", this.chatState.getTopic())
                 .put("History", this.chatState.getHistory())
@@ -582,7 +584,7 @@ public class ChatLogic {
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
             WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
-                    chatInfo.clientVariables, chatInfo.devId, chatInfo.aiid);
+                    chatInfo);
             if (response == null) {
                 this.logger.logUserErrorEvent(LOGFROM,
                         "Error occured executing WebHook for intent %s for aiid %s.",
@@ -813,23 +815,6 @@ public class ChatLogic {
         result.setContext("");
         result.setTopicOut("");
         return result;
-    }
-
-    private static class ChatRequestInfo {
-        private UUID devId;
-        private UUID aiid;
-        private UUID chatId;
-        private String question;
-        private Map<String, String> clientVariables;
-
-        ChatRequestInfo(final UUID devId, final UUID aiid, final UUID chatId, final String question,
-                        final Map<String, String> clientVariables) {
-            this.devId = devId;
-            this.aiid = aiid;
-            this.chatId = chatId;
-            this.question = question;
-            this.clientVariables = clientVariables;
-        }
     }
 
     static class IntentException extends Exception {

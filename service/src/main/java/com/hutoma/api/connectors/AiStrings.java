@@ -42,7 +42,7 @@ public class AiStrings {
         return responses.get(index);
     }
 
-    public class AiStringsException extends Exception {
+    public static class AiStringsException extends Exception {
         public AiStringsException(final String message) {
             super(message);
         }

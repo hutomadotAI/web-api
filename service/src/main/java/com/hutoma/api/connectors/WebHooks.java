@@ -6,22 +6,22 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.AiBotConfig;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookPayload;
 import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.logic.ChatRequestInfo;
 
 import org.apache.commons.codec.binary.Hex;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -58,18 +58,32 @@ public class WebHooks {
      * @param intent The intent.
      * @param chatResult The chat result for the request.
      * @return a WebHookResponse containing the returned data.
-     * @throws IOException if the endpoint cannot be accessed.
      */
-    public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
-                                                final Map<String, String> clientVariables, final UUID devId,
-                                                final UUID originatingAiid) {
-        final String devIdString = devId.toString();
+    public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent,
+                                                final ChatResult chatResult, final ChatRequestInfo chatInfo) {
+        final String devIdString = chatInfo.devId.toString();
         if (webHook == null || intent == null) {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
             return null;
         }
-
         String webHookEndpoint = webHook.getEndpoint();
+
+        AiBotConfig config = null;
+        try {
+            config = this.database.getBotConfigForWebhookCall(chatInfo.devId, chatInfo.aiid, intent.getAiid(),
+                    this.serializer);
+        } catch (Database.DatabaseException e) {
+            this.logger.logException(LOGFROM, e);
+            // if the config load fails, then abort the webhook call.
+            this.logger.logUserWarnEvent(LOGFROM, "Webhook aborted due to failure to load config",
+                    devIdString,
+                    LogMap.map("Endpoint", webHookEndpoint)
+                            .put("Intent", intent.getName())
+                            .put("AIID", intent.getAiid())
+                            .put("Endpoint", webHook.getEndpoint()));
+            return null;
+        }
+
         String[] webHookSplit = webHookEndpoint.split(":", 2);
         if (webHookSplit.length < 2) {
             this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
@@ -82,7 +96,7 @@ public class WebHooks {
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
-        WebHookPayload payload = new WebHookPayload(intent, chatResult, originatingAiid, clientVariables);
+        WebHookPayload payload = new WebHookPayload(intent, chatResult, chatInfo, config);
 
         String jsonPayload;
         try {
@@ -92,7 +106,7 @@ public class WebHooks {
             return null;
         }
 
-        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, originatingAiid);
+        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, chatInfo.aiid);
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
@@ -122,7 +136,8 @@ public class WebHooks {
         return webHookResponse;
     }
 
-    private Response executeWebhook(String webHookEndpoint, String jsonPayload, String devIdString, boolean isHttps, UUID aiid) {
+    private Response executeWebhook(final String webHookEndpoint, final String jsonPayload, final String devIdString,
+                                    final boolean isHttps, final UUID aiid) {
         byte[] payloadBytes;
         try {
             payloadBytes = jsonPayload.getBytes("UTF-8");
@@ -150,7 +165,9 @@ public class WebHooks {
 
             // getMessageHash logs internally, no need to log again
             calculatedHash = getMessageHash(devIdString, secret, payloadBytes);
-            if (calculatedHash == null) return null;
+            if (calculatedHash == null) {
+                return null;
+            }
         }
 
         Response response;
@@ -174,11 +191,10 @@ public class WebHooks {
     }
 
     public WebHookResponse executePassthroughWebhook(final String passthroughUrl, final ChatResult chatResult,
-                                                     final Map<String, String> clientVariables, final UUID devId,
-                                                     final UUID originatingAiid) {
-        final String devIdString = devId.toString();
+                                                     final ChatRequestInfo chatInfo) {
+        final String devIdString = chatInfo.devId.toString();
 
-        if (passthroughUrl == null || passthroughUrl == "") {
+        if (passthroughUrl == null || passthroughUrl.isEmpty()) {
             this.logger.logError(LOGFROM, "Invalid url passed.");
             return null;
         }
@@ -189,14 +205,13 @@ public class WebHooks {
             this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
                     devIdString,
                     LogMap.map("Endpoint", webHookEndpoint)
-                            .put("AIID", originatingAiid)
+                            .put("AIID", chatInfo.aiid)
                             .put("Endpoint", webHookEndpoint));
             return null;
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
-        WebHookPayload payload = new WebHookPayload(chatResult, originatingAiid, clientVariables);
-
+        WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
         String jsonPayload;
         try {
             jsonPayload = this.serializer.serialize(payload);
@@ -205,17 +220,17 @@ public class WebHooks {
             return null;
         }
 
-        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, originatingAiid);
+        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, chatInfo.aiid);
 
         if (response.getStatus() != HttpURLConnection.HTTP_OK) {
             this.logger.logUserWarnEvent(LOGFROM,
                     String.format("Chat WebHook Failed (%s): aiid %s at %s",
                             response.getStatus(),
-                            originatingAiid,
+                            chatInfo.aiid,
                             webHookEndpoint),
                     devIdString,
                     LogMap.map("ResponseStatus", response.getStatus())
-                            .put("AIID", originatingAiid)
+                            .put("AIID", chatInfo.aiid)
                             .put("Endpoint", webHookEndpoint));
             return null;
         }
@@ -226,8 +241,8 @@ public class WebHooks {
 
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed chat webhook for aiid %s",
-                        originatingAiid),
-                LogMap.map("AIID", originatingAiid)
+                        chatInfo.aiid),
+                LogMap.map("AIID", chatInfo.aiid)
                         .put("Endpoint", webHookEndpoint));
         return webHookResponse;
     }
@@ -267,7 +282,6 @@ public class WebHooks {
      * Determines whether an active WebHook exists.
      * @param intent The intent.
      * @return the active WebHook if it exists, null otherwise.
-     * @throws Database.DatabaseException if the WebHook cannot be retrieved.
      */
     public WebHook getWebHookForIntent(final MemoryIntent intent, final UUID devId) {
         WebHook webHook = null;

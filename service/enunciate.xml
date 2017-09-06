@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <enunciate
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.7.0.xsd">
+        xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.9.1.xsd">
 
     <description>
         <![CDATA[
@@ -12,5 +12,6 @@
 
     <modules>
         <jackson1 disabled="true"/>
+        <swagger basePath="/v1/" />
     </modules>
 </enunciate>

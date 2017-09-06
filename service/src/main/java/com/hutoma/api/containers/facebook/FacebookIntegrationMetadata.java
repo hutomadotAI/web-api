@@ -10,17 +10,37 @@ public class FacebookIntegrationMetadata {
     private String pageToken;
     private String pageName;
 
+    private String pageGreeting;
+    private String getStartedPayload;
+
     public FacebookIntegrationMetadata() {
         this.accessToken = "";
         this.userName = "";
         this.accessTokenExpiry = DateTime.now();
     }
 
-    public FacebookIntegrationMetadata(final String accessToken, final String userName,
-                                       final DateTime accessTokenExpiry) {
+    public FacebookIntegrationMetadata connect(final String accessToken, final String userName,
+                                               final DateTime accessTokenExpiry) {
         this.accessToken = accessToken;
         this.userName = userName;
         this.accessTokenExpiry = accessTokenExpiry;
+        return this;
+    }
+
+    public String getPageGreeting() {
+        return this.pageGreeting;
+    }
+
+    public void setPageGreeting(final String pageGreeting) {
+        this.pageGreeting = pageGreeting;
+    }
+
+    public String getGetStartedPayload() {
+        return this.getStartedPayload;
+    }
+
+    public void setGetStartedPayload(final String getStartedPayload) {
+        this.getStartedPayload = getStartedPayload;
     }
 
     public String getAccessToken() {

@@ -215,7 +215,7 @@ public class DatabaseAiStatusUpdates extends Database {
      * what was sent by the backend server
      * @param jsonSerializer
      * @param serverType which server are we dealing with?
-     * @param serverReported aiid->entry map
+     * @param serverReported aiid to entry map
      * @param excludeBots ignore any mention of bots on this list
      * @throws DatabaseException
      */

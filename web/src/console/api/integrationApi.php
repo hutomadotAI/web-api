@@ -26,7 +26,7 @@ class integrationApi extends apiBase
     public function setConnectToken($aiid, $token, $redirectUri)
     {
         if ($this->isLoggedIn()) {
-            $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid)."/connect", []));
+            $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid) . "/connect", []));
             $this->curl->setVerbPost();
             $this->curl->addHeader('Content-Type', 'application/json');
             $this->curl->setOpt(CURLOPT_POSTFIELDS, json_encode(
@@ -60,6 +60,38 @@ class integrationApi extends apiBase
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid), $params));
             $this->curl->setVerbPut();
+            $curl_response = $this->curl->exec();
+            $this->handleApiCallError($curl_response, 410);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function getFacebookCustomisations($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid) . "/custom", []));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $this->handleApiCallError($curl_response, 410);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function setFacebookCustomisations($aiid, $page_greeting, $get_started)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl($this->buildIntegrationUrl($aiid) . "/custom", []));
+            $this->curl->setVerbPost();
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $this->curl->setOpt(CURLOPT_POSTFIELDS, json_encode(
+                array(
+                    'page_greeting' => $page_greeting,
+                    'get_started_payload' => $get_started
+                )));
             $curl_response = $this->curl->exec();
             $this->handleApiCallError($curl_response, 410);
             $json_response = json_decode($curl_response, true);

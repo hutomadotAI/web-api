@@ -70,7 +70,10 @@ public class ApiAi extends ApiResult {
     @SerializedName("default_chat_responses")
     private List<String> defaultChatResponses;
 
-    public ApiAi(String aiid, String clientToken) {
+    @SerializedName("bot_config_definition")
+    private AiBotConfigDefinition botConfigDefinition;
+
+    public ApiAi(final String aiid, final String clientToken) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.hmacSecret = null;
@@ -80,7 +83,8 @@ public class ApiAi extends ApiResult {
                  final DateTime createdOn, final boolean isPrivate, final BackendStatus backendStatus,
                  final boolean hasTrainingFile, final int personality, final double confidence, final int voice,
                  final Locale language, final String timezone, final String hmacSecret,
-                 String passthroughUrl, final List<String> defaultChatResponses) {
+                 final String passthroughUrl, final List<String> defaultChatResponses,
+                 final AiBotConfigDefinition botConfigDefinition) {
         this.aiid = aiid;
         this.clientToken = clientToken;
         this.name = name;
@@ -97,6 +101,28 @@ public class ApiAi extends ApiResult {
         this.hmacSecret = hmacSecret;
         this.defaultChatResponses = defaultChatResponses;
         this.passthroughUrl = passthroughUrl;
+        this.botConfigDefinition = botConfigDefinition;
+        populateExtendedStatus();
+    }
+
+    public ApiAi(final ApiAi other) {
+        this.aiid = other.aiid;
+        this.clientToken = other.clientToken;
+        this.name = other.name;
+        this.description = other.description;
+        this.createdOn = other.createdOn;
+        this.isPrivate = other.isPrivate;
+        this.backendStatus = other.backendStatus;
+        this.personality = other.personality;
+        this.confidence = other.confidence;
+        this.voice = other.voice;
+        this.language = other.language;
+        this.timezone = other.timezone;
+        this.trainingFileUploaded = other.trainingFileUploaded;
+        this.hmacSecret = other.hmacSecret;
+        this.defaultChatResponses = other.defaultChatResponses;
+        this.passthroughUrl = other.passthroughUrl;
+        this.botConfigDefinition = other.botConfigDefinition;
         populateExtendedStatus();
     }
 
@@ -131,7 +157,7 @@ public class ApiAi extends ApiResult {
     /***
      * Get the version of training status that will be reported to the caller
      * Note that this masks some of the internal workings (requeuing of bot training)
-     * @return
+     * @return the training status
      */
     public TrainingStatus getSummaryStatusPublic() {
         return this.summaryStatusPublic;
@@ -167,6 +193,14 @@ public class ApiAi extends ApiResult {
 
     public String getPassthroughUrl() {
         return this.passthroughUrl;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     public boolean trainingFileUploaded() {

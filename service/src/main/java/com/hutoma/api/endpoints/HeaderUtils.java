@@ -1,10 +1,10 @@
 package com.hutoma.api.endpoints;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * Created by paul on 19/07/17.
@@ -23,7 +23,7 @@ public final class HeaderUtils {
                     String key = e.getKey();
                     String modifiedKey = key.substring(HEADER_PREFIX_LENGTH, key.length());
                     return modifiedKey;
-                }, e-> {
+                }, e -> {
                     String value = "INVALID_VALUE";
                     try {
                         // URL decode the first entry

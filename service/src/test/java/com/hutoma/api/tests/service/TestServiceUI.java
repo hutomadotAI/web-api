@@ -72,7 +72,7 @@ public class TestServiceUI extends ServiceTestBase {
 
     private void testCallingGetBotStoreItem(final boolean isAuthenticated) throws Database.DatabaseException {
         BotstoreItem item = new BotstoreItem(0, SAMPLEBOT, DEVINFO, false);
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt())).thenReturn(item);
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
         final Response response = target(UI_PATH_BOTSTORE + "/" + SAMPLEBOT.getBotId()).request().headers(isAuthenticated ? defaultHeaders : noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }

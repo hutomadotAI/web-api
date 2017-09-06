@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
+import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -83,23 +84,36 @@ public class FacebookChatHandler implements Callable {
                     .put("Facebook_Recipient", this.messaging.getRecipient())
                     .put("Facebook_Timestamp", this.messaging.getTimestamp());
 
+            boolean isQuickReply = false;
             if (this.messaging.isMessage()) {
                 // incoming message type event
                 userQuery = this.messaging.getMessageText();
+                if (this.messaging.isQuickReply()) {
+                    userQuery = this.messaging.getQuickReplyPayload();
+                    isQuickReply = true;
+                }
                 logMap.add("Facebook_Sequence", this.messaging.getMessageSeq());
-                logMap.add("Facebook_Question", userQuery);
                 logMap.add("Facebook_WebhookType", "message");
             } else if (this.messaging.isPostback()) {
                 // postback event type
                 userQuery = this.messaging.getPostbackPayload();
                 logMap.add("Facebook_WebhookType", "postback");
-                logMap.add("Facebook_Question", userQuery);
                 logMap.add("Facebook_Referrer", this.messaging.getPostbackReferral());
                 logMap.add("Facebook_ClickTitle", this.messaging.getPostbackTitle());
             } else {
                 // some other type that we don't handle or care about
                 logMap.add("Facebook_WebhookType", "unknown");
             }
+
+            // check whether there is an attached location and log it if present
+            FacebookNotification.FacebookLocation location = this.messaging.getFacebookLocation();
+            if (location != null) {
+                userQuery = String.format("location %s", location.toLatLon());
+                logMap.add("Facebook_Location", location.toString());
+            }
+
+            logMap.add("Facebook_QuickReply", isQuickReply);
+            logMap.add("Facebook_Question", userQuery);
 
             // the pageid that the message was sent to i.e. the page intgerated to the bot
             String recipientPageId = this.messaging.getRecipient();
@@ -171,7 +185,7 @@ public class FacebookChatHandler implements Callable {
 
                     try {
                         // note the start time
-                        long startTime = this.tools.getTimestamp();
+                        final long startTime = this.tools.getTimestamp();
 
                         // send the response back to Facebook
                         sendChatResponseToFacebook(metadata, messageOriginatorId, response);
@@ -222,7 +236,7 @@ public class FacebookChatHandler implements Callable {
      * @param facebookID
      * @return
      */
-    public UUID generateChatId(UUID aiid, String facebookID) {
+    public UUID generateChatId(final UUID aiid, final String facebookID) {
 
         // write all the data into a byte buffer
         ByteBuffer bb = ByteBuffer.wrap(new byte[128]);
@@ -281,9 +295,33 @@ public class FacebookChatHandler implements Callable {
 
             if (!createdContentFromIntentPrompt) {
                 if (webhookResponseSentRichContent) {
-                    // add the rich content
-                    responseList.add(new FacebookResponseSegment.FacebookResponseRichSegment(
-                            chatResult.getWebhookResponse().getFacebookNode()));
+
+                    // if the webhook returned rich data in the old format then we
+                    // have to convert it to the new format
+                    FacebookMessageNode richNode =
+                            convertDeprecatedFormat(logMap, chatResult.getWebhookResponse().getFacebookNode());
+
+                    // is this a quick reply?
+                    if (richNode.hasQuickReplies()) {
+
+                        // quick reply with attachment or with plain text?
+                        if (richNode.hasAttachment()) {
+                            responseList.add(
+                                    new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                            richNode.getQuickReplies(), richNode.getAttachment()));
+                        } else {
+                            responseList.add(
+                                    new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                            richNode.getQuickReplies(), chatResult.getAnswer()));
+
+                        }
+                    } else {
+                        // otherwise just plain attachment
+                        responseList.add(
+                                new FacebookResponseSegment.FacebookResponseAttachmentSegment(
+                                        richNode.getAttachment()));
+                    }
+
                 } else {
                     // or add the text
                     createTextResponse(responseList, chatResult.getAnswer());
@@ -298,14 +336,23 @@ public class FacebookChatHandler implements Callable {
         return responseList;
     }
 
+    private FacebookMessageNode convertDeprecatedFormat(final LogMap logMap,
+                                                        final FacebookMessageNode facebookNode) {
+        if (facebookNode.isDeprecatedFormat()) {
+            logMap.add("Facebook_DeprecatedFormat", true);
+            return new FacebookMessageNode(facebookNode);
+        }
+        return facebookNode;
+    }
+
     /***
      * Process a text message to Facebook, generating some response segments
      * @param responseList
      * @param answer
      */
     private void createTextResponse(final List<FacebookResponseSegment> responseList, final String answer) {
-        String acceptedText = answer.length() > FB_MESSAGE_SIZE_LIMIT ?
-                answer.substring(0, FB_MESSAGE_SIZE_LIMIT) : answer;
+        String acceptedText = answer.length() > FB_MESSAGE_SIZE_LIMIT
+                ? answer.substring(0, FB_MESSAGE_SIZE_LIMIT) : answer;
         responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(acceptedText));
     }
 

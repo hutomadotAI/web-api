@@ -1,11 +1,8 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendEngineStatus;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
-import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.controllers.IServerEndpoint;
 import com.hutoma.api.logic.ChatLogic;
 
@@ -27,11 +24,12 @@ public class TestDataHelper {
     public static final UUID SESSIONID = UUID.fromString("e6a7d7b4-245a-44ad-8018-5c0516583713");
     public static final UUID ALT_SESSIONID = UUID.fromString("f29a1eed-6094-464a-b335-c0885a501750");
     public static final List<String> DEFAULT_CHAT_RESPONSES = Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT);
+    public static final AiBotConfigDefinition DEFAULT_API_KEY_DESC = new AiBotConfigDefinition(null);
 
     public static ApiAi getSampleAI() {
         return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,
                 new BackendStatus(), true,
-                0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES);
+                0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC);
     }
 
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {
@@ -39,7 +37,7 @@ public class TestDataHelper {
         result.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(status, 0.0, 0.0));
         result.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(status, 0.0, 0.0));
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, result, true,
-                0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES);
+                0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC);
     }
 
     public static ApiAi getAI() {
@@ -48,7 +46,7 @@ public class TestDataHelper {
 
     public static ApiAi getAi(final BackendStatus backendStatus) {
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), false,
-                backendStatus, true, 1, 0.1, 1, Locale.UK, "Europe/London", null, "", DEFAULT_CHAT_RESPONSES);
+                backendStatus, true, 1, 0.1, 1, Locale.UK, "Europe/London", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC);
     }
 
     private static BackendStatus setBackendEngineStatus(final TrainingStatus status) {

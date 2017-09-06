@@ -6,7 +6,11 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.containers.AiBotConfig;
+import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiAiWithConfig;
+import com.hutoma.api.containers.ApiLinkedBotData;
 import com.hutoma.api.containers.sub.*;
 
 import org.joda.time.DateTime;
@@ -18,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -27,6 +32,8 @@ import javax.inject.Provider;
 public class Database {
 
     protected static final String LOGFROM = "database";
+    private static final String FACEBOOK_DEACTIVATED_MESSAGE =
+            "Deactivated because another bot was integrated with this Facebook page.";
     protected final ILogger logger;
     protected final Provider<DatabaseCall> callProvider;
     protected Provider<DatabaseTransaction> transactionProvider;
@@ -533,10 +540,24 @@ public class Database {
                     .add(devid)
                     .add(aiid)
                     .executeQuery();
+
+            ApiAi apiAi = null;
             if (rs.next()) {
-                return getAiFromResultset(rs, backendStatus, serializer);
+                apiAi = getAiFromResultset(rs, backendStatus, serializer);
             }
-            return null;
+            if (apiAi != null) {
+                rs = transaction.getDatabaseCall().initialise("getAiBotConfig", 3)
+                        .add(devid)
+                        .add(aiid)
+                        .add(0)
+                        .executeQuery();
+                if (rs.next()) {
+                    String configString = rs.getString("config");
+                    AiBotConfig config = (AiBotConfig) serializer.deserialize(configString, AiBotConfig.class);
+                    apiAi = new ApiAiWithConfig(apiAi, config);
+                }
+            }
+            return apiAi;
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -623,6 +644,114 @@ public class Database {
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
+        }
+    }
+
+    public Pair<UUID, UUID> getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIsBotLinkedToAi", 3).add(devId).add(aiid).add(botId);
+
+            try {
+                ResultSet rs = call.executeQuery();
+
+                Pair<UUID, UUID> linkedDevAiidPair = null;
+                if (rs.next()) {
+                    String linkedDevidString = rs.getString("dev_id");
+                    UUID linkedDevid = UUID.fromString(linkedDevidString);
+                    String linkedAiidString = rs.getString("aiid");
+                    UUID linkedAiid = UUID.fromString(linkedAiidString);
+                    linkedDevAiidPair = new Pair<>(linkedDevid, linkedAiid);
+                }
+                return linkedDevAiidPair;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public ApiLinkedBotData getLinkedBotData(final UUID devId, final UUID aiid, final int botId,
+                                             final JsonSerializer serializer)
+            throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            DatabaseCall call = transaction.getDatabaseCall();
+            try {
+                if (this.getIsBotLinkedToAi(devId, aiid, botId) == null) {
+                    // bot not linked, not point in querying further
+                    return null;
+                }
+
+                call = transaction.getDatabaseCall();
+                call.initialise("getBotstoreItem", 1).add(botId);
+                ResultSet rs = call.executeQuery();
+                ApiLinkedBotData botData = null;
+
+                if (rs.next()) {
+                    final AiBot aiBot = getAiBotFromResultset(rs);
+                    call = transaction.getDatabaseCall();
+                    call.initialise("getAiBotConfig", 3).add(devId).add(aiid).add(botId);
+                    rs = call.executeQuery();
+                    AiBotConfig config = null;
+                    if (rs.next()) {
+                        String configString = rs.getString("config");
+                        config = (AiBotConfig) serializer.deserialize(configString, AiBotConfig.class);
+                    }
+                    botData = new ApiLinkedBotData(aiBot, config);
+                }
+                return botData;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public AiBotConfigDefinition getBotConfigDefinition(final UUID devid, final UUID aiid,
+                                                        JsonSerializer serializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotConfigDefinition", 2)
+                    .add(devid)
+                    .add(aiid);
+            ResultSet rs = call.executeQuery();
+            try {
+                AiBotConfigDefinition definition = null;
+                if (rs.next()) {
+                    String definitionString = rs.getString("api_keys_desc");
+                    definition = (AiBotConfigDefinition) serializer.deserialize(definitionString,
+                            AiBotConfigDefinition.class);
+                }
+                return definition;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public boolean setBotConfigDefinition(final UUID devid, final UUID aiid,
+                                          AiBotConfigDefinition definition,
+                                          JsonSerializer serializer)
+            throws DatabaseException {
+        String apiKeyString = serializer.serialize(definition);
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setBotConfigDefinition", 3)
+                    .add(devid)
+                    .add(aiid)
+                    .add(apiKeyString);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig,
+                                  JsonSerializer serializer)
+            throws DatabaseException {
+        String aiBotConfigString = serializer.serialize(aiBotConfig);
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("setAiBotConfig", 4)
+                    .add(devid)
+                    .add(aiid)
+                    .add(botId)
+                    .add(aiBotConfigString);
+            return call.executeUpdate() > 0;
         }
     }
 
@@ -854,6 +983,29 @@ public class Database {
         }
     }
 
+    public AiBotConfig getBotConfigForWebhookCall(final UUID devId, final UUID originatingAiid,
+                                                  UUID aiid,
+                                                  final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotConfigForWebhookCall", 3)
+                    .add(devId)
+                    .add(originatingAiid)
+                    .add(aiid);
+            ResultSet rs = call.executeQuery();
+            try {
+                AiBotConfig config = null;
+                if (rs.next()) {
+                    String configString = rs.getString("config");
+                    config = (AiBotConfig) jsonSerializer.deserialize(configString, AiBotConfig.class);
+                }
+                return config;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
     public ChatState getChatState(final UUID devId, final UUID aiid, final UUID chatId,
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {
@@ -1011,30 +1163,6 @@ public class Database {
         }
     }
 
-    public boolean updateIntegration(final UUID aiid, final UUID devid, final IntegrationType integration,
-                                     final String integratedResource, final String integratedUserid,
-                                     final String data, final String status,
-                                     boolean active) throws DatabaseException {
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            DatabaseCall call = transaction.getDatabaseCall()
-                    .initialise("updateAiIntegration", 9)
-                    .add(aiid)
-                    .add(devid)
-                    .add(integration.value())
-                    .add(integratedResource)
-                    .add(integratedUserid)
-                    .add(data)
-                    .add(status)
-                    .add(active)
-                    .add("Deactivated because another bot was integrated with this Facebook page.");
-            if (call.executeUpdate() > 0) {
-                transaction.commit();
-                return true;
-            }
-        }
-        return false;
-    }
-
     public IntegrationRecord getIntegration(final UUID aiid, final UUID devid, final IntegrationType integration)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
@@ -1122,6 +1250,59 @@ public class Database {
         }
     }
 
+    public IntegrationRecord updateIntegrationRecord(final UUID aiid, final UUID devid,
+                                                     final IntegrationType integration,
+                                                     final UnaryOperator<IntegrationRecord> updater)
+            throws DatabaseException {
+
+        // open a transaction
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+            // load the current integration record
+            ResultSet rs = transaction.getDatabaseCall()
+                    .initialise("getAiIntegrationForUpdate", 3)
+                    .add(aiid)
+                    .add(devid)
+                    .add(integration.value())
+                    .executeQuery();
+            IntegrationRecord record = rs.next() ? new IntegrationRecord(
+                    rs.getString("integrated_resource"),
+                    rs.getString("integrated_userid"),
+                    rs.getString("data"),
+                    rs.getString("status"),
+                    rs.getBoolean("active"))
+                    : null;
+
+            // make the changes we require
+            record = updater.apply(record);
+
+            // if the updater still wants to save the result ...
+            if (record != null) {
+
+                // write the changes to the database
+                DatabaseCall call = transaction.getDatabaseCall()
+                        .initialise("updateAiIntegration", 9)
+                        .add(aiid)
+                        .add(devid)
+                        .add(integration.value())
+                        .add(record.getIntegrationResource())
+                        .add(record.getIntegrationUserid())
+                        .add(record.getData())
+                        .add(record.getStatus())
+                        .add(record.isActive())
+                        .add(FACEBOOK_DEACTIVATED_MESSAGE);
+
+                if (call.executeUpdate() > 0) {
+                    transaction.commit();
+                    return record;
+                }
+            }
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+        return null;
+    }
+
     private List<AiBot> getBotListFromResultset(final ResultSet rs) throws SQLException {
         final ArrayList<AiBot> bots = new ArrayList<>();
         while (rs.next()) {
@@ -1136,6 +1317,8 @@ public class Database {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
         List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
+        AiBotConfigDefinition definition = (AiBotConfigDefinition) serializer.deserialize(
+                rs.getString("api_keys_desc"), AiBotConfigDefinition.class);
         // create one summary training status from the block of data
         return new ApiAi(
                 rs.getString("aiid"),
@@ -1153,7 +1336,8 @@ public class Database {
                 timezoneString,
                 rs.getString("hmac_secret"),
                 rs.getString("passthrough_url"),
-                defaultChatResponses);
+                defaultChatResponses,
+                definition);
     }
 
     /***

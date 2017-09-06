@@ -1,8 +1,10 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
@@ -77,16 +79,21 @@ public class DatabaseUI extends Database {
         }
     }
 
-    public BotstoreItem getBotstoreItem(final int botId) throws DatabaseException {
+    public BotstoreItem getBotstoreItem(final int botId, JsonSerializer serializer) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotstoreItem", 1).add(botId);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
-                return new BotstoreItem(
+                String apiKeysString = rs.getString("api_keys_desc");
+                AiBotConfigDefinition definition = (AiBotConfigDefinition) serializer.deserialize(apiKeysString,
+                        AiBotConfigDefinition.class);
+                BotstoreItem bi = new BotstoreItem(
                         0,
                         this.getAiBotFromResultset(rs),
                         this.getDeveloperInfoFromBotstoreList(rs),
                         false);
+                bi.setBotConfigDefinition(definition);
+                return bi;
             }
             return null;
         } catch (SQLException ex) {

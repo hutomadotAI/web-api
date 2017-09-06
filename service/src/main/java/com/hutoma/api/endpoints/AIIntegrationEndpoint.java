@@ -104,4 +104,34 @@ public class AIIntegrationEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @GET
+    @Path("{aiid}/facebook/custom")
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFacebookCustomisations(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiIntegrationLogic.getFacebookCustomisation(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
+    @POST
+    @Path("{aiid}/facebook/custom")
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    @ValidatePost({APIParameter.FacebookCustomisations})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setFacebookCustomisations(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiIntegrationLogic.setFacebookCustomisation(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getFacebookCustomisations(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
 }

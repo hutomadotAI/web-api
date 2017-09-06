@@ -7,6 +7,7 @@ import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
@@ -85,8 +86,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case FacebookConnect:
                     //fallthrough
                 case FacebookNotification:
+                    //fallthrough
+                case FacebookCustomisations:
                     expectingJson = true;
                     break;
+
                 case AIName:
                     //fallthrough
                 case AIDescription:
@@ -197,7 +201,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             String jsonList = getFirst(form.get(DEFAULT_CHAT_RESPONSES));
             List<String> list = jsonList.isEmpty()
                     ? Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT)
-                    : serializer.deserializeList(jsonList);
+                    : this.serializer.deserializeList(jsonList);
             request.setProperty(APIParameter.DefaultChatResponses.toString(), list);
         }
     }
@@ -313,6 +317,13 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 FacebookNotification facebookNotification = (FacebookNotification)
                         this.serializer.deserialize(request.getEntityStream(), FacebookNotification.class);
                 request.setProperty(APIParameter.FacebookNotification.toString(), facebookNotification);
+            }
+
+            if (checkList.contains(APIParameter.FacebookCustomisations)) {
+                ApiFacebookCustomisation facebookCustomisation = (ApiFacebookCustomisation)
+                        this.serializer.deserialize(request.getEntityStream(), ApiFacebookCustomisation.class);
+                this.validateFieldLength(1000, "greeting", facebookCustomisation.getPageGreeting());
+                request.setProperty(APIParameter.FacebookCustomisations.toString(), facebookCustomisation);
             }
 
         } catch (JsonParseException jpe) {

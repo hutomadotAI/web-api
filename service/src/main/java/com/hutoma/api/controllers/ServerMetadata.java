@@ -83,7 +83,7 @@ public class ServerMetadata {
      * Check whether the sessionID matches a server session
      * that is currently tagged as the primary master,
      * meaning that it is the earliest connected server
-     * with training_capacity >0
+     * with training_capacity more than 0
      * @param serverSessionID sessionId of the connected server
      * @return t/f
      */

@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseUI;
@@ -33,13 +34,14 @@ public class TestUILogic {
 
     private DatabaseUI fakeDatabaseUi;
     private ILogger fakeLogger;
+    private JsonSerializer fakeSerializer;
     private UILogic uiLogic;
 
     @Before
     public void setup() {
         this.fakeDatabaseUi = mock(DatabaseUI.class);
         this.fakeLogger = mock(ILogger.class);
-        this.uiLogic = new UILogic(this.fakeDatabaseUi, this.fakeLogger);
+        this.uiLogic = new UILogic(this.fakeDatabaseUi, this.fakeLogger, this.fakeSerializer);
     }
 
     @Test
@@ -108,7 +110,7 @@ public class TestUILogic {
     @Test
     public void testGetBotstoreItem() throws Database.DatabaseException {
         BotstoreItem item = new BotstoreItem(0, TestBotHelper.SAMPLEBOT, DeveloperInfoHelper.DEVINFO, false);
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt())).thenReturn(item);
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
         ApiBotstoreItem result = (ApiBotstoreItem) this.uiLogic.getBotstoreBot(null, TestBotHelper.SAMPLEBOT.getBotId());
         validateGetBostoreItemResponse(result, item);
     }
@@ -116,7 +118,7 @@ public class TestUILogic {
     @Test
     public void testGetBotstoreItem_authenticated_notOwned() throws Database.DatabaseException {
         BotstoreItem item = new BotstoreItem(0, TestBotHelper.SAMPLEBOT, DeveloperInfoHelper.DEVINFO, false);
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt())).thenReturn(item);
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
         when(this.fakeDatabaseUi.getPurchasedBots(any())).thenReturn(Collections.emptyList());
         ApiBotstoreItem result = (ApiBotstoreItem) this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         validateGetBostoreItemResponse(result, item);
@@ -125,14 +127,14 @@ public class TestUILogic {
 
     @Test
     public void testGetBotstoreItem_nonExistent() throws Database.DatabaseException {
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt())).thenReturn(null);
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(null);
         ApiResult result = this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testGetBotstoreItem_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -140,7 +142,7 @@ public class TestUILogic {
     @Test
     public void testGetBotstoreItem_authenticated_owned() throws Database.DatabaseException {
         BotstoreItem item = new BotstoreItem(0, TestBotHelper.SAMPLEBOT, DeveloperInfoHelper.DEVINFO, false);
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt())).thenReturn(item);
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
         when(this.fakeDatabaseUi.getPurchasedBots(any())).thenReturn(Collections.singletonList(TestBotHelper.SAMPLEBOT));
         ApiBotstoreItem result = (ApiBotstoreItem) this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         validateGetBostoreItemResponse(result, item);

@@ -5,53 +5,30 @@ required for the next deployment.
 
 USE `hutoma`;
 
-ALTER TABLE `ai` ADD COLUMN `default_chat_responses` JSON NOT NULL AFTER `ai_description`;
-UPDATE `ai` SET `default_chat_responses`='["Erm... What?"]';
+# Support for API keys
+ALTER TABLE `ai` ADD COLUMN `api_keys_desc` JSON DEFAULT NULL AFTER `passthrough_url`;
+ALTER TABLE `bot_ai` ADD COLUMN `config` JSON DEFAULT NULL AFTER `dev_id`;
 
+--
+-- Table structure for table `bot_ai_config`
+--
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `bot_ai_config` (
+  `dev_id` varchar(50) NOT NULL,
+  `aiid` varchar(50) NOT NULL,
+  `botId` int(11) NOT NULL,
+  `config` JSON NULL,
+  PRIMARY KEY (`dev_id`, `aiid`, `botId`),
+  KEY `aiid` (`aiid`),
+  KEY `dev_id` (`dev_id`),
+  KEY `botId` (`botId`),
+  CONSTRAINT `bot_ai_config_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE,
+  CONSTRAINT `bot_ai_config_ibfk_2` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
-drop procedure `addAi`;
-
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAi`(
-  IN `param_aiid` VARCHAR(50),
-  IN `param_ai_name` VARCHAR(50),
-  IN `param_ai_description` VARCHAR(250),
-  IN `param_dev_id` VARCHAR(50),
-  IN `param_is_private` TINYINT(1),
-  IN `param_client_token` VARCHAR(250),
-  IN `param_ui_ai_language` VARCHAR(10),
-  IN `param_ui_ai_timezone` VARCHAR(50),
-  IN `param_ui_ai_confidence` DOUBLE,
-  IN `param_ui_ai_personality` BOOLEAN,
-  IN `param_ui_ai_voice` INT(11))
-MODIFIES SQL DATA
-  BEGIN
-
-    DECLARE var_exists_count INT;
-    DECLARE var_named_aiid VARCHAR(50);
-
-    SELECT count(aiid), min(aiid) INTO var_exists_count, var_named_aiid
-    FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name` AND `ai`.`deleted` = 0;
-
-    IF var_exists_count=0 THEN
-      INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private,
-                      client_token,
-                      ui_ai_language, ui_ai_timezone, ui_ai_confidence, ui_ai_personality, ui_ai_voice,
-                      default_chat_responses)
-      VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private,
-                          param_client_token,
-                          param_ui_ai_language,
-                          param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice,
-              '["Erm...What?"]');
-      SET var_named_aiid = `param_aiid`;
-    END IF;
-
-    SELECT var_named_aiid AS aiid;
-
-  END ;;
-DELIMITER ;
-
+GRANT SELECT ON `hutoma`.`bot_ai_config` TO 'aiReader'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`bot_ai_config` TO 'aiWriter'@'127.0.0.1';
 
 DROP PROCEDURE `getAi`;
 
@@ -79,6 +56,7 @@ READS SQL DATA
       `ui_ai_voice`,
       `passthrough_url`,
       `default_chat_responses`,
+      `api_keys_desc`,
       (SELECT COUNT(`ai_training`.`aiid`)
        FROM `ai_training`
        WHERE `ai_training`.`aiid`=`in_aiid`)
@@ -94,6 +72,7 @@ DELIMITER ;
 
 
 DROP PROCEDURE `getAIs`;
+DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAIs`(
   IN `in_dev_id` VARCHAR(50))
 READS SQL DATA
@@ -116,6 +95,7 @@ READS SQL DATA
       `ai`.`ui_ai_voice`,
       `ai`.`passthrough_url`,
       `ai`.`default_chat_responses`,
+      `ai`.`api_keys_desc`,
       (SELECT COUNT(`ai_training`.`aiid`)
        FROM `ai_training`
        WHERE `ai_training`.`aiid`=`ai`.`aiid`)
@@ -128,35 +108,155 @@ READS SQL DATA
   END ;;
 DELIMITER ;
 
-
-DROP PROCEDURE `updateAi`;
+DROP procedure IF EXISTS `getAiSkillConfig`;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateAi`(
-  IN `param_aiid` VARCHAR(50),
-  IN `param_ai_description` VARCHAR(250),
-  IN `param_dev_id` VARCHAR(50),
-  IN `param_is_private` TINYINT(1),
-  IN `param_ui_ai_language` VARCHAR(10),
-  IN `param_ui_ai_timezone` VARCHAR(50),
-  IN `param_ui_ai_confidence` DOUBLE,
-  IN `param_ui_ai_personality` TINYINT(4),
-  IN `param_ui_ai_voice` VARCHAR(50),
-  IN `param_default_chat_responses` TEXT)
-MODIFIES SQL DATA
-  BEGIN
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiSkillConfig`(
+  IN `in_dev_id` VARCHAR(50),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_bot_id` INT(11))
+BEGIN
+	SELECT * FROM `bot_ai` WHERE `bot_ai`.`dev_id` = `in_dev_id` AND `bot_ai`.`aiid` = `in_aiid` AND `bot_ai`.`botId` = `in_bot_id`;
+END;;
 
-    update ai
-    set
-      ai_description = param_ai_description,
-      is_private = param_is_private,
-      ui_ai_language = param_ui_ai_language,
-      ui_ai_timezone = param_ui_ai_timezone,
-      ui_ai_confidence = param_ui_ai_confidence,
-      ui_ai_personality = param_ui_ai_personality,
-      ui_ai_voice = param_ui_ai_voice,
-      default_chat_responses = param_default_chat_responses
-    where aiid = param_aiid AND dev_id = param_dev_id;
+DELIMITER ;
+DROP procedure IF EXISTS `getBotsLinkedToAi`;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getBotsLinkedToAi`(IN `param_devId` VARCHAR(50), IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+    SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id WHERE bai.aiid = param_aiid AND bai.dev_id = param_devId AND bai.botId != 0;
+END;;
 
-  END ;;
+DELIMITER ;
+DROP procedure IF EXISTS `getAisLinkedToAi`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAisLinkedToAi`(
+  IN `param_devId` VARCHAR(50),
+  IN `param_aiid` VARCHAR(50))
+BEGIN
+	SELECT bai.aiid as 'ai', bs.aiid as 'linked_ai', bs.dev_id as 'linked_ai_devId', ai.ui_ai_confidence as 'minP'
+	FROM bot_ai bai INNER JOIN botStore bs ON bs.id = bai.botId INNER JOIN ai ai ON ai.aiid = bs.aiid
+	WHERE bai.aiid=param_aiid AND bai.dev_id=param_devId AND botId != 0;
+END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `getBotstoreItem`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotstoreItem`(
+	IN `param_botId` INT)
+BEGIN
+
+SELECT bs.*, di.company AS 'dev_company', di.name as 'dev_name', di.email as 'dev_email', di.country as 'dev_country', di.website as 'dev_website', ai.api_keys_desc as 'api_keys_desc'
+FROM botStore bs INNER JOIN developerInfo di ON di.dev_id = bs.dev_id INNER JOIN ai ON ai.aiid = bs.aiid WHERE bs.publishing_state=2 AND bs.id = param_botId;
+
+END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `getAiBotConfig`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiBotConfig`(
+  IN `in_dev_id` VARCHAR(50),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_bot_id` INT(11))
+BEGIN
+	SELECT * FROM `bot_ai_config` WHERE `dev_id` = `in_dev_id` AND `aiid` = `in_aiid` AND `botId` = `in_bot_id`;
+END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `setAiBotConfig`;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setAiBotConfig`(
+  IN `in_dev_id` VARCHAR(50),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_botId` INT(11),
+  IN `in_config` JSON)
+    MODIFIES SQL DATA
+BEGIN
+  INSERT INTO `bot_ai_config` SET
+    `dev_id` = `in_dev_id`,
+    `aiid` = `in_aiid`,
+    `botId` = `in_botId`,
+    `config`= `in_config`
+  ON DUPLICATE KEY UPDATE `config` = `in_config`;
+END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `getIsBotLinkedToAi`;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getIsBotLinkedToAi`(
+	IN `param_devId` VARCHAR(50), 
+    IN `param_aiid` VARCHAR(50),
+    IN `param_botId` INT(11))
+    NO SQL
+BEGIN
+    SELECT bs.* FROM botStore bs INNER JOIN bot_ai bai ON bai.botId = bs.id WHERE bai.aiid = param_aiid AND bai.dev_id = param_devId AND bai.botId = param_botId;
+END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `getBotConfigForWebhookCall`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigForWebhookCall`(
+	IN `param_devId` VARCHAR(50), 
+    IN `param_aiid` VARCHAR(50),
+    IN `param_aiidLinkedBot` VARCHAR(50))
+    NO SQL
+BEGIN
+	IF `param_aiid` = `param_aiidLinkedBot` THEN
+		SELECT bac.config AS `config` FROM bot_ai_config bac 
+		WHERE bac.aiid = param_aiid AND bac.dev_id = param_devId AND bac.botId = 0;
+    ELSE
+		SELECT bac.config AS `config` FROM bot_ai_config bac 
+		INNER JOIN botStore bs ON bac.botId = bs.id 
+		WHERE bac.aiid = param_aiid AND bac.dev_id = param_devId AND bs.aiid = param_aiidLinkedBot;
+	END IF;
+END;;
 DELIMITER ;
 
+#
+# DB update for validating bot configuration JSON
+#
+DROP procedure IF EXISTS `setApiKeyDescriptions`;
+DROP procedure IF EXISTS `setBotConfigDefinition`;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setBotConfigDefinition`(
+  IN `in_dev_id` VARCHAR(50),
+  IN `in_aiid` VARCHAR(50),
+  IN `in_config_def` JSON)
+    MODIFIES SQL DATA
+BEGIN
+	UPDATE ai
+    SET `api_keys_desc` = `in_config_def` 
+    WHERE aiid = in_aiid AND dev_id = in_dev_id;
+END;;
+
+DELIMITER ;
+DROP procedure IF EXISTS `getBotConfigDefinition`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigDefinition`(
+	IN `param_devId` VARCHAR(50), 
+    IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+    SELECT api_keys_desc FROM ai WHERE aiid = param_aiid AND dev_id = param_devId;
+END;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `getAiIntegration`;
+DROP PROCEDURE IF EXISTS `getAiIntegrationForUpdate`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAiIntegrationForUpdate`(
+  IN `in_aiid` VARCHAR(50),
+  IN `in_devid` VARCHAR(50),
+  IN `in_integration` VARCHAR(50))
+BEGIN
+
+SELECT `integrated_resource`, `integrated_userid`, `data`, `status`, `active`
+FROM `hutoma`.`ai_integration`
+INNER JOIN `ai` ON `ai`.`aiid` = `ai_integration`.`aiid`
+WHERE `ai`.`dev_id` = `in_devid`
+AND `ai_integration`.`aiid`=`in_aiid` 
+AND `integration`=`in_integration`
+FOR UPDATE;
+    
+END;;
+DELIMITER ;

@@ -2,10 +2,10 @@ package com.hutoma.api.common;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -15,8 +15,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -52,6 +54,9 @@ public class JsonSerializer {
 
     public Object deserialize(String content, Class resultClass) throws JsonParseException {
         try {
+            if (content == null) {
+                return null;
+            }
             Object obj = this.gson.fromJson(content, resultClass);
             if (null == obj) {
                 throw new JsonParseException("cannot deserialize valid object from json");
@@ -64,12 +69,32 @@ public class JsonSerializer {
 
     public <T> List<T> deserializeList(String content) throws JsonParseException {
         try {
+            if (content == null) {
+                return null;
+            }
+
             List<T> list = this.gson.fromJson(content, new TypeToken<List<T>>() {
             }.getType());
             if (list == null) {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
             return list;
+        } catch (JsonSyntaxException jse) {
+            throw new JsonParseException(jse);
+        }
+    }
+
+    public Map<String, String> deserializeStringMap(String content) throws JsonParseException {
+        try {
+            if (content == null) {
+                return new HashMap<>();
+            }
+            Map<String, String> stringMap = this.gson.fromJson(content, new TypeToken<Map<String, String>>() {
+            }.getType());
+            if (stringMap == null) {
+                throw new JsonParseException("cannot deserialize valid object from json");
+            }
+            return stringMap;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }
@@ -94,7 +119,7 @@ public class JsonSerializer {
         }
     }
 
-    public class LocaleTypeAdapter extends TypeAdapter<Locale> {
+    public static class LocaleTypeAdapter extends TypeAdapter<Locale> {
         @Override
         public void write(JsonWriter writer, Locale value) throws IOException {
             if (value == null) {

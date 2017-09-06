@@ -169,7 +169,6 @@ $currentAiInfo = json_encode($aiInfo);
     </button>
 </div>
 
-
 <!-- Modal DELETE AI-->
 <div class="modal fade" id="deleteAI" role="dialog">
     <div class="modal-dialog flat"  style="border: 1px solid red;">

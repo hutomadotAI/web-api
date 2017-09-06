@@ -2,6 +2,8 @@ package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.AiBotConfig;
+import com.hutoma.api.logic.ChatRequestInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -33,15 +35,28 @@ public class WebHookPayload {
     @SerializedName("chatSession")
     private String chatSession;
 
-    public WebHookPayload(final MemoryIntent intent, final ChatResult chatResult, final UUID originatingAiid,
-                          final Map<String, String> clientVariables) {
+    @SerializedName("config")
+    private AiBotConfig config;
+
+    public WebHookPayload(final MemoryIntent intent, final ChatResult chatResult, final ChatRequestInfo chatInfo,
+                          final AiBotConfig config) {
         this.intentName = intent.getName();
         this.variables = intent.getVariables();
         this.variablesMap = intent.getVariablesMap();
         this.chatResult = chatResult;
-        this.clientVariables = clientVariables;
-        this.originatingAiid = originatingAiid.toString();
-        this.chatSession = Tools.getHashedDigestFromUuid(chatResult.getChatId());
+        this.clientVariables = chatInfo.clientVariables;
+        this.originatingAiid = chatInfo.aiid.toString();
+        this.chatSession = Tools.getHashedDigestFromUuid(chatInfo.chatId);
+        this.config = config;
+    }
+
+    public WebHookPayload(final ChatResult chatResult, final ChatRequestInfo chatInfo,
+                          final AiBotConfig config) {
+        this.chatResult = chatResult;
+        this.originatingAiid = chatInfo.aiid.toString();
+        this.clientVariables = chatInfo.clientVariables;
+        this.chatSession = Tools.getHashedDigestFromUuid(chatInfo.chatId);
+        this.config = config;
     }
 
     public WebHookPayload(final ChatResult chatResult, final UUID originatingAiid, final Map<String, String> clientVariables) {

@@ -56,6 +56,7 @@ include __DIR__ . "/include/page_head_default.php";
 include __DIR__ . "/include/page_body_default.php";
 include __DIR__ . "/include/page_menu.php";
 ?>
+
     <div class="content-wrapper">
         <?php include __DIR__ . "/include/page_header_default.php"; ?>
         <section class="content">

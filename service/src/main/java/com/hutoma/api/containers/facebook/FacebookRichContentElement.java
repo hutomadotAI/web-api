@@ -26,7 +26,7 @@ public class FacebookRichContentElement {
         web_url
     }
 
-    private class TemplateDefaultAction {
+    private static class TemplateDefaultAction {
 
         @SerializedName("type")
         private ActionType actionType;

@@ -52,6 +52,8 @@ public class DeveloperInfoEndpoint {
 
     /**
      * Gets the developer info.
+     * @param requestContext The container request context
+     * @param requestDevId The request dev id
      * @return the developer info
      */
     @GET

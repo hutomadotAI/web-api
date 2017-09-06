@@ -7,12 +7,15 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
+import com.hutoma.api.containers.facebook.FacebookMessageNode;
+import com.hutoma.api.containers.facebook.FacebookMessengerProfile;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
+import com.hutoma.api.containers.facebook.FacebookQuickReply;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.facebook.FacebookRichContentNode;
 import com.hutoma.api.containers.facebook.FacebookToken;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -52,19 +55,19 @@ public class FacebookConnector {
      * @param token
      * @return
      */
-    public boolean isShortLivedToken(FacebookToken token) {
+    public boolean isShortLivedToken(final FacebookToken token) {
         return (token.getExpiresInSeconds() > 0) // token does expire
                 && (token.getExpiresInSeconds() < (60 * 60 * 24 * 30)); // in less than a month
     }
 
     /***
      * If we are sent a short-lived token then we call facebook api to swap it for a long-lived one
-     * @see https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
+     * @see <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension">Facebook docs</a>
      * @param shortToken
      * @return
      * @throws FacebookException
      */
-    public FacebookToken getLongFromShortLivedToken(FacebookToken shortToken) throws FacebookException {
+    public FacebookToken getLongFromShortLivedToken(final FacebookToken shortToken) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("oauth")
                 .path("access_token")
@@ -78,12 +81,12 @@ public class FacebookConnector {
     /***
      * On the client side we are given a code as a result of user-login and auth
      * We send the code to Facebook to get an access token.
-     * @see https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
+     * @see <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension">Facebook docs</a>
      * @param facebookConnect
      * @return
      * @throws FacebookException
      */
-    public FacebookToken getFacebookUserToken(FacebookConnect facebookConnect) throws FacebookException {
+    public FacebookToken getFacebookUserToken(final FacebookConnect facebookConnect) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("oauth")
                 .path("access_token")
@@ -107,8 +110,8 @@ public class FacebookConnector {
      * @param responseSegment
      * @throws FacebookException
      */
-    public void sendFacebookMessage(String toFacebookID, String pageToken,
-                                    FacebookResponseSegment responseSegment)
+    public void sendFacebookMessage(final String toFacebookID, final String pageToken,
+                                    final FacebookResponseSegment responseSegment)
             throws FacebookException {
         SendMessage sendMessage = new SendMessage(toFacebookID);
         responseSegment.populateMessageContent(sendMessage);
@@ -123,8 +126,8 @@ public class FacebookConnector {
      * @param sendAction
      * @throws FacebookException
      */
-    public void sendFacebookSenderAction(String toFacebookID, String pageToken,
-                                         SendMessage.SenderAction sendAction)
+    public void sendFacebookSenderAction(final String toFacebookID, final String pageToken,
+                                         final SendMessage.SenderAction sendAction)
             throws FacebookException {
         SendMessage sendMessage = new SendMessage(toFacebookID, sendAction);
         sendFacebookMeMessages(toFacebookID, pageToken, sendMessage);
@@ -136,7 +139,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    public FacebookNode getFacebookUserFromToken(FacebookToken token) throws FacebookException {
+    public FacebookNode getFacebookUserFromToken(final FacebookToken token) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
                 .queryParam("fields", "id,name")
@@ -152,7 +155,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    public FacebookNodeList getUserPages(String accessToken) throws FacebookException {
+    public FacebookNodeList getUserPages(final String accessToken) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
                 .path("accounts")
@@ -162,7 +165,8 @@ public class FacebookConnector {
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
-    public FacebookNodeList getUserGrantedPermissions(String userid, String accessToken) throws FacebookException {
+    public FacebookNodeList getUserGrantedPermissions(final String userid, final String accessToken)
+            throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path(userid)
                 .path("permissions")
@@ -209,8 +213,50 @@ public class FacebookConnector {
         subscribedApps(pageId, pageAccessToken, RequestMethod.POST);
     }
 
-    private void sendFacebookMeMessages(String toFacebookID, String pageToken,
-                                        SendMessage sendMessage)
+    /***
+     * Set customisations through the Messenger Profile API
+     * We need to make up to two calls here:
+     * one to set things and one to delete things
+     * @param pageToken
+     * @param messengerProfile
+     * @throws FacebookException
+     */
+    public void setFacebookMessengerProfile(final String pageToken,
+                                            final FacebookMessengerProfile messengerProfile)
+            throws FacebookException {
+
+        if (messengerProfile.getProfileSet().hasContent()) {
+            JerseyWebTarget target = getGraphApiTarget()
+                    .path("me")
+                    .path("messenger_profile")
+                    .queryParam("client_id", this.config.getFacebookAppId())
+                    .queryParam("client_secret", this.config.getFacebookAppSecret())
+                    .queryParam("access_token", pageToken);
+
+            // post the fields that we have content for
+            webCall(target, RequestMethod.POST,
+                    Entity.json(this.jsonSerializer.serialize(messengerProfile.getProfileSet())),
+                    this.config.getFacebookSendAPITimeout());
+        }
+
+        if (messengerProfile.getProfileDelete().hasContent()) {
+            JerseyWebTarget target = getGraphApiTarget()
+                    .path("me")
+                    .path("messenger_profile")
+                    .queryParam("client_id", this.config.getFacebookAppId())
+                    .queryParam("client_secret", this.config.getFacebookAppSecret())
+                    .queryParam("access_token", pageToken);
+
+            // delete the fields that we have no content for
+            webCall(target, RequestMethod.DELETE,
+                    Entity.json(this.jsonSerializer.serialize(messengerProfile.getProfileDelete())),
+                    this.config.getFacebookSendAPITimeout());
+        }
+
+    }
+
+    private void sendFacebookMeMessages(final String toFacebookID, final String pageToken,
+                                        final SendMessage sendMessage)
             throws FacebookException {
         // set up the parameters
         JerseyWebTarget target = getGraphApiTarget()
@@ -282,7 +328,8 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    private String webCall(JerseyWebTarget target, RequestMethod requestmethod, int readTimeout) throws FacebookException {
+    private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod, final int readTimeout)
+            throws FacebookException {
         return webCall(target, requestmethod, Entity.text(""), readTimeout);
     }
 
@@ -294,8 +341,8 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    private String webCall(JerseyWebTarget target, RequestMethod requestmethod,
-                           Entity entity, int readTimeout) throws FacebookException {
+    private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod,
+                           final Entity entity, final int readTimeout) throws FacebookException {
 
         try {
             JerseyInvocation.Builder builder = target
@@ -312,7 +359,11 @@ public class FacebookConnector {
                     response = builder.put(entity);
                     break;
                 case DELETE:
-                    response = builder.delete();
+                    // we are not supposed to make a DELETE call with a body
+                    // however, Facebook requires it so we have to relax compliance validation
+                    // and suffer a warning on the console every time this happens
+                    builder.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true);
+                    response = builder.method("DELETE", entity);
                     break;
                 case GET:
                 default:
@@ -355,14 +406,14 @@ public class FacebookConnector {
         @SerializedName("recipient")
         private Recipient recipient;
         @SerializedName("message")
-        private MessagePayload message;
+        private FacebookMessageNode message;
         @SerializedName("sender_action")
         private SenderAction senderAction;
 
         public SendMessage(final String recipient) {
             this.recipient = new Recipient();
             this.recipient.id = recipient;
-            this.message = new MessagePayload();
+            this.message = null;
         }
 
         public SendMessage(final String recipient, final SenderAction senderAction) {
@@ -371,30 +422,22 @@ public class FacebookConnector {
             this.senderAction = senderAction;
         }
 
-        public String getText() {
-            return this.message.text;
+        public FacebookMessageNode getMessageNode() {
+            return this.message;
         }
 
-        public void setText(final String text) {
-            this.message.text = text;
+        public void setMessageNode(FacebookMessageNode content) {
+            this.message = content;
         }
 
-        public FacebookRichContentNode getRichContent() {
-            return this.message.richContent;
-        }
-
-        public void setRichContent(FacebookRichContentNode content) {
-            this.message.richContent = content;
-        }
-
-        public List<QuickReply> getQuickReplies() {
-            return this.message.quickReplies;
+        public List<FacebookQuickReply> getQuickReplies() {
+            return this.message.getQuickReplies();
         }
 
         public void setQuickReplies(final List<String> options) {
-            this.message.quickReplies = options.stream()
-                    .map(name -> new QuickReply(name, name))
-                    .collect(Collectors.toList());
+            this.message.setQuickReplies(options.stream()
+                    .map(name -> new FacebookQuickReply(name, name))
+                    .collect(Collectors.toList()));
         }
 
         public enum SenderAction {
@@ -407,34 +450,5 @@ public class FacebookConnector {
             @SerializedName("id")
             private String id;
         }
-
-        private static class MessagePayload {
-            @SerializedName("text")
-            private String text;
-
-            @SerializedName("attachment")
-            private FacebookRichContentNode richContent;
-
-            @SerializedName("quick_replies")
-            private List<QuickReply> quickReplies;
-        }
-
-        private static class QuickReply {
-
-            @SerializedName("content_type")
-            private String contentType;
-            @SerializedName("title")
-            private String title;
-            @SerializedName("payload")
-            private String payload;
-
-            public QuickReply(final String title, final String payload) {
-                this.contentType = "text";
-                this.title = title;
-                this.payload = payload;
-            }
-        }
-
     }
-
 }
