@@ -1,4 +1,6 @@
-document.getElementById('btnAiSkillCancel').style.visibility = 'hidden';
+if (document.getElementById('btnAiSkillCancel') !== null) {
+    document.getElementById('btnAiSkillCancel').style.visibility = 'hidden';
+}
 
 if (document.getElementById("btnAiSkillSave") !== null) {
     document.getElementById("btnAiSkillSave").addEventListener("click", updateAISkill);
