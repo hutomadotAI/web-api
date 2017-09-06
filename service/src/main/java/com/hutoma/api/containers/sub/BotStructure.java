@@ -47,7 +47,9 @@ public class BotStructure {
         return this.trainingFile;
     }
 
-    public HashMap<String, ApiEntity> getEntities() { return this.entities; }
+    public HashMap<String, ApiEntity> getEntities() {
+        return this.entities;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -65,5 +67,7 @@ public class BotStructure {
         this.trainingFile = trainingFile;
     }
 
-    public void setEntities(HashMap<String, ApiEntity> entities) { this.entities = entities; }
+    public void setEntities(HashMap<String, ApiEntity> entities) {
+        this.entities = entities;
+    }
 }

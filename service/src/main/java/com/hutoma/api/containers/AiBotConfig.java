@@ -12,12 +12,12 @@ public class AiBotConfig {
     /**
      * The current version
      */
-    public final static int CURRENT_VERSION = 1;
+    public static final int CURRENT_VERSION = 1;
 
     private int version;
 
     @SerializedName("api_keys")
-    private Map<String,String> apiKeys;
+    private Map<String, String> apiKeys;
 
     public AiBotConfig(Map<String, String> apiKeys) {
         this.version = CURRENT_VERSION;

@@ -185,7 +185,7 @@ public class FacebookChatHandler implements Callable {
 
                     try {
                         // note the start time
-                        long startTime = this.tools.getTimestamp();
+                        final long startTime = this.tools.getTimestamp();
 
                         // send the response back to Facebook
                         sendChatResponseToFacebook(metadata, messageOriginatorId, response);
@@ -236,7 +236,7 @@ public class FacebookChatHandler implements Callable {
      * @param facebookID
      * @return
      */
-    public UUID generateChatId(UUID aiid, String facebookID) {
+    public UUID generateChatId(final UUID aiid, final String facebookID) {
 
         // write all the data into a byte buffer
         ByteBuffer bb = ByteBuffer.wrap(new byte[128]);
@@ -351,8 +351,8 @@ public class FacebookChatHandler implements Callable {
      * @param answer
      */
     private void createTextResponse(final List<FacebookResponseSegment> responseList, final String answer) {
-        String acceptedText = answer.length() > FB_MESSAGE_SIZE_LIMIT ?
-                answer.substring(0, FB_MESSAGE_SIZE_LIMIT) : answer;
+        String acceptedText = answer.length() > FB_MESSAGE_SIZE_LIMIT
+                ? answer.substring(0, FB_MESSAGE_SIZE_LIMIT) : answer;
         responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(acceptedText));
     }
 

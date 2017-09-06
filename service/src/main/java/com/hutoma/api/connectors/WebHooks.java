@@ -59,8 +59,8 @@ public class WebHooks {
      * @param chatResult The chat result for the request.
      * @return a WebHookResponse containing the returned data.
      */
-    public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent, final ChatResult chatResult,
-                                                final ChatRequestInfo chatInfo) {
+    public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent,
+                                                final ChatResult chatResult, final ChatRequestInfo chatInfo) {
         final String devIdString = chatInfo.devId.toString();
         if (webHook == null || intent == null) {
             this.logger.logError(LOGFROM, "Invalid parameters passed.");
@@ -136,7 +136,8 @@ public class WebHooks {
         return webHookResponse;
     }
 
-    private Response executeWebhook(String webHookEndpoint, String jsonPayload, String devIdString, boolean isHttps, UUID aiid) {
+    private Response executeWebhook(final String webHookEndpoint, final String jsonPayload, final String devIdString,
+                                    final boolean isHttps, final UUID aiid) {
         byte[] payloadBytes;
         try {
             payloadBytes = jsonPayload.getBytes("UTF-8");
@@ -164,7 +165,9 @@ public class WebHooks {
 
             // getMessageHash logs internally, no need to log again
             calculatedHash = getMessageHash(devIdString, secret, payloadBytes);
-            if (calculatedHash == null) return null;
+            if (calculatedHash == null) {
+                return null;
+            }
         }
 
         Response response;

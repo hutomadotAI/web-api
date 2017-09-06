@@ -1,16 +1,21 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.access.Role;
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
+import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.*;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -245,8 +250,9 @@ public class AILogic {
             } catch (AiBotConfigException configException) {
                 return ApiError.getBadRequest(configException.getMessage());
             }
-            if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer))
+            if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer)) {
                 return new ApiResult().setSuccessStatus();
+            }
             return ApiError.getBadRequest("Failed to set AI/bot config");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "setAiConfig", devIdString, e);
@@ -454,7 +460,8 @@ public class AILogic {
                     }
                 }
             }
-            BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile, entityMap);
+            BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
+                    entityMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
 
 

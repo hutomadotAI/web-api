@@ -3,10 +3,7 @@ package com.hutoma.api.containers.ui;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.ApiKeyDescription;
 import com.hutoma.api.containers.sub.DeveloperInfo;
-
-import java.util.List;
 
 /**
  * Item in the botstore.
@@ -47,7 +44,9 @@ public class BotstoreItem {
         return this.devInfo;
     }
 
-    public AiBotConfigDefinition getBotConfigDefinition() { return this.botConfigDefinition; }
+    public AiBotConfigDefinition getBotConfigDefinition() {
+        return this.botConfigDefinition;
+    }
 
     public void setBotConfigDefinition(AiBotConfigDefinition botConfigDefinition) {
         this.botConfigDefinition = botConfigDefinition;

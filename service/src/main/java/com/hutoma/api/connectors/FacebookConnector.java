@@ -52,7 +52,7 @@ public class FacebookConnector {
      * @param token
      * @return
      */
-    public boolean isShortLivedToken(FacebookToken token) {
+    public boolean isShortLivedToken(final FacebookToken token) {
         return (token.getExpiresInSeconds() > 0) // token does expire
                 && (token.getExpiresInSeconds() < (60 * 60 * 24 * 30)); // in less than a month
     }
@@ -64,7 +64,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    public FacebookToken getLongFromShortLivedToken(FacebookToken shortToken) throws FacebookException {
+    public FacebookToken getLongFromShortLivedToken(final FacebookToken shortToken) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("oauth")
                 .path("access_token")
@@ -83,7 +83,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    public FacebookToken getFacebookUserToken(FacebookConnect facebookConnect) throws FacebookException {
+    public FacebookToken getFacebookUserToken(final FacebookConnect facebookConnect) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("oauth")
                 .path("access_token")
@@ -107,8 +107,8 @@ public class FacebookConnector {
      * @param responseSegment
      * @throws FacebookException
      */
-    public void sendFacebookMessage(String toFacebookID, String pageToken,
-                                    FacebookResponseSegment responseSegment)
+    public void sendFacebookMessage(final String toFacebookID, final String pageToken,
+                                    final FacebookResponseSegment responseSegment)
             throws FacebookException {
         SendMessage sendMessage = new SendMessage(toFacebookID);
         responseSegment.populateMessageContent(sendMessage);
@@ -123,8 +123,8 @@ public class FacebookConnector {
      * @param sendAction
      * @throws FacebookException
      */
-    public void sendFacebookSenderAction(String toFacebookID, String pageToken,
-                                         SendMessage.SenderAction sendAction)
+    public void sendFacebookSenderAction(final String toFacebookID, final String pageToken,
+                                         final SendMessage.SenderAction sendAction)
             throws FacebookException {
         SendMessage sendMessage = new SendMessage(toFacebookID, sendAction);
         sendFacebookMeMessages(toFacebookID, pageToken, sendMessage);
@@ -136,7 +136,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    public FacebookNode getFacebookUserFromToken(FacebookToken token) throws FacebookException {
+    public FacebookNode getFacebookUserFromToken(final FacebookToken token) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
                 .queryParam("fields", "id,name")
@@ -152,7 +152,7 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    public FacebookNodeList getUserPages(String accessToken) throws FacebookException {
+    public FacebookNodeList getUserPages(final String accessToken) throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
                 .path("accounts")
@@ -162,7 +162,8 @@ public class FacebookConnector {
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
     }
 
-    public FacebookNodeList getUserGrantedPermissions(String userid, String accessToken) throws FacebookException {
+    public FacebookNodeList getUserGrantedPermissions(final String userid, final String accessToken)
+            throws FacebookException {
         JerseyWebTarget target = getGraphApiTarget()
                 .path(userid)
                 .path("permissions")
@@ -251,8 +252,8 @@ public class FacebookConnector {
 
     }
 
-    private void sendFacebookMeMessages(String toFacebookID, String pageToken,
-                                        SendMessage sendMessage)
+    private void sendFacebookMeMessages(final String toFacebookID, final String pageToken,
+                                        final SendMessage sendMessage)
             throws FacebookException {
         // set up the parameters
         JerseyWebTarget target = getGraphApiTarget()
@@ -324,7 +325,8 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    private String webCall(JerseyWebTarget target, RequestMethod requestmethod, int readTimeout) throws FacebookException {
+    private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod, final int readTimeout)
+            throws FacebookException {
         return webCall(target, requestmethod, Entity.text(""), readTimeout);
     }
 
@@ -336,8 +338,8 @@ public class FacebookConnector {
      * @return
      * @throws FacebookException
      */
-    private String webCall(JerseyWebTarget target, RequestMethod requestmethod,
-                           Entity entity, int readTimeout) throws FacebookException {
+    private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod,
+                           final Entity entity, final int readTimeout) throws FacebookException {
 
         try {
             JerseyInvocation.Builder builder = target

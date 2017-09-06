@@ -13,7 +13,8 @@ public class FacebookRichContentAttachment {
     protected FacebookRichContentAttachment() {
     }
 
-    FacebookRichContentAttachment(final FacebookRichContentAttachment.RichContentType contentType, final FacebookRichContentPayload payload) {
+    FacebookRichContentAttachment(final FacebookRichContentAttachment.RichContentType contentType,
+                                  final FacebookRichContentPayload payload) {
         this.contentType = contentType;
         this.payload = payload;
     }

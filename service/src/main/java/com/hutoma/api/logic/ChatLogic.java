@@ -156,7 +156,8 @@ public class ChatLogic {
                              final Map<String, String> clientVariables)
             throws ChatFailedException {
 
-        final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, UUID.fromString(chatId), question, clientVariables);
+        final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, UUID.fromString(chatId),
+                question, clientVariables);
 
         final String devIdString = devId.toString();
         final long startTime = this.tools.getTimestamp();

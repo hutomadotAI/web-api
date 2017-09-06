@@ -77,7 +77,8 @@ public class AIIntegrationLogic {
                 .put("devid", devid);
         try {
 
-            IntegrationRecord updatedRecord = this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+            IntegrationRecord updatedRecord = this.database.updateIntegrationRecord(aiid, devid,
+                    IntegrationType.FACEBOOK,
                     (record) -> {
                         // load a record if we have one
                         FacebookIntegrationMetadata metadata = null;
@@ -92,7 +93,8 @@ public class AIIntegrationLogic {
 
                         // set the fields we care about
                         metadata.setPageGreeting(Strings.emptyToNull(facebookCustomisation.getPageGreeting()));
-                        metadata.setGetStartedPayload(Strings.emptyToNull(facebookCustomisation.getGetStartedPayload()));
+                        metadata.setGetStartedPayload(Strings.emptyToNull(
+                                facebookCustomisation.getGetStartedPayload()));
 
                         // set the new data
                         record.setData(this.serializer.serialize(metadata));
@@ -293,7 +295,8 @@ public class AIIntegrationLogic {
                 // and log
                 this.logger.logUserWarnEvent(LOGFROM, "facebook account already in use", devid.toString(),
                         logMap);
-                return ApiError.getConflict("Cannot connect. Another user has already registered that Facebook account.");
+                return ApiError.getConflict(
+                        "Cannot connect. Another user has already registered that Facebook account.");
             }
 
             // make sure we got the permissions we require
@@ -479,7 +482,8 @@ public class AIIntegrationLogic {
      * @throws FacebookException
      */
     private ApiResult disconnect(final LogMap logMap, final UUID devid, final UUID aiid,
-                                 final IntegrationRecord integrationRecord, final FacebookIntegrationMetadata integrationMetadata)
+                                 final IntegrationRecord integrationRecord,
+                                 final FacebookIntegrationMetadata integrationMetadata)
             throws Database.DatabaseException, FacebookException {
 
         // switch off customisations
@@ -611,7 +615,8 @@ public class AIIntegrationLogic {
 
         // log
         this.logger.logUserInfoEvent(LOGFROM, String.format("integrated bot %s with Facebook page %s for user %s",
-                aiid.toString(), integrationMetadata.getPageName(), integrationMetadata.getUserName()), devid.toString(), logMap);
+                aiid.toString(), integrationMetadata.getPageName(), integrationMetadata.getUserName()),
+                devid.toString(), logMap);
 
         return new ApiResult().setSuccessStatus("Link successful.");
     }

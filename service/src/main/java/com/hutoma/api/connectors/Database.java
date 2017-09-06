@@ -647,7 +647,7 @@ public class Database {
         }
     }
 
-    public Pair<UUID,UUID> getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
+    public Pair<UUID, UUID> getIsBotLinkedToAi(final UUID devId, final UUID aiid, final int botId)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getIsBotLinkedToAi", 3).add(devId).add(aiid).add(botId);
@@ -687,7 +687,7 @@ public class Database {
                 ApiLinkedBotData botData = null;
 
                 if (rs.next()) {
-                    AiBot aiBot = getAiBotFromResultset(rs);
+                    final AiBot aiBot = getAiBotFromResultset(rs);
                     call = transaction.getDatabaseCall();
                     call.initialise("getAiBotConfig", 3).add(devId).add(aiid).add(botId);
                     rs = call.executeQuery();
@@ -706,7 +706,7 @@ public class Database {
     }
 
     public AiBotConfigDefinition getBotConfigDefinition(final UUID devid, final UUID aiid,
-                                          JsonSerializer serializer)
+                                                        JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getBotConfigDefinition", 2)
@@ -728,8 +728,8 @@ public class Database {
     }
 
     public boolean setBotConfigDefinition(final UUID devid, final UUID aiid,
-                                         AiBotConfigDefinition definition,
-                                         JsonSerializer serializer)
+                                          AiBotConfigDefinition definition,
+                                          JsonSerializer serializer)
             throws DatabaseException {
         String apiKeyString = serializer.serialize(definition);
         try (DatabaseCall call = this.callProvider.get()) {
@@ -1250,8 +1250,9 @@ public class Database {
         }
     }
 
-    public IntegrationRecord updateIntegrationRecord(final UUID aiid, final UUID devid, final IntegrationType integration,
-                                                     UnaryOperator<IntegrationRecord> updater)
+    public IntegrationRecord updateIntegrationRecord(final UUID aiid, final UUID devid,
+                                                     final IntegrationType integration,
+                                                     final UnaryOperator<IntegrationRecord> updater)
             throws DatabaseException {
 
         // open a transaction

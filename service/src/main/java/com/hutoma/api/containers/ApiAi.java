@@ -1,7 +1,11 @@
 package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.joda.time.DateTime;
 
@@ -191,9 +195,13 @@ public class ApiAi extends ApiResult {
         return this.passthroughUrl;
     }
 
-    public String getName() { return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
-    public String getDescription() { return this.description; }
+    public String getDescription() {
+        return this.description;
+    }
 
     public boolean trainingFileUploaded() {
         return this.trainingFileUploaded;
