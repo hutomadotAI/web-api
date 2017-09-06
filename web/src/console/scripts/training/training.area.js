@@ -345,7 +345,7 @@ function setStateResponse(aiStatus) {
 
 function trainingStartCall() {
     jQuery.ajax({
-        url: './dynamic/trainingStart.php',
+        url: './proxy/trainingStart.php',
         type: 'GET',
         dataType: 'json',
         processData: false,  // tell jQuery not to process the data
