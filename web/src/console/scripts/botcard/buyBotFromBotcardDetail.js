@@ -5,7 +5,7 @@ function purchaseBotFromBotcardDetail() {
     document.getElementById('btnBuyBot').disabled = true;
     var botId = document.getElementById('bot_id').value;
     $.ajax({
-        url: './dynamic/purchaseBot.php',
+        url: './proxy/purchaseBot.php',
         data: {botId: botId},
         type: 'POST',
         success: function (response) {

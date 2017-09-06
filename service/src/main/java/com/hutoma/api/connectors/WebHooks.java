@@ -212,7 +212,6 @@ public class WebHooks {
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
         WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
-
         String jsonPayload;
         try {
             jsonPayload = this.serializer.serialize(payload);

@@ -1,26 +1,29 @@
 <?php
-require "../../pages/config.php";
-require_once "../../console/api/apiBase.php";
-require_once "../../console/api/integrationApi.php";
-require_once "../../console/api/botstoreApi.php";
 
-if (!\hutoma\console::checkSessionIsActive()) {
-    exit;
-}
+namespace hutoma;
 
-$integrationApi = new \hutoma\api\integrationApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/integrationApi.php";
+require_once __DIR__ . "/../api/botstoreApi.php";
 
-if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
-    \hutoma\console::redirect('./error.php?err=200');
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$integrationApi = new api\integrationApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+
+if (!isset(sessionObject::getCurrentAI()['aiid'])) {
+    utils::redirect('./error.php?err=200');
     exit;
 }
 
 // get the aiid from the session
-$aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
+$aiid = sessionObject::getCurrentAI()['aiid'];
 
 // if this happens right after a connect ...
-$connect_result = $_SESSION[$_SESSION['navigation_id']]['fb_connect_result'];
-if (isset($connect_result)) {
+if (isset($_SESSION[$_SESSION['navigation_id']]['fb_connect_result'])) {
+    $connect_result = $_SESSION[$_SESSION['navigation_id']]['fb_connect_result'];
     // load the result of that connect
     unset($_SESSION[$_SESSION['navigation_id']]['fb_connect_result']);
     // if there was a connect warning message then display that
@@ -93,7 +96,7 @@ if ($fb_not_connected) {
     </div>
     <?php
 } else {
-$fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
+    $fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
 ?>
 <div class="box-header with-border ">
     <div class="alert alert-base flat no-shadow">

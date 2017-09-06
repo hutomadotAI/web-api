@@ -769,7 +769,6 @@ public class TestChatLogic {
 
         when(this.fakeChatServices.getAIPassthroughUrl(any(), any())).thenReturn(null);
         when(this.fakeWebHooks.executePassthroughWebhook(any(), any(), any())).thenReturn(response);
-
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
 

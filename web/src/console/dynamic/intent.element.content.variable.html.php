@@ -45,13 +45,13 @@
                 <div class="col-xs-2">
                     <div class="text-center">
                         <i class="fa fa-sliders text-md text-red"></i>
-                        N°prompts
+                        Times to prompt
                     </div>
                 </div>
                 <div class="col-xs-2">
                     <div class="text-center">
                         <i class="fa  fa-comments text-md text-blue"></i>
-                        Prompt
+                        Prompts
                     </div>
                 </div>
                 <div class="col-xs-2">

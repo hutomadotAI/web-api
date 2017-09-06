@@ -1,0 +1,33 @@
+{{#bots}}
+    <span id="card{{medatata.botId}}" data-pos="{{index}}">
+            <div class="box-card card flat no-padding col-xs-6 col-sm-4 col-md-3 col-lg-1">
+
+                {{#openFullStore}}
+                    <a href="/pages/login.php?redirect=/console/botstore.php?botId={{metadata.botId}}&category={{safeCategory}}" target="_top">
+                {{/openFullStore}}
+                {{^openFullStore}}
+                    <a href="/console/botstore.php?botId={{metadata.botId}}&category={{safeCategory}}" target="_top">
+                {{/openFullStore}}
+
+                    <img class="card-icon unselectable" src="{{iconPath}}"></a>
+                <div class="card-title unselectable no-shadow">{{metadata.name}}</div>
+                <div class="card-author unselectable no-shadow">by {{developer.company}}</div>
+                <a class="card-testBotLink" id="cardTestBotLink{{metadata.botId}}" href="./newAI.php" target="_top"
+                    style="display:{{botOwnedBlock}}">Test Bot</a>
+                <div class="card-footer flat unselectable">
+                    <div class="row no-margin">
+                        <div class="pull-left"></div>
+                        <span class="card-linked" data-botid="{{metadata.botId}}" data-linked="">
+                            {{#purchased}}
+                                <div class="card-purchased pull-right">purchased</div>
+                            {{/purchased}}
+                            {{^purchased}}
+                                <a class href="/console/botstore.php?botId={{metadata.botId}}&category={{safeCategory}}" target="_top">
+                                    <div class="card-price pull-right">{{metadata.price}} &#8364</div></a>
+                            {{/purchased}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+</span>
+{{/bots}}

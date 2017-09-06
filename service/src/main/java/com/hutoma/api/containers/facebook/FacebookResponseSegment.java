@@ -62,8 +62,6 @@ public abstract class FacebookResponseSegment {
                     .setAttachment(attachment)
                     .setQuickReplies(quickReplies);
         }
-
     }
-
 }
 

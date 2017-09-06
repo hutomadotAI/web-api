@@ -1,7 +1,7 @@
 document.getElementById("btnAddEntityValue").addEventListener("click", addEntityValue);
 
 function checkValueCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if( activeButtonCreateEntityValue())
             addEntityValue();
     }
@@ -50,36 +50,15 @@ function addEntityValue() {
 }
 
 function createNewValueEntityRow(value, parent) {
-    var wHTML = '';
-
-    wHTML += ('<div class="box-body flat no-padding item-row" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
-    wHTML += ('<div class="row">');
-
-    wHTML += ('<div class="col-xs-10" >');
-    wHTML += ('<div class="inner-addon left-addon" style="background-color: #404446;">');
-    wHTML += ('<i class="fa fa-sign-out text-gray"></i>');
-    wHTML += ('<input type="text" class="form-control flat no-shadow no-border" name="value-entity-row" style="background-color: #404446;" value="' + value + '" placeholder="' + value + '">');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    wHTML += ('<div class="col-xs-2" id="btnValueEntity" style="display:none;" >');
-    wHTML += ('<div class="btn-group pull-right text-gray" style="padding-right:7px; padding-top:7px;">');
-
-    wHTML += ('<a data-toggle="modal" data-target="#deleteValueEntity" style="padding-right:3px; cursor: pointer;" onClick="deleteValueEntity(this)">');
-    wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
-    wHTML += ('</a>');
-
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    var newNode = document.createElement('div');
-    newNode.setAttribute('class', 'col-xs-12');
-    newNode.setAttribute('style', 'col-xs-12');
-    newNode.innerHTML = wHTML;
-    parent.insertBefore(newNode, parent.firstChild);
+    var view = {
+        value: value
+    };
+    $.get('templates/entity_value_row.mustache', function(template) {
+        var newNode = document.createElement('div');
+        newNode.setAttribute('class', 'col-xs-12');
+        newNode.innerHTML = Mustache.render(template, view);
+        parent.insertBefore(newNode, parent.firstChild);
+    });
 }
 
 function deleteValueEntity(element) {
@@ -113,7 +92,7 @@ function saveEntity() {
     var entityName = document.getElementById('entity-name').value;
     var elements = document.getElementsByName('value-entity-row');
 
-    if (elements.length == 0){
+    if (elements.length === 0){
         msgAlertEntityValues(ALERT.WARNING.value, 'Please enter at least one value for this entity.');
         return;
     }
@@ -127,32 +106,22 @@ function saveEntity() {
 
     msgAlertEntityValues(ALERT.WARNING.value, 'Saving...');
 
-    $.ajax({
-        url: './dynamic/updateEntity.php',
+    commonAjaxApiRequest({
+        url: './proxy/entityProxy.php?entity=' + entityName,
         data: {
-            entity_name: entityName, entity_values: values
+            values: values
         },
-        type: 'POST',
-        success: function (response) {
-            var JSONdata = JSON.parse(response);
-            switch (JSONdata['status']['code']) {
-                case 200:
-                    msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved.');
-                    break;
-                case 400:
-                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-                case 500:
-                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-                default:
-                    msgAlertEntityValues(ALERT.DANGER.value, JSONdata['status']['info']);
-            }
+        verb: 'PUT',
+        onOK: function() {
+            msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved.');
         },
-        error: function (xhr, ajaxOptions, thrownError) {
+        onGenericError: function() {
             msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved.');
         },
-        complete: function () {
+        onShowError: function(message) {
+            msgAlertEntityValues(ALERT.DANGER.value, message);
+        },
+        onComplete: function() {
             $("#btnSaveEntity").prop("disabled", false);
             document.body.style.cursor = prevCursor;
         }

@@ -81,7 +81,7 @@
                 </div>
             </div>
             <div class="col-xs-5">
-                <?php include './dynamic/input.country.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.country.html.php'; ?>
             </div>
             <div class="col-xs-3">
                 <div class="form-group">

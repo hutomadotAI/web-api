@@ -1,40 +1,40 @@
 <?php
-require "../pages/config.php";
 
-require_once "../console/api/apiBase.php";
-require_once "../console/api/intentsApi.php";
-require_once "../console/api/aiApi.php";
-require_once "../console/api/botstoreApi.php";
+namespace hutoma;
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/intentsApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
 
-$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+sessionObject::redirectToLoginIfUnauthenticated();
 
+$intentsApi = new api\intentsApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+
+$aiid = sessionObject::getCurrentAI()['aiid'];
 $intent_deleted = false;
-if (isset($_REQUEST['deleteintent'])) {
-    $intentName = $_REQUEST['deleteintent'];
-    $result = $intentsApi->deleteIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
-    $intent_deleted = true;
-}
+$currentIntent = isset($_POST['intent']) ? $_POST['intent'] : "";
 
-$intents = $intentsApi->getIntents($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$intents = $intentsApi->getIntents($aiid);
 unset($intentsApi);
 
 if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
     unset($intents);
-    \hutoma\console::redirect('./error.php?err=210');
+    utils::redirect('./error.php?err=210');
     exit;
 }
 
-$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$bot = $aiApi->getSingleAI($aiid);
 unset($aiApi);
 
 if ($bot['status']['code'] !== 200) {
     unset($bot);
-    \hutoma\console::redirect('./error.php?err=204');
+    utils::redirect('./error.php?err=204');
     exit;
 }
 
@@ -46,41 +46,16 @@ function echoJsonIntentsResponse($intents)
         echo '""'; // return empty string
 }
 
+$header_page_title = "Intents";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Intents</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    
-    <?php include_once "../console/common/google_tag_manager.php" ?>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini" onload="showIntents('')">
-    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
 
 <div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12" id="intentElementBox">
@@ -88,22 +63,157 @@ function echoJsonIntentsResponse($intents)
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/intent.content.create.html.php'; ?>
-                    <?php include './dynamic/intent.content.list.html.php'; ?>
+                    <div class="box box-solid box-clean flat no-shadow unselectable">
+
+                        <div class="box-header with-border">
+                            <i class="fa fa-commenting-o text-green"></i>
+                            <div class="box-title"><b>New Intent</b></div>
+                            <a data-toggle="collapse" href="#collapseIntentsInfo">
+                                <div class=" pull-right">more info
+                                    <i class="fa fa-info-circle text-sm text-yellow"></i>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div id="collapseIntentsInfo" class="panel-collapse collapse">
+                            <div class="box-body" style="padding-bottom:0;">
+                                <div class="overlay center-block">
+                                    <section class="content-info">
+                                        <div class="box-body">
+                                            <dl class="dl-horizontal no-margin" style="text-align:justify">
+                                                Let’s say you’re creating a Bot that takes orders in a bar. A user may
+                                                say "I want to order" - this is their intent. The associated entities
+                                                could be "beer" "cola" or “wine".
+                                            </dl>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-body" id="boxIntents">
+                            <div class="bootstrap-filestyle input-group" id="GrpIntentButton">
+                                <input type="text" class="form-control flat no-shadow" id="inputIntentName"
+                                       name="intent" placeholder="Give the intent a name" style="width: 96%;"
+                                       onkeyup="checkIntentCode(this,event.keyCode)">
+                                <div class="input-group-btn" tabindex="0">
+                                    <button id="btnCreateIntent" class="btn btn-success flat" style="width: 120px;">
+                                        Create Intent
+                                    </button>
+                                </div>
+                            </div>
+                            <p></p>
+
+                            <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntent"
+                                 style="margin: 0 0 10px 0;">
+                                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+                                <i class="icon fa fa-check" id="iconAlertIntent"></i>
+                                <span id="msgAlertIntent"></span>
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+        <span>
+            If you’re stuck check out our <a data-toggle="collapse"
+                                             href="#collapseVideoTutorialIntent">intents tutorial</a> or email <a
+                    href='mailto:support@hutoma.ai?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.ai</a> for an invite to our slack channel.
+        </span>
+                            <p></p>
+
+                            <div id="collapseVideoTutorialIntent" class="panel-collapse collapse">
+                                <div class="box-body flat no-padding">
+                                    <div class="overlay center-block">
+                                        <div class="embed-responsive embed-responsive-16by9" id="videoIntents01">
+                                            <iframe
+                                                    src="//www.youtube.com/embed/SI5XgQm660A?controls=1&hd=1&enablejsapi=1"
+                                                    frameborder="0" allowfullscreen>
+                                            </iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <input type="hidden" id="intent-name" name="intent-name" value="<?php echo $currentIntent ?>">
+                        <input type="hidden" id="bot-status" name="bot-status" value="0" style="display:none;"/>
+                        <div class="box box-solid box-clean flat no-shadow unselectable">
+
+                            <div class="box-header with-border">
+                                <i class="fa fa-commenting-o text-green"></i>
+                                <div class="box-title"><b>Intent List</b></div>
+                                <a data-toggle="collapse" href="#collapseIntentsListInfo">
+                                    <div class=" pull-right">more info
+                                        <i class="fa fa-info-circle text-sm text-yellow"></i>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div id="collapseIntentsListInfo" class="panel-collapse collapse">
+                                <div class="box-body" style="padding-bottom: 0px;">
+                                    <div class="overlay center-block">
+                                        <section class="content-info">
+                                            <div class="box-body">
+                                                <dl class="dl-horizontal no-margin" style="text-align:justify">
+                                                    This is a list of intents that you have created for your bot so far.
+                                                    These are unique to this Bot.
+                                                </dl>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="box-body">
+
+                                <div class="input-group-btn">
+                                    <input class="form-control flat no-shadow pull-right"
+                                           onkeyup="searchIntents(this.value)" value="" placeholder="Search...">
+                                </div>
+
+                                <p></p>
+
+                                <div class="tab-pane" id="tab_intents">
+                                    <p id="intentsearch"></p>
+                                </div>
+                                <p></p>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Modal DELETE entity-->
+                        <div class="modal fade" id="deleteIntent" role="dialog">
+                            <div class="modal-dialog flat">
+                                <!-- Modal content-->
+                                <div class="modal-content bordered" style="background-color: #202020">
+                                    <div class="modal-header">
+                                        <button type="button" class="close text-gray" data-dismiss="modal">&times;
+                                        </button>
+                                        <h4 class="modal-title">Delete Intent</h4>
+                                    </div>
+                                    <div class="modal-body" style="background-color: #212121">
+                                        <div class="box-body" id="delete-intent-label">
+
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary flat" data-dismiss="modal">Cancel
+                                        </button>
+                                        <button type="button" class="btn btn-danger flat" id="modalDelete" value=""
+                                                onClick="deleteIntent(this.value)" data-dismiss="modal">Delete
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
         </section>
     </div>
 
-    <!-- ================ CHAT CONTENT ================= -->
-    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
-    </aside>
-
-    <footer class="main-footer" style="margin-right:350px;">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
@@ -111,38 +221,32 @@ function echoJsonIntentsResponse($intents)
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-
+<script src="./dist/js/mustache.min.js"></script>
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/validation/validation.js"></script>
 <script src="./scripts/intent/intent.polling.js"></script>
 <script src="./scripts/intent/intent.js"></script>
-<script src="./scripts/chat/chat.js"></script>
-<script src="./scripts/chat/voice.js"></script>
-
-
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "intents", 1, true, false]);
-    </script>
-</form>
+<?php
+$menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "intents", 1, true, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
+
 
 <script>
     var intents = <?php echoJsonIntentsResponse($intents); unset($intents); ?>;
-    var newNode = document.createElement('div');
-    newNode.className = 'row';
-    newNode.id = 'intents_list';
-    
-    var intent_deleted = <?php if ($intent_deleted) echo 'true'; else echo 'false'; unset($intent_deleted)?>;
+
+    var intent_deleted = <?php echo($intent_deleted ? 'true' : 'false'); unset($intent_deleted)?>;
     var ai_state = <?php echo json_encode($bot['ai_status'])?>;
-    var trainingFile = <?php if ($bot['training_file_uploaded']) echo 'true'; else echo 'false'; unset($bot)?>;
-</script>
-<script>
+    var trainingFile = <?php echo($bot['training_file_uploaded'] ? 'true' : 'false'); unset($bot)?>;
+
     function searchIntents(str) {
         showIntents(str);
     }
+
+    $(document).ready(function () {
+        showIntents('');
+    });
 </script>
 </body>
 </html>

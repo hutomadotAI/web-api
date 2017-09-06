@@ -54,25 +54,29 @@ function updateAISkill() {
     }
 
     $.ajax({
-        url: './dynamic/updateBotsLinked.php',
+        url: './proxy/updateBotsLinked.php',
         type: 'POST',
         data: {'aiSkill': jsonString},
         success: function (response) {
             var statusCode = JSON.parse(response);
 
-            switch (statusCode['status']['code']) {
+            switch (statusCode['code']) {
                 case 200:
                     msgAlertAiSkill(ALERT.PRIMARY.value, 'Your Bot has been updated with the selected skills. Go to the <a href=\'/console/trainingAI.php\'>training</a> page to test it.');
                     activeAiSkillButtons();
                     //TODO probably make difference to refresh data on redirection ( use POST not simple for messaging and cards BOT )
                     callback(jsonString);
                     break;
+                case 400:
+                    msgAlertAiSkill(ALERT.DANGER.value, statusCode['info'] + ' Please retry or contact support@hutoma.ai.');
+                    activeAiSkillButtons();
+                    break;
                 case 404:
                     msgAlertAiSkill(ALERT.DANGER.value, 'Bot cannot be found or not currently linked. Please retry or contact support@hutoma.ai.');
                     activeAiSkillButtons();
                     break;
                 case 500:
-                    msgAlertAiSkill(ALERT.DANGER.value, 'Please try again. If the problem persists, contact support@hutoma.ai.');
+                    msgAlertAiSkill(ALERT.DANGER.value, statusCode['info'] + ' If the problem persists, contact support@hutoma.ai.');
                     activeAiSkillButtons();
                     break;
             }

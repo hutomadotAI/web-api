@@ -3,7 +3,7 @@
         <div class="box-title"><b>Basic Bot Settings</b></div>
     </div>
 
-    <form method="POST" name="createAIform" action="./dynamic/sessionCreateAI.php">
+    <form method="POST" name="createAIform" action="./proxy/sessionCreateAI.php">
         <div class="box-body">
 
             <div class="alert alert-dismissable flat alert-danger no-margin" id="containerMsgAlertNewAI" style="display:none;">
@@ -14,30 +14,30 @@
 
             <div class="row" style="margin-top: 10px;">
                 <div class="col-md-6">
-                    <?php include './dynamic/input.name.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.name.html.php'; ?>
                 </div>
                 <div class="col-md-6">
-                    <?php include './dynamic/input.language.html.php'; ?>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <?php include './dynamic/input.description.html.php'; ?>
-                </div>
-                <div class="col-md-6">
-                    <?php include './dynamic/input.timezone.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.language.html.php'; ?>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6">
-                    <?php include './dynamic/input.confidence.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.description.html.php'; ?>
+                </div>
+                <div class="col-md-6">
+                    <?php include __DIR__ . '/../dynamic/input.timezone.html.php'; ?>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <?php include __DIR__ . '/../dynamic/input.confidence.html.php'; ?>
                 </div>
 
                 <div class="col-md-6">
-                    <?php include './dynamic/input.learn.html.php'; ?>
-                    <?php include './dynamic/input.voice.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.learn.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.voice.html.php'; ?>
                 </div>
 
             </div>

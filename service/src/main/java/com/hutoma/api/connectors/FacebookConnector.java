@@ -11,6 +11,7 @@ import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookMessengerProfile;
 import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNodeList;
+import com.hutoma.api.containers.facebook.FacebookQuickReply;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
 import com.hutoma.api.containers.facebook.FacebookToken;
 
@@ -20,6 +21,8 @@ import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -427,6 +430,16 @@ public class FacebookConnector {
             this.message = content;
         }
 
+        public List<FacebookQuickReply> getQuickReplies() {
+            return this.message.getQuickReplies();
+        }
+
+        public void setQuickReplies(final List<String> options) {
+            this.message.setQuickReplies(options.stream()
+                    .map(name -> new FacebookQuickReply(name, name))
+                    .collect(Collectors.toList()));
+        }
+
         public enum SenderAction {
             typing_on,
             typing_off,
@@ -437,7 +450,5 @@ public class FacebookConnector {
             @SerializedName("id")
             private String id;
         }
-
     }
-
 }

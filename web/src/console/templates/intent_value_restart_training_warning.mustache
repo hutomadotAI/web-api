@@ -1,0 +1,18 @@
+<div class="box flat no-padding no-shadow no-margin">
+    <div class="alert alert-dismissable flat alert-warning" id="containerWarningIntentAlert">
+        <button type="button" class="close" id="btnRestart" data-dismiss="alert" aria-hidden="true"
+                value="' + intent_action + '">×
+        </button>
+        <span id="msgAlertWarningIntentAlert">
+    <dd class="text-center">
+    Training must be restarted to incorporate your new changes.
+    </dd>
+    <p></p>
+    <dt class="text-center">
+    <button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="restartTraining();"> <b>Restart Training</b></button>
+    </dt>
+</span></div>
+    <div class="overlay dark" id="alert-overlay" style="display: none;">
+        <i class="fa fa-refresh fa-spin"></i>
+    </div>
+</div>

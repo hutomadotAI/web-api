@@ -58,4 +58,10 @@ public class WebHookPayload {
         this.chatSession = Tools.getHashedDigestFromUuid(chatInfo.chatId);
         this.config = config;
     }
+
+    public WebHookPayload(final ChatResult chatResult, final UUID originatingAiid, final Map<String, String> clientVariables) {
+        this.chatResult = chatResult;
+        this.originatingAiid = originatingAiid.toString();
+        this.clientVariables = clientVariables;
+    }
 }

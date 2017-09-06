@@ -104,7 +104,7 @@ function requestPublish() {
 
     $.ajax({
         type: "POST",
-        url: './dynamic/publishBot.php',
+        url: './proxy/publishBot.php',
         data: {'bot': jsonString},
         cache: false,
         success: function (response) {
@@ -167,7 +167,7 @@ function uploadIconFile(botId,imageFile) {
 
     $.ajax({
         type: "POST",
-        url: './dynamic/uploadIcon.php',
+        url: './proxy/uploadIcon.php',
         data: formData,
         contentType: false,
         processData: false,
@@ -193,7 +193,7 @@ function uploadIconFile(botId,imageFile) {
 }
 
 function removeAlert(node) {
-    if (node.getAttribute("style") != null && node.getAttribute("style") != "") {
+    if (node.getAttribute("style") !== null && node.getAttribute("style") !== "") {
         node.style.border = "0px";
         if (document.getElementById('containerMsgAlertPublish') !== null)
             document.getElementById('containerMsgAlertPublish').remove();

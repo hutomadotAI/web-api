@@ -5,7 +5,7 @@
         <div class="box-title"><b>Download chat logs</b></div>
     </div>
 
-    <form action="./dynamic/downloadChatLogs.php" method="post">
+    <form action="./proxy/downloadChatLogs.php" method="post">
     <div class="box-body" id="boxIntents">
         <table style="width:100%">
             <tr>

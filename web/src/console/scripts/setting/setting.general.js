@@ -39,7 +39,7 @@ function updateAI() {
 
     msgAlertUpdateAI(ALERT.WARNING.value,'Updating...');
     $.ajax({
-        url : './dynamic/updateAI.php',
+        url : './proxy/updateAI.php',
         type : 'POST',
         data : formData,
         //dataType: 'json',
@@ -68,7 +68,7 @@ function updateAI() {
 
 function checkDescriptionLength() {
     var limitTextInputSize = 100;
-    if ( limitText($("#ai_description"), limitTextInputSize) == 1 )
+    if ( limitText($("#ai_description"), limitTextInputSize) === 1 )
         msgAlertDescriptionAI(ALERT.WARNING.value, 'Description is too long!');
     else {
         document.getElementById('btnSave').removeAttribute('disabled');

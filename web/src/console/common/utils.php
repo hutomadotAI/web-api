@@ -95,4 +95,47 @@ class utils
             && preg_match('/[a-z]/', $password) == 1    // at least a lowercase letter
             && preg_match('/[A-Z]/', $password) == 1;   // at least an uppercase letter
     }
+
+    /**
+     * Returns a string which shows the time since the user has joined
+     */
+    public static function joinedSince($created)
+    {
+
+        $timeFirst = strtotime($created);
+        $timeSecond = strtotime("now");
+        $memsince = $timeSecond - strtotime($created);
+        $regged = date("n/j/Y", strtotime($created));
+
+        $memfor = "";
+
+        if ($memsince < 60) {
+            $memfor = $memsince . " Seconds";
+        } else if ($memsince < 120) {
+            $memfor = floor($memsince / 60) . " Minute";
+        } else if ($memsince < 3600 && $memsince > 120) {
+            $memfor = floor($memsince / 60) . " Minutes";
+        } else if ($memsince < 7200 && $memsince > 3600) {
+            $memfor = floor($memsince / 3600) . " Hour";
+        } else if ($memsince < 86400 && $memsince > 3600) {
+            $memfor = floor($memsince / 3600) . " Hours";
+        } else if ($memsince < 172800) {
+            $memfor = floor($memsince / 86400) . " Day";
+        } else if ($memsince < 604800 && $memsince > 172800) {
+            $memfor = floor($memsince / 86400) . " Days";
+        } else if ($memsince < 1209600 && $memsince > 604800) {
+            $memfor = floor($memsince / 604800) . " Week";
+        } else if ($memsince < 2419200 && $memsince > 1209600) {
+            $memfor = floor($memsince / 604800) . " Weeks";
+        } else if ($memsince < 4838400) {
+            $memfor = floor($memsince / 2419200) . " Month";
+        } else if ($memsince < 31536000 && $memsince > 4838400) {
+            $memfor = floor($memsince / 2419200) . " Months";
+        } else if ($memsince < 63072000) {
+            $memfor = floor($memsince / 31536000) . " Year";
+        } else if ($memsince > 63072000) {
+            $memfor = floor($memsince / 31536000) . " Years";
+        }
+        return (string) $memfor;
+    }
 }

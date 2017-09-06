@@ -1,9 +1,16 @@
 <?php
 
-include_once __DIR__ . "/../console/api/signupCodeApi.php";
-include_once __DIR__ . "/../console/common/config.php";
+namespace hutoma;
 
-include "config.php";
+use hutoma\api\userMgmt;
+
+require_once __DIR__ . "/../console/common/globals.php";
+require_once __DIR__ . "/../console/common/utils.php";
+require_once __DIR__ . "/../console/common/config.php";
+require_once __DIR__ . "/../console/common/sessionObject.php";
+require_once __DIR__ . "/../console/api/userMgmt.php";
+include_once __DIR__ . "/../console/api/signupCodeApi.php";
+
 
 function getErrorMessage($message, $alertType = 'alert-warning') {
     $msg ='<div class="alert ' . $alertType . ' text-white flat">';
@@ -35,7 +42,7 @@ if(isset($_POST['submit'])) {
                 && preg_match('/[a-z]/', $password) == 1  // at least a lowercase letter
                 && preg_match('/[A-Z]/', $password) == 1; // at least an uppercase letter
 
-            $api = new \hutoma\api\signupCodeApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
+            $api = new api\signupCodeApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
             if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) {
                 $msg= getErrorMessage('Some fields were left blank.');
             }
@@ -51,7 +58,7 @@ if(isset($_POST['submit'])) {
             elseif($invite_code !== '' && $api->inviteCodeValid($invite_code) !== 200) {
                 $msg  = getErrorMessage('Your promo code is invalid, please try again.');
             } else {
-                $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
+                $createAccount = userMgmt::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
                 if($createAccount === "exists") {
                     $msg = getErrorMessage('This user already exists.');
@@ -69,12 +76,12 @@ if(isset($_POST['submit'])) {
                         setcookie('logSyscuruser', $email);
 
                         // Try to login if successful redirect to homepage using naive register trigger
-                        $login = \hutoma\console::login(
+                        $login = userMgmt::login(
                             $email, 
                             $password, 
                             false, 
                             true, 
-                            \hutoma\console::$config['pages']['home_page'] . '?register=1'
+                            config::getHomePageUrl() . '?register=1'
                         );
 
                         if ($login === false) {
@@ -182,8 +189,7 @@ if(isset($_POST['submit'])) {
     <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body id="body" class="web-body hold-transition register-page">
-    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
-    <?php include_once "./header.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_header.php"; ?>
 
 <section>
     <div class="register-box">
@@ -226,7 +232,6 @@ if(isset($_POST['submit'])) {
                         <label>
                             <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the terms stated in the Subscription <a href="https://www.hutoma.ai/Hutoma_WebPlatformSaaSAgreement.pdf" target="_blank">Agreement.</a>.
                         </label>
-                        </label>
                     </div>
                 </div><!-- /.col -->
 
@@ -244,7 +249,7 @@ if(isset($_POST['submit'])) {
     </div><!-- /.register-box -->
 </section>
 
-<?php include_once "./footer.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_footer.php"; ?>
 <!-- Google Code for sign-up Conversion Page -->
 <script type="text/javascript">
     /* <![CDATA[ */

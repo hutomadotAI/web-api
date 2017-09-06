@@ -1,26 +1,7 @@
 function createWarningIntentAlert(intent_action) {
-    var wHTML = '';
-    wHTML += ('<div class="box flat no-padding no-shadow no-margin">');
-    wHTML += ('<div class="alert alert-dismissable flat alert-warning" id="containerWarningIntentAlert">');
-    wHTML += ('<button type="button" class="close" id="btnRestart" data-dismiss="alert" aria-hidden="true" value="' + intent_action + '">×</button>');
-    wHTML += ('<span id="msgAlertWarningIntentAlert">');
-    wHTML += ('<dd class="text-center">');
-    wHTML += ('Training must be restarted to incorporate your new changes.');
-    wHTML += ('</dd>');
-    wHTML += ('<p></p>');
-    wHTML += ('<dt class="text-center">');
-    wHTML += ('<button class="btn btn-primary btn-md center-block flat" id="restart-button" onclick="restartTraining();"> <b>Restart Training</b></button>');
-    wHTML += ('</dt>');
-
-    wHTML += ('</span>');
-    wHTML += ('</div>');
-    wHTML += ('<div class="overlay dark" id="alert-overlay" style="display: none;">');
-    wHTML += ('<i class="fa fa-refresh fa-spin"></i>');
-    wHTML += ('</div>');
-    wHTML += ('</div>');
-
-    var parent = document.getElementById('intentElementBox');
-    parent.innerHTML = wHTML;
+    $.get('templates/intent_value_restart_training_warning.mustache', function (template) {
+        $('#intentElementBox').html(Mustache.render(template, {}));
+    });
 }
 
 function removeWarningIntentAlert() {
@@ -68,7 +49,7 @@ function showAlertMessage(code, intent_action) {
 function startTraining() {
     var ERROR_MESSAGE = 'Unexpected error occurred. Could not start training.';
     jQuery.ajax({
-        url: './dynamic/trainingStart.php',
+        url: './proxy/trainingStart.php',
         type: 'GET',
         dataType: 'json',
         processData: false,
@@ -92,7 +73,7 @@ function startTraining() {
 function updateTraining() {
     var ERROR_MESSAGE = 'Unexpected error occurred. Could not start training.';
     jQuery.ajax({
-        url: './dynamic/trainingUpdate.php',
+        url: './proxy/trainingUpdate.php',
         type: 'GET',
         dataType: 'json',
         processData: false,
@@ -139,7 +120,7 @@ function restartTraining() {
 
 function botStatusCall() {
     jQuery.ajax({
-        url: './dynamic/trainingStatusAI.php',
+        url: './proxy/trainingStatusAI.php',
         type: 'GET',
         processData: false,
         contentType: "application/json; charset=utf-8",

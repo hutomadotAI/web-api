@@ -144,8 +144,13 @@ function saveIntent() {
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
     msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
-    $.ajax({
-        url: './dynamic/updateIntent.php',
+
+    saveIntentToApi(intentName, expressions, responses, variables, webhook);
+}
+
+function saveIntentToApi(intentName, expressions, responses, variables, webhook) {
+    var request = {
+        url: './proxy/intentProxy.php',
         data: {
             intent_name: intentName,
             intent_expressions: expressions,
@@ -153,31 +158,20 @@ function saveIntent() {
             variables: variables,
             webhook: webhook
         },
-        type: 'POST',
-        success: function (response) {
-            var JSONdata = JSON.parse(response);
-            switch (JSONdata['status']['code']) {
-                case 200:
-                    msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
-                    enableSaving(false);
-                    createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
-                    break;
-                case 400: // fallthrough
-                case 500: // fallthrough
-                default:
-                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-            }
+        verb: 'PUT',
+        onGenericError: function() {
+            msgAlertIntentElement(ALERT.DANGER.value, "There was a problem saving the intent.");
         },
-        complete: function () {
-            $("#btnSaveIntent").prop("disabled", false);
-            document.body.style.cursor = prevCursor;
+        onOK: function() {
+            msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
+            enableSaving(false);
+            createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
         },
-        error: function (xhr, ajaxOptions, thrownError) {
-            //alert(xhr.status + ' ' + thrownError);
-            msgAlertIntentElement(ALERT.DANGER.value, 'Unexpected error occurred. Intent not saved!');
+        onShowError: function(message) {
+            msgAlertIntentElement(message);
         }
-    });
+    };
+    commonAjaxApiRequest(request);
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {

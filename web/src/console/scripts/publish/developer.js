@@ -65,7 +65,7 @@ function requestDevPublish() {
     var jsonString = JSON.stringify(devInfo);
 
     $.ajax({
-        url: './dynamic/updateDeveloper.php',
+        url: './proxy/updateDeveloper.php',
         data: {'developer': jsonString},
         cache: false,
         type: 'POST',

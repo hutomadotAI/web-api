@@ -1,106 +1,69 @@
 <?php
-require "../pages/config.php";
-require_once "../console/api/apiBase.php";
-require_once "../console/api/integrationApi.php";
-require_once "../console/api/botstoreApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
+namespace hutoma;
+
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/integrationApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$integrationApi = new api\integrationApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+
+if (!isset(sessionObject::getCurrentAI()['aiid'])) {
+    utils::redirect('./error.php?err=200');
     exit;
 }
+$aiid = sessionObject::getCurrentAI()['aiid'];
 
-$integrationApi = new \hutoma\api\integrationApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-
-if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
-    \hutoma\console::redirect('./error.php?err=200');
-    exit;
-}
-$aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
-
-$connect_token = $_GET["code"];
-if (isset($connect_token)) {
+if (isset($_GET["code"])) {
+    $connect_token = $_GET["code"];
     $redir = $_COOKIE["facebookRedir"];
     $connect_result = $integrationApi->setConnectToken($aiid, $connect_token, $redir);
     $_SESSION[$_SESSION['navigation_id']]['fb_connect_result'] = $connect_result;
-    \hutoma\console::redirect($redir);
+    utils::redirect($redir);
     exit();
 }
+
+$header_page_title = "Bot Integrations";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Bot Integrations</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="icon" href="dist/img/favicon.ico" type="image/x-icon">
-    
-    <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-    <?php include_once "../console/common/google_tag_manager.php" ?>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
-    <?php include_once "../console/common/google_tag_manager_no_js.php" ?>
-
+<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
-
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
                     <div class="box box-solid box-clean flat no-shadow">
-                    <?php include './dynamic/integrations.facebook.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/integrations.facebook.html.php'; ?>
                     </div>
                 </div>
             </div>
         </section>
     </div>
-
-    <!-- ================ CHAT CONTENT ================= -->
-    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
-    </aside>
-
-    <footer class="main-footer" style="margin-right:350px;">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
-
 <script src="./scripts/validation/validation.js"></script>
-<xscript src="./scripts/entity/entity.js"></xscript>
-<script src="./scripts/chat/chat.js"></script>
-<script src="./scripts/chat/voice.js"></script>
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.v2.js"></script>
 
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "integrations", 1, true, false]);
-    </script>
-</form>
+<?php
+$menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "integrations", 1, true, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
 
 </body>
 </html>
