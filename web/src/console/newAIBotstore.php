@@ -15,7 +15,7 @@ require_once __DIR__ . "/api/botstoreApi.php";
 sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isSessionVariablesAvailable()) {
-    errorRedirect::defaultErrorRedirect();
+    utils::redirect(config::getErrorPageUrl());
     exit;
 }
 
@@ -69,7 +69,7 @@ function isSessionVariablesAvailable()
 }
 
 $header_page_title = "Add Bot Skills";
-$header_additional_entries = "<link rel=\"stylesheet\" href=\"./scripts/switch/switch.css\">";
+$header_additional_entries = "<link rel=\"stylesheet\" href=\"./dist/css/switch.css\">";
 include __DIR__ . "/include/page_head_default.php";
 include __DIR__ . "/include/page_body_default.php";
 include __DIR__ . "/include/page_menu.php";
@@ -111,7 +111,7 @@ include __DIR__ . "/include/page_menu.php";
 
 <script src="./scripts/setting/setting.linkBot.js"></script>
 <script src="./scripts/setting/setting.aiSkill.js"></script>
-
+<script src="./dist/js/mustache.min.js"></script>
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
 
@@ -123,10 +123,6 @@ include __DIR__ . "/include/page_menu_builder.php" ?>
 
     var purchasedBots = <?php echo $purchasedBotsJson ?>;
     var linkedBots = <?php echo $linkedBotsJson ?>;
-
-    var newNode = document.createElement('div');
-    newNode.className = 'row no-margin';
-    newNode.id = 'bot_list';
 
     function searchBots(str) {
         showAddSkills(str, purchasedBots, linkedBots);

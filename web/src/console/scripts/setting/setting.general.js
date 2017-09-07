@@ -1,7 +1,3 @@
-document.getElementById("btnReset").addEventListener("click", resetGeneralInputFields);
-document.getElementById("btnSave").addEventListener("click", updateAI);
-document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLength);
-
 $(function () {
     $("#ai_confidence").ionRangeSlider({
         type: "single",
@@ -101,6 +97,11 @@ function updatePreviousDataLoaded(JSONdata){
 }
 
 $(document).ready(function(){
+
+    document.getElementById("btnReset").addEventListener("click", resetGeneralInputFields);
+    document.getElementById("btnSave").addEventListener("click", updateAI);
+    document.getElementById('ai_description').addEventListener('keydown', checkDescriptionLength);
+
     resetGeneralInputFields();
     $("#ai_name").prop("readonly",true);
 });

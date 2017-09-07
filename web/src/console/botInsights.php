@@ -171,7 +171,7 @@ include __DIR__ . "/include/page_menu.php";
 <script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="./bootstrap/js/bootstrap.min.js"></script>
 <script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="./scripts/external/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
 <script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="scripts/external/fastclick/fastclick.min.js"></script>
 <script src="./dist/js/app.min.js"></script>
