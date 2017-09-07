@@ -287,7 +287,7 @@ public class CentralLogger implements ILogger {
         return new LogMap(map).put("user", user == null ? "" : user);
     }
 
-    private String getStackTraceAsString(StackTraceElement[] stackTrace) {
+    public static String getStackTraceAsString(StackTraceElement[] stackTrace) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement e : stackTrace) {
             sb.append(e.toString()).append("\n");

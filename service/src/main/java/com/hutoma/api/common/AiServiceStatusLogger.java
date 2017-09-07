@@ -25,13 +25,13 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String SERVER = "Server";
     private static final String OPERATION = "Op";
 
-    private static String logUuid(UUID uuid) {
+    public static String logUuid(UUID uuid) {
         return (uuid == null) ? "null" : uuid.toString().substring(0, 7);
     }
 
     public void logStatusUpdate(final String logFrom, final AiStatus status, final boolean actioned) {
         LogParameters logParameters = new LogParameters("UpdateAIStatus") {{
-            this.put(AIENGINE, status.getAiEngine());
+            this.put(AIENGINE, status.getAiEngine().value());
             this.put(AIID, status.getAiid());
             this.put(DEVID, status.getDevId());
             this.put(STATUS, status.getTrainingStatus().value());
@@ -69,7 +69,7 @@ public class AiServiceStatusLogger extends CentralLogger {
             this.put("AiCountDatabase", itemsDatabase);
             this.put("AiCountServer", itemsServerReg);
             this.put(AICOUNTUPDATED, itemsChangedStatus);
-            this.put(AIENGINE, serverType);
+            this.put(AIENGINE, serverType.value());
         }};
         String narrative = String.format("%s server db-sync complete. %s items updated.",
                 logParameters.get(AIENGINE),

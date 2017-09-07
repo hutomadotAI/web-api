@@ -1,5 +1,6 @@
 package com.hutoma.api.controllers;
 
+import com.hutoma.api.common.CentralLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
@@ -240,7 +241,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
                 .put("Url", this.registration.getServerUrl())
                 .put("Type", this.registration.getServerType().value())
                 .put("Server", this.serverIdentity)
-                .put("SessionId", this.serverSessionID);
+                .put("SessionId", this.serverSessionID.toString());
         try {
             JerseyWebTarget target = this.jerseyClient
                     .target(this.registration.getServerUrl())
@@ -276,7 +277,9 @@ public class ServerTracker implements Callable, IServerEndpoint {
             }
         } catch (Exception e) {
             this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %s",
-                    this.serverIdentity, e.toString()), logMap.put("Status", e.toString()));
+                    this.serverIdentity, e.toString()),
+                    logMap.put("Status", e.getMessage())
+                            .put("Stack trace", CentralLogger.getStackTraceAsString(e.getStackTrace())));
 
         }
         return false;

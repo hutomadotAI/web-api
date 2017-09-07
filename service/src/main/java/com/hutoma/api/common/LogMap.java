@@ -1,6 +1,7 @@
 package com.hutoma.api.common;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +34,7 @@ public final class LogMap {
      * @return the LogMap
      */
     public static LogMap map(final String key, final Object value) {
-        return new LogMap((LogMap) null).put(key, value);
+        return new LogMap((LogMap) null).put(key, convertObject(value));
     }
 
     /**
@@ -49,12 +50,29 @@ public final class LogMap {
     }
 
     /**
+     * If the object isn't a basic json serializable type, then return the string representation of it.
+     * This is required for serialization mechanisms that don't handle complex types correctly.
+     * @param obj the original object
+     * @return the object or it's string representation, based on it's type
+     */
+    private static Object convertObject(final Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Map || obj instanceof Integer || obj instanceof Boolean || obj instanceof String
+                || obj instanceof Double || obj instanceof Float || obj instanceof List) {
+            return obj;
+        }
+        return obj.toString();
+    }
+
+    /**
      * Adds a (key, value) pair to the current map.
      * @param key   the key
      * @param value the value
      */
     public void add(final String key, final Object value) {
-        this.map.put(key, value);
+        this.map.put(key, convertObject(value));
     }
 
     /**
