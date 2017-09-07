@@ -91,7 +91,7 @@ function postRender(botcard_data, carousel_category, flow) {
             if (owned) {
                 btnFromBuyToPurchased();
             } else {
-                $('#btnBuyBot').click(purchaseBotFromBotcardDetail());
+                $('#btnBuyBot').click(purchaseBotFromBotcardDetail);
             }
 
             var botstoreLink = './botstore.php';
