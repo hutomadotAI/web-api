@@ -4,30 +4,34 @@
             <div class="carousel-box">
                 <table>
                     <tr>
-            {{#carousel.showHeader}}
-                        <td>
-                            <div class="row no-margin">
-                            <span><div class="carousel-title pull-left">{{carousel.category}}</div></span></div>
+                        {{#carousel.showHeader}}
+                            <td>
+                                <div class="row no-margin">
+                                    <span><div class="carousel-title pull-left">{{carousel.category}}</div></span></div>
                             </td>
-            <td>
-                {{#carousel.showMoreButton}}
-                                <span class="carousel-see-more pull-right">
-                            <a href="botstoreList.php?category={{carousel.safeCategory}}" onclick="triggerCategoryChanged('{{carousel.safeCategory}}')">
-                            <button class="btn-link btn-flat" value="{{carousel.category}}">(show all)</button>
+                            <td>
+                                {{#carousel.showMoreButton}}
+                                    <span class="carousel-see-more pull-right">
+                            <a href="botstoreList.php?category={{carousel.safeCategory}}"
+                               onclick="triggerCategoryChanged('{{carousel.safeCategory}}')">
+                            <button class="btn-link btn-flat show-all"
+                                    value="{{carousel.category}}">(show all)</button>
                             </a></span>
-                {{/carousel.showMoreButton}}
+                                {{/carousel.showMoreButton}}
 
 
-                        </td>
-            {{/carousel.showHeader}}
+                            </td>
+                        {{/carousel.showHeader}}
                     </tr>
                     <tr>
                         <td colspan="2">
                             {{#carousel.showMoreButton}}
-                                <div class="row carousel-row no-margin carousel-overflow" name="bot_list" id="bot_list_{{carousel.categoryHash}}"></div>
+                                <div class="row carousel-row no-margin carousel-overflow" name="bot_list"
+                                     id="bot_list_{{carousel.categoryHash}}"></div>
                             {{/carousel.showMoreButton}}
                             {{^carousel.showMoreButton}}
-                                <div class="row no-margin" name="bot_list" id="bot_list_{{carousel.categoryHash}}"></div>
+                                <div class="row no-margin" name="bot_list"
+                                     id="bot_list_{{carousel.categoryHash}}"></div>
                             {{/carousel.showMoreButton}}
                         </td>
                     </tr>

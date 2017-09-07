@@ -7003,3 +7003,7 @@ ul.pagination li a {
     text-decoration: none;
     color: #72afd2;
 }
+
+.show-all {
+    color: #72afd2;
+}
