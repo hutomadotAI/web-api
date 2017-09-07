@@ -1,23 +1,19 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Andrea
- * Date: 30/09/16
- * Time: 13:21
- */
-require '../../pages/config.php';
-require_once "../api/apiBase.php";
-require_once "../api/aiApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-     exit;
-}
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
-    \hutoma\console::redirect('./error.php?err=110');
+    utils::redirect(config::getErrorPageUrl() . './error.php?err=110');
     exit;
 }
-$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $response = $aiApi->updateAI(
     $_POST['aiid'],
     $_POST['description'],
