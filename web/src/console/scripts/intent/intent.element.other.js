@@ -377,7 +377,7 @@ function createNewParameterRow(entity, n_prompts, prompts, size, value, required
         if (size > 0) {
             view.variable.promptsList = encodeStringArrayAsCSString(prompts);
         }
-        if (required === 0) {
+        if (required) {
             view.variable.required = true;
         }
 
