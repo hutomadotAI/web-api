@@ -27,7 +27,6 @@ if (isset($response_getAIs) && (array_key_exists("ai_list", $response_getAIs))) 
     $aiList = $response_getAIs['ai_list'];
 }
 $aiListJson = json_encode($aiList);
-unset($aiList);
 unset($response_getAIs);
 unset($aiApi);
 
@@ -43,7 +42,7 @@ include __DIR__ . "/include/page_menu.php";
         <section class="content">
             <?php
 
-            if (!isset($aiListJson)) {
+            if (empty($aiList)) {
                 include __DIR__ . '/dynamic/home.content.first.html.php';
                 include __DIR__ . '/dynamic/home.content.start.html.php';
             }
