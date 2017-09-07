@@ -1,10 +1,5 @@
 package com.hutoma.api.common;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +27,6 @@ public class Config {
     public Config(ILogger logger) {
         this.logger = logger;
         this.propertyLoaded = new HashSet<>();
-        loadPropertiesFile();
     }
 
     /***
@@ -51,21 +45,6 @@ public class Config {
             }
         }
         return value;
-    }
-
-    public void loadPropertiesFile() {
-        this.propertyLoaded.clear();
-        Path configPath = Paths.get(System.getProperty("user.home"), "/ai/v1.config.properties");
-
-        try (InputStream fileInputStream = new FileInputStream(configPath.toFile())) {
-            Properties loadProperties = new Properties();
-            loadProperties.load(fileInputStream);
-            this.properties = loadProperties;
-            this.logger.logInfo(LOGFROM, "loaded " + this.properties.size() + " properties file from "
-                    + configPath.toString());
-        } catch (IOException e) {
-            this.logger.logWarning(LOGFROM, "failed to load valid properties file: " + e.toString());
-        }
     }
 
     public String getEncodingKey() {
@@ -155,10 +134,6 @@ public class Config {
         return stringList.stream()
                 .map(UUID::fromString)
                 .collect(Collectors.toList());
-    }
-
-    public int getLoggingUploadCadency() {
-        return Integer.parseInt(getConfigFromProperties("logging_cadency", "5000"));
     }
 
     public int getMaxLinkedBotsPerAi() {
@@ -318,8 +293,12 @@ public class Config {
         return getConfigFromProperties("bot_icon_path", "/boticon");
     }
 
-    public String getElasticSearchLoggingUrl() {
-        return getConfigFromProperties("logging_es_url", "");
+    public String getFluentLoggingHost() {
+        return getConfigFromProperties("logging_fluent_host", "log-fluent");
+    }
+
+    public int getFluentLoggingPort() {
+        return Integer.parseInt(getConfigFromProperties("logging_fluent_port", "24224"));
     }
 
     public String getElasticSearchAnalyticsUrl() {

@@ -1,27 +1,18 @@
 package com.hutoma.api.common;
 
-import com.google.gson.JsonParseException;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.glassfish.jersey.client.JerseyClient;
+import org.fluentd.logger.FluentLogger;
+import org.fluentd.logger.sender.Reconnector;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.core.Response;
 
 /**
  * Central logger.
@@ -30,7 +21,9 @@ import javax.ws.rs.core.Response;
 @Singleton
 public class CentralLogger implements ILogger {
 
-    private static final int LOGGING_QUEUE_LENGTH = 2000;
+    private static final int TIMEOUT = 500; // 500ms
+    private static final int BUFFER_SIZE = 1024 * 1024;
+    private static final int WAIT_MAX_MILLIS = 5 * 60 * 1000; // Max wait is 5 minute
 
     private static final Map<EventType, Level> mapEventToLog4j = new HashMap<EventType, Level>() {{
         put(EventType.DEBUG, Level.DEBUG);
@@ -43,32 +36,68 @@ public class CentralLogger implements ILogger {
     }};
     private static final Logger LOGGER = LogManager.getRootLogger();
 
-    protected final JsonSerializer serializer;
-    private final JerseyClient jerseyClient;
-    private final ArrayBlockingQueue<LogEvent> logQueue = new ArrayBlockingQueue<>(LOGGING_QUEUE_LENGTH);
-    private Timer timer;
-    private String esLoggingUrl;
+    private FluentLogger fluentLogger;
+    private static Config config;
 
-    @Inject
-    public CentralLogger(final JerseyClient jerseyClient, final JsonSerializer serializer) {
-        this.jerseyClient = jerseyClient;
-        this.serializer = serializer;
-    }
 
-    private static LogEvent generateErrorEvent(final String message, final LogEvent original) {
-        LogEvent err = new LogEvent();
-        err.timestamp = System.currentTimeMillis();
-        err.dateTime = new DateTime(DateTimeZone.UTC);
-        err.type = EventType.ERROR.name();
-        err.message = message;
-        err.tag = "centrallogger";
-        if (original != null) {
-            err.params.put("orig date", original.dateTime);
-            err.params.put("orig type", original.type);
-            err.params.put("orig tag", original.tag);
-            err.params.put("orig message", original.message);
+    /**
+     * Implementation of an exponential reconnector so we can control the timeouts.
+     */
+    protected static class ExponentialReconnector implements Reconnector {
+
+        private static final double WAIT_INCR_RATE = 1.5;
+        private static final int MAX_ERROR_COUNT = 100;
+
+        private int waitMaxCount;
+        private final int initialTimeout;
+        private final int maxWaitTime;
+        private final LinkedList<Long> errorHistory;
+
+        ExponentialReconnector(final int initialTimeout, final int maxWaitTime) {
+            this.initialTimeout = initialTimeout;
+            this.maxWaitTime = maxWaitTime;
+            this.waitMaxCount = getWaitMaxCount();
+            this.errorHistory = new LinkedList<>();
         }
-        return err;
+
+        private int getWaitMaxCount() {
+            double r = (double) this.maxWaitTime / (double) this.initialTimeout;
+            for (int j = 1; j <= MAX_ERROR_COUNT; j++) {
+                if (r < WAIT_INCR_RATE) {
+                    return j + 1;
+                }
+                r = r / WAIT_INCR_RATE;
+            }
+            return MAX_ERROR_COUNT;
+        }
+
+        public void addErrorHistory(long timestamp) {
+            System.out.println(String.format("[%d] Could not connect to FluentD agent", timestamp));
+            errorHistory.addLast(timestamp);
+            if (errorHistory.size() > waitMaxCount) {
+                errorHistory.removeFirst();
+            }
+        }
+
+        public boolean isErrorHistoryEmpty() {
+            return errorHistory.isEmpty();
+        }
+
+        public void clearErrorHistory() {
+            errorHistory.clear();
+        }
+
+        public boolean enableReconnection(long timestamp) {
+            int size = errorHistory.size();
+            if (size == 0) {
+                return true;
+            }
+
+            double suppressMillis = (size < waitMaxCount)
+                    ? this.initialTimeout * Math.pow(WAIT_INCR_RATE, size - 1) : maxWaitTime;
+
+            return (timestamp - errorHistory.getLast()) >= suppressMillis;
+        }
     }
 
     /**
@@ -115,6 +144,7 @@ public class CentralLogger implements ILogger {
             }
             sb.append("]");
         }
+
         logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
     }
 
@@ -151,9 +181,24 @@ public class CentralLogger implements ILogger {
     }
 
     public void initialize(final Config config) {
-        this.startLoggingScheduler(
-                config.getElasticSearchLoggingUrl(),
-                config.getLoggingUploadCadency());
+        if (CentralLogger.config != null) {
+            // Multiple initialization
+            return;
+        }
+        CentralLogger.config = config;
+    }
+
+    private FluentLogger getFluentLogger() {
+        if (this.fluentLogger == null) {
+            this.fluentLogger = FluentLogger.getLogger(
+                    this.getAppId(),
+                    config.getFluentLoggingHost(),
+                    config.getFluentLoggingPort(),
+                    TIMEOUT,
+                    BUFFER_SIZE,
+                    new ExponentialReconnector(TIMEOUT, WAIT_MAX_MILLIS));
+        }
+        return this.fluentLogger;
     }
 
     /**
@@ -238,63 +283,8 @@ public class CentralLogger implements ILogger {
         this.logOutput(EventType.WARNING, logFrom, event, addUserToMap(user, properties));
     }
 
-    public void shutdown() {
-        this.timer.cancel();
-    }
-
     private LogMap addUserToMap(final String user, final LogMap map) {
         return new LogMap(map).put("user", user == null ? "" : user);
-    }
-
-    private void dumpToStorage() {
-        if (this.logQueue.isEmpty() || this.esLoggingUrl == null) {
-            return;
-        }
-
-        List<LogEvent> events;
-        synchronized (this) {
-            events = this.logQueue.stream().collect(Collectors.toList());
-            this.logQueue.clear();
-        }
-
-        Response response = null;
-        try {
-            List<String> docs = new ArrayList<>();
-            for (LogEvent event : events) {
-                String doc = this.serializer.serialize(event);
-                if (doc == null || doc.isEmpty()) {
-                    docs.add(this.serializer.serialize(generateErrorEvent("Error serialising logging event", event)));
-                } else {
-                    docs.add(doc);
-                }
-            }
-            
-            if (this.esLoggingUrl != null && !this.esLoggingUrl.isEmpty()) {
-                ElasticSearchClient esClient = new ElasticSearchClient(this.jerseyClient, this.esLoggingUrl);
-                response = esClient.uploadDocumentBulk(this.getAppId().toLowerCase(), docs);
-                response.bufferEntity();
-                if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                    LOGGER.error(String.format("Failed to upload logs to the ES logging server! - %s - %s",
-                            response.getStatus(), response.readEntity(String.class)));
-                } else {
-                    ElasticSearchClient.BulkResponse br =
-                            (ElasticSearchClient.BulkResponse) this.serializer.deserialize(
-                                    response.readEntity(String.class),
-                                    ElasticSearchClient.BulkResponse.class);
-                    List<String> errors = br.getErrors(events.size());
-                    if (!errors.isEmpty()) {
-                        LOGGER.error(String.format("There were errors uploading the logs: %s ",
-                                String.join("; ", errors)));
-                    }
-                }
-            }
-        } catch (JsonParseException ex) {
-            LOGGER.error(ex.getMessage());
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
     }
 
     private String getStackTraceAsString(StackTraceElement[] stackTrace) {
@@ -316,22 +306,6 @@ public class CentralLogger implements ILogger {
         PERF
     }
 
-    private static class LogEvent {
-        private long timestamp;
-        private DateTime dateTime;
-        private String type;
-        private String tag;
-        private String message;
-        private Map<String, Object> params;
-
-        @Override
-        public String toString() {
-            SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            String date = df.format(this.dateTime);
-            return String.format("%s HU:API %s [%s] %s", date, this.type, this.tag, this.message);
-        }
-    }
-
     public static class LogParameters extends HashMap<String, Object> {
 
         public LogParameters(String action) {
@@ -345,45 +319,41 @@ public class CentralLogger implements ILogger {
 
     }
 
-    protected void startLoggingScheduler(final String esLoggingUrl, final int loggingCadence) {
-        if (this.timer != null) {
-            this.timer.cancel();
-        }
-        this.timer = new Timer();
-        this.timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                CentralLogger.this.dumpToStorage();
-            }
-        }, loggingCadence, loggingCadence);
-        this.esLoggingUrl = esLoggingUrl;
-    }
-
     protected String getAppId() {
         return "API-applog-v1";
     }
 
-    void logOutput(EventType level, String fromLabel, String logComment) {
+    void logOutput(final EventType level, final String fromLabel, final String logComment) {
         this.logOutput(level, fromLabel, logComment, null);
     }
 
-    void logOutput(EventType level, String fromLabel, String logComment, LogMap params) {
-        LogEvent event = new LogEvent();
-        event.type = level.name();
-        event.timestamp = System.currentTimeMillis();
-        event.dateTime = new DateTime(DateTimeZone.UTC);
-        event.tag = (fromLabel == null || fromLabel.isEmpty()) ? "none" : fromLabel;
-        event.message = logComment == null ? "" : logComment;
-        event.params = params == null ? null : params.get();
+    private void logOutput(final EventType level, final String fromLabel, final String logComment,
+                           final LogMap params) {
 
-        // If the queue is full then it means that we can't contact the logging service, or that we're
-        // logging too many operations within a session
-        if (this.logQueue.size() == LOGGING_QUEUE_LENGTH) {
-            LOGGER.error("Logging queue full!!! Removing oldest entry.");
-            this.logQueue.remove();
+        long timestamp = System.currentTimeMillis();
+        DateTime date = new DateTime(timestamp, DateTimeZone.UTC);
+        String message = logComment == null ? "" : logComment;
+        String tag = (fromLabel == null || fromLabel.isEmpty()) ? "none" : fromLabel;
+        Map<String, Object> map = new LinkedHashMap<String, Object>() {{
+            put("type", level.name());
+            put("dateTime", date);
+            put("message", message);
+            put("params", params == null ? null : params.get());
+        }};
+
+        LOGGER.log(mapEventToLog4j.get(level), String.format("[%s] %s", tag, message));
+
+        FluentLogger logger = getFluentLogger();
+        boolean wasLoggedToFluent = false;
+        if (logger != null) {
+            wasLoggedToFluent = getFluentLogger().log(
+                    tag,
+                    map,
+                    timestamp);
         }
 
-        this.logQueue.add(event);
-        LOGGER.log(mapEventToLog4j.get(level), String.format("[%s] %s", event.tag, event.message));
+        if (!wasLoggedToFluent) {
+            LOGGER.log(Level.ERROR, "Could not log to fluent!");
+        }
     }
 }

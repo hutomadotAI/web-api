@@ -57,7 +57,7 @@ public class QueueProcessor extends TimerTask {
     protected BackendServerType serverType;
     protected ControllerBase controller;
     // server rotation
-    AtomicInteger roundRobinIndex;
+    private AtomicInteger roundRobinIndex;
     private String logFrom;
     // only used for logging
     private long lastRun = 0;
@@ -128,7 +128,7 @@ public class QueueProcessor extends TimerTask {
      * If the queue processor was sleeping (long intervals)
      * then tell it to run soon
      */
-    public void kickQueueProcessor() {
+    void kickQueueProcessor() {
 
         long timeNow = this.tools.getTimestamp();
         this.lastKicked = timeNow;
@@ -163,7 +163,7 @@ public class QueueProcessor extends TimerTask {
         if (changes) {
             // log the new state
             LogMap logMap = LogMap.map("Op", "controllerstate")
-                    .put("Type", this.serverType)
+                    .put("Type", this.serverType.value())
                     .put("ServerCount", serverCount)
                     .put("TrainingCapacity", totalTrainingCapacity)
                     .put("TrainingSlotsAvailable", availableTrainingSlots)

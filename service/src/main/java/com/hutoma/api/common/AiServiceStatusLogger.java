@@ -5,18 +5,12 @@ import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 
-import org.glassfish.jersey.client.JerseyClient;
-
 import java.util.UUID;
-import javax.inject.Inject;
 
 /**
  * AI Service Status Logger.
  */
 public class AiServiceStatusLogger extends CentralLogger {
-
-    // Log chat iterations every 10 seconds
-    private static final int SERVICESTATUS_LOGGING_CADENCE = 8000;
 
     private static final String APP_ID = "API-servicesStatus-v1";
 
@@ -31,14 +25,7 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String SERVER = "Server";
     private static final String OPERATION = "Op";
 
-    @Inject
-    public AiServiceStatusLogger(final JerseyClient jerseyClient, final JsonSerializer serializer,
-                                 final Config config) {
-        super(jerseyClient, serializer);
-        this.startLoggingScheduler(config.getElasticSearchLoggingUrl(), SERVICESTATUS_LOGGING_CADENCE);
-    }
-
-    public static String logUuid(UUID uuid) {
+    private static String logUuid(UUID uuid) {
         return (uuid == null) ? "null" : uuid.toString().substring(0, 7);
     }
 

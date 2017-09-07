@@ -8,6 +8,7 @@ import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 
+import org.fluentd.logger.FluentLogger;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.model.Invocable;
 import org.glassfish.jersey.server.monitoring.ApplicationEvent;
@@ -24,8 +25,7 @@ public class ServerInit implements ApplicationEventListener {
 
     private static final String LOGFROM = "serverinit";
     @Inject
-    ServiceLocator serviceLocator;
-    private Config config;
+    private ServiceLocator serviceLocator;
     private ILogger logger;
 
     /**
@@ -38,13 +38,13 @@ public class ServerInit implements ApplicationEventListener {
             case INITIALIZATION_FINISHED:
                 initialise(applicationEvent);
                 break;
-            case RELOAD_FINISHED:
-                if (null != this.config) {
-                    this.config.loadPropertiesFile();
-                }
-                break;
-            case INITIALIZATION_START:
             case DESTROY_FINISHED:
+                FluentLogger.flushAll();
+                FluentLogger.closeAll();
+                break;
+            case RELOAD_FINISHED:
+            case INITIALIZATION_START:
+
             default:
                 break;
         }
@@ -89,10 +89,10 @@ public class ServerInit implements ApplicationEventListener {
 
     private void initialise(final ApplicationEvent applicationEvent) {
         this.logger = this.serviceLocator.getService(ILogger.class);
-        this.config = this.serviceLocator.getService(Config.class);
+        Config config = this.serviceLocator.getService(Config.class);
         try {
-            this.config.validateConfigPresent();
-            this.logger.initialize(this.config);
+            config.validateConfigPresent();
+            this.logger.initialize(config);
             DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
             connectionPool.borrowConnection().close();
             this.logger.logInfo(LOGFROM, "initialisation finished");

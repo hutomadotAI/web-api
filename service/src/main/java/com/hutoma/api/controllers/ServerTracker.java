@@ -36,10 +36,10 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JerseyClient jerseyClient;
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
-    protected AtomicBoolean runFlag;
+    private AtomicBoolean runFlag;
     protected UUID serverSessionID;
     protected AtomicBoolean endpointVerified;
-    private ServerRegistration registration;
+    protected ServerRegistration registration;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
     private String serverIdentity = "(uninitialised)";
