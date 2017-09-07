@@ -2,6 +2,8 @@
 
 namespace hutoma;
 
+use DateTime;
+
 require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/utils.php";
@@ -96,7 +98,7 @@ if ($fb_not_connected) {
     </div>
     <?php
 } else {
-    $fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
+$fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
 ?>
 <div class="box-header with-border ">
     <div class="alert alert-base flat no-shadow">
@@ -168,7 +170,7 @@ if ($fb_not_connected) {
                         </div>
                         <input type="text" class="form-control flat no-shadow"
                                id="fb_page_greeting"
-                               value="<?php echo $page_greeting; ?>">
+                               value="<?php echo htmlentities($page_greeting); ?>">
                     </div>
                 </div>
             </div>
@@ -185,7 +187,7 @@ if ($fb_not_connected) {
                         </div>
                         <input type="text" class="form-control flat no-shadow"
                                id="fb_get_started_payload"
-                               value="<?php echo $get_started_payload; ?>">
+                               value="<?php echo htmlentities($get_started_payload); ?>">
                     </div>
                 </div>
             </div>
