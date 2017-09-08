@@ -264,7 +264,7 @@ function commonAjaxApiRequest(request) {
                         request.onOK();
                         return request;
                     case 404:
-                        if (typeof request.onNotFound() !== 'undefined') {
+                        if (request.hasOwnProperty('onNotFound') && typeof request.onNotFound() !== 'undefined') {
                             request.onNotFound();
                         }
                         break;
@@ -272,7 +272,7 @@ function commonAjaxApiRequest(request) {
                         request.onGenericError();
                         break;
                     default:
-                        if (typeof request.onShowError() !== 'undefined') {
+                        if (request.hasOwnProperty('onShowError') && typeof request.onShowError() !== 'undefined') {
                             request.onShowError(parsedResponse['status']['info']);
                         } else {
                             request.onGenericError();
@@ -282,7 +282,7 @@ function commonAjaxApiRequest(request) {
             }
         },
         complete: function () {
-            if (typeof request.onComplete() !== 'undefined') {
+            if (request.hasOwnProperty('onComplete') && typeof request.onComplete() !== 'undefined') {
                 request.onComplete();
             }
         },

@@ -1,6 +1,6 @@
 function createWarningIntentAlert(intent_action) {
     $.get('templates/intent_value_restart_training_warning.mustache', function (template) {
-        $('#intentElementBox').html(Mustache.render(template, {}));
+        $('#intentElementBox').html(Mustache.render(template, {'intent_action':intent_action}));
     });
 }
 
