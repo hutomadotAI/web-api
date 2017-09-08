@@ -45,7 +45,7 @@ public final class LogMap {
      */
     public LogMap put(final String key, final Object value) {
         LogMap newMap = new LogMap(this);
-        newMap.get().put(key, value);
+        newMap.get().put(key, convertObject(value));
         return newMap;
     }
 
