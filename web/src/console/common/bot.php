@@ -61,8 +61,9 @@ class bot
         $theBot->setSample($botDetails['sample']);
         $theBot->setVersion($botDetails['version']);
         $theBot->setVideoLink($botDetails['videoLink']);
-        $theBot->setIconFile($botDetails['botIcon']);
-        $theBot->setUpdate(isset($botDetails['lastUpdate']) ? date("Y-m-d H:i:s", strtotime($botDetails['lastUpdate'])) : "");
+        $theBot->setIconFile(array_key_exists('botIcon', $botDetails) ? $botDetails['botIcon'] : null);
+        $theBot->setUpdate(array_key_exists('lastUpdate', $botDetails)
+            ? date("Y-m-d H:i:s", strtotime($botDetails['lastUpdate'])) : "");
         return $theBot;
     }
 

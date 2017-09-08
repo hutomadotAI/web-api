@@ -33,11 +33,10 @@ function displayBotCardDetail(botstoreItem, origin, carousel_category, flow) {
     };
 
     botcard_data['get_bot_icon_url'] = function () {
-        var message = this.metadata.botIcon.trim();
-        return (message.length === 0) ?
+        return (typeof this.metadata.botIcon === 'undefined' || this.metadata.botIcon.length === 0) ?
             BOT_ICON.DEFAULT_IMAGE.value :
-            BOT_ICON.PATH.value + message;
-    }
+            BOT_ICON.PATH.value + this.metadata.botIcon;
+    };
 
     botcard_data.metadata['last_update_display'] = function () {
         var last_update = this.metadata.lastUpdate;
@@ -52,7 +51,7 @@ function displayBotCardDetail(botstoreItem, origin, carousel_category, flow) {
         var url = this.metadata.videoLink;
         var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         var match = url.match(regExp);
-        return (match && match[2].length == 11) ?
+        return (match && match[2].length === 11) ?
             match[2] : '';
     };
 
