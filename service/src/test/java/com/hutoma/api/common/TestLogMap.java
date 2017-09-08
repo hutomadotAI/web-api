@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by pedrotei on 23/03/17.
@@ -62,5 +63,56 @@ public class TestLogMap {
         logMap.add("e", 0);
         Assert.assertEquals(0, logMap.put("f", "g").get().get("e"));
         Assert.assertFalse(logMap.get().containsKey("f"));
+    }
+
+    @Test
+    public void testConvertValue_map() {
+        // An UUID is converted to string
+        LogMap logMap = LogMap.map("a", UUID.randomUUID());
+        Assert.assertTrue(logMap.get().get("a") instanceof String);
+        // But an integer is still an integer
+        logMap = LogMap.map("b", 1);
+        Assert.assertTrue(logMap.get().get("b") instanceof Integer);
+    }
+
+    @Test
+    public void testConvertValue_put() {
+        LogMap logMap = new LogMap((Map<String, Object>) null);
+        // An UUID is converted to string
+        Assert.assertTrue(logMap.put("a", UUID.randomUUID()).get().get("a") instanceof String);
+        // But an integer is still an integer
+        Assert.assertTrue(logMap.put("b", 1).get().get("b") instanceof Integer);
+    }
+
+    @Test
+    public void testConvertValue_add() {
+        LogMap logMap = new LogMap((Map<String, Object>) null);
+        // An UUID is converted to string
+        logMap.add("a", UUID.randomUUID());
+        Assert.assertTrue(logMap.get().get("a") instanceof String);
+        // But an integer is still an integer
+        logMap.add("b", 1);
+        Assert.assertTrue(logMap.put("b", 1).get().get("b") instanceof Integer);
+    }
+
+    @Test
+    public void testConvertValue_mapCtor() {
+        Map<String, Object> map = new HashMap<String, Object>() {{
+            put("a", UUID.randomUUID());
+            put("b", 1);
+            put("c", new HashMap<String, Object>() {{
+                put("c_a", UUID.randomUUID());
+                put("c_b", 1);
+            }});
+        }};
+        LogMap logMap = new LogMap(map);
+        // An UUID is converted to string
+        Assert.assertTrue(logMap.get().get("a") instanceof String);
+        // But an integer is still an integer
+        Assert.assertTrue(logMap.put("b", 1).get().get("b") instanceof Integer);
+        // Now the submap needs to have been converted as well
+        Map<String, Object> subMap = (Map<String, Object>) logMap.get().get("c");
+        Assert.assertTrue(subMap.get("c_a") instanceof String);
+        Assert.assertTrue(subMap.get("c_b") instanceof Integer);
     }
 }

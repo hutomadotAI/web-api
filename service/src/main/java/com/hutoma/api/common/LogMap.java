@@ -24,7 +24,23 @@ public final class LogMap {
      * @param otherMap the map to copy from
      */
     public LogMap(final Map<String, Object> otherMap) {
-        this.map = otherMap == null ? new LinkedHashMap<>() : new LinkedHashMap<>(otherMap);
+
+        this.map = otherMap == null ? new LinkedHashMap<>() : convertMapValues(otherMap);
+    }
+
+    private static LinkedHashMap<String, Object> convertMapValues(final Map<String, Object> otherMap) {
+        if (otherMap == null) {
+            return null;
+        }
+        LinkedHashMap<String, Object> convertedMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : otherMap.entrySet()) {
+            if (entry.getValue() instanceof Map) {
+                convertedMap.put(entry.getKey(), convertMapValues((Map<String, Object>) entry.getValue()));
+            } else {
+                convertedMap.put(entry.getKey(), convertObject(entry.getValue()));
+            }
+        }
+        return convertedMap;
     }
 
     /**
