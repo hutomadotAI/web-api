@@ -109,9 +109,11 @@ public class ServerConnector {
     }
 
     void executeAndWait(final HashMap<String, Callable<InvocationResult>> callables) throws AiServicesException {
+
+        HashMap<String, Future<InvocationResult>> futures = null;
         try {
             // start the calls async
-            HashMap<String, Future<InvocationResult>> futures = execute(callables);
+            futures = execute(callables);
 
             List<InvocationResult> errors = new ArrayList<>();
             for (String endpoint : callables.keySet()) {
@@ -141,7 +143,23 @@ public class ServerConnector {
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AiServicesException(e.toString());
+        } finally {
+            if (futures != null) {
+                futures.values().forEach((future) -> {
+                    try {
+                        // attempt to close the connection
+                        Response response = future.isDone() ?
+                                future.get().getResponse() :
+                                future.get(0, TimeUnit.MILLISECONDS).getResponse();
+                        response.close();
+                    } catch (Exception e) {
+                        this.logger.logError(LOGFROM, String.format("Failed to close http connection after use",
+                                e.toString()));
+                    }
+                });
+            }
         }
         this.logger.logDebug(LOGFROM, String.format("All %d calls executed successfully", callables.size()));
     }
+
 }
