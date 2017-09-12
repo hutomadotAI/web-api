@@ -90,6 +90,11 @@ public class QueueProcessor extends TimerTask {
 
     @Override
     public void run() {
+
+        // TEST TEST dont do this ever
+        Runtime r = Runtime.getRuntime();
+        r.gc();
+
         // check the run flag
         if (this.runQueueProcessor.get()) {
             try {

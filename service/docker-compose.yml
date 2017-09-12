@@ -7,6 +7,8 @@ services:
         dockerfile: Dockerfile
       ports: 
       - "11080:8080"
+      - "5005:5005"
+      - "7012:7012"
       environment:
       - API_ENCODING_KEY=${API_ENCODING_KEY}
       - API_MAX_UPLOAD_SIZE_KB=512
@@ -23,6 +25,8 @@ services:
       - API_LOGGING_URL=http://log-svc:8080/log
       - API_LOGGING_CADENCY=5000
       - API_AI_AIML_BOT_AIIDS=e1bb8226-e8ce-467a-8305-bc2fcb89dd7f,491091b1-5458-4d87-b7e9-0ccf3002970c,9a7a3376-e872-463e-aaa5-9f7e0e8c3380,873e61b9-9b75-449b-9532-821fcea6f864
+      - JAVA_OPTS=-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.rmi.port=7012 -Dcom.sun.management.jmxremote.port=7012 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.1.70
+      - XJAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -Dhttp.proxyHost=192.168.1.70 -Dhttp.proxyPort=4444 -Dhttps.proxyHost=192.168.1.70 -Dhttps.proxyPort=4444 -Djavax.net.ssl.trustStore=/usr/local/tomcat/webapps/FiddlerKeystore -Djavax.net.ssl.trustStorePassword=password
 networks:
   default:
     external:
