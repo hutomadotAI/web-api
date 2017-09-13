@@ -344,13 +344,13 @@ public class FacebookConnector {
     private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod,
                            final Entity entity, final int readTimeout) throws FacebookException {
 
+        Response response = null;
         try {
             JerseyInvocation.Builder builder = target
                     .property(CONNECT_TIMEOUT, this.config.getFacebookGraphAPITimeout())
                     .property(READ_TIMEOUT, readTimeout)
                     .request();
 
-            Response response;
             switch (requestmethod) {
                 case POST:
                     response = builder.post(entity);
@@ -391,6 +391,10 @@ public class FacebookConnector {
             throw fe;
         } catch (Exception e) {
             throw new FacebookException(e.toString());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
         }
     }
 
