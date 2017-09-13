@@ -254,7 +254,11 @@ function commonAjaxApiRequest(request) {
         type: request.verb,
         data: request.data,
         success: function (response) {
-            var parsedResponse = JSON.parse(response);
+            var parsedResponse = null;
+            try {
+                parsedResponse = JSON.parse(response);
+            } catch(error) {
+            }
             if (parsedResponse === null) {
                 request.onGenericError();
             } else {
