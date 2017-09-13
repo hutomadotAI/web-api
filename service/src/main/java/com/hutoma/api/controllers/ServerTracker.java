@@ -37,10 +37,10 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JerseyClient jerseyClient;
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
-    private AtomicBoolean runFlag;
     protected UUID serverSessionID;
     protected AtomicBoolean endpointVerified;
     protected ServerRegistration registration;
+    private AtomicBoolean runFlag;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
     private String serverIdentity = "(uninitialised)";
@@ -242,12 +242,13 @@ public class ServerTracker implements Callable, IServerEndpoint {
                 .put("Type", this.registration.getServerType().value())
                 .put("Server", this.serverIdentity)
                 .put("SessionId", this.serverSessionID.toString());
+        Response response = null;
         try {
             JerseyWebTarget target = this.jerseyClient
                     .target(this.registration.getServerUrl())
                     .path("heartbeat");
 
-            Response response = target
+            response = target
                     .property(CONNECT_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
                     .request()
                     .post(Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
@@ -281,6 +282,10 @@ public class ServerTracker implements Callable, IServerEndpoint {
                     logMap.put("Status", e.getMessage())
                             .put("Stack trace", CentralLogger.getStackTraceAsString(e.getStackTrace())));
 
+        } finally {
+            if (response != null) {
+                response.close();
+            }
         }
         return false;
     }
