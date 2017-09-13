@@ -228,7 +228,7 @@ public class Config {
      * @return
      */
     public long getProcessQueueIntervalDefault() {
-        return 2 * 1000;
+        return 100;
     }
 
     /***
@@ -238,7 +238,7 @@ public class Config {
      * @return
      */
     public long getProcessQueueIntervalShort() {
-        return 1000;
+        return 100;
     }
 
     /***
@@ -247,7 +247,7 @@ public class Config {
      * @return
      */
     public long getProcessQueueIntervalLong() {
-        return 10 * 1000;
+        return 100;
     }
 
     /***
@@ -255,7 +255,7 @@ public class Config {
      * (in seconds)
      */
     public int getProcessQueueScheduleFutureCommand() {
-        return 30;
+        return 1;
     }
 
     /***
