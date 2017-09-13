@@ -88,48 +88,52 @@ public abstract class RequestBase {
 
         Map<UUID, ChatResult> map = new HashMap<>();
 
-        // get and wait for all the calls to complete
-        for (RequestInProgress future : futures) {
-            final InvocationResult result = waitForResult(future, timeoutMs);
+        try {
+            // get and wait for all the calls to complete
+            for (RequestInProgress future : futures) {
+                final InvocationResult result = waitForResult(future, timeoutMs);
 
-            if (result != null) {
-                Response.StatusType statusInfo = result.getResponse().getStatusInfo();
-                switch (statusInfo.getStatusCode()) {
-                    case HttpURLConnection.HTTP_OK:
-                        break;
-                    case HttpURLConnection.HTTP_NOT_FOUND:
-                        this.logger.logError(this.getLogFrom(), "AI not found: " + result.getAiid());
-                        throw new AiNotFoundException("AI was not found");
-                    default:
-                        // generate error text from the HTTP result only
-                        // (ignores response body for now)
-                        String errorText = String.format("http error: %d %s)",
-                                statusInfo.getStatusCode(),
-                                statusInfo.getReasonPhrase());
-                        this.logger.logError(this.getLogFrom(), errorText);
-                        throw new AiControllerException(errorText);
-                }
+                if (result != null) {
+                    Response.StatusType statusInfo = result.getResponse().getStatusInfo();
+                    switch (statusInfo.getStatusCode()) {
+                        case HttpURLConnection.HTTP_OK:
+                            break;
+                        case HttpURLConnection.HTTP_NOT_FOUND:
+                            this.logger.logError(this.getLogFrom(), "AI not found: " + result.getAiid());
+                            throw new AiNotFoundException("AI was not found");
+                        default:
+                            // generate error text from the HTTP result only
+                            // (ignores response body for now)
+                            String errorText = String.format("http error: %d %s)",
+                                    statusInfo.getStatusCode(),
+                                    statusInfo.getReasonPhrase());
+                            this.logger.logError(this.getLogFrom(), errorText);
+                            throw new AiControllerException(errorText);
+                    }
 
-                if (statusInfo.getStatusCode() == HttpURLConnection.HTTP_OK) {
-                    // otherwise attempt to deserialize the chat result
-                    try {
-                        String content = result.getResponse().readEntity(String.class);
-                        this.logger.logDebug("requestbase", "chat response from " + result.getEndpoint());
-                        ChatResult chatResult = new ChatResult((ChatResult)
-                                this.serializer.deserialize(content, ChatResult.class));
-                        UUID aiid = result.getAiid();
-                        chatResult.setAiid(aiid);
-                        chatResult.setElapsedTime(result.getDurationMs() / 1000.0);
-                        map.put(aiid, chatResult);
-                    } catch (JsonParseException jpe) {
-                        this.logger.logException(this.getLogFrom(), jpe);
-                        throw new AiControllerException(jpe.getMessage());
+                    if (statusInfo.getStatusCode() == HttpURLConnection.HTTP_OK) {
+                        // otherwise attempt to deserialize the chat result
+                        try {
+                            String content = result.getResponse().readEntity(String.class);
+                            this.logger.logDebug("requestbase", "chat response from " + result.getEndpoint());
+                            ChatResult chatResult = new ChatResult((ChatResult)
+                                    this.serializer.deserialize(content, ChatResult.class));
+                            UUID aiid = result.getAiid();
+                            chatResult.setAiid(aiid);
+                            chatResult.setElapsedTime(result.getDurationMs() / 1000.0);
+                            map.put(aiid, chatResult);
+                        } catch (JsonParseException jpe) {
+                            this.logger.logException(this.getLogFrom(), jpe);
+                            throw new AiControllerException(jpe.getMessage());
+                        }
                     }
                 }
-            }
 
+            }
+            return map;
+        } finally {
+            futures.forEach(RequestInProgress::closeRequest);
         }
-        return map;
     }
 
     public void abandonCalls() {
@@ -184,6 +188,23 @@ public abstract class RequestBase {
 
         public String getEndpointIdentifier() {
             return this.endpointIdentifier;
+        }
+
+        /***
+         * Closes the call no matter what state it is in
+         * Suppresses an exception if one occurred
+         */
+        public void closeRequest() {
+            try {
+                if (this.future != null) {
+                    Response response = this.future.isDone() ?
+                            this.future.get().getResponse() :
+                            this.future.get(0, TimeUnit.MILLISECONDS).getResponse();
+                    response.close();
+                }
+            } catch (Exception e) {
+                // suppressed
+            }
         }
     }
 
