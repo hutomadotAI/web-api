@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -22,9 +23,10 @@ function getBasicAiInfo($aiid){
     $singleAI = $aiApi->getSingleAI($aiid);
     unset($aiApi);
 
-    if ($singleAI['status']['code'] !== 200) {
+    if ($singleAI['status']['code'] !== 200 && $singleAI['status']['code'] !== 404) {
+        $singleAI_result = $singleAI;
         unset($singleAI);
-        utils::redirect('../error.php?err=200');
+        errorRedirect::handleErrorRedirect($singleAI_result);
         exit;
     }
     unset($singleAI);

@@ -2,6 +2,7 @@
 
 namespace hutoma\api;
 
+include_once __DIR__ . '/../common/errorRedirect.php';
 include_once __DIR__ . '/../common/apiConnector.php';
 include_once __DIR__ . '/../common/config.php';
 include_once __DIR__ . '/../common/utils.php';
@@ -36,40 +37,29 @@ class apiBase
     }
 
     /**
-     * Redirects to the error page.
-     * @param $errorCode - the error code to be used on the error page
-     */
-    protected function redirectToErrorPage($errorCode) {
-        \hutoma\utils::redirect(base\config::getErrorPageUrl() . '?err=' . $errorCode);
-    }
-
-    /**
      * Handles API "errors" (statuses that are not 200, 400, 404 or 409) or if the request did not reach the API.
      * @param $response - the API response
-     * @param $errorCode - the error code to be used on the error page
      */
-    protected function handleApiCallError($response, $errorCode)
+    protected function handleApiCallError($response)
     {
-        if ($response === false) {
+        $responseJson = json_decode($response, true);
+
+        if ($response === false || !isset($responseJson)) {
             base\logging::error("no response from api");
             $this->cleanup();
-            $this->redirectToErrorPage($errorCode);
+            base\errorRedirect::defaultErrorRedirect();
         }
 
-        $responseJson = json_decode($response);
-        if (isset($responseJson)) {
-            switch ($responseJson->status->code) {
-                case 200:
-                case 404:
-                case 400:
-                case 409:
-                    // allowable codes
-                    break;
-                default:
-                    base\logging::error("api " . json_encode($responseJson->status));
-                    $this->cleanup();
-                    $this->redirectToErrorPage($errorCode);
-            }
+        switch ($responseJson['status']['code']) {
+            case 200:
+            case 400:
+            case 404:
+            case 409:
+                break;
+            default:
+                $this->cleanup();
+                base\logging::error($response);
+                base\errorRedirect::handleErrorRedirect($responseJson);
         }
     }
 

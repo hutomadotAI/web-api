@@ -9,8 +9,7 @@ require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/botstoreApi.php";
 
 
-logging::error(sprintf("%s - referrer: %s  errorObject: %s", $_GET['err'], $_SERVER['HTTP_REFERER'],
-        isset($_GET['errObj']) ? $_GET['errObj'] : ""));
+logging::error(sprintf("%s - referrer: %s  msg: %s", $_GET['err'], $_SERVER['HTTP_REFERER'], $_GET['msg']));
 
 
 sessionObject::redirectToLoginIfUnauthenticated();

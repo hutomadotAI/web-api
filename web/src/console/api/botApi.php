@@ -139,7 +139,7 @@ class botApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 386);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

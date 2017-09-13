@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -15,7 +16,7 @@ sessionObject::redirectToLoginIfUnauthenticated();
 $aiid = isset($_REQUEST['ai']) ? $_REQUEST['ai'] : sessionObject::getCurrentAI()['aiid'];
 
 if (!isset($aiid)) {
-    utils::redirect('./error.php?err=200');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
@@ -30,8 +31,9 @@ if ($ai['status']['code'] === 200) {
     $phase2progress = json_encode($ai['phase_2_progress']);
     $trainingFileUploaded = json_encode($ai['training_file_uploaded']);
 } else {
+    $ai_result = $ai;
     unset($ai);
-    utils::redirect('../error.php?err=200');
+    errorRedirect::handleErrorRedirect($ai_result);
     exit;
 }
 unset($singleAI);

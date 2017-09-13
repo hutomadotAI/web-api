@@ -4,6 +4,7 @@ namespace hutoma;
 
 use DateTime;
 
+require_once __DIR__ . "/../common/errorRedirect.php";
 require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/utils.php";
@@ -16,7 +17,7 @@ sessionObject::redirectToLoginIfUnauthenticated();
 $integrationApi = new api\integrationApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 
 if (!isset(sessionObject::getCurrentAI()['aiid'])) {
-    utils::redirect('./error.php?err=200');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 

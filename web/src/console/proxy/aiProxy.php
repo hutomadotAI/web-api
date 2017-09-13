@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/../common/errorRedirect.php";
 require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/ajaxApiProxy.php";
@@ -51,7 +52,7 @@ class aiProxy extends ajaxApiProxy {
                         $response = $aiApi->linkBotToAI($aiid, $skill['botId']);
                     }
                     if ($this->getApiReponseCode($response) !== 200) {
-                        utils::redirect('../error.php?errObj=' . urldecode($response), null);
+                        errorRedirect::handleErrorRedirect($response);
                         unset($aiApi);
                         return;
                     }
@@ -62,7 +63,7 @@ class aiProxy extends ajaxApiProxy {
             return;
         }
 
-        utils::redirect('../error.php?errObj=' . urldecode($response), null);
+        errorRedirect::handleErrorRedirect($response);
     }
 
     private function updateAi($vars) {

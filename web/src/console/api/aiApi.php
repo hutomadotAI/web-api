@@ -24,7 +24,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 302);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -37,7 +37,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 303);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -62,7 +62,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-            //$this->handleApiCallError($curl_response, 305);
+            //$this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -108,7 +108,7 @@ class aiApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 305);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -154,7 +154,7 @@ class aiApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 301);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -196,7 +196,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/domain'));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 360);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -234,7 +234,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/training/stop'));
             $this->curl->setVerbPut();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 309);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -13,7 +14,7 @@ sessionObject::redirectToLoginIfUnauthenticated();
 
 
 if (!isPostInputAvailable()) {
-    utils::redirect('./error.php?err=119');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
@@ -24,7 +25,7 @@ if (isset($_POST['entity_name'])) {
     $retValue = $entityApi->updateEntity($entityName, $_POST['entity_values']);
 
     if (isset($retvalue) && $retvalue['status']['code'] != 200) {
-        utils::redirect('./error.php?errObj=' . urlencode($retvalue), null);
+        errorRedirect::handleErrorRedirect($retvalue);
         exit;
     }
 } else {
@@ -34,9 +35,10 @@ if (isset($_POST['entity_name'])) {
 $entity_values_list = $entityApi->getEntityValues($entityName);
 unset($entityApi);
 
-if ($entity_values_list['status']['code'] !== 200) {
+if ($entity_values_list['status']['code'] !== 200 && $entity_values_list['status']['code'] !== 404) {
+    $entity_result = $entity_values_list;
     unset($entity_values_list);
-    utils::redirect('./error.php?err=225');
+    errorRedirect::handleErrorRedirect($entity_result);
     exit;
 }
 

@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
