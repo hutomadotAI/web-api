@@ -113,7 +113,7 @@ function requestPublish() {
                 case 200:
                     createAlertMessage(ALERT.SUCCESS.value, 'Request sent ');
                     buttonPublishToRequest();
-                    callback(JSONdata['bot']['botId']);
+                    callback(JSONdata['bot']);
                     break;
                 default:
                     createAlertMessage(ALERT.DANGER.value, JSONdata['status']['info']);
@@ -132,15 +132,15 @@ function requestPublish() {
 
 }
 
-function callback(botId) {
+function callback(bot) {
     var node = document.getElementById('drop-zone');
 
     if(!node.hasAttribute('src'))
-        callRedirection();
+        callRedirection(bot);
     else {
         var src = node.getAttribute('src');
         var imageFile = dataURLtoFile(src, 'icon.png');
-        uploadIconFile(botId, imageFile);
+        uploadIconFile(bot.botId, imageFile);
     }
 }
 
@@ -152,8 +152,26 @@ function dataURLtoFile(dataurl, filename) {
     return new File([u8arr], filename, {type:mime});
 }
 
+/**
+ * After successfull publish trigger an event in GTM, and get back to homepage
+ * @return {undefined}
+ */
+function callRedirection(bot){
 
-function callRedirection(){
+    if ('dataLayer' in window && bot && bot.aiid && bot.name) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'botstore',
+            eventAction: 'publish',
+            eventLabel: bot.aiid,
+            eventMetadata: {
+                timestamp: Date.now(),
+                aiid: bot.aiid,
+                name: bot.name
+            }
+        });
+    }
+
     window.location.href = './home.php';
 }
 
@@ -271,23 +289,28 @@ function createAlertMessage(alarm, message, id) {
 }
 
 function populateBotFields(bot) {
-    var json = JSON.parse(bot);
-    document.getElementById('bot_id').value = json['botId'];
-    document.getElementById('bot_aiid').value = json['aiid'];
-    document.getElementById('bot_alertMessage').value = json['alertMessage'];
-    document.getElementById('bot_badge').value = json['badge'];
-    document.getElementById('bot_description').value = json['description'];
-    document.getElementById('bot_longDescription').value = json['longDescription'];
-    document.getElementById('bot_name').value = json['name'];
-    document.getElementById('bot_price').value = 0;
-    document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
-    document.getElementById('bot_sample').value = json['sample'];
-    document.getElementById('bot_version').value = 1;
-    document.getElementById('bot_videoLink').value = json['videoLink'];
+    try { 
+        var json = JSON.parse(bot);
+        
+        document.getElementById('bot_id').value = json['botId'];
+        document.getElementById('bot_aiid').value = json['aiid'];
+        document.getElementById('bot_alertMessage').value = json['alertMessage'];
+        document.getElementById('bot_badge').value = json['badge'];
+        document.getElementById('bot_description').value = json['description'];
+        document.getElementById('bot_longDescription').value = json['longDescription'];
+        document.getElementById('bot_name').value = json['name'];
+        document.getElementById('bot_price').value = 0;
+        document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
+        document.getElementById('bot_sample').value = json['sample'];
+        document.getElementById('bot_version').value = 1;
+        document.getElementById('bot_videoLink').value = json['videoLink'];
 
-    setSelectValue('bot_category', json['category']);
-    setSelectValue('bot_classification', json['classification']);
-    setSelectValue('bot_licenseType', json['licenseType']);
+        setSelectValue('bot_category', json['category']);
+        setSelectValue('bot_classification', json['classification']);
+        setSelectValue('bot_licenseType', json['licenseType']);
+    } catch(error) {
+        throw('No bot data');
+    }
 }
 
 function populateDeveloperFields(developer) {
