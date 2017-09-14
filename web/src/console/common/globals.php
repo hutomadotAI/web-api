@@ -1,7 +1,8 @@
 <?php
-// Disable all PHP error reporting
-error_reporting(10);
-ini_set("display_errors", "on"); // for development only
+// Report all errors
+error_reporting(E_ALL);
+// Don't display errors to users
+ini_set("display_errors", "off");
 
 date_default_timezone_set('Europe/London');
 
