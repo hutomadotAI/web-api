@@ -77,6 +77,26 @@ if (isset($facebook_state)) {
     echo "\npermissions = \"$fb_permissions\";";
 
     ?>
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: appid,
+            xfbml: true,
+            version: "v2.6"
+        });
+
+    };
+
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
 </script>
 
 <?php
@@ -201,6 +221,8 @@ $fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
             </button>
         </div>
 
+        <div id="fb_messageus"></div>
+
         <?php
     }
     }
@@ -215,3 +237,19 @@ $fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
     </div>
 </div>
 
+<script>
+
+    var message_us_data = {
+        plugin_class: 'fb-messengermessageus',
+        appid: '<?php echo $fb_app_id ?>',
+        pageid: '<?php echo $facebook_state["page_integrated_id"]; ?>',
+        button_name: 'Message Us',
+        button_action: 'to start chatting to this bot on Facebook Messenger.',
+        plugin_reference: 'https://developers.facebook.com/docs/messenger-platform/plugin-reference/message-us'
+    };
+
+    $.get('./templates/integration_code.mustache', function (template) {
+        $('#fb_messageus').replaceWith(Mustache.render(template, message_us_data));
+    });
+
+</script>

@@ -44,7 +44,7 @@ include __DIR__ . "/include/page_menu.php";
             <div class="row">
                 <div class="col-md-12">
                     <div class="box box-solid box-clean flat no-shadow">
-                    <?php include __DIR__ . '/dynamic/integrations.facebook.html.php'; ?>
+                        <?php include __DIR__ . '/dynamic/integrations.facebook.html.php'; ?>
                     </div>
                 </div>
             </div>
@@ -61,6 +61,7 @@ include __DIR__ . "/include/page_menu.php";
 
 <script src="./scripts/messaging/messaging.js"></script>
 <script src="./scripts/shared/shared.js"></script>
+<script src="./dist/js/mustache.min.js"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "integrations", 1, true, false);
