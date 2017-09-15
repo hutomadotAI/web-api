@@ -33,6 +33,30 @@ public class TestServiceFacebook extends ServiceTestBase {
             + "{\"title\":\"TITLE_FOR_THE_CTA\",\"payload\":\"hook\",\"referral\":{\"ref\":"
             + "\"USER_DEFINED_REFERRAL_PARAM\",\"source\":\"SHORTLINK\",\"type\":\"OPEN_THREAD\"}}}]}]}";
 
+    String fbOptin = "{\n" +
+            "   \"object\":\"page\",\n" +
+            "   \"entry\":[\n" +
+            "      {\n" +
+            "         \"id\":\"1731355550428969\",\n" +
+            "         \"time\":1458692752478,\n" +
+            "         \"messaging\":[\n" +
+            "            {\n" +
+            "               \"sender\":{\n" +
+            "                  \"id\":\"from_fb_user\"\n" +
+            "               },\n" +
+            "               \"recipient\":{\n" +
+            "                  \"id\":\"page_id\"\n" +
+            "               },\n" +
+            "               \"timestamp\":1234567890,\n" +
+            "               \"optin\":{\n" +
+            "                  \"ref\":\"PASS_THROUGH_PARAM\"\n" +
+            "               }\n" +
+            "            }\n" +
+            "         ]\n" +
+            "      }\n" +
+            "   ]\n" +
+            "}";
+
     @Test
     public void testFBWebhookVerifyOk() {
         when(this.fakeConfig.getFacebookVerifyToken()).thenReturn(FBVERIFY);
@@ -79,6 +103,14 @@ public class TestServiceFacebook extends ServiceTestBase {
                 .request()
                 .post(Entity.json(""));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testFBOptIn() {
+        final Response response = target(BASEPATH)
+                .request()
+                .post(Entity.json(this.fbOptin));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     protected Class<?> getClassUnderTest() {

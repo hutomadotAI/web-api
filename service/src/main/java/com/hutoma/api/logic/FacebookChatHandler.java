@@ -85,25 +85,36 @@ public class FacebookChatHandler implements Callable {
                     .put("Facebook_Timestamp", this.messaging.getTimestamp());
 
             boolean isQuickReply = false;
-            if (this.messaging.isMessage()) {
-                // incoming message type event
-                userQuery = this.messaging.getMessageText();
-                if (this.messaging.isQuickReply()) {
-                    userQuery = this.messaging.getQuickReplyPayload();
-                    isQuickReply = true;
-                }
-                logMap.add("Facebook_Sequence", this.messaging.getMessageSeq());
-                logMap.add("Facebook_WebhookType", "message");
-            } else if (this.messaging.isPostback()) {
-                // postback event type
-                userQuery = this.messaging.getPostbackPayload();
-                logMap.add("Facebook_WebhookType", "postback");
-                logMap.add("Facebook_Referrer", this.messaging.getPostbackReferral());
-                logMap.add("Facebook_ClickTitle", this.messaging.getPostbackTitle());
-            } else {
-                // some other type that we don't handle or care about
-                logMap.add("Facebook_WebhookType", "unknown");
+
+            FacebookNotification.FacebookMessageType messageType = this.messaging.getMessageType();
+            switch (messageType) {
+
+                case message:
+                    // incoming message type event
+                    userQuery = this.messaging.getMessageText();
+                    if (this.messaging.isQuickReply()) {
+                        userQuery = this.messaging.getQuickReplyPayload();
+                        isQuickReply = true;
+                    }
+                    logMap.add("Facebook_Sequence", this.messaging.getMessageSeq());
+                    break;
+
+                case postback:
+                    // postback event type
+                    userQuery = this.messaging.getPostbackPayload();
+                    logMap.add("Facebook_Referrer", this.messaging.getPostbackReferral());
+                    logMap.add("Facebook_ClickTitle", this.messaging.getPostbackTitle());
+                    break;
+
+                case opt_in:
+                    // opt-in event, from Send To Messenger button
+                    userQuery = this.messaging.getOptIn();
+                    break;
+
+                default:
+                    // some other type that we don't handle or care about ... yet.
             }
+            logMap.add("Facebook_WebhookType", messageType.name());
 
             // check whether there is an attached location and log it if present
             FacebookNotification.FacebookLocation location = this.messaging.getFacebookLocation();

@@ -20,6 +20,13 @@ public class FacebookNotification {
         location
     }
 
+    public enum FacebookMessageType {
+        unknown,
+        message,
+        postback,
+        opt_in,
+    }
+
     public static class Messaging {
 
         @SerializedName("sender")
@@ -32,6 +39,8 @@ public class FacebookNotification {
         private Message message;
         @SerializedName("postback")
         private Postback postback;
+        @SerializedName("optin")
+        private OptIn optIn;
 
         public Messaging(final String sender, final String recipient, final String message) {
             this.sender = new Sender();
@@ -62,17 +71,22 @@ public class FacebookNotification {
             return Strings.nullToEmpty(this.message.text);
         }
 
-        public boolean isMessage() {
-            return this.message != null;
-        }
-
-        public boolean isPostback() {
-            return this.postback != null;
-        }
-
         public boolean isQuickReply() {
             return (this.message.quickReply != null
                     && this.message.quickReply.payload != null);
+        }
+
+        public FacebookMessageType getMessageType() {
+            if (this.message != null) {
+                return FacebookMessageType.message;
+            }
+            if (this.postback != null) {
+                return FacebookMessageType.postback;
+            }
+            if (this.optIn != null) {
+                return FacebookMessageType.opt_in;
+            }
+            return FacebookMessageType.unknown;
         }
 
         public String getQuickReplyPayload() {
@@ -92,12 +106,17 @@ public class FacebookNotification {
                     Strings.nullToEmpty(this.postback.referral.referrer);
         }
 
+        public String getOptIn() {
+            return (this.optIn == null) ? "" :
+                    Strings.nullToEmpty(this.optIn.dataRef);
+        }
+
         /***
          * https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
          * @return
          */
         public FacebookLocation getFacebookLocation() {
-            if (!isMessage()
+            if (getMessageType() != FacebookMessageType.message
                     || this.message.attachments == null
                     || this.message.attachments.isEmpty()) {
                 return null;
@@ -183,6 +202,11 @@ public class FacebookNotification {
             @SerializedName("payload")
             public String payload;
         }
+
+        static class OptIn {
+            @SerializedName("ref")
+            public String dataRef;
+        }
     }
 
     public static class FacebookLocation {
@@ -199,11 +223,11 @@ public class FacebookNotification {
 
         @Override
         public String toString() {
-            return String.format("%.6f, %.6f %s", latitude, longitude, title);
+            return String.format("%.6f, %.6f %s", this.latitude, this.longitude, this.title);
         }
 
         public String toLatLon() {
-            return String.format("%f,%f", latitude, longitude);
+            return String.format("%f,%f", this.latitude, this.longitude);
         }
 
     }
