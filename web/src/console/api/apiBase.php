@@ -29,6 +29,12 @@ class apiBase
     {
         $this->sessionObject = $sessionObject;
         $this->curl = new base\apiConnector(null, $devToken);
+        $this->setTimeouts(10, 60);
+    }
+
+    public function setTimeouts($connectionTimeout, $callTimeout) {
+        $this->curl->setConnectionTimeout($connectionTimeout);
+        $this->curl->setCallTimeout($callTimeout);
     }
 
     protected function isLoggedIn()

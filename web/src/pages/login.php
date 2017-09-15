@@ -20,24 +20,18 @@ if(isset($_POST['action_login'])){
     if($identification == "" || $password == ""){
         $msg = array("Error", $loginerror);
     }else{
-        try {
-            $login = api\userMgmt::login($identification, $password, isset($_POST['remember_me']), true, $redirect);
-            if ($login === false) {
-                $msg = array("Error", $loginerror);
-            } else if (is_array($login) && $login['status'] == "blocked") {
-                $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
-            }
+        $login = api\userMgmt::login($identification, $password, isset($_POST['remember_me']), true, $redirect);
+        if ($login === false) {
+            $msg = array("Error", $loginerror);
+        } else if (is_array($login) && $login['status'] == "blocked") {
+            $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
+        }
 
+        if (array_key_exists('redirect', $_GET)) {
             $redirectPage = $_GET["redirect"];
             if (isset($redirectPage)) {
                 utils::redirect(urldecode($redirectPage));
             }
-        }
-        catch(Exception $e){
-            $servererror  ='<div class="alert alert-danger text-white flat">';
-            $servererror .='<i class="icon fa fa-warning"></i> Server connection lost';
-            $servererror .='</div>';
-            $msg = array("Error", $servererror);
         }
     }
 }
@@ -108,7 +102,7 @@ if(isset($_POST['action_login'])){
                 if (isset($msg)) {
                     echo "$msg[1]";
                 }
-                if (isset($_REQUEST['redirect'])) {
+                if (array_key_exists('redirect', $_REQUEST)) {
                     echo '<input type="hidden" name="redirect" value="' . $_REQUEST['redirect'] . '">';
                 }
                 ?>

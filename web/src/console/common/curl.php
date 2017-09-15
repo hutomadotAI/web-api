@@ -143,4 +143,20 @@ class curl
         $this->setOpt(CURLOPT_HTTPHEADER, $this->headers);
         return curl_exec($this->curl);
     }
+
+    /**
+     * Sets the timeout for the connection.
+     * @param $timeout - the timeout to set
+     */
+    public function setConnectionTimeout($timeout) {
+        $this->setOpt(CURLOPT_CONNECTTIMEOUT, $timeout);
+    }
+
+    /**
+     * Sets the timeout for the call.
+     * @param $timeout - the timeout to set
+     */
+    public function setCallTimeout($timeout) {
+        $this->setOpt(CURLOPT_TIMEOUT, $timeout);
+    }
 }
