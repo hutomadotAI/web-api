@@ -17,10 +17,10 @@ class errorRedirect
         $code = $result['status']['code'];
         $info = $result['status']['info'];
 
-        utils::redirect('./error.php?err=' . $code . '&msg=' . $info);
+        utils::redirect(config::getErrorPageUrl() . '?err=' . $code . '&msg=' . $info);
     }
 
     public static function defaultErrorRedirect() {
-        utils::redirect('./error.php?err=500&msg=Internal%20Server%20Error');
+        utils::redirect(config::getErrorPageUrl() . '?err=500&msg=Internal%20Server%20Error');
     }
 }
