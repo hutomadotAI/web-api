@@ -189,7 +189,7 @@ include __DIR__ . "/include/page_menu.php";
 
                         <!-- Modal DELETE entity-->
                         <div class="modal fade" id="deleteIntent" role="dialog">
-                            <div class="modal-dialog flat">
+                            <div class="modal-dialog flat width600">
                                 <!-- Modal content-->
                                 <div class="modal-content bordered" style="background-color: #202020">
                                     <div class="modal-header">

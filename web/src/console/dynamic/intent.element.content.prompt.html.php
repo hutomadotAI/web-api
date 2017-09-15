@@ -1,8 +1,8 @@
 <!-- Modal PROMPT -->
 <div class="modal fade" id="boxPrompts" role="dialog">
-    <div class="modal-dialog flat">
+    <div class="modal-dialog flat width600">
         <!-- Modal Prompt content-->
-        <div class="modal-content bordered" style="background-color: #202020; width:600px; margin: 0 auto">
+        <div class="modal-content bordered" style="background-color: #202020;">
 
             <div class="modal-header">
                 <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>

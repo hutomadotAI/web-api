@@ -171,7 +171,7 @@ $currentAiInfo = json_encode($aiInfo);
 
 <!-- Modal DELETE AI-->
 <div class="modal fade" id="deleteAI" role="dialog">
-    <div class="modal-dialog flat"  style="border: 1px solid red;">
+    <div class="modal-dialog flat width600"  style="border: 1px solid red;">
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
@@ -200,7 +200,7 @@ $currentAiInfo = json_encode($aiInfo);
 
 <!-- Modal Regenerate HMAC secret-->
 <div class="modal fade" id="regenHmacSecret" role="dialog">
-    <div class="modal-dialog flat"  style="border: 1px solid red;">
+    <div class="modal-dialog flat width600"  style="border: 1px solid red;">
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">

@@ -50,7 +50,7 @@
 
 <!-- MODAL Example training file -->
 <div class="modal fade" id="sampleTrainingFile" role="dialog">
-    <div class="modal-dialog flat">
+    <div class="modal-dialog flat width600">
 
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #212121">
