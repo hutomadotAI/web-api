@@ -11,6 +11,7 @@ namespace hutoma\api;
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/config.php";
 require_once __DIR__ . "/../common/logging.php";
+require_once __DIR__ . "/../common/utils.php";
 require_once __DIR__ . "/../api/adminApi.php";
 
 use hutoma as base;
@@ -294,7 +295,7 @@ class userMgmt
                         <a href='" . base\utils::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
                     $textBody = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please enter this link in your browser :\n"
-                        . utils::curPageURL() . "?resetPassToken={$encodedToken}\n\nThanks!\n-the Hu:toma Team";
+                        . base\utils::curPageURL() . "?resetPassToken={$encodedToken}\n\nThanks!\n-the Hu:toma Team";
 
                     $emailDetails = base\config::getRegistrationEmailDetails();
                     $result = base\emailUtil::sendEmail($email, $emailDetails['from'], $subject, $htmlBody, $textBody);
