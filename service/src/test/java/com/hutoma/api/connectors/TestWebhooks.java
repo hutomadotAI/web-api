@@ -26,6 +26,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * Tests for the WebHooks connector.
  */
@@ -78,8 +79,9 @@ public class TestWebhooks {
         ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, null, chatResult, CHATINFO);
-        Assert.assertNull(response);
+
+        assertThatExceptionOfType(WebHooks.WebHookException.class)
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, null, chatResult, CHATINFO));
     }
 
     /*
@@ -96,8 +98,9 @@ public class TestWebhooks {
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
-        Assert.assertNull(response);
+
+        assertThatExceptionOfType(WebHooks.WebHookCallException.class)
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -178,8 +181,8 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
-        WebHookResponse response = this.webHooks.executeIntentWebHook(null, mi, chatResult, CHATINFO);
-        Assert.assertNull(response);
+        assertThatExceptionOfType(WebHooks.WebHookException.class)
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(null, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -197,8 +200,9 @@ public class TestWebhooks {
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
-        Assert.assertNull(response);
+
+        assertThatExceptionOfType(WebHooks.WebHookCallException.class)
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -215,8 +219,9 @@ public class TestWebhooks {
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
-        Assert.assertNull(response);
+
+        assertThatExceptionOfType(WebHooks.WebHookCallException.class)
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -229,11 +234,13 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         when(this.fakeDatabase.getBotConfigForWebhookCall(any(), any(), any(), any())).thenThrow(new Database.DatabaseException("BAD CALL"));
-        WebHookResponse response = this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
+
+        assertThatExceptionOfType(WebHooks.WebHookException.class)
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
+
         verify(this.fakeDatabase).getBotConfigForWebhookCall(any(), any(), any(), any());
         // ensure no attempt is made to build the webhook call
         verify(this.fakeClient, never()).target(anyString());
-        Assert.assertNull(response);
     }
 
     /*
