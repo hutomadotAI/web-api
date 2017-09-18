@@ -154,6 +154,13 @@ public class AIBotStoreLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devIdString, logMap);
                 return ApiError.getBadRequest("Bot needs to be fully trained before being allowed to be published");
             }
+            List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
+            if (!linkedBots.isEmpty()) {
+                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI is linked to other bots", devIdString, logMap);
+                return ApiError.getBadRequest(
+                        "Publishing an bot that is already linked to one or more bots is not yet supported "
+                                + "(coming soon!)");
+            }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
                     videoLink, AiBot.PublishingState.SUBMITTED, null);
