@@ -165,8 +165,11 @@ public class DatabaseEntitiesIntents extends Database {
                 intent.addVariable(variable);
             }
 
+            intent.setWebHook(this.getWebHook(aiid, intentName));
+
             // nothing was written but this prevents an auto-rollback
             transaction.commit();
+
             return intent;
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);

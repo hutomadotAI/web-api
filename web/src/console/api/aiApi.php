@@ -174,6 +174,25 @@ class aiApi extends apiBase
         return $this->getDefaultResponse();
     }
 
+    public function importAI($file)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/import'));
+
+            $filename = $file['tmp_name'];
+            $file_contents = file_get_contents($filename);
+
+            $this->curl->addHeader("Content-Type", "application/json");
+            $this->curl->setOpt(CURLOPT_POSTFIELDS, $file_contents);
+            $this->curl->setVerbPost();
+            $curl_response = $this->curl->exec();
+
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
     public function chatAI($aiid, $chatId, $q)
     {
         if ($this->isLoggedIn()) {

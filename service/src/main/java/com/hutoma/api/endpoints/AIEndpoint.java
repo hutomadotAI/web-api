@@ -7,6 +7,7 @@ import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
@@ -15,6 +16,7 @@ import com.hutoma.api.validation.ValidatePost;
 import com.webcohesion.enunciate.metadata.rs.*;
 
 import java.net.HttpURLConnection;
+import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -215,6 +217,18 @@ public class AIEndpoint {
         ApiResult result = this.aiLogic.exportBotData(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
+    @Path("import")
+    @POST
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidatePost()
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response importAI(
+            @Context ContainerRequestContext requestContext, BotStructure botStructure) {
+        ApiResult result = this.aiLogic.importBot(
+                ParameterFilter.getDevid(requestContext), botStructure);
         return result.getResponse(this.serializer).build();
     }
 

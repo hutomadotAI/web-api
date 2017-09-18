@@ -203,6 +203,16 @@ public class ApiAi extends ApiResult {
         return this.description;
     }
 
+    public boolean getIsPrivate() { return this.isPrivate; }
+
+    public int getPersonality() { return this.personality; }
+
+    public int getVoice() { return this.voice; }
+
+    public Locale getLanguage() { return this.language; }
+
+    public String getTimezone() { return this.timezone; }
+
     public boolean trainingFileUploaded() {
         return this.trainingFileUploaded;
     }
