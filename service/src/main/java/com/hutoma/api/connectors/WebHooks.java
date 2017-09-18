@@ -147,12 +147,12 @@ public class WebHooks {
             }
             response = builder.post(Entity.json(payloadBytes));
         } catch (Exception e) {
-            throw new WebHookCallException("WebHook Execution Failed", e);
+            throw WebHookCallException.createWithTypeMessage("WebHook Execution Failed", e);
         }
 
         try {
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                throw new WebHookCallException(String.format("Webhook call failed (%s)", response.getStatus()));
+                throw new WebHookCallException(String.format("Webhook call failed (HTTP code %s)", response.getStatus()));
             }
 
             response.bufferEntity();
@@ -211,7 +211,7 @@ public class WebHooks {
             return (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class),
                     WebHookResponse.class);
         } catch (JsonParseException e) {
-            throw new WebHookCallException("Failed to deserialize webhook response JSON", e);
+            throw WebHookCallException.createWithTypeMessage("Failed to deserialize webhook response JSON", e);
         }
     }
 
@@ -258,6 +258,11 @@ public class WebHooks {
 
         public WebHookCallException(String message, Throwable e) {
             super(message, e);
+        }
+
+        public static WebHookCallException createWithTypeMessage(String message, Throwable e) {
+            String messageWithType = String.format("%s - %s", message, e.getMessage());
+            return new WebHookCallException(messageWithType, e);
         }
     }
 }

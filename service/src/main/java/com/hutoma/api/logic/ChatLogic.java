@@ -322,13 +322,7 @@ public class ChatLogic {
                 }
             }
 
-            // prepare to send back a result
-            result.setScore(toOneDecimalPlace(result.getScore()));
 
-            // set the chat response time to the whole duration since the start of the request until now
-            result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
-
-            apiChat.setResult(result);
 
         } catch (RequestBase.AiNotFoundException notFoundException) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devIdString,
@@ -341,6 +335,17 @@ public class ChatLogic {
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             throw new ChatFailedException(ApiError.getBadRequest(
                     "This bot is not ready to chat. It needs to train and/or be linked to other bots"));
+
+        } catch (WebHooks.WebHookCallException ex) {
+            // if the webhook call fails, log it as a warning. The default chat response will be sent to the user.
+            String webHookErrorString = ex.getMessage();
+            this.logger.logUserWarnEvent(LOGFROM,
+                    "Call to WebHook failed for intent",
+                    chatInfo.devId.toString(),
+                    LogMap.map("Intent", currentIntent.getName())
+                            .put("AIID", aiidForMemoryIntents)
+                            .put("Error", webHookErrorString));
+            this.telemetryMap.add("webHookCallFailure", webHookErrorString);
 
         } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
@@ -355,6 +360,13 @@ public class ChatLogic {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
         }
+
+        // prepare to send back a result
+        result.setScore(toOneDecimalPlace(result.getScore()));
+
+        // set the chat response time to the whole duration since the start of the request until now
+        result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+        apiChat.setResult(result);
 
         this.chatState.setTopic(apiChat.getResult().getTopicOut());
         this.chatState.setHistory(apiChat.getResult().getHistory());
@@ -598,38 +610,27 @@ public class ChatLogic {
         WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, chatInfo.devId);
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            try {
-                WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
-                        chatInfo);
-                // first store the whole deserialized webhook in a transient field
-                chatResult.setWebHookResponse(response);
+            WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
+                    chatInfo);
+            // first store the whole deserialized webhook in a transient field
+            chatResult.setWebHookResponse(response);
 
-                // log and set the text if there was any
-                if (!Strings.isNullOrEmpty(response.getText())) {
-                    chatResult.setAnswer(response.getText());
-                    log.put("Webhook response", response.getText());
-                } else {
-                    // otherwise we got no text
-                    this.logger.logUserInfoEvent(LOGFROM,
-                            "Executing WebHook for intent for aiid: empty response.",
-                            chatInfo.devId.toString(),
-                            LogMap.map("Intent", currentIntent.getName()).put("AIID", aiidForMemoryIntents));
-                }
-                // log the Facebook rich-content type if available
-                if ((response.getFacebookNode() != null)
-                        && (response.getFacebookNode().getContentType() != null)) {
-                    log.put("Webhook facebook response",
-                            response.getFacebookNode().getContentType().name());
-                }
-            }
-            catch (WebHooks.WebHookCallException userException) {
-                // if the webhook call fails, log it as a warning. The default response will be sent to the user.
-                this.logger.logUserWarnEvent(LOGFROM,
-                        "Call to WebHook failed for intent",
+            // log and set the text if there was any
+            if (!Strings.isNullOrEmpty(response.getText())) {
+                chatResult.setAnswer(response.getText());
+                log.put("Webhook response", response.getText());
+            } else {
+                // otherwise we got no text
+                this.logger.logUserInfoEvent(LOGFROM,
+                        "Executing WebHook for intent for aiid: empty response.",
                         chatInfo.devId.toString(),
-                        LogMap.map("Intent", currentIntent.getName())
-                                .put("AIID", aiidForMemoryIntents)
-                                .put("Error", userException.getMessage()));
+                        LogMap.map("Intent", currentIntent.getName()).put("AIID", aiidForMemoryIntents));
+            }
+            // log the Facebook rich-content type if available
+            if ((response.getFacebookNode() != null)
+                    && (response.getFacebookNode().getContentType() != null)) {
+                log.put("Webhook facebook response",
+                        response.getFacebookNode().getContentType().name());
             }
         } else {
             log.put("Webhook run", false);
