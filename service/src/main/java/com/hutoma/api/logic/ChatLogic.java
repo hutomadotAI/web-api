@@ -8,10 +8,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AiStrings;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -96,14 +93,31 @@ public class ChatLogic {
     }
 
     public ApiChat chatPassthrough(final UUID aiid, final UUID devId, final String chatId, final String question,
-                                   final Map<String, String> clientVariables, String passthrough) {
+                                   final Map<String, String> clientVariables, String passthrough)
+            throws ChatFailedException {
         UUID chatUuid = UUID.fromString(chatId);
         ChatResult chatResult = new ChatResult(question);
         final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, chatUuid, question, clientVariables);
-        WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
 
-        if (response != null) {
-            chatResult.setAnswer(response.getText());
+        try {
+            WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
+
+            if (response != null) {
+                chatResult.setAnswer(response.getText());
+            }
+        }
+        catch (WebHooks.WebHookCallException callException) {
+            this.chatLogger.logChatError(LOGFROM, devId.toString(), callException, this.telemetryMap);
+            throw new ChatFailedException(ApiError.getBadRequest());
+        }
+        catch (WebHooks.WebHookException webhookException) {
+            this.logger.logUserErrorEvent(LOGFROM,
+                    "Error occurred executing WebHook for passthrough",
+                    chatInfo.devId.toString(),
+                    LogMap.map("AIID", aiid)
+                            .put("Error", webhookException.getMessage()));
+            this.chatLogger.logChatError(LOGFROM, devId.toString(), webhookException, this.telemetryMap);
+            throw new ChatFailedException(ApiError.getInternalServerError());
         }
 
         ApiChat apiChat = new ApiChat(chatUuid, 0);
@@ -370,7 +384,7 @@ public class ChatLogic {
      */
     private boolean processIntent(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
                                   final MemoryIntent currentIntent, final ChatResult chatResult)
-            throws IntentException {
+            throws IntentException, WebHooks.WebHookException {
 
         if (currentIntent == null) {
             // no intent to process
@@ -465,7 +479,7 @@ public class ChatLogic {
                                      final MemoryIntent currentIntent,
                                      final ChatResult chatResult, final List<MemoryVariable> memoryVariables,
                                      final List<MemoryIntent> intentsToClear, final Map<String, Object> log)
-            throws IntentException {
+            throws IntentException, WebHooks.WebHookException {
 
         boolean handledIntent = false;
 
@@ -578,19 +592,15 @@ public class ChatLogic {
 
     private void checkAndExecuteWebhook(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
                                         final MemoryIntent currentIntent,
-                                        final ChatResult chatResult, final Map<String, Object> log) {
+                                        final ChatResult chatResult, final Map<String, Object> log)
+            throws WebHooks.WebHookException {
         // If the webhook returns a text response, overwrite the answer.
         WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, chatInfo.devId);
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
-                    chatInfo);
-            if (response == null) {
-                this.logger.logUserErrorEvent(LOGFROM,
-                        "Error occured executing WebHook for intent %s for aiid %s.",
-                        chatInfo.devId.toString(),
-                        LogMap.map("Intent", currentIntent.getName()).put("AIID", aiidForMemoryIntents));
-            } else {
+            try {
+                WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
+                        chatInfo);
                 // first store the whole deserialized webhook in a transient field
                 chatResult.setWebHookResponse(response);
 
@@ -611,6 +621,15 @@ public class ChatLogic {
                     log.put("Webhook facebook response",
                             response.getFacebookNode().getContentType().name());
                 }
+            }
+            catch (WebHooks.WebHookCallException userException) {
+                // if the webhook call fails, log it as a warning. The default response will be sent to the user.
+                this.logger.logUserWarnEvent(LOGFROM,
+                        "Call to WebHook failed for intent",
+                        chatInfo.devId.toString(),
+                        LogMap.map("Intent", currentIntent.getName())
+                                .put("AIID", aiidForMemoryIntents)
+                                .put("Error", userException.getMessage()));
             }
         } else {
             log.put("Webhook run", false);
