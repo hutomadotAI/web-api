@@ -6,6 +6,7 @@ ARG DEBUG=0
 RUN apt-get update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get -y install \
     libcurl4-gnutls-dev \
     curl \
+    libyaml-dev \
     lynx-cur  \
     wget
 
@@ -30,6 +31,9 @@ COPY config/internal.hutoma.key /etc/apache2/ssl
 COPY config/000-default.conf /etc/apache2/sites-enabled
 COPY config/default-ssl.conf /etc/apache2/sites-enabled
 COPY config/apache2.conf /etc/apache2/
+
+# Install YAML to read Statics manifest
+RUN pecl install yaml-2.0.0 && echo "extension=yaml.so" > /usr/local/etc/php/conf.d/ext-yaml.ini
 
 # Install xDebug if in debug mode
 RUN if [ $DEBUG -eq 1 ]; then pecl install xdebug \

@@ -61,3 +61,7 @@ modules.xml
 *.pyc
 
 **/node_modules
+
+# Statics
+web/src/console/dist/manifest.yml
+web/src/console/dist/assets/

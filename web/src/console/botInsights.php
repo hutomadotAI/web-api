@@ -9,6 +9,9 @@ require_once __DIR__ . "/common/utils.php";
 require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/analyticsApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+
+$assets = new Assets();
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
@@ -168,15 +171,15 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/external/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="/console/dist/vendors/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="./scripts/messaging/messaging.js"></script>
+<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "insights", 1, true, false);

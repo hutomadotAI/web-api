@@ -10,7 +10,9 @@ require_once __DIR__ . "/../console/common/config.php";
 require_once __DIR__ . "/../console/common/sessionObject.php";
 require_once __DIR__ . "/../console/api/userMgmt.php";
 include_once __DIR__ . "/../console/api/signupCodeApi.php";
+require_once __DIR__ . "/../console/common/Assets.php";
 
+$assets = new Assets();
 
 function getErrorMessage($message, $alertType = 'alert-warning') {
     $msg ='<div class="alert ' . $alertType . ' text-white flat">';
@@ -132,19 +134,19 @@ if(isset($_POST['submit'])) {
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="../console/dist/css/hutoma.css">
-    <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../console/scripts/cookiePolicyBar/cookiePolicyBar.css">
+    <link rel="stylesheet" href="/console/dist/css/hutoma.css">
+    <link rel="stylesheet" href="/console/dist/vendors/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/console/dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/console/dist/vendors/cookiePolicyBar/cookiePolicyBar.css">
 
     <link rel="stylesheet" href="https://www.hutoma.ai/css/main.css">
-    <link rel="icon" href="../console/dist/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/console/dist/img/favicon.ico" type="image/x-icon">
 
-    <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
-    <script type="text/javascript" src="../console/scripts/external/iCheck/icheck.min.js"></script>
+    <script type="text/javascript" src="/console/dist/vendors/jQuery/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="/console/dist/vendors/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript" src="/console/dist/vendors/iCheck/icheck.min.js"></script>
     
-    <script src='../console/scripts/security/password.js'></script>
+    <script src='<? $assets->getAsset('security/password.js') ?>'></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
     
     <script type="text/javascript">

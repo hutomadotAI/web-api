@@ -8,6 +8,9 @@ require_once __DIR__ . "/../common/utils.php";
 require_once __DIR__ . "/../common/developer.php";
 require_once __DIR__ . "/../common/bot.php";
 require_once __DIR__ . "/../api/botApi.php";
+require_once __DIR__ . "/../common/Assets.php";
+
+$assets = new Assets();
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
@@ -422,5 +425,5 @@ unset($botApi);
         unset($tmp_bot);
         ?>;
 </script>
-<script src="./scripts/drag-and-drop/drag-and-drop.js"></script>
-<script src="./scripts/publish/publish.js"></script>
+<script src="<? $assets->getAsset('drag-and-drop/drag-and-drop.js') ?>"></script>
+<script src="<? $assets->getAsset('publish/publish.js') ?>"></script>

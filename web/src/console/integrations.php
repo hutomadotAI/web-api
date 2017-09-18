@@ -10,6 +10,9 @@ require_once __DIR__ . "/common/utils.php";
 require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/integrationApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+
+$assets = new Assets();
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
@@ -36,7 +39,7 @@ include __DIR__ . "/include/page_body_default.php";
 include __DIR__ . "/include/page_menu.php";
 ?>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
 <div class="wrapper">
     <?php include __DIR__ . "/include/page_header_default.php"; ?>
     <div class="content-wrapper">
@@ -53,15 +56,14 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
-<script src="./dist/js/mustache.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
+<script src="/console/dist/js/mustache.min.js"></script>
+<script src="<? $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "integrations", 1, true, false);
