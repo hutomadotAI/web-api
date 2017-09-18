@@ -117,15 +117,15 @@ function saveIntent() {
     }
 
 
+    var usedLabels = new Object();
     for (var entityName in labelsMap) {
         if (labelsMap.hasOwnProperty(entityName)) {
             var labelArr = labelsMap[entityName];
-            var usedLabels = new Object();
             for (var x in labelArr) {
                 var label = labelArr[x].label;
                 if (label === "" || usedLabels.hasOwnProperty(label)) {
                     labelArr[x].node.style.border = "thin dotted red";
-                    msgAlertIntentVariable(ALERT.DANGER.value, 'You need to provide a unique label for each entity type.');
+                    msgAlertIntentVariable(ALERT.DANGER.value, 'You need to provide a unique label for each entity.');
                     msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
                     return false;
                 }

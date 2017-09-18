@@ -9,9 +9,14 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -83,6 +88,36 @@ public class IntentLogic {
         String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
         try {
+            // Check if there are any variables with duplicate or empty labels
+            Set<String> usedLabels = new HashSet<>();
+            List<String> duplicateLabels = new ArrayList<>();
+            List<IntentVariable> variables = intent.getVariables();
+            if (variables != null) {
+                Optional<IntentVariable> firstEmptyLabelVar = variables.stream().filter(
+                        x -> x.getLabel().isEmpty()).findFirst();
+                if (firstEmptyLabelVar.isPresent()) {
+                    this.logger.logUserErrorEvent(LOGFROM, "Unlabeled variable", devidString,
+                            LogMap.map("Variable", firstEmptyLabelVar.get().getEntityName()).put("AIID", aiid)
+                                    .put("IntentName", intent.getIntentName()));
+                    return ApiError.getBadRequest(
+                            String.format("Unlabeled variable: %s", firstEmptyLabelVar.get().getEntityName()));
+                }
+                variables.forEach(x -> {
+                    if (usedLabels.contains(x.getLabel())) {
+                        duplicateLabels.add(x.getLabel());
+                    } else {
+                        usedLabels.add(x.getLabel());
+                    }
+                });
+            }
+            if (!duplicateLabels.isEmpty()) {
+                String dupLabelsString = String.join(", ", duplicateLabels);
+                this.logger.logUserErrorEvent(LOGFROM, "Duplicate labels", devidString,
+                        LogMap.map("DupLabels", dupLabelsString).put("AIID", aiid)
+                                .put("IntentName", intent.getIntentName()));
+                return ApiError.getBadRequest(
+                        String.format("Duplicate label%s: %s", dupLabelsString.isEmpty() ? "" : "s", dupLabelsString));
+            }
             this.database.writeIntent(devid, aiid, intent.getIntentName(), intent);
             WebHook webHook = intent.getWebHook();
             if (webHook != null) {
