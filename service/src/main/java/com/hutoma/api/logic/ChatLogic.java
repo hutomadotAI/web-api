@@ -96,8 +96,24 @@ public class ChatLogic {
                                    final Map<String, String> clientVariables, String passthrough)
             throws ChatFailedException {
         UUID chatUuid = UUID.fromString(chatId);
+        final String devIdString = devId.toString();
+
         ChatResult chatResult = new ChatResult(question);
         final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, chatUuid, question, clientVariables);
+        final long startTime = this.tools.getTimestamp();
+
+        // prepare the result container
+        ApiChat apiChat = new ApiChat(chatUuid, 0);
+        // Set the timestamp of the request
+        apiChat.setTimestamp(startTime);
+
+        // Add telemetry for the request
+        this.telemetryMap = this.telemetryMap.put("DevId", devIdString)
+                .put("AIID", aiid)
+                .put("ChatId", chatUuid)
+                .put("Q", question)
+                .put("IsPassthrough", true);
+
 
         try {
             WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
@@ -120,8 +136,17 @@ public class ChatLogic {
             throw new ChatFailedException(ApiError.getInternalServerError());
         }
 
-        ApiChat apiChat = new ApiChat(chatUuid, 0);
+        // set the chat response time to the whole duration since the start of the request until now
+        chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
         apiChat.setResult(chatResult);
+
+        this.telemetryMap.add("RequestDuration", chatResult.getElapsedTime());
+        this.telemetryMap.add("ResponseSent", chatResult.getAnswer());
+        this.telemetryMap.add("Score", chatResult.getScore());
+
+        // log the results
+        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
+        this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid).put("SessionId", chatId));
 
         return apiChat;
     }
