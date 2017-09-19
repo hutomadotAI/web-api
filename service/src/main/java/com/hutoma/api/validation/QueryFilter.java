@@ -121,7 +121,7 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
 
         } catch (ParameterValidationException pve) {
             requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
-            this.logger.logUserErrorEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
+            this.logger.logUserWarnEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
                     LogMap.map("Type", "Query")
                             .put("Parameter", pve.getParameterName())
                             .put("Message", pve.getMessage()));
