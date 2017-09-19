@@ -112,7 +112,7 @@ public class ChatLogic {
                 .put("AIID", aiid)
                 .put("ChatId", chatUuid)
                 .put("Q", question)
-                .put("IsPassthrough", true);
+                .put("ChatType", "Passthrough");
 
 
         try {
@@ -166,7 +166,8 @@ public class ChatLogic {
         // Add telemetry for the request
         this.telemetryMap = LogMap.map("DevId", devId)
                 .put("AIID", aiid)
-                // TODO: potentially PII info, we may need to mask this later, but for
+                .put("ChatType", "Assistant")
+        // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid.toString())
                 .put("Q", question);
@@ -214,6 +215,7 @@ public class ChatLogic {
                 .put("AIID", aiid)
                 .put("Topic", this.chatState.getTopic())
                 .put("History", this.chatState.getHistory())
+                .put("ChatType", "Platform")
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid)
