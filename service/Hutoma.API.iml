@@ -283,6 +283,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:2.23.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.glassfish.jersey.containers:jersey-container-servlet:2.23.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.glassfish.grizzly:grizzly-http-servlet:2.3.23" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.assertj:assertj-core:3.8.0" level="project" />
     <orderEntry type="library" name="Maven: commons-httpclient:commons-httpclient:3.1" level="project" />
     <orderEntry type="library" name="Maven: com.webcohesion.enunciate:enunciate-maven-plugin:2.9.1" level="project" />
     <orderEntry type="library" name="Maven: com.webcohesion.enunciate:enunciate-slim-maven-plugin:maven-plugin:2.9.1" level="project" />
