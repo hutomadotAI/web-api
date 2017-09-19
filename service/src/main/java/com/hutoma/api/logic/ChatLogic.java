@@ -122,7 +122,7 @@ public class ChatLogic {
                 chatResult.setAnswer(response.getText());
             }
         }
-        catch (WebHooks.WebHookCallException callException) {
+        catch (WebHooks.WebHookExternalException callException) {
             this.chatLogger.logChatError(LOGFROM, devId.toString(), callException, this.telemetryMap);
             throw new ChatFailedException(ApiError.getBadRequest());
         }
@@ -363,7 +363,7 @@ public class ChatLogic {
             throw new ChatFailedException(ApiError.getBadRequest(
                     "This bot is not ready to chat. It needs to train and/or be linked to other bots"));
 
-        } catch (WebHooks.WebHookCallException ex) {
+        } catch (WebHooks.WebHookExternalException ex) {
             // if the webhook call fails, log it as a warning. The default chat response will be sent to the user.
             String webHookErrorString = ex.getMessage();
             this.logger.logUserWarnEvent(LOGFROM,

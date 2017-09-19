@@ -74,13 +74,13 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_InvalidIntent()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         ChatResult chatResult = new ChatResult("Hi");
 
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
 
-        assertThatExceptionOfType(WebHooks.WebHookException.class)
+        assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, null, chatResult, CHATINFO));
     }
 
@@ -89,7 +89,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_InvalidEndpoint()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
@@ -99,7 +99,7 @@ public class TestWebhooks {
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
 
-        assertThatExceptionOfType(WebHooks.WebHookCallException.class)
+        assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
@@ -181,7 +181,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
-        assertThatExceptionOfType(WebHooks.WebHookException.class)
+        assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(null, mi, chatResult, CHATINFO));
     }
 
@@ -201,7 +201,7 @@ public class TestWebhooks {
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
 
-        assertThatExceptionOfType(WebHooks.WebHookCallException.class)
+        assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
@@ -210,7 +210,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_InvalidErrorCode()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
@@ -220,7 +220,7 @@ public class TestWebhooks {
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
 
-        assertThatExceptionOfType(WebHooks.WebHookCallException.class)
+        assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
@@ -229,13 +229,13 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_FailureLookupConfig()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         when(this.fakeDatabase.getBotConfigForWebhookCall(any(), any(), any(), any())).thenThrow(new Database.DatabaseException("BAD CALL"));
 
-        assertThatExceptionOfType(WebHooks.WebHookException.class)
+        assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
 
         verify(this.fakeDatabase).getBotConfigForWebhookCall(any(), any(), any(), any());
@@ -248,7 +248,7 @@ public class TestWebhooks {
      */
     @Test
     public void testHashWebHook_CalculatesOk()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
         String hashString = this.webHooks.getMessageHash("123456", "ThisIsAMessage".getBytes());
 
         // Here's what Python calculated this should be using HMAC SHA256

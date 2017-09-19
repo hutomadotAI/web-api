@@ -64,10 +64,10 @@ public class WebHooks {
             throws WebHookException {
         final String devIdString = chatInfo.devId.toString();
         if (webHook == null) {
-            throw new WebHookException("Webhook cannot be null");
+            throw new WebHookInternalException("Webhook cannot be null");
         }
         if (intent == null) {
-            throw new WebHookException("Intent cannot be null");
+            throw new WebHookInternalException("Intent cannot be null");
         }
         String webHookEndpoint = webHook.getEndpoint();
 
@@ -76,7 +76,7 @@ public class WebHooks {
             config = this.database.getBotConfigForWebhookCall(chatInfo.devId, chatInfo.aiid, intent.getAiid(),
                     this.serializer);
         } catch (Database.DatabaseException e) {
-            throw new WebHookException("Webhook aborted due to failure to load config", e);
+            throw new WebHookInternalException("Webhook aborted due to failure to load config", e);
         }
 
         WebHookPayload payload = new WebHookPayload(intent, chatResult, chatInfo, config);
@@ -96,7 +96,7 @@ public class WebHooks {
                                     final UUID aiid) throws WebHookException {
         String[] webHookSplit = webHookEndpoint.split(":", 2);
         if (webHookSplit.length < 2) {
-            throw new WebHookCallException("Webhook endpoint invalid");
+            throw new WebHookExternalException("Webhook endpoint invalid");
         }
         boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
@@ -104,7 +104,7 @@ public class WebHooks {
         try {
             jsonPayload = this.serializer.serialize(payload);
         } catch (JsonIOException e) {
-            throw new WebHookException("Webhook Payload Serialisation Failed", e);
+            throw new WebHookInternalException("Webhook Payload Serialisation Failed", e);
         }
 
 
@@ -113,7 +113,7 @@ public class WebHooks {
             payloadBytes = jsonPayload.getBytes("UTF-8");
         } catch (java.io.UnsupportedEncodingException e) {
             // should never hit this for UTF-8, not user's fault
-            throw new WebHookException("Webhook payload encoding failed", e);
+            throw new WebHookInternalException("Webhook payload encoding failed", e);
         }
 
         String calculatedHash = null;
@@ -128,7 +128,7 @@ public class WebHooks {
                     this.database.setWebhookSecretForBot(aiid, secret);
                 }
             } catch (Database.DatabaseException e) {
-                throw new WebHookException("WebHook Database Error", e);
+                throw new WebHookInternalException("WebHook Database Error", e);
             }
 
             calculatedHash = getMessageHash(secret, payloadBytes);
@@ -147,12 +147,12 @@ public class WebHooks {
             }
             response = builder.post(Entity.json(payloadBytes));
         } catch (Exception e) {
-            throw WebHookCallException.createWithTypeMessage("WebHook Execution Failed", e);
+            throw WebHookExternalException.createWithTypeMessage("WebHook Execution Failed", e);
         }
 
         try {
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                throw new WebHookCallException(String.format("Webhook call failed (HTTP code %s)", response.getStatus()));
+                throw new WebHookExternalException(String.format("Webhook call failed (HTTP code %s)", response.getStatus()));
             }
 
             response.bufferEntity();
@@ -170,7 +170,7 @@ public class WebHooks {
         final String devIdString = chatInfo.devId.toString();
 
         if (passthroughUrl == null || passthroughUrl.isEmpty()) {
-            throw new WebHookCallException("Invalid URL for passthrough webhook");
+            throw new WebHookExternalException("Invalid URL for passthrough webhook");
         }
 
 
@@ -186,7 +186,7 @@ public class WebHooks {
         return webHookResponse;
     }
 
-    public String getMessageHash(String secret, byte[] payloadBytes) throws WebHookException {
+    public String getMessageHash(String secret, byte[] payloadBytes) throws WebHookInternalException {
         String calculatedHash;
         try {
             SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes("UTF-8"), HMAC_ALGORITHM);
@@ -196,7 +196,7 @@ public class WebHooks {
             calculatedHash = Hex.encodeHexString(calculatedHashBytes);
         } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException | InvalidKeyException e) {
             // should never happen
-            throw new WebHookException("Webhook Payload MAC calculation failed", e);
+            throw new WebHookInternalException("Webhook Payload MAC calculation failed", e);
         }
         return calculatedHash;
     }
@@ -206,12 +206,12 @@ public class WebHooks {
      * @param response the Response to deserialize.
      * @return The deserialized WebHookResponse or null.
      */
-    public WebHookResponse deserializeResponse(final Response response) throws WebHookCallException {
+    public WebHookResponse deserializeResponse(final Response response) throws WebHookExternalException {
         try {
             return (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class),
                     WebHookResponse.class);
         } catch (JsonParseException e) {
-            throw WebHookCallException.createWithTypeMessage("Failed to deserialize webhook response JSON", e);
+            throw WebHookExternalException.createWithTypeMessage("Failed to deserialize webhook response JSON", e);
         }
     }
 
@@ -231,38 +231,53 @@ public class WebHooks {
         return webHook;
     }
 
+
     /**
      * Base class for exceptions due to web hooks.
-     * A direct exception of this type would lead to an Internal Server Error being logged
+     * Shouldn't directly use this class, use one of the derived classes instead.
      */
     public static class WebHookException extends Exception {
-
-        public WebHookException(String message) {
+        protected WebHookException(String message) {
             super(message);
         }
 
-        public WebHookException(String message, Throwable e) {
+        protected WebHookException(String message, Throwable e) {
+            super(message, e);
+        }
+
+    }
+
+    /**
+     * Class for exceptions due to web hooks, where the web hook call failed due to an internal platform issue.
+     * A direct exception of this type would lead to an Internal Server Error being logged.
+     */
+    public static class WebHookInternalException extends WebHookException {
+        public WebHookInternalException(String message) {
+            super(message);
+        }
+
+        public WebHookInternalException(String message, Throwable e) {
             super(message, e);
         }
     }
 
     /**
-     * Class for exceptions due to web hooks, where the web hook call failed.
+     * Class for exceptions due to web hooks, where the web hook call failed due to an external factor.
      * Couldn't connect to the server, invalid URL specified, invalid response from webhook, non 200 return from webhook
      * etc.
      */
-    public static class WebHookCallException extends WebHookException {
-        public WebHookCallException(String message) {
+    public static class WebHookExternalException extends WebHookException {
+        public WebHookExternalException(String message) {
             super(message);
         }
 
-        public WebHookCallException(String message, Throwable e) {
+        public WebHookExternalException(String message, Throwable e) {
             super(message, e);
         }
 
-        public static WebHookCallException createWithTypeMessage(String message, Throwable e) {
+        public static WebHookExternalException createWithTypeMessage(String message, Throwable e) {
             String messageWithType = String.format("%s - %s", message, e.getMessage());
-            return new WebHookCallException(messageWithType, e);
+            return new WebHookExternalException(messageWithType, e);
         }
     }
 }

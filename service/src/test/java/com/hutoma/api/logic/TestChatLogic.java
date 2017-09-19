@@ -1074,7 +1074,7 @@ public class TestChatLogic {
 
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
-                .thenThrow(new WebHooks.WebHookCallException("It went wrong"));
+                .thenThrow(new WebHooks.WebHookExternalException("It went wrong"));
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);
