@@ -162,7 +162,7 @@ $currentAiInfo = json_encode($aiInfo);
 
 <div class="box-footer unselectable">
     <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">revert to saved values</button>
-    <form action="./dynamic/downloadBotExport.php" method="post" style="display:inline; margin:0; padding:0">
+    <form action="./downloadBotExport.php" method="post" style="display:inline; margin:0; padding:0">
         <button type="submit" name="btnExport" id="btnExport" value="_export" class="btn btn-primary flat">export Bot</button>
     </form>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
