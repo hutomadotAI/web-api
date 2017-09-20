@@ -9,8 +9,9 @@ require_once __DIR__ . "/../common/developer.php";
 require_once __DIR__ . "/../common/bot.php";
 require_once __DIR__ . "/../api/botApi.php";
 require_once __DIR__ . "/../common/Assets.php";
+require_once __DIR__ . "/../dist/manifest.php";
 
-$assets = new Assets();
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 

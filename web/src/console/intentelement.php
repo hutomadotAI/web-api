@@ -13,8 +13,9 @@ require_once __DIR__ . "/api/intentsApi.php";
 require_once __DIR__ . "/api/entityApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
 require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
 
-$assets = new Assets();
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 

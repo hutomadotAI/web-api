@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . "/../common/Assets.php";
+require_once __DIR__ . "/../dist/manifest.php";
 
-$assets = new Assets();
+
+$assets = new Assets($manifest);
 ?>
 
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">

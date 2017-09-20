@@ -7,13 +7,18 @@ class Assets
   private $manifest;
   private $host = "/";
 
-  public function __construct()
+  public function __construct($manifest)
   {
-    $this->manifest = yaml_parse_file(__DIR__ . "/../dist/manifest.yml");   
+    $this->manifest = $manifest;
   }
 
   public function getAsset($asset)
   {
     echo $this->host . $this->manifest[$asset];
+  }
+
+  public function getManifest()
+  {
+    return $manifest;
   }
 }

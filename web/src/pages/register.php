@@ -11,8 +11,9 @@ require_once __DIR__ . "/../console/common/sessionObject.php";
 require_once __DIR__ . "/../console/api/userMgmt.php";
 include_once __DIR__ . "/../console/api/signupCodeApi.php";
 require_once __DIR__ . "/../console/common/Assets.php";
+require_once __DIR__ . "/../console/dist/manifest.php";
 
-$assets = new Assets();
+$assets = new Assets($manifest);
 
 function getErrorMessage($message, $alertType = 'alert-warning') {
     $msg ='<div class="alert ' . $alertType . ' text-white flat">';

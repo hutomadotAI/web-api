@@ -4,8 +4,9 @@ namespace hutoma;
 
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
 
-$assets = new Assets();
+$assets = new Assets($manifest);
 
 $header_page_title = "Botstore";
 include __DIR__ . "/include/page_head_default.php";

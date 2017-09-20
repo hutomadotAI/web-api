@@ -2,20 +2,21 @@
 
 namespace hutoma;
 
-    require_once __DIR__ . "/common/globals.php";
-    require_once __DIR__ . "/api/apiBase.php";
-    require_once __DIR__ . "/api/adminApi.php";
-    require_once __DIR__ . "/api/aiApi.php";
-    require_once __DIR__ . "/api/botApi.php";
-    require_once __DIR__ . "/common/bot.php";
-    require_once __DIR__ . "/common/utils.php";
-    require_once __DIR__ . "/common/config.php";
-    require_once __DIR__ . "/common/sessionObject.php";
-    require_once __DIR__ . "/api/botstoreApi.php";
-    require_once __DIR__ . "/common/menuObj.php";
-    require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/adminApi.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/botApi.php";
+require_once __DIR__ . "/common/bot.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/common/config.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
 
-$assets = new Assets();
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 

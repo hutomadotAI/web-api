@@ -5,7 +5,7 @@ UGLIFYJS  := ./node_modules/.bin/uglifyjs
 UGLIFYJS_FLAGS := --compress
 
 # Manifest file where we store mapping for build assets
-MANIFEST_FILE := console/dist/manifest.yml
+MANIFEST_FILE := console/dist/manifest.php
 
 JS_DIRECTORY := console/scripts
 ASSETS_DIRECTORY := console/dist/assets
@@ -50,13 +50,15 @@ build-hash: compress-assets
 	# 4. Add hash to filename;
 	# 5. Replace original file;
 	# 6. Add file mapping to manifest;
+	@echo "<?php \$$manifest = [" >> $(MANIFEST_FILE)
 	@for filename in $(subst $(JS_DIRECTORY)/,$(ASSETS_DIRECTORY)/,$(wildcard $(JS_DIRECTORY)/**/*.js)); do \
 		hash=($$(md5sum $$filename)); \
 		hash=$${hash:0:8}; \
 		hashed_filename="$${filename%%.*}-$$hash.$${filename#*.}"; \
 		mv $$filename $$hashed_filename; \
-		echo "$${filename#$(ASSETS_DIRECTORY)/}: $$hashed_filename" >> $(MANIFEST_FILE); \
+		echo "\"$${filename#$(ASSETS_DIRECTORY)/}\" => \"$$hashed_filename\"," >> $(MANIFEST_FILE); \
 	done
+	@echo "]; ?>" >> $(MANIFEST_FILE)
 
 build-manifest: build-assets
 	# For all the build files create generate hashes, rename files and create an
@@ -64,8 +66,10 @@ build-manifest: build-assets
 	@echo "> build-manifest"
 	# 1. Get all output files
 	# 6. Add file mapping to manifest;
+	@echo "<?php \$$manifest = [" >> $(MANIFEST_FILE)
 	@for filename in $(subst $(JS_DIRECTORY)/,$(ASSETS_DIRECTORY)/,$(wildcard $(JS_DIRECTORY)/**/*.js)); do \
-		echo "$${filename#$(ASSETS_DIRECTORY)/}: $$filename" >> $(MANIFEST_FILE); \
+		echo "\"$${filename#$(ASSETS_DIRECTORY)/}\" => \"$$filename\"," >> $(MANIFEST_FILE); \
 	done
+	@echo "]; ?>" >> $(MANIFEST_FILE)
 
 build: build-hash
