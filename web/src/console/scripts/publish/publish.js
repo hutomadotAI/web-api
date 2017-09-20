@@ -58,7 +58,7 @@ function checkInput() {
 
     // BOT short description input validation
     var bot_description = document.getElementById('bot_description');
-    if (bot_description.value != '' && bot_description.value !== 'undefined') {
+    if (bot_description.value !== '' && bot_description.value !== 'undefined') {
         if (isInputInvalid(bot_description.value, 'bot_description')) {
             createAlertMessage(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.', 'bot_description');
             return false;
@@ -67,7 +67,7 @@ function checkInput() {
 
     // BOT licence fee ( price ) input validation
     var bot_price = document.getElementById('bot_price');
-    if (bot_price.value != '' && bot_price.value !== 'undefined') {
+    if (bot_price.value !== '' && bot_price.value !== 'undefined') {
         if (isInputInvalid(bot_price.value, 'bot_price')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid number.', 'bot_price');
             return false;
@@ -76,7 +76,7 @@ function checkInput() {
 
     // BOT privacy policy input validation URI
     var bot_privacyPolicy = document.getElementById('bot_privacyPolicy');
-    if (bot_privacyPolicy.value != '' && bot_privacyPolicy.value !== 'undefined') {
+    if (bot_privacyPolicy.value !== '' && bot_privacyPolicy.value !== 'undefined') {
         if (isInputInvalid(bot_privacyPolicy.value, 'URI')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'bot_privacyPolicy');
             return false;
@@ -241,19 +241,19 @@ function createAlertMessage(alarm, message, id) {
         case ALERT.BASIC.value:
             msg_class = 'alert alert-dismissable flat alert-base';
             ico_class = 'icon fa fa-check';
-            if (id != null)
+            if (id !== null)
                 document.getElementById(id).style.border = "0px";
             break;
         case ALERT.WARNING.value:
             msg_class = 'alert alert-dismissable flat alert-warning';
             ico_class = 'icon fa fa-check';
-            if (id != null)
+            if (id !== null)
                 document.getElementById(id).style.border = "1px solid orange";
             break;
         case ALERT.DANGER.value:
             msg_class = 'alert alert-dismissable flat alert-danger';
             ico_class = 'icon fa fa-warning';
-            if (id != null)
+            if (id !== null)
                 document.getElementById(id).style.border = "1px solid red";
             break;
         case ALERT.SUCCESS.value:
@@ -389,63 +389,63 @@ function fieldsBotValidation() {
     var elem;
 
     elem = document.getElementById('bot_name');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The name field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_description');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The description field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_longDescription');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The long description field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_licenseType');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The licenseType field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_category');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The category field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_classification');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The classification field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_sample');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The sample field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_price');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The price field cannot be empty!');
         return false;
     }
 
     elem = document.getElementById('bot_version');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The version field cannot be empty!');
         return false;

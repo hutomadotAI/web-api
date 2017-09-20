@@ -30,7 +30,7 @@ function checkDevInput() {
 
     // Developer email input validation
     var developer_email = document.getElementById('developer_email');
-    if (developer_email.value != '' && developer_email.value !== 'undefined') {
+    if (developer_email.value !== '' && developer_email.value !== 'undefined') {
         if (isInputInvalid(developer_email.value, 'developer_email')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid email.', 'developer_email');
             return false;
@@ -38,7 +38,7 @@ function checkDevInput() {
     }
     // Developer website input validation
     var developer_website = document.getElementById('developer_website');
-    if (developer_website.value != '' && developer_website.value !== 'undefined') {
+    if (developer_website.value !== '' && developer_website.value !== 'undefined') {
         if (isInputInvalid(developer_website.value, 'URI')) {
             createAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'developer_website');
             return false;
@@ -104,7 +104,7 @@ function callback() {
 }
 
 function removeAlert(node) {
-    if (node.getAttribute("style") != null && node.getAttribute("style") != "") {
+    if (node.getAttribute("style") !== null && node.getAttribute("style") !== "") {
         node.style.border = "0px";
         if (document.getElementById('containerMsgAlertDeveloper') !== null)
             document.getElementById('containerMsgAlertDeveloper').remove();
@@ -120,19 +120,19 @@ function createAlertMessage(alarm, message, id) {
         case ALERT.BASIC.value:
             msg_class = 'alert alert-dismissable flat alert-base no-margin';
             ico_class = 'icon fa fa-check';
-            if (id != null)
+            if (id !== null)
                 document.getElementById(id).style.border = "0px";
             break;
         case ALERT.WARNING.value:
             msg_class = 'alert alert-dismissable flat alert-warning no-margin';
             ico_class = 'icon fa fa-check';
-            if (id != null)
+            if (id !== null)
                 document.getElementById(id).style.border = "1px solid orange";
             break;
         case ALERT.DANGER.value:
             msg_class = 'alert alert-dismissable flat alert-danger no-margin';
             ico_class = 'icon fa fa-warning';
-            if (id != null)
+            if (id !== null)
                 document.getElementById(id).style.border = "1px solid red";
             break;
         case ALERT.PRIMARY.value:
@@ -190,21 +190,21 @@ function fieldsDevValidation() {
     var elem;
 
     elem = document.getElementById('developer_name');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The name field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_address');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The address field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_postCode');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The postcode field cannot is empty!');
         return false;
@@ -218,14 +218,14 @@ function fieldsDevValidation() {
     }
 
     elem = document.getElementById('developer_email');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The email field cannot is empty!');
         return false;
     }
 
     elem = document.getElementById('developer_company');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The company field cannot is empty!');
         return false;

@@ -15,9 +15,11 @@ $assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
+$requestedAi = $_REQUEST['ai'];
 $botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
-$botDetails = $botApi->getAiBotDetails(sessionObject::getCurrentAI()['aiid']);
+$botDetails = $botApi->getAiBotDetails($requestedAi);
 unset($botApi);
+
 ?>
 <div class="row">
     <div class="col-md-12" id="publishInfoBox">
@@ -373,7 +375,7 @@ unset($botApi);
 
 <script>
     var developer = <?php
-        $dev = new \hutoma\developer();
+        $dev = new developer();
         $dev->setName($developer['info']['name']);
         $dev->setCompany($developer['info']['company']);
         $dev->setEmail($developer['info']['email']);
@@ -391,7 +393,7 @@ unset($botApi);
         ?>;
 
     var bot = <?php
-        $bot = new \hutoma\bot();
+        $bot = new bot();
         //TODO need check controll on value returned by API
         /* if (isset($botDetails)!=200) {} */
 
@@ -413,7 +415,8 @@ unset($botApi);
             $bot->setVideoLink($botDetails['bot']['videoLink']);
         }
         else{
-            $ai = sessionObject::getCurrentAI();
+            $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+            $ai = $aiApi->getSingleAI($requestedAi);
             $bot->setAiid($ai['aiid']);
             $bot->setName($ai['name']);
             $bot->setDescription(isset($ai['description']) ? $ai['description'] : "");
