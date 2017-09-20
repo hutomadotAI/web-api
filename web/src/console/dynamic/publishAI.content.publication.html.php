@@ -426,5 +426,5 @@ unset($botApi);
         unset($tmp_bot);
         ?>;
 </script>
-<script src="<? $assets->getAsset('drag-and-drop/drag-and-drop.js') ?>"></script>
-<script src="<? $assets->getAsset('publish/publish.js') ?>"></script>
+<script src="<?php $assets->getAsset('drag-and-drop/drag-and-drop.js') ?>"></script>
+<script src="<?php $assets->getAsset('publish/publish.js') ?>"></script>

@@ -147,7 +147,7 @@ if(isset($_POST['submit'])) {
     <script type="text/javascript" src="/console/dist/vendors/cookiePolicyBar/cookiePolicyBar.js"></script>
     <script type="text/javascript" src="/console/dist/vendors/iCheck/icheck.min.js"></script>
     
-    <script src='<? $assets->getAsset('security/password.js') ?>'></script>
+    <script src='<?php $assets->getAsset('security/password.js') ?>'></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
     
     <script type="text/javascript">

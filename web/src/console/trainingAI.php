@@ -105,14 +105,14 @@ include __DIR__ . "/include/page_menu.php";
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
-<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
 <script src="/console/dist/vendors/iCheck/icheck.min.js"></script>
-<script src="<? $assets->getAsset('training/training.area.upload.textfile.js') ?>"></script>
-<script src="<? $assets->getAsset('training/training.area.js') ?>"></script>
-<script src="<? $assets->getAsset('chat/chat.js') ?>"></script>
-<script src="<? $assets->getAsset('chat/voice.js') ?>"></script>
-<script src="<? $assets->getAsset('clipboard/copyToClipboard.js') ?>"></script>
+<script src="<?php $assets->getAsset('training/training.area.upload.textfile.js') ?>"></script>
+<script src="<?php $assets->getAsset('training/training.area.js') ?>"></script>
+<script src="<?php $assets->getAsset('chat/chat.js') ?>"></script>
+<script src="<?php $assets->getAsset('chat/voice.js') ?>"></script>
+<script src="<?php $assets->getAsset('clipboard/copyToClipboard.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "training", 1, true, false);

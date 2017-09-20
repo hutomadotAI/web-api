@@ -100,13 +100,13 @@ include __DIR__ . "/include/page_head_default.php";
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
 <script src="/console/dist/vendors/select2/select2.full.js"></script>
-<script src="<? $assets->getAsset('botstore/botstore.js') ?>"></script>
-<script src="<? $assets->getAsset('botstore/carousel.js') ?>"></script>
-<script src="<? $assets->getAsset('botcard/botcard.js') ?>"></script>
-<script src="<? $assets->getAsset('botcard/buyBot.js') ?>"></script>
+<script src="<?php $assets->getAsset('botstore/botstore.js') ?>"></script>
+<script src="<?php $assets->getAsset('botstore/carousel.js') ?>"></script>
+<script src="<?php $assets->getAsset('botcard/botcard.js') ?>"></script>
+<script src="<?php $assets->getAsset('botcard/buyBot.js') ?>"></script>
 <script src="/console/dist/vendors/mustache.min.js"></script>
-<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $category = isset($_GET['category']) ? $_GET['category'] : "";

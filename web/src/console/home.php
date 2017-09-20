@@ -90,8 +90,8 @@ include __DIR__ . "/include/page_menu.php";
 <script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
-<script src="<? $assets->getAsset('home/home.js') ?>"></script>
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('home/home.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <script>
     var aiList = <?php echo $aiListJson ?>;

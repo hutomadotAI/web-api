@@ -110,15 +110,15 @@ include __DIR__ . "/include/page_menu.php";
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="<? $assets->getAsset('createAI/createAIWizard.js') ?>"></script>
-<script src="<? $assets->getAsset('botstore/botstore.js') ?>"></script>
-<script src="<? $assets->getAsset('botstore/carousel.js') ?>"></script>
+<script src="<?php $assets->getAsset('createAI/createAIWizard.js') ?>"></script>
+<script src="<?php $assets->getAsset('botstore/botstore.js') ?>"></script>
+<script src="<?php $assets->getAsset('botstore/carousel.js') ?>"></script>
 
-<script src="<? $assets->getAsset('setting/setting.linkBot.js') ?>"></script>
-<script src="<? $assets->getAsset('setting/setting.aiSkill.js') ?>"></script>
+<script src="<?php $assets->getAsset('setting/setting.linkBot.js') ?>"></script>
+<script src="<?php $assets->getAsset('setting/setting.aiSkill.js') ?>"></script>
 <script src="/console/dist/vendors/mustache.min.js"></script>
-<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj("", "home", 0, false, true);

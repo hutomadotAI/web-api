@@ -147,14 +147,14 @@ include __DIR__ . "/include/page_menu.php";
 
 <script src="/console/dist/vendors/jQuery/jquery.omniselect.js"></script>
 <script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
-<script src="<? $assets->getAsset('validation/validation.js') ?>"></script>
-<script src="<? $assets->getAsset('button-select/buttonSelect.js') ?>"></script>
-<script src="<? $assets->getAsset('intent/intent.polling.js') ?>"></script>
-<script src="<? $assets->getAsset('intent/intent.element.other.js') ?>"></script>
-<script src="<? $assets->getAsset('intent/intent.element.js') ?>"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('button-select/buttonSelect.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.polling.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.element.other.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.element.js') ?>"></script>
 <script src="/console/dist/vendors/mustache.min.js"></script>
-<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 <script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
 
 <?php

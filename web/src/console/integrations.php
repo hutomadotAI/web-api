@@ -62,9 +62,9 @@ include __DIR__ . "/include/page_menu.php";
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
 <script src="/console/dist/js/mustache.min.js"></script>
-<script src="<? $assets->getAsset('validation/validation.js') ?>"></script>
-<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "integrations", 1, true, false);

@@ -146,4 +146,4 @@ $assets = new Assets($manifest);
     </div>
 </div>
 
-<script src="<? $assets->getAsset('publish/developer.js') ?>"></script>
+<script src="<?php $assets->getAsset('publish/developer.js') ?>"></script>

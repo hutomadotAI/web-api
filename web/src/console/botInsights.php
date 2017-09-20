@@ -174,13 +174,13 @@ include __DIR__ . "/include/page_menu.php";
 
 <script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
-<script src="<? $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 <script src="/console/dist/vendors/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
 <script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="<? $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "insights", 1, true, false);
