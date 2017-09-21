@@ -12,6 +12,7 @@ require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/config.php";
 require_once __DIR__ . "/../common/logging.php";
 require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../common/emailUtil.php";
 require_once __DIR__ . "/../api/adminApi.php";
 
 use hutoma as base;
