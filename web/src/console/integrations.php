@@ -61,7 +61,7 @@ include __DIR__ . "/include/page_menu.php";
 <script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
-<script src="/console/dist/js/mustache.min.js"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
 <script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
 <script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
 <script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
