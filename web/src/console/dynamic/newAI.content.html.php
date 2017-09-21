@@ -57,7 +57,7 @@
             as a bot can't be created with a duplicate name.
         </p>
         <br />
-        <form method="POST" action="./botImport.php" enctype="multipart/form-data" style="display:inline; margin:0; padding:0">
+        <form method="POST" action="./proxy/botImport.php" enctype="multipart/form-data" style="display:inline; margin:0; padding:0">
             <input type="file" name="file" class="filestyle" data-iconName="glyphicon glyphicon-inbox"
                    data-buttonName="btn-success btn-sm flat" data-placeholder="Select Bot File"
                    data-buttonText="select bot file" style="float:left;">
