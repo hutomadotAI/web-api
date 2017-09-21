@@ -18,7 +18,15 @@ class aiProxy extends ajaxApiProxy {
         $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
         $result = $aiApi->deleteAI(sessionObject::getCurrentAI()['aiid']);
         unset($aiApi);
-        utils::redirect('../home.php');
+
+        if (isset($result)) {
+            if ($result['status']['code'] !== 200) {
+                errorRedirect::handleErrorRedirect($result);
+            }
+        } else {
+            errorRedirect::handleErrorRedirect(
+                errorRedirect::buildError(500,'Could not delete the bot. Please try again later.'));
+        }
     }
 
     private function addAi($vars)

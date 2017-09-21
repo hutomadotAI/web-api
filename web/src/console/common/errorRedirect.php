@@ -23,4 +23,13 @@ class errorRedirect
     public static function defaultErrorRedirect() {
         utils::redirect(config::getErrorPageUrl() . '?err=500&msg=Internal%20Server%20Error');
     }
+
+    public static function buildError($code, $info) {
+        return array(
+            'status' => array (
+                'code' => $code,
+                'info' => $info
+            )
+        );
+    }
 }
