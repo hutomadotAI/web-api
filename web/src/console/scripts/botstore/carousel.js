@@ -16,7 +16,8 @@ function showCarousel(botstoreCategorizedItems, category, see_more, showHeader, 
             view.category = category;
         }
         $.get('templates/botstore_carousel_empty.mustache', function (template) {
-            targetElement.html(Mustache.render(template, view));
+            targetElement.append(Mustache.render(template, view));
+            notifyParentOfPaintEnd(category === "");
         });
     } else {
 
@@ -36,7 +37,6 @@ function showCarousel(botstoreCategorizedItems, category, see_more, showHeader, 
                 view.carousel.showMoreButton = see_more;
             }
             targetElement.append(Mustache.render(template, view));
-
 
             $.get('templates/botstore_carousel_item.mustache', function (template) {
                 var arr = [];
@@ -119,9 +119,9 @@ function getCarousels(category, showHeader, openFullStore) {
 function notifyParentOfPaintEnd(hasMultipleCategories) {
     // Notify any parent that we've finished painting
     var carousels = document.getElementsByClassName('carousel-content');
+    var height;
     if (carousels !== null && carousels.length > 0) {
         var lastCarousel = carousels[carousels.length - 1];
-        var height;
         if (hasMultipleCategories) {
             height = lastCarousel.getBoundingClientRect().bottom;
         } else {
@@ -131,16 +131,19 @@ function notifyParentOfPaintEnd(hasMultipleCategories) {
                 height = lastCard.getBoundingClientRect().bottom;
             }
         }
+    } else {
+        carousels = document.getElementById('botsCarousels');
+        height = carousels.getBoundingClientRect().bottom;
+    }
 
-        if (window.parent !== null) {
-            var event = new CustomEvent('BotstoreFinishPaintEvent', {
-                detail: {
-                    height: height,
-                    event: 'BotstoreFinishPaintEvent'
-                }
-            });
-            window.parent.postMessage(event.detail, '*');
-        }
+    if (window.parent !== null) {
+        var event = new CustomEvent('BotstoreFinishPaintEvent', {
+            detail: {
+                height: height,
+                event: 'BotstoreFinishPaintEvent'
+            }
+        });
+        window.parent.postMessage(event.detail, '*');
     }
 }
 
