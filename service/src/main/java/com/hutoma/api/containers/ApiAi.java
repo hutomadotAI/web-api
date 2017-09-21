@@ -9,6 +9,7 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,6 +74,9 @@ public class ApiAi extends ApiResult {
     @SerializedName("bot_config_definition")
     private AiBotConfigDefinition botConfigDefinition;
 
+    @SerializedName("linked_bots")
+    private List<Integer> linkedBots = new ArrayList<>();
+
     public ApiAi(final String aiid, final String clientToken) {
         this.aiid = aiid;
         this.clientToken = clientToken;
@@ -124,6 +128,14 @@ public class ApiAi extends ApiResult {
         this.passthroughUrl = other.passthroughUrl;
         this.botConfigDefinition = other.botConfigDefinition;
         populateExtendedStatus();
+    }
+
+    public void setLinkedBots(final List<Integer> linkedBots) {
+        this.linkedBots = linkedBots == null ? new ArrayList<>() : linkedBots;
+    }
+
+    public List<Integer> getLinkedBots() {
+        return this.linkedBots;
     }
 
     /***
@@ -203,15 +215,25 @@ public class ApiAi extends ApiResult {
         return this.description;
     }
 
-    public boolean getIsPrivate() { return this.isPrivate; }
+    public boolean getIsPrivate() {
+        return this.isPrivate;
+    }
 
-    public int getPersonality() { return this.personality; }
+    public int getPersonality() {
+        return this.personality;
+    }
 
-    public int getVoice() { return this.voice; }
+    public int getVoice() {
+        return this.voice;
+    }
 
-    public Locale getLanguage() { return this.language; }
+    public Locale getLanguage() {
+        return this.language;
+    }
 
-    public String getTimezone() { return this.timezone; }
+    public String getTimezone() {
+        return this.timezone;
+    }
 
     public boolean trainingFileUploaded() {
         return this.trainingFileUploaded;
