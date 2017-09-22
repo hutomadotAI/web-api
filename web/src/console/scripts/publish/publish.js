@@ -291,6 +291,9 @@ function displayPublishAlertMessage(alarm, message, id) {
 function populateBotFields(bot) {
     try { 
         var json = JSON.parse(bot);
+
+        // If there are linked bots show the warning that this is not supported yet
+        document.getElementById('linkedBotWarning').style.display = json['linked_bots'].length > 0 ? 'block' : 'none';
         
         document.getElementById('bot_id').value = json['botId'];
         document.getElementById('bot_aiid').value = json['aiid'];

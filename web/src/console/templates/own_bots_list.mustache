@@ -2,18 +2,22 @@
 <tr role="row" class="{{oddEven}}">
     <td class="text-gray" style="padding-top: 15px;">{{name}}</td>
     <td style="padding-top: 15px;">{{description}}</td>
+    <td class="text-center" style="padding-top: 15px;">{{numLinkedSkills}}</td>
     <td class="text-center" style="padding-top: 15px;">{{{trainingStatusString}}}</td>
+
     <td style="padding-top: 8px;padding-right: 0;">
 
         {{#canBePublished}}
-            <button type="button" id="btnPublishAI"  value="{{aiid}}" onClick = "sendAIID(this,'./publishAI.php')"
+            <button type="button" id="btnPublishAI"  value="{{aiid}}" onClick="sendAIID(this,'./publishAI.php')"
+                    data-toggle="tooltip" title=""
+                    data-original-title="{{publishButtonTooltip}}"
                     class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;"><b> <span class="fa fa-globe"></span> Publish Bot</b> </button>
         {{/canBePublished}}
-        {{#needsTrainingForPublishing}}
+        {{#cannotBePublished}}
             <button type="button" id="btnPublishAI"  value="{{aiid}}"
                 data-toggle="tooltip" title="" class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;"
-                    data-original-title="The bot needs to be fully trained before being published" ><b><span class="fa fa-globe"></span> Publish Bot</b> </button>
-        {{/needsTrainingForPublishing}}
+                    data-original-title="{{publishButtonTooltip}}"><b><span class="fa fa-globe"></span> Publish Bot</b> </button>
+        {{/cannotBePublished}}
         {{#submittedForPublishing}}
             <button type="button" id="btnPublishAI"  value="{{aiid}}" class="btn btn-warning flat pull-right" style="margin-right: 0; width: 125px;"><b> Request Sent</b></button>
         {{/submittedForPublishing}}

@@ -34,6 +34,18 @@ unset($botApi);
         </div>
     </div>
 </div>
+<div class="row" id="linkedBotWarning" style="display: none">
+    <div class="col-md-12">
+        <div class="alert alert-dismissable flat alert-danger unselectable" style="padding-bottom: 25px;">
+            <span class="text-white">
+                <dt>Important note:</dt>
+                <dl class="dl-horizontal no-margin" style="text-align:justify">
+                    We do not currently support publishing with linked skills. Please remove them if you’d like your bot to be published.
+                </dl>
+            </span>
+        </div>
+    </div>
+</div>
 <div class="box box-solid flat no-shadow drop-zone-580">
     <div class="box-body">
         <!-- row 0 -->
@@ -413,6 +425,7 @@ unset($botApi);
             $bot->setSample($botDetails['bot']['sample']);
             $bot->setVersion($botDetails['bot']['version']);
             $bot->setVideoLink($botDetails['bot']['videoLink']);
+            $bot->setLinkedBots($botDetails['bot']['linked_bots']);
         }
         else{
             $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
@@ -420,6 +433,7 @@ unset($botApi);
             $bot->setAiid($ai['aiid']);
             $bot->setName($ai['name']);
             $bot->setDescription(isset($ai['description']) ? $ai['description'] : "");
+            $bot->setLinkedBots($ai['linked_bots']);
         }
 
         $tmp_bot = $bot->toJSON();

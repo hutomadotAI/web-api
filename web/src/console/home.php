@@ -63,6 +63,7 @@ include __DIR__ . "/include/page_menu.php";
                             <tr disabled>
                                 <th class="text-left" style="border:0; width:20%">Bot Name</th>
                                 <th class="text-left" style="border:0; width:25%">Description</th>
+                                <th class="text-center" style="border:0; width:15%"># Skills Linked</th>
                                 <th class="text-center" style="border:0; width:15%">Status</th>
                                 <th style="border:0; width:5%"></th>
                                 <th style="border:0; width:5%"></th>
