@@ -119,6 +119,7 @@ class aiProxy extends ajaxApiProxy {
         if (isset($vars['action'])) {
             if ($vars['action'] === 'delete') {
                 $this->deleteAi($vars);
+                utils::redirect('../home.php', null);
             }
         } else {
             $this->addAi($vars);
