@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -183,6 +184,10 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
             } else {
+                List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devid, aiid);
+                if (!linkedBots.isEmpty()) {
+                    ai.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+                }
                 this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI", devIdString, logMap);
                 return ai.setSuccessStatus();
             }
@@ -463,7 +468,7 @@ public class AILogic {
                 }
             }
             BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
-                    entityMap, this.version, bot.getIsPrivate(), bot.getPersonality(), (float)bot.getConfidence(),
+                    entityMap, this.version, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
                     bot.getVoice(), bot.getLanguage().toString(), bot.getTimezone());
             return new ApiBotStructure(botStructure).setSuccessStatus();
 
@@ -520,17 +525,16 @@ public class AILogic {
 
         ApiAi bot = null;
 
-        try
-        {
-            bot = (ApiAi)result;
-        } catch(ClassCastException e) {
+        try {
+            bot = (ApiAi) result;
+        } catch (ClassCastException e) {
             throw new BotImportException(result.getStatus().getInfo());
         }
 
         UUID aiid = UUID.fromString(bot.getAiid());
 
         try {
-            bot = (ApiAi)this.getSingleAI(devId, aiid);
+            bot = (ApiAi) this.getSingleAI(devId, aiid);
         } catch (Exception e) {
             throw new BotImportException("Failed to retrieve newly imported bot.");
         }
@@ -556,8 +560,7 @@ public class AILogic {
                     this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e);
                 }
             }
-        }
-        catch (Database.DatabaseException ex) {
+        } catch (Database.DatabaseException ex) {
             throw new BotImportException("Failed to create new entities from imported bot.");
         }
 
