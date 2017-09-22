@@ -518,8 +518,12 @@ public class AILogic {
                 importedBot.getPersonality(), importedBot.getConfidence(), importedBot.getVoice(), Locale.forLanguageTag(importedBot.getLanguage()),
                 importedBot.getTimezone());
 
-        ApiAi bot = (ApiAi)result;
-        if (bot == null) {
+        ApiAi bot = null;
+
+        try
+        {
+            bot = (ApiAi)result;
+        } catch(ClassCastException e) {
             throw new BotImportException(result.getStatus().getInfo());
         }
 

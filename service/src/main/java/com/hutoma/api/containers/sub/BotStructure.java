@@ -126,7 +126,7 @@ public class BotStructure {
 
     private boolean validV1() {
         if (this.name == null || this.name.isEmpty() ||
-                this.description == null || this.description.isEmpty() ||
+                this.description == null ||
                 this.language == null || this.language.isEmpty() ||
                 this.timezone == null || this.timezone.isEmpty()) {
             return false;
