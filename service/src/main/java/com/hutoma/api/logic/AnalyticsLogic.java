@@ -260,7 +260,7 @@ public class AnalyticsLogic {
                                                      final DateTime to) {
         return org.elasticsearch.index.query.QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("type.keyword", "TRACE"))
-                .must(QueryBuilders.termQuery("tag.keyword", "chatlogic"))
+                .must(QueryBuilders.termQuery("@log_name.keyword", "API-chatlog-v1.chatlogic"))
                 .must(QueryBuilders.termQuery("params.AIID.keyword", aiid.toString()))
                 .must(QueryBuilders.termQuery("params.DevId.keyword", devId.toString()))
                 .must(QueryBuilders.rangeQuery(CHATLOGS_DATETIME_FIELD).from(from.toString()).to(to.toString()));
