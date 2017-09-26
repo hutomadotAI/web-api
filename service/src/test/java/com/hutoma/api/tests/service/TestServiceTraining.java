@@ -1,9 +1,7 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.TrainingEndpoint;
@@ -17,7 +15,6 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -40,19 +37,17 @@ public class TestServiceTraining extends ServiceTestBase {
     private static final String TRAINING_BASEPATH = "/ai/" + TestDataHelper.AIID + "/training";
     @Mock
     private IMemoryIntentHandler fakeMemoryIntentHandler;
-    @Mock
-    private AIServices fakeAiServices;
 
     @Before
     public void setup() {
     }
 
     @Test
-    @Ignore // @Bug 2972
     public void testTrainingUpload() throws Database.DatabaseException, IOException {
         doReturn(1000).when(this.fakeConfig).getMaxUploadSizeKb();
         when(this.fakeDatabaseEntitiesIntents.updateAiTrainingFile(any(), any())).thenReturn(true);
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         Response response = upload(String.valueOf(TrainingLogic.TrainingType.TEXT.type()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
@@ -105,7 +100,6 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    @Ignore // @Bug 2972
     public void testTrainingUpdate() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
@@ -115,7 +109,6 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    @Ignore // @Bug 2972
     public void testTrainingUpdate_invalid_devId() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
@@ -124,10 +117,10 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    @Ignore // @Bug 2972
     public void testGetTrainingMaterials() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         final Response response = target(TRAINING_BASEPATH)
                 .path("materials")
                 .request()
@@ -147,7 +140,6 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    @Ignore
     public void testTrainingUpdate_intentOnly() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
@@ -157,7 +149,6 @@ public class TestServiceTraining extends ServiceTestBase {
         intent.setResponses(Collections.singletonList("response"));
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(intent);
-        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(intent.getIntentName());
 
         final Response response = testTraining("update", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -200,10 +191,9 @@ public class TestServiceTraining extends ServiceTestBase {
         binder.bind(AILogic.class).to(AILogic.class);
 
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
-        this.fakeAiServices = mock(AIServices.class);
 
         binder.bindFactory(new InstanceFactory<>(TestServiceTraining.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
-        binder.bindFactory(new InstanceFactory<>(TestServiceTraining.this.fakeAiServices)).to(AIServices.class);
+
         return binder;
     }
 }
