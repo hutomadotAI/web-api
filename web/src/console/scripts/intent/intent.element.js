@@ -139,8 +139,6 @@ function saveIntent() {
         return false;
     }
 
-    var prevCursor = document.body.style.cursor;
-    document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
     msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
@@ -149,6 +147,7 @@ function saveIntent() {
 }
 
 function saveIntentToApi(intentName, expressions, responses, variables, webhook) {
+    var prevCursor = document.body.style.cursor;
     var request = {
         url: './proxy/intentProxy.php',
         data: {
@@ -159,18 +158,23 @@ function saveIntentToApi(intentName, expressions, responses, variables, webhook)
             webhook: webhook
         },
         verb: 'PUT',
-        onGenericError: function() {
+        onGenericError: function () {
             msgAlertIntentElement(ALERT.DANGER.value, "There was a problem saving the intent.");
         },
-        onOK: function() {
+        onOK: function () {
             msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
             enableSaving(false);
             createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
         },
-        onShowError: function(message) {
+        onShowError: function (message) {
             msgAlertIntentElement(message);
+        },
+        onComplete: function () {
+            document.body.style.cursor = prevCursor;
         }
+
     };
+    document.body.style.cursor = 'wait';
     commonAjaxApiRequest(request);
 }
 
