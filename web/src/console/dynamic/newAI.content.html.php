@@ -58,7 +58,7 @@
         </p>
         <br />
         <form method="POST" action="./proxy/botImport.php" enctype="multipart/form-data" style="display:inline; margin:0; padding:0">
-            <input type="file" name="file" class="filestyle" data-iconName="glyphicon glyphicon-inbox"
+            <input type="file" name="file" required class="filestyle" data-iconName="glyphicon glyphicon-inbox"
                    data-buttonName="btn-success btn-sm flat" data-placeholder="Select Bot File"
                    data-buttonText="select bot file" style="float:left;">
         <b><input type="submit" value="Import Bot" class="btn btn-success flat pull-right" style="float:right;"></b>
