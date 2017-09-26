@@ -2,7 +2,8 @@
      class="alert alert-dismissable flat alert-base">
     <div class="integration-plugin {{plugin_class}}"
          messenger_app_id="{{appid}}"
-         page_id="{{pageid}}"
+         page_id="{{pageid}}"{{#data_ref}}
+         data-ref="{{data_ref}}"{{/data_ref}}
          color="blue"
          size="large">
     </div>
