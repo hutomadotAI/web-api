@@ -17,6 +17,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -47,6 +48,7 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
+    @Ignore // @Bug 2972
     public void testTrainingUpload() throws Database.DatabaseException, IOException {
         doReturn(1000).when(this.fakeConfig).getMaxUploadSizeKb();
         when(this.fakeDatabaseEntitiesIntents.updateAiTrainingFile(any(), any())).thenReturn(true);
@@ -103,6 +105,7 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
+    @Ignore // @Bug 2972
     public void testTrainingUpdate() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
@@ -112,6 +115,7 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
+    @Ignore // @Bug 2972
     public void testTrainingUpdate_invalid_devId() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
@@ -120,6 +124,7 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
+    @Ignore // @Bug 2972
     public void testGetTrainingMaterials() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
@@ -142,6 +147,7 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
+    @Ignore
     public void testTrainingUpdate_intentOnly() throws Database.DatabaseException, IOException {
         when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
@@ -151,11 +157,14 @@ public class TestServiceTraining extends ServiceTestBase {
         intent.setResponses(Collections.singletonList("response"));
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(intent);
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(intent.getIntentName());
+
         final Response response = testTraining("update", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
-    private Response testTraining(final String path, final MultivaluedHashMap<String, Object> headers) {
+    private Response testTraining(final String path, final MultivaluedHashMap<String, Object> headers) throws Database.DatabaseException {
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         return target(TRAINING_BASEPATH)
                 .path(path)
                 .request()

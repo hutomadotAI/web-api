@@ -503,9 +503,19 @@ public class AILogic {
             return ApiError.getInternalServerError();
         }
 
+        UUID uuidAiid = UUID.fromString(createdBot.getAiid());
+
+        try {
+            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devId, uuidAiid, this.jsonSerializer);
+            this.aiServices.uploadTraining(createdBot.getBackendStatus(), devId, uuidAiid, trainingMaterials);
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+
         // Bot successfully imported. Start training.
         try {
-            this.aiServices.startTraining(createdBot.getBackendStatus(), devId, UUID.fromString(createdBot.getAiid()));
+            this.aiServices.startTraining(createdBot.getBackendStatus(), devId, uuidAiid);
         } catch (AIServices.AiServicesException | RuntimeException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "ImportStartTraining", devId.toString(), ex);
             return ApiError.getInternalServerError();
@@ -573,7 +583,7 @@ public class AILogic {
             throw new BotImportException("Failed to write intents for imported bot.");
         }
 
-        // Add the training file.
+        // Add the training file to the database.
         try {
             this.databaseEntitiesIntents.updateAiTrainingFile(aiid, importedBot.getTrainingFile());
         } catch (Exception e) {

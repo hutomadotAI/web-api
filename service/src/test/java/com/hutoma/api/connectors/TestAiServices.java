@@ -50,6 +50,7 @@ public class TestAiServices {
 
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
+    private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
@@ -66,6 +67,7 @@ public class TestAiServices {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
+        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
@@ -82,7 +84,7 @@ public class TestAiServices {
                 TestDataHelper.getEndpointFor(WNET_ENDPOINT));
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
                 TestDataHelper.getEndpointFor(RNN_ENDPOINT));
-        this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
+        this.aiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, this.fakeClient, new ThreadSubPool(threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }

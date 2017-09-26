@@ -113,7 +113,7 @@ public class TrainingLogic {
                         return ApiError.getNotFound();
                     }
 
-                    String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
+                    String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid, this.jsonSerializer);
                     if (trainingMaterials == null) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadFile - training materials null after validation",
                                 devidString, logMap);
@@ -277,7 +277,6 @@ public class TrainingLogic {
      * @param aiid
      * @return
      */
-
     public ApiResult updateTraining(final UUID devid, final UUID aiid) {
         final String devidString = devid.toString();
         try {
@@ -297,7 +296,7 @@ public class TrainingLogic {
                 case AI_ERROR:              // fallthrough
                 case AI_UNDEFINED:
                     try {
-                        String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
+                        String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid, this.jsonSerializer);
                         if (trainingMaterials == null || trainingMaterials.isEmpty()) {
                             this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
                                     devidString, logMap);
@@ -343,7 +342,7 @@ public class TrainingLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            String trainingMaterials = this.getTrainingMaterialsCommon(devid, aiid);
+            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid, this.jsonSerializer);
             if (trainingMaterials == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterials - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -434,32 +433,6 @@ public class TrainingLogic {
 
     private boolean isTopicMarker(final String line) {
         return line.startsWith(TrainingLogic.TOPIC_MARKER);
-    }
-
-    private String getTrainingMaterialsCommon(final UUID devid, final UUID aiid) throws DatabaseException {
-        final String devidString = devid.toString();
-        StringBuilder sb = new StringBuilder();
-        ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
-        if (ai == null) {
-            this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterialsCommon - AI not found", devidString,
-                    LogMap.map("AIID", aiid));
-            return null;
-        }
-        String userTrainingFile = this.database.getAiTrainingFile(aiid);
-        if (userTrainingFile != null && !userTrainingFile.isEmpty()) {
-            sb.append(userTrainingFile);
-        }
-        for (String intentName : this.database.getIntents(devid, aiid)) {
-            ApiIntent intent = this.database.getIntent(aiid, intentName);
-            for (String userSays : intent.getUserSays()) {
-                if (sb.length() > 0) {
-                    sb.append(EOL);
-                }
-                sb.append(userSays).append(EOL);
-                sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentName).append(EOL);
-            }
-        }
-        return sb.toString();
     }
 
     /**

@@ -226,4 +226,6 @@ public class TestAIServicesLogic {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
+
+
 }
