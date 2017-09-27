@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import javax.inject.Provider;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -134,8 +135,10 @@ public class TestQueueProcessor {
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
         this.fakeTools = new FakeTimerTools();
+        Provider<AIQueueServices> fakeQueueServicesProvider = mock(Provider.class);
+        when(fakeQueueServicesProvider.get()).thenReturn(this.fakeQueueServices);
 
-        this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, this.fakeQueueServices,
+        this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, fakeQueueServicesProvider,
                 this.fakeTools, mock(AiServiceStatusLogger.class));
         this.qproc.initialise(this.fakeController, BackendServerType.WNET);
 
@@ -177,7 +180,8 @@ public class TestQueueProcessor {
 
         String chosenServer;
 
-        public QueueProcessorTest(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
+        public QueueProcessorTest(final Config config, final DatabaseAiStatusUpdates database,
+                                  final Provider<AIQueueServices> queueServices,
                                   final Tools tools, final AiServiceStatusLogger logger) {
             super(config, database, queueServices, tools, logger);
         }
