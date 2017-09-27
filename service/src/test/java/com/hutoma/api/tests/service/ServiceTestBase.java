@@ -3,15 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
-import com.hutoma.api.common.AccessLogger;
-import com.hutoma.api.common.AiServiceStatusLogger;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.ThreadPool;
-import com.hutoma.api.common.ThreadSubPool;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
@@ -59,27 +51,13 @@ import static org.mockito.Mockito.when;
  */
 public abstract class ServiceTestBase extends JerseyTest {
 
+    public static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
-
     protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
-    public static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     @SuppressWarnings("unchecked")
     protected static final MultivaluedHashMap<String, Object> defaultHeaders = getDevIdAuthHeaders(Role.ROLE_PLAN_1, DEVID);
-
-    public static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
-        return new MultivaluedHashMap<String, Object>() {{
-            put("Authorization", Collections.singletonList("Bearer " + getDevToken(devId, role)));
-        }};
-    }
-
-    public MultivaluedHashMap<String, Object> getClientAuthHeaders(final UUID devId, final UUID aiid) {
-        return new MultivaluedHashMap<String, Object>() {{
-            put("Authorization", Collections.singletonList("Bearer " + getClientToken(devId, aiid)));
-        }};
-    }
-
     @Mock
     protected DatabaseCall fakeDatabaseCall;
     @Mock
@@ -125,6 +103,12 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected AiStrings fakeAiStrings;
 
+    public static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
+        return new MultivaluedHashMap<String, Object>() {{
+            put("Authorization", Collections.singletonList("Bearer " + getDevToken(devId, role)));
+        }};
+    }
+
     public static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder()
                 .claim("ROLE", role)
@@ -142,6 +126,12 @@ public abstract class ServiceTestBase extends JerseyTest {
                 .compressWith(CompressionCodecs.DEFLATE)
                 .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY)
                 .compact();
+    }
+
+    public MultivaluedHashMap<String, Object> getClientAuthHeaders(final UUID devId, final UUID aiid) {
+        return new MultivaluedHashMap<String, Object>() {{
+            put("Authorization", Collections.singletonList("Bearer " + getClientToken(devId, aiid)));
+        }};
     }
 
     static class InstanceFactory<T> implements Factory<T> {
@@ -200,6 +190,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(JerseyClient.class).to(JerseyClient.class);
                 bind(ThreadPool.class).to(ThreadPool.class);
                 bind(ThreadSubPool.class).to(ThreadSubPool.class);
+                bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
                 bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
                 // Bind a mock of HttpServletRequest
                 bind(mock(HttpServletRequest.class)).to(HttpServletRequest.class);

@@ -4,8 +4,8 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -29,14 +29,14 @@ public class TestControllerAiml {
     Config config;
     FakeTimerTools tools;
     ControllerAiml test;
-    ThreadSubPool fakeThreadSubPool;
+    TrackedThreadSubPool fakeThreadSubPool;
 
     @Before
     public void setUp() throws Exception {
         this.logger = mock(AiServiceStatusLogger.class);
         this.tools = new FakeTimerTools();
         this.config = mock(Config.class);
-        this.fakeThreadSubPool = mock(ThreadSubPool.class);
+        this.fakeThreadSubPool = mock(TrackedThreadSubPool.class);
         this.test = new ControllerAiml(TestControllerAiml.this.config, this.fakeThreadSubPool, null,
                 this.logger, mock(QueueProcessor.class)) {
             @Override

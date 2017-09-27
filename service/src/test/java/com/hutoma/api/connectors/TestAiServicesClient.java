@@ -6,8 +6,8 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.DevPlan;
@@ -114,7 +114,7 @@ public class TestAiServicesClient {
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
                 TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
 
@@ -143,7 +143,7 @@ public class TestAiServicesClient {
     public void testUploadTraining() throws AIServices.AiServicesException {
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, new JsonSerializer(),
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
+                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }

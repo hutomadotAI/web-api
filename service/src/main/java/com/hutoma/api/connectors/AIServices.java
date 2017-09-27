@@ -5,8 +5,8 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -46,7 +46,7 @@ public class AIServices extends ServerConnector {
     public AIServices(final Database database, final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
                       final JsonSerializer serializer,
                       final Tools tools, final Config config, final JerseyClient jerseyClient,
-                      final ThreadSubPool threadSubPool,
+                      final TrackedThreadSubPool threadSubPool,
                       final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
                       final AIQueueServices queueServices) {
         super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
