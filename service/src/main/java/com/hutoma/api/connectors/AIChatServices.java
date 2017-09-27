@@ -3,8 +3,8 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -50,7 +50,7 @@ public class AIChatServices extends ServerConnector {
     @Inject
     public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
-                          final ThreadSubPool threadSubPool,
+                          final TrackedThreadSubPool threadSubPool,
                           final RequestWnet wnetController, final RequestRnn rnnController,
                           final RequestAiml aimlController) {
         super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
@@ -81,9 +81,9 @@ public class AIChatServices extends ServerConnector {
             put("q", question);
         }};
         List<AiMinP> ais = this.getAIsLinkedToAi(devId, aiid);
-        minPMap = ais.stream().collect(Collectors.toMap(AiMinP::getAiid, AiMinP::getMinP));
+        this.minPMap = ais.stream().collect(Collectors.toMap(AiMinP::getAiid, AiMinP::getMinP));
         // add self
-        minPMap.put(aiid, chatState.getConfidenceThreshold());
+        this.minPMap.put(aiid, chatState.getConfidenceThreshold());
 
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;

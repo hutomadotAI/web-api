@@ -4,7 +4,7 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ThreadPool;
-import com.hutoma.api.common.ThreadSubPool;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -31,7 +31,7 @@ public class TestController {
     Config config;
     FakeTimerTools tools;
     ThreadPool threadPool;
-    ThreadSubPool subPool;
+    TrackedThreadSubPool subPool;
 
     ControllerUnderTest controllerUnderTest;
 
@@ -43,7 +43,7 @@ public class TestController {
         when(this.config.getThreadPoolMaxThreads()).thenReturn(16);
         when(this.config.getThreadPoolIdleTimeMs()).thenReturn(1L);
         this.threadPool = new ThreadPool(this.config);
-        this.subPool = new ThreadSubPool(this.threadPool);
+        this.subPool = new TrackedThreadSubPool(this.threadPool);
         this.controllerUnderTest = new ControllerUnderTest(this.config, this.subPool, this.logger);
     }
 
@@ -93,19 +93,19 @@ public class TestController {
 
     public static class ControllerUnderTest extends ControllerBase {
 
-        public ControllerUnderTest(Config config, final ThreadSubPool threadSubPool,
+        public ControllerUnderTest(Config config, final TrackedThreadSubPool threadSubPool,
                                    final AiServiceStatusLogger logger) {
             super(config, threadSubPool, null, logger);
         }
 
         @Override
-        protected ServerTracker createNewServerTracker() {
-            return mock(ServerTracker.class);
+        public boolean logErrorIfNoTrainingCapacity() {
+            return true;
         }
 
         @Override
-        public boolean logErrorIfNoTrainingCapacity() {
-            return true;
+        protected ServerTracker createNewServerTracker() {
+            return mock(ServerTracker.class);
         }
     }
 }

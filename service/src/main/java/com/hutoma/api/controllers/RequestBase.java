@@ -4,8 +4,8 @@ import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.connectors.AiDevId;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
@@ -42,11 +42,11 @@ public abstract class RequestBase {
     protected final ILogger logger;
     protected final JsonSerializer serializer;
     protected final ControllerBase controller;
-    private final ThreadSubPool threadSubPool;
+    private final TrackedThreadSubPool threadSubPool;
 
     @Inject
     public RequestBase(final JerseyClient jerseyClient, final Tools tools, final Config config,
-                       final ThreadSubPool threadSubPool,
+                       final TrackedThreadSubPool threadSubPool,
                        final ILogger logger, final JsonSerializer serializer, final ControllerBase controller) {
         this.jerseyClient = jerseyClient;
         this.tools = tools;

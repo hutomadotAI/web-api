@@ -5,8 +5,8 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -49,7 +49,7 @@ public class TestAiChatServices {
     private RequestWnet fakeRequestWnet;
     private Config fakeConfig;
     private AIChatServices chatServices;
-    private ThreadSubPool threadSubPool;
+    private TrackedThreadSubPool threadSubPool;
 
 
     @Before
@@ -59,7 +59,7 @@ public class TestAiChatServices {
         this.fakeRequestWnet = mock(RequestWnet.class);
         this.fakeRequestAiml = mock(RequestAiml.class);
         this.fakeRequestRnn = mock(RequestRnn.class);
-        this.threadSubPool = mock(ThreadSubPool.class);
+        this.threadSubPool = mock(TrackedThreadSubPool.class);
         this.chatServices = new AIChatServices(
                 this.fakeDatabase, mock(ILogger.class), mock(JsonSerializer.class),
                 mock(Tools.class), this.fakeConfig, mock(JerseyClient.class),

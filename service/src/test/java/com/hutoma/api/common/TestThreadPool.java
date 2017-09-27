@@ -45,7 +45,7 @@ public class TestThreadPool {
     @Test
     public void runOne() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 100);
-        ThreadSubPool subPool = new ThreadSubPool(this.pool);
+        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         makeTasksAndAwait(subPool, 50, 1);
         Assert.assertEquals(1, this.pool.getPoolSize());
     }
@@ -53,7 +53,7 @@ public class TestThreadPool {
     @Test
     public void runMany() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 100);
-        ThreadSubPool subPool = new ThreadSubPool(this.pool);
+        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         makeTasksAndAwait(subPool, 50, 10);
         Assert.assertEquals(10, this.pool.getPoolSize());
     }
@@ -61,7 +61,7 @@ public class TestThreadPool {
     @Test
     public void runManyEnd() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
-        ThreadSubPool subPool = new ThreadSubPool(this.pool);
+        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         makeTasksAndAwait(subPool, 2, 32);
         Thread.sleep(50);
         Assert.assertEquals(16, this.pool.getPoolSize());
@@ -70,7 +70,7 @@ public class TestThreadPool {
     @Test
     public void runManyCancel() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
-        ThreadSubPool subPool = new ThreadSubPool(this.pool);
+        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         List<Future> tasks = makeTasks(subPool, 200, 32);
         subPool.cancelAll();
         int cancelled = waitForTermination(tasks);
@@ -81,7 +81,7 @@ public class TestThreadPool {
     public void launchTooMany() throws ExecutionException, InterruptedException {
         // hard limit of 32 threads
         this.pool = getPool(32, 0);
-        try (ThreadSubPool subPool = new ThreadSubPool(this.pool)) {
+        try (TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool)) {
 
             // expect an exception when launching more than 32
             boolean exception = false;
@@ -97,7 +97,7 @@ public class TestThreadPool {
         }
     }
 
-    private void makeTasksAndAwait(final ThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
+    private void makeTasksAndAwait(final TrackedThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
         waitForTermination(makeTasks(subPool, taskDurationMs, howManyTasks));
     }
 
@@ -113,7 +113,7 @@ public class TestThreadPool {
         return exceptions;
     }
 
-    private ArrayList<Future> makeTasks(final ThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
+    private ArrayList<Future> makeTasks(final TrackedThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
         ArrayList<Future> futures = new ArrayList<>();
         for (int i = 0; i < howManyTasks; i++) {
             TestThread thread = new TestThread(taskDurationMs);

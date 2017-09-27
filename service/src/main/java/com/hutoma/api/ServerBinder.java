@@ -56,6 +56,7 @@ public class ServerBinder extends AbstractBinder {
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);
+        bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
         bind(ServerTracker.class).to(ServerTracker.class);
 
         // logging
