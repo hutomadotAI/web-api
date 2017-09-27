@@ -9,8 +9,7 @@ require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/botstoreApi.php";
 
 
-logging::error(sprintf("%s - referrer: %s  errorObject: %s", $_GET['err'], $_SERVER['HTTP_REFERER'],
-        isset($_GET['errObj']) ? $_GET['errObj'] : ""));
+logging::error(sprintf("%s - referrer: %s  msg: %s", $_GET['err'], $_SERVER['HTTP_REFERER'], $_GET['msg']));
 
 
 sessionObject::redirectToLoginIfUnauthenticated();
@@ -43,10 +42,10 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 </body>
 </html>

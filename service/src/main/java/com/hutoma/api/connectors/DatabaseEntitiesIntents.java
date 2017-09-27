@@ -1,12 +1,16 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.db.DatabaseCall;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.memory.MemoryIntentHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -165,8 +169,11 @@ public class DatabaseEntitiesIntents extends Database {
                 intent.addVariable(variable);
             }
 
+            intent.setWebHook(this.getWebHook(aiid, intentName));
+
             // nothing was written but this prevents an auto-rollback
             transaction.commit();
+
             return intent;
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);

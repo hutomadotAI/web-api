@@ -60,72 +60,28 @@ public class WebHooks {
      * @return a WebHookResponse containing the returned data.
      */
     public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent,
-                                                final ChatResult chatResult, final ChatRequestInfo chatInfo) {
+                                                final ChatResult chatResult, final ChatRequestInfo chatInfo)
+            throws WebHookException {
         final String devIdString = chatInfo.devId.toString();
-        if (webHook == null || intent == null) {
-            this.logger.logError(LOGFROM, "Invalid parameters passed.");
-            return null;
+        if (webHook == null) {
+            throw new WebHookInternalException("Webhook cannot be null");
+        }
+        if (intent == null) {
+            throw new WebHookInternalException("Intent cannot be null");
         }
         String webHookEndpoint = webHook.getEndpoint();
 
-        AiBotConfig config = null;
+        AiBotConfig config;
         try {
             config = this.database.getBotConfigForWebhookCall(chatInfo.devId, chatInfo.aiid, intent.getAiid(),
                     this.serializer);
         } catch (Database.DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
-            // if the config load fails, then abort the webhook call.
-            this.logger.logUserWarnEvent(LOGFROM, "Webhook aborted due to failure to load config",
-                    devIdString,
-                    LogMap.map("Endpoint", webHookEndpoint)
-                            .put("Intent", intent.getName())
-                            .put("AIID", intent.getAiid())
-                            .put("Endpoint", webHook.getEndpoint()));
-            return null;
+            throw new WebHookInternalException("Webhook aborted due to failure to load config", e);
         }
-
-        String[] webHookSplit = webHookEndpoint.split(":", 2);
-        if (webHookSplit.length < 2) {
-            this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
-                    devIdString,
-                    LogMap.map("Endpoint", webHookEndpoint)
-                            .put("Intent", intent.getName())
-                            .put("AIID", intent.getAiid())
-                            .put("Endpoint", webHook.getEndpoint()));
-            return null;
-        }
-        boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
 
         WebHookPayload payload = new WebHookPayload(intent, chatResult, chatInfo, config);
 
-        String jsonPayload;
-        try {
-            jsonPayload = this.serializer.serialize(payload);
-        } catch (JsonIOException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "Webhook Payload Serialisation Failed", devIdString, e);
-            return null;
-        }
-
-        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, chatInfo.aiid);
-
-        if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-            this.logger.logUserWarnEvent(LOGFROM,
-                    String.format("WebHook Failed (%s): intent %s for aiid %s at %s",
-                            response.getStatus(),
-                            intent.getName(),
-                            intent.getAiid(),
-                            webHook.getEndpoint()),
-                    devIdString,
-                    LogMap.map("ResponseStatus", response.getStatus())
-                            .put("Intent", intent.getName())
-                            .put("AIID", intent.getAiid())
-                            .put("Endpoint", webHook.getEndpoint()));
-            return null;
-        }
-
-        response.bufferEntity();
-        WebHookResponse webHookResponse = this.deserializeResponse(response);
-        response.close();
+        WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString, chatInfo.aiid);
 
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed webhook for aiid %s and intent %s",
@@ -136,15 +92,28 @@ public class WebHooks {
         return webHookResponse;
     }
 
-    private Response executeWebhook(final String webHookEndpoint, final String jsonPayload, final String devIdString,
-                                    final boolean isHttps, final UUID aiid) {
+    private WebHookResponse executeWebhook(final String webHookEndpoint, final WebHookPayload payload, final String devIdString,
+                                    final UUID aiid) throws WebHookException {
+        String[] webHookSplit = webHookEndpoint.split(":", 2);
+        if (webHookSplit.length < 2) {
+            throw new WebHookExternalException("Webhook endpoint invalid");
+        }
+        boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
+
+        String jsonPayload;
+        try {
+            jsonPayload = this.serializer.serialize(payload);
+        } catch (JsonIOException e) {
+            throw new WebHookInternalException("Webhook Payload Serialisation Failed", e);
+        }
+
+
         byte[] payloadBytes;
         try {
             payloadBytes = jsonPayload.getBytes("UTF-8");
         } catch (java.io.UnsupportedEncodingException e) {
-            // should never hit this for UTF-8
-            this.logger.logUserExceptionEvent(LOGFROM, "Webhook payload encoding failed", devIdString, e);
-            return null;
+            // should never hit this for UTF-8, not user's fault
+            throw new WebHookInternalException("Webhook payload encoding failed", e);
         }
 
         String calculatedHash = null;
@@ -159,15 +128,10 @@ public class WebHooks {
                     this.database.setWebhookSecretForBot(aiid, secret);
                 }
             } catch (Database.DatabaseException e) {
-                this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devIdString, e);
-                return null;
+                throw new WebHookInternalException("WebHook Database Error", e);
             }
 
-            // getMessageHash logs internally, no need to log again
-            calculatedHash = getMessageHash(devIdString, secret, payloadBytes);
-            if (calculatedHash == null) {
-                return null;
-            }
+            calculatedHash = getMessageHash(secret, payloadBytes);
         }
 
         Response response;
@@ -183,62 +147,37 @@ public class WebHooks {
             }
             response = builder.post(Entity.json(payloadBytes));
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Execution Failed", devIdString, e);
-            return null;
+            throw WebHookExternalException.createWithTypeMessage("WebHook Execution Failed", e);
         }
 
-        return response;
+        try {
+            if (response.getStatus() != HttpURLConnection.HTTP_OK) {
+                throw new WebHookExternalException(String.format("Webhook call failed (HTTP code %s)", response.getStatus()));
+            }
+
+            response.bufferEntity();
+            WebHookResponse webHookResponse = this.deserializeResponse(response);
+            return webHookResponse;
+        }
+        finally {
+            response.close();
+        }
     }
 
     public WebHookResponse executePassthroughWebhook(final String passthroughUrl, final ChatResult chatResult,
-                                                     final ChatRequestInfo chatInfo) {
+                                                     final ChatRequestInfo chatInfo)
+            throws WebHookException {
         final String devIdString = chatInfo.devId.toString();
 
         if (passthroughUrl == null || passthroughUrl.isEmpty()) {
-            this.logger.logError(LOGFROM, "Invalid url passed.");
-            return null;
+            throw new WebHookExternalException("Invalid URL for passthrough webhook");
         }
+
 
         String webHookEndpoint = passthroughUrl;
-        String[] webHookSplit = webHookEndpoint.split(":", 2);
-        if (webHookSplit.length < 2) {
-            this.logger.logUserWarnEvent(LOGFROM, "Webhook endpoint invalid",
-                    devIdString,
-                    LogMap.map("Endpoint", webHookEndpoint)
-                            .put("AIID", chatInfo.aiid)
-                            .put("Endpoint", webHookEndpoint));
-            return null;
-        }
-        boolean isHttps = webHookSplit[0].equalsIgnoreCase("https");
-
         WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
-        String jsonPayload;
-        try {
-            jsonPayload = this.serializer.serialize(payload);
-        } catch (JsonIOException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "Webhook Payload Serialisation Failed", devIdString, e);
-            return null;
-        }
 
-        Response response = this.executeWebhook(webHookEndpoint, jsonPayload, devIdString, isHttps, chatInfo.aiid);
-
-        if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-            this.logger.logUserWarnEvent(LOGFROM,
-                    String.format("Chat WebHook Failed (%s): aiid %s at %s",
-                            response.getStatus(),
-                            chatInfo.aiid,
-                            webHookEndpoint),
-                    devIdString,
-                    LogMap.map("ResponseStatus", response.getStatus())
-                            .put("AIID", chatInfo.aiid)
-                            .put("Endpoint", webHookEndpoint));
-            return null;
-        }
-
-        response.bufferEntity();
-        WebHookResponse webHookResponse = this.deserializeResponse(response);
-        response.close();
-
+        WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString, chatInfo.aiid);
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed chat webhook for aiid %s",
                         chatInfo.aiid),
@@ -247,7 +186,7 @@ public class WebHooks {
         return webHookResponse;
     }
 
-    public String getMessageHash(String devIdString, String secret, byte[] payloadBytes) {
+    public String getMessageHash(String secret, byte[] payloadBytes) throws WebHookInternalException {
         String calculatedHash;
         try {
             SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes("UTF-8"), HMAC_ALGORITHM);
@@ -256,9 +195,8 @@ public class WebHooks {
             byte[] calculatedHashBytes = macAlgorithm.doFinal(payloadBytes);
             calculatedHash = Hex.encodeHexString(calculatedHashBytes);
         } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException | InvalidKeyException e) {
-            this.logger.logUserExceptionEvent(LOGFROM,
-                    "Webhook Payload MAC calculation failed", devIdString, e);
-            return null;
+            // should never happen
+            throw new WebHookInternalException("Webhook Payload MAC calculation failed", e);
         }
         return calculatedHash;
     }
@@ -268,13 +206,12 @@ public class WebHooks {
      * @param response the Response to deserialize.
      * @return The deserialized WebHookResponse or null.
      */
-    public WebHookResponse deserializeResponse(final Response response) {
+    public WebHookResponse deserializeResponse(final Response response) throws WebHookExternalException {
         try {
             return (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class),
                     WebHookResponse.class);
         } catch (JsonParseException e) {
-            this.logger.logException(LOGFROM, e);
-            return null;
+            throw WebHookExternalException.createWithTypeMessage("Failed to deserialize webhook response JSON", e);
         }
     }
 
@@ -292,5 +229,55 @@ public class WebHooks {
         }
 
         return webHook;
+    }
+
+
+    /**
+     * Base class for exceptions due to web hooks.
+     * Shouldn't directly use this class, use one of the derived classes instead.
+     */
+    public static class WebHookException extends Exception {
+        protected WebHookException(String message) {
+            super(message);
+        }
+
+        protected WebHookException(String message, Throwable e) {
+            super(message, e);
+        }
+
+    }
+
+    /**
+     * Class for exceptions due to web hooks, where the web hook call failed due to an internal platform issue.
+     * A direct exception of this type would lead to an Internal Server Error being logged.
+     */
+    public static class WebHookInternalException extends WebHookException {
+        public WebHookInternalException(String message) {
+            super(message);
+        }
+
+        public WebHookInternalException(String message, Throwable e) {
+            super(message, e);
+        }
+    }
+
+    /**
+     * Class for exceptions due to web hooks, where the web hook call failed due to an external factor.
+     * Couldn't connect to the server, invalid URL specified, invalid response from webhook, non 200 return from webhook
+     * etc.
+     */
+    public static class WebHookExternalException extends WebHookException {
+        public WebHookExternalException(String message) {
+            super(message);
+        }
+
+        public WebHookExternalException(String message, Throwable e) {
+            super(message, e);
+        }
+
+        public static WebHookExternalException createWithTypeMessage(String message, Throwable e) {
+            String messageWithType = String.format("%s - %s", message, e.getMessage());
+            return new WebHookExternalException(messageWithType, e);
+        }
     }
 }

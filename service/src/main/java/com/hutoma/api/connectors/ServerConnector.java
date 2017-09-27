@@ -3,6 +3,7 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.controllers.InvocationResult;
@@ -101,31 +102,41 @@ public class ServerConnector {
         HashMap<String, Future<InvocationResult>> futures = new HashMap<>();
 
         // get a named future for a named callable response
-        callables.entrySet().forEach((entry) -> {
-            futures.put(entry.getKey(), this.threadSubPool.submit(entry.getValue()));
+        callables.forEach((key, value) -> {
+            futures.put(key, this.threadSubPool.submit(value));
         });
 
         return futures;
     }
 
     void executeAndWait(final HashMap<String, Callable<InvocationResult>> callables) throws AiServicesException {
+
+        HashMap<String, Future<InvocationResult>> futures = null;
         try {
             // start the calls async
-            HashMap<String, Future<InvocationResult>> futures = execute(callables);
+            futures = execute(callables);
 
             List<InvocationResult> errors = new ArrayList<>();
             for (String endpoint : callables.keySet()) {
                 // wait for each call to terminate
                 InvocationResult response = waitFor(endpoint, futures);
 
+                // Consume the input stream
+                boolean hasEntity = response.getResponse().bufferEntity();
                 Response.StatusType statusInfo = response.getResponse().getStatusInfo();
                 // aggregate the errors
                 if (statusInfo.getStatusCode() != HttpURLConnection.HTTP_OK) {
                     errors.add(response);
+                    LogMap logMap = LogMap.map("Status", statusInfo.getStatusCode())
+                            .put("Reason", statusInfo.getReasonPhrase());
+                    if (hasEntity) {
+                        logMap.add("Response", response.getResponse().getEntity());
+                    }
                     this.logger.logError(LOGFROM, String.format("Failure status %s (id=%d msg=%s)",
                             endpoint,
                             statusInfo.getStatusCode(),
-                            statusInfo.getReasonPhrase()));
+                            statusInfo.getReasonPhrase()),
+                            logMap);
                 }
             }
             if (!errors.isEmpty()) {
@@ -141,7 +152,24 @@ public class ServerConnector {
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AiServicesException(e.toString());
+        } finally {
+            if (futures != null) {
+                futures.values().forEach((future) -> {
+                    try {
+                        // attempt to close the connection
+                        Response response = future.isDone()
+                                ? future.get().getResponse()
+                                : future.get(0, TimeUnit.MILLISECONDS).getResponse();
+                        response.bufferEntity(); // It's ok to call buffer entity multiple times
+                        response.close();
+                    } catch (Exception e) {
+                        this.logger.logError(LOGFROM, String.format("Failed to close http connection after use: %s",
+                                e.toString()));
+                    }
+                });
+            }
         }
         this.logger.logDebug(LOGFROM, String.format("All %d calls executed successfully", callables.size()));
     }
+
 }

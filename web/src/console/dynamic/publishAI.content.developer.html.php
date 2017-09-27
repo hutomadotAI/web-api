@@ -1,3 +1,11 @@
+<?php
+require_once __DIR__ . "/../common/Assets.php";
+require_once __DIR__ . "/../dist/manifest.php";
+
+
+$assets = new Assets($manifest);
+?>
+
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
         <div class="box-title"><b>Developer Info</b></div>
@@ -138,4 +146,4 @@
     </div>
 </div>
 
-<script src="./scripts/publish/developer.js"></script>
+<script src="<?php $assets->getAsset('publish/developer.js') ?>"></script>

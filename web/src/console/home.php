@@ -13,6 +13,10 @@ require_once __DIR__ . "/common/config.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/api/botstoreApi.php";
 require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
@@ -59,6 +63,7 @@ include __DIR__ . "/include/page_menu.php";
                             <tr disabled>
                                 <th class="text-left" style="border:0; width:20%">Bot Name</th>
                                 <th class="text-left" style="border:0; width:25%">Description</th>
+                                <th class="text-center" style="border:0; width:15%"># Skills Linked</th>
                                 <th class="text-center" style="border:0; width:15%">Status</th>
                                 <th style="border:0; width:5%"></th>
                                 <th style="border:0; width:5%"></th>
@@ -80,14 +85,14 @@ include __DIR__ . "/include/page_menu.php";
     </div>
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./dist/js/mustache.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
-<script src="./scripts/home/home.js"></script>
-<script src="./scripts/shared/shared.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
+<script src="<?php $assets->getAsset('home/home.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <script>
     var aiList = <?php echo $aiListJson ?>;
@@ -100,7 +105,8 @@ include __DIR__ . "/include/page_menu.php";
 
 <?php
 $menuObj = new menuObj("", "home", 0, false, true);
-include __DIR__ . "/include/page_menu_builder.php" ?>
+include __DIR__ . "/include/page_menu_builder.php";
+?>
 
 </body>
 </html>

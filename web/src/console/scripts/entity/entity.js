@@ -59,6 +59,9 @@ function showEntities(filter) {
     var view = {
         entities: entities.filter(function (item) {
             return !(filter.trim() !== "" && item.entity_name.toLowerCase().indexOf(filter.toLowerCase()) === -1);
+        }).map(function (entity, index) {
+            entity.index = index;
+            return entity;
         }).sort(function (a, b) {
             if (a.is_system > b.is_system)
                 return 1;
@@ -69,9 +72,6 @@ function showEntities(filter) {
             else if (a.entity_name < b.entity_name)
                 return -1;
             return 0;
-        }).map(function (entity, index) {
-            entity.index = index;
-            return entity;
         })
     };
 
@@ -143,7 +143,7 @@ $('#deleteEntity').on('show.bs.modal', function (e) {
     var $modal = $(this), esseyId = e.relatedTarget.id;
     var elem = document.getElementById('delete-entity-label');
     var elemBtn = document.getElementById('modalDelete');
-    var value = $('#entity-label' + esseyId).text();
+    var value = document.getElementById('entity-label' + esseyId).value;
     elem.innerHTML = 'Are you sure you want to delete the entity <label>' + value + '</label>?';
     elemBtn.setAttribute("value", esseyId);
 });

@@ -4,9 +4,11 @@ import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;
@@ -38,9 +40,11 @@ public class AIServices extends ServerConnector {
     private final ControllerWnet controllerWnet;
     private final ControllerRnn controllerRnn;
     private final AIQueueServices queueServices;
+    private final DatabaseEntitiesIntents databaseEntitiesIntents;
 
     @Inject
-    public AIServices(final Database database, final ILogger logger, final JsonSerializer serializer,
+    public AIServices(final Database database, final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
+                      final JsonSerializer serializer,
                       final Tools tools, final Config config, final JerseyClient jerseyClient,
                       final ThreadSubPool threadSubPool,
                       final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
@@ -49,6 +53,7 @@ public class AIServices extends ServerConnector {
         this.controllerWnet = controllerWnet;
         this.controllerRnn = controllerRnn;
         this.queueServices = queueServices;
+        this.databaseEntitiesIntents = databaseEntitiesIntents;
     }
 
     /***
@@ -183,6 +188,33 @@ public class AIServices extends ServerConnector {
                     0));
         }
         executeAndWait(callables);
+    }
+
+    public String getTrainingMaterialsCommon(final UUID devid, final UUID aiid, final JsonSerializer jsonSerializer) throws Database.DatabaseException {
+        final String EOL = "\n";
+        final String devidString = devid.toString();
+        StringBuilder sb = new StringBuilder();
+        ApiAi ai = this.database.getAI(devid, aiid, jsonSerializer);
+        if (ai == null) {
+            this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterialsCommon - AI not found", devidString,
+                    LogMap.map("AIID", aiid));
+            return null;
+        }
+        String userTrainingFile = this.database.getAiTrainingFile(aiid);
+        if (userTrainingFile != null && !userTrainingFile.isEmpty()) {
+            sb.append(userTrainingFile);
+        }
+        for (String intentName : this.databaseEntitiesIntents.getIntents(devid, aiid)) {
+            ApiIntent intent = this.databaseEntitiesIntents.getIntent(aiid, intentName);
+            for (String userSays : intent.getUserSays()) {
+                if (sb.length() > 0) {
+                    sb.append(EOL);
+                }
+                sb.append(userSays).append(EOL);
+                sb.append(MemoryIntentHandler.META_INTENT_TAG).append(intentName).append(EOL);
+            }
+        }
+        return sb.toString();
     }
 
     /**

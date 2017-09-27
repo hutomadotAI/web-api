@@ -1599,6 +1599,31 @@ a:focus {
     background-color: #353939;
 }
 
+/* Integration code */
+.integration-code {
+    border-color: #515151;
+    background-color: #353939;
+    padding: 16px;
+}
+
+.integration-code-block {
+    color: lightgray;
+    background-color: #232426;
+    border-color: #515151;
+    margin-top: 8px;
+}
+
+.integration-code-title {
+    font-size: large;
+}
+
+.integration-plugin {
+    background-color: #ffffff;
+    border-radius: 4px;
+    padding: 16px;
+    color: dimgray;
+}
+
 /* button groups */
 .btn-group-vertical .btn.btn-flat:first-of-type,
 .btn-group-vertical .btn.btn-flat:last-of-type {
@@ -2821,7 +2846,6 @@ a:focus {
     border: 1px solid #a3a3a3;
 }
 
-
 .btn-info:hover,
 .btn-info:active,
 .btn-info.hover {
@@ -3584,7 +3608,7 @@ table.text-center th {
     color: #999;
 }
 
-.chat-warning{
+.chat-warning {
     background: #f39c12;
     border-color: #f39c12;
     color: #ffffff;
@@ -3594,7 +3618,7 @@ table.text-center th {
     border-left-color: #f39c12;
 }
 
-.chat-success{
+.chat-success {
     background: #00a65a;
     border-color: #00a65a;
     color: #ffffff;
@@ -3717,7 +3741,6 @@ table.text-center th {
     margin-top: -20px;
 }
 
-
 /*
  * Component: modal
  * ----------------
@@ -3733,9 +3756,9 @@ table.text-center th {
     border: 0;
 }
 
-.modal-dialog.width600{
-    min-width:600px;
-    max-width:600px;
+.modal-dialog.width600 {
+    min-width: 600px;
+    max-width: 600px;
 }
 
 @media (min-width: 768px) {
@@ -6335,12 +6358,12 @@ ul.pagination li a {
     border-style: none;
     box-shadow: none;
     -webkit-box-shadow: none;
-    overflow:hidden;
+    overflow: hidden;
     outline: none;
     box-shadow: none !important;
     font-size: 16px;
     font-weight: bold;
-    padding-top:5px;
+    padding-top: 5px;
 }
 
 .item-row {
@@ -6464,40 +6487,40 @@ ul.pagination li a {
     color: #ADADAD;
 }
 
-.carousel-box{
+.carousel-box {
     height: 295px;
     padding: 0px;
     display: inline-block;
 }
 
-.carousel-row{
+.carousel-row {
     max-height: 249px;
     min-height: 245px;
     white-space: nowrap;
-    padding-top:2px;
-    padding-right:2px;
+    padding-top: 2px;
+    padding-right: 2px;
     text-overflow: ellipsis;
 }
 
-.carousel-overflow{
+.carousel-overflow {
     overflow: hidden;
 }
 
-.carousel-title{
+.carousel-title {
     font-size: 18px;
     height: 45px;
     min-width: 180px;
     color: lightgray;
-    padding: 10px  0px 10px 10px;
+    padding: 10px 0px 10px 10px;
 }
 
-.carousel-see-more{
+.carousel-see-more {
     height: 45px;
     top: 8px;
-    position:relative;
+    position: relative;
 }
 
-.carousel-ovelay{
+.carousel-ovelay {
     font-size: 50px;
     position: relative;
     top: 130px;
@@ -6549,55 +6572,59 @@ ul.pagination li a {
     font-size: 15px;
     font-weight: bold;
     text-align: center;
-    height:30px;
-    color: #000000; !important;
+    height: 30px;
+    color: #000000;
+!important;
     padding-top: 10px;
-    margin:0 3px 0 3px;
-    white-space: nowrap ;
+    margin: 0 3px 0 3px;
+    white-space: nowrap;
     overflow: hidden;
     cursor: pointer;
     text-overflow: clip;
 }
 
 .card-title:after {
-    top:160px;
-    left:0;
-    height:20px;
+    top: 160px;
+    left: 0;
+    height: 20px;
     line-width: 168px;
-    background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
+    background-image: linear-gradient(to left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 10%);
     position: absolute;
     content: '';
 }
 
-.card-title > p{
+.card-title > p {
     font-size: 15px;
     font-weight: bold;
-    color: #000000; !important;
+    color: #000000;
+!important;
 }
 
 .card-author {
     font-size: 10px;
     text-align: center;
-    color: #626262; !important;
-    white-space: nowrap ;
+    color: #626262;
+!important;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: clip;
 }
 
 .card-author:after {
-    top:180px;
-    left:0;
-    height:15px;
-    width:100%;
-    background-image: linear-gradient( to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 10%);
+    top: 180px;
+    left: 0;
+    height: 15px;
+    width: 100%;
+    background-image: linear-gradient(to left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 10%);
     position: absolute;
     content: '';
 }
 
-.card-author > p{
+.card-author > p {
     font-size: 10px;
-    color: #626262; !important;
-    white-space: nowrap ;
+    color: #626262;
+!important;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: clip;
 }
@@ -6624,17 +6651,19 @@ ul.pagination li a {
     font-size: 12px;
     height: 25px;
     text-align: center;
-    padding:8px 0px 0px 10px;
-    color: #a2a2a2; !important;
+    padding: 8px 0px 0px 10px;
+    color: #a2a2a2;
+!important;
 }
 
 .card-users {
     font-size: 12px;
     font-weight: bold;
     text-align: center;
-    color: #a2a2a2; !important;
-    bottom:5px;
-    margin:15px 0 0 5px;
+    color: #a2a2a2;
+!important;
+    bottom: 5px;
+    margin: 15px 0 0 5px;
 }
 
 .card-price {
@@ -6644,9 +6673,10 @@ ul.pagination li a {
     font-weight: bold;
     text-align: center;
     line-height: 25px;
-    color: #ffffff; !important;
+    color: #ffffff;
+!important;
     background: #7cc841;
-    margin-right:10px;
+    margin-right: 10px;
     letter-spacing: -1px;
     cursor: pointer;
 }
@@ -6658,16 +6688,18 @@ ul.pagination li a {
     font-weight: bold;
     text-align: center;
     line-height: 25px;
-    color: gray; !important;
-    padding:2px 10px 0 0;
+    color: gray;
+!important;
+    padding: 2px 10px 0 0;
 }
 
 .card-testBotLink {
     font-size: 12px;
     font-weight: bold;
     text-align: center;
-    padding-top:3px;
-    color: #007bb6; !important;
+    padding-top: 3px;
+    color: #007bb6;
+!important;
     cursor: pointer;
 }
 
@@ -6712,7 +6744,7 @@ ul.pagination li a {
 .bot-card-alert {
     max-width: 720px;
     margin: auto;
-    padding-top:50px;
+    padding-top: 50px;
 }
 
 .bot-card-area {
@@ -6763,7 +6795,7 @@ ul.pagination li a {
 
 .bot-title {
     font-size: 20px;
-    color:white;
+    color: white;
     padding: 0px 0px 0px 10px;
 }
 
@@ -6792,7 +6824,7 @@ ul.pagination li a {
 .bot-description-limited {
     width: 100%;
     text-align: left;
-    overflow:hidden;
+    overflow: hidden;
     color: #dddddd;
 }
 
@@ -6979,6 +7011,7 @@ ul.pagination li a {
     max-width: 100%;
     padding: 0 15px;
 }
+
 .web-container .text-muted {
     margin: 20px 0;
 }
@@ -6998,7 +7031,7 @@ ul.pagination li a {
 
 .new-link:hover,
 .new-link:active,
-.new-link:focus{
+.new-link:focus {
     outline: none;
     text-decoration: none;
     color: #72afd2;

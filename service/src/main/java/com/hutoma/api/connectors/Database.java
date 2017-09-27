@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -512,6 +513,10 @@ public class Database {
                         state = AiBot.PublishingState.NOT_PUBLISHED;
                     }
                     bot.setPublishingState(state);
+                    List<AiBot> linkedBots = this.getBotsLinkedToAi(devid, aiid);
+                    if (!linkedBots.isEmpty()) {
+                        bot.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+                    }
                     res.add(bot);
                 }
                 return res;

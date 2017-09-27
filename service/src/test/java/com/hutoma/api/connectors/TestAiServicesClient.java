@@ -68,6 +68,7 @@ public class TestAiServicesClient {
     private static HttpServer httpServer;
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
+    private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
@@ -95,6 +96,7 @@ public class TestAiServicesClient {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
+        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
@@ -111,7 +113,7 @@ public class TestAiServicesClient {
                 TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
                 TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
-        this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
+        this.aiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
@@ -140,7 +142,7 @@ public class TestAiServicesClient {
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException {
         // Need to have a real serializer here to transform the ai info
-        AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeLogger, new JsonSerializer(),
+        AIServices thisAiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, new JsonSerializer(),
                 this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new ThreadSubPool(this.threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);

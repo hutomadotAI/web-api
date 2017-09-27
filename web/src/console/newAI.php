@@ -9,6 +9,10 @@ require_once __DIR__ . "/common/utils.php";
 require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/aiApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
@@ -40,8 +44,8 @@ unset($response_getAIs);
 
 
 $header_page_title = "Create Bot";
-$header_additional_entries = "<link rel=\"stylesheet\" href=\"scripts/external/ionslider/ion.rangeSlider.css\">
-    <link rel=\"stylesheet\" href=\"scripts/external/ionslider/ion.rangeSlider.skinNice.css\">";
+$header_additional_entries = "<link rel=\"stylesheet\" href=\"/console/dist/vendors/ionslider/ion.rangeSlider.css\">
+    <link rel=\"stylesheet\" href=\"/console/dist/vendors/ionslider/ion.rangeSlider.skinNice.css\">";
 include __DIR__ . "/include/page_head_default.php";
 include __DIR__ . "/include/page_body_default.php";
 include __DIR__ . "/include/page_menu.php";
@@ -67,21 +71,21 @@ include __DIR__ . "/include/page_menu.php";
     var errObj = <?php if(isset($_GET['errObj'])) echo($_GET['errObj']); else echo json_encode('');?>;
 </script>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="./scripts/inputCommon/inputCommon.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/createAI/createAI.js"></script>
-<script src="scripts/external/select2/select2.full.js"></script>
-<script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
-<script src="scripts/external/ionslider/ion.rangeSlider.min.js"></script>
+<script src="<?php $assets->getAsset('inputCommon/inputCommon.js') ?>"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('createAI/createAI.js') ?>"></script>
+<script src="/console/dist/vendors/select2/select2.full.js"></script>
+<script src="/console/dist/vendors/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="/console/dist/vendors/ionslider/ion.rangeSlider.min.js"></script>
 
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj("", "home", 0, false, true);

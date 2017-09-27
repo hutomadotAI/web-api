@@ -2,18 +2,23 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
 require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/entityApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
 
 if (!isPostInputAvailable()) {
-    utils::redirect('./error.php?err=119');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
@@ -24,7 +29,7 @@ if (isset($_POST['entity_name'])) {
     $retValue = $entityApi->updateEntity($entityName, $_POST['entity_values']);
 
     if (isset($retvalue) && $retvalue['status']['code'] != 200) {
-        utils::redirect('./error.php?errObj=' . urlencode($retvalue), null);
+        errorRedirect::handleErrorRedirect($retvalue);
         exit;
     }
 } else {
@@ -34,9 +39,10 @@ if (isset($_POST['entity_name'])) {
 $entity_values_list = $entityApi->getEntityValues($entityName);
 unset($entityApi);
 
-if ($entity_values_list['status']['code'] !== 200) {
+if ($entity_values_list['status']['code'] !== 200 && $entity_values_list['status']['code'] !== 404) {
+    $entity_result = $entity_values_list;
     unset($entity_values_list);
-    utils::redirect('./error.php?err=225');
+    errorRedirect::handleErrorRedirect($entity_result);
     exit;
 }
 
@@ -137,19 +143,19 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
-<script src="./dist/js/mustache.min.js"></script>
-<script src="scripts/external/saveFile/FileSaver.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/entity/entity.element.js"></script>
-<script src="scripts/external/select2/select2.full.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
+<script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('entity/entity.element.js') ?>"></script>
+<script src="/console/dist/vendors/select2/select2.full.js"></script>
 
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "entities", 1, false, false);

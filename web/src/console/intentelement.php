@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -11,11 +12,15 @@ require_once __DIR__ . "/api/aiApi.php";
 require_once __DIR__ . "/api/intentsApi.php";
 require_once __DIR__ . "/api/entityApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
-    utils::redirect('./error.php?err=118');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
@@ -33,20 +38,23 @@ $bot= $aiApi->getSingleAI(sessionObject::getCurrentAI()['aiid']);
 unset($aiApi);
 
 if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 404) {
+    $entityList_result = $entityList;
     unset($entityList);
-    utils::redirect('./error.php?err=210');
+    errorRedirect::handleErrorRedirect($entityList_result);
     exit;
 }
 
 if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
+    $intent_result = $intent;
     unset($intent);
-    utils::redirect('./error.php?err=211');
+    errorRedirect::handleErrorRedirect($intent_result);
     exit;
 }
 
-if ($bot['status']['code'] !== 200) {
+if ($bot['status']['code'] !== 200 && $bot['status']['code'] !== 404) {
+    $bot_result = $bot;
     unset($bot);
-    utils::redirect('./error.php?err=204');
+    errorRedirect::handleErrorRedirect($bot_result);
     exit;
 }
 
@@ -131,23 +139,23 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="scripts/external/jQuery/jquery.omniselect.js"></script>
-<script src="scripts/external/saveFile/FileSaver.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/button-select/buttonSelect.js"></script>
-<script src="./scripts/intent/intent.polling.js"></script>
-<script src="scripts/intent/intent.element.other.js"></script>
-<script src="./scripts/intent/intent.element.js"></script>
-<script src="./dist/js/mustache.min.js"></script>
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
-<script src="scripts/external/saveFile/FileSaver.js"></script>
+<script src="/console/dist/vendors/jQuery/jquery.omniselect.js"></script>
+<script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('button-select/buttonSelect.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.polling.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.element.other.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.element.js') ?>"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "intents", 1, false, false);

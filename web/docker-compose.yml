@@ -41,6 +41,7 @@ services:
       # https://github.com/docker/compose/pull/3955
       API_ADMIN_DEVTOKEN: 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c'
       LOG_SERVICE_ANALYTICS_URL: 'http://log-svc:8080/log'
+      HUTOMA_API_URL: http://10.132.0.4:8081/v1
       PHP_XDEBUG_ENABLED: 1
       XDEBUG_CONFIG: remote_host=192.168.1.255
     volumes:

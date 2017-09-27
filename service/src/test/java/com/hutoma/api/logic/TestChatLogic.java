@@ -744,7 +744,7 @@ public class TestChatLogic {
      * @throws RequestBase.AiControllerException.
      */
     @Test
-    public void testChat_botPassthrough() throws RequestBase.AiControllerException {
+    public void testChat_botPassthrough() throws RequestBase.AiControllerException, WebHooks.WebHookException {
         String passthroughResponse = "different message.";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
 
@@ -763,7 +763,7 @@ public class TestChatLogic {
     * @throws RequestBase.AiControllerException.
     */
     @Test
-    public void testChat_botPassthroughIgnored() throws RequestBase.AiControllerException {
+    public void testChat_botPassthroughIgnored() throws RequestBase.AiControllerException, WebHooks.WebHookException {
         String passthroughResponse = "won't see this";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
 
@@ -781,7 +781,7 @@ public class TestChatLogic {
      * @throws ServerConnector.AiServicesException
      */
     @Test
-    public void testAssistant_Valid_Semantic() throws ServerConnector.AiServicesException {
+    public void testAssistant_Valid_Semantic() throws ServerConnector.AiServicesException, WebHooks.WebHookException {
         ApiResult result = getAssistantChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(ASSISTANTRESULT, ((ApiChat) result).getResult().getAnswer());
@@ -973,7 +973,7 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_webHookTriggered()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -1006,7 +1006,7 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_webHookNullResponseHandled()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = null;
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
@@ -1034,7 +1034,7 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_inactiveWebHookIgnored()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -1065,7 +1065,7 @@ public class TestChatLogic {
      */
     @Test
     public void testChat_badWebHookHandled()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
 
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
@@ -1073,7 +1073,8 @@ public class TestChatLogic {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
-        when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(null);
+        when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
+                .thenThrow(new WebHooks.WebHookExternalException("It went wrong"));
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), anyString())).thenReturn(mi);

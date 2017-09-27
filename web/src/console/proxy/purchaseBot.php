@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/../common/errorRedirect.php";
 require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/utils.php";
@@ -11,7 +12,7 @@ require_once __DIR__ . "/../api/botApi.php";
 sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isset($_POST['botId'])) {
-    utils::redirect('./error.php?err=110');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 

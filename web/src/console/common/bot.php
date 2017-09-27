@@ -36,6 +36,7 @@ class bot
     private $videoLink;
     private $widgetColor;
     private $iconFile;
+    private $linkedBots;
 
 
     public function __construct()
@@ -133,6 +134,7 @@ class bot
             'description' => $this->getDescription(),
             'imagePath' => $this->getIconFile(),
             'licenseType' => $this->getLicenseType(),
+            'linked_bots' => $this->linkedBots,
             'longDescription' => $this->getLongDescription(),
             'name' => $this->getName(),
             'price' => $this->getPrice(),
@@ -370,6 +372,10 @@ class bot
     public function setWidgetColor($widgetColor)
     {
         $this->widgetColor = $widgetColor;
+    }
+
+    public function setLinkedBots($linkedBots) {
+        $this->linkedBots = $linkedBots;
     }
 
     public function __destruct()

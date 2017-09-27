@@ -7,9 +7,13 @@ import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.WebHook;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -493,6 +497,27 @@ public class TestAILogic {
     public void testExportBot_DoesntExist() {
         ApiResult result = this.aiLogic.exportBotData(VALIDDEVID, AIID);
         Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testImportBot_validationV1() {
+        BotStructure botStructure = new BotStructure("Name", "description", null, "",
+                null, 1, false, 0, 0, 1, "en-US", "London");
+        Assert.assertTrue(botStructure.validVersion());
+    }
+
+    @Test
+    public void testImportBot_invalidVersionIgnored() {
+        BotStructure botStructure = new BotStructure("Name", "description", null, "",
+                null, 0, false, 0, 0, 1, "en-US", "London");
+        Assert.assertFalse(botStructure.validVersion());
+    }
+
+    @Test
+    public void testImportBot_invalidBot() {
+        BotStructure botStructure = new BotStructure("", "", null, "",
+                null, 0, false, 0, 0, 1, "en-US", "London");
+        Assert.assertFalse(botStructure.validVersion());
     }
 
     @Test

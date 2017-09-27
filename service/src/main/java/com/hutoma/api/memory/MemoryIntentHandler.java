@@ -2,6 +2,7 @@ package com.hutoma.api.memory;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiEntity;
@@ -11,7 +12,9 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,6 +144,20 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 intent = new MemoryIntent(intentName, aiid, chatId, variables, false);
                 // write it to the db
                 this.database.updateMemoryIntent(intent, this.jsonSerializer);
+            } else {
+                // DEBUG - Check if there are any variables with duplicate labels
+                Set<String> usedLabels = new HashSet<>();
+                List<MemoryVariable> variables = intent.getVariables();
+                if (variables != null) {
+                    intent.getVariables().forEach(x -> {
+                        if (usedLabels.contains(x.getLabel())) {
+                            this.logger.logWarning(LOGFROM, "Duplicate labels",
+                                    LogMap.map("Label", x.getLabel()).put("AIID", aiid).put("IntentName", intentName));
+                        } else {
+                            usedLabels.add(x.getLabel());
+                        }
+                    });
+                }
             }
         } catch (Database.DatabaseException e) {
             this.logger.logException(LOGFROM, e);

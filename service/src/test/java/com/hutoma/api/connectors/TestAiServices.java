@@ -9,11 +9,13 @@ import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import junitparams.JUnitParamsRunner;
 
@@ -26,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import java.util.Collections;
 import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
@@ -50,6 +53,7 @@ public class TestAiServices {
 
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
+    private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
@@ -66,6 +70,7 @@ public class TestAiServices {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
+        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
@@ -82,7 +87,7 @@ public class TestAiServices {
                 TestDataHelper.getEndpointFor(WNET_ENDPOINT));
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
                 TestDataHelper.getEndpointFor(RNN_ENDPOINT));
-        this.aiServices = new AIServices(this.fakeDatabase, this.fakeLogger, this.fakeSerializer,
+        this.aiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, this.fakeClient, new ThreadSubPool(threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
@@ -123,6 +128,71 @@ public class TestAiServices {
                         + MemoryIntentHandler.META_INTENT_TAG + "name")));
         Assert.assertEquals(sysIndependent("line1\nline2"),
                 this.aiServices.removeIntentExpressions(sysIndependent("line1\nline2\n")));
+    }
+
+    @Test
+    public void testGetTrainingMaterialsCommon() throws Database.DatabaseException {
+        final String userTrainingFile = "line1\nline2";
+        final ApiIntent intent = TestIntentLogic.getIntent();
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
+        String trainingFile = this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
+
+        final String expectedTrainingFile = String.format("%s\n%s\n%s%s\n", userTrainingFile, intent.getUserSays().get(0),
+                MemoryIntentHandler.META_INTENT_TAG, intent.getIntentName());
+        Assert.assertEquals(expectedTrainingFile, trainingFile);
+    }
+
+    @Test
+    public void testGetTrainingMaterialsCommon_noIntents() throws Database.DatabaseException {
+        final String userTrainingFile = "line1\nline2";
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.emptyList());
+        String trainingFile = this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
+        Assert.assertEquals(userTrainingFile, trainingFile);
+    }
+
+    @Test
+    public void testGetTrainingMaterialsCommon_aiNotFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        String trainingFile = this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
+        Assert.assertNull(trainingFile);
+    }
+
+    @Test(expected = Database.DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getAiException() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenThrow(Database.DatabaseException.class);
+        this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
+    }
+
+    @Test(expected = Database.DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getAiTrainingFileException() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenThrow(Database.DatabaseException.class);
+        this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
+    }
+
+    @Test(expected = Database.DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getIntentsException() throws Database.DatabaseException {
+        final String userTrainingFile = "line1\nline2";
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenThrow(Database.DatabaseException.class);
+        this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
+    }
+
+    @Test(expected = Database.DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getIntentException() throws Database.DatabaseException {
+        final String userTrainingFile = "line1\nline2";
+        final ApiIntent intent = TestIntentLogic.getIntent();
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenThrow(Database.DatabaseException.class);
+        this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
     }
 
     public static String sysIndependent(String data) {

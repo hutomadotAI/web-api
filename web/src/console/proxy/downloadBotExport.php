@@ -1,12 +1,21 @@
 <?php
-require "../../pages/config.php";
-require_once "../api/aiApi.php";
-require_once "../common/utils.php";
+
+namespace hutoma;
+
+require_once __DIR__ . "/../common/config.php";
+require_once __DIR__ . "/../common/errorRedirect.php";
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../api/apiBase.php";
+require_once __DIR__ . "/../api/aiApi.php";
+require_once __DIR__ . "/../common/utils.php";
+
+\hutoma\sessionObject::redirectToLoginIfUnauthenticated();
 
 $aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
 $format = 'json';
 
-$api = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$api = new \hutoma\api\aiApi(\hutoma\sessionObject::isLoggedIn(), \hutoma\sessionObject::getDevToken());
 $exportedBot = $api->exportAI($aiid);
 $botJson = json_encode($exportedBot['bot']);
 if ($botJson == null || $exportedBot['status']['code'] != 200) {

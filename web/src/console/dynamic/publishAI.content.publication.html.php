@@ -8,12 +8,18 @@ require_once __DIR__ . "/../common/utils.php";
 require_once __DIR__ . "/../common/developer.php";
 require_once __DIR__ . "/../common/bot.php";
 require_once __DIR__ . "/../api/botApi.php";
+require_once __DIR__ . "/../common/Assets.php";
+require_once __DIR__ . "/../dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
+$requestedAi = $_REQUEST['ai'];
 $botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
-$botDetails = $botApi->getAiBotDetails(sessionObject::getCurrentAI()['aiid']);
+$botDetails = $botApi->getAiBotDetails($requestedAi);
 unset($botApi);
+
 ?>
 <div class="row">
     <div class="col-md-12" id="publishInfoBox">
@@ -23,6 +29,18 @@ unset($botApi);
                 <dt>Information</dt>
                 <dl class="dl-horizontal no-margin" style="text-align:justify">
                     This platform is currently under preview. As such the options and features are actively being developed and will likely change. Submitted bots will be reviewed before publishing.
+                </dl>
+            </span>
+        </div>
+    </div>
+</div>
+<div class="row" id="linkedBotWarning" style="display: none">
+    <div class="col-md-12">
+        <div class="alert alert-dismissable flat alert-danger unselectable" style="padding-bottom: 25px;">
+            <span class="text-white">
+                <dt>Important note:</dt>
+                <dl class="dl-horizontal no-margin" style="text-align:justify">
+                    We do not currently support publishing with linked skills. Please remove them if you’d like your bot to be published.
                 </dl>
             </span>
         </div>
@@ -369,7 +387,7 @@ unset($botApi);
 
 <script>
     var developer = <?php
-        $dev = new \hutoma\developer();
+        $dev = new developer();
         $dev->setName($developer['info']['name']);
         $dev->setCompany($developer['info']['company']);
         $dev->setEmail($developer['info']['email']);
@@ -387,7 +405,7 @@ unset($botApi);
         ?>;
 
     var bot = <?php
-        $bot = new \hutoma\bot();
+        $bot = new bot();
         //TODO need check controll on value returned by API
         /* if (isset($botDetails)!=200) {} */
 
@@ -407,12 +425,15 @@ unset($botApi);
             $bot->setSample($botDetails['bot']['sample']);
             $bot->setVersion($botDetails['bot']['version']);
             $bot->setVideoLink($botDetails['bot']['videoLink']);
+            $bot->setLinkedBots($botDetails['bot']['linked_bots']);
         }
         else{
-            $ai = sessionObject::getCurrentAI();
+            $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+            $ai = $aiApi->getSingleAI($requestedAi);
             $bot->setAiid($ai['aiid']);
             $bot->setName($ai['name']);
             $bot->setDescription(isset($ai['description']) ? $ai['description'] : "");
+            $bot->setLinkedBots($ai['linked_bots']);
         }
 
         $tmp_bot = $bot->toJSON();
@@ -422,5 +443,5 @@ unset($botApi);
         unset($tmp_bot);
         ?>;
 </script>
-<script src="./scripts/drag-and-drop/drag-and-drop.js"></script>
-<script src="./scripts/publish/publish.js"></script>
+<script src="<?php $assets->getAsset('drag-and-drop/drag-and-drop.js') ?>"></script>
+<script src="<?php $assets->getAsset('publish/publish.js') ?>"></script>

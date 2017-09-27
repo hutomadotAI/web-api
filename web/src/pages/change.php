@@ -14,7 +14,7 @@ require_once __DIR__ . "/../console/api/userMgmt.php";
 <html>
   <head>
     <title>Hu:toma | Change Password</title>
-    <link rel="icon" href="../console/dist/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/console/dist/img/favicon.ico" type="image/x-icon">
     <?php include_once "../console/common/google_tag_manager.php" ?>
   </head>
   <body>

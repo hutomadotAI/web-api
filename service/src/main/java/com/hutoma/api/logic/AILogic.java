@@ -15,6 +15,7 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -37,6 +39,7 @@ import javax.inject.Provider;
 public class AILogic {
 
     private static final String LOGFROM = "ailogic";
+    private static final int version = 1;
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
@@ -181,6 +184,10 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
             } else {
+                List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devid, aiid);
+                if (!linkedBots.isEmpty()) {
+                    ai.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+                }
                 this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI", devIdString, logMap);
                 return ai.setSuccessStatus();
             }
@@ -461,7 +468,8 @@ public class AILogic {
                 }
             }
             BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
-                    entityMap);
+                    entityMap, this.version, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
+                    bot.getVoice(), bot.getLanguage().toString(), bot.getTimezone());
             return new ApiBotStructure(botStructure).setSuccessStatus();
 
 
@@ -474,4 +482,120 @@ public class AILogic {
         return ApiError.getInternalServerError();
     }
 
+    public ApiResult importBot(final UUID devId, BotStructure importedBot) {
+        if (importedBot == null) {
+            return new ApiError();
+        }
+
+        ApiAi createdBot = null;
+
+        // Handle specific versions.
+        if (importedBot.getVersion() == 1) {
+            try {
+                createdBot = importV1(devId, importedBot);
+            } catch (BotImportException e) {
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBotV1", devId.toString(), e);
+                return ApiError.getBadRequest(e.getMessage());
+            }
+        }
+
+        if (createdBot == null) {
+            return ApiError.getInternalServerError();
+        }
+
+        UUID uuidAiid = UUID.fromString(createdBot.getAiid());
+
+        try {
+            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devId, uuidAiid, this.jsonSerializer);
+            this.aiServices.uploadTraining(createdBot.getBackendStatus(), devId, uuidAiid, trainingMaterials);
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+
+        // Bot successfully imported. Start training.
+        try {
+            this.aiServices.startTraining(createdBot.getBackendStatus(), devId, uuidAiid);
+        } catch (AIServices.AiServicesException | RuntimeException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportStartTraining", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+
+        return new ApiResult().setCreatedStatus();
+    }
+
+
+    private ApiAi importV1(UUID devId, BotStructure importedBot) throws BotImportException {
+        if (!importedBot.validVersion()) {
+            throw new BotImportException("Invalid Bot Structure for specified version.");
+        }
+        ApiResult result = this.createAI(devId, importedBot.getName(), importedBot.getDescription(), importedBot.isPrivate(),
+                importedBot.getPersonality(), importedBot.getConfidence(), importedBot.getVoice(), Locale.forLanguageTag(importedBot.getLanguage()),
+                importedBot.getTimezone());
+
+        ApiAi bot = null;
+
+        try {
+            bot = (ApiAi) result;
+        } catch (ClassCastException e) {
+            throw new BotImportException(result.getStatus().getInfo());
+        }
+
+        UUID aiid = UUID.fromString(bot.getAiid());
+
+        try {
+            bot = (ApiAi) this.getSingleAI(devId, aiid);
+        } catch (Exception e) {
+            throw new BotImportException("Failed to retrieve newly imported bot.");
+        }
+
+        List<Entity> userEntities = null;
+        try {
+            // Add the entities that the user doesn't currently have.
+            userEntities = this.databaseEntitiesIntents.getEntities(devId);
+        } catch (Database.DatabaseException ex) {
+            throw new BotImportException("Can't retrieve users existing entities.");
+        }
+
+        try {
+            for (ApiEntity e : importedBot.getEntities().values()) {
+                boolean hasEntity = false;
+                for (Entity ue : userEntities) {
+                    if (ue.getName().equals(e.getEntityName())) {
+                        hasEntity = true;
+                        break;
+                    }
+                }
+                if (!hasEntity) {
+                    this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e);
+                }
+            }
+        } catch (Database.DatabaseException ex) {
+            throw new BotImportException("Failed to create new entities from imported bot.");
+        }
+
+        // Import intents.
+        try {
+            for (ApiIntent intent : importedBot.getIntents()) {
+                this.databaseEntitiesIntents.writeIntent(devId, UUID.fromString(bot.getAiid()), intent.getIntentName(), intent);
+            }
+        } catch (Database.DatabaseException ex) {
+            throw new BotImportException("Failed to write intents for imported bot.");
+        }
+
+        // Add the training file to the database.
+        try {
+            this.databaseEntitiesIntents.updateAiTrainingFile(aiid, importedBot.getTrainingFile());
+        } catch (Exception e) {
+            throw new BotImportException("Failed to add training file for imported bot.");
+        }
+
+        return bot;
+    }
+
+    static class BotImportException extends Exception {
+        public BotImportException(final String message) {
+            super(message);
+        }
+    }
 }

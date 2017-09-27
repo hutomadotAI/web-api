@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/common/errorRedirect.php";
 require_once __DIR__ . "/common/globals.php";
 require_once __DIR__ . "/common/sessionObject.php";
 require_once __DIR__ . "/common/menuObj.php";
@@ -10,6 +11,10 @@ require_once __DIR__ . "/api/apiBase.php";
 require_once __DIR__ . "/api/aiApi.php";
 require_once __DIR__ . "/api/intentsApi.php";
 require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
@@ -22,9 +27,11 @@ $currentIntent = isset($_POST['intent']) ? $_POST['intent'] : "";
 $intents = $intentsApi->getIntents($aiid);
 unset($intentsApi);
 
-if ($intents['status']['code'] !== 200 && $intents['status']['code'] !== 404) {
+$intents_status = $intents['status']['code'];
+if ($intents_status !== 200 && $intents_status !== 404) {
+        $intents_result = $intents;
     unset($intents);
-    utils::redirect('./error.php?err=210');
+    errorRedirect::handleErrorRedirect($intents_result);
     exit;
 }
 
@@ -32,9 +39,11 @@ $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken()
 $bot = $aiApi->getSingleAI($aiid);
 unset($aiApi);
 
-if ($bot['status']['code'] !== 200) {
+$bot_status = $bot['status']['code'];
+if ($bot_status !== 200 && $bot_status !== 404) {
+    $bot_result = $bot;
     unset($bot);
-    utils::redirect('./error.php?err=204');
+    errorRedirect::handleErrorRedirect($bot_result);
     exit;
 }
 
@@ -184,7 +193,7 @@ include __DIR__ . "/include/page_menu.php";
 
                         <!-- Modal DELETE entity-->
                         <div class="modal fade" id="deleteIntent" role="dialog">
-                            <div class="modal-dialog flat">
+                            <div class="modal-dialog flat width600">
                                 <!-- Modal content-->
                                 <div class="modal-content bordered" style="background-color: #202020">
                                     <div class="modal-header">
@@ -216,17 +225,17 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
-<script src="./dist/js/mustache.min.js"></script>
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/intent/intent.polling.js"></script>
-<script src="./scripts/intent/intent.js"></script>
-<script src="./scripts/shared/shared.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.polling.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "intents", 1, true, false);

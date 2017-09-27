@@ -8,9 +8,12 @@
 
 namespace hutoma\api;
 
+require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/config.php";
 require_once __DIR__ . "/../common/logging.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../common/emailUtil.php";
 require_once __DIR__ . "/../api/adminApi.php";
 
 use hutoma as base;
@@ -144,18 +147,17 @@ class userMgmt
         return true;
     }
 
-    public static function changePassword($newpass)
+    public static function changePassword($userId, $newpass)
     {
         if (base\sessionObject::isLoggedIn()) {
             $randomSalt = base\utils::getRandomSalt();
             $saltedPass = base\utils::generatePassword($newpass, $randomSalt);
             $api = new adminApi(base\sessionObject::isLoggedIn(), base\config::getAdminToken());
-            $api->updateUserPassword(
-                base\sessionObject::getCurrentUsername(),
+            return $api->updateUserPassword(
+                $userId,
                 $saltedPass,
                 $randomSalt
             );
-            return true;
         } else {
             echo "<h3>Error : Not Logged In</h3>";
             return "notLoggedIn";
@@ -236,21 +238,25 @@ class userMgmt
                      * change the password as \Fr\LS::changePassword()
                      * requires the user to be logged in.
                      */
-                    $user = $api->getUserIdForToken($reset_pass_token);
+                    $userId = $api->getUserIdForToken($reset_pass_token);
                     base\sessionObject::setLoggedin(true);
 
-                    if (self::changePassword($newPassword)) {
+                    if (self::changePassword($userId, $newPassword)) {
                         base\sessionObject::setLoggedin(false);
 
                         /**
                          * The token shall not be used again, so remove it.
                          */
                         if (!$api->deletePasswordResetToken($reset_pass_token)) {
+                            base\logging::error("Failed to delete the password token for userId " . $userId);
                             echo "<h3>Error</h3><p>There was a problem resetting your password.</p>";
                         } else {
                             echo "<h3>Password Reset Successful</h3><p>You may now login with your new password.</p>";
                             $curStatus = "passwordChanged"; // The password was successfully changed
                         }
+                    } else {
+                        base\logging::error("Failed to change password for userId " . $userId);
+                        echo "<h3>Error</h3><p>There was a problem resetting your password. Please try again later.</p>";
                     }
                 }
             }
@@ -294,7 +300,7 @@ class userMgmt
                         <a href='" . base\utils::curPageURL() . "?resetPassToken={$encodedToken}'>Reset Password : {$token}</a>
                       </blockquote><br/>Thanks!<br/>-the Hu:toma Team";
                     $textBody = "Hello, we got a request to reset your password. If you ignore this message, your password won't be changed. If you do want to change your password please enter this link in your browser :\n"
-                        . utils::curPageURL() . "?resetPassToken={$encodedToken}\n\nThanks!\n-the Hu:toma Team";
+                        . base\utils::curPageURL() . "?resetPassToken={$encodedToken}\n\nThanks!\n-the Hu:toma Team";
 
                     $emailDetails = base\config::getRegistrationEmailDetails();
                     $result = base\emailUtil::sendEmail($email, $emailDetails['from'], $subject, $htmlBody, $textBody);

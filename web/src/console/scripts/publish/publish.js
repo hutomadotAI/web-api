@@ -51,34 +51,34 @@ function checkInput() {
     var bot_name = document.getElementById('bot_name');
     if (bot_name.value !== 'undefined') {
         if (isInputInvalid(bot_name.value, 'bot_name')) {
-            createAlertMessage(ALERT.DANGER.value, 'The AI name can only contains letters and numbers.', 'bot_name');
+            displayPublishAlertMessage(ALERT.DANGER.value, 'The AI name can only contains letters and numbers.', 'bot_name');
             return false;
         }
     }
 
     // BOT short description input validation
     var bot_description = document.getElementById('bot_description');
-    if (bot_description.value != '' && bot_description.value !== 'undefined') {
+    if (bot_description.value !== '' && bot_description.value !== 'undefined') {
         if (isInputInvalid(bot_description.value, 'bot_description')) {
-            createAlertMessage(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.', 'bot_description');
+            displayPublishAlertMessage(ALERT.DANGER.value, 'Invalid description text. Please enter a string that contains alphanumeric characters.', 'bot_description');
             return false;
         }
     }
 
     // BOT licence fee ( price ) input validation
     var bot_price = document.getElementById('bot_price');
-    if (bot_price.value != '' && bot_price.value !== 'undefined') {
+    if (bot_price.value !== '' && bot_price.value !== 'undefined') {
         if (isInputInvalid(bot_price.value, 'bot_price')) {
-            createAlertMessage(ALERT.DANGER.value, 'Please enter a valid number.', 'bot_price');
+            displayPublishAlertMessage(ALERT.DANGER.value, 'Please enter a valid number.', 'bot_price');
             return false;
         }
     }
 
     // BOT privacy policy input validation URI
     var bot_privacyPolicy = document.getElementById('bot_privacyPolicy');
-    if (bot_privacyPolicy.value != '' && bot_privacyPolicy.value !== 'undefined') {
+    if (bot_privacyPolicy.value !== '' && bot_privacyPolicy.value !== 'undefined') {
         if (isInputInvalid(bot_privacyPolicy.value, 'URI')) {
-            createAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'bot_privacyPolicy');
+            displayPublishAlertMessage(ALERT.DANGER.value, 'Please enter a valid URI.', 'bot_privacyPolicy');
             return false;
         }
     }
@@ -98,7 +98,7 @@ function requestPublish() {
         return false;
     }
 
-    createAlertMessage(ALERT.WARNING.value, 'Sending request...');
+    displayPublishAlertMessage(ALERT.WARNING.value, 'Sending request...');
     var botInfo = fieldsToBotIstance();
     var jsonString = JSON.stringify(botInfo);
 
@@ -111,12 +111,12 @@ function requestPublish() {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
                 case 200:
-                    createAlertMessage(ALERT.SUCCESS.value, 'Request sent ');
+                    displayPublishAlertMessage(ALERT.SUCCESS.value, 'Request sent ');
                     buttonPublishToRequest();
-                    callback(JSONdata['bot']['botId']);
+                    callback(JSONdata['bot']);
                     break;
                 default:
-                    createAlertMessage(ALERT.DANGER.value, JSONdata['status']['info']);
+                    displayPublishAlertMessage(ALERT.DANGER.value, JSONdata['status']['info']);
                     $("#btnPublishRequest").prop("disabled", false);
             }
         },
@@ -126,21 +126,21 @@ function requestPublish() {
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
             $("#btnPublishRequest").prop("disabled", false);
-            createAlertMessage(ALERT.DANGER.value, 'Request not sent!');
+            displayPublishAlertMessage(ALERT.DANGER.value, 'Request not sent!');
         }
     });
 
 }
 
-function callback(botId) {
+function callback(bot) {
     var node = document.getElementById('drop-zone');
 
     if(!node.hasAttribute('src'))
-        callRedirection();
+        callRedirection(bot);
     else {
         var src = node.getAttribute('src');
         var imageFile = dataURLtoFile(src, 'icon.png');
-        uploadIconFile(botId, imageFile);
+        uploadIconFile(bot.botId, imageFile);
     }
 }
 
@@ -152,8 +152,26 @@ function dataURLtoFile(dataurl, filename) {
     return new File([u8arr], filename, {type:mime});
 }
 
+/**
+ * After successfull publish trigger an event in GTM, and get back to homepage
+ * @return {undefined}
+ */
+function callRedirection(bot){
 
-function callRedirection(){
+    if ('dataLayer' in window && bot && bot.aiid && bot.name) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'botstore',
+            eventAction: 'publish',
+            eventLabel: bot.aiid,
+            eventMetadata: {
+                timestamp: Date.now(),
+                aiid: bot.aiid,
+                name: bot.name
+            }
+        });
+    }
+
     window.location.href = './home.php';
 }
 
@@ -163,7 +181,7 @@ function uploadIconFile(botId,imageFile) {
     formData.append("inputfile", imageFile);
     formData.append('botId', botId);
 
-    createAlertMessage(1, 'Uploading image...');
+    displayPublishAlertMessage(1, 'Uploading image...');
 
     $.ajax({
         type: "POST",
@@ -180,13 +198,13 @@ function uploadIconFile(botId,imageFile) {
                     break;
                 default:
                     var prev_msg = document.getElementById('msgAlertPublish').innerText;
-                    createAlertMessage(ALERT.WARNING.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
+                    displayPublishAlertMessage(ALERT.WARNING.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
                     buttonRequestToNext();
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             var prev_msg = document.getElementById('msgAlertPublish').innerText;
-            createAlertMessage(ALERT.WARNING.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
+            displayPublishAlertMessage(ALERT.WARNING.value, prev_msg + ' ' + xhr.status + ' ' + thrownError);
             buttonRequestToNext();
         }
     });
@@ -215,7 +233,7 @@ function buttonRequestToNext(){
 }
 
 
-function createAlertMessage(alarm, message, id) {
+function displayPublishAlertMessage(alarm, message, id) {
     var msg_class;
     var ico_class;
 
@@ -223,19 +241,19 @@ function createAlertMessage(alarm, message, id) {
         case ALERT.BASIC.value:
             msg_class = 'alert alert-dismissable flat alert-base';
             ico_class = 'icon fa fa-check';
-            if (id != null)
+            if (typeof id !== 'undefined' && id !== null)
                 document.getElementById(id).style.border = "0px";
             break;
         case ALERT.WARNING.value:
             msg_class = 'alert alert-dismissable flat alert-warning';
             ico_class = 'icon fa fa-check';
-            if (id != null)
+            if (typeof id !== 'undefined' && id !== null)
                 document.getElementById(id).style.border = "1px solid orange";
             break;
         case ALERT.DANGER.value:
             msg_class = 'alert alert-dismissable flat alert-danger';
             ico_class = 'icon fa fa-warning';
-            if (id != null)
+            if (typeof id !== 'undefined' && id !== null)
                 document.getElementById(id).style.border = "1px solid red";
             break;
         case ALERT.SUCCESS.value:
@@ -271,23 +289,31 @@ function createAlertMessage(alarm, message, id) {
 }
 
 function populateBotFields(bot) {
-    var json = JSON.parse(bot);
-    document.getElementById('bot_id').value = json['botId'];
-    document.getElementById('bot_aiid').value = json['aiid'];
-    document.getElementById('bot_alertMessage').value = json['alertMessage'];
-    document.getElementById('bot_badge').value = json['badge'];
-    document.getElementById('bot_description').value = json['description'];
-    document.getElementById('bot_longDescription').value = json['longDescription'];
-    document.getElementById('bot_name').value = json['name'];
-    document.getElementById('bot_price').value = 0;
-    document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
-    document.getElementById('bot_sample').value = json['sample'];
-    document.getElementById('bot_version').value = 1;
-    document.getElementById('bot_videoLink').value = json['videoLink'];
+    try { 
+        var json = JSON.parse(bot);
 
-    setSelectValue('bot_category', json['category']);
-    setSelectValue('bot_classification', json['classification']);
-    setSelectValue('bot_licenseType', json['licenseType']);
+        // If there are linked bots show the warning that this is not supported yet
+        document.getElementById('linkedBotWarning').style.display = json['linked_bots'].length > 0 ? 'block' : 'none';
+        
+        document.getElementById('bot_id').value = json['botId'];
+        document.getElementById('bot_aiid').value = json['aiid'];
+        document.getElementById('bot_alertMessage').value = json['alertMessage'];
+        document.getElementById('bot_badge').value = json['badge'];
+        document.getElementById('bot_description').value = json['description'];
+        document.getElementById('bot_longDescription').value = json['longDescription'];
+        document.getElementById('bot_name').value = json['name'];
+        document.getElementById('bot_price').value = 0;
+        document.getElementById('bot_privacyPolicy').value = json['privacyPolicy'];
+        document.getElementById('bot_sample').value = json['sample'];
+        document.getElementById('bot_version').value = 1;
+        document.getElementById('bot_videoLink').value = json['videoLink'];
+
+        setSelectValue('bot_category', json['category']);
+        setSelectValue('bot_classification', json['classification']);
+        setSelectValue('bot_licenseType', json['licenseType']);
+    } catch(error) {
+        throw('No bot data');
+    }
 }
 
 function populateDeveloperFields(developer) {
@@ -366,65 +392,65 @@ function fieldsBotValidation() {
     var elem;
 
     elem = document.getElementById('bot_name');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The name field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The name field cannot be empty!', 'bot_name');
         return false;
     }
 
     elem = document.getElementById('bot_description');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The description field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The description field cannot be empty!', 'bot_description');
         return false;
     }
 
     elem = document.getElementById('bot_longDescription');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The long description field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The long description field cannot be empty!', 'bot_longDescription');
         return false;
     }
 
     elem = document.getElementById('bot_licenseType');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The licenseType field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The licenseType field cannot be empty!', 'bot_licenseType');
         return false;
     }
 
     elem = document.getElementById('bot_category');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The category field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The category field cannot be empty!', 'bot_category');
         return false;
     }
 
     elem = document.getElementById('bot_classification');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The classification field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The classification field cannot be empty!', 'bot_classification');
         return false;
     }
 
     elem = document.getElementById('bot_sample');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The sample field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The sample field cannot be empty!', 'bot_sample');
         return false;
     }
 
     elem = document.getElementById('bot_price');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The price field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The price field cannot be empty!', 'bot_price');
         return false;
     }
 
     elem = document.getElementById('bot_version');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The version field cannot be empty!');
+        displayPublishAlertMessage(ALERT.DANGER.value, 'The version field cannot be empty!', 'bot_price');
         return false;
     }
 

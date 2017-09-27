@@ -3,6 +3,10 @@
 namespace hutoma;
 
 require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
 
 $header_page_title = "Botstore";
 include __DIR__ . "/include/page_head_default.php";
@@ -90,19 +94,19 @@ include __DIR__ . "/include/page_head_default.php";
     <input type="hidden" id="bot_id" name="bot_id" style="display:none;">
 </section>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
-<script src="scripts/external/select2/select2.full.js"></script>
-<script src="./scripts/botstore/botstore.js"></script>
-<script src="./scripts/botstore/carousel.js"></script>
-<script src="./scripts/botcard/botcard.js"></script>
-<script src="./scripts/botcard/buyBot.js"></script>
-<script src="./dist/js/mustache.min.js"></script>
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
+<script src="/console/dist/vendors/select2/select2.full.js"></script>
+<script src="<?php $assets->getAsset('botstore/botstore.js') ?>"></script>
+<script src="<?php $assets->getAsset('botstore/carousel.js') ?>"></script>
+<script src="<?php $assets->getAsset('botcard/botcard.js') ?>"></script>
+<script src="<?php $assets->getAsset('botcard/buyBot.js') ?>"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 
 <?php
 $category = isset($_GET['category']) ? $_GET['category'] : "";

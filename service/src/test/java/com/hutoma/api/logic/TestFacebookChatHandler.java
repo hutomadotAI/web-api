@@ -47,6 +47,30 @@ public class TestFacebookChatHandler {
     private static final String ANSWER = "answer";
     private static final String WEBHOOK_ANSWER = "webhook answer";
     private static final String LABEL = "label";
+    private static final String OPTIN = "send-to-messenger";
+    String fbOptin = "{\n" +
+            "   \"object\":\"page\",\n" +
+            "   \"entry\":[\n" +
+            "      {\n" +
+            "         \"id\":\"1731355550428969\",\n" +
+            "         \"time\":1458692752478,\n" +
+            "         \"messaging\":[\n" +
+            "            {\n" +
+            "               \"sender\":{\n" +
+            "                  \"id\":\"" + SENDER + "\"\n" +
+            "               },\n" +
+            "               \"recipient\":{\n" +
+            "                  \"id\":\"page_id\"\n" +
+            "               },\n" +
+            "               \"timestamp\":1234567890,\n" +
+            "               \"optin\":{\n" +
+            "                  \"ref\":\"" + OPTIN + "\"\n" +
+            "               }\n" +
+            "            }\n" +
+            "         ]\n" +
+            "      }\n" +
+            "   ]\n" +
+            "}";
     private FacebookChatHandler chatHandler;
     private Config fakeConfig;
     private JsonSerializer serializer;
@@ -58,15 +82,12 @@ public class TestFacebookChatHandler {
     private IntegrationRecord fakeIntegrationRecord;
     private Provider<ChatLogic> fakeChatLogicProvider;
     private ChatLogic fakeChatLogic;
-
     private ChatResult chatResult;
-
     private String fbPostback = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\","
             + "\"time\":1498224298036,\"messaging\":[{\"sender\":{\"id\":\"" + SENDER + "\"},"
             + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854,\"postback\":"
             + "{\"title\":\"TITLE_FOR_THE_CTA\",\"payload\":\"" + POSTBACK + "\",\"referral\":{\"ref\":"
             + "\"USER_DEFINED_REFERRAL_PARAM\",\"source\":\"SHORTLINK\",\"type\":\"OPEN_THREAD\"}}}]}]}";
-
     private String fbUnknown = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\","
             + "\"time\":1498224298036,\"messaging\":[{\"sender\":{\"id\":\"" + SENDER + "\"},"
             + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854}]}]}";
@@ -311,6 +332,18 @@ public class TestFacebookChatHandler {
         verify(this.fakeChatLogic, never()).chatFacebook(
                 Matchers.eq(TestDataHelper.AIID), any(), any(), anyString(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
+                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
+    }
+
+    @Test
+    public void testChat_OptIn() throws Exception {
+        FacebookNotification notification = (FacebookNotification)
+                this.serializer.deserialize(this.fbOptin, FacebookNotification.class);
+        this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
+        this.chatHandler.call();
+        verify(this.fakeChatLogic, times(1)).chatFacebook(
+                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(OPTIN), anyString(), any());
+        verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
     }
 

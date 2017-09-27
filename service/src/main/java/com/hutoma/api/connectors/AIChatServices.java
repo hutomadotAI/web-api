@@ -177,6 +177,15 @@ public class AIChatServices extends ServerConnector {
     }
 
     public void abandonCalls() {
+        if (this.rnnFutures != null) {
+            this.rnnFutures.forEach(RequestBase.RequestInProgress::closeRequest);
+        }
+        if (this.wnetFutures != null) {
+            this.wnetFutures.forEach(RequestBase.RequestInProgress::closeRequest);
+        }
+        if (this.aimlFutures != null) {
+            this.aimlFutures.forEach(RequestBase.RequestInProgress::closeRequest);
+        }
         this.requestWnet.abandonCalls();
         this.requestRnn.abandonCalls();
         this.requestAiml.abandonCalls();
@@ -231,6 +240,17 @@ public class AIChatServices extends ServerConnector {
         return this.minPMap;
     }
 
+    public String getAIPassthroughUrl(UUID devid, UUID aiid) {
+        String result = null;
+        try {
+            ApiAi ai = this.database.getAI(devid, aiid, this.serializer);
+            result = ai.getPassthroughUrl();
+        } catch (Database.DatabaseException e) {
+            this.logger.logException("Database exception attempting to retrieve PassthroughUrl", e);
+        }
+        return result;
+    }
+
     /***
      * Assuming that we pre-calculated the deadline when we started the chat requests,
      * this calculates the time remaining until we reach the deadline
@@ -245,16 +265,5 @@ public class AIChatServices extends ServerConnector {
         public AiNotReadyToChat(final String message) {
             super(message);
         }
-    }
-
-    public String getAIPassthroughUrl(UUID devid, UUID aiid) {
-        String result = null;
-        try {
-            ApiAi ai = this.database.getAI(devid, aiid, this.serializer);
-            result = ai.getPassthroughUrl();
-        } catch (Database.DatabaseException e) {
-            this.logger.logException("Database exception attempting to retrieve PassthroughUrl", e);
-        }
-        return result;
     }
 }

@@ -20,12 +20,34 @@ function drawTableRows() {
 
     var view = {
         ais: aiList.map(function(ai, index) {
-            ai.canBePublished = ai.publishing_state === "NOT_PUBLISHED" && ai.ai_status === 'ai_training_complete';
-            ai.needsTrainingForPublishing = ai.publishing_state === "NOT_PUBLISHED" && ai.ai_status !== 'ai_training_complete';
-            ai.submittedForPublishing = ai.publishing_state === "SUBMITTED";
-            ai.published = ai.publishing_state === "PUBLISHED";
+            var canBePublished = ai.publishing_state === 'NOT_PUBLISHED' && ai.ai_status === 'ai_training_complete';
+            if (canBePublished) {
+                ai.canBePublished = true;
+            } else {
+                if (ai.publishing_state === 'NOT_PUBLISHED') {
+                    ai.cannotBePublished = true;
+                }
+            }
+            if (ai.publishing_state === 'SUBMITTED') {
+                ai.submittedForPublishing = true;
+            }
+            if (ai.publishing_state === 'PUBLISHED') {
+                ai.published = true;
+            }
             ai.trainingStatusString = decodeAIState(ai.ai_status);
-            ai.oddEven = index % 2 === 0 ? "odd" : "even";
+            ai.oddEven = index % 2 === 0 ? 'odd' : 'even';
+            if (ai.linked_bots.length > 0) {
+                ai.numLinkedSkills = ai.linked_bots.length;
+            }
+
+            if (canBePublished) {
+                if (ai.numLinkedSkills > 0) {
+                    ai.publishButtonTooltip = 'We do not currently support publishing with linked skills. Please remove them if you’d like your bot to be published.';
+                }
+            } else if (ai.ai_status !== 'ai_training_complete') {
+                ai.publishButtonTooltip = 'The bot needs to be fully trained before being published';
+            }
+
             return ai;
         }).sort(function(a, b){
             if (a.created_on < b.created_on)
@@ -60,10 +82,10 @@ function decodeAIState(state) {
             return ('<span class="text-olive">Completed</span>');
             break;
         case API_AI_STATE.ERROR.value :
-            return ('<span class="text-red" flat>Error</span>');
+            return ('<span class="text-red flat">Error</span>');
             break;
         default:
-            return ('<span class="text-red" flat></span>');
+            return ('<span class="text-red flat"></span>');
     }
 }
 

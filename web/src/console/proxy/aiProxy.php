@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/../common/errorRedirect.php";
 require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/ajaxApiProxy.php";
@@ -17,7 +18,15 @@ class aiProxy extends ajaxApiProxy {
         $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
         $result = $aiApi->deleteAI(sessionObject::getCurrentAI()['aiid']);
         unset($aiApi);
-        utils::redirect('../home.php');
+
+        if (isset($result)) {
+            if ($result['status']['code'] !== 200) {
+                errorRedirect::handleErrorRedirect($result);
+            }
+        } else {
+            errorRedirect::handleErrorRedirect(
+                errorRedirect::buildError(500,'Could not delete the bot. Please try again later.'));
+        }
     }
 
     private function addAi($vars)
@@ -45,13 +54,16 @@ class aiProxy extends ajaxApiProxy {
 
             foreach ($botSkills as $skill) {
                 if (!empty($skill['active'])) {
-                    if ($skill['active'] == '0') {
-                        $response = $aiApi->unlinkBotFromAI($aiid, $skill['botId']);
-                    } else {
+                    $shouldLink = $skill['active'] != '0';
+                    if ($shouldLink) {
                         $response = $aiApi->linkBotToAI($aiid, $skill['botId']);
+                    } else {
+                        $response = $aiApi->unlinkBotFromAI($aiid, $skill['botId']);
                     }
                     if ($this->getApiReponseCode($response) !== 200) {
-                        utils::redirect('../error.php?errObj=' . urldecode($response), null);
+                        logging::error(sprintf(
+                            "Error % skill: %s", $shouldLink ? "linking" : "unlinking", $response));
+                        errorRedirect::handleErrorRedirect($response);
                         unset($aiApi);
                         return;
                     }
@@ -62,7 +74,8 @@ class aiProxy extends ajaxApiProxy {
             return;
         }
 
-        utils::redirect('../error.php?errObj=' . urldecode($response), null);
+        logging::error("Error creating AI");
+        errorRedirect::handleErrorRedirect($response);
     }
 
     private function updateAi($vars) {
@@ -73,6 +86,7 @@ class aiProxy extends ajaxApiProxy {
         $this->assertRequestVar($vars, 'personality', 400, 'Personality not provided');
         $this->assertRequestVar($vars, 'voice', 400, 'Voice not provided');
         $this->assertRequestVar($vars, 'confidence', 400, 'Confidence not provided');
+        $this->assertRequestVar($vars, 'default_chat_responses', 400, 'Default response not provided');
         $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
         $result = $aiApi->updateAI(
             $vars['aiid'],
@@ -81,11 +95,12 @@ class aiProxy extends ajaxApiProxy {
             $vars['timezone'],
             $vars['personality'],
             $vars['voice'],
-            $vars['confidence']
+            $vars['confidence'],
+            $vars['default_chat_responses']
         );
         // Update the session variables
-        sessionObject::getCurrentAI()['language'] = $_POST['language'];
-        sessionObject::getCurrentAI()['voice'] = $_POST['voice'];
+        sessionObject::getCurrentAI()['language'] = $vars['language'];
+        sessionObject::getCurrentAI()['voice'] = $vars['voice'];
 
         unset($entityApi);
         echo json_encode($result);
@@ -104,6 +119,7 @@ class aiProxy extends ajaxApiProxy {
         if (isset($vars['action'])) {
             if ($vars['action'] === 'delete') {
                 $this->deleteAi($vars);
+                utils::redirect('../home.php', null);
             }
         } else {
             $this->addAi($vars);

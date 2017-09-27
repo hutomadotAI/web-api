@@ -33,7 +33,6 @@ class analyticsApi extends apiBase
             $this->curl->setVerbGet();
             $this->curl->addHeader('Content-Type', 'application/json');
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 999);
             return $curl_response;
         }
         return $this->getDefaultResponse();
@@ -52,7 +51,7 @@ class analyticsApi extends apiBase
             $this->curl->setUrl($url);
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 999);
+            $this->handleApiCallError($curl_response);
             return json_decode($curl_response);
         }
         return $this->getDefaultResponse();
@@ -71,7 +70,7 @@ class analyticsApi extends apiBase
             $this->curl->setUrl($url);
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 999);
+            $this->handleApiCallError($curl_response);
             return json_decode($curl_response);
         }
         return $this->getDefaultResponse();

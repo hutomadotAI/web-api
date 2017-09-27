@@ -2,7 +2,7 @@
 
 namespace hutoma;
 
-include __DIR__ . "/curl.php";
+include_once __DIR__ . "/curl.php";
 
 /**
  * Class curlHelper

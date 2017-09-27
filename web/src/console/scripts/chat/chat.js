@@ -31,16 +31,16 @@ function keyboardChat(e) {
 }
 
 function createNodeChat(human_name, ai_name) {
-    if (chatSemaphore === 0) {
-        chatSemaphore = (chatSemaphore + 1) % (2);
-        var msg = $('#message').val();
-        var chatId = $('#chatId').val();
-        if (msg.length !== 0) {
-            disableChat();
-            deactiveSpeechButton();
-            lockSpeechOption();
-            createLeftMsg(human_name, msg);
-            requestAnswerAI(ai_name, msg, chatId);
+    var msg = $('#message').val().trim();
+    var chatId = $('#chatId').val();
+    if (msg.length !== 0) {
+        if (chatSemaphore === 0) {
+            chatSemaphore = (chatSemaphore + 1) % (2);
+                disableChat();
+                deactiveSpeechButton();
+                lockSpeechOption();
+                createLeftMsg(human_name, msg);
+                requestAnswerAI(ai_name, msg, chatId);
         }
     }
 }

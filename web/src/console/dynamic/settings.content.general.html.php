@@ -162,6 +162,9 @@ $currentAiInfo = json_encode($aiInfo);
 
 <div class="box-footer unselectable">
     <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">revert to saved values</button>
+    <form action="./proxy/downloadBotExport.php" method="post" style="display:inline; margin:0; padding:0">
+        <button type="submit" name="btnExport" id="btnExport" value="_export" class="btn btn-primary flat">export Bot</button>
+    </form>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
             value="<?php echo $aiInfo['name']; ?>"
@@ -171,7 +174,7 @@ $currentAiInfo = json_encode($aiInfo);
 
 <!-- Modal DELETE AI-->
 <div class="modal fade" id="deleteAI" role="dialog">
-    <div class="modal-dialog flat"  style="border: 1px solid red;">
+    <div class="modal-dialog flat width600"  style="border: 1px solid red;">
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
@@ -200,7 +203,7 @@ $currentAiInfo = json_encode($aiInfo);
 
 <!-- Modal Regenerate HMAC secret-->
 <div class="modal fade" id="regenHmacSecret" role="dialog">
-    <div class="modal-dialog flat"  style="border: 1px solid red;">
+    <div class="modal-dialog flat width600"  style="border: 1px solid red;">
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">

@@ -2,6 +2,7 @@
 
 namespace hutoma;
 
+require_once __DIR__ . "/../common/errorRedirect.php";
 require_once __DIR__ . "/../common/globals.php";
 require_once __DIR__ . "/../common/sessionObject.php";
 require_once __DIR__ . "/../common/menuObj.php";
@@ -13,7 +14,7 @@ sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
     error_log("missing post data after stage 1 create AI");
-    utils::redirect('../error.php?err=301');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
