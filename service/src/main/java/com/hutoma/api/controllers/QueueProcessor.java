@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /***
  * Only one of these should exist for each queuing controller.
@@ -40,7 +41,7 @@ import javax.inject.Inject;
 public class QueueProcessor extends TimerTask {
 
     private final DatabaseAiStatusUpdates database;
-    private final AIQueueServices queueServices;
+    private final Provider<AIQueueServices> queueServicesProvider;
     private final Tools tools;
     private final AiServiceStatusLogger logger;
     private final Config config;
@@ -65,12 +66,13 @@ public class QueueProcessor extends TimerTask {
 
     @Inject
     public QueueProcessor(final Config config, final DatabaseAiStatusUpdates database,
-                          final AIQueueServices queueServices, final Tools tools, AiServiceStatusLogger logger) {
+                          final Provider<AIQueueServices> queueServicesProvider,
+                          final Tools tools, AiServiceStatusLogger logger) {
         this.config = config;
         this.logger = logger;
         this.database = database;
         this.tools = tools;
-        this.queueServices = queueServices;
+        this.queueServicesProvider = queueServicesProvider;
         this.runQueueProcessor = new AtomicBoolean(true);
         this.runAgainAfterMs = new AtomicLong(0);
         this.lastKnownControllerState = new AtomicReference<>("");
@@ -122,23 +124,6 @@ public class QueueProcessor extends TimerTask {
                 this.logger.logException(this.logFrom, e);
             }
         }
-    }
-
-    /***
-     * If the queue processor was sleeping (long intervals)
-     * then tell it to run soon
-     */
-    void kickQueueProcessor() {
-
-        long timeNow = this.tools.getTimestamp();
-        this.lastKicked = timeNow;
-
-        // ideally, we would run the queue at this time
-        final long latestTimeToRun = timeNow + this.config.getProcessQueueIntervalShort();
-
-        // only update the run time if we are bringing it forward not pushing it back
-        this.runAgainAfterMs.getAndUpdate(previousTimeToRunNext ->
-                (previousTimeToRunNext > latestTimeToRun) ? latestTimeToRun : previousTimeToRunNext);
     }
 
     private void queueCheckAgainAfter(long milliseconds) {
@@ -361,6 +346,23 @@ public class QueueProcessor extends TimerTask {
     }
 
     /***
+     * If the queue processor was sleeping (long intervals)
+     * then tell it to run soon
+     */
+    void kickQueueProcessor() {
+
+        long timeNow = this.tools.getTimestamp();
+        this.lastKicked = timeNow;
+
+        // ideally, we would run the queue at this time
+        final long latestTimeToRun = timeNow + this.config.getProcessQueueIntervalShort();
+
+        // only update the run time if we are bringing it forward not pushing it back
+        this.runAgainAfterMs.getAndUpdate(previousTimeToRunNext ->
+                (previousTimeToRunNext > latestTimeToRun) ? latestTimeToRun : previousTimeToRunNext);
+    }
+
+    /***
      * Process a deletion
      * @param queued
      * @param server
@@ -382,7 +384,7 @@ public class QueueProcessor extends TimerTask {
             // if we have a status then proceed to tell the backend
             // to delete this AI
             if (currentStatus != null) {
-                this.queueServices.deleteAIDirect(this.serverType,
+                this.queueServicesProvider.get().deleteAIDirect(this.serverType,
                         currentStatus.getDevId(), queued.getAiid(),
                         server.getServerUrl(), server.getServerIdentifier());
             } else {
@@ -427,7 +429,7 @@ public class QueueProcessor extends TimerTask {
 
         try {
             // tell the chosen server to start training
-            this.queueServices.startTrainingDirect(this.serverType,
+            this.queueServicesProvider.get().startTrainingDirect(this.serverType,
                     currentStatus.getDevId(), queued.getAiid(),
                     server.getServerUrl(), server.getServerIdentifier());
 

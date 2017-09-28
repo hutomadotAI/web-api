@@ -4,8 +4,8 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.controllers.InvocationResult;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -42,12 +42,12 @@ public class ServerConnector {
     protected final JerseyClient jerseyClient;
     protected final ILogger logger;
     protected final Tools tools;
-    protected final ThreadSubPool threadSubPool;
+    protected final TrackedThreadSubPool threadSubPool;
 
     @Inject
     public ServerConnector(final Database database, final ILogger logger, final JsonSerializer serializer,
                            final Tools tools, final Config config, final JerseyClient jerseyClient,
-                           final ThreadSubPool threadSubPool) {
+                           final TrackedThreadSubPool threadSubPool) {
         this.database = database;
         this.logger = logger;
         this.serializer = serializer;

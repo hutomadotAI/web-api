@@ -1,26 +1,22 @@
 package com.hutoma.api.common;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 /***
- * Create a dynamic sub-pool of threads out of the big queue
+ * A proxy for the singleton main threadpool that does
+ * not allow the caller to shutdown the pool or anything like that
  */
-public class ThreadSubPool implements AutoCloseable {
+public class ThreadSubPool {
 
     // copy of executor service from the big pool
-    private ExecutorService executorService;
-
-    // a list of threads that we have opened
-    private ConcurrentLinkedQueue<Future> threads;
+    private final ExecutorService executorService;
 
     @Inject
     public ThreadSubPool(ThreadPool threadPool) {
         this.executorService = threadPool.getExecutorService();
-        this.threads = new ConcurrentLinkedQueue<>();
     }
 
     /***
@@ -29,9 +25,7 @@ public class ThreadSubPool implements AutoCloseable {
      * @return a future
      */
     public Future submit(Runnable runnable) {
-        Future future = this.executorService.submit(runnable);
-        this.threads.add(future);
-        return future;
+        return this.executorService.submit(runnable);
     }
 
     /***
@@ -40,25 +34,7 @@ public class ThreadSubPool implements AutoCloseable {
      * @return a future
      */
     public Future submit(Callable callable) {
-        Future future = this.executorService.submit(callable);
-        this.threads.add(future);
-        return future;
+        return this.executorService.submit(callable);
     }
 
-    /***
-     * Cancels all tasks immediately
-     * If they were running then they get interrupted.
-     */
-    public void cancelAll() {
-        Future future = this.threads.poll();
-        while (future != null) {
-            future.cancel(true);
-            future = this.threads.poll();
-        }
-    }
-
-    @Override
-    public void close() {
-        cancelAll();
-    }
 }

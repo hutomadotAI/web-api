@@ -17,6 +17,8 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.inject.Provider;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -228,8 +230,10 @@ public class TestQueueProcessorCommand {
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
         this.fakeServerTracker = mock(ServerTracker.class);
-        this.qproc = new QueueProcessorCommandTest(this.fakeConfig, this.fakeDatabase, this.fakeQueueServices,
-                mock(Tools.class));
+        Provider<AIQueueServices> fakeQueueServicesProvider = mock(Provider.class);
+        when(fakeQueueServicesProvider.get()).thenReturn(this.fakeQueueServices);
+        this.qproc = new QueueProcessorCommandTest(this.fakeConfig, this.fakeDatabase,
+                fakeQueueServicesProvider, mock(Tools.class));
         this.qproc.initialise(this.fakeController, BackendServerType.WNET);
 
         this.status = new BackendEngineStatus(
@@ -245,7 +249,7 @@ public class TestQueueProcessorCommand {
 
     public class QueueProcessorCommandTest extends QueueProcessor {
 
-        public QueueProcessorCommandTest(final Config config, final DatabaseAiStatusUpdates database, final AIQueueServices queueServices,
+        public QueueProcessorCommandTest(final Config config, final DatabaseAiStatusUpdates database, final Provider<AIQueueServices> queueServices,
                                          final Tools tools) {
             super(config, database, queueServices, tools, mock(AiServiceStatusLogger.class));
         }

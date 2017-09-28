@@ -6,8 +6,8 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
-import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.TrackedThreadSubPool;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -62,6 +62,10 @@ public class TestAiServices {
     private AIQueueServices fakeQueueServices;
     private AIServices aiServices;
 
+    public static String sysIndependent(String data) {
+        return data.replace("\n", System.getProperty("line.separator"));
+    }
+
     @Before
     public void setup() throws ServerMetadata.NoServerAvailable {
         this.fakeSerializer = mock(JsonSerializer.class);
@@ -85,7 +89,7 @@ public class TestAiServices {
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
                 TestDataHelper.getEndpointFor(RNN_ENDPOINT));
         this.aiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, this.fakeClient, new ThreadSubPool(threadPool),
+                this.fakeTools, this.fakeConfig, this.fakeClient, new TrackedThreadSubPool(threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
 
@@ -190,10 +194,6 @@ public class TestAiServices {
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenThrow(Database.DatabaseException.class);
         this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
-    }
-
-    public static String sysIndependent(String data) {
-        return data.replace("\n", System.getProperty("line.separator"));
     }
 
     private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
