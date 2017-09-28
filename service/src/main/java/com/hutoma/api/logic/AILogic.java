@@ -529,8 +529,15 @@ public class AILogic {
         if (!importedBot.validVersion()) {
             throw new BotImportException("Invalid Bot Structure for specified version.");
         }
-        ApiResult result = this.createAI(devId, importedBot.getName(), importedBot.getDescription(), importedBot.isPrivate(),
-                importedBot.getPersonality(), importedBot.getConfidence(), importedBot.getVoice(), Locale.forLanguageTag(importedBot.getLanguage()),
+        ApiResult result = this.createAI(
+                devId,
+                importedBot.getName(),
+                importedBot.getDescription(),
+                importedBot.isPrivate(),
+                importedBot.getPersonality(),
+                importedBot.getConfidence(),
+                importedBot.getVoice(),
+                Locale.forLanguageTag(importedBot.getLanguage()),
                 importedBot.getTimezone());
 
         ApiAi bot = null;
@@ -577,7 +584,8 @@ public class AILogic {
         // Import intents.
         try {
             for (ApiIntent intent : importedBot.getIntents()) {
-                this.databaseEntitiesIntents.writeIntent(devId, UUID.fromString(bot.getAiid()), intent.getIntentName(), intent);
+                this.databaseEntitiesIntents.writeIntent(devId, UUID.fromString(bot.getAiid()),
+                        intent.getIntentName(), intent);
             }
         } catch (Database.DatabaseException ex) {
             throw new BotImportException("Failed to write intents for imported bot.");

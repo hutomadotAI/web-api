@@ -197,9 +197,9 @@ public abstract class RequestBase {
         public void closeRequest() {
             try {
                 if (this.future != null) {
-                    Response response = this.future.isDone() ?
-                            this.future.get().getResponse() :
-                            this.future.get(0, TimeUnit.MILLISECONDS).getResponse();
+                    Response response = this.future.isDone()
+                            ? this.future.get().getResponse()
+                            : this.future.get(0, TimeUnit.MILLISECONDS).getResponse();
                     response.close();
                 }
             } catch (Exception e) {

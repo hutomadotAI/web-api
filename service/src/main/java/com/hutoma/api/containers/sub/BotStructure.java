@@ -6,7 +6,6 @@ import com.hutoma.api.containers.ApiIntent;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by bretc on 10/08/2017.
@@ -74,19 +73,33 @@ public class BotStructure {
         return this.entities;
     }
 
-    public int getVersion() { return this.version; }
+    public int getVersion() {
+        return this.version;
+    }
 
-    public boolean isPrivate() { return this.isPrivate; }
+    public boolean isPrivate() {
+        return this.isPrivate;
+    }
 
-    public int getPersonality() { return this.personality; }
+    public int getPersonality() {
+        return this.personality;
+    }
 
-    public float getConfidence() { return this.confidence; }
+    public float getConfidence() {
+        return this.confidence;
+    }
 
-    public int getVoice() { return this.voice; }
+    public int getVoice() {
+        return this.voice;
+    }
 
-    public String getLanguage() { return this.language; }
+    public String getLanguage() {
+        return this.language;
+    }
 
-    public String getTimezone() { return this.timezone; }
+    public String getTimezone() {
+        return this.timezone;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -96,25 +109,45 @@ public class BotStructure {
         this.description = description;
     }
 
-    public void setIntents(List<ApiIntent> intents) { this.intents = intents; }
+    public void setIntents(List<ApiIntent> intents) {
+        this.intents = intents;
+    }
 
-    public void setTrainingFile(String trainingFile) { this.trainingFile = trainingFile; }
+    public void setTrainingFile(String trainingFile) {
+        this.trainingFile = trainingFile;
+    }
 
-    public void setEntities(HashMap<String, ApiEntity> entities) { this.entities = entities; }
+    public void setEntities(HashMap<String, ApiEntity> entities) {
+        this.entities = entities;
+    }
 
-    public void setVersion(int version) {this.version = version; }
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
-    public void setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
 
-    public void setPersonality(int personality) { this.personality = personality; }
+    public void setPersonality(int personality) {
+        this.personality = personality;
+    }
 
-    public void setConfidence(float confidence) { this.confidence = confidence; }
+    public void setConfidence(float confidence) {
+        this.confidence = confidence;
+    }
 
-    public void setVoice(int voice) { this.voice = voice; }
+    public void setVoice(int voice) {
+        this.voice = voice;
+    }
 
-    public void setLanguage(String language) { this.language = language; }
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 
-    public void setTimezone(String timezone) { this.timezone = timezone; }
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
 
     public boolean validVersion() {
         if (this.version == 1) {
@@ -125,10 +158,10 @@ public class BotStructure {
     }
 
     private boolean validV1() {
-        if (this.name == null || this.name.isEmpty() ||
-                this.description == null ||
-                this.language == null || this.language.isEmpty() ||
-                this.timezone == null || this.timezone.isEmpty()) {
+        if (this.name == null || this.name.isEmpty()
+                || this.description == null
+                || this.language == null || this.language.isEmpty()
+                || this.timezone == null || this.timezone.isEmpty()) {
             return false;
         }
         return true;

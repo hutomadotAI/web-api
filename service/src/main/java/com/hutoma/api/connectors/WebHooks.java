@@ -92,8 +92,9 @@ public class WebHooks {
         return webHookResponse;
     }
 
-    private WebHookResponse executeWebhook(final String webHookEndpoint, final WebHookPayload payload, final String devIdString,
-                                    final UUID aiid) throws WebHookException {
+    private WebHookResponse executeWebhook(final String webHookEndpoint, final WebHookPayload payload,
+                                           final String devIdString, final UUID aiid)
+            throws WebHookException {
         String[] webHookSplit = webHookEndpoint.split(":", 2);
         if (webHookSplit.length < 2) {
             throw new WebHookExternalException("Webhook endpoint invalid");
@@ -152,14 +153,14 @@ public class WebHooks {
 
         try {
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
-                throw new WebHookExternalException(String.format("Webhook call failed (HTTP code %s)", response.getStatus()));
+                throw new WebHookExternalException(String.format("Webhook call failed (HTTP code %s)",
+                        response.getStatus()));
             }
 
             response.bufferEntity();
             WebHookResponse webHookResponse = this.deserializeResponse(response);
             return webHookResponse;
-        }
-        finally {
+        } finally {
             response.close();
         }
     }

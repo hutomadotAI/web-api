@@ -8,7 +8,10 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.*;
+import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AiStrings;
+import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -121,12 +124,10 @@ public class ChatLogic {
             if (response != null) {
                 chatResult.setAnswer(response.getText());
             }
-        }
-        catch (WebHooks.WebHookExternalException callException) {
+        } catch (WebHooks.WebHookExternalException callException) {
             this.chatLogger.logChatError(LOGFROM, devId.toString(), callException, this.telemetryMap);
             throw new ChatFailedException(ApiError.getBadRequest());
-        }
-        catch (WebHooks.WebHookException webhookException) {
+        } catch (WebHooks.WebHookException webhookException) {
             this.logger.logUserErrorEvent(LOGFROM,
                     "Error occurred executing WebHook for passthrough",
                     chatInfo.devId.toString(),
@@ -167,7 +168,7 @@ public class ChatLogic {
         this.telemetryMap = LogMap.map("DevId", devId)
                 .put("AIID", aiid)
                 .put("ChatType", "Assistant")
-        // TODO: potentially PII info, we may need to mask this later, but for
+                // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid.toString())
                 .put("Q", question);
@@ -348,7 +349,6 @@ public class ChatLogic {
                     }
                 }
             }
-
 
 
         } catch (RequestBase.AiNotFoundException notFoundException) {
