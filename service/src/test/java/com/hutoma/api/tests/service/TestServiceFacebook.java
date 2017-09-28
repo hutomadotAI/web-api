@@ -2,12 +2,10 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.endpoints.IntegrationEndpoint;
 import com.hutoma.api.logic.FacebookIntegrationLogic;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import javax.ws.rs.client.Entity;
@@ -15,7 +13,6 @@ import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnitParamsRunner.class)
 public class TestServiceFacebook extends ServiceTestBase {
 
     private static final String BASEPATH = "/integration/facebook";

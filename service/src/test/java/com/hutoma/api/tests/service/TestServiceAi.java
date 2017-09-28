@@ -3,7 +3,6 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
@@ -14,12 +13,10 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -37,7 +34,6 @@ import static org.mockito.Mockito.when;
 /**
  * Created by pedrotei on 29/10/16.
  */
-@RunWith(JUnitParamsRunner.class)
 public class TestServiceAi extends ServiceTestBase {
 
     private static final String AI_BASEPATH = "/ai";

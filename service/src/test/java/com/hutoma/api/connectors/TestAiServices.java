@@ -17,7 +17,6 @@ import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerMetadata;
 import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.memory.MemoryIntentHandler;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
@@ -25,7 +24,6 @@ import org.glassfish.jersey.client.JerseyWebTarget;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import java.util.Collections;
@@ -41,7 +39,6 @@ import static org.mockito.Mockito.when;
 /**
  * Created by pedrotei on 08/11/16.
  */
-@RunWith(JUnitParamsRunner.class)
 public class TestAiServices {
 
     private static final UUID DEVID = UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");

@@ -1,7 +1,8 @@
 package com.hutoma.api.validation;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,7 +12,6 @@ import org.junit.runner.RunWith;
 import java.util.Locale;
 import java.util.UUID;
 
-import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by David MG on 06/09/2016.
  */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(DataProviderRunner.class)
 public class TestParameterValidation {
 
     private Validate validation;
@@ -38,23 +38,25 @@ public class TestParameterValidation {
         return fakeValidation;
     }
 
-    private static Object[] dataProviderTopicDisallowedChars() {
-        return $(
-                $("@")
-        );
+    @DataProvider
+    public static Object[] dataProviderTopicDisallowedChars() {
+        return new Object[]{
+                "@"
+        };
     }
 
-    private static Object[] dataProviderTimezones() {
-        return $(
-                $("America/Argentina/ComodRivadavia"),
-                $("Pacific/Port_Moresby"),
-                $("Etc/GMT"),
-                $("GMT"),
-                $("UTC"),
-                $("GMT0"),
-                $("Iceland"),
-                $("Zulu")
-        );
+    @DataProvider
+    public static Object[] dataProviderTimezones() {
+        return new Object[]{
+                "America/Argentina/ComodRivadavia",
+                "Pacific/Port_Moresby",
+                "Etc/GMT",
+                "GMT",
+                "UTC",
+                "GMT0",
+                "Iceland",
+                "Zulu"
+        };
     }
 
     @Before
@@ -193,7 +195,7 @@ public class TestParameterValidation {
     }
 
     @Test(expected = Validate.ParameterValidationException.class)
-    @Parameters(method = "dataProviderTopicDisallowedChars")
+    @UseDataProvider("dataProviderTopicDisallowedChars")
     public void testTopicDisallowedCharacters(String chars) throws Validate.ParameterValidationException {
         assertFailTopic(chars);
     }
@@ -292,7 +294,7 @@ public class TestParameterValidation {
     }
 
     @Test
-    @Parameters(method = "dataProviderTimezones")
+    @UseDataProvider("dataProviderTimezones")
     public void validateTimezoneString(final String tz) throws Validate.ParameterValidationException {
         Assert.assertEquals(tz, this.validation.validateTimezoneString("tz", tz));
     }

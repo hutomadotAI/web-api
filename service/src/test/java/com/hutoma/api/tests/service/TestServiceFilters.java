@@ -4,22 +4,17 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.endpoints.AIIntegrationEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnitParamsRunner.class)
 public class TestServiceFilters extends ServiceTestBase {
 
     private static final String BASEPATH = "/ai/integration";

@@ -5,12 +5,10 @@ import com.hutoma.api.containers.ApiIntegrationList;
 import com.hutoma.api.containers.sub.Integration;
 import com.hutoma.api.endpoints.AIIntegrationEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnitParamsRunner.class)
 public class TestServiceIntegrations extends ServiceTestBase {
 
     private static final String BASEPATH = "/ai/integration";

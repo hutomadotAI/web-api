@@ -21,8 +21,9 @@ import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.TestParameterValidation;
 import com.hutoma.api.validation.Validate;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.joda.time.DateTime;
@@ -45,14 +46,13 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.hutoma.api.common.TestDataHelper.*;
-import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
  * Created by David MG on 12/08/2016.
  */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(DataProviderRunner.class)
 public class TestTrainingLogic {
 
     private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
@@ -73,61 +73,67 @@ public class TestTrainingLogic {
     private IMemoryIntentHandler fakeIntentHandler;
     private JsonSerializer fakeSerializer;
 
-
-    private static Object[] updateTraining_successStates() {
-        return $(
-                $(TrainingStatus.AI_TRAINING),
-                $(TrainingStatus.AI_READY_TO_TRAIN),
-                $(TrainingStatus.AI_TRAINING_STOPPED),
-                $(TrainingStatus.AI_TRAINING_COMPLETE),
-                $(TrainingStatus.AI_TRAINING_QUEUED)
-        );
+    @DataProvider
+    public static Object[] updateTraining_successStates() {
+        return new Object[]{
+                TrainingStatus.AI_TRAINING,
+                TrainingStatus.AI_READY_TO_TRAIN,
+                TrainingStatus.AI_TRAINING_STOPPED,
+                TrainingStatus.AI_TRAINING_COMPLETE,
+                TrainingStatus.AI_TRAINING_QUEUED
+        };
     }
 
-    private static Object[] updateTraining_failureStates() {
-        return $(
-                $(TrainingStatus.AI_UNDEFINED),
-                $(TrainingStatus.AI_ERROR)
-        );
+    @DataProvider
+    public static Object[] updateTraining_failureStates() {
+        return new Object[]{
+                TrainingStatus.AI_UNDEFINED,
+                TrainingStatus.AI_ERROR
+        };
     }
 
-    private static Object[] startTraining_successStates() {
-        return $(
-                $(TrainingStatus.AI_READY_TO_TRAIN),
-                $(TrainingStatus.AI_TRAINING_STOPPED)
-        );
+    @DataProvider
+    public static Object[] startTraining_successStates() {
+        return new Object[]{
+                TrainingStatus.AI_READY_TO_TRAIN,
+                TrainingStatus.AI_TRAINING_STOPPED
+        };
     }
 
-    private static Object[] startTraining_failureStates() {
-        return $(
-                $(TrainingStatus.AI_ERROR),
-                $(TrainingStatus.AI_UNDEFINED),
-                $(TrainingStatus.AI_TRAINING_COMPLETE),
-                $(TrainingStatus.AI_TRAINING_QUEUED),
-                $(TrainingStatus.AI_TRAINING)
-        );
+    @DataProvider
+    public static Object[] startTraining_failureStates() {
+        return new Object[]{
+                TrainingStatus.AI_ERROR,
+                TrainingStatus.AI_UNDEFINED,
+                TrainingStatus.AI_TRAINING_COMPLETE,
+                TrainingStatus.AI_TRAINING_QUEUED,
+                TrainingStatus.AI_TRAINING
+        };
     }
 
-    private static Object[] stopTraining_successStates() {
-        return $(
-                $(TrainingStatus.AI_TRAINING)
-        );
+    @DataProvider
+    public static Object[] stopTraining_successStates() {
+        return new Object[]{
+                TrainingStatus.AI_TRAINING
+        };
     }
 
-    private static Object[] stopTraining_failureStates() {
-        return $(
-                $(TrainingStatus.AI_ERROR),
-                $(TrainingStatus.AI_UNDEFINED),
-                $(TrainingStatus.AI_TRAINING_COMPLETE)
-        );
+    @DataProvider
+    public static Object[] stopTraining_failureStates() {
+        return new Object[]{
+                TrainingStatus.AI_ERROR,
+                TrainingStatus.AI_UNDEFINED,
+                TrainingStatus.AI_TRAINING_COMPLETE
+        };
     }
 
-    private static Object[] topicsNonClosedConversation() {
-        return $(
-                $(Arrays.asList("Q1", DEFAULT_TOPIC, "Q2", "A2")),
-                $(Arrays.asList("Q1", "", DEFAULT_TOPIC, "Q2", "A2")),
-                $(Arrays.asList("Q2", "A2", DEFAULT_TOPIC))
-        );
+    @DataProvider
+    public static Object[] topicsNonClosedConversation() {
+        return new Object[]{
+                Arrays.asList("Q1", DEFAULT_TOPIC, "Q2", "A2"),
+                Arrays.asList("Q1", "", DEFAULT_TOPIC, "Q2", "A2"),
+                Arrays.asList("Q2", "A2", DEFAULT_TOPIC)
+        };
     }
 
     private static String topic(final String topicName) {
@@ -288,14 +294,14 @@ public class TestTrainingLogic {
     }
 
     @Test
-    @Parameters(method = "startTraining_successStates")
+    @UseDataProvider("startTraining_successStates")
     public void testStartTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException,
             AIServices.AiServicesException {
         testStartTrainingCommon(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
-    @Parameters(method = "startTraining_failureStates")
+    @UseDataProvider("startTraining_failureStates")
     public void testStartTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException,
             AIServices.AiServicesException {
         testStartTrainingCommon(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
@@ -315,13 +321,13 @@ public class TestTrainingLogic {
     }
 
     @Test
-    @Parameters(method = "stopTraining_successStates")
+    @UseDataProvider("stopTraining_successStates")
     public void testStopTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException {
         testStopTrainingCommon(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
-    @Parameters(method = "stopTraining_failureStates")
+    @UseDataProvider("stopTraining_failureStates")
     public void testStopTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
         testStopTrainingCommon(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }
@@ -342,13 +348,13 @@ public class TestTrainingLogic {
     }
 
     @Test
-    @Parameters(method = "updateTraining_successStates")
+    @UseDataProvider("updateTraining_successStates")
     public void testUpdateTraining_initialStates_success(TrainingStatus initialState) throws Database.DatabaseException {
         testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_OK);
     }
 
     @Test
-    @Parameters(method = "updateTraining_failureStates")
+    @UseDataProvider("updateTraining_failureStates")
     public void testUpdateTraining_initialStates_failure(TrainingStatus initialState) throws Database.DatabaseException {
         testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }

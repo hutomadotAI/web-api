@@ -10,13 +10,11 @@ import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
@@ -31,7 +29,6 @@ import static org.mockito.Mockito.when;
 /**
  * Tests for Assistant service.
  */
-@RunWith(JUnitParamsRunner.class)
 public class TestServiceAssistant extends ServiceTestBase {
     private static final String CHAT_PATH = "/assistant/" + AIID + "/chat";
 

@@ -19,13 +19,11 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
-import junitparams.JUnitParamsRunner;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 
 import java.net.HttpURLConnection;
@@ -34,7 +32,6 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(JUnitParamsRunner.class)
 public class TestAIServicesLogic {
 
     private static final String ENDPOINTID = "fake";

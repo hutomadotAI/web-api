@@ -10,8 +10,9 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,13 +25,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static junitparams.JUnitParamsRunner.$;
 import static org.mockito.Mockito.*;
 
 /**
  * Created by pedrotei on 06/10/16.
  */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(DataProviderRunner.class)
 public class TestMemoryIntentHandler {
     public static final UUID DEVID_UUID = UUID.fromString("113d39cb-7f43-40d7-8dee-17b25b205581");
     public static final String DEVID = DEVID_UUID.toString();
@@ -46,13 +46,14 @@ public class TestMemoryIntentHandler {
     private ILogger fakeLogger;
     private IEntityRecognizer fakeRecognizer;
 
-    private static Object[] recognizeIntentDataProvider() {
-        return $(
-                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME),
-                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " "),
-                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " this is something else"),
-                $(MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " line1\nline2")
-        );
+    @DataProvider
+    public static Object[] recognizeIntentDataProvider() {
+        return new Object[]{
+                MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME,
+                MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " ",
+                MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " this is something else",
+                MemoryIntentHandler.META_INTENT_TAG + INTENT_NAME + " line1\nline2"
+        };
     }
 
     @Before
@@ -81,7 +82,7 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    @Parameters(method = "recognizeIntentDataProvider")
+    @UseDataProvider("recognizeIntentDataProvider")
     public void testRecognizeIntent(String response) throws Database.DatabaseException {
         MemoryIntent mi = setDummyMemoryIntent(response);
         Assert.assertNotNull(mi);

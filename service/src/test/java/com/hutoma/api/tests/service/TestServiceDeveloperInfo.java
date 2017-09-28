@@ -5,12 +5,10 @@ import com.hutoma.api.containers.ApiDeveloperInfo;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.endpoints.DeveloperInfoEndpoint;
 import com.hutoma.api.logic.DeveloperInfoLogic;
-import junitparams.JUnitParamsRunner;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.UUID;
@@ -25,7 +23,6 @@ import static org.mockito.Mockito.when;
 /**
  * Developer Info endpoint service tests.
  */
-@RunWith(JUnitParamsRunner.class)
 public class TestServiceDeveloperInfo extends ServiceTestBase {
 
     private static final String DEVINFO_BASEPATH = "/developer/";

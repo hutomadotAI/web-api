@@ -1,8 +1,9 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ResultEvent;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,24 +15,24 @@ import java.util.List;
 
 import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
-import static junitparams.JUnitParamsRunner.$;
 
 
 /**
  * Created by David MG on 10/08/2016.
  */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(DataProviderRunner.class)
 public class TestTrainingLogicParser {
 
     private TrainingLogic logic;
 
-    private static Object[] noResponseDataProvider() {
-        return $(
-                $("Q"),
-                $("Q1", "R1", "Q"),
-                $("Q", "", "Q1", "R1"),
-                $("Q1", "R1", "", "Q", "", "Q2", "R2")
-        );
+    @DataProvider
+    public static Object[] noResponseDataProvider() {
+        return new Object[]{
+                new String[]{"Q"},
+                new String[]{"Q1", "R1", "Q"},
+                new String[]{"Q", "", "Q1", "R1"},
+                new String[]{"Q1", "R1", "", "Q", "", "Q2", "R2"}
+        };
     }
 
     @Before
@@ -99,7 +100,7 @@ public class TestTrainingLogicParser {
     }
 
     @Test
-    @Parameters(method = "noResponseDataProvider")
+    @UseDataProvider("noResponseDataProvider")
     public void testParse_NoResponse(final String[] textLines) {
         TrainingFileParsingResult result = this.logic.parseTrainingFile(Arrays.asList(textLines));
         List<String> eventsForNoResponse = result.getEventsFor(UPLOAD_MISSING_RESPONSE);
