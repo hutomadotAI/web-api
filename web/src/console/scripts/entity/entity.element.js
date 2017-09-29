@@ -112,7 +112,7 @@ function saveEntity() {
             values: values
         },
         verb: 'PUT',
-        onOK: function() {
+        onOK: function(response) {
             msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved.');
         },
         onGenericError: function() {

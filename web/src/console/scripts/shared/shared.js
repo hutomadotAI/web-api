@@ -265,8 +265,8 @@ function commonAjaxApiRequest(request) {
                 var statusCode = parsedResponse['status']['code'];
                 switch (statusCode) {
                     case 200:
-                        request.onOK();
-                        return request;
+                        request.onOK(parsedResponse);
+                        break;
                     case 404:
                         if (request.hasOwnProperty('onNotFound') && typeof request.onNotFound() !== 'undefined') {
                             request.onNotFound();
@@ -294,7 +294,6 @@ function commonAjaxApiRequest(request) {
             request.onGenericError();
         }
     });
-    return null;
 }
 
 function getHash(string) {

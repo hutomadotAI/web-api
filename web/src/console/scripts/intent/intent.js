@@ -72,7 +72,7 @@ function deleteIntent(elem) {
         onGenericError: function() {
             msgAlertIntentOp(ALERT.DANGER.value, "There was a problem deleting the intent.");
         },
-        onOK: function() {
+        onOK: function(response) {
             msgAlertIntentOp(ALERT.SUCCESS.value, 'The intent was deleted.');
             // Should just delete the list entry, but for now refresh the page as previously
             location.href = 'intent.php';

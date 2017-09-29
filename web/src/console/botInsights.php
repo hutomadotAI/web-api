@@ -16,10 +16,6 @@ $assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
-function toJSDate($dateParts) {
-    return 'new Date(' . $dateParts[0] . ',' . ($dateParts[1] - 1) . ',' . $dateParts[2] . ')';
-}
-
 $intervalString = "";
 if (isset($_REQUEST['from'])) {
     $fromDate = date('Y-m-d');
@@ -39,18 +35,12 @@ if (isset($_REQUEST['to'])) {
     $toDateIso = \hutoma\utils::toIsoDate($toDate);
 }
 
-if (!isset($intervalString)) {
-    $intervalString = 'last 30 days';
+if (empty($intervalString)) {
+    $intervalString = '(last 30 days)';
 }
 
-$fromDateParts = explode('-', $fromDate);
-$toDateParts = explode('-', $toDate);
+$aiid = sessionObject::getCurrentAI()['aiid'];
 
-$aiid = $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'];
-$api = new api\analyticsApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
-$sessions = $api->getChatSessions($aiid, $fromDateIso, $toDateIso);
-$interactions = $api->getChatInteractions($aiid, $fromDateIso, $toDateIso);
-unset($pi);
 
 $header_page_title = "Bot Insights";
 $header_additional_entries = "<style>
@@ -83,87 +73,46 @@ include __DIR__ . "/include/page_menu.php";
 
             <div class="row">
 
-                <?php if (sizeof($interactions->objects) > 0 && sizeof($sessions->objects) > 0) { ?>
-
+                <script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
                 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+                <script src="<?php $assets->getAsset('insights/insights.js') ?>"></script>
                 <script type="text/javascript">
-
-                    function getChatOptions(title, color) {
-                        return {
-                            title: title,
-                            width: "90%",
-                            height: 300,
-                            bar: {groupWidth: "35"},
-                            legend: {position: "none"},
-                            backgroundColor: {fill: 'transparent'},
-                            vAxis: {
-                                textStyle: {color: '#999999'},
-                                format: 'short',
-                                gridlines: {color: '#404040'}
-                            },
-                            hAxis: {
-                                textStyle: {color: '#999999'},
-                                gridlines: {color: "#404040"},
-                                baselineColor: '#808080',
-                                minValue: (<?php echo toJSDate($fromDateParts) ?>),
-                                maxValue: (<?php echo toJSDate($toDateParts) ?>)
-                            },
-                            titleTextStyle: {color: 'white', fontName: 'Helvetica', fontSize: '16px'},
-                            colors: [color]
-                        };
-                    }
-
                     google.charts.load("current", {packages: ['corechart']});
-                    google.charts.setOnLoadCallback(drawChart);
-                    function drawChart() {
-                        var dataSessions = google.visualization.arrayToDataTable([
-                            ["Date", "Sessions"],
-                            <?php
-                            foreach ($sessions->objects as $entry) {
-                                $date = explode('-', date('Y-m-d', strtotime($entry->date)));
-                                echo '[' . toJSDate($date) . ', ' . $entry->count . '],';
-                            }
-                            ?>
-                        ]);
+                    requestInsightsSessions('<?php echo $aiid?>', '<?php echo $fromDateIso ?>', '<?php echo $toDateIso ?>', '<?php echo $intervalString ?>');
+                    requestInsightsInteractions('<?php echo $aiid?>', '<?php echo $fromDateIso ?>', '<?php echo $toDateIso ?>', '<?php echo $intervalString ?>');
 
-                        var dataInteractions = google.visualization.arrayToDataTable([
-                            ["Date", "Interactions"],
-                            <?php
-                            foreach ($interactions->objects as $entry) {
-                                $date = explode('-', date('Y-m-d', strtotime($entry->date)));
-                                echo '[' . toJSDate($date) . ', ' . $entry->count . '],';
-                            }
-                            ?>
-                        ]);
-
-                        <?php if ($sessions != null) {?>
-                        var chartSessions = new google.visualization.ColumnChart(document.getElementById("chartSessions"));
-                        chartSessions.draw(dataSessions, getChatOptions('Chat sessions per day (<?php echo $intervalString?>)', '#ffa31a'));
-                        <?php }
-                        if ($interactions != null) {?>
-                        var chartInteractions = new google.visualization.ColumnChart(document.getElementById("chartInteractions"));
-                        chartInteractions.draw(dataInteractions, getChatOptions('Chat interactions per day (<?php echo $intervalString?>)', '#4d94ff'));
-                        <?php } ?>
-                    }
                 </script>
 
                 <div class="col-md-12">
-                <div class="box box-solid box-clean flat no-shadow unselectable">
-                <div class="box-header with-border">
-                    <i class="fa fa-bar-chart-o text-green"></i>
-                    <div class="box-title"><b>Charts</b></div>
-                </div>
-                <div class="box-body"
-                <div id="chartSessions"></div>
-                <div id="chartInteractions"></div>
-                    <?php } else { ?>
-                    <div class="col-md-12">
-                        <div class="box box-solid box-clean flat no-shadow unselectable">
-                            <div class="box-header with-border">
-                        No data for the period: <?php echo $intervalString ?>
-                    <?php } ?>
-                            </div></div></div>
-                </div>
+                    <div class="box box-solid box-clean flat no-shadow unselectable">
+                        <div class="box-header with-border">
+                            <i class="fa fa-bar-chart-o text-green"></i>
+                            <div class="box-title"><b>Charts</b></div>
+                        </div>
+                        <div class="box-body">
+
+                            <div style="width:90%; height: 300px; display: block; margin: auto; text-align: center;">
+                                <div id="chartSessionsLoading" style="height:100%; width:100%">
+                                    <span style="display: inline-block; height:50%"></span><img src="dist/img/loader_grey.gif" style="vertical-align: middle;">
+                                </div>
+                                <div id="chartSessions"></div>
+                                <div id="chartSessionsError" style="width:100%; height:100%; border:1px solid red; display: none;">
+                                    <span style="line-height:150px">There was an error loading the data for Chat Sessions. Please try again later.</span>
+                                </div>
+                            </div>
+
+                            <div style="width:90%; height: 300px; display: block; margin: auto; text-align: center; vertical-align: middle">
+                                <div id="chartInteractionsLoading" style="height:100%; width:100%">
+                                    <span style="display: inline-block; height:50%"></span><img src="dist/img/loader_grey.gif" style="vertical-align: middle;"></div>
+                                <div id="chartInteractions"></div>
+                                <div id="chartInteractionsError" style="width:100%; height:100%; border:1px solid red; display: none;">
+                                    <span style="line-height:150px">There was an error loading the data for Chat Interactions. Please try again later.</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
     </section>
@@ -172,7 +121,6 @@ include __DIR__ . "/include/page_menu.php";
     <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
 <script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 <script src="/console/dist/vendors/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
@@ -187,25 +135,8 @@ $menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "insights", 1, tru
 include __DIR__ . "/include/page_menu_builder.php" ?>
 
 <script>
-    var todayDate = new Date();
-    $('#chatlogsDateFrom').datepicker({
-        autoclose: true,
-        format: 'yyyy-mm-dd',
-        todayBtn: 'linked',
-        todayHighlight: true,
-        endDate: todayDate
-    })
-        .on('changeDate', function (selected) {
-            var minDate = new Date(selected.date.valueOf());
-            $('#chatlogsDateTo').datepicker('setStartDate', minDate);
-        });
-    $('#chatlogsDateTo').datepicker({
-        autoclose: true,
-        format: 'yyyy-mm-dd',
-        todayBtn: 'linked',
-        endDate: "0d",
-        todayHighlight: true
-    });
+
 </script>
+
 </body>
 </html>

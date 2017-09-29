@@ -39,7 +39,7 @@ function updateAI() {
             msgAlertUpdateAI(ALERT.DANGER.value,'Whoops, something went wrong. Your changes weren\'t saved. Please retry');
             activeGeneralButtons();
         },
-        onOK: function() {
+        onOK: function(response) {
             msgAlertUpdateAI(ALERT.SUCCESS.value, 'Your Bot\'s information has been updated.');
             updatePreviousDataLoaded();
             activeGeneralButtons();
