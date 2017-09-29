@@ -65,4 +65,8 @@ public class WebHookPayload {
         this.originatingAiid = originatingAiid.toString();
         this.clientVariables = clientVariables;
     }
+
+    public String getObfuscatedChatSession() {
+        return this.chatSession;
+    }
 }

@@ -88,13 +88,16 @@ public class WebHooks {
                         intent.getAiid(), intent.getName()),
                 LogMap.map("Intent", intent.getName())
                         .put("AIID", intent.getAiid())
-                        .put("Endpoint", webHook.getEndpoint()));
+                        .put("Endpoint", webHook.getEndpoint())
+                        .put("ChatId", chatInfo.chatId)
+                        .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
         return webHookResponse;
     }
 
     private WebHookResponse executeWebhook(final String webHookEndpoint, final WebHookPayload payload,
                                            final String devIdString, final UUID aiid)
             throws WebHookException {
+
         String[] webHookSplit = webHookEndpoint.split(":", 2);
         if (webHookSplit.length < 2) {
             throw new WebHookExternalException("Webhook endpoint invalid");
@@ -158,8 +161,7 @@ public class WebHooks {
             }
 
             response.bufferEntity();
-            WebHookResponse webHookResponse = this.deserializeResponse(response);
-            return webHookResponse;
+            return this.deserializeResponse(response);
         } finally {
             response.close();
         }
@@ -174,16 +176,15 @@ public class WebHooks {
             throw new WebHookExternalException("Invalid URL for passthrough webhook");
         }
 
-
-        String webHookEndpoint = passthroughUrl;
         WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
-
-        WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString, chatInfo.aiid);
+        WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.aiid);
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed chat webhook for aiid %s",
                         chatInfo.aiid),
                 LogMap.map("AIID", chatInfo.aiid)
-                        .put("Endpoint", webHookEndpoint));
+                        .put("Endpoint", passthroughUrl)
+                        .put("ChatId", chatInfo.chatId)
+                        .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
         return webHookResponse;
     }
 
