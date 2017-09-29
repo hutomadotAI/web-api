@@ -17,6 +17,7 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.WebHook;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -271,7 +272,7 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            String newSecret = tools.generateRandomHexString(WebHooks.HMAC_SECRET_LENGTH);
+            String newSecret = this.tools.generateRandomHexString(WebHooks.HMAC_SECRET_LENGTH);
             boolean isOk = this.database.setWebhookSecretForBot(aiid, newSecret);
             if (isOk) {
                 this.logger.logUserTraceEvent(LOGFROM, "regenerateWebhookSecret", devIdString, logMap);
@@ -529,6 +530,7 @@ public class AILogic {
         if (!importedBot.validVersion()) {
             throw new BotImportException("Invalid Bot Structure for specified version.");
         }
+
         ApiResult result = this.createAI(
                 devId,
                 importedBot.getName(),
@@ -584,8 +586,14 @@ public class AILogic {
         // Import intents.
         try {
             for (ApiIntent intent : importedBot.getIntents()) {
-                this.databaseEntitiesIntents.writeIntent(devId, UUID.fromString(bot.getAiid()),
+                UUID botAiid = UUID.fromString(bot.getAiid());
+                this.databaseEntitiesIntents.writeIntent(devId, botAiid,
                         intent.getIntentName(), intent);
+                WebHook webHook = intent.getWebHook();
+                if (webHook != null) {
+                    this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
+                            webHook.getEndpoint(), webHook.isEnabled());
+                }
             }
         } catch (Database.DatabaseException ex) {
             throw new BotImportException("Failed to write intents for imported bot.");
