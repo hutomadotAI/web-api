@@ -18,6 +18,7 @@ import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -470,7 +471,7 @@ public class AILogic {
             }
             BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
                     entityMap, this.version, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
-                    bot.getVoice(), bot.getLanguage().toString(), bot.getTimezone());
+                    bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
             return new ApiBotStructure(botStructure).setSuccessStatus();
 
 
@@ -531,6 +532,15 @@ public class AILogic {
             throw new BotImportException("Invalid Bot Structure for specified version.");
         }
 
+        // try to interpret the locale
+        Locale locale = null;
+        try {
+            locale = Validate.validateLocale("locale", importedBot.getLanguage());
+        } catch (Validate.ParameterValidationException e) {
+            // if the local is missing or badly formatted then use en-US
+            locale = Locale.US;
+        }
+
         ApiResult result = this.createAI(
                 devId,
                 importedBot.getName(),
@@ -539,7 +549,7 @@ public class AILogic {
                 importedBot.getPersonality(),
                 importedBot.getConfidence(),
                 importedBot.getVoice(),
-                Locale.forLanguageTag(importedBot.getLanguage()),
+                locale,
                 importedBot.getTimezone());
 
         ApiAi bot = null;

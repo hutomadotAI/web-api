@@ -37,6 +37,17 @@ public class Validate {
         return Arrays.stream(params).anyMatch(s -> s == null || s.isEmpty());
     }
 
+    public static Locale validateLocale(final String paramName, final String param) throws ParameterValidationException {
+        if (param == null || param.isEmpty()) {
+            throw new ParameterValidationException("parameter null or empty", paramName);
+        }
+        if (!Arrays.stream(Locale.getAvailableLocales()).anyMatch(x -> x.toLanguageTag().equals(param))) {
+            throw new ParameterValidationException("invalid locale: " + param, paramName);
+        }
+        // At this moment we know the locale is correctly formatted
+        return Locale.forLanguageTag(param);
+    }
+
     /**
      * Returns the same string with anything over char 127 or below char 32 removed
      * Also, []&lt;&gt;&amp; are removed altogether
@@ -296,17 +307,6 @@ public class Validate {
             throw new ParameterValidationException("invalid timezone value: " + param, paramName);
         }
         return param;
-    }
-
-    Locale validateLocale(final String paramName, final String param) throws ParameterValidationException {
-        if (param == null || param.isEmpty()) {
-            throw new ParameterValidationException("parameter null or empty", paramName);
-        }
-        if (!Arrays.stream(Locale.getAvailableLocales()).anyMatch(x -> x.toLanguageTag().equals(param))) {
-            throw new ParameterValidationException("invalid locale: " + param, paramName);
-        }
-        // At this moment we know the locale is correctly formatted
-        return Locale.forLanguageTag(param);
     }
 
     UUID validateUuid(final String paramName, final String param) throws ParameterValidationException {
