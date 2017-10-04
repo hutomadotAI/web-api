@@ -248,7 +248,6 @@ public class ChatLogic {
                 // wait for WNET to return
                 result = this.interpretSemanticResult(question, this.chatState.getConfidenceThreshold());
 
-
                 boolean wnetConfident = false;
                 if (result != null) {
                     // are we confident enough with this reply?
@@ -269,6 +268,9 @@ public class ChatLogic {
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
+                            // for error logging purposes
+                            currentIntent = memoryIntent;
+                            
                             this.telemetryMap.add("IntentRecognized", true);
 
                             if (processIntent(chatInfo, aiidFromResult, memoryIntent, result)) {
@@ -369,7 +371,8 @@ public class ChatLogic {
             this.logger.logUserWarnEvent(LOGFROM,
                     "Call to WebHook failed for intent",
                     chatInfo.devId.toString(),
-                    LogMap.map("Intent", currentIntent.getName())
+                    LogMap.map("Intent", (currentIntent == null)
+                            ? "unknown" : currentIntent.getName())
                             .put("AIID", aiidForMemoryIntents)
                             .put("Error", webHookErrorString));
             this.telemetryMap.add("webHookCallFailure", webHookErrorString);
@@ -639,6 +642,7 @@ public class ChatLogic {
             log.put("Webhook run", true);
             WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
                     chatInfo);
+
             // first store the whole deserialized webhook in a transient field
             chatResult.setWebHookResponse(response);
 

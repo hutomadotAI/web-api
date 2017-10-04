@@ -8,8 +8,8 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.ServerMetadata;
-
 import com.hutoma.api.logic.ChatRequestInfo;
+
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * Tests for the WebHooks connector.
  */
@@ -51,7 +51,7 @@ public class TestWebhooks {
         this.fakeClient = mock(JerseyClient.class);
         this.fakeTools = mock(Tools.class);
 
-        this.webHooks = new WebHooks(this.fakeDatabase, this.fakeLogger, this.serializer, this.fakeClient,
+        this.webHooks = new WebHooksWrapper(this.fakeDatabase, this.fakeLogger, this.serializer, this.fakeClient,
                 this.fakeTools);
     }
 
@@ -67,7 +67,6 @@ public class TestWebhooks {
         WebHook retrieved = this.webHooks.getWebHookForIntent(mi, DEVID);
         Assert.assertEquals(wh, retrieved);
     }
-
 
     /*
      * executeIntentWebHook returns false if it is provided with an invalid intent.
@@ -197,9 +196,9 @@ public class TestWebhooks {
         chatResult.setChatId(CHATID);
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
-        when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
+        when(getFakeBuilder().post(any())).thenReturn(Response.ok(new WebHookResponse("Success")).build());
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
-        when(this.serializer.deserialize(anyString(), any())).thenReturn("{\"text\":\"test\"}");
+        when(this.serializer.deserialize(anyString(), any())).thenReturn(null);
 
         assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
@@ -218,7 +217,7 @@ public class TestWebhooks {
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
-        when(getFakeBuilder().post(any())).thenReturn(Response.accepted().entity(new WebHookResponse("Success")).build());
+        when(getFakeBuilder().post(any())).thenReturn(Response.status(0).entity(new WebHookResponse("Success")).build());
 
         assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
@@ -268,5 +267,19 @@ public class TestWebhooks {
         when(jerseyWebTarget.request()).thenReturn(builder);
         when(builder.header(any(), any())).thenReturn(builder);
         return builder;
+    }
+
+    public static class WebHooksWrapper extends WebHooks {
+
+        public WebHooksWrapper(final Database database, final ILogger logger,
+                               final JsonSerializer serializer, final JerseyClient jerseyClient,
+                               final Tools tools) {
+            super(database, logger, serializer, jerseyClient, tools);
+        }
+
+        @Override
+        protected String getEntity(final Response response) {
+            return response.getEntity().toString();
+        }
     }
 }

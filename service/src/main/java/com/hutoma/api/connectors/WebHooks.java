@@ -36,9 +36,9 @@ public class WebHooks {
     public static final int HMAC_SECRET_LENGTH = 40;
     private static final String LOGFROM = "webhooks";
     private static final String HMAC_ALGORITHM = "HmacSHA256";
+    protected final JsonSerializer serializer;
     private final Database database;
     private final ILogger logger;
-    private final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
     private final Tools tools;
 
@@ -92,6 +92,77 @@ public class WebHooks {
                         .put("ChatId", chatInfo.chatId)
                         .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
         return webHookResponse;
+    }
+
+    public WebHookResponse executePassthroughWebhook(final String passthroughUrl, final ChatResult chatResult,
+                                                     final ChatRequestInfo chatInfo)
+            throws WebHookException {
+        final String devIdString = chatInfo.devId.toString();
+
+        if (passthroughUrl == null || passthroughUrl.isEmpty()) {
+            throw new WebHookExternalException("Invalid URL for passthrough webhook");
+        }
+
+        WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
+        WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.aiid);
+        this.logger.logInfo(LOGFROM,
+                String.format("Successfully executed chat webhook for aiid %s",
+                        chatInfo.aiid),
+                LogMap.map("AIID", chatInfo.aiid)
+                        .put("Endpoint", passthroughUrl)
+                        .put("ChatId", chatInfo.chatId)
+                        .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
+        return webHookResponse;
+    }
+
+    public String getMessageHash(String secret, byte[] payloadBytes) throws WebHookInternalException {
+        String calculatedHash;
+        try {
+            SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes("UTF-8"), HMAC_ALGORITHM);
+            Mac macAlgorithm = Mac.getInstance(HMAC_ALGORITHM);
+            macAlgorithm.init(signingKey);
+            byte[] calculatedHashBytes = macAlgorithm.doFinal(payloadBytes);
+            calculatedHash = Hex.encodeHexString(calculatedHashBytes);
+        } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException | InvalidKeyException e) {
+            // should never happen
+            throw new WebHookInternalException("Webhook Payload MAC calculation failed", e);
+        }
+        return calculatedHash;
+    }
+
+    /***
+     * Deserializes the json response to a WebHookResponse.
+     * @param response the Response to deserialize.
+     * @return The deserialized WebHookResponse or null.
+     */
+    public WebHookResponse deserializeResponse(final Response response) throws WebHookExternalException {
+        WebHookResponse deserializedResponse = null;
+        try {
+            deserializedResponse = (WebHookResponse) this.serializer.deserialize(getEntity(response),
+                    WebHookResponse.class);
+        } catch (JsonParseException e) {
+            throw WebHookExternalException.createWithTypeMessage("Failed to deserialize webhook response JSON", e);
+        }
+        if (deserializedResponse == null) {
+            throw new WebHookExternalException("Failed to deserialize webhook response JSON");
+        }
+        return deserializedResponse;
+    }
+
+    /***
+     * Determines whether an active WebHook exists.
+     * @param intent The intent.
+     * @return the active WebHook if it exists, null otherwise.
+     */
+    public WebHook getWebHookForIntent(final MemoryIntent intent, final UUID devId) {
+        WebHook webHook = null;
+        try {
+            webHook = this.database.getWebHook(intent.getAiid(), intent.getName());
+        } catch (Database.DatabaseException e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId.toString(), e);
+        }
+
+        return webHook;
     }
 
     private WebHookResponse executeWebhook(final String webHookEndpoint, final WebHookPayload payload,
@@ -167,73 +238,6 @@ public class WebHooks {
         }
     }
 
-    public WebHookResponse executePassthroughWebhook(final String passthroughUrl, final ChatResult chatResult,
-                                                     final ChatRequestInfo chatInfo)
-            throws WebHookException {
-        final String devIdString = chatInfo.devId.toString();
-
-        if (passthroughUrl == null || passthroughUrl.isEmpty()) {
-            throw new WebHookExternalException("Invalid URL for passthrough webhook");
-        }
-
-        WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
-        WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.aiid);
-        this.logger.logInfo(LOGFROM,
-                String.format("Successfully executed chat webhook for aiid %s",
-                        chatInfo.aiid),
-                LogMap.map("AIID", chatInfo.aiid)
-                        .put("Endpoint", passthroughUrl)
-                        .put("ChatId", chatInfo.chatId)
-                        .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
-        return webHookResponse;
-    }
-
-    public String getMessageHash(String secret, byte[] payloadBytes) throws WebHookInternalException {
-        String calculatedHash;
-        try {
-            SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes("UTF-8"), HMAC_ALGORITHM);
-            Mac macAlgorithm = Mac.getInstance(HMAC_ALGORITHM);
-            macAlgorithm.init(signingKey);
-            byte[] calculatedHashBytes = macAlgorithm.doFinal(payloadBytes);
-            calculatedHash = Hex.encodeHexString(calculatedHashBytes);
-        } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException | InvalidKeyException e) {
-            // should never happen
-            throw new WebHookInternalException("Webhook Payload MAC calculation failed", e);
-        }
-        return calculatedHash;
-    }
-
-    /***
-     * Deserializes the json response to a WebHookResponse.
-     * @param response the Response to deserialize.
-     * @return The deserialized WebHookResponse or null.
-     */
-    public WebHookResponse deserializeResponse(final Response response) throws WebHookExternalException {
-        try {
-            return (WebHookResponse) this.serializer.deserialize(response.readEntity(String.class),
-                    WebHookResponse.class);
-        } catch (JsonParseException e) {
-            throw WebHookExternalException.createWithTypeMessage("Failed to deserialize webhook response JSON", e);
-        }
-    }
-
-    /***
-     * Determines whether an active WebHook exists.
-     * @param intent The intent.
-     * @return the active WebHook if it exists, null otherwise.
-     */
-    public WebHook getWebHookForIntent(final MemoryIntent intent, final UUID devId) {
-        WebHook webHook = null;
-        try {
-            webHook = this.database.getWebHook(intent.getAiid(), intent.getName());
-        } catch (Database.DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId.toString(), e);
-        }
-
-        return webHook;
-    }
-
-
     /**
      * Base class for exceptions due to web hooks.
      * Shouldn't directly use this class, use one of the derived classes instead.
@@ -281,5 +285,9 @@ public class WebHooks {
             String messageWithType = String.format("%s - %s", message, e.getMessage());
             return new WebHookExternalException(messageWithType, e);
         }
+    }
+
+    protected String getEntity(Response response) {
+        return response.readEntity(String.class);
     }
 }
