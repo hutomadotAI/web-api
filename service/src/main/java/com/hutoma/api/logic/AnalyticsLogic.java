@@ -57,6 +57,7 @@ public class AnalyticsLogic {
     private static final int DEFAULT_PAGE_SIZE = 100;
     private static final String RESULT_DATE_FIELD_NAME = "date";
     private static final String RESULT_COUNT_FIELD_NAME = "count";
+    static final int DEFAULT_DATE_FROM = 30; // last 30 days
 
     private final Config config;
     private final ILogger logger;
@@ -135,11 +136,11 @@ public class AnalyticsLogic {
         }
     }
 
-    private static DateTime getDateFrom(final String fromTime) {
+    static DateTime getDateFrom(final String fromTime) {
         DateTime dateFrom;
         // If start date is not specified default to 30 days ago
         if (fromTime == null || fromTime.isEmpty()) {
-            dateFrom = DateTime.now().minusDays(30);
+            dateFrom = DateTime.now().minusDays(DEFAULT_DATE_FROM);
         } else {
             dateFrom = DateTime.parse(fromTime);
         }
@@ -147,7 +148,7 @@ public class AnalyticsLogic {
         return dateFrom.toDateTime(DateTimeZone.UTC);
     }
 
-    private static DateTime getDateTo(final String toTime) {
+    static DateTime getDateTo(final String toTime) {
         DateTime dateTo;
         // If end date is not specified, use 'now' otherwise select the last hour+min+sec of the specified day
         if (toTime == null || toTime.isEmpty()) {
@@ -279,13 +280,13 @@ public class AnalyticsLogic {
         }
     }
 
-    private void flattenMapRec(final Map<String, Object> map, final Map<String, String> stored, final String path) {
+    void flattenMapRec(final Map<String, Object> map, final Map<String, String> stored, final String path) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String newPath = path.isEmpty() ? entry.getKey() : String.format("%s.%s", path, entry.getKey());
             if (entry.getValue() instanceof Map) {
                 flattenMapRec(((Map<String, Object>) entry.getValue()), stored, newPath);
             } else {
-                stored.put(newPath, entry.getValue().toString());
+                stored.put(newPath, entry.getValue() == null ? null : entry.getValue().toString());
             }
         }
     }
@@ -343,7 +344,7 @@ public class AnalyticsLogic {
         return sb.toString();
     }
 
-    private static boolean isNumber(final String text) {
+    static boolean isNumber(final String text) {
         if (text == null || text.isEmpty()) {
             return false;
         }
@@ -351,6 +352,9 @@ public class AnalyticsLogic {
         for (int i = 0; i < sz; ++i) {
             char theChar = text.charAt(i);
             if (!Character.isDigit(theChar) && theChar != '.') {
+                if (theChar == '-' && i == 0) { // allow negative numbers
+                    continue;
+                }
                 return false;
             }
         }
