@@ -114,10 +114,18 @@ GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'hutoma_caller'@'%';
 
 # Privileges for `django_caller`@`%`
 GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
-GRANT EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
+# Allow Django to create new tables
+GRANT ALTER, CREATE, EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
 
-# TODO: REVIEW ACCESS FOR DJANGO
-#GRANT ALL PRIVILEGES ON `hutoma`.* TO 'django_caller'@'%';
+# Allow Django to manipulate users
+GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`django_migrations` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`django_content_type` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`auth_permission` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`auth_group` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`auth_user` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`reversion_revision` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`django_session` TO 'django_caller'@'%';
 
 # Privileges for `integrReader`@`127.0.0.1`
 GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';
