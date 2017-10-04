@@ -1,4 +1,6 @@
 <?php
+namespace hutoma;
+
 require_once __DIR__ . "/../common/Assets.php";
 require_once __DIR__ . "/../dist/manifest.php";
 

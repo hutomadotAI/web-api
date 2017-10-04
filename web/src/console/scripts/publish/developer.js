@@ -60,7 +60,7 @@ function requestDevPublish() {
         document.body.style.cursor = '';
         return false;
     }
-    createAlertMessage(ALERT.WARNING.value, 'Sending request...');
+    createAlertMessage(ALERT.WARNING.value, 'Sending request...', null);
     var devInfo = fieldsToDevInstance();
     var jsonString = JSON.stringify(devInfo);
 
@@ -93,7 +93,7 @@ function requestDevPublish() {
         error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.status + ' ' + thrownError);
             $("#btnPublishDeveloper").prop("disabled", false);
-            createAlertMessage(ALERT.DANGER.value, 'Request not sended!');
+            createAlertMessage(ALERT.DANGER.value, 'Request not sent!', null);
         }
     });
 
@@ -192,42 +192,42 @@ function fieldsDevValidation() {
     elem = document.getElementById('developer_name');
     if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The name field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The name field cannot be empty!', 'developer_name');
         return false;
     }
 
     elem = document.getElementById('developer_address');
     if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The address field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The address field cannot be empty!', 'developer_address');
         return false;
     }
 
     elem = document.getElementById('developer_postCode');
     if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The postcode field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The postcode field cannot be empty!', 'developer_postCode');
         return false;
     }
 
     elem = document.getElementById('developer_city');
     if (elem.value == '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The city field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The city field cannot be empty!', 'developer_city');
         return false;
     }
 
     elem = document.getElementById('developer_email');
     if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The email field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The email field cannot be empty!', 'developer_email');
         return false;
     }
 
     elem = document.getElementById('developer_company');
     if (elem.value === '') {
         elem.style.border = "1px solid red";
-        createAlertMessage(ALERT.DANGER.value, 'The company field cannot is empty!');
+        createAlertMessage(ALERT.DANGER.value, 'The company field cannot be empty!', 'developer_company');
         return false;
     }
 
