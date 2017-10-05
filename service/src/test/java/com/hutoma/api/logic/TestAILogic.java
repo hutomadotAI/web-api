@@ -1,25 +1,35 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.TestBotHelper;
+import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.BotStructure;
-import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.WebHook;
 
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestBotHelper.BOTID;
@@ -496,7 +506,7 @@ public class TestAILogic {
     @Test
     public void testExportBot_DoesntExist() {
         ApiResult result = this.aiLogic.exportBotData(VALIDDEVID, AIID);
-        Assert.assertEquals(500, result.getStatus().getCode());
+        Assert.assertEquals(404, result.getStatus().getCode());
     }
 
     @Test
@@ -608,7 +618,7 @@ public class TestAILogic {
     }
 
     private AiBotConfig generateAiBotConfig() {
-        Map<String,String> configApiKeys = new HashMap<>();
+        Map<String, String> configApiKeys = new HashMap<>();
         configApiKeys.put("key1", "value1");
         configApiKeys.put("key2", "value2");
         AiBotConfig config = new AiBotConfig(configApiKeys);

@@ -451,13 +451,18 @@ public class AILogic {
     public ApiResult exportBotData(final UUID devId, final UUID aiid) {
         final String devIdString = devId.toString();
         try {
+            LogMap logMap = LogMap.map("AIID", aiid);
             // Get the bot.
             ApiAi bot = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (bot == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "Export bot - not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
             String trainingFile = this.database.getAiTrainingFile(aiid);
             final List<String> intentList = this.databaseEntitiesIntents.getIntents(devId, aiid);
 
-            List<ApiIntent> intents = new ArrayList<ApiIntent>();
-            HashMap<String, ApiEntity> entityMap = new HashMap<String, ApiEntity>();
+            List<ApiIntent> intents = new ArrayList<>();
+            HashMap<String, ApiEntity> entityMap = new HashMap<>();
             for (String intent : intentList) {
                 ApiIntent apiIntent = this.databaseEntitiesIntents.getIntent(aiid, intent);
                 intents.add(apiIntent);
@@ -472,9 +477,9 @@ public class AILogic {
             BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
                     entityMap, this.version, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
                     bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
+            this.logger.logUserTraceEvent(LOGFROM, "Export bot", devIdString, logMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
-
-
+            
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Failed to export bot data.", devIdString, ex);
         } catch (Exception ex) {
