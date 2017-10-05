@@ -130,6 +130,7 @@ GRANT ALL ON `hutoma`.`socialaccount_socialapp` TO 'django_caller'@'%';
 GRANT ALL ON `hutoma`.`account_emailaddress` TO 'django_caller'@'%';
 GRANT ALL ON `hutoma`.`django_site` TO 'django_caller'@'%';
 GRANT ALL ON `hutoma`.`socialaccount_socialaccount` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`django_admin_log` TO 'django_caller'@'%';
 
 # Privileges for `integrReader`@`127.0.0.1`
 GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';

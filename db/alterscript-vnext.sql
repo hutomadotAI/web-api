@@ -24,3 +24,4 @@ GRANT ALL ON `hutoma`.`socialaccount_socialapp` TO 'django_caller'@'%';
 GRANT ALL ON `hutoma`.`account_emailaddress` TO 'django_caller'@'%';
 GRANT ALL ON `hutoma`.`django_site` TO 'django_caller'@'%';
 GRANT ALL ON `hutoma`.`socialaccount_socialaccount` TO 'django_caller'@'%';
+GRANT ALL ON `hutoma`.`django_admin_log` TO 'django_caller'@'%';
