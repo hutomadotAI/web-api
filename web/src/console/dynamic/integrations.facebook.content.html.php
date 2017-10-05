@@ -264,6 +264,8 @@ $fb_token_expiry = new DateTime($facebook_state["access_token_expiry"]);
     $.get('./templates/integration_code.mustache', function (template) {
         $('#fb_messageus').replaceWith(Mustache.render(template, message_us_data));
         $('#fb_sendtomessenger').replaceWith(Mustache.render(template, sendtomessenger_data));
+        // re-run facebook initialisation after templates have rendered
+        window.fbAsyncInit();
     });
 
 </script>
