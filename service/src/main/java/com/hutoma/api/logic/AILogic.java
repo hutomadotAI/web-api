@@ -178,25 +178,7 @@ public class AILogic {
     }
 
     public ApiResult getSingleAI(final UUID devid, final UUID aiid) {
-        final String devIdString = devid.toString();
-        try {
-            LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
-            if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI - not found", devIdString, logMap);
-                return ApiError.getNotFound();
-            } else {
-                List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devid, aiid);
-                if (!linkedBots.isEmpty()) {
-                    ai.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
-                }
-                this.logger.logUserTraceEvent(LOGFROM, "GetSingleAI", devIdString, logMap);
-                return ai.setSuccessStatus();
-            }
-        } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetSingleAI", devIdString, e);
-            return ApiError.getInternalServerError();
-        }
+        return getAI(devid, aiid, "GetSingleAI", false);
     }
 
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
@@ -479,7 +461,7 @@ public class AILogic {
                     bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
             this.logger.logUserTraceEvent(LOGFROM, "Export bot", devIdString, logMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
-            
+
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Failed to export bot data.", devIdString, ex);
         } catch (Exception ex) {
@@ -491,7 +473,7 @@ public class AILogic {
 
     public ApiResult importBot(final UUID devId, BotStructure importedBot) {
         if (importedBot == null) {
-            return new ApiError();
+            return ApiError.getBadRequest();
         }
 
         ApiAi createdBot = null;
@@ -528,9 +510,32 @@ public class AILogic {
             return ApiError.getInternalServerError();
         }
 
-        return new ApiResult().setCreatedStatus();
+        // load the new bot as a get
+        return getAI(devId, uuidAiid, "Import-Get", true);
     }
 
+    private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate) {
+        final String devIdString = devid.toString();
+        try {
+            LogMap logMap = LogMap.map("AIID", aiid);
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM,
+                        String.format("%s - not found", logTag), devIdString, logMap);
+                return ApiError.getNotFound();
+            } else {
+                List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devid, aiid);
+                if (!linkedBots.isEmpty()) {
+                    ai.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+                }
+                this.logger.logUserTraceEvent(LOGFROM, logTag, devIdString, logMap);
+                return isCreate ? ai.setCreatedStatus() : ai.setSuccessStatus();
+            }
+        } catch (Exception e) {
+            this.logger.logUserExceptionEvent(LOGFROM, logTag, devIdString, e);
+            return ApiError.getInternalServerError();
+        }
+    }
 
     private ApiAi importV1(UUID devId, BotStructure importedBot) throws BotImportException {
         if (!importedBot.validVersion()) {
