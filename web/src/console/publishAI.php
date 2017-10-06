@@ -18,8 +18,10 @@ $assets = new Assets($manifest);
 
 sessionObject::redirectToLoginIfUnauthenticated();
 
-if (isset($_POST['ai'])) {
-    getBasicAiInfo($_POST['ai']);
+$aiToPublish = null;
+
+if (isset($_REQUEST['ai'])) {
+    $aiToPublish = getBasicAiInfo($_REQUEST['ai']);
 }
 
 function getBasicAiInfo($aiid){
@@ -33,7 +35,7 @@ function getBasicAiInfo($aiid){
         errorRedirect::handleErrorRedirect($singleAI_result);
         exit;
     }
-    unset($singleAI);
+    return $singleAI;
 }
 
 $header_page_title = "Publish Bot";

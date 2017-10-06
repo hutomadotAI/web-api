@@ -8,6 +8,7 @@ require_once __DIR__ . "/../dist/manifest.php";
 $assets = new Assets($manifest);
 ?>
 
+<input type="hidden" name="ai" value="<?php echo $aiToPublish['aiid'] ?>" id="aiToPublish">
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
         <div class="box-title"><b>Developer Info</b></div>

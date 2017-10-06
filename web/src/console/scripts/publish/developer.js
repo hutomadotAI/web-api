@@ -50,10 +50,28 @@ function checkDevInput() {
     requestDevPublish();
 }
 
+function postDataToPage(url, dictionaryDataToPost) {
+    var form = document.createElement("form");
+    form.style.display = "none";
+    form.action = url;
+    var keys = Object.keys(dictionaryDataToPost);
+    for (var i = 0; i < keys.length; i++) {
+        var node = document.createElement("input");
+        node.name = keys[i];
+        node.value = dictionaryDataToPost[node.name];
+        form.appendChild(node);
+    }
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
 function requestDevPublish() {
     var prevCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
     $("#btnPublishDeveloper").prop("disabled", true);
+
+    var aiToPublish = $('#aiToPublish').attr("value");
 
     if (!fieldsDevValidation()) {
         $("#btnPublishDeveloper").prop("disabled", false);
@@ -73,9 +91,9 @@ function requestDevPublish() {
             var statusCode = JSON.parse(response);
             switch (statusCode['status']['code']) {
                 case 200:
-                    // UPDATED developer
+                    // Developer has been updated
                     $("#btnPublishDeveloper").prop("disabled", true);
-                    callback();
+                    postDataToPage("./publishAI.php", {"ai":aiToPublish});
                     break;
                 case 400:
                     // UPDATED not complete
@@ -97,10 +115,6 @@ function requestDevPublish() {
         }
     });
 
-}
-
-function callback() {
-    location.href = "./publishAI.php";
 }
 
 function removeAlert(node) {
@@ -211,7 +225,7 @@ function fieldsDevValidation() {
     }
 
     elem = document.getElementById('developer_city');
-    if (elem.value == '') {
+    if (elem.value === '') {
         elem.style.border = "1px solid red";
         createAlertMessage(ALERT.DANGER.value, 'The city field cannot be empty!', 'developer_city');
         return false;
