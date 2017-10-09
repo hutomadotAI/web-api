@@ -9,6 +9,12 @@
     <version>1.0-SNAPSHOT</version>
     <name>HutomaAPI</name>
 
+    <properties>
+        <argLine>-Xmx1024m</argLine>
+        <jersey.version>2.23.1</jersey.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <build>
         <finalName>HutomaAPI</finalName>
         <plugins>
@@ -29,7 +35,6 @@
                 <configuration>
                     <parallel>both</parallel>
                     <threadCount>10</threadCount>
-                    <argLine>-Xmx1024m</argLine>
                     <excludes>
                         <exclude>**/TestThreadPool.java</exclude>
                     </excludes>
@@ -61,10 +66,53 @@
                 <executions>
                     <execution>
                         <id>analyze-compile</id>
-                        <phase>compile</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.9</version>
+                <executions>
+                    <!--
+                        Prepares the property pointing to the JaCoCo runtime agent which
+                        is passed as VM argument when Maven the Surefire plugin is executed.
+                    -->
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${project.build.directory}/jacoco.exec</destFile>
+                            <!--
+                                Sets the name of the property containing the settings
+                                for JaCoCo runtime agent.
+                            -->
+                            <propertyName>argLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!--
+                        Ensures that the code coverage report for unit tests is created after
+                        unit tests have been run.
+                    -->
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -74,6 +122,7 @@
                 <version>2.9.1</version>
                 <executions>
                     <execution>
+                        <phase>package</phase>
                         <goals>
                             <goal>assemble</goal>
                         </goals>
@@ -347,11 +396,6 @@
         </dependency>
 
     </dependencies>
-
-    <properties>
-        <jersey.version>2.23.1</jersey.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <reporting>
         <plugins>
