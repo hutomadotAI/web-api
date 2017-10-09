@@ -768,7 +768,8 @@ public class ChatLogic {
         }
 
         this.logger.logDebug(LOGFROM, String.format("WNET response in time %f with confidence %f",
-                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
+                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())),
+                LogMap.map("AIID", aiid).put("ChatId", chatResult.getChatId()));
 
         this.telemetryMap.add("WNETAnswer", chatResult.getAnswer());
         this.telemetryMap.add("WNETTopicOut", chatResult.getTopicOut());
@@ -796,7 +797,8 @@ public class ChatLogic {
         chatResult.setAnswer(chatResult.getAnswer().trim());
 
         this.logger.logDebug(LOGFROM, String.format("AIML response in time %f with confidence %f",
-                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
+                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())),
+                LogMap.map("AIID", aiid).put("ChatId", chatResult.getChatId()));
 
         this.telemetryMap.add("AIMLAnswer", chatResult.getAnswer());
         this.telemetryMap.add("AIMLElapsedTime", chatResult.getElapsedTime());
@@ -827,7 +829,8 @@ public class ChatLogic {
         }
 
         this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
-                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())));
+                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())),
+                LogMap.map("AIID", aiid).put("ChatId", chatResult.getChatId()));
 
         this.telemetryMap.add("RNNElapsedTime", chatResult.getElapsedTime());
         this.telemetryMap.add("RNNAnswer", chatResult.getAnswer());
