@@ -6748,8 +6748,9 @@ ul.pagination li a {
 }
 
 .bot-card-area {
-    overflow: hidden;
     height: 185px;
+    overflow: hidden;
+    position: relative;
 }
 
 .bot-card-icon {
@@ -6770,6 +6771,12 @@ ul.pagination li a {
     background-color: rgba(255, 255, 255, 0.9);
     border: 2px solid #FFF;
     opacity: 0.3;
+}
+
+.bot-card-actions {
+    bottom: 0;
+    position: absolute;
+    width: 100%;
 }
 
 .bot-padding {
