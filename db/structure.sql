@@ -209,11 +209,13 @@ CREATE TABLE `botStore` (
   `version` varchar(25) NOT NULL,
   `video_link` varchar(1800) DEFAULT NULL,
   `publishing_state` tinyint(1) NOT NULL,
+  `publishing_type` tinyint(1) NOT NULL DEFAULT '1',
   `botIcon` varchar(255) DEFAULT NULL,
   `featured` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `dev_id` (`dev_id`),
   KEY `aiid` (`aiid`),
+  KEY `idx_botStore_publishing_state_publishing_type` (`publishing_state`,`publishing_type`),
   CONSTRAINT `botStore_ibfk_1` FOREIGN KEY (`dev_id`) REFERENCES `users` (`dev_id`) ON DELETE CASCADE,
   CONSTRAINT `botStore_ibfk_2` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
