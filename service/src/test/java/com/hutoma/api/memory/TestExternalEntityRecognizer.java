@@ -47,7 +47,7 @@ public class TestExternalEntityRecognizer {
     @Test
     public void testExternal_recognizeMultipleEntities_andSystemEntities() {
         final String[] varNames = {"var1", "var2"};
-        final String[] varValues = {"value 1", "value2"};
+        final String[] varValues = {"value1", "value2"};
         List<MemoryVariable> l = new ArrayList<MemoryVariable>() {{
             this.add(new MemoryVariable(varNames[0], Arrays.asList("A", varValues[0], "B")));
             this.add(new MemoryVariable(varNames[1], Arrays.asList(varValues[1], "K")));
@@ -81,5 +81,35 @@ public class TestExternalEntityRecognizer {
             index++;
         }
 
+    }
+
+    @Test
+    public void testGetNumbersFromString() {
+        Assert.assertEquals(Collections.emptyList(), ExternalEntityRecognizer.getNumbersFromString(""));
+        Assert.assertEquals(Collections.emptyList(), ExternalEntityRecognizer.getNumbersFromString("no numbers"));
+        Assert.assertEquals(Collections.emptyList(), ExternalEntityRecognizer.getNumbersFromString("no1 numbers2"));
+        Assert.assertEquals(Collections.singletonList("1"), ExternalEntityRecognizer.getNumbersFromString("1"));
+        Assert.assertEquals(Collections.singletonList("123"), ExternalEntityRecognizer.getNumbersFromString("123"));
+        Assert.assertEquals(Collections.singletonList("-1"), ExternalEntityRecognizer.getNumbersFromString("-1"));
+        Assert.assertEquals(Collections.singletonList("1.000123"), ExternalEntityRecognizer.getNumbersFromString("1.000123"));
+        Assert.assertEquals(Collections.singletonList("-1.000123"), ExternalEntityRecognizer.getNumbersFromString("-1.000123"));
+        Assert.assertEquals(Arrays.asList("1", "0.123", "-5.9"), ExternalEntityRecognizer.getNumbersFromString("1 0.123 -5.9"));
+        Assert.assertEquals(Arrays.asList("1", "0.123", "-5.9"), ExternalEntityRecognizer.getNumbersFromString("1 some text 0.123 more text -5.9 end"));
+        // Don't process currency
+        Assert.assertEquals(Collections.emptyList(), ExternalEntityRecognizer.getNumbersFromString("£123.45 €1.99 $9.87"));
+    }
+
+    @Test
+    public void testExternal_discardExternalSysNumber() {
+        final int number = 10;
+        List<RecognizedEntity> systemEntities = new ArrayList<RecognizedEntity>() {{
+            this.add(new RecognizedEntity("sys.number", Integer.toString(number + 1)));
+        }};
+        when(this.fakeService.getEntities(any())).thenReturn(systemEntities);
+        List<Pair<String, String>> r = this.recognizer.retrieveEntities(
+                String.format("string with number %d", number), Collections.emptyList());
+        Assert.assertEquals(1, r.size());
+        Assert.assertEquals("sys.number", r.get(0).getA());
+        Assert.assertEquals(number, Integer.parseInt(r.get(0).getB()));
     }
 }

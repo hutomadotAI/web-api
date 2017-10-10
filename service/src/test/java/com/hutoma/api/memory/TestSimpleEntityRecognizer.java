@@ -49,7 +49,7 @@ public class TestSimpleEntityRecognizer {
 
     public static void recognizeMultipleEntities(final IEntityRecognizer recognizer) {
         final String[] varNames = {"var1", "var2"};
-        final String[] varValues = {"value 1", "value2"};
+        final String[] varValues = {"value1", "value2"};
         List<MemoryVariable> l = new ArrayList<MemoryVariable>() {{
             this.add(new MemoryVariable(varNames[0], Arrays.asList("A", varValues[0], "B")));
             this.add(new MemoryVariable(varNames[1], Arrays.asList(varValues[1], "K")));

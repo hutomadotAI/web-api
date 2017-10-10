@@ -10,6 +10,7 @@ import org.glassfish.hk2.api.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import javax.inject.Inject;
 
 /**
@@ -18,6 +19,8 @@ import javax.inject.Inject;
  */
 public class ExternalEntityRecognizer implements IEntityRecognizer {
 
+    private static final String NUMBER_DELIMITER = "[^\\p{Alnum}£$€,.-]";
+    private static final String NUMBER_ENTITY_NAME = "sys.number";
     private final EntityRecognizerService service;
     private final ILogger logger;
 
@@ -42,8 +45,30 @@ public class ExternalEntityRecognizer implements IEntityRecognizer {
 
         List<RecognizedEntity> systemEntities = this.service.getEntities(chatLine);
         for (RecognizedEntity re: systemEntities) {
-            result.add(new Pair<>(re.getCategory(), re.getValue()));
+            if (!re.getCategory().equalsIgnoreCase(NUMBER_ENTITY_NAME)) {
+                result.add(new Pair<>(re.getCategory(), re.getValue()));
+            }
         }
+        List<String> numbers = getNumbersFromString(chatLine);
+        numbers.forEach(x -> result.add(new Pair<>(NUMBER_ENTITY_NAME, x)));
         return result;
+    }
+
+    static List<String> getNumbersFromString(final String str) {
+        List<String> numbers = new ArrayList<>();
+        Scanner scanner = new Scanner(str);
+        scanner.useDelimiter(NUMBER_DELIMITER);
+        while (true) {
+            if (scanner.hasNextInt()) {
+                numbers.add(Integer.toString(scanner.nextInt()));
+            } else if (scanner.hasNextDouble()) {
+                numbers.add(Double.toString(scanner.nextDouble()));
+            } else if (scanner.hasNext()) {
+                scanner.next();
+            } else {
+                break;
+            }
+        }
+        return numbers;
     }
 }
