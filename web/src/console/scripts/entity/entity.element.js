@@ -1,3 +1,5 @@
+var dataChanged = false;
+
 document.getElementById("btnAddEntityValue").addEventListener("click", addEntityValue);
 
 function checkValueCode(element, key) {
@@ -41,6 +43,7 @@ function addEntityValue() {
         return;
     }
 
+    dataChanged = true;
     var element = document.getElementById('value-entity');
     var value = element.value;
     var parent = document.getElementById('entityValues-list');
@@ -124,6 +127,19 @@ function saveEntity() {
         onComplete: function() {
             $("#btnSaveEntity").prop("disabled", false);
             document.body.style.cursor = prevCursor;
+            dataChanged = false;
         }
     });
 }
+
+window.onbeforeunload = function (e) {
+    var evt = e || window.event;
+    // For IE and Firefox prior to version 4
+    if (evt && dataChanged) {
+        evt.returnValue = 'Are you sure you want to leave this page?';
+    }
+    // For Safari
+    if (dataChanged) {
+        return 'Are you sure you want to leave this page?';
+    }
+};
