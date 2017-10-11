@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -47,6 +48,7 @@ public class ParameterFilter extends Validate {
     protected static final String FACEBOOK_CONNECT = "facebook_connect";
     protected static final String ANALYTICS_RESPONSE_FORMAT = "format";
     protected static final String DEFAULT_CHAT_RESPONSES = "default_chat_responses";
+    protected static final String PUBLISHING_TYPE = "publishing_type";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -151,6 +153,10 @@ public class ParameterFilter extends Validate {
 
     public static ApiFacebookCustomisation getFacebookCustomisations(final ContainerRequestContext requestContext) {
         return (ApiFacebookCustomisation) requestContext.getProperty(APIParameter.FacebookCustomisations.toString());
+    }
+
+    public static AiBot.PublishingType getBotPublishingType(final ContainerRequestContext requestContext) {
+        return (AiBot.PublishingType) requestContext.getProperty(APIParameter.PublishingType.toString());
     }
 
     /***

@@ -27,13 +27,14 @@ public final class TestBotHelper {
         return aiBotStoreLogic.publishBot(SAMPLEBOT.getDevId(), SAMPLEBOT.getAiid(), SAMPLEBOT.getName(),
                 SAMPLEBOT.getDescription(), SAMPLEBOT.getLongDescription(), SAMPLEBOT.getAlertMessage(), SAMPLEBOT.getBadge(),
                 SAMPLEBOT.getPrice(), SAMPLEBOT.getSample(), SAMPLEBOT.getCategory(), SAMPLEBOT.getLicenseType(),
-                SAMPLEBOT.getPrivacyPolicy(), SAMPLEBOT.getClassification(), SAMPLEBOT.getVersion(), SAMPLEBOT.getVideoLink());
+                SAMPLEBOT.getPrivacyPolicy(), SAMPLEBOT.getClassification(), SAMPLEBOT.getVersion(), SAMPLEBOT.getVideoLink(),
+                AiBot.PublishingType.SKILL);
     }
 
     public static AiBot getBot(final UUID devId, final UUID aiid, final int botId) {
         return new AiBot(devId, aiid, botId, "name", "description", "long description", "alert message", "badge",
                 BigDecimal.valueOf(1.123), "sample", "category", "licType", DateTime.now(), "privacy policy",
-                "classification", "version", "http://video", AiBot.PublishingState.PUBLISHED, "");
+                "classification", "version", "http://video", AiBot.PublishingState.PUBLISHED, AiBot.PublishingType.SKILL, "");
     }
 
     public static byte[] getBotIconContent() {

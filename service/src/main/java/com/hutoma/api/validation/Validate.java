@@ -1,5 +1,6 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.logic.TrainingLogic;
 
 import java.util.ArrayList;
@@ -46,6 +47,18 @@ public class Validate {
         }
         // At this moment we know the locale is correctly formatted
         return Locale.forLanguageTag(param);
+    }
+
+    public static AiBot.PublishingType validatePublishingType(final String paramName, final String param)
+            throws ParameterValidationException {
+        if (param == null || param.isEmpty()) {
+            throw new ParameterValidationException("parameter null or empty", paramName);
+        }
+        try {
+            return AiBot.PublishingType.from(Integer.parseInt(param));
+        } catch (IllegalArgumentException ex) {
+            throw new ParameterValidationException("invalid publishing type: " + param, paramName);
+        }
     }
 
     /**

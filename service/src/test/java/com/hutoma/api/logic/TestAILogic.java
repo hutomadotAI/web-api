@@ -381,6 +381,7 @@ public class TestAILogic {
     public void testLinkBotToAi_botNotPurchased_Owned() throws Database.DatabaseException {
         AiBot bot = new AiBot(SAMPLEBOT);
         bot.setDevId(DEVID_UUID);
+        bot.setPublishingType(AiBot.PublishingType.SKILL);
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt())).thenReturn(true);
@@ -391,6 +392,17 @@ public class TestAILogic {
     @Test
     public void testLinkBotToAi_botAlreadyLinked() throws Database.DatabaseException {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testLinkBotToAi_cannotLinkToTemplate() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setPublishingType(AiBot.PublishingType.TEMPLATE);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
         when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);

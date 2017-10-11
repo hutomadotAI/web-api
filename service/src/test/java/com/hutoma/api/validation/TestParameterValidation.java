@@ -265,32 +265,32 @@ public class TestParameterValidation {
 
     @Test
     public void testLocaleLangCountry() throws Validate.ParameterValidationException {
-        Assert.assertEquals(new Locale("fr", "CA"), this.validation.validateLocale("locale", "fr-CA"));
+        Assert.assertEquals(new Locale("fr", "CA"), Validate.validateLocale("locale", "fr-CA"));
     }
 
     @Test
     public void testLocaleLang() throws Validate.ParameterValidationException {
-        Assert.assertEquals(new Locale("en"), this.validation.validateLocale("locale", "en"));
+        Assert.assertEquals(new Locale("en"), Validate.validateLocale("locale", "en"));
     }
 
     @Test(expected = Validate.ParameterValidationException.class)
     public void testLocaleInvalidFormat() throws Validate.ParameterValidationException {
-        this.validation.validateLocale("locale", "notALocale");
+        Validate.validateLocale("locale", "notALocale");
     }
 
     @Test(expected = Validate.ParameterValidationException.class)
     public void testLocaleInvalidLocale() throws Validate.ParameterValidationException {
-        this.validation.validateLocale("locale", "xb-BX");
+        Validate.validateLocale("locale", "xb-BX");
     }
 
     @Test(expected = Validate.ParameterValidationException.class)
     public void testLocaleEmpty() throws Validate.ParameterValidationException {
-        this.validation.validateLocale("locale", "");
+        Validate.validateLocale("locale", "");
     }
 
     @Test(expected = Validate.ParameterValidationException.class)
     public void testLocaleNull() throws Validate.ParameterValidationException {
-        this.validation.validateLocale("locale", null);
+        Validate.validateLocale("locale", null);
     }
 
     @Test

@@ -97,6 +97,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                     //fallthrough
                 case AIID:
                     //fallthrough
+                case PublishingType:
+                    // fallthrough
                 case DefaultChatResponses:
                     expectingForm = true;
                     break;
@@ -194,7 +196,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         }
         if (checkList.contains(APIParameter.Locale)) {
             request.setProperty(APIParameter.Locale.toString(),
-                    this.validateLocale(LOCALE, getFirst(form.get(LOCALE))));
+                    validateLocale(LOCALE, getFirst(form.get(LOCALE))));
         }
         if (checkList.contains(APIParameter.DefaultChatResponses)) {
             // We should receive a Json list
@@ -203,6 +205,10 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                     ? Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT)
                     : this.serializer.deserializeList(jsonList);
             request.setProperty(APIParameter.DefaultChatResponses.toString(), list);
+        }
+        if (checkList.contains(APIParameter.PublishingType)) {
+            request.setProperty(APIParameter.PublishingType.toString(),
+                    validatePublishingType(PUBLISHING_TYPE, getFirst(form.get(PUBLISHING_TYPE))));
         }
     }
 

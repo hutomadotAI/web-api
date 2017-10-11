@@ -23,6 +23,7 @@ public enum APIParameter {
     AnalyticsResponseFormat,
     DefaultChatResponses,
     FacebookCustomisations,
+    PublishingType,
     // Backend
     AiStatusJson,
     ServerRegistration,

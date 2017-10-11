@@ -151,7 +151,7 @@ public class AIBotStoreEndpoint {
 
     @RateLimit(RateKey.Botstore_Publish)
     @POST
-    @ValidateParameters({APIParameter.DevID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.PublishingType})
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -166,7 +166,6 @@ public class AIBotStoreEndpoint {
     @RequestHeaders({
             @RequestHeader(name = "Authorization", description = "Developer token.")
     })
-    // TODO: need to validate the bot data
     public
     @TypeHint(AiBot.class)
     Response publishBot(
@@ -201,7 +200,8 @@ public class AIBotStoreEndpoint {
                 privacyPolicy,
                 classification,
                 version,
-                videoLink);
+                videoLink,
+                ParameterFilter.getBotPublishingType(requestContext));
         return result.getResponse(this.serializer).build();
     }
 

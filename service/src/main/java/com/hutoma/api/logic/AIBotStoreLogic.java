@@ -134,7 +134,8 @@ public class AIBotStoreLogic {
                                 final String longDescription, final String alertMessage, final String badge,
                                 final BigDecimal price, final String sample, final String category,
                                 final String licenseType, final String privacyPolicy, final String classification,
-                                final String version, final String videoLink) {
+                                final String version, final String videoLink,
+                                final AiBot.PublishingType publishingType) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
@@ -156,7 +157,7 @@ public class AIBotStoreLogic {
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
-                    videoLink, AiBot.PublishingState.SUBMITTED, null);
+                    videoLink, AiBot.PublishingState.SUBMITTED, publishingType, null);
             int botId = this.database.publishBot(bot);
             if (botId == -1) {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);

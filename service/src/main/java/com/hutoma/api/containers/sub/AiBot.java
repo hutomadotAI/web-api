@@ -32,6 +32,7 @@ public class AiBot {
     @SerializedName("dev_id")
     private UUID devId;
     private PublishingState publishingState;
+    private PublishingType publishingType;
     private UUID aiid;
     private int botId;
 
@@ -39,7 +40,7 @@ public class AiBot {
                  final String longDescription, final String alertMessage, final String badge, final BigDecimal price,
                  final String sample, final String category, final String licenseType, final DateTime lastUpdate,
                  final String privacyPolicy, final String classification, final String version, final String videoLink,
-                 final PublishingState publishingState, final String botIcon) {
+                 final PublishingState publishingState, final PublishingType publishingType, final String botIcon) {
         this.botId = botId;
         this.devId = devId;
         this.aiid = aiid;
@@ -58,6 +59,7 @@ public class AiBot {
         this.version = version;
         this.videoLink = videoLink;
         this.publishingState = publishingState;
+        this.publishingType = publishingType;
         this.botIcon = botIcon;
     }
 
@@ -167,6 +169,10 @@ public class AiBot {
         this.publishingState = publishingState;
     }
 
+    public PublishingType getPublishingType() { return this.publishingType; }
+
+    public void setPublishingType(final PublishingType publishingType) { this.publishingType = publishingType; }
+
     public String getLicenseType() {
         return this.licenseType;
     }
@@ -191,7 +197,7 @@ public class AiBot {
                     .filter(x -> x.value == value)
                     .findFirst();
             if (!state.isPresent()) {
-                throw new IllegalArgumentException("Unknown publishing value");
+                throw new IllegalArgumentException("Unknown publishing state value");
             }
             return state.get();
         }
@@ -199,5 +205,26 @@ public class AiBot {
         public int value() {
             return this.value;
         }
+    }
+
+    public enum PublishingType {
+        SKILL(1),
+        TEMPLATE(2);
+
+        private final int value;
+
+        PublishingType(final int value) { this.value = value; }
+
+        public static PublishingType from(final int value) {
+            Optional<PublishingType> state = Arrays.stream(PublishingType.values())
+                    .filter(x -> x.value == value)
+                    .findFirst();
+            if (!state.isPresent()) {
+                throw new IllegalArgumentException("Unknown publishing type value");
+            }
+            return state.get();
+        }
+
+        public int value() { return this.value; }
     }
 }

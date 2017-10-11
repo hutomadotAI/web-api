@@ -364,10 +364,14 @@ public class AILogic {
             // If bot is now owned (purchased or built by the dev) then it can't be linked
             if (!botDetails.getDevId().equals(devId)) {
                 List<AiBot> purchased = this.database.getPurchasedBots(devId);
-                if (!purchased.stream().anyMatch(b -> b.getBotId() == botId)) {
+                if (purchased.stream().noneMatch(b -> b.getBotId() == botId)) {
                     this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devIdString, logMap);
                     return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
                 }
+            }
+            if (botDetails.getPublishingType() != AiBot.PublishingType.SKILL) {
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot is not a skill", devIdString, logMap);
+                return ApiError.getBadRequest(String.format("Bot %d not a Skill", botId));
             }
             List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
             if (linked.size() >= this.config.getMaxLinkedBotsPerAi()) {
