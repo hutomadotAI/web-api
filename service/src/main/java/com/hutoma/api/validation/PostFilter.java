@@ -208,7 +208,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         }
         if (checkList.contains(APIParameter.PublishingType)) {
             request.setProperty(APIParameter.PublishingType.toString(),
-                    validatePublishingType(PUBLISHING_TYPE, getFirst(form.get(PUBLISHING_TYPE))));
+                    validatePublishingType(getFirst(form.get(PUBLISHING_TYPE))));
         }
     }
 

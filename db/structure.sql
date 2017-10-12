@@ -2745,10 +2745,12 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`()
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`(
+  IN `param_publishing_type` TINYINT(1)
+)
     NO SQL
 BEGIN
-    SELECT * FROM botStore WHERE publishing_state = 2;
+    SELECT * FROM botStore WHERE publishing_state = 2 AND publishing_type = param_publishing_type;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

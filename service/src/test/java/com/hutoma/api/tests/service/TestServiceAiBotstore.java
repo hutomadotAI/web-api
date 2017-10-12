@@ -52,6 +52,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         this.put("name", Collections.singletonList("bot name"));
         this.put("description", Collections.singletonList("bot description"));
         this.put("price", Collections.singletonList("1.0"));
+        this.put("publishing_type", Collections.singletonList(Integer.toString(AiBot.PublishingType.SKILL.value())));
     }};
 
     @Before
@@ -60,14 +61,20 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         when(this.fakeConfig.getBotIconStoragePath()).thenReturn(System.getProperty("java.io.tmpdir"));
     }
 
+    // TODO: remove when we're only using Skills and Templates
     @Test
     public void testGetPublishedBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBots()).thenReturn(Collections.singletonList(SAMPLEBOT));
-        final Response response = target(BOTSTORE_BASEPATH).request().headers(defaultHeaders).get();
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
-        ApiAiBotList list = deserializeResponse(response, ApiAiBotList.class);
-        Assert.assertEquals(1, list.getBotList().size());
-        Assert.assertEquals(SAMPLEBOT.getBotId(), list.getBotList().get(0).getBotId());
+        testGetBotsDetailsByType(BOTSTORE_BASEPATH, AiBot.PublishingType.SKILL);
+    }
+
+    @Test
+    public void testGetPublishedSkills() throws Database.DatabaseException {
+        testGetBotsDetailsByType(BOTSTORE_BASEPATH + "/skills", AiBot.PublishingType.SKILL);
+    }
+
+    @Test
+    public void testGetPublishedTemplates() throws Database.DatabaseException {
+        testGetBotsDetailsByType(BOTSTORE_BASEPATH + "/templates", AiBot.PublishingType.TEMPLATE);
     }
 
     @Test
@@ -194,6 +201,23 @@ public class TestServiceAiBotstore extends ServiceTestBase {
                 .post(Entity.entity(multipart, multipart.getMediaType()));
         multipart.close();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    private void testGetBotsDetailsByType(final String path, final AiBot.PublishingType publishingType) throws Database.DatabaseException{
+        AiBot botSkill = new AiBot(SAMPLEBOT);
+        botSkill.setBotId(1);
+        botSkill.setPublishingType(AiBot.PublishingType.SKILL);
+        AiBot botTemplate = new AiBot(SAMPLEBOT);
+        botTemplate.setBotId(2);
+        botTemplate.setPublishingType(AiBot.PublishingType.TEMPLATE);
+        AiBot expectedBot = publishingType == AiBot.PublishingType.SKILL ? botSkill : botTemplate;
+        when(this.fakeDatabase.getPublishedBots(publishingType)).thenReturn(Collections.singletonList(expectedBot));
+        final Response response = target(path).request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiAiBotList list = deserializeResponse(response, ApiAiBotList.class);
+        Assert.assertEquals(1, list.getBotList().size());
+
+        Assert.assertEquals(expectedBot.getBotId(), list.getBotList().get(0).getBotId());
     }
 
     private FormDataMultiPart generateIconMultipartEntity() {

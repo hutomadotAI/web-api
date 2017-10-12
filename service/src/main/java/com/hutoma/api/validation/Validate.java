@@ -42,22 +42,23 @@ public class Validate {
         if (param == null || param.isEmpty()) {
             throw new ParameterValidationException("parameter null or empty", paramName);
         }
-        if (!Arrays.stream(Locale.getAvailableLocales()).anyMatch(x -> x.toLanguageTag().equals(param))) {
+        if (Arrays.stream(Locale.getAvailableLocales()).noneMatch(x -> x.toLanguageTag().equals(param))) {
             throw new ParameterValidationException("invalid locale: " + param, paramName);
         }
         // At this moment we know the locale is correctly formatted
         return Locale.forLanguageTag(param);
     }
 
-    public static AiBot.PublishingType validatePublishingType(final String paramName, final String param)
+    static AiBot.PublishingType validatePublishingType(final String param)
             throws ParameterValidationException {
         if (param == null || param.isEmpty()) {
-            throw new ParameterValidationException("parameter null or empty", paramName);
+            throw new ParameterValidationException("parameter null or empty", ParameterFilter.PUBLISHING_TYPE);
         }
         try {
             return AiBot.PublishingType.from(Integer.parseInt(param));
         } catch (IllegalArgumentException ex) {
-            throw new ParameterValidationException("invalid publishing type: " + param, paramName);
+            throw new ParameterValidationException("invalid publishing type: " + param,
+                    ParameterFilter.PUBLISHING_TYPE);
         }
     }
 
@@ -316,7 +317,7 @@ public class Validate {
         if (param == null || param.isEmpty()) {
             throw new ParameterValidationException("parameter null or empty", paramName);
         }
-        if (!Arrays.stream(TimeZone.getAvailableIDs()).anyMatch(x -> x.equals(param))) {
+        if (Arrays.stream(TimeZone.getAvailableIDs()).noneMatch(x -> x.equals(param))) {
             throw new ParameterValidationException("invalid timezone value: " + param, paramName);
         }
         return param;

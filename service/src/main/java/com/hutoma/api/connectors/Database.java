@@ -782,9 +782,10 @@ public class Database {
         }
     }
 
-    public List<AiBot> getPublishedBots() throws DatabaseException {
+    public List<AiBot> getPublishedBots(final AiBot.PublishingType publishingType) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getPublishedBots", 0);
+            call.initialise("getPublishedBots", 1)
+                .add(publishingType.value());
             final ResultSet rs = call.executeQuery();
             try {
                 return getBotListFromResultset(rs);

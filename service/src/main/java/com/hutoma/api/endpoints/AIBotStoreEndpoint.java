@@ -11,6 +11,7 @@ import com.hutoma.api.logic.AIBotStoreLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
+import com.hutoma.api.validation.ValidatePost;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.metadata.rs.ResponseCode;
@@ -71,6 +72,50 @@ public class AIBotStoreEndpoint {
             @Context ContainerRequestContext requestContext
     ) {
         ApiResult result = this.aiBotStoreLogic.getPublishedBots(
+                ParameterFilter.getDevid(requestContext)
+        );
+        return result.getResponse(this.serializer).build();
+    }
+
+    @RateLimit(RateKey.Botstore_Metadata)
+    @Path("/skills")
+    @GET
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public Response getPublishedSkills(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiBotStoreLogic.getPublishedSkills(
+                ParameterFilter.getDevid(requestContext)
+        );
+        return result.getResponse(this.serializer).build();
+    }
+
+    @RateLimit(RateKey.Botstore_Metadata)
+    @Path("/templates")
+    @GET
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public Response getPublishedTemplates(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiBotStoreLogic.getPublishedTemplates(
                 ParameterFilter.getDevid(requestContext)
         );
         return result.getResponse(this.serializer).build();
@@ -151,7 +196,8 @@ public class AIBotStoreEndpoint {
 
     @RateLimit(RateKey.Botstore_Publish)
     @POST
-    @ValidateParameters({APIParameter.DevID, APIParameter.PublishingType})
+    @ValidatePost({APIParameter.PublishingType})
+    @ValidateParameters({APIParameter.DevID})
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -159,7 +205,6 @@ public class AIBotStoreEndpoint {
             @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition =
                     "Developer information hasn't been update yet; Invalid publish information; "
                             + "AI already has a published bot; "
-                            + "Publishing an AI that is already linked to one or more bots is not supported"
                             + "AI needs to be fully trained before being allowed to be published"),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
     })

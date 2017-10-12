@@ -50,3 +50,14 @@ BEGIN
     SELECT LAST_INSERT_ID();
   END ;;
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `getPublishedBots`;
+DELIMITER ;;
+CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`(
+  IN `param_publishing_type` TINYINT(1)
+)
+    NO SQL
+BEGIN
+    SELECT * FROM botStore WHERE publishing_state = 2 AND publishing_type = param_publishing_type;
+  END ;;
+DELIMITER ;

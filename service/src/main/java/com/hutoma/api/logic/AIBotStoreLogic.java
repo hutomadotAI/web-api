@@ -41,7 +41,7 @@ import static java.nio.file.attribute.PosixFilePermission.*;
  */
 public class AIBotStoreLogic {
 
-    public static final long MAX_ICON_FILE_SIZE = 512 * 1024; // 512Kb
+    static final long MAX_ICON_FILE_SIZE = 512 * 1024; // 512Kb
     private static final String LOGFROM = "botstorelogic";
     private static final Set<String> ALLOWED_ICON_EXT = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
     private final Database database;
@@ -59,8 +59,20 @@ public class AIBotStoreLogic {
     }
 
     public ApiResult getPublishedBots(final UUID devId) {
+        return getPublishedSkills(devId);
+    }
+
+    public ApiResult getPublishedSkills(final UUID devId) {
+        return getPublishedBotByType(devId, AiBot.PublishingType.SKILL);
+    }
+
+    public ApiResult getPublishedTemplates(final UUID devId) {
+        return getPublishedBotByType(devId, AiBot.PublishingType.TEMPLATE);
+    }
+
+    private ApiResult getPublishedBotByType(final UUID devId, final AiBot.PublishingType publishingType) {
         try {
-            List<AiBot> bots = this.database.getPublishedBots();
+            List<AiBot> bots = this.database.getPublishedBots(publishingType);
             this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId.toString(),
                     LogMap.map("Num Bots", bots.size()));
             return new ApiAiBotList(bots).setSuccessStatus();
@@ -149,6 +161,12 @@ public class AIBotStoreLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot",
                         devIdString, logMap);
                 return ApiError.getBadRequest("Bot already has a published bot");
+            }
+            List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
+            if (!linkedBots.isEmpty() && publishingType == AiBot.PublishingType.SKILL) {
+                this.logger.logUserTraceEvent(LOGFROM,
+                        "PublishBot - Attempting to publish a skill with linked bots", devIdString, logMap);
+                return ApiError.getBadRequest("Bot cannot be published as a skill when it has linked bots");
             }
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {

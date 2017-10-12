@@ -59,7 +59,7 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testGetPublishedBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBots()).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabase.getPublishedBots(AiBot.PublishingType.SKILL)).thenReturn(Collections.singletonList(SAMPLEBOT));
         ApiAiBotList result = (ApiAiBotList) this.aiBotStoreLogic.getPublishedBots(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(1, result.getBotList().size());
@@ -68,14 +68,14 @@ public class TestAIBotstoreLogic {
 
     @Test
     public void testGetPublishedBots_DBFail() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBots()).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getPublishedBots(AiBot.PublishingType.SKILL)).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiBotStoreLogic.getPublishedBots(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetPublishedBots_NoBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBots()).thenReturn(Collections.emptyList());
+        when(this.fakeDatabase.getPublishedBots(AiBot.PublishingType.SKILL)).thenReturn(Collections.emptyList());
         ApiAiBotList result = (ApiAiBotList) this.aiBotStoreLogic.getPublishedBots(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertTrue(result.getBotList().isEmpty());
@@ -243,7 +243,8 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testPublishBot_botsLinked() throws Database.DatabaseException {
+    public void testPublishBot_publishAsSkill_botsLinked() throws Database.DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(TestBotHelper.SAMPLEBOT));
         ApiResult result = publishSampleBot(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
