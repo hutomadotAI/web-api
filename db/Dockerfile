@@ -1,17 +1,20 @@
 FROM mysql:5.7
 MAINTAINER  Pedro Teixeira pedrotei@hutoma.com
 
-
+# API DB
 COPY structure.sql /docker-entrypoint-initdb.d/0.sql
 COPY users.sql /docker-entrypoint-initdb.d/1.sql
 COPY default-data.sql /docker-entrypoint-initdb.d/2.sql
 
+# Django database
+COPY django_structure.sql /docker-entrypoint-initdb.d/3.sql
+
 # Test data - should not be added to production
-COPY test-data.sql /docker-entrypoint-initdb.d/3.sql
+COPY test-data.sql /docker-entrypoint-initdb.d/4.sql
 
 # Alarm data for Nokia
-COPY datastorage_structure.sql /docker-entrypoint-initdb.d/4.sql
-COPY datastorage_default-data.sql /docker-entrypoint-initdb.d/5.sql
+COPY datastorage_structure.sql /docker-entrypoint-initdb.d/5.sql
+COPY datastorage_default-data.sql /docker-entrypoint-initdb.d/6.sql
 
 # Default values for passwords and database name. Can be overridden on docker run
 ENV MYSQL_ROOT_PASSWORD=password

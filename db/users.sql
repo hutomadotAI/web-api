@@ -112,6 +112,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`resetTokens` TO 'hutoma_caller
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'hutoma_caller'@'%';
 
+# Privileges for `django_caller`@`%`
+GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
+GRANT EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
+
+# Grant read-only DB access to django_caller
+GRANT SELECT ON `hutoma`.`users` TO 'django_caller'@'%';
 
 # Privileges for `integrReader`@`127.0.0.1`
 GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';

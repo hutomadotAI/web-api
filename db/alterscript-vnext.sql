@@ -3,9 +3,25 @@ The purpose of this script file is to include all the db alterations
 required for the next deployment.
 */
 
+#------------------------------------------------------------------------------------
+# Create Django database
+CREATE DATABASE  IF NOT EXISTS `django` CHARACTER SET utf8;
+USE `django`;
+
+# Privileges for `django_caller`@`%`
+GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
+GRANT CREATE, ALTER, EXECUTE, INSERT, SELECT, DELETE, UPDATE, REFERENCES, INDEX ON `django`.* TO 'django_caller'@'%';
+
+
 USE `hutoma`;
 
+# Privileges for `django_caller`@`%`
+GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
+GRANT EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
+#-End-Django-----------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------------
+# Template publishing update
 ALTER TABLE botStore ADD COLUMN `publishing_type` tinyint(1) NOT NULL DEFAULT 1 AFTER `publishing_state`;
 CREATE INDEX `idx_botStore_publishing_state_publishing_type` on botStore (`publishing_state`, `publishing_type`);
 
@@ -61,3 +77,4 @@ BEGIN
     SELECT * FROM botStore WHERE publishing_state = 2 AND publishing_type = param_publishing_type;
   END ;;
 DELIMITER ;
+#-End-publish-----------------------------------------------------------------------------------
