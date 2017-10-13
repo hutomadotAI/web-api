@@ -5,6 +5,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.ApiBotStructure;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiFacebookCustomisation;
@@ -12,6 +13,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -82,6 +84,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case ServerRegistration:
                     //fallthrough
                 case ServerAffinity:
+                    //fallthrough
+                case BotStructure:
                     //fallthrough
                 case FacebookConnect:
                     //fallthrough
@@ -222,11 +226,9 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         request.bufferEntity();
 
         try {
-
             if (checkList.contains(APIParameter.EntityJson)) {
                 ApiEntity entity = (ApiEntity) this.serializer.deserialize(request.getEntityStream(), ApiEntity.class);
-                this.validateEntityName(ENTITYNAME, entity.getEntityName());
-                this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
+                this.validateEntity(entity);
                 request.setProperty(APIParameter.EntityJson.toString(), entity);
             }
 
@@ -234,51 +236,15 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (checkList.contains(APIParameter.IntentJson)) {
                 // decode
                 ApiIntent intent = (ApiIntent) this.serializer.deserialize(request.getEntityStream(), ApiIntent.class);
-                // validate name
-                this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
-                this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
-
-                // for each response, filter and check against size limit
-                intent.setResponses(
-                        this.validateFieldLengthsInList(250, INTENT_RESPONSES,
-                                this.filterCoalesceSpacesInList(intent.getResponses())));
-
-                // for each user expression, filter and check against size limit
-                intent.setUserSays(
-                        this.validateFieldLengthsInList(250, INTENT_USERSAYS,
-                                this.filterCoalesceSpacesInList(intent.getUserSays())));
-
-                // for each variable
-                if (null != intent.getVariables()) {
-                    for (IntentVariable variable : intent.getVariables()) {
-                        // validate the name
-                        this.validateFieldLength(250, ENTITYNAME, variable.getEntityName());
-                        this.validateEntityName(ENTITYNAME, variable.getEntityName());
-
-                        // the list of prompts
-                        variable.setPrompts(
-                                this.validateFieldLengthsInList(250, INTENT_PROMPTLIST,
-                                        this.filterCoalesceSpacesInList(variable.getPrompts())));
-
-                        // the value
-                        this.validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
-                        this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
-                    }
-                }
-
-                WebHook webHook = intent.getWebHook();
-                if (webHook != null) {
-                    this.checkParameterNotNull("enabled", webHook.isEnabled());
-                    this.validateFieldLength(250, INTENTNAME, webHook.getIntentName());
-                    this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
-
-                    if (webHook.isEnabled()) {
-                        this.validateFieldLength(2048, "endpoint", webHook.getEndpoint());
-                        this.checkParameterNotNull("endpoint", webHook.getEndpoint());
-                        this.checkParameterNotNull(AIID, webHook.getAiid());
-                    }
-                }
+                this.validateIntent(intent);
                 request.setProperty(APIParameter.IntentJson.toString(), intent);
+            }
+
+            if (checkList.contains(APIParameter.BotStructure)) {
+                BotStructure botStructure = (BotStructure)
+                        this.serializer.deserialize(request.getEntityStream(), BotStructure.class);
+                this.validateBotStructure(botStructure);
+                request.setProperty(APIParameter.BotStructure.toString(), botStructure);
             }
 
             if (checkList.contains(APIParameter.AiStatusJson)) {
@@ -369,6 +335,93 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (validateParameters != null) {
                 final APIParameter[] allowedAPIParameters = validateParameters.value();
                 container.addAll(Arrays.asList(allowedAPIParameters));
+            }
+        }
+    }
+
+    /***
+     * Verify that a provided intent is valid.
+     * @param intent The Intent.
+     * @throws ParameterValidationException
+     */
+    void validateIntent(ApiIntent intent) throws ParameterValidationException {
+        // validate name
+        this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
+        this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
+
+        // for each response, filter and check against size limit
+        intent.setResponses(
+                this.validateFieldLengthsInList(250, INTENT_RESPONSES,
+                        this.filterCoalesceSpacesInList(intent.getResponses())));
+
+        // for each user expression, filter and check against size limit
+        intent.setUserSays(
+                this.validateFieldLengthsInList(250, INTENT_USERSAYS,
+                        this.filterCoalesceSpacesInList(intent.getUserSays())));
+
+        // for each variable
+        if (null != intent.getVariables()) {
+            for (IntentVariable variable : intent.getVariables()) {
+                // validate the name
+                this.validateFieldLength(250, ENTITYNAME, variable.getEntityName());
+                this.validateEntityName(ENTITYNAME, variable.getEntityName());
+
+                // the list of prompts
+                variable.setPrompts(
+                        this.validateFieldLengthsInList(250, INTENT_PROMPTLIST,
+                                this.filterCoalesceSpacesInList(variable.getPrompts())));
+
+                // the value
+                this.validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
+                this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
+            }
+        }
+
+        WebHook webHook = intent.getWebHook();
+        if (webHook != null) {
+            this.checkParameterNotNull("enabled", webHook.isEnabled());
+            this.validateFieldLength(250, INTENTNAME, webHook.getIntentName());
+            this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+
+            if (webHook.isEnabled()) {
+                this.validateFieldLength(2048, "endpoint", webHook.getEndpoint());
+                this.checkParameterNotNull("endpoint", webHook.getEndpoint());
+                this.checkParameterNotNull(AIID, webHook.getAiid());
+            }
+        }
+    }
+
+    /***
+     * Verify that a provided entity is valid.
+     * @param entity The Entity.
+     * @throws ParameterValidationException
+     */
+    void validateEntity(ApiEntity entity) throws ParameterValidationException {
+        this.validateEntityName(ENTITYNAME, entity.getEntityName());
+        this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
+    }
+
+    /***
+     * Verify that a provided BotStructure is valid.
+     * @param botStructure The BotStructure.
+     * @throws ParameterValidationException
+     */
+    void validateBotStructure(BotStructure botStructure) throws ParameterValidationException {;
+        this.validateLocale(LOCALE, botStructure.getLanguage());
+        this.validateAiName(AINAME, botStructure.getName());
+        this.validateFieldLength(50, AINAME, botStructure.getName());
+        this.validateFieldLength(250, AIDESC,
+                this.filterControlAndCoalesceSpaces(botStructure.getDescription()));
+        this.validateFieldLength(250, AIDESC, botStructure.getDescription());
+        this.validateTimezoneString(TIMEZONE, botStructure.getTimezone());
+        if (botStructure.getEntities() != null) {
+            for (ApiEntity entity : botStructure.getEntities().values()) {
+                this.validateEntity(entity);
+            }
+        }
+        if (botStructure.getIntents() != null) {
+            for (ApiIntent intent : botStructure.getIntents()) {
+                this.validateIntent(intent);
             }
         }
     }

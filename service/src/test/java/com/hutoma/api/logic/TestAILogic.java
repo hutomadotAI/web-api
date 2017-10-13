@@ -15,6 +15,7 @@ import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.validation.Validate;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -58,6 +59,7 @@ public class TestAILogic {
     private AILogic aiLogic;
     private ILogger fakeLogger;
     private JsonSerializer fakeSerializer;
+    private Validate fakeValidate;
 
     @Before
     public void setup() {
@@ -69,13 +71,14 @@ public class TestAILogic {
         this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(ILogger.class);
+        this.fakeValidate = mock(Validate.class);
         this.fakeAiIntegrationLogicProvider = mock(Provider.class);
         when(this.fakeAiIntegrationLogicProvider.get()).thenReturn(mock(AIIntegrationLogic.class));
 
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeDatabaseEntitiesIntents,
-                this.fakeAiServices, this.fakeLogger, this.fakeTools, this.fakeAiIntegrationLogicProvider);
+                this.fakeAiServices, this.fakeLogger, this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider);
     }
 
     @Test
@@ -557,27 +560,6 @@ public class TestAILogic {
     public void testExportBot_DoesntExist() {
         ApiResult result = this.aiLogic.exportBotData(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testImportBot_validationV1() {
-        BotStructure botStructure = new BotStructure("Name", "description", null, "",
-                null, 1, false, 0, 0, 1, "en-US", "London");
-        Assert.assertTrue(botStructure.validVersion());
-    }
-
-    @Test
-    public void testImportBot_invalidVersionIgnored() {
-        BotStructure botStructure = new BotStructure("Name", "description", null, "",
-                null, 0, false, 0, 0, 1, "en-US", "London");
-        Assert.assertFalse(botStructure.validVersion());
-    }
-
-    @Test
-    public void testImportBot_invalidBot() {
-        BotStructure botStructure = new BotStructure("", "", null, "",
-                null, 0, false, 0, 0, 1, "en-US", "London");
-        Assert.assertFalse(botStructure.validVersion());
     }
 
     @Test

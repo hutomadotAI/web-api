@@ -22,6 +22,7 @@ public enum APIParameter {
     FacebookConnect,
     AnalyticsResponseFormat,
     DefaultChatResponses,
+    BotStructure,
     FacebookCustomisations,
     PublishingType,
     // Backend

@@ -1,8 +1,11 @@
 package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.LogMap;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.validation.Validate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +14,9 @@ import java.util.List;
  * Created by bretc on 10/08/2017.
  */
 public class BotStructure {
+
+    private static final String LOGFROM = "BotStructure";
+
     @SerializedName("name")
     private String name;
     @SerializedName("description")
@@ -167,23 +173,5 @@ public class BotStructure {
 
     public void setTimezone(final String timezone) {
         this.timezone = timezone;
-    }
-
-    public boolean validVersion() {
-        if (this.version == 1) {
-            return validV1();
-        }
-
-        return false;
-    }
-
-    private boolean validV1() {
-        if (this.name == null || this.name.isEmpty()
-                || this.description == null
-                || this.language == null || this.language.isEmpty()
-                || this.timezone == null || this.timezone.isEmpty()) {
-            return false;
-        }
-        return true;
     }
 }

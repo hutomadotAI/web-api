@@ -53,13 +53,14 @@ public class AILogic {
     private final AIServices aiServices;
     private final ILogger logger;
     private final Tools tools;
+    private final Validate validate;
     private Provider<AIIntegrationLogic> integrationLogicProvider;
 
     @Inject
     public AILogic(final Config config, final JsonSerializer jsonSerializer, final Database database,
                    final DatabaseEntitiesIntents databaseEntitiesIntents,
-                   final AIServices aiServices, final ILogger logger, final Tools tools,
-                   Provider<AIIntegrationLogic> integrationLogicProvider) {
+                   final AIServices aiServices, final ILogger logger, final Tools tools, final Validate validate,
+                   final Provider<AIIntegrationLogic> integrationLogicProvider) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
@@ -67,6 +68,7 @@ public class AILogic {
         this.logger = logger;
         this.tools = tools;
         this.aiServices = aiServices;
+        this.validate = validate;
         this.integrationLogicProvider = integrationLogicProvider;
     }
 
@@ -520,25 +522,18 @@ public class AILogic {
         return ApiError.getInternalServerError();
     }
 
-    public ApiResult importBot(final UUID devId, BotStructure importedBot) {
+    public ApiResult importBot(final UUID devId, final BotStructure importedBot) {
         if (importedBot == null) {
             return ApiError.getBadRequest();
         }
 
         ApiAi createdBot = null;
 
-        // Handle specific versions.
-        if (importedBot.getVersion() == 1) {
-            try {
-                createdBot = importV1(devId, importedBot);
-            } catch (BotImportException e) {
-                this.logger.logUserExceptionEvent(LOGFROM, "ImportBotV1", devId.toString(), e);
-                return ApiError.getBadRequest(e.getMessage());
-            }
-        }
-
-        if (createdBot == null) {
-            return ApiError.getInternalServerError();
+        try {
+            createdBot = createImportedBot(devId, importedBot);
+        } catch (BotImportException e) {
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportBotV1", devId.toString(), e);
+            return ApiError.getBadRequest(e.getMessage());
         }
 
         UUID uuidAiid = UUID.fromString(createdBot.getAiid());
@@ -633,15 +628,11 @@ public class AILogic {
         }
     }
 
-    private ApiAi importV1(UUID devId, BotStructure importedBot) throws BotImportException {
-        if (!importedBot.validVersion()) {
-            throw new BotImportException("Invalid Bot Structure for specified version.");
-        }
-
+    private ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
         // try to interpret the locale
         Locale locale = null;
         try {
-            locale = Validate.validateLocale("locale", importedBot.getLanguage());
+            locale = this.validate.validateLocale("locale", importedBot.getLanguage());
         } catch (Validate.ParameterValidationException e) {
             // if the local is missing or badly formatted then use en-US
             locale = DEFAULT_LOCALE;

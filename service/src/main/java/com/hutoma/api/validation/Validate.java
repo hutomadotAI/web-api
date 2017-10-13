@@ -19,6 +19,7 @@ import javax.inject.Inject;
  */
 public class Validate {
 
+
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
     private static final Pattern entityNames = Pattern.compile("^[\\.a-zA-Z0-9_-]+$");
     private static final Pattern printableAscii =
@@ -29,6 +30,7 @@ public class Validate {
             Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private static final Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
     private static final Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
+    private static final Pattern aiName = Pattern.compile("^[a-zA-Z0-9\\-_\\s]+$");
 
     @Inject
     public Validate() {
@@ -127,7 +129,7 @@ public class Validate {
      * @return
      * @throws ParameterValidationException
      */
-    public List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
+    List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
             throws ParameterValidationException {
         for (String item : paramList) {
             validateFieldLength(maxLength, paramName, item);
@@ -357,17 +359,12 @@ public class Validate {
 
     String validateAiName(final String paramName, final String param)
             throws ParameterValidationException {
-        return validatePatternOptionalField(printableAscii, paramName, param);
+        return validatePatternOptionalField(aiName, paramName, param);
     }
 
     String validateOptionalDescription(final String paramName, final String param)
             throws ParameterValidationException {
         return validatePatternOptionalField(printableAscii, paramName, param);
-    }
-
-    List<String> validateOptionalDescriptionList(String paramName, List<String> paramList)
-            throws ParameterValidationException {
-        return validatePatternUniqueList(printableAscii, paramName, paramList);
     }
 
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param)
