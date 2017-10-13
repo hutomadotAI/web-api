@@ -18,6 +18,8 @@ USE `hutoma`;
 # Privileges for `django_caller`@`%`
 GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
 GRANT EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
+# Grant read-only DB access to django_caller
+GRANT SELECT ON `hutoma`.`users` TO 'django_caller'@'%';
 #-End-Django-----------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------
