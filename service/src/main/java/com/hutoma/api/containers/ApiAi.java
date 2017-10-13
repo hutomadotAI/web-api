@@ -77,6 +77,9 @@ public class ApiAi extends ApiResult {
     @SerializedName("linked_bots")
     private List<Integer> linkedBots = new ArrayList<>();
 
+    @SerializedName("readonly")
+    private boolean readonly;
+
     public ApiAi(final String aiid, final String clientToken) {
         this.aiid = aiid;
         this.clientToken = clientToken;
@@ -245,6 +248,14 @@ public class ApiAi extends ApiResult {
 
     public void setDefaultChatResponses(final List<String> defaultChatResponses) {
         this.defaultChatResponses = defaultChatResponses;
+    }
+
+    public boolean isReadOnly() {
+        return readonly;
+    }
+
+    public void setReadOnly(final boolean isReadOnly) {
+        this.readonly = isReadOnly;
     }
 
     private void populateExtendedStatus() {

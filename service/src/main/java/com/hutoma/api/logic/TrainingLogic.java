@@ -9,14 +9,12 @@ import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.memory.IMemoryIntentHandler;
-import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -85,6 +83,10 @@ public class TrainingLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "UploadFile - Bot is RO", devidString, logMap);
+                return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+            }
 
             switch (type) {
 
@@ -113,7 +115,8 @@ public class TrainingLogic {
                         return ApiError.getNotFound();
                     }
 
-                    String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid, this.jsonSerializer);
+                    String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid,
+                            this.jsonSerializer);
                     if (trainingMaterials == null) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadFile - training materials null after validation",
                                 devidString, logMap);
@@ -202,6 +205,10 @@ public class TrainingLogic {
             this.logger.logUserTraceEvent(LOGFROM, "StartTraining - AI not found", devidString, logMap);
             return ApiError.getNotFound();
         }
+        if (ai.isReadOnly()) {
+            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - Bot is RO", devidString, logMap);
+            return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+        }
 
         TrainingStatus trainingStatus = ai.getSummaryAiStatus();
         logMap.add("Start from state", trainingStatus.name());
@@ -250,6 +257,10 @@ public class TrainingLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "StopTraining - Bot is RO", devidString, logMap);
+                return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+            }
             TrainingStatus trainingStatus = ai.getSummaryAiStatus();
             BackendStatus backendStatus = ai.getBackendStatus();
             TrainingStatus statusWnet = backendStatus.getEngineStatus(BackendServerType.WNET).getTrainingStatus();
@@ -286,6 +297,10 @@ public class TrainingLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - Bot is RO", devidString, logMap);
+                return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+            }
 
             switch (ai.getSummaryAiStatus()) {
                 case AI_TRAINING:           // fallthrough
@@ -296,7 +311,8 @@ public class TrainingLogic {
                 case AI_ERROR:              // fallthrough
                 case AI_UNDEFINED:
                     try {
-                        String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid, this.jsonSerializer);
+                        String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid,
+                                this.jsonSerializer);
                         if (trainingMaterials == null || trainingMaterials.isEmpty()) {
                             this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
                                     devidString, logMap);

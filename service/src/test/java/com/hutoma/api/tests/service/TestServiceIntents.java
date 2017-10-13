@@ -2,6 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -23,7 +24,9 @@ import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestServiceIntents extends ServiceTestBase {
 
@@ -32,7 +35,8 @@ public class TestServiceIntents extends ServiceTestBase {
     private IMemoryIntentHandler fakeMemoryIntentHandler;
 
     @Test
-    public void testSaveIntent() {
+    public void testSaveIntent() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setUserSays(Collections.singletonList(
                 String.join("", Collections.nCopies(250, "A"))));

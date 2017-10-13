@@ -249,6 +249,20 @@ public class TestTrainingLogic {
     }
 
     @Test
+    public void testTrain_upload_AI_notFound() throws HTMLExtractor.HtmlExtractionException, Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, null, null);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_upload_AI_readonly() throws HTMLExtractor.HtmlExtractionException, Database.DatabaseException {
+        setupAiReadonlyMode(this.fakeDatabase);
+        ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, null, null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testTrain_TextDBFail() throws Database.DatabaseException, HTMLExtractor.HtmlExtractionException {
         makeDBFail(TrainingLogic.TrainingType.TEXT);
     }
@@ -315,6 +329,13 @@ public class TestTrainingLogic {
     }
 
     @Test
+    public void testStartTraining_AI_readonly() throws Database.DatabaseException, AIServices.AiServicesException {
+        setupAiReadonlyMode(this.fakeDatabase);
+        ApiResult result = this.logic.startTraining(DEVID_UUID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testStartTraining_dbException() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_dbException(() -> this.logic.startTraining(DEVID_UUID, AIID),
                 HttpURLConnection.HTTP_INTERNAL_ERROR);
@@ -335,6 +356,11 @@ public class TestTrainingLogic {
     @Test
     public void testStopTraining_unknownAi() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_invalidAi(() -> this.logic.stopTraining(DEVID_UUID, AIID));
+    }
+
+    @Test
+    public void testStopTraining_AI_readonly() throws Database.DatabaseException, AIServices.AiServicesException {
+        testTraining_AI_readonly(() -> this.logic.stopTraining(DEVID_UUID, AIID));
     }
 
     @Test
@@ -362,6 +388,11 @@ public class TestTrainingLogic {
     @Test
     public void testUpdateTraining_invalidAi() throws Database.DatabaseException, AIServices.AiServicesException {
         testTraining_invalidAi(() -> this.logic.updateTraining(DEVID_UUID, AIID));
+    }
+
+    @Test
+    public void testUpdateTraining_AI_readonly() throws Database.DatabaseException, AIServices.AiServicesException {
+        testTraining_AI_readonly(() -> this.logic.updateTraining(DEVID_UUID, AIID));
     }
 
     @Test
@@ -497,6 +528,7 @@ public class TestTrainingLogic {
     @Test
     public void testUploadTraining_serviceException() throws Database.DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, true));
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(SOMETEXT);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any(), anyString());
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, null, createUpload(SOMETEXT), this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -604,6 +636,15 @@ public class TestTrainingLogic {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
         ApiResult result = supplier.get();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+        verify(this.fakeAiServices, never()).startTraining(any(), any(), any());
+    }
+
+    private void testTraining_AI_readonly(Supplier<ApiResult> supplier) throws Database.DatabaseException,
+            AIServices.AiServicesException {
+        setupAiReadonlyMode(this.fakeDatabase);
+        ApiResult result = supplier.get();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        verify(this.fakeAiServices, never()).stopTraining(any(), any(), any());
         verify(this.fakeAiServices, never()).startTraining(any(), any(), any());
     }
 

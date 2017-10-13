@@ -500,19 +500,6 @@ public class Database {
                     // combine status data with AI
                     UUID aiid = UUID.fromString(rs.getString("aiid"));
                     ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid), serializer);
-                    int publishingStateOnDb = rs.getInt("publishing_state");
-                    // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
-                    // we always get it right regardless of the default value
-                    AiBot.PublishingState state;
-                    try {
-                        state = rs.wasNull()
-                                ? AiBot.PublishingState.NOT_PUBLISHED
-                                : AiBot.PublishingState.from(publishingStateOnDb);
-                    } catch (IllegalArgumentException ex) {
-                        // Default to NOT_PUBLISHED if for some reason we can't understand what is in the db
-                        state = AiBot.PublishingState.NOT_PUBLISHED;
-                    }
-                    bot.setPublishingState(state);
                     List<AiBot> linkedBots = this.getBotsLinkedToAi(devid, aiid);
                     if (!linkedBots.isEmpty()) {
                         bot.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
@@ -1338,8 +1325,22 @@ public class Database {
         List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
         AiBotConfigDefinition definition = (AiBotConfigDefinition) serializer.deserialize(
                 rs.getString("api_keys_desc"), AiBotConfigDefinition.class);
+
+        int publishingStateOnDb = rs.getInt("publishing_state");
+        // Note that if null we actually match as it will return 0 => NOT_PUBLISHED, but to make sure
+        // we always get it right regardless of the default value
+        AiBot.PublishingState publishingState;
+        try {
+            publishingState = rs.wasNull()
+                    ? AiBot.PublishingState.NOT_PUBLISHED
+                    : AiBot.PublishingState.from(publishingStateOnDb);
+        } catch (IllegalArgumentException ex) {
+            // Default to NOT_PUBLISHED if for some reason we can't understand what is in the db
+            publishingState = AiBot.PublishingState.NOT_PUBLISHED;
+        }
+
         // create one summary training status from the block of data
-        return new ApiAi(
+        ApiAi ai = new ApiAi(
                 rs.getString("aiid"),
                 rs.getString("client_token"),
                 rs.getString("ai_name"),
@@ -1357,6 +1358,11 @@ public class Database {
                 rs.getString("passthrough_url"),
                 defaultChatResponses,
                 definition);
+        ai.setPublishingState(publishingState);
+        ai.setReadOnly(publishingState == AiBot.PublishingState.SUBMITTED
+            || publishingState == AiBot.PublishingState.PUBLISHED
+            || publishingState == AiBot.PublishingState.REMOVED);
+        return ai;
     }
 
     /***

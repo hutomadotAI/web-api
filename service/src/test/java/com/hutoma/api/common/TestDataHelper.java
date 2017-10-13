@@ -40,6 +40,12 @@ public class TestDataHelper {
                 0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC);
     }
 
+    public static void setupAiReadonlyMode(final Database fakeDatabase) throws Database.DatabaseException {
+        ApiAi ai = new ApiAi(TestDataHelper.getSampleAI());
+        ai.setReadOnly(true);
+        when(fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
+    }
+
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {
         BackendStatus result = new BackendStatus();
         result.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(status, 0.0, 0.0));

@@ -41,7 +41,9 @@ import javax.inject.Provider;
  */
 public class AILogic {
 
-    static final int BOT_SCHEMA_VERSION = 1;
+    static final String BOT_RO_MESSAGE = "Bot is read-only";
+
+    private static final int BOT_SCHEMA_VERSION = 1;
     private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String LOGFROM = "ailogic";
     private final Config config;
@@ -140,6 +142,11 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
             }
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - Attempt to update when in RO mode",
+                        devIdString, logMap);
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
+            }
             if (!this.database.updateAI(
                     devId,
                     aiid,
@@ -184,8 +191,9 @@ public class AILogic {
     }
 
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
-                                               AiBotConfigWithDefinition aiBotConfigWithDefinition) {
+                                               final AiBotConfigWithDefinition aiBotConfigWithDefinition) {
         final String devIdString = devid.toString();
+        LogMap logMap = LogMap.map("AIID", aiid);
 
         try {
             aiBotConfigWithDefinition.checkIsValid();
@@ -195,7 +203,15 @@ public class AILogic {
 
         AiBotConfigDefinition definition = aiBotConfigWithDefinition.getDefinitions();
         try {
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiBotConfigDescription - Bot is RO", devIdString, logMap);
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
+            }
+
             if (!this.database.setBotConfigDefinition(devid, aiid, definition, this.jsonSerializer)) {
+                this.logger.logUserErrorEvent(LOGFROM, "setAiBotConfigDescription - failed to write to db",
+                        devIdString, logMap);
                 return ApiError.getBadRequest("Failed to write API key description");
             }
 
@@ -209,6 +225,7 @@ public class AILogic {
 
     public ApiResult setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig) {
         final String devIdString = devid.toString();
+        LogMap logMap = LogMap.map("AIID", aiid);
 
         if (!aiBotConfig.isValid()) {
             return ApiError.getBadRequest("Config is not valid");
@@ -221,7 +238,14 @@ public class AILogic {
 
         try {
             if (!this.database.checkAIBelongsToDevId(devid, aiid)) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - AI not owned", devIdString, logMap);
                 return ApiError.getNotFound();
+            }
+
+            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - Bot is RO", devIdString, logMap);
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
             UUID linkedDevid = devid;
@@ -241,9 +265,13 @@ public class AILogic {
             try {
                 withDefinition.checkIsValid();
             } catch (AiBotConfigException configException) {
+                this.logger.logUserWarnEvent(LOGFROM, "setAiConfig - invalid config", devIdString,
+                        logMap.put("Message", configException.getMessage()));
                 return ApiError.getBadRequest(configException.getMessage());
             }
             if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer)) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiConfig", devIdString,
+                        logMap.put("BotId", botId));
                 return new ApiResult().setSuccessStatus();
             }
             return ApiError.getBadRequest("Failed to set AI/bot config");
@@ -298,6 +326,11 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
             }
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - Bot is RO", devIdString, logMap);
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
+            }
+
             this.database.deleteAi(devid, aiid);
 
             // if there are integrations, get rid of them
@@ -371,6 +404,11 @@ public class AILogic {
                     return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
                 }
             }
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - AI is RO", devIdString, logMap);
+                return ApiError.getBadRequest("Bot is read-only");
+            }
             if (botDetails.getPublishingType() != AiBot.PublishingType.SKILL) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot is not a skill", devIdString, logMap);
                 return ApiError.getBadRequest(String.format("Bot %d not a Skill", botId));
@@ -404,6 +442,11 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - AI is RO", devIdString, logMap);
+                return ApiError.getBadRequest("Bot is read-only");
+            }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.unlinkBotFromAi(devId, aiid, botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devIdString, logMap);
@@ -463,8 +506,8 @@ public class AILogic {
                 }
             }
             BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
-                    entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
-                    bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
+                    entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(),
+                    bot.getConfidence(), bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
             this.logger.logUserTraceEvent(LOGFROM, "Export bot", devIdString, logMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
 

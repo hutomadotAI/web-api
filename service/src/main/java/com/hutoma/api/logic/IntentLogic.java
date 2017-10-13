@@ -2,9 +2,11 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
@@ -28,23 +30,28 @@ public class IntentLogic {
     private static final String LOGFROM = "intentlogic";
     private final Config config;
     private final ILogger logger;
-    private final DatabaseEntitiesIntents database;
+    private final DatabaseEntitiesIntents databaseEntitiesIntents;
+    private final Database databaseAi;
     private final TrainingLogic trainingLogic;
+    private final JsonSerializer jsonSerializer;
 
     @Inject
-    public IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents database,
-                       final TrainingLogic trainingLogic) {
+    public IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents databaseEntitiesIntents,
+                       final Database databaseAi, final TrainingLogic trainingLogic,
+                       final JsonSerializer jsonSerializer) {
         this.config = config;
         this.logger = logger;
-        this.database = database;
+        this.databaseEntitiesIntents = databaseEntitiesIntents;
+        this.databaseAi = databaseAi;
         this.trainingLogic = trainingLogic;
+        this.jsonSerializer = jsonSerializer;
     }
 
     public ApiResult getIntents(final UUID devid, final UUID aiid) {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            final List<String> intentList = this.database.getIntents(devid, aiid);
+            final List<String> intentList = this.databaseEntitiesIntents.getIntents(devid, aiid);
             if (intentList.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devidString, logMap.put("Num Intents", "0"));
                 return ApiError.getNotFound();
@@ -62,17 +69,17 @@ public class IntentLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
-            boolean aiidValid = this.database.checkAIBelongsToDevId(devid, aiid);
+            boolean aiidValid = this.databaseEntitiesIntents.checkAIBelongsToDevId(devid, aiid);
             if (!aiidValid) {
                 return ApiError.getBadRequest("AI not found for this Dev ID");
             }
 
-            ApiIntent intent = this.database.getIntent(aiid, intentName);
+            ApiIntent intent = this.databaseEntitiesIntents.getIntent(aiid, intentName);
             if (null == intent) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
-            WebHook webHook = this.database.getWebHook(aiid, intentName);
+            WebHook webHook = this.databaseEntitiesIntents.getWebHook(aiid, intentName);
             intent.setWebHook(webHook);
 
             this.logger.logUserTraceEvent(LOGFROM, "GetIntent", devidString, logMap);
@@ -88,6 +95,12 @@ public class IntentLogic {
         String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
         try {
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - Bot is RO", devidString, logMap);
+                return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+            }
+
             // Check if there are any variables with duplicate or empty labels
             Set<String> usedLabels = new HashSet<>();
             List<String> duplicateLabels = new ArrayList<>();
@@ -118,15 +131,15 @@ public class IntentLogic {
                 return ApiError.getBadRequest(
                         String.format("Duplicate label%s: %s", dupLabelsString.isEmpty() ? "" : "s", dupLabelsString));
             }
-            this.database.writeIntent(devid, aiid, intent.getIntentName(), intent);
+            this.databaseEntitiesIntents.writeIntent(devid, aiid, intent.getIntentName(), intent);
             WebHook webHook = intent.getWebHook();
             if (webHook != null) {
-                if (this.database.getWebHook(aiid, intent.getIntentName()) != null) {
-                    this.database.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(),
+                if (this.databaseEntitiesIntents.getWebHook(aiid, intent.getIntentName()) != null) {
+                    this.databaseEntitiesIntents.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(),
                             webHook.isEnabled());
                     this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devidString, logMap);
                 } else {
-                    this.database.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(),
+                    this.databaseEntitiesIntents.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(),
                             webHook.isEnabled());
                     this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devidString, logMap);
                 }
@@ -152,12 +165,17 @@ public class IntentLogic {
         String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
-            if (!this.database.deleteIntent(devid, aiid, intentName)) {
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - Bot is RO", devidString, logMap);
+                return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+            }
+            if (!this.databaseEntitiesIntents.deleteIntent(devid, aiid, intentName)) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
-            if (this.database.getWebHook(aiid, intentName) != null) {
-                this.database.deleteWebHook(aiid, intentName);
+            if (this.databaseEntitiesIntents.getWebHook(aiid, intentName) != null) {
+                this.databaseEntitiesIntents.deleteWebHook(aiid, intentName);
             }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent", devidString, logMap);
