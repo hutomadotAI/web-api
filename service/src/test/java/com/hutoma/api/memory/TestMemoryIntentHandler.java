@@ -162,6 +162,16 @@ public class TestMemoryIntentHandler {
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testLoadIntentForAi_duplicateLabels_throwsException() throws Database.DatabaseException {
+        final String label = "theLabel";
+        MemoryVariable var1 = new MemoryVariable("var1", "val", true, Collections.singletonList("sys.test"),
+                Collections.singletonList("Prompt"), 1, 0, true, false, label);
+        MemoryVariable var2 = new MemoryVariable("var2", "val", true, Collections.singletonList("sys.test"),
+                Collections.singletonList("Prompt"), 1, 0, true, false, label);
+        new MemoryIntent(INTENT_NAME, AIID, CHATID,Arrays.asList(var1, var2));
+    }
+
     @Test
     public void testMemoryIntentCtor() {
         MemoryVariable mv = new MemoryVariable("name", null);

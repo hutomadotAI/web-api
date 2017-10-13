@@ -1,5 +1,6 @@
 package com.hutoma.api.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -70,5 +71,10 @@ public class ExternalEntityRecognizer implements IEntityRecognizer {
             }
         }
         return numbers;
+    }
+
+    @VisibleForTesting
+    ILogger getLogger() {
+        return this.logger;
     }
 }

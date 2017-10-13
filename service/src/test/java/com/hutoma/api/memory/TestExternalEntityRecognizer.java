@@ -6,9 +6,11 @@ import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.RecognizedEntity;
 
+import org.glassfish.hk2.api.ServiceLocator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,14 @@ public class TestExternalEntityRecognizer {
     public void setup() {
         this.fakeService = mock(EntityRecognizerService.class);
         this.recognizer = new ExternalEntityRecognizer(this.fakeService, mock(ILogger.class));
+    }
+
+    @Test
+    public void testExternal_injectedCtor() {
+        ServiceLocator sl = Mockito.mock(ServiceLocator.class);
+        ILogger logger = mock(ILogger.class);
+        ExternalEntityRecognizer r = new ExternalEntityRecognizer(sl,logger);
+        Assert.assertEquals(logger, r.getLogger());
     }
 
     @Test
