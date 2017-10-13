@@ -16,13 +16,15 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.WebHook;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -83,16 +85,14 @@ public class TestAILogic {
     @Test
     public void testCreate_Valid() throws Database.DatabaseException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyObject())).thenReturn(TestDataHelper.AIID);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, TestDataHelper.AIID);
         ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_Valid_Token() throws Database.DatabaseException {
-        whenCreateAiReturn(AIID);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, AIID);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
         ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertTrue(result instanceof ApiAi);
@@ -111,7 +111,7 @@ public class TestAILogic {
 
     @Test
     public void testCreate_DB_NameClash() throws Database.DatabaseException {
-        whenCreateAiReturn(UUID.randomUUID());
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, UUID.randomUUID());
         ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -498,9 +498,9 @@ public class TestAILogic {
         ApiEntity intentEntity = new ApiEntity("entity", VALIDDEVID);
         ApiIntent intent = new ApiIntent("intent_name", "topic_in", "topic_out");
         intent.setWebHook(new WebHook(AIID, "intent_name", "http://not.a.real.address:8080", true));
-        intent.setUserSays(Arrays.asList("test"));
-        intent.setResponses(Arrays.asList("ok"));
-        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Arrays.asList("intent_name"));
+        intent.setUserSays(Collections.singletonList("test"));
+        intent.setResponses(Collections.singletonList("ok"));
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList("intent_name"));
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(intentEntity);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
@@ -621,12 +621,77 @@ public class TestAILogic {
 
     @Test
     public void testGetLinkedBotData_success() throws Database.DatabaseException {
-        AiBot bot = TestBotHelper.SAMPLEBOT;
+        AiBot bot = new AiBot(TestBotHelper.SAMPLEBOT);
         ApiLinkedBotData linkedData = new ApiLinkedBotData(bot, generateAiBotConfig());
 
         when(this.fakeDatabase.getLinkedBotData(any(), any(), anyInt(), any())).thenReturn(linkedData);
         ApiResult result = this.aiLogic.getLinkedBotData(DEVID_UUID, AIID, 1);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testCloneBot() throws Database.DatabaseException {
+        final ApiAi baseAi = TestDataHelper.getSampleAI();
+        final AiBot originalBot = new AiBot(DEVID_UUID, UUID.fromString(baseAi.getAiid()), 12345, baseAi.getName(), baseAi.getDescription(),
+                "long description", "alert", "badge", BigDecimal.ZERO, "sample", "category", "license", DateTime.now(), "privacy",
+                "classif", "1.0", "videolink", AiBot.PublishingState.NOT_PUBLISHED, AiBot.PublishingType.SKILL, "icon");
+        final String trainingFile = "aaaaa\nbbbbb";
+        final UUID generatedAiid = UUID.randomUUID();
+        final String newName = "this is a new name";
+        final String newDescription = "new description";
+        final boolean newIsPrivate = true;
+        final int newPersonality = 3;
+        final double newConfidence = 0.3;
+        final int newVoice = 9;
+        final Locale newLanguage = Locale.ITALY;
+        final String newTimezone = "Europe/Dublin";
+
+        ApiAi importedAi = new ApiAi(generatedAiid.toString(), "token", newName, newDescription, DateTime.now(),
+                newIsPrivate, baseAi.getBackendStatus(), baseAi.trainingFileUploaded(), newPersonality,
+                newConfidence, newVoice, newLanguage, newTimezone, null,
+                baseAi.getPassthroughUrl(), baseAi.getDefaultChatResponses(), null);
+
+        // For when we read the original AI for export
+        when(this.fakeDatabase.getAI(DEVID_UUID, UUID.fromString(baseAi.getAiid()), fakeSerializer)).thenReturn(baseAi);
+        // For when we read the imported AI
+        when(this.fakeDatabase.getAI(DEVID_UUID, generatedAiid, fakeSerializer)).thenReturn(importedAi);
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(trainingFile);
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(generatedAiid);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, generatedAiid);
+
+        AILogic spyLogic = spy(this.aiLogic);
+        ApiAi cloned = (ApiAi) spyLogic.cloneBot(originalBot.getDevId(), originalBot.getAiid(),
+                newName, newDescription, newIsPrivate, newPersonality, newConfidence, newVoice, newLanguage, newTimezone);
+
+        ArgumentCaptor<BotStructure> argument = ArgumentCaptor.forClass(BotStructure.class);
+        verify(spyLogic).importBot(any(), argument.capture());
+
+        Assert.assertNotEquals(baseAi.getAiid(), cloned.getAiid());
+        Assert.assertEquals(newName, argument.getValue().getName());
+        Assert.assertEquals(newDescription, argument.getValue().getDescription());
+        Assert.assertEquals(newTimezone, argument.getValue().getTimezone());
+        Assert.assertEquals(newLanguage.toLanguageTag(), argument.getValue().getLanguage());
+        Assert.assertEquals(newVoice, argument.getValue().getVoice());
+        Assert.assertEquals(newPersonality, argument.getValue().getPersonality());
+
+        Assert.assertEquals(baseAi.getPassthroughUrl(), cloned.getPassthroughUrl());
+        Assert.assertEquals(baseAi.getDefaultChatResponses(), cloned.getDefaultChatResponses());
+    }
+
+    @Test
+    public void testCloneBot_errorExportingOrImporting() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        ApiResult result = this.aiLogic.cloneBot(DEVID_UUID, AIID, null, null, true, 1, 0.1, 0, Locale.ITALY, null);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGenerateBotNameRandomSuffix() {
+        String suffix = AILogic.generateBotNameRandomSuffix();
+        Assert.assertEquals(6, suffix.length());
+        Assert.assertEquals('_', suffix.charAt(0));
+        Assert.assertEquals(suffix.toLowerCase(), suffix);
+        Assert.assertNotEquals(suffix, AILogic.generateBotNameRandomSuffix());
     }
 
     private AiBotConfig generateAiBotConfig() {
@@ -654,12 +719,6 @@ public class TestAILogic {
         AiBotConfigDefinition definition = generateAiBotConfigDefinition();
         AiBotConfigWithDefinition def = new AiBotConfigWithDefinition(config, definition);
         return def;
-    }
-
-    private void whenCreateAiReturn(UUID aiid) throws Database.DatabaseException {
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyObject())).thenReturn(aiid);
     }
 
     private ArrayList<ApiAi> getAIList() {

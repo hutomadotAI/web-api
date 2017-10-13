@@ -1,8 +1,13 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.BackendEngineStatus;
+import com.hutoma.api.containers.sub.BackendServerType;
+import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.IServerEndpoint;
 import com.hutoma.api.logic.ChatLogic;
 
@@ -12,6 +17,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by pedrotei on 09/01/17.
@@ -87,5 +95,9 @@ public class TestDataHelper {
         };
     }
 
-
+    public static void mockDatabaseCreateAI(final Database fakeDatabase, final UUID createdAiid) throws Database.DatabaseException {
+        when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
+                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyInt(), anyObject())).thenReturn(createdAiid);
+    }
 }

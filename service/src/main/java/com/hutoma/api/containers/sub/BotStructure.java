@@ -20,7 +20,7 @@ public class BotStructure {
     @SerializedName("personality")
     private int personality;
     @SerializedName("confidence")
-    private float confidence;
+    private double confidence;
     @SerializedName("voice")
     private int voice;
     @SerializedName("language")
@@ -36,9 +36,10 @@ public class BotStructure {
     @SerializedName("version")
     private int version;
 
-    public BotStructure(String name, String description, List<ApiIntent> intents, String trainingFile,
-                        HashMap<String, ApiEntity> entities, int version, boolean isPrivate, int personality,
-                        float confidence, int voice, String language, String timezone) {
+    public BotStructure(final String name, final String description, final List<ApiIntent> intents,
+                        final String trainingFile, final HashMap<String, ApiEntity> entities, final int version,
+                        final boolean isPrivate, final int personality, final double confidence, final int voice,
+                        final String language, final String timezone) {
         this.name = name;
         this.description = description;
         this.intents = intents;
@@ -51,6 +52,25 @@ public class BotStructure {
         this.voice = voice;
         this.language = language;
         this.timezone = timezone;
+    }
+
+    /**
+     * Copy ctor.
+     * @param other the structure to copy from
+     */
+    public BotStructure(final BotStructure other) {
+        this.name = other.name;
+        this.description = other.description;
+        this.intents = other.intents;
+        this.trainingFile = other.trainingFile;
+        this.entities = other.entities;
+        this.version = other.version;
+        this.isPrivate = other.isPrivate;
+        this.personality = other.personality;
+        this.confidence = other.confidence;
+        this.voice = other.voice;
+        this.language = other.language;
+        this.timezone = other.timezone;
     }
 
     public String getName() {
@@ -85,7 +105,7 @@ public class BotStructure {
         return this.personality;
     }
 
-    public float getConfidence() {
+    public double getConfidence() {
         return this.confidence;
     }
 
@@ -101,51 +121,51 @@ public class BotStructure {
         return this.timezone;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public void setIntents(List<ApiIntent> intents) {
+    public void setIntents(final List<ApiIntent> intents) {
         this.intents = intents;
     }
 
-    public void setTrainingFile(String trainingFile) {
+    public void setTrainingFile(final String trainingFile) {
         this.trainingFile = trainingFile;
     }
 
-    public void setEntities(HashMap<String, ApiEntity> entities) {
+    public void setEntities(final HashMap<String, ApiEntity> entities) {
         this.entities = entities;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(final int version) {
         this.version = version;
     }
 
-    public void setPrivate(boolean isPrivate) {
+    public void setPrivate(final boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
 
-    public void setPersonality(int personality) {
+    public void setPersonality(final int personality) {
         this.personality = personality;
     }
 
-    public void setConfidence(float confidence) {
+    public void setConfidence(final double confidence) {
         this.confidence = confidence;
     }
 
-    public void setVoice(int voice) {
+    public void setVoice(final int voice) {
         this.voice = voice;
     }
 
-    public void setLanguage(String language) {
+    public void setLanguage(final String language) {
         this.language = language;
     }
 
-    public void setTimezone(String timezone) {
+    public void setTimezone(final String timezone) {
         this.timezone = timezone;
     }
 

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,8 +41,9 @@ import javax.inject.Provider;
  */
 public class AILogic {
 
+    static final int BOT_SCHEMA_VERSION = 1;
+    private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String LOGFROM = "ailogic";
-    private static final int version = 1;
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Database database;
@@ -212,7 +214,7 @@ public class AILogic {
             return ApiError.getBadRequest("Config is not valid");
         }
 
-        // if version is not specified, then change it to the current version
+        // if VERSION is not specified, then change it to the current VERSION
         if (aiBotConfig.getVersion() != AiBotConfig.CURRENT_VERSION) {
             aiBotConfig.setVersion(AiBotConfig.CURRENT_VERSION);
         }
@@ -461,7 +463,7 @@ public class AILogic {
                 }
             }
             BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
-                    entityMap, this.version, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
+                    entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(), (float) bot.getConfidence(),
                     bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
             this.logger.logUserTraceEvent(LOGFROM, "Export bot", devIdString, logMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
@@ -518,6 +520,53 @@ public class AILogic {
         return getAI(devId, uuidAiid, "Import-Get", true);
     }
 
+    public ApiResult cloneBot(final UUID devId, final UUID aiidToClone,
+                              final String newName,
+                              final String newDescription,
+                              final boolean isPrivate,
+                              final int newPersonality,
+                              final double newConfidence,
+                              final int newVoice,
+                              final Locale newLanguage,
+                              final String newTimezone) {
+        ApiResult result = this.exportBotData(devId, aiidToClone);
+        if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
+            return result;
+        }
+
+        BotStructure botStructure = ((ApiBotStructure) result).getBotStructure();
+        String originalName = botStructure.getName();
+
+        if (originalName.equalsIgnoreCase(newName)) {
+            // Name always has to be overridden as we don't support duplicate names
+            botStructure.setName(botStructure.getName() + generateBotNameRandomSuffix());
+        } else {
+            botStructure.setName(newName);
+        }
+        botStructure.setDescription(newDescription);
+        botStructure.setPrivate(isPrivate);
+        botStructure.setPersonality(newPersonality);
+        botStructure.setConfidence(newConfidence);
+        botStructure.setVoice(newVoice);
+        botStructure.setLanguage(newLanguage.toLanguageTag());
+        botStructure.setTimezone(newTimezone);
+
+        return this.importBot(devId, botStructure);
+    }
+
+    static String generateBotNameRandomSuffix() {
+        final String saltChars = "abcdefghijklmnopqrstuvwxyz1234567890";
+        final int suffixLength = 6;
+        StringBuilder salt = new StringBuilder();
+        salt.append("_");
+        Random rnd = new Random();
+        while (salt.length() < suffixLength) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * saltChars.length());
+            salt.append(saltChars.charAt(index));
+        }
+        return salt.toString();
+    }
+
     private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate) {
         final String devIdString = devid.toString();
         try {
@@ -552,7 +601,7 @@ public class AILogic {
             locale = Validate.validateLocale("locale", importedBot.getLanguage());
         } catch (Validate.ParameterValidationException e) {
             // if the local is missing or badly formatted then use en-US
-            locale = Locale.US;
+            locale = DEFAULT_LOCALE;
         }
 
         ApiResult result = this.createAI(

@@ -41,6 +41,7 @@ public class TestServiceAi extends ServiceTestBase {
     private static final String BOTS_BASEPATH = AI_PATH + "/bots";
     private static final String BOT_BASEPATH = AI_PATH + "/bot";
     private static final String BOT_PATH = BOT_BASEPATH + "/" + BOTID;
+    private static final String BOT_CLONE_PATH = AI_BASEPATH + "/" + AIID + "/clone";
 
     private static MultivaluedMap<String, String> getCreateAiRequestParams() {
         return new MultivaluedHashMap<String, String>() {{
@@ -117,9 +118,7 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCreateAI() throws Database.DatabaseException {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
-        when(this.fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyObject())).thenReturn(uuid);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, uuid);
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -230,6 +229,28 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetPublishedBotForAI_devId_invalid() throws Database.DatabaseException {
         final Response response = target(BOT_BASEPATH).request().headers(noDevIdHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testCloneBot() throws Database.DatabaseException {
+        final UUID aiid = UUID.randomUUID();
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, aiid);
+          final Response response = target(BOT_CLONE_PATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.form(getCreateAiRequestParams()));
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
+    }
+
+    @Test
+    public void testCloneBot_devId_invalid() throws Database.DatabaseException {
+        final Response response = target(BOT_CLONE_PATH)
+                .request()
+                .headers(noDevIdHeaders)
+                .post(Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
