@@ -1508,12 +1508,12 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAi`(
 BEGIN
 
     SELECT
-      `id`,
-      `aiid`,
+      `ai`.`id`,
+      `ai`.`aiid`,
       `ai_name`,
       `ai_description`,
       `created_on`,
-      `dev_id`,
+      `ai`.`dev_id`,
       `is_private`,
       `client_token`,
       `hmac_secret`,
@@ -1525,16 +1525,17 @@ BEGIN
       `passthrough_url`,
       `default_chat_responses`,
       `api_keys_desc`,
+      `botStore`.`publishing_state` as `publishing_state`,
       (SELECT COUNT(`ai_training`.`aiid`)
        FROM `ai_training`
        WHERE `ai_training`.`aiid`=`in_aiid`)
         AS `has_training_file`
-    FROM `ai`
+    FROM `ai` LEFT OUTER JOIN `botStore` on `botStore`.`aiid` = `ai`.`aiid`
     WHERE `ai`.`dev_id`=`in_dev_id`
           AND `ai`.`aiid`=`in_aiid`
           AND `deleted`=0;
 
-  END ;;
+  END;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
