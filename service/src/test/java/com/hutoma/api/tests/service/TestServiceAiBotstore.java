@@ -9,6 +9,7 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIBotStoreEndpoint;
 import com.hutoma.api.logic.AIBotStoreLogic;
+import com.hutoma.api.logic.TestAIBotstoreLogic;
 
 import org.apache.commons.lang.SystemUtils;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -46,6 +47,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     private static final String BOTSTORE_BOTICONPATH = BOTSTORE_BOTPATH + "/icon";
     private static final String BOTSTORE_PURCHASEBOTPATH = BOTSTORE_BASEPATH + "/purchase/" + BOTID;
     private static final String BOT_ICON_PATH = BOTID + ".png";
+    private static final String BOTSTORE_BOTTEMPLATEPATH = BOTSTORE_BOTPATH + "/template";
 
     private static final MultivaluedMap<String, String> BOT_PUBLISH_POST = new MultivaluedHashMap<String, String>() {{
         this.put("aiid", Collections.singletonList(UUID.randomUUID().toString()));
@@ -100,6 +102,22 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     }
 
     @Test
+    public void testGetBotTemplate() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setPublishingType(AiBot.PublishingType.TEMPLATE);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabase.getBotTemplate(anyInt())).thenReturn(TestAIBotstoreLogic.getBotStructureTemplate());
+        final Response response = target(BOTSTORE_BOTTEMPLATEPATH).request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testGetBotTemplate_invalid_devId() throws Database.DatabaseException {
+        final Response response = target(BOTSTORE_BOTTEMPLATEPATH).request().headers(noDevIdHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
     public void testGetPurchasedBots() throws Database.DatabaseException {
         when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         final Response response = target(BOTSTORE_PURCHASEDPATH).request().headers(defaultHeaders).get();
@@ -136,7 +154,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
+        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(newBotId);
         final Response response = target(BOTSTORE_BASEPATH)
                 .request()
                 .headers(defaultHeaders)

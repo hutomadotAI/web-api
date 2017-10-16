@@ -825,8 +825,8 @@ public class Database {
         }
     }
 
-    public int publishBot(final AiBot bot) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+    public int publishBot(final AiBot bot, final DatabaseTransaction transaction) throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("publishBot", 17)
                     .add(bot.getDevId())
                     .add(bot.getAiid())
@@ -852,6 +852,31 @@ public class Database {
             } else {
                 throw new DatabaseException("Stored procedure publishBot did not return any value!");
             }
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    public boolean addBotTemplate(final int botId, final BotStructure botStructure, final DatabaseTransaction transaction,
+                               final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
+            call.initialise("addBotTemplate", 2)
+                    .add(botId)
+                    .add(jsonSerializer.serialize(botStructure));
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public String getBotTemplate(final int botId)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getBotTemplate", 1).add(botId);
+            final ResultSet rs = call.executeQuery();
+            if (rs.next()) {
+                return rs.getString("template");
+            }
+            return null;
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }

@@ -23,12 +23,20 @@ public final class TestBotHelper {
     public static final AiBot SAMPLEBOT = getBot(DEVID_UUID, AIID, BOTID);
     private static final byte[] BOTICON_CONTENT = "this is an image!".getBytes(Charset.defaultCharset());
 
-    public static ApiResult publishSampleBot(final AIBotStoreLogic aiBotStoreLogic) {
+    public static ApiResult publishSampleBotSkill(final AIBotStoreLogic aiBotStoreLogic) {
+        return publishSampleBot(aiBotStoreLogic, AiBot.PublishingType.SKILL);
+    }
+
+    public static ApiResult publishSampleBotTemplate(final AIBotStoreLogic aiBotStoreLogic) {
+        return publishSampleBot(aiBotStoreLogic, AiBot.PublishingType.TEMPLATE);
+    }
+
+    private static ApiResult publishSampleBot(final AIBotStoreLogic aiBotStoreLogic, AiBot.PublishingType publishingType) {
         return aiBotStoreLogic.publishBot(SAMPLEBOT.getDevId(), SAMPLEBOT.getAiid(), SAMPLEBOT.getName(),
                 SAMPLEBOT.getDescription(), SAMPLEBOT.getLongDescription(), SAMPLEBOT.getAlertMessage(), SAMPLEBOT.getBadge(),
                 SAMPLEBOT.getPrice(), SAMPLEBOT.getSample(), SAMPLEBOT.getCategory(), SAMPLEBOT.getLicenseType(),
                 SAMPLEBOT.getPrivacyPolicy(), SAMPLEBOT.getClassification(), SAMPLEBOT.getVersion(), SAMPLEBOT.getVideoLink(),
-                AiBot.PublishingType.SKILL);
+                publishingType);
     }
 
     public static AiBot getBot(final UUID devId, final UUID aiid, final int botId) {

@@ -7,6 +7,7 @@ import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.logic.AIBotStoreLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
@@ -142,6 +143,32 @@ public class AIBotStoreEndpoint {
             @PathParam("botId") int botId
     ) {
         ApiResult result = this.aiBotStoreLogic.getBotDetails(
+                ParameterFilter.getDevid(requestContext),
+                botId);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @RateLimit(RateKey.Botstore_Metadata)
+    @Path("{botId}/template")
+    @GET
+    @ValidateParameters({APIParameter.DevID})
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public
+    @TypeHint(BotStructure.class)
+    Response getBotTemplate(
+            @Context ContainerRequestContext requestContext,
+            @PathParam("botId") int botId
+    ) {
+        ApiResult result = this.aiBotStoreLogic.getBotTemplate(
                 ParameterFilter.getDevid(requestContext),
                 botId);
         return result.getResponse(this.serializer).build();

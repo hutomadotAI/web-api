@@ -16,7 +16,6 @@ import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.Entity;
-import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
@@ -24,8 +23,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -42,8 +39,6 @@ import javax.inject.Provider;
 public class AILogic {
 
     static final String BOT_RO_MESSAGE = "Bot is read-only";
-
-    private static final int BOT_SCHEMA_VERSION = 1;
     private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String LOGFROM = "ailogic";
     private final Config config;
@@ -484,32 +479,14 @@ public class AILogic {
     public ApiResult exportBotData(final UUID devId, final UUID aiid) {
         final String devIdString = devId.toString();
         try {
+            BotStructure botStructure = BotStructureSerializer.serialize(
+                    devId, aiid, this.database, this.databaseEntitiesIntents, this.jsonSerializer);
+
             LogMap logMap = LogMap.map("AIID", aiid);
-            // Get the bot.
-            ApiAi bot = this.database.getAI(devId, aiid, this.jsonSerializer);
-            if (bot == null) {
+            if (botStructure == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "Export bot - not found", devIdString, logMap);
                 return ApiError.getNotFound();
             }
-            String trainingFile = this.database.getAiTrainingFile(aiid);
-            final List<String> intentList = this.databaseEntitiesIntents.getIntents(devId, aiid);
-
-            List<ApiIntent> intents = new ArrayList<>();
-            HashMap<String, ApiEntity> entityMap = new HashMap<>();
-            for (String intent : intentList) {
-                ApiIntent apiIntent = this.databaseEntitiesIntents.getIntent(aiid, intent);
-                intents.add(apiIntent);
-
-                for (IntentVariable intentVariable : apiIntent.getVariables()) {
-                    String entityName = intentVariable.getEntityName();
-                    if (!entityMap.containsKey(entityName)) {
-                        entityMap.put(entityName, this.databaseEntitiesIntents.getEntity(devId, entityName));
-                    }
-                }
-            }
-            BotStructure botStructure = new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
-                    entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(),
-                    bot.getConfidence(), bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
             this.logger.logUserTraceEvent(LOGFROM, "Export bot", devIdString, logMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
 
@@ -527,7 +504,7 @@ public class AILogic {
             return ApiError.getBadRequest();
         }
 
-        ApiAi createdBot = null;
+        ApiAi createdBot;
 
         try {
             createdBot = createImportedBot(devId, importedBot);

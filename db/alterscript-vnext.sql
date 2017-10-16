@@ -84,6 +84,42 @@ DELIMITER ;
 #-End-publish-----------------------------------------------------------------------------------
 
 
+CREATE TABLE IF NOT EXISTS `hutoma`.`botTemplate` (
+  `botId` INT NOT NULL,
+  `template` LONGTEXT NULL,
+  UNIQUE INDEX `botId_UNIQUE` (`botId` ASC),
+  PRIMARY KEY (`botId`),
+  CONSTRAINT `fk_botTemplate_botId`
+    FOREIGN KEY (`botId`)
+    REFERENCES `hutoma`.`botStore` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION);
+
+GRANT SELECT ON `hutoma`.`botTemplate` TO 'aiReader'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botTemplate` TO 'aiWriter'@'127.0.0.1';
+
+DROP PROCEDURE IF EXISTS `hutoma`.`addBotTemplate`;
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addBotTemplate`(
+  IN `param_botId` INT(11),
+  IN `param_template` TEXT
+)
+BEGIN
+    INSERT INTO botTemplate (botId, template) VALUES (param_botId, param_template);
+  END ;;
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS `hutoma`.`getBotTemplate`;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotTemplate`(
+  IN `param_botId` INT(11)
+)
+BEGIN
+    SELECT `template` FROM botTemplate WHERE `botId` = param_botId;
+  END ;;
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS `getAi`;
 DELIMITER ;;
 CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAi`(

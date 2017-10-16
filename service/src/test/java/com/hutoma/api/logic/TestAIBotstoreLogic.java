@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
@@ -7,11 +8,16 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
+import com.hutoma.api.containers.ApiBotStructure;
+import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
 import org.apache.commons.lang.SystemUtils;
@@ -24,14 +30,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.UUID;
+import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestBotHelper.*;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the AI Bot Store logic.
@@ -42,19 +50,28 @@ public class TestAIBotstoreLogic {
     private static final String BOT_ICON_PATH = BOTID + ".png";
     private final ByteArrayInputStream botIconStream = new ByteArrayInputStream(TestBotHelper.getBotIconContent());
     private Database fakeDatabase;
+    private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private AIBotStoreLogic aiBotStoreLogic;
     private Config fakeConfig;
     private FormDataContentDisposition iconContentDisp;
+    private Provider<DatabaseTransaction> fakeDatabaseTransactionProvider;
+    private DatabaseTransaction fakeDatabaseTransaction;
+    private JsonSerializer fakeJsonSerializer;
 
     @Before
     public void setup() {
         this.fakeDatabase = mock(Database.class);
+        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeConfig = mock(Config.class);
-        this.aiBotStoreLogic = new AIBotStoreLogic(this.fakeDatabase, mock(ILogger.class), this.fakeConfig,
-                mock(JsonSerializer.class));
+        this.fakeDatabaseTransactionProvider = mock(Provider.class);
+        this.fakeDatabaseTransaction = mock(DatabaseTransaction.class);
+        this.fakeJsonSerializer = mock(JsonSerializer.class);
+        this.aiBotStoreLogic = new AIBotStoreLogic(this.fakeDatabase, this.fakeDatabaseEntitiesIntents,
+                fakeDatabaseTransactionProvider, mock(ILogger.class), this.fakeConfig, this.fakeJsonSerializer);
         this.iconContentDisp = FormDataContentDisposition.name("file").fileName(BOT_ICON_PATH).build();
         // Store any bot icons in the temp folder
         when(this.fakeConfig.getBotIconStoragePath()).thenReturn(System.getProperty("java.io.tmpdir"));
+        when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeDatabaseTransaction);
     }
 
     @Test
@@ -191,13 +208,13 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testPublishBot() throws Database.DatabaseException {
+    public void testPublishBot_skill() throws Database.DatabaseException {
         final int newBotId = 987654;
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeDatabase.publishBot(any())).thenReturn(newBotId);
-        ApiAiBot result = (ApiAiBot) TestBotHelper.publishSampleBot(this.aiBotStoreLogic);
+        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(newBotId);
+        ApiAiBot result = (ApiAiBot) TestBotHelper.publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertNotNull(result.getBot());
         Assert.assertEquals(newBotId, result.getBot().getBotId());
@@ -206,55 +223,96 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testPublishBot_errorInsert() throws Database.DatabaseException {
+    public void testPublishBot_skill_errorInsert() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeDatabase.publishBot(any())).thenReturn(-1);
-        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(-1);
+        ApiResult result = publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testPublishBot_alreadyPublished() throws Database.DatabaseException {
+    public void testPublishBot_skill_alreadyPublished() throws Database.DatabaseException {
         when(this.fakeDatabase.getPublishedBotForAI(any(), any())).thenReturn(TestBotHelper.SAMPLEBOT);
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        ApiResult result = publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testPublishBot_DBException() throws Database.DatabaseException {
+    public void testPublishBot_skill_DBException() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeDatabase.publishBot(any())).thenThrow(Database.DatabaseException.class);
-        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        when(this.fakeDatabase.publishBot(any(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testPublishBot_aiNotTrained() throws Database.DatabaseException {
+    public void testPublishBot_skill_aiNotTrained() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, false));
-        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        ApiResult result = publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testPublishBot_publishAsSkill_botsLinked() throws Database.DatabaseException {
+    public void testPublishBot_skill_publishAsSkill_botsLinked() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
         when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(TestBotHelper.SAMPLEBOT));
-        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        ApiResult result = publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testPublishBot_noDevInfo() throws Database.DatabaseException {
+    public void testPublishBot_skill_noDevInfo() throws Database.DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(null);
-        ApiResult result = publishSampleBot(this.aiBotStoreLogic);
+        ApiResult result = publishSampleBotSkill(this.aiBotStoreLogic);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testPublishBot_template() throws Database.DatabaseException {
+        final int newBotId = 876543;
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, false));
+        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(newBotId);
+        when(this.fakeDatabase.addBotTemplate(anyInt(), any(), any(), any())).thenReturn(true);
+        ApiAiBot result = (ApiAiBot) TestBotHelper.publishSampleBotTemplate(this.aiBotStoreLogic);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertNotNull(result.getBot());
+        Assert.assertEquals(newBotId, result.getBot().getBotId());
+        Assert.assertEquals(SAMPLEBOT.getDevId(), result.getBot().getDevId());
+        Assert.assertEquals(AiBot.PublishingState.SUBMITTED, result.getBot().getPublishingState());
+        verify(this.fakeDatabaseTransaction).commit();
+    }
+
+    @Test
+    public void testPublishBot_template_errorPublishing() throws Database.DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, false));
+        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(-1);
+        ApiResult result = TestBotHelper.publishSampleBotTemplate(this.aiBotStoreLogic);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        verify(this.fakeDatabaseTransaction).rollback();
+    }
+
+    @Test
+    public void testPublishBot_template_errorWritingTemplate() throws Database.DatabaseException {
+        final int newBotId = 876543;
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
+                TestDataHelper.getAi(TrainingStatus.AI_UNDEFINED, false));
+        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(newBotId);
+        when(this.fakeDatabase.addBotTemplate(anyInt(), any(), any(), any())).thenReturn(false);
+        ApiResult result = TestBotHelper.publishSampleBotTemplate(this.aiBotStoreLogic);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+        verify(this.fakeDatabaseTransaction).rollback();
     }
 
     @Test
@@ -262,6 +320,60 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenThrow(Database.DatabaseException.class);
         ApiResult result = this.aiBotStoreLogic.getBotDetails(DEVID_UUID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetBotTemplate() throws Database.DatabaseException {
+        final BotStructure botStructure = getBotStructure();
+        final String template = getBotStructureTemplate();
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setPublishingType(AiBot.PublishingType.TEMPLATE);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabase.getBotTemplate(anyInt())).thenReturn(template);
+        when(this.fakeJsonSerializer.deserialize(template, BotStructure.class)).thenReturn(botStructure);
+        ApiBotStructure result = (ApiBotStructure) this.aiBotStoreLogic.getBotTemplate(DEVID_UUID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(botStructure.getName(), result.getBotStructure().getName());
+        Assert.assertEquals(botStructure.getDescription(), result.getBotStructure().getDescription());
+        Assert.assertEquals(botStructure.getTrainingFile(), result.getBotStructure().getTrainingFile());
+    }
+
+    @Test
+    public void testGetBotTemplate_invalidBotId() throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotTemplate(anyInt())).thenReturn(null);
+        ApiResult result = this.aiBotStoreLogic.getBotTemplate(DEVID_UUID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetBotTemplate_errorInSerialization() throws Database.DatabaseException {
+        String template = getBotStructureTemplate();
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setPublishingType(AiBot.PublishingType.TEMPLATE);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabase.getBotTemplate(anyInt())).thenReturn(template);
+        when(this.fakeJsonSerializer.deserialize(template, BotStructure.class)).thenThrow(JsonParseException.class);
+        ApiResult result = this.aiBotStoreLogic.getBotTemplate(DEVID_UUID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetBotTemplate_notTemplate() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setPublishingType(AiBot.PublishingType.SKILL);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        ApiResult result = this.aiBotStoreLogic.getBotTemplate(DEVID_UUID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetBotTemplate_noTemplateInDb() throws Database.DatabaseException {
+        AiBot bot = new AiBot(SAMPLEBOT);
+        bot.setPublishingType(AiBot.PublishingType.TEMPLATE);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabase.getBotTemplate(anyInt())).thenReturn(null);
+        ApiResult result = this.aiBotStoreLogic.getBotTemplate(DEVID_UUID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
@@ -336,5 +448,15 @@ public class TestAIBotstoreLogic {
         AiBot bot = new AiBot(SAMPLEBOT);
         bot.setDevId(DEVID_UUID);
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+    }
+
+    public static BotStructure getBotStructure() {
+        return new BotStructure("bot", "desc", Collections.emptyList(), "aaa\nbbb", new HashMap<String, ApiEntity>(),
+                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC");
+    }
+
+    public static String getBotStructureTemplate() {
+        JsonSerializer serializer = new JsonSerializer();
+        return serializer.serialize(getBotStructure());
     }
 }

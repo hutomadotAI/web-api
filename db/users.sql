@@ -30,6 +30,8 @@ GRANT SELECT ON `hutoma`.`botPurchase` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`botStore` TO 'aiReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`botTemplate` TO 'aiReader'@'127.0.0.1';
+
 GRANT SELECT ON `hutoma`.`bot_ai` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`bot_ai_config` TO 'aiReader'@'127.0.0.1';
@@ -62,6 +64,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`bot_ai_config` TO 'aiWriter'@'
 GRANT INSERT ON `hutoma`.`botPurchase` TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT, UPDATE, DELETE ON `hutoma`.`botStore` TO 'aiWriter'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botTemplate` TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`webhooks` TO `aiWriter`@'127.0.0.1';
 

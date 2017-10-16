@@ -5,13 +5,17 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
+import com.hutoma.api.containers.ApiBotStructure;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.sub.TrainingStatus;
 
@@ -33,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import static java.nio.file.attribute.PosixFilePermission.*;
 
@@ -45,14 +50,19 @@ public class AIBotStoreLogic {
     private static final String LOGFROM = "botstorelogic";
     private static final Set<String> ALLOWED_ICON_EXT = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
     private final Database database;
+    private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final ILogger logger;
     private final Config config;
     private final JsonSerializer jsonSerializer;
+    private final Provider<DatabaseTransaction> databaseTransactionProvider;
 
     @Inject
-    public AIBotStoreLogic(Database database, ILogger logger, final Config config,
-                           final JsonSerializer jsonSerializer) {
+    public AIBotStoreLogic(final Database database, final DatabaseEntitiesIntents databaseEntitiesIntents,
+                           final Provider<DatabaseTransaction> databaseTransactionProvider,
+                           final ILogger logger, final Config config, final JsonSerializer jsonSerializer) {
         this.database = database;
+        this.databaseEntitiesIntents = databaseEntitiesIntents;
+        this.databaseTransactionProvider = databaseTransactionProvider;
         this.logger = logger;
         this.config = config;
         this.jsonSerializer = jsonSerializer;
@@ -136,8 +146,35 @@ public class AIBotStoreLogic {
             }
             this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails", devIdString, logMap);
             return new ApiAiBot(bot).setSuccessStatus();
-        } catch (Database.DatabaseException e) {
+        } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetBotDetails", devIdString, e);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult getBotTemplate(final UUID devId, final int botId) {
+        final String devIdString = devId.toString();
+        try {
+            LogMap logMap = LogMap.map("BotId", botId);
+            AiBot bot = this.database.getBotDetails(botId);
+            if (bot == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate - bot not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
+            if (bot.getPublishingType() != AiBot.PublishingType.TEMPLATE) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate - not a template", devIdString, logMap);
+                return ApiError.getBadRequest("Bot is not a template");
+            }
+            String template = this.database.getBotTemplate(botId);
+            if (template == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate - template not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
+            BotStructure botStructure = (BotStructure) this.jsonSerializer.deserialize(template, BotStructure.class);
+            this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate", devIdString, logMap);
+            return new ApiBotStructure(botStructure).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetBotTemplate", devId.toString(), ex);
             return ApiError.getInternalServerError();
         }
     }
@@ -162,29 +199,54 @@ public class AIBotStoreLogic {
                         devIdString, logMap);
                 return ApiError.getBadRequest("Bot already has a published bot");
             }
-            List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
-            if (!linkedBots.isEmpty() && publishingType == AiBot.PublishingType.SKILL) {
-                this.logger.logUserTraceEvent(LOGFROM,
-                        "PublishBot - Attempting to publish a skill with linked bots", devIdString, logMap);
-                return ApiError.getBadRequest("Bot cannot be published as a skill when it has linked bots");
-            }
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
-            if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devIdString, logMap);
-                return ApiError.getBadRequest("Bot needs to be fully trained before being allowed to be published");
+            if (publishingType == AiBot.PublishingType.SKILL) {
+                List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devId, aiid);
+                if (!linkedBots.isEmpty()) {
+                    this.logger.logUserTraceEvent(LOGFROM,
+                            "PublishBot - Attempting to publish a skill with linked bots", devIdString, logMap);
+                    return ApiError.getBadRequest("Bot cannot be published as a skill when it has linked bots");
+                }
+                ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+                if (ai.getSummaryAiStatus() != TrainingStatus.AI_TRAINING_COMPLETE) {
+                    this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI not trained", devIdString, logMap);
+                    return ApiError.getBadRequest("Bot needs to be fully trained before being allowed to be published");
+                }
             }
             bot = new AiBot(devId, aiid, -1, name, description, longDescription, alertMessage, badge, price,
                     sample, category, licenseType, DateTime.now(), privacyPolicy, classification, version,
                     videoLink, AiBot.PublishingState.SUBMITTED, publishingType, null);
-            int botId = this.database.publishBot(bot);
-            if (botId == -1) {
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);
-                return ApiError.getBadRequest("Invalid publish request");
+
+            int botId;
+            if (publishingType == AiBot.PublishingType.TEMPLATE) {
+                try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
+                    botId = this.database.publishBot(bot, transaction);
+                    if (botId == -1) {
+                        transaction.rollback();
+                        this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);
+                        return ApiError.getBadRequest("Invalid publish request");
+                    }
+                    BotStructure botStructure = BotStructureSerializer.serialize(devId, aiid, this.database,
+                            this.databaseEntitiesIntents, this.jsonSerializer);
+                    if (!this.database.addBotTemplate(botId, botStructure, transaction, this.jsonSerializer)) {
+                        transaction.rollback();
+                        this.logger.logUserTraceEvent(LOGFROM, "PublishBot - could not write the template",
+                                devIdString, logMap);
+                        return ApiError.getInternalServerError();
+                    } else {
+                        transaction.commit();
+                    }
+                }
             } else {
-                bot.setBotId(botId);
-                this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devIdString, logMap.put("New BotId", botId));
-                return new ApiAiBot(bot).setSuccessStatus();
+                botId = this.database.publishBot(bot, null);
+                if (botId == -1) {
+                    this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);
+                    return ApiError.getBadRequest("Invalid publish request");
+                }
             }
+
+            bot.setBotId(botId);
+            this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devIdString, logMap.put("New BotId", botId));
+            return new ApiAiBot(bot).setSuccessStatus();
         } catch (Database.DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "PublishBot", devIdString, e);
             return ApiError.getInternalServerError();
