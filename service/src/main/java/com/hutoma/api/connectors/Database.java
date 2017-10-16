@@ -40,8 +40,8 @@ public class Database {
     protected Provider<DatabaseTransaction> transactionProvider;
 
     @Inject
-    public Database(ILogger logger, Provider<DatabaseCall> callProvider,
-                    Provider<DatabaseTransaction> transactionProvider) {
+    public Database(final ILogger logger, final Provider<DatabaseCall> callProvider,
+                    final Provider<DatabaseTransaction> transactionProvider) {
         this.logger = logger;
         this.callProvider = callProvider;
         this.transactionProvider = transactionProvider;
@@ -53,7 +53,7 @@ public class Database {
      * @param maxLength
      * @return
      */
-    protected static String limitSize(String field, int maxLength) {
+    protected static String limitSize(final String field, final int maxLength) {
         return ((field == null) || (field.length() <= maxLength)) ? field : field.substring(0, maxLength);
     }
 
@@ -783,14 +783,25 @@ public class Database {
     }
 
     public boolean linkBotToAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        return this.linkBotToAi(devId, aiid, botId, null);
+    }
+
+    public boolean linkBotToAi(final UUID devId, final UUID aiid, final int botId,
+                               final DatabaseTransaction transaction)
+            throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("linkBotToAi", 3).add(devId).add(aiid).add(botId);
             return call.executeUpdate() > 0;
         }
     }
 
     public boolean unlinkBotFromAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        return this.unlinkBotFromAi(devId, aiid, botId, null);
+    }
+    public boolean unlinkBotFromAi(final UUID devId, final UUID aiid, final int botId,
+                                   final DatabaseTransaction transaction)
+            throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("unlinkBotFromAi", 3).add(devId).add(aiid).add(botId);
             return call.executeUpdate() > 0;
         }

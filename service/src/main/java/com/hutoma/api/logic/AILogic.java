@@ -12,6 +12,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
@@ -23,9 +24,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,13 +54,15 @@ public class AILogic {
     private final ILogger logger;
     private final Tools tools;
     private final Validate validate;
+    private final Provider<DatabaseTransaction> transactionProvider;
     private Provider<AIIntegrationLogic> integrationLogicProvider;
 
     @Inject
     public AILogic(final Config config, final JsonSerializer jsonSerializer, final Database database,
                    final DatabaseEntitiesIntents databaseEntitiesIntents,
                    final AIServices aiServices, final ILogger logger, final Tools tools, final Validate validate,
-                   final Provider<AIIntegrationLogic> integrationLogicProvider) {
+                   final Provider<AIIntegrationLogic> integrationLogicProvider,
+                   final Provider<DatabaseTransaction> transactionProvider) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
@@ -65,6 +72,7 @@ public class AILogic {
         this.aiServices = aiServices;
         this.validate = validate;
         this.integrationLogicProvider = integrationLogicProvider;
+        this.transactionProvider = transactionProvider;
     }
 
     public ApiResult createAI(
@@ -385,6 +393,11 @@ public class AILogic {
     }
 
     public ApiResult linkBotToAI(final UUID devId, final UUID aiid, final int botId) {
+        return this.linkBotToAI(devId, aiid, botId, null);
+    }
+
+    private ApiResult linkBotToAI(final UUID devId, final UUID aiid, final int botId,
+                                 final DatabaseTransaction transaction) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
@@ -422,7 +435,7 @@ public class AILogic {
                 return ApiError.getBadRequest(String.format("Bot %d already linked to AI", botId));
             }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
-            if (this.database.linkBotToAi(devId, aiid, botId)) {
+            if (this.database.linkBotToAi(devId, aiid, botId, transaction)) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
@@ -435,7 +448,81 @@ public class AILogic {
         }
     }
 
+    public ApiResult updateLinkedBots(final UUID devId, final UUID aiid, final List<Integer> botList) {
+        String devIdString = devId.toString();
+
+        try {
+            LogMap logMap = LogMap.map("AIID", aiid);
+
+            // Check for duplicate elements in the list of bots to link
+            Set<Integer> botSet = new HashSet<>(botList);
+            if (botSet.size() < botList.size()) {
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - repeated elements", devIdString, logMap);
+                return ApiError.getBadRequest("List of bots to link cannot have repeated elements");
+            }
+
+            // Check if this AI can be updated
+            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "updateLinkedBots - AI is RO", devIdString, logMap);
+                return ApiError.getBadRequest("Bot is read-only");
+            }
+
+            // Determine which bots to link and unlink
+            List<AiBot> botsLinked = this.database.getBotsLinkedToAi(devId, aiid);
+            List<AiBot> botsToRemove = botsLinked.stream().filter(x -> !botSet.contains(x.getBotId()))
+                    .collect(Collectors.toList());
+            List<Integer> botIdsLinked = botsLinked.stream().map(AiBot::getBotId).collect(Collectors.toList());
+            List<Integer> botsToAdd = new ArrayList<>(botList);
+            botsToAdd.removeAll(botIdsLinked);
+
+            int finalNumLinkedBots = botsLinked.size() - botsToRemove.size() + botsToAdd.size();
+            if (finalNumLinkedBots >= this.config.getMaxLinkedBotsPerAi()) {
+                this.logger.logUserTraceEvent(LOGFROM,
+                        "updateLinkedBots - trying to exceed the limit of linked bots", devIdString,
+                        logMap.put("Count", finalNumLinkedBots).put("Max", this.config.getMaxLinkedBotsPerAi()));
+                return ApiError.getBadRequest(String.format(
+                        "Requested links (%d) would go over the the limit of %d linked bots",
+                        finalNumLinkedBots,
+                        this.config.getMaxLinkedBotsPerAi()));
+            }
+
+            try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+
+                for (AiBot bot : botsToRemove) {
+                    ApiResult result = this.unlinkBotFromAI(devId, aiid, bot.getBotId(), transaction);
+                    if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
+                        transaction.rollback();
+                        return result;
+                    }
+                }
+
+                for (Integer botId : botsToAdd) {
+                    ApiResult result = this.linkBotToAI(devId, aiid, botId, transaction);
+                    if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
+                        transaction.rollback();
+                        return result;
+                    }
+                }
+
+                transaction.commit();
+
+                this.logger.logUserTraceEvent(LOGFROM, "updateLinkedBots", devIdString, logMap);
+                return new ApiResult().setSuccessStatus();
+            }
+
+        } catch (Database.DatabaseException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "updateLinkedBots", devIdString, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     public ApiResult unlinkBotFromAI(final UUID devId, final UUID aiid, final int botId) {
+        return this.unlinkBotFromAI(devId, aiid, botId, null);
+    }
+
+    private ApiResult unlinkBotFromAI(final UUID devId, final UUID aiid, final int botId,
+                                     final DatabaseTransaction transaction) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
@@ -444,8 +531,9 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - AI is RO", devIdString, logMap);
                 return ApiError.getBadRequest("Bot is read-only");
             }
-            this.aiServices.stopTrainingIfNeeded(devId, aiid);
-            if (this.database.unlinkBotFromAi(devId, aiid, botId)) {
+
+            if (this.database.unlinkBotFromAi(devId, aiid, botId, transaction)) {
+                this.aiServices.stopTrainingIfNeeded(devId, aiid);
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
@@ -609,7 +697,7 @@ public class AILogic {
         // try to interpret the locale
         Locale locale = null;
         try {
-            locale = this.validate.validateLocale("locale", importedBot.getLanguage());
+            locale = Validate.validateLocale("locale", importedBot.getLanguage());
         } catch (Validate.ParameterValidationException e) {
             // if the local is missing or badly formatted then use en-US
             locale = DEFAULT_LOCALE;
@@ -694,7 +782,7 @@ public class AILogic {
     }
 
     static class BotImportException extends Exception {
-        public BotImportException(final String message) {
+        BotImportException(final String message) {
             super(message);
         }
     }

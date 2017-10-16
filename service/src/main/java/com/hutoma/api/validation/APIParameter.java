@@ -25,6 +25,7 @@ public enum APIParameter {
     BotStructure,
     FacebookCustomisations,
     PublishingType,
+    BotIdList,
     // Backend
     AiStatusJson,
     ServerRegistration,

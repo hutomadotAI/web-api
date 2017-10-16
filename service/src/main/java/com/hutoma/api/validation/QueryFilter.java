@@ -117,6 +117,12 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                 }
                 requestContext.setProperty(APIParameter.AnalyticsResponseFormat.toString(), format);
             }
+
+            if (checkList.contains(APIParameter.BotIdList)) {
+                requestContext.setProperty(APIParameter.BotIdList.toString(),
+                        this.validateIntegerList(APIParameter.BotIdList.toString(), queryParameters.get(BOT_ID_LIST)));
+            }
+
             this.logger.logDebug(LOGFROM, "parameter validation passed");
 
         } catch (ParameterValidationException pve) {

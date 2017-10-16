@@ -6,6 +6,7 @@ import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
@@ -19,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import javax.ws.rs.client.Entity;
@@ -188,7 +190,7 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
         final Response response = target(BOT_PATH)
                 .request()
                 .headers(defaultHeaders)
@@ -206,15 +208,15 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testUnlinkBotToAi() throws Database.DatabaseException {
+    public void testUnlinkBotFromAi() throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
-        when(this.fakeDatabase.unlinkBotFromAi(any(), any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
         final Response response = target(BOT_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testUnlLinkBotToAi_devId_invalid() throws Database.DatabaseException {
+    public void testUnlLinkBotFromAi_devId_invalid() throws Database.DatabaseException {
         final Response response = target(BOT_PATH).request().headers(noDevIdHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
@@ -251,6 +253,37 @@ public class TestServiceAi extends ServiceTestBase {
                 .request()
                 .headers(noDevIdHeaders)
                 .post(Entity.form(getCreateAiRequestParams()));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateBotList() throws Database.DatabaseException {
+        AiBot bot1 = new AiBot(SAMPLEBOT);
+        bot1.setBotId(1);
+        bot1.setPublishingType(AiBot.PublishingType.SKILL);
+        AiBot bot2 = new AiBot(SAMPLEBOT);
+        bot2.setBotId(2);
+        bot2.setPublishingType(AiBot.PublishingType.SKILL);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabase.getBotDetails(bot1.getBotId())).thenReturn(bot1);
+        when(this.fakeDatabase.getBotDetails(bot2.getBotId())).thenReturn(bot2);
+        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Arrays.asList(bot1, bot2));
+        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
+        final Response response = target(BOTS_BASEPATH)
+                .queryParam("bot_list", bot1.getBotId(), bot2.getBotId())
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateBotList_devId_invalid() throws Database.DatabaseException {
+        final Response response = target(BOTS_BASEPATH)
+                .queryParam("bot_list", 1)
+                .request()
+                .headers(noDevIdHeaders)
+                .post(Entity.text(""));
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 

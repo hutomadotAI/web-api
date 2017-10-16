@@ -298,6 +298,35 @@ public class AIEndpoint {
     }
 
     /**
+     * Updates the list of the bots the AI is linked to
+     * @param requestContext the request context
+     * @return the response
+     */
+    @Path("{aiid}/bots")
+    @POST
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.AIID, APIParameter.BotIdList})
+    @Produces(MediaType.APPLICATION_JSON)
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = ""),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error.")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token.")
+    })
+    public Response updateLinkedBots(
+            @Context ContainerRequestContext requestContext
+    ) {
+        ApiResult result = this.aiLogic.updateLinkedBots(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getBotIdList(requestContext)
+        );
+        return result.getResponse(this.serializer).build();
+    }
+
+    /**
      * Get the data for the linked bot, including configuration
      * @param requestContext
      * @param botId

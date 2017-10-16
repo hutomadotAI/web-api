@@ -285,6 +285,15 @@ public class Validate {
         return validateInteger(paramName, param);
     }
 
+    List<Integer> validateIntegerList(final String paramName, final List<String> params)
+            throws ParameterValidationException {
+        List<Integer> list = new ArrayList<>();
+        for (String param: params) {
+            list.add(validateInteger(paramName, param));
+        }
+        return list;
+    }
+
     /***
      * Validates a floating point number
      * @param paramName parameter name used for exception

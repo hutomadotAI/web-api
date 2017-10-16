@@ -49,6 +49,7 @@ public class ParameterFilter extends Validate {
     protected static final String ANALYTICS_RESPONSE_FORMAT = "format";
     protected static final String DEFAULT_CHAT_RESPONSES = "default_chat_responses";
     protected static final String PUBLISHING_TYPE = "publishing_type";
+    protected static final String BOT_ID_LIST = "bot_list";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -157,6 +158,11 @@ public class ParameterFilter extends Validate {
 
     public static AiBot.PublishingType getBotPublishingType(final ContainerRequestContext requestContext) {
         return (AiBot.PublishingType) requestContext.getProperty(APIParameter.PublishingType.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Integer> getBotIdList(final ContainerRequestContext requestContext) {
+        return (List<Integer>) requestContext.getProperty(APIParameter.BotIdList.toString());
     }
 
     /***
