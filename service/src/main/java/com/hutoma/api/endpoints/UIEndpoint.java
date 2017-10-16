@@ -3,6 +3,7 @@ package com.hutoma.api.endpoints;
 import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItem;
@@ -15,8 +16,6 @@ import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -52,19 +51,6 @@ public class UIEndpoint {
         this.config = config;
     }
 
-    private static List<String> getListFromMultipeValuedParam(final List<String> values) {
-        // JAX-RS doesnt's support params with multiple values comma separated
-        List<String> list = new ArrayList<>();
-        if (values != null && !values.isEmpty()) {
-            values.forEach(x -> {
-                if (!x.isEmpty()) {
-                    list.addAll(Arrays.asList(x.split(",")));
-                }
-            });
-        }
-        return list;
-    }
-
     @GET
     @Path("botstore")
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,7 +79,7 @@ public class UIEndpoint {
                 AuthFilter.getDevIdFromHeader(requestContext, this.config),
                 startFrom,
                 pageSize,
-                getListFromMultipeValuedParam(filters),
+                Tools.getListFromMultipeValuedParam(filters),
                 orderField,
                 orderDirection);
         return result.getResponse(this.serializer).build();

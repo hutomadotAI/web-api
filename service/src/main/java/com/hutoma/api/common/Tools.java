@@ -6,6 +6,9 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -64,5 +67,18 @@ public class Tools {
 
     public void threadSleep(long milliseconds) throws InterruptedException {
         Thread.sleep(milliseconds);
+    }
+
+    public static List<String> getListFromMultipeValuedParam(final List<String> values) {
+        // JAX-RS doesnt's support params with multiple values comma separated
+        List<String> list = new ArrayList<>();
+        if (values != null && !values.isEmpty()) {
+            values.forEach(x -> {
+                if (!x.isEmpty()) {
+                    list.addAll(Arrays.asList(x.split(",")));
+                }
+            });
+        }
+        return list;
     }
 }

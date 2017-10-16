@@ -1,5 +1,6 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.logic.TrainingLogic;
 
@@ -288,7 +289,8 @@ public class Validate {
     List<Integer> validateIntegerList(final String paramName, final List<String> params)
             throws ParameterValidationException {
         List<Integer> list = new ArrayList<>();
-        for (String param: params) {
+        List<String> paramsList = Tools.getListFromMultipeValuedParam(params);
+        for (String param: paramsList) {
             list.add(validateInteger(paramName, param));
         }
         return list;
