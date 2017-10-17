@@ -158,3 +158,6 @@ BEGIN
 
   END;;
 DELIMITER ;
+
+
+CREATE INDEX `idx_ai_status_training_status` ON `ai_status` (`training_status`);

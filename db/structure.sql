@@ -112,6 +112,7 @@ CREATE TABLE `ai_status` (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`server_type`,`aiid`),
   KEY `fk_aiid` (`aiid`),
+  KEY `idx_ai_status_training_status` (`training_status`),
   CONSTRAINT `fk_aiid` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
