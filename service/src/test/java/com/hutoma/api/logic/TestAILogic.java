@@ -379,6 +379,14 @@ public class TestAILogic {
     }
 
     @Test
+    public void testLinkBotToAi_AI_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
     public void testLinkBotToAi_AI_readonly() throws Database.DatabaseException {
         setupAiReadonlyMode(this.fakeDatabase);
         when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
@@ -493,6 +501,13 @@ public class TestAILogic {
     }
 
     @Test
+    public void testUnlinkBotFromAi_AI_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID_UUID, AIID, BOTID);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
     public void testUnlinkBotFromAi_AI_readonly() throws Database.DatabaseException {
         setupAiReadonlyMode(this.fakeDatabase);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID_UUID, AIID, BOTID);
@@ -576,6 +591,14 @@ public class TestAILogic {
     }
 
     @Test
+    public void testSetBotConfig_invalidVersion() throws Database.DatabaseException {
+        AiBotConfig config = this.generateAiBotConfig();
+        config.setVersion(9999);
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testSetBotConfig_badAiLookup() throws Database.DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(false);
         AiBotConfig config = this.generateAiBotConfig();
@@ -629,9 +652,38 @@ public class TestAILogic {
     }
 
     @Test
-    public void testSetBotConfig_AI_readonly() throws Database.DatabaseException {
-        setupAiReadonlyMode(this.fakeDatabase);
+    public void testSetBotConfig_failureToSaveToDb() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getIsBotLinkedToAi(any(), any(), anyInt())).thenReturn(generateLinkedBotIds());
+        when(this.fakeDatabase.setAiBotConfig(any(), any(), anyInt(), any(), any())).thenReturn(false);
+        when(this.fakeDatabase.getBotConfigDefinition(any(), any(), any())).thenReturn(this.generateAiBotConfigDefinition());
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_DB_exception() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenThrow(Database.DatabaseException.class);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_AI_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        AiBotConfig config = this.generateAiBotConfig();
+        ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_AI_readonly() throws Database.DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        setupAiReadonlyMode(this.fakeDatabase);
         AiBotConfig config = this.generateAiBotConfig();
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -649,6 +701,14 @@ public class TestAILogic {
     }
 
     @Test
+    public void testSetAiBotConfiguration_invalidConfig() throws Database.DatabaseException {
+        AiBotConfig config = new AiBotConfig(new HashMap<String, String>(){{put("a", "b");}});
+        AiBotConfigWithDefinition def = new AiBotConfigWithDefinition(config, null);
+        ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testSetAiBotConfiguration_success() throws Database.DatabaseException {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
@@ -661,11 +721,27 @@ public class TestAILogic {
     }
 
     @Test
+    public void testSetAiBotConfiguration_AI_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        AiBotConfigWithDefinition def = this.generateAiBotConfigWithDefinition();
+        ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
     public void testSetAiBotConfiguration_AI_readonly() throws Database.DatabaseException {
         setupAiReadonlyMode(this.fakeDatabase);
         AiBotConfigWithDefinition def = this.generateAiBotConfigWithDefinition();
         ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetAiBotConfiguration_DB_exception() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenThrow(Database.DatabaseException.class);
+        AiBotConfigWithDefinition def = this.generateAiBotConfigWithDefinition();
+        ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
@@ -681,6 +757,13 @@ public class TestAILogic {
         when(this.fakeDatabase.getLinkedBotData(any(), any(), anyInt(), any())).thenReturn(linkedData);
         ApiResult result = this.aiLogic.getLinkedBotData(DEVID_UUID, AIID, 1);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetLinkedBotData_DB_exception() throws Database.DatabaseException {
+        when(this.fakeDatabase.getLinkedBotData(any(), any(), anyInt(), any())).thenThrow(Database.DatabaseException.class);
+        ApiResult result = this.aiLogic.getLinkedBotData(DEVID_UUID, AIID, 1);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
@@ -763,6 +846,14 @@ public class TestAILogic {
     public void testUpdateLinkedBots_duplicatedInList() throws Database.DatabaseException {
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 2, 3, 2));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        verify(this.databaseTransaction, never()).commit();
+    }
+
+    @Test
+    public void testUpdateLinkedBots_AI_notFound() throws Database.DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
+        ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 2));
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
         verify(this.databaseTransaction, never()).commit();
     }
 

@@ -208,6 +208,11 @@ public class AILogic {
         AiBotConfigDefinition definition = aiBotConfigWithDefinition.getDefinitions();
         try {
             ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiBotConfigDescription - AI not found",
+                        devIdString, logMap);
+                return ApiError.getNotFound();
+            }
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiBotConfigDescription - Bot is RO", devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
@@ -247,6 +252,10 @@ public class AILogic {
             }
 
             ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - AI not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - Bot is RO", devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
@@ -414,6 +423,10 @@ public class AILogic {
                 }
             }
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - AI not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - AI is RO", devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
@@ -462,6 +475,10 @@ public class AILogic {
 
             // Check if this AI can be updated
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "updateLinkedBots - AI not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "updateLinkedBots - AI is RO", devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
@@ -526,6 +543,10 @@ public class AILogic {
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - AI not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - AI is RO", devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
