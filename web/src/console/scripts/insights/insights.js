@@ -28,7 +28,7 @@ function requestInsightsSessions(aiid, fromDateIso, toDateIso, intervalString) {
                 dataType: 'sessions'
             },
             verb: 'POST',
-            onGenericError: function () { showError(); },
+            onGenericError: function (statusMessage) { showError(); },
             onOK: function (response) {
                 drawChart(response, 'Sessions', fromDateIso, toDateIso, 'chartSessions',
                     'chartSessionsLoading', 'Chat sessions per day ' + intervalString, '#ffa31a');
@@ -79,7 +79,7 @@ function requestInsightsInteractions(aiid, fromDateIso, toDateIso, intervalStrin
                 dataType: 'interactions'
             },
             verb: 'POST',
-            onGenericError: function () { showError(); },
+            onGenericError: function (statusMessage) { showError(); },
             onOK: function (response) {
                 drawChart(response, 'Interactions', fromDateIso, toDateIso, 'chartInteractions',
                     'chartInteractionsLoading', 'Chat interactions per day ' + intervalString, '#4d94ff');

@@ -25,7 +25,6 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +42,7 @@ import javax.inject.Provider;
  */
 public class AILogic {
 
-    static final String BOT_RO_MESSAGE = "Bot is read-only";
+    static final String BOT_RO_MESSAGE = "Bot is read-only.";
     private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String LOGFROM = "ailogic";
     private final Config config;
@@ -404,7 +403,7 @@ public class AILogic {
             AiBot botDetails = this.database.getBotDetails(botId);
             if (botDetails == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devIdString, logMap);
-                return ApiError.getBadRequest(String.format("Bot %d not found", botId));
+                return ApiError.getBadRequest(String.format("Bot %d not found.", botId));
             }
             // If bot is now owned (purchased or built by the dev) then it can't be linked
             if (!botDetails.getDevId().equals(devId)) {
@@ -417,7 +416,7 @@ public class AILogic {
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - AI is RO", devIdString, logMap);
-                return ApiError.getBadRequest("Bot is read-only");
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
             if (botDetails.getPublishingType() != AiBot.PublishingType.SKILL) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot is not a skill", devIdString, logMap);
@@ -432,7 +431,7 @@ public class AILogic {
             }
             if (linked.stream().anyMatch(b -> b.getBotId() == botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot already linked to AI", devIdString, logMap);
-                return ApiError.getBadRequest(String.format("Bot %d already linked to AI", botId));
+                return ApiError.getBadRequest(String.format("Bot %d already linked to AI.", botId));
             }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.database.linkBotToAi(devId, aiid, botId, transaction)) {
@@ -440,7 +439,7 @@ public class AILogic {
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devIdString, logMap);
-                return ApiError.getNotFound("Bot not found");
+                return ApiError.getNotFound("Bot not found.");
             }
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "LinkBotToAI", devIdString, ex);
@@ -458,14 +457,14 @@ public class AILogic {
             Set<Integer> botSet = new HashSet<>(botList);
             if (botSet.size() < botList.size()) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - repeated elements", devIdString, logMap);
-                return ApiError.getBadRequest("List of bots to link cannot have repeated elements");
+                return ApiError.getBadRequest("List of bots to link cannot have repeated elements.");
             }
 
             // Check if this AI can be updated
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "updateLinkedBots - AI is RO", devIdString, logMap);
-                return ApiError.getBadRequest("Bot is read-only");
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
             // Determine which bots to link and unlink
@@ -482,7 +481,7 @@ public class AILogic {
                         "updateLinkedBots - trying to exceed the limit of linked bots", devIdString,
                         logMap.put("Count", finalNumLinkedBots).put("Max", this.config.getMaxLinkedBotsPerAi()));
                 return ApiError.getBadRequest(String.format(
-                        "Requested links (%d) would go over the the limit of %d linked bots",
+                        "Requested links (%d) would go over the the limit of %d linked bots.",
                         finalNumLinkedBots,
                         this.config.getMaxLinkedBotsPerAi()));
             }
@@ -529,7 +528,7 @@ public class AILogic {
             ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - AI is RO", devIdString, logMap);
-                return ApiError.getBadRequest("Bot is read-only");
+                return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
             if (this.database.unlinkBotFromAi(devId, aiid, botId, transaction)) {
@@ -539,7 +538,7 @@ public class AILogic {
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - not found or not linked",
                         devIdString, logMap);
-                return ApiError.getNotFound("Bot not found, or not currently linked");
+                return ApiError.getNotFound("Bot not found, or not currently linked.");
             }
         } catch (Database.DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UnlinkBotFromAI", devIdString, ex);

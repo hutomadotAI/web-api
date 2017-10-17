@@ -158,8 +158,9 @@ function saveIntentToApi(intentName, expressions, responses, variables, webhook)
             webhook: webhook
         },
         verb: 'PUT',
-        onGenericError: function () {
-            msgAlertIntentElement(ALERT.DANGER.value, "There was a problem saving the intent.");
+        onGenericError: function (statusMessage) {
+            msgAlertIntentElement(ALERT.DANGER.value, statusMessage === null
+                ? "There was a problem saving the intent." : statusMessage);
         },
         onOK: function(response) {
             msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');

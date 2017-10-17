@@ -69,8 +69,9 @@ function deleteIntent(elem) {
     var request = {
         url: './proxy/intentProxy.php?intent=' + intents[elem],
         verb: 'DELETE',
-        onGenericError: function() {
-            msgAlertIntentOp(ALERT.DANGER.value, "There was a problem deleting the intent.");
+        onGenericError: function(statusMessage) {
+            msgAlertIntentOp(ALERT.DANGER.value, statusMessage === null
+                ? "There was a problem deleting the intent." : statusMessage);
         },
         onOK: function(response) {
             msgAlertIntentOp(ALERT.SUCCESS.value, 'The intent was deleted.');

@@ -41,13 +41,17 @@ function uploadTextFile() {
                     startPollForStatus();
                     break;
                 case 400:
+                    var message = JSONdata['status']['info'];
                     if (haNoContentError(JSONdata['status']['additionalInfo'])) {
                         $("#containerMsgAlertUploadFile").attr('class', 'alert alert-dismissable flat alert-danger');
                         $("#iconAlertUploadFile").attr('class', 'icon fa fa-warning');
-                        document.getElementById('msgAlertUploadFile').innerHTML = 'There was a problem reading your file. Please check that the content follows our structure. You can load a sample file  <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor=\'pointer\'">here</a>';
+                        document.getElementById('msgAlertUploadFile').innerHTML = message === null
+                            ? 'There was a problem reading your file. Please check that the content follows our structure. ' +
+                                'You can load a sample file  <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor=\'pointer\'">here</a>'
+                            : message;
                     }
                     else
-                        msgAlertUploadFile(ALERT.DANGER.value, 'Something has gone wrong. File not uploaded.');
+                        msgAlertUploadFile(ALERT.DANGER.value, message === null ? 'Something has gone wrong. File not uploaded.' : message);
 
                     setUICurrentStatus(UI_STATE.ERROR.value);
                     disableButtonUploadTextFile(false);

@@ -470,6 +470,9 @@ function getUploadWarnings(info) {
 }
 
 function haNoContentError(info) {
+    if (typeof info === 'undefined' || info === null) {
+        return false;
+    }
     for (var i = 0; i < info.length; i++) {
         if (info[i]['key'] === 'UPLOAD_NO_CONTENT') {
             return true;

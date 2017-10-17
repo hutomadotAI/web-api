@@ -118,7 +118,7 @@ function saveEntity() {
         onOK: function(response) {
             msgAlertEntityValues(ALERT.PRIMARY.value, 'Entity saved.');
         },
-        onGenericError: function() {
+        onGenericError: function(statusMessage) {
             msgAlertEntityValues(ALERT.DANGER.value, 'Entity not saved.');
         },
         onShowError: function(message) {

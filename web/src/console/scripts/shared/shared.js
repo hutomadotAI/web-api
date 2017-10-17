@@ -260,9 +260,10 @@ function commonAjaxApiRequest(request) {
             } catch(error) {
             }
             if (parsedResponse === null) {
-                request.onGenericError();
+                request.onGenericError(null);
             } else {
                 var statusCode = parsedResponse['status']['code'];
+                var statusMessage = parsedResponse['status']['info'];
                 switch (statusCode) {
                     case 200:
                         request.onOK(parsedResponse);
@@ -273,13 +274,13 @@ function commonAjaxApiRequest(request) {
                         }
                         break;
                     case 500:
-                        request.onGenericError();
+                        request.onGenericError(statusMessage);
                         break;
                     default:
                         if (request.hasOwnProperty('onShowError') && typeof request.onShowError() !== 'undefined') {
                             request.onShowError(parsedResponse['status']['info']);
                         } else {
-                            request.onGenericError();
+                            request.onGenericError(statusMessage);
                         }
                         break;
                 }
@@ -291,7 +292,7 @@ function commonAjaxApiRequest(request) {
             }
         },
         error: function () {
-            request.onGenericError();
+            request.onGenericError(null);
         }
     });
 }

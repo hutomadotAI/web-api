@@ -35,8 +35,11 @@ function updateAI() {
             default_chat_responses: document.getElementById('ai_default_response').value
         },
         verb: 'PUT',
-        onGenericError: function() {
-            msgAlertUpdateAI(ALERT.DANGER.value,'Whoops, something went wrong. Your changes weren\'t saved. Please retry');
+        onGenericError: function(statusMessage) {
+            var message = statusMessage === null
+                ? 'Whoops, something went wrong. Your changes weren\'t saved. Please retry'
+                : statusMessage;
+            msgAlertUpdateAI(ALERT.DANGER.value, message);
             activeGeneralButtons();
         },
         onOK: function(response) {
