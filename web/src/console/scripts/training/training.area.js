@@ -84,7 +84,7 @@ function initializeTrainingConsole(aiStatus) {
         case API_AI_STATE.QUEUED.value:
             var phaseOnePercentProgress = getErrorPercentProgress(aiStatus['phase_1_progress']);
             switch (true) {
-                case (phaseOnePercentProgress < 0.0001 ):
+                case (phaseOnePercentProgress < 0.0001):
                     phaseOneFlashing(true);
                     break;
                 case (phaseOnePercentProgress < 99.999):
@@ -115,7 +115,7 @@ function initializeTrainingConsole(aiStatus) {
             var deepLearningError = aiStatus['deep_learning_error'];
 
             switch (true) {
-                case (phaseOnePercentProgress < 0.0001 ):
+                case (phaseOnePercentProgress < 0.0001):
                     hideTrainingBar(true);
                     hideChart(true);
                     phaseOneFlashing(true);
@@ -138,8 +138,7 @@ function initializeTrainingConsole(aiStatus) {
                         hideChart(true);
 
                         showAlertMessage(UI_TRAINING_STATE.PHASE2_INIT.value);
-                    }
-                    else {
+                    } else {
                         phaseOneFlashing(false);
                         phaseOneStriped(false);
                         phaseOneMaxValue();
@@ -166,7 +165,7 @@ function initializeTrainingConsole(aiStatus) {
             createMessageWarningInfoAlert();
             showAlertMessage(aiStatus['ai_status']);
             break;
-        case API_AI_STATE.COMPLETED.value :
+        case API_AI_STATE.COMPLETED.value:
             hidePreTrainingBar(true);
             hideTrainingBar(true);
             hideChart(true);
@@ -215,7 +214,7 @@ function getUIStatusCall() {
         case (status == UI_STATE.PHASE2_QUEUE.value):
             var phaseOnePercentProgress = getP1Progress();
             switch (true) {
-                case (phaseOnePercentProgress < 0.0001 ):
+                case (phaseOnePercentProgress < 0.0001):
                     phaseOneFlashing(true);
                     phaseOneStriped(false);
                     break;
@@ -292,7 +291,7 @@ function getUIStatusCall() {
 function setStateResponse(aiStatus) {
     var status = aiStatus["ai_status"];
     switch (status) {
-        case  API_AI_STATE.UNDEFINED.value:
+        case API_AI_STATE.UNDEFINED.value:
             setUICurrentStatus(UI_STATE.LISTENING_MODE.value);
             break;
         case API_AI_STATE.QUEUED.value:
@@ -348,20 +347,20 @@ function trainingStartCall() {
         url: './proxy/trainingStart.php',
         type: 'GET',
         dataType: 'json',
-        processData: false,  // tell jQuery not to process the data
+        processData: false, // tell jQuery not to process the data
         contentType: "application/json; charset=utf-8",
-        success: function (response) {
+        success: function(response) {
             var JSONdata = response;
             var statusCode = JSONdata['status']['code'];
             //TODO temporary coded - code 400 returned when you upload file on existing file
-            if ((statusCode === 200 ) || (statusCode === 400 )) {
+            if ((statusCode === 200) || (statusCode === 400)) {
                 setUICurrentStatus(UI_STATE.PHASE1_INIT.value);
             } else {
                 msgAlertProgressBar(ALERT.DANGER.value, 'Training cannot start! Error code ' + statusCode + '!');
                 setUICurrentStatus(UI_STATE.ERROR.value);
             }
         },
-        error: function (xhr, ajaxOptions, thrownError) {
+        error: function(xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(UI_STATE.ERROR.value);
             msgAlertProgressBar(ALERT.DANGER.value, 'Unexpected error occurred, please re-upload the training file.');
@@ -373,9 +372,9 @@ function trainingStatusCall() {
     jQuery.ajax({
         url: './proxy/trainingStatusAI.php',
         type: 'GET',
-        processData: false,  // tell jQuery not to process the data
+        processData: false, // tell jQuery not to process the data
         contentType: "application/json; charset=utf-8",
-        success: function (response) {
+        success: function(response) {
             try {
                 var jsonData = JSON.parse(response);
                 if (jsonData['api_status']['code'] === 200) {
@@ -389,7 +388,7 @@ function trainingStatusCall() {
                 msgAlertProgressBar(ALERT.DANGER.value, 'Unable to query Bots training status.');
             }
         },
-        error: function (xhr, ajaxOptions, thrownError) {
+        error: function(xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(UI_STATE.ERROR.value);
             msgAlertProgressBar(ALERT.DANGER.value, 'Cannot contact server.');
@@ -693,8 +692,7 @@ function disableRestartBoxButton(state) {
         if (state) {
             document.getElementById('restart-button').setAttribute('onClick', '');
             document.getElementById('restart-button').setAttribute("disabled", "disabled");
-        }
-        else {
+        } else {
             document.getElementById('restart-button').setAttribute('onClick', 'trainingRestart()');
             document.getElementById('restart-button').setAttribute("disabled", "enabled");
         }
@@ -702,12 +700,12 @@ function disableRestartBoxButton(state) {
     }
 }
 
-$("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function () {
+$("#collapseVideoTutorialTraining").on('hidden.bs.collapse', function() {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
 });
 
-$(document).ready(function () {
+$(document).ready(function() {
     initializePretrainingMonitor(aiStatus);
     initializeTrainingMonitor(aiStatus);
     initializeAlertMessage(aiStatus);

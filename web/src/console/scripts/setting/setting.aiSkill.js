@@ -7,7 +7,7 @@ if (document.getElementById("btnAiSkillSave") !== null) {
 }
 
 
-$(function () {
+$(function() {
     if ((purchasedBots).length === 0) {
         msgAlertAiSkill(ALERT.WARNING.value, 'You don\'t appear to have created or purchased a bot, please begin training or purchase one in the <a href="./botstore.php">Botstore</a>');
         deactiveAiSkillButtons();
@@ -27,8 +27,7 @@ function getLinkTasks(userSkill, aiSkill) {
                     "active": '1'
                 });
             }
-        }
-        else {
+        } else {
             if (userSkill[i]['active'] === 'false') { //exists
                 //pushed to  unlink a bot
                 linkTasks.bots.push({
@@ -42,6 +41,26 @@ function getLinkTasks(userSkill, aiSkill) {
 
 }
 
+/**
+ * Create and send an Add Skill Event to the GTM
+ * @return {undefined}
+ */
+function createAddSkillEvent(eventname, name, aiid) {
+    if ('dataLayer' in window) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'skill',
+            eventAction: 'add',
+            eventLabel: eventname,
+            eventMetadata: {
+                timestamp: Date.now(),
+                aiid: aiid,
+                name: name
+            }
+        });
+    }
+}
+
 function updateAISkill() {
     deactiveAiSkillButtons();
 
@@ -49,7 +68,7 @@ function updateAISkill() {
     var tasks = getLinkTasks(userSkill, linkedBots);
     var jsonString = JSON.stringify(tasks['bots']);
 
-    if (jsonString.length <= 2) {   // character [] is empty request
+    if (jsonString.length <= 2) { // character [] is empty request
         msgAlertAiSkill(ALERT.WARNING.value, ' No update.');
         activeAiSkillButtons();
         return;
@@ -58,12 +77,23 @@ function updateAISkill() {
     $.ajax({
         url: './proxy/updateBotsLinked.php',
         type: 'POST',
-        data: {'aiSkill': jsonString},
-        success: function (response) {
+        data: { 'aiSkill': jsonString },
+        success: function(response) {
             var statusCode = JSON.parse(response);
 
             switch (statusCode['code']) {
                 case 200:
+                    // Send an event per aiid activated
+                    // If we're purchased a lot of bots this could be problematic.... 
+                    for (var i = 0; i < purchasedBots.length; i++) {
+                        purchasebot = JSON.parse(purchasedBots[i])
+                        for (var j = 0; j < tasks.bots.length; j++) {
+                            if (tasks.bots[j].active != '0' && parseInt(tasks.bots[j].botId) == purchasebot.botId) {
+                                createAddSkillEvent(purchasebot.aiid, user.email, purchasebot.name);
+                            }
+                        }
+                    }
+
                     msgAlertAiSkill(ALERT.PRIMARY.value, 'Your Bot has been updated with the selected skills. Go to the <a href=\'/console/trainingAI.php\'>training</a> page to test it.');
                     activeAiSkillButtons();
                     //TODO probably make difference to refresh data on redirection ( use POST not simple for messaging and cards BOT )
@@ -83,7 +113,7 @@ function updateAISkill() {
                     break;
             }
         },
-        error: function (xhr, ajaxOptions, thrownError) {
+        error: function(xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             msgAlertAiSkill(ALERT.DANGER.value, 'Whoops, something went wrong. Your changes weren\'t saved. Please retry');
             activeAiSkillButtons();

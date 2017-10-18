@@ -1,3 +1,23 @@
+/**
+ * Create and send an Upload Training Event to the GTM
+ * @return {undefined}
+ */
+function createUploadTrainingEvent(eventname, name, aiid) {
+    if ('dataLayer' in window) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'training',
+            eventAction: 'upload',
+            eventLabel: eventname,
+            eventMetadata: {
+                timestamp: Date.now(),
+                aiid: aiid,
+                name: name
+            }
+        });
+    }
+}
+
 function uploadTextFile() {
     var maximumFileSize = 512 * 1024; // 512k
 
@@ -19,12 +39,14 @@ function uploadTextFile() {
         url: './proxy/upload.php',
         type: 'POST',
         data: formData,
-        processData: false,  // tell jQuery not to process the data
-        contentType: false,  // tell jQuery not to set contentType
-        success: function (response) {
+        processData: false, // tell jQuery not to process the data
+        contentType: false, // tell jQuery not to set contentType
+        success: function(response) {
             var JSONdata = JSON.parse(response);
             switch (JSONdata['status']['code']) {
                 case 200:
+                    // We do not know aiid at this point - that's why we use "UNKNOWN"
+                    createUploadTrainingEvent(AI + "_" + user.email, user.email, "UNKNOWN");
                     var uploadWarnings = null;
                     var additionalInfo = JSONdata['status']['additionalInfo'];
 
@@ -45,12 +67,11 @@ function uploadTextFile() {
                     if (haNoContentError(JSONdata['status']['additionalInfo'])) {
                         $("#containerMsgAlertUploadFile").attr('class', 'alert alert-dismissable flat alert-danger');
                         $("#iconAlertUploadFile").attr('class', 'icon fa fa-warning');
-                        document.getElementById('msgAlertUploadFile').innerHTML = message === null
-                            ? 'There was a problem reading your file. Please check that the content follows our structure. ' +
-                                'You can load a sample file  <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor=\'pointer\'">here</a>'
-                            : message;
-                    }
-                    else
+                        document.getElementById('msgAlertUploadFile').innerHTML = message === null ?
+                            'There was a problem reading your file. Please check that the content follows our structure. ' +
+                            'You can load a sample file  <a data-toggle="modal" data-target="#sampleTrainingFile" onMouseOver="this.style.cursor=\'pointer\'">here</a>' :
+                            message;
+                    } else
                         msgAlertUploadFile(ALERT.DANGER.value, message === null ? 'Something has gone wrong. File not uploaded.' : message);
 
                     setUICurrentStatus(UI_STATE.ERROR.value);
@@ -65,7 +86,7 @@ function uploadTextFile() {
                     break;
             }
         },
-        error: function (xhr, ajaxOptions, thrownError) {
+        error: function(xhr, ajaxOptions, thrownError) {
             var JSONdata = JSON.stringify(xhr.responseText);
             msgAlertUploadFile(ALERT.DANGER.value, 'Unexpected error occurred, please re-upload the training file.');
             disableButtonUploadTextFile(false);
