@@ -97,7 +97,7 @@ if(isset($_POST['action_login'])){
         <div class="login-box-body" style="border: 1px solid #d2d6de; background-color: #202020;">
             <p class="login-box-msg"><b>sign in and start creating awesomeness</b></p>
 
-            <form action="login.php" method="POST">
+            <form action="login.php?login=1" method="POST">
                 <?php
                 if (isset($msg)) {
                     echo "$msg[1]";

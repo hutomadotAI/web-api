@@ -27,7 +27,7 @@ include __DIR__ . "/include/page_menu.php";
             <!-- ================ USER ACTION ================= -->
             <ul class="sidebar-menu disabled" style="position: absolute; bottom:0; width: 230px; min-height: 135px;">
                 <li class="header" style="text-align: center;">MY ACCOUNT</li>
-                <li><a href="./logout.php"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
+                <li><a href="./logout.php?logout=1"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>
             </ul>
         </section>
     </aside>

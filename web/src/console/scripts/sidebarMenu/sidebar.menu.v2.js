@@ -1,17 +1,17 @@
-var MENU = MENU || (function () {
-        return {
-            init: function (Args) {
-                var aiName = Args[0];
-                var labelMenuClicked = Args[1];
-                var levelTreeMenuClicked = Args[2];
-                var blockHrefLinkMenuClicked = Args[3];
-                var isMenuLimited = Args[4];
-                
-                buildConsoleMenu(aiName, labelMenuClicked, levelTreeMenuClicked, blockHrefLinkMenuClicked, isMenuLimited );
-                buildAccountMenu();
-            }
-        };
-    }());
+var MENU = MENU || (function() {
+    return {
+        init: function(Args) {
+            var aiName = Args[0];
+            var labelMenuClicked = Args[1];
+            var levelTreeMenuClicked = Args[2];
+            var blockHrefLinkMenuClicked = Args[3];
+            var isMenuLimited = Args[4];
+
+            buildConsoleMenu(aiName, labelMenuClicked, levelTreeMenuClicked, blockHrefLinkMenuClicked, isMenuLimited);
+            buildAccountMenu();
+        }
+    };
+}());
 
 function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     const MAX_LENGTH_AINAME_TEXT_VISIBLE = 18;
@@ -24,7 +24,7 @@ function buildConsoleMenu(ai_name, label_menu, level, block, limitedMenu) {
     if (label_menu === "") {
         label_menu = "botstore";
     }
-    
+
     wHTML += ('<li class="header unselectable" style="text-align: center;color:#8A8A8A;">CONSOLE</li>');
     wHTML += ('<li id="menu_home"><a href="./home.php"><i class="fa fa-home text-light-blue" id="level0"> </i><span>Home</span></a></li>');
 
@@ -85,21 +85,21 @@ function buildAccountMenu() {
 
     wHTML += ('<ul class="sidebar-menu" style=" background: #2e3032; position: absolute; bottom:0; width: 230px; min-height: 85px;">');
     wHTML += ('<li class="header" style="color:#8A8A8A;text-align: center;"><b>MY ACCOUNT</b></li>');
-    wHTML += ('<li id="menu_logout"><a href="./logout.php" id="link_logout"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>');
+    wHTML += ('<li id="menu_logout"><a href="./logout.php?logout=1" id="link_logout"><i class="fa fa-power-off text-red"></i> <span>LOGOUT</span></a></li>');
     wHTML += ('</ul>');
 
     newNode.innerHTML = wHTML;
     document.getElementById('sidebarmenu').appendChild(newNode);
 }
 
-function buildCategoryURIparameter(category){
-    return '?category='+ adjustURIEscapingCategoryValue(category);
+function buildCategoryURIparameter(category) {
+    return '?category=' + adjustURIEscapingCategoryValue(category);
 }
 
-function adjustURIEscapingCategoryValue(value){
+function adjustURIEscapingCategoryValue(value) {
     return value.replace('&', '%26').split(' ').join('%20');
 }
 
-function removeSpecialCharacters(str){
+function removeSpecialCharacters(str) {
     return str.replace(/[&\/\\#,+()$~%.'":*?<>{}\s+]/g, '');
 }
