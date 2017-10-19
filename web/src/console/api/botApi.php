@@ -106,6 +106,7 @@ class botApi extends apiBase
                 'sample' => $bot['sample'],
                 'version' => $bot['version'],
                 'videoLink' =>  $bot['videoLink'],
+                'publishing_type' => 1, // Skill=1, Template=2. Should go on an enum but this code is throwaway anyway
             );
 
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
