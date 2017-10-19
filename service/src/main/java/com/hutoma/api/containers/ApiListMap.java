@@ -13,4 +13,8 @@ public class ApiListMap extends ApiResult {
     public ApiListMap(final List<Map<String, Object>> objects) {
         this.objects = objects;
     }
+
+    public List<Map<String, Object>> getObjects() {
+        return this.objects;
+    }
 }

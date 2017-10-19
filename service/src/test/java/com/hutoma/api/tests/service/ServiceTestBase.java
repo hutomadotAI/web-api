@@ -23,11 +23,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
+import org.glassfish.grizzly.utils.Exceptions;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.spi.ExtendedExceptionMapper;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.mockito.Mock;
@@ -38,9 +41,11 @@ import java.util.Collections;
 import java.util.UUID;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -289,10 +294,34 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         // Register the multipart handler for supporting uploads
         rc.register(MultiPartFeature.class);
+
+        // Log request and response payload to make debugging easier on errors
+        enable(TestProperties.LOG_TRAFFIC);
+        enable(TestProperties.DUMP_ENTITY);
+        rc.property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL_SERVER, "WARNING");
+
+        rc.register(DebugExceptionMapper.class);
+
         return rc;
     }
 
     protected String getTestsBaseLocation() {
         return this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+    }
+
+    @Provider
+    public static class DebugExceptionMapper implements ExtendedExceptionMapper<Throwable> {
+
+        @Override
+        public boolean isMappable(Throwable throwable) {
+            // ignore these guys and let jersey handle them
+            return !(throwable instanceof WebApplicationException);
+        }
+
+        @Override
+        public Response toResponse(Throwable throwable) {
+            return Response.status(500).entity(Exceptions.getStackTraceAsString(throwable)).type("text/plain")
+                    .build();
+        }
     }
 }

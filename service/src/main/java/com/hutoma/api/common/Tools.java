@@ -6,8 +6,12 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,5 +84,49 @@ public class Tools {
             });
         }
         return list;
+    }
+
+    public static boolean isNumber(final String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+        int sz = text.length();
+        for (int i = 0; i < sz; ++i) {
+            char theChar = text.charAt(i);
+            if (!Character.isDigit(theChar) && theChar != '.') {
+                if (theChar == '-' && i == 0) { // allow negative numbers
+                    continue;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String getCsvFriendlyField(final String text) {
+        final String textQualifier = "\"";
+        final String textQualifierEscaped = "\"\"";
+
+        // Check if it's a number
+        if (isNumber(text)) {
+            return text;
+        }
+
+        // Check if it's a date
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        df.setLenient(false);
+        try {
+            Date date = df.parse(text);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyy/MM/dd HH:mm:ss");
+            return sdf.format(date);
+        } catch (ParseException e) {
+            // nothing to do, it's just not a date
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(textQualifier);
+        sb.append(text.replace(textQualifier, textQualifierEscaped));
+        sb.append(textQualifier);
+        return sb.toString();
     }
 }

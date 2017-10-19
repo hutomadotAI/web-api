@@ -41,4 +41,18 @@ public class TestTools {
     public void testCreateHashFromUuid_different() {
         Assert.assertNotEquals(Tools.getHashedDigestFromUuid(UUID.randomUUID()), Tools.getHashedDigestFromUuid(UUID.randomUUID()));
     }
+
+    @Test
+    public void testAnalytics_isNumber() {
+        Assert.assertTrue(Tools.isNumber("1"));
+        Assert.assertTrue(Tools.isNumber("123456"));
+        Assert.assertTrue(Tools.isNumber("-1"));
+        Assert.assertTrue(Tools.isNumber("0"));
+        Assert.assertTrue(Tools.isNumber("0.000001"));
+        Assert.assertFalse(Tools.isNumber(""));
+        Assert.assertFalse(Tools.isNumber(null));
+        Assert.assertFalse(Tools.isNumber(" "));
+        Assert.assertFalse(Tools.isNumber("A"));
+        Assert.assertFalse(Tools.isNumber("123B"));
+    }
 }
