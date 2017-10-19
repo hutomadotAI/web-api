@@ -406,7 +406,10 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      * @param botStructure The BotStructure.
      * @throws ParameterValidationException
      */
-    void validateBotStructure(BotStructure botStructure) throws ParameterValidationException {;
+    void validateBotStructure(BotStructure botStructure) throws ParameterValidationException {
+        if (botStructure.getLanguage().equals("en_US")) {
+            botStructure.setLanguage("en-US");
+        }
         this.validateLocale(LOCALE, botStructure.getLanguage());
         this.validateAiName(AINAME, botStructure.getName());
         this.validateFieldLength(50, AINAME, botStructure.getName());

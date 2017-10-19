@@ -59,6 +59,14 @@ public class TestPostFilterValidation {
         // If the test doesn't throw an exception, it's valid.
     }
 
+    @Test
+    public void validatV1BotStructureAllowsEN_US() throws Validate.ParameterValidationException {
+        BotStructure botStructure = generateValidV1BotStructure();
+        botStructure.setLanguage("en_US");
+        postFilter.validateBotStructure(botStructure);
+        // If the test doesn't throw an exception it's valid.
+    }
+
     @Test(expected = Validate.ParameterValidationException.class)
     public void validateV1BotStructureInvalidTimeZone() throws Validate.ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
