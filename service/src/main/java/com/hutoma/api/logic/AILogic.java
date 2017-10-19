@@ -23,6 +23,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -401,11 +403,11 @@ public class AILogic {
     }
 
     public ApiResult linkBotToAI(final UUID devId, final UUID aiid, final int botId) {
-        return this.linkBotToAI(devId, aiid, botId, null);
+        return this.linkBotToAI(devId, aiid, botId, null, false);
     }
 
     private ApiResult linkBotToAI(final UUID devId, final UUID aiid, final int botId,
-                                 final DatabaseTransaction transaction) {
+                                 final DatabaseTransaction transaction, final boolean skipValidation) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
@@ -436,7 +438,7 @@ public class AILogic {
                 return ApiError.getBadRequest(String.format("Bot %d not a Skill", botId));
             }
             List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
-            if (linked.size() >= this.config.getMaxLinkedBotsPerAi()) {
+            if (!skipValidation && linked.size() >= this.config.getMaxLinkedBotsPerAi()) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         "LinkBotToAI - reached maximum allowed number of bots to be linked", devIdString, logMap);
                 return ApiError.getBadRequest(String.format("Maximum number of linked bots reached: %d",
@@ -493,10 +495,14 @@ public class AILogic {
             botsToAdd.removeAll(botIdsLinked);
 
             int finalNumLinkedBots = botsLinked.size() - botsToRemove.size() + botsToAdd.size();
-            if (finalNumLinkedBots >= this.config.getMaxLinkedBotsPerAi()) {
+            if (finalNumLinkedBots > this.config.getMaxLinkedBotsPerAi()) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         "updateLinkedBots - trying to exceed the limit of linked bots", devIdString,
-                        logMap.put("Count", finalNumLinkedBots).put("Max", this.config.getMaxLinkedBotsPerAi()));
+                        logMap.put("Count", finalNumLinkedBots).put("Max", this.config.getMaxLinkedBotsPerAi())
+                                .put("Already linked", StringUtils.join(botIdsLinked, ","))
+                                .put("Would add", StringUtils.join(botsToAdd, ","))
+                                .put("Would remove", StringUtils.join(
+                                        botsToRemove.stream().map(AiBot::getBotId).collect(Collectors.toList()), ",")));
                 return ApiError.getBadRequest(String.format(
                         "Requested links (%d) would go over the the limit of %d linked bots.",
                         finalNumLinkedBots,
@@ -514,7 +520,7 @@ public class AILogic {
                 }
 
                 for (Integer botId : botsToAdd) {
-                    ApiResult result = this.linkBotToAI(devId, aiid, botId, transaction);
+                    ApiResult result = this.linkBotToAI(devId, aiid, botId, transaction, true);
                     if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
                         transaction.rollback();
                         return result;

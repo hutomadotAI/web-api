@@ -472,13 +472,25 @@ public class TestAILogic {
 
     @Test
     public void testLinkBotToAi_maximumBotsReached() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getSampleAI());
-        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
-        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
-        // Limit the maximum number of bots to 1, so that we're already at the limit
-        when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(1);
-        ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        final int maxLinkedBots = 5;
+        List<AiBot> bots = generateBots(maxLinkedBots);
+        AiBot botToLink = generateSkillToLink(99);
+        verifyCannotLinkMoreBots(bots, botToLink, maxLinkedBots);
+    }
+
+    @Test
+    public void testLinkBotToAi_maximumBotsReached_resetAfterUnlinking() throws Database.DatabaseException {
+        final int maxLinkedBots = 5;
+        List<AiBot> bots = generateBots(maxLinkedBots);
+        AiBot botToLink = generateSkillToLink(99);
+        verifyCannotLinkMoreBots(bots, botToLink, maxLinkedBots);
+
+        // now "unlink" a bot
+        bots.remove(0);
+        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(bots);
+        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
+        ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, botToLink.getBotId());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
@@ -932,6 +944,35 @@ public class TestAILogic {
                 .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(1).getBotId(), this.databaseTransaction);
     }
 
+    @Test
+    public void testUpdateLinkedBots_removAllAddAllNew() throws Database.DatabaseException {
+        List<AiBot> ownedBots = generateBotsWithIds(Arrays.asList(1, 2, 3, 4, 5));
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getSampleAI());
+        when(this.fakeDatabase.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabase.getBotsLinkedToAi(DEVID_UUID, AIID)).thenReturn(ownedBots); // For unlinking only
+        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
+
+        List<Integer> newBotIds = Arrays.asList(10, 11, 22, 13, 14);
+        List<AiBot> newBots = generateBotsWithIds(newBotIds);
+        for (int i = 0; i < newBotIds.size(); i++) {
+            newBots.get(i).setPublishingType(AiBot.PublishingType.SKILL);
+            when(this.fakeDatabase.getBotDetails(newBotIds.get(i))).thenReturn(newBots.get(i));
+        }
+
+        ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, newBotIds);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.databaseTransaction).commit();
+        for (int i = 0; i < ownedBots.size(); i++) {
+            verify(this.fakeDatabase, times(1))
+                    .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(0).getBotId(), this.databaseTransaction);
+        }
+        for (int i = 0; i < newBotIds.size(); i++) {
+            verify(this.fakeDatabase, times(1))
+                    .linkBotToAi(DEVID_UUID, AIID, newBotIds.get(0), this.databaseTransaction);
+        }
+    }
+
     private List<AiBot> generateBotsWithIds(final List<Integer> idList) {
         List<AiBot> bots = new ArrayList<>();
         for (Integer id: idList) {
@@ -973,6 +1014,35 @@ public class TestAILogic {
         ArrayList<ApiAi> returnList = new ArrayList<>();
         returnList.add(TestDataHelper.getSampleAI());
         return returnList;
+    }
+
+    private AiBot generateSkillToLink(final int botId) {
+        AiBot botToLink = new AiBot(SAMPLEBOT);
+        botToLink.setBotId(botId);
+        botToLink.setPublishingType(AiBot.PublishingType.SKILL);
+        return botToLink;
+    }
+
+    private List<AiBot> generateBots(final int numBots) throws Database.DatabaseException {
+        List<AiBot> bots = new ArrayList<>();
+        for (int i = 1; i <= numBots; i++) {
+            AiBot bot = new AiBot(SAMPLEBOT);
+            bot.setBotId(i);
+            bots.add(bot);
+            when(this.fakeDatabase.getBotDetails(bot.getBotId())).thenReturn(bot);
+        }
+        return bots;
+    }
+
+    private void verifyCannotLinkMoreBots(final List<AiBot> alreadyLinkedBots, final AiBot botToLink,
+                                          final int maxLinkedBots) throws Database.DatabaseException {
+        when(this.fakeDatabase.getBotDetails(botToLink.getBotId())).thenReturn(botToLink);
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(getSampleAI());
+        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(alreadyLinkedBots);
+        // Limit the maximum number of bots to 1, so that we're already at the limit
+        when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(maxLinkedBots);
+        ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, botToLink.getBotId());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 }
 
