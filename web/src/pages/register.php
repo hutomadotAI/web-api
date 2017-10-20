@@ -215,9 +215,6 @@ if(isset($_POST['submit'])) {
                        onkeyup="confirmPassword('passwordField','passConfirmationField');">
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
-            <div class="form-group has-feedback">
-                <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
-            </div>
             <div class="row">
                 <div class="col-xs-8">
                     <div class="checkbox icheck">
