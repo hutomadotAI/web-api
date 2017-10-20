@@ -36,17 +36,16 @@ unset($botApi);
 </div>
 <div class="row">
     <div class="col-md-12">
-        <div class="alert alert-dismissable flat alert-danger unselectable" style="padding-bottom: 25px;">
+        <div class="alert alert-warning unselectable" style="padding-bottom: 25px;">
             <span class="text-white">
                 <dt>Please note:</dt>
                 <dl class="dl-horizontal no-margin" style="text-align:justify">
-                    After sending your bot for publishing, it will become Read-Only, meaning <strong>you will not be able to make any changes to it</strong>!<br/>
+                    After sending your bot for publishing, it will become Read-Only, meaning <strong>you will not be able to make any changes to it</strong>!
                     You can, however, export the bot and re-import it as a new one.
                 </dl>
             </span>
-        </div>
-        <div id="linkedBotWarning" class="alert alert-dismissable flat alert-danger unselectable" style="padding-bottom: 25px;">
-            <span class="text-white">
+            <span class="text-white" id="linkedBotWarning">
+                <br/>
                 <dt>Also:</dt>
                 <dl class="dl-horizontal no-margin" style="text-align:justify">
                     We do not currently support publishing with linked skills. Please remove them if you’d like your bot to be published.
