@@ -3,6 +3,7 @@ package com.hutoma.api.common;
 import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -13,6 +14,7 @@ import com.hutoma.api.logic.ChatLogic;
 
 import org.joda.time.DateTime;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -105,5 +107,12 @@ public class TestDataHelper {
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), anyObject())).thenReturn(createdAiid);
+    }
+
+    public static AiBot getAiBot(int id, String name) {
+        return new AiBot(DEVID_UUID, AIID, id, name, "desc", "longdesc", "alert",
+                "badge", new BigDecimal(0), "sample", "category", "licenseType",
+                DateTime.now(), "privacyPolicy", "classification", "version",
+                "videoLink", AiBot.PublishingState.NOT_PUBLISHED, AiBot.PublishingType.SKILL, "botIcon");
     }
 }

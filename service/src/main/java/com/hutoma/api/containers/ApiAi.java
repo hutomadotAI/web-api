@@ -6,6 +6,8 @@ import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.UITrainingState;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.joda.time.DateTime;
 
@@ -38,47 +40,39 @@ public class ApiAi extends ApiResult {
     private int voice;
     private Locale language;
     private String timezone;
-
     // transient because this should never be serialized along with the ApiAi object
     private transient BackendStatus backendStatus;
-
     // a single real status that represents the ai state on multiple backend servers
     private transient TrainingStatus summaryStatusReal;
-
     // a public version of summaryStatus, with requeueing phases masked as "training"
     @SerializedName("ai_status")
     private TrainingStatus summaryStatusPublic;
-
     // value from 0.0 to 1.0 representing training progress on the WNET server
     @SerializedName("phase_1_progress")
     private double phase1Progress;
-
     // value from 0.0 to 1.0 representing training progress on the deep learning server
     @SerializedName("phase_2_progress")
     private double phase2Progress;
-
     // value from around 1.0 (100%) to 10000 or more (~0%)
     @SerializedName("deep_learning_error")
     private double deepLearningError;
-
     // true if the user has already successfully uploaded a training file for this ai
     @SerializedName("training_file_uploaded")
     private boolean trainingFileUploaded;
-
     @SerializedName("publishing_state")
     private AiBot.PublishingState publishingState;
-
     @SerializedName("default_chat_responses")
     private List<String> defaultChatResponses;
-
     @SerializedName("bot_config_definition")
     private AiBotConfigDefinition botConfigDefinition;
-
     @SerializedName("linked_bots")
     private List<Integer> linkedBots = new ArrayList<>();
-
     @SerializedName("readonly")
     private boolean readonly;
+    @SerializedName("training")
+    private UITrainingState uiTrainingState;
+    @SerializedName("can_chat")
+    private boolean canChat;
 
     public ApiAi(final String aiid, final String clientToken) {
         this.aiid = aiid;
@@ -133,14 +127,6 @@ public class ApiAi extends ApiResult {
         populateExtendedStatus();
     }
 
-    public void setLinkedBots(final List<Integer> linkedBots) {
-        this.linkedBots = linkedBots == null ? new ArrayList<>() : linkedBots;
-    }
-
-    public List<Integer> getLinkedBots() {
-        return this.linkedBots;
-    }
-
     /***
      * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
      * @param wnetStatus
@@ -167,6 +153,29 @@ public class ApiAi extends ApiResult {
             return TrainingStatus.AI_TRAINING;
         }
         return TrainingStatus.AI_TRAINING_COMPLETE;
+    }
+
+    public UITrainingState getUiTrainingState() {
+        return this.uiTrainingState;
+    }
+
+    public boolean isCanChat() {
+        return this.canChat;
+    }
+
+    public List<Integer> getLinkedBots() {
+        return this.linkedBots;
+    }
+
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
+    public void setLinkedBots(final List<Integer> linkedBots) {
+        this.linkedBots = linkedBots == null ? new ArrayList<>() : linkedBots;
+
+        // if we have any linked bots then set can_chat to true
+        // otherwise leave it as it was set in the constructor
+        if (!linkedBots.isEmpty()) {
+            this.canChat = true;
+        }
     }
 
     /***
@@ -251,7 +260,7 @@ public class ApiAi extends ApiResult {
     }
 
     public boolean isReadOnly() {
-        return readonly;
+        return this.readonly;
     }
 
     public void setReadOnly(final boolean isReadOnly) {
@@ -259,6 +268,10 @@ public class ApiAi extends ApiResult {
     }
 
     private void populateExtendedStatus() {
+
+        // unless we have servers online, this bot cannot be chatted with
+        this.canChat = false;
+
         if (this.backendStatus == null) {
             this.summaryStatusReal = TrainingStatus.AI_UNDEFINED;
             this.phase1Progress = 0.0d;
@@ -274,6 +287,10 @@ public class ApiAi extends ApiResult {
             this.phase1Progress = clampProgress(wnetStatus, wnet.getTrainingProgress());
             this.phase2Progress = clampProgress(rnnStatus, rnn.getTrainingProgress());
             this.deepLearningError = rnn.getTrainingError();
+
+            // depending on which servers are in what state for the bot,
+            // we can determine whether we can chat with it or not
+            this.canChat = UITrainingState.canChat(wnetStatus);
         }
 
         // if the bot has been requeued, i.e. training started but paused for any reason
@@ -283,6 +300,15 @@ public class ApiAi extends ApiResult {
         } else {
             this.summaryStatusPublic = this.summaryStatusReal;
         }
+
+        this.uiTrainingState = new UITrainingState(
+                // use the summary status to generate a uistatus
+                this.summaryStatusPublic,
+                // the first 25% is for WNET, the rest is RNN progress
+                (this.phase1Progress * 0.25) + (this.phase2Progress * 0.75),
+                // placeholder error until we can actually report the real training error
+                "an error has occurred");
+
     }
 
     /***

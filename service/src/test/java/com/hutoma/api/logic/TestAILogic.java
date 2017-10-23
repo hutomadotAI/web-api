@@ -15,6 +15,8 @@ import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.UITrainingState;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.validation.Validate;
 
@@ -140,6 +142,57 @@ public class TestAILogic {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiAi result = (ApiAi) this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(AIID.toString(), result.getAiid());
+    }
+
+    /**
+     * Common setup code for UI-status tests
+     * @param wnet
+     * @param rnn
+     * @param hasLinked
+     * @return
+     * @throws Database.DatabaseException
+     */
+
+    public ApiAi getSingleUIFields(TrainingStatus wnet, TrainingStatus rnn, boolean hasLinked) throws Database.DatabaseException {
+        ApiAi ai = TestDataHelper.getAi(TestDataHelper.getBackendStatus(wnet, rnn));
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(
+                hasLinked ? Collections.singletonList(TestDataHelper.getAiBot(1, "name"))
+                        : Collections.EMPTY_LIST);
+        return (ApiAi) this.aiLogic.getSingleAI(VALIDDEVID, AIID);
+    }
+
+    @Test
+    // no training, no linked bots so we cant chat
+    public void testGetSingle_UI_empty() throws Database.DatabaseException {
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED, false);
+        Assert.assertEquals(UITrainingState.Status.empty, result.getUiTrainingState().getUiTrainingStatus());
+        Assert.assertFalse(result.isCanChat());
+    }
+
+    @Test
+    // wnet is complete so we can chat
+    public void testGetSingle_UI_training() throws Database.DatabaseException {
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING, false);
+        Assert.assertEquals(UITrainingState.Status.training, result.getUiTrainingState().getUiTrainingStatus());
+        Assert.assertTrue(result.isCanChat());
+    }
+
+    @Test
+    // no training but linked bots means we can chat
+    public void testGetSingle_UI_linked() throws Database.DatabaseException {
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED, true);
+        Assert.assertEquals(UITrainingState.Status.empty, result.getUiTrainingState().getUiTrainingStatus());
+        Assert.assertTrue(result.isCanChat());
+    }
+
+    @Test
+    // error in wnet training so we cant chat
+    public void testGetSingle_UI_errors() throws Database.DatabaseException {
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_ERROR, TrainingStatus.AI_UNDEFINED, false);
+        Assert.assertEquals(UITrainingState.Status.error, result.getUiTrainingState().getUiTrainingStatus());
+        Assert.assertTrue(result.getUiTrainingState().getErrorMessage().length() > 0);
+        Assert.assertFalse(result.isCanChat());
     }
 
     @Test
@@ -714,7 +767,9 @@ public class TestAILogic {
 
     @Test
     public void testSetAiBotConfiguration_invalidConfig() throws Database.DatabaseException {
-        AiBotConfig config = new AiBotConfig(new HashMap<String, String>(){{put("a", "b");}});
+        AiBotConfig config = new AiBotConfig(new HashMap<String, String>() {{
+            put("a", "b");
+        }});
         AiBotConfigWithDefinition def = new AiBotConfigWithDefinition(config, null);
         ApiResult result = this.aiLogic.setAiBotConfigDescription(DEVID_UUID, AIID, def);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -801,9 +856,9 @@ public class TestAILogic {
                 baseAi.getPassthroughUrl(), baseAi.getDefaultChatResponses(), null);
 
         // For when we read the original AI for export
-        when(this.fakeDatabase.getAI(DEVID_UUID, UUID.fromString(baseAi.getAiid()), fakeSerializer)).thenReturn(baseAi);
+        when(this.fakeDatabase.getAI(DEVID_UUID, UUID.fromString(baseAi.getAiid()), this.fakeSerializer)).thenReturn(baseAi);
         // For when we read the imported AI
-        when(this.fakeDatabase.getAI(DEVID_UUID, generatedAiid, fakeSerializer)).thenReturn(importedAi);
+        when(this.fakeDatabase.getAI(DEVID_UUID, generatedAiid, this.fakeSerializer)).thenReturn(importedAi);
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(trainingFile);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(generatedAiid);
         TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, generatedAiid);
@@ -975,7 +1030,7 @@ public class TestAILogic {
 
     private List<AiBot> generateBotsWithIds(final List<Integer> idList) {
         List<AiBot> bots = new ArrayList<>();
-        for (Integer id: idList) {
+        for (Integer id : idList) {
             AiBot bot = new AiBot(SAMPLEBOT);
             bot.setBotId(id);
             bots.add(bot);
