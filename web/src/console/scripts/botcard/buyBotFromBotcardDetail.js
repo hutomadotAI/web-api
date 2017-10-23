@@ -6,8 +6,8 @@ function createBuyBotEvent(eventname, name, aiid) {
     if ('dataLayer' in window) {
         dataLayer.push({
             event: 'abstractEvent',
-            eventCategory: 'bot',
-            eventAction: 'buy',
+            eventCategory: 'botstore',
+            eventAction: 'purchase',
             eventLabel: eventname,
             eventMetadata: {
                 timestamp: Date.now(),

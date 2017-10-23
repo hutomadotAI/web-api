@@ -9,8 +9,7 @@ if (isChrome) {
         deactiveSpeechButton();
     else
         activeSpeechButton();
-}
-else {
+} else {
     lockSpeechOption();
     document.getElementById('speech-icon').className = 'fa fa-microphone text-gray';
     document.getElementById('speech-text').className = 'text-gray';
@@ -36,11 +35,11 @@ function createNodeChat(human_name, ai_name) {
     if (msg.length !== 0) {
         if (chatSemaphore === 0) {
             chatSemaphore = (chatSemaphore + 1) % (2);
-                disableChat();
-                deactiveSpeechButton();
-                lockSpeechOption();
-                createLeftMsg(human_name, msg);
-                requestAnswerAI(ai_name, msg, chatId);
+            disableChat();
+            deactiveSpeechButton();
+            lockSpeechOption();
+            createLeftMsg(human_name, msg);
+            requestAnswerAI(ai_name, msg, chatId);
         }
     }
 }
@@ -142,6 +141,26 @@ function stripHtml(text) {
     return $('<div>' + text + '</div>').text();
 }
 
+/**
+ * Create and send a chat Event to the GTM
+ * @return {undefined}
+ */
+function createChatEvent(eventname, name, chatid) {
+    if ('dataLayer' in window) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'chat',
+            eventAction: 'post',
+            eventLabel: eventname,
+            eventMetadata: {
+                timestamp: Date.now(),
+                chatId: chatid,
+                name: name
+            }
+        });
+    }
+}
+
 function requestAnswerAI(ai_name, question, previousChatId) {
     if (question !== '') {
         jQuery.ajax({
@@ -149,8 +168,8 @@ function requestAnswerAI(ai_name, question, previousChatId) {
             contentType: "application/json; charset=utf-8",
             type: 'GET',
             dataType: 'json',
-            data: {chatId: previousChatId, q: question},
-            success: function (response) {
+            data: { chatId: previousChatId, q: question },
+            success: function(response) {
 
                 if (response === null) {
                     createRightMsg(ai_name, "Oops, there was an error...", previousChatId, -1, true);
@@ -166,13 +185,14 @@ function requestAnswerAI(ai_name, question, previousChatId) {
                         if (JSONdata['status']['code'] === 200) {
                             var safeAnswer = htmlEncode(JSONdata['result']['answer']);
                             createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
-                        }
-                        else
+                            createChatEvent(chatId + "_" + user.email, user.email, chatId);
+                        } else {
                             createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
+                        }
                     }
                 }
             },
-            error: function (xhr, ajaxOptions, thrownError) {
+            error: function(xhr, ajaxOptions, thrownError) {
                 if (xhr.status === 200) {
                     // We're most likely being redirected to the login page due to session having expired
                     window.location.href = "/";
@@ -235,8 +255,7 @@ function speechOption() {
     speechResponse = !speechResponse;
     if (speechResponse) {
         activeSpeechButton();
-    }
-    else {
+    } else {
         // deactive speech buttons
         deactiveSpeechButton();
         stopSynthesis();
@@ -244,22 +263,21 @@ function speechOption() {
     updateVoiceSessionVariable(speechResponse);
 }
 
-function updateVoiceSessionVariable(voiceOption){
+function updateVoiceSessionVariable(voiceOption) {
     jQuery.ajax({
         url: "./proxy/sessionChat.php",
         type: "POST",
-        data: {speech: voiceOption},
+        data: { speech: voiceOption },
         cache: false,
-        success: function(response) {
-        },
-        error: function () {
+        success: function(response) {},
+        error: function() {
             console.log('Cannot update speech session variable.');
         }
     });
 }
 
 function setOptionJsonWindow() {
-    document.getElementById('json-text').innerHTML = ( !showJsonWindow ) ? '  Hide JSON Message' : '  Show JSON Message';
+    document.getElementById('json-text').innerHTML = (!showJsonWindow) ? '  Hide JSON Message' : '  Show JSON Message';
     // toggle json window
     $('#jsonBox').toggle();
     showJsonWindow = !showJsonWindow;
@@ -288,14 +306,12 @@ function copyJsonToClipboard(elementId) {
         if (!copysuccess) {
             $('#btnJSON').attr('data-original-title', 'Not supported.').tooltip('show');
             $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
-        }
-        else {
+        } else {
             $('#btnJSON').attr('data-original-title', 'Copied.').tooltip('show');
             $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
         }
         document.body.removeChild(aux);
-    }
-    else {
+    } else {
         $('#btnJSON').attr('data-original-title', 'Nothing to copy.').tooltip('show');
         $('#btnJSON').attr('data-original-title', 'Copy to clipboard.');
     }
@@ -307,10 +323,8 @@ function cleanChat(msg) {
     return msg.replace('\<', '&#60').replace('\>', '&#62;').trim();
 }
 
-String.prototype.toHtmlEntities = function () {
-    return this.replace(/./gm, function (s) {
+String.prototype.toHtmlEntities = function() {
+    return this.replace(/./gm, function(s) {
         return '&#' + s.charCodeAt(0) + ';';
     });
 };
-
-
